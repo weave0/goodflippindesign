@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Inquiry - Brett Weaver</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --bg-dark: #0a0e1a;
+            --bg-card: #111827;
+            --text-primary: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: rgba(139, 92, 246, 0.2);
+            --success: #10b981;
+            --error: #ef4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .form-container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .form-header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .form-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .required::after {
+            content: ' *';
+            color: var(--error);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        }
+        
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted);
+        }
+        
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.25rem;
+        }
+        
+        select option {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .char-count {
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 500px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .success-message svg {
+            width: 64px;
+            height: 64px;
+            color: var(--success);
+            margin-bottom: 1rem;
+        }
+        
+        .success-message h2 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .success-message p {
+            color: var(--text-muted);
+        }
+        
+        form.hidden {
+            display: none;
+        }
+        
+        .portfolio-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        
+        .portfolio-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-header">
+            <h1>Project Inquiry</h1>
+            <p>Let's discuss your project. I respond to qualified inquiries within 48 hours.</p>
+            <a href="https://globaldeets.com" target="_blank" class="portfolio-link">
+                View Portfolio →
+            </a>
+        </div>
+        
+        <!-- Replace YOUR_FORM_ID with actual Formspree form ID -->
+        <form id="inquiry-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+            <!-- Hidden field to redirect email to brett.l.weaver@gmail.com -->
+            <input type="hidden" name="_replyto" value="">
+            <input type="hidden" name="_subject" value="New Project Inquiry from Website">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name" class="required">Name</label>
+                    <input type="text" id="name" name="name" required placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label for="email" class="required">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="you@company.com">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="company">Company/Organization</label>
+                <input type="text" id="company" name="company" placeholder="Optional">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="project-type" class="required">Project Type</label>
+                    <select id="project-type" name="project_type" required>
+                        <option value="">Select project type</option>
+                        <option value="business-intelligence">Business Intelligence Dashboard</option>
+                        <option value="strategic-portal">Strategic Research Portal</option>
+                        <option value="website">Company Website/Landing Page</option>
+                        <option value="web-app">Web Application</option>
+                        <option value="ai-integration">AI/Data Integration</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="budget" class="required">Budget Range</label>
+                    <select id="budget" name="budget" required>
+                        <option value="">Select budget range</option>
+                        <option value="under-5k">Under $5,000</option>
+                        <option value="5k-15k">$5,000 - $15,000</option>
+                        <option value="15k-50k">$15,000 - $50,000</option>
+                        <option value="50k-plus">$50,000+</option>
+                        <option value="discuss">Let's discuss</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="timeline" class="required">Timeline</label>
+                <select id="timeline" name="timeline" required>
+                    <option value="">Select timeline</option>
+                    <option value="asap">ASAP (within 2 weeks)</option>
+                    <option value="1-3-months">1-3 months</option>
+                    <option value="3-6-months">3-6 months</option>
+                    <option value="flexible">Flexible</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="description" class="required">Brief Project Description</label>
+                <textarea 
+                    id="description" 
+                    name="description" 
+                    required 
+                    maxlength="500"
+                    placeholder="Describe your project goals, current challenges, and what success looks like..."
+                ></textarea>
+                <div class="char-count"><span id="char-count">0</span>/500</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="referral">How did you find me?</label>
+                <input type="text" id="referral" name="referral" placeholder="e.g., LinkedIn, referral, Google">
+            </div>
+            
+            <button type="submit" class="submit-btn">Submit Inquiry</button>
+            
+            <div class="form-footer">
+                I only take on select projects that align with my expertise.<br>
+                <a href="mailto:brett.l.weaver@gmail.com">Prefer email?</a>
+            </div>
+        </form>
+        
+        <div class="success-message" id="success-message">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2>Inquiry Received!</h2>
+            <p>Thanks for reaching out. I'll review your project and respond within 48 hours if it's a good fit.</p>
+            <a href="https://globaldeets.com" class="portfolio-link">
+                Explore the portfolio while you wait →
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Character counter
+        const description = document.getElementById('description');
+        const charCount = document.getElementById('char-count');
+        
+        description.addEventListener('input', () => {
+            charCount.textContent = description.value.length;
+        });
+        
+        // Form submission handling (for Formspree)
+        const form = document.getElementById('inquiry-form');
+        const successMessage = document.getElementById('success-message');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    form.classList.add('hidden');
+                    successMessage.classList.add('show');
+                } else {
+                    alert('Oops! There was a problem submitting your form. Please email brett.l.weaver@gmail.com directly.');
+                }
+            } catch (error) {
+                alert('Oops! There was a problem submitting your form. Please email brett.l.weaver@gmail.com directly.');
+            }
+        });
+    </script>
+</body>
+</html>
