@@ -374,6 +374,15 @@
             color: var(--text-secondary);
             font-size: 0.9375rem;
         }
+        .contact-item a {
+            color: var(--text);
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .contact-item a:hover {
+            opacity: 0.8;
+        }
         .contact-item .icon {
             width: 36px;
             height: 36px;
@@ -783,7 +792,7 @@
                 <div class="contact-details">
                     <div class="contact-item">
                         <span class="icon">→</span>
-                        <span>hello@goodflippindesign.com</span>
+                        <a href="#" id="email-link">hello@goodflippindesign.com</a>
                     </div>
                     <div class="contact-item">
                         <span class="icon">◎</span>
@@ -999,6 +1008,17 @@
                             console.warn('Page load time:', pageLoadTime + 'ms - Consider optimization');
                         }
                     }, 0);
+                });
+            }
+            
+            // 9. Email obfuscation to prevent Cloudflare bot protection
+            const emailLink = document.getElementById('email-link');
+            if (emailLink) {
+                emailLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const user = 'hello';
+                    const domain = 'goodflippindesign.com';
+                    window.location.href = 'mailto:' + user + '@' + domain;
                 });
             }
             
