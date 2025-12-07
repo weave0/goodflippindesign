@@ -842,8 +842,7 @@
             </div>
             <p class="footer-text">© 2025 GFV LLC</p>
             <div class="footer-links">
-                <a href="https://brettleeweaver.com" target="_blank" rel="noopener">About</a>
-                <a href="https://linkedin.com/in/brettweaver" target="_blank" rel="noopener">LinkedIn</a>
+                <a href="javascript:void(0)" id="footer-email-link">getsome@goodflippinvibes.com</a>
             </div>
         </div>
     </footer>
@@ -1013,13 +1012,20 @@
             
             // 9. Email obfuscation to prevent Cloudflare bot protection
             const emailLink = document.getElementById('email-link');
+            const footerEmailLink = document.getElementById('footer-email-link');
+            
+            function openEmail(e) {
+                e.preventDefault();
+                const user = 'getsome';
+                const domain = 'goodflippinvibes.com';
+                window.location.href = 'mailto:' + user + '@' + domain;
+            }
+            
             if (emailLink) {
-                emailLink.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const user = 'getsome';
-                    const domain = 'goodflippinvibes.com';
-                    window.location.href = 'mailto:' + user + '@' + domain;
-                });
+                emailLink.addEventListener('click', openEmail);
+            }
+            if (footerEmailLink) {
+                footerEmailLink.addEventListener('click', openEmail);
             }
             
         })();
