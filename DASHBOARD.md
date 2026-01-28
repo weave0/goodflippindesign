@@ -1,11 +1,13 @@
 # 🎯 Good Flippin Design - Developer Dashboard
 
 ## 🌐 Your Live Site
+
 - **Production**: https://goodflippindesign.com ✅ LIVE
 - **Cloudflare**: https://goodflippindesign.pages.dev
 - **Latest Deploy**: https://71255fe9.goodflippindesign.pages.dev
 
 ## 💰 Monthly Costs: **$0**
+
 - Cloudflare Pages: **FREE**
 - GitHub Actions: **~5 minutes** (free tier: 2,000 min/month)
 - Bandwidth: **UNLIMITED**
@@ -38,6 +40,7 @@ npm run cache-bust
 ## 📊 Infrastructure Status
 
 ### ✅ Automated
+
 - [x] Tests run on PR (GitHub Actions)
 - [x] Auto-deploy on push to main (Cloudflare)
 - [x] Security headers configured
@@ -47,6 +50,7 @@ npm run cache-bust
 - [x] SSL certificate (automatic)
 
 ### 🔧 Optional (If Needed)
+
 - [ ] Contact form (use Cloudflare Workers - already set up)
 - [ ] Analytics (Cloudflare Web Analytics - free)
 - [ ] Email routing (Cloudflare - free)
@@ -80,11 +84,13 @@ Local Edit → Commit → Push → Cloudflare Detects → Builds → Deploys
 ## 🛠️ Important Links
 
 ### Cloudflare Dashboard
+
 - **Pages Project**: https://dash.cloudflare.com/pages/goodflippindesign
 - **Analytics**: https://dash.cloudflare.com/analytics
 - **Email Routing**: https://dash.cloudflare.com/email
 
 ### GitHub
+
 - **Repository**: https://github.com/weave0/goodflippindesign
 - **Actions**: https://github.com/weave0/goodflippindesign/actions
 - **Settings**: https://github.com/weave0/goodflippindesign/settings
@@ -93,28 +99,30 @@ Local Edit → Commit → Push → Cloudflare Detects → Builds → Deploys
 
 ## 📁 Key Files
 
-| File | Purpose |
-|------|---------|
-| `index.html` | Production website (1044 lines) |
-| `temp_review.html` | Test target (auto-synced) |
-| `wrangler.toml` | Cloudflare Pages config |
-| `_headers` | Security headers (CSP, XSS) |
-| `.github/workflows/ci.yml` | Test automation (PR only) |
-| `scripts/sync-review.js` | File sync automation |
-| `scripts/update-cache-bust.js` | Cache busting |
-| `functions/api/contact.js` | Form handler (FREE alternative to Formspree) |
+| File                           | Purpose                                      |
+| ------------------------------ | -------------------------------------------- |
+| `index.html`                   | Production website (1044 lines)              |
+| `temp_review.html`             | Test target (auto-synced)                    |
+| `wrangler.toml`                | Cloudflare Pages config                      |
+| `_headers`                     | Security headers (CSP, XSS)                  |
+| `.github/workflows/ci.yml`     | Test automation (PR only)                    |
+| `scripts/sync-review.js`       | File sync automation                         |
+| `scripts/update-cache-bust.js` | Cache busting                                |
+| `functions/api/contact.js`     | Form handler (FREE alternative to Formspree) |
 
 ---
 
 ## 🎯 Daily Workflow
 
 ### Morning
+
 1. `git pull origin main` - Get latest changes
 2. `npm run dev` - Start local server
 3. Make changes to `index.html`
 4. `npm test` - Verify tests pass (auto-syncs)
 
 ### Deployment
+
 1. `git add .`
 2. `git commit -m "feat: your changes"`
 3. `git push origin main`
@@ -127,12 +135,14 @@ Local Edit → Commit → Push → Cloudflare Detects → Builds → Deploys
 ## 🔥 Cost Optimization Achievements
 
 ### Before
+
 - GitHub Actions: ~100 min/month (tests on every push + Lighthouse)
 - Manual deployment steps
 - Manual cache busting
 - Manual file syncing
 
 ### After (Now)
+
 - GitHub Actions: **~5 min/month** (PR tests only) ✅
 - Cloudflare auto-deploy: **FREE** ✅
 - Automated cache bust: **FREE** ✅
@@ -145,6 +155,7 @@ Local Edit → Commit → Push → Cloudflare Detects → Builds → Deploys
 ## 🎊 Focus Areas
 
 ### ✅ Automated (Don't Think About These)
+
 - Deployment
 - Testing
 - Cache busting
@@ -153,6 +164,7 @@ Local Edit → Commit → Push → Cloudflare Detects → Builds → Deploys
 - SSL certificates
 
 ### 🎯 Your Focus (Business Development)
+
 - Closing deals with prospects
 - Building portfolio
 - Client communication
@@ -165,9 +177,11 @@ Local Edit → Commit → Push → Cloudflare Detects → Builds → Deploys
 ## 📞 Contact Form Options
 
 ### Option 1: Cloudflare Workers (FREE - Recommended)
+
 Already set up at `functions/api/contact.js`
 
 **To Enable:**
+
 1. Go to: https://dash.cloudflare.com/email
 2. Create routing rule: `forms@goodflippindesign.com` → `brett.l.weaver@gmail.com`
 3. Update form action in HTML: `/api/contact`
@@ -175,6 +189,7 @@ Already set up at `functions/api/contact.js`
 **Cost: $0**
 
 ### Option 2: Formspree
+
 1. Sign up: https://formspree.io
 2. Get form ID
 3. Update `assets/contact-form.html` line 229
@@ -186,6 +201,7 @@ Already set up at `functions/api/contact.js`
 ## 🎉 Summary
 
 ### What You Have
+
 - ✅ Live website at custom domain
 - ✅ 98.6% test coverage
 - ✅ $0/month hosting costs
@@ -194,11 +210,13 @@ Already set up at `functions/api/contact.js`
 - ✅ Zero manual processes
 
 ### What You Do
+
 1. Edit code locally
 2. `git push`
 3. ✅ **DONE!** (Live in 2 minutes)
 
 ### What I Did For You
+
 - Set up cost-optimized CI/CD
 - Deployed to Cloudflare Pages
 - Configured security headers
@@ -210,7 +228,7 @@ Already set up at `functions/api/contact.js`
 
 ---
 
-**Last Updated**: January 28, 2026, 5:45 PM  
-**Status**: ✅ DEPLOYED & LIVE  
-**Monthly Cost**: $0  
+**Last Updated**: January 28, 2026, 5:45 PM
+**Status**: ✅ DEPLOYED & LIVE
+**Monthly Cost**: $0
 **Your Focus**: Closing deals, not DevOps
