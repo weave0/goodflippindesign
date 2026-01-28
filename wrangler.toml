@@ -1,0 +1,11 @@
+name = "goodflippindesign"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "."
+
+# Cloudflare Pages Configuration
+[build]
+command = "npm run build"
+
+# Environment variables
+[vars]
+NODE_ENV = "production"
