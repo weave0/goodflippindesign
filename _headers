@@ -1,32 +1,43 @@
 # Security Headers for Cloudflare Pages / Netlify
+
 # Apply to all routes
 
-/*
-  # Prevent clickjacking
-  X-Frame-Options: DENY
+/\*
 
-  # Prevent MIME sniffing
-  X-Content-Type-Options: nosniff
+# Prevent clickjacking
 
-  # Enable XSS protection
-  X-XSS-Protection: 1; mode=block
+X-Frame-Options: DENY
 
-  # Strict referrer policy
-  Referrer-Policy: strict-origin-when-cross-origin
+# Prevent MIME sniffing
 
-  # Content Security Policy
-  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com https://formspree.io;
+X-Content-Type-Options: nosniff
 
-  # Permissions Policy (formerly Feature-Policy)
-  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+# Enable XSS protection
 
-  # Cache control for HTML (no cache - always check for updates)
-  Cache-Control: no-cache, no-store, must-revalidate
+X-XSS-Protection: 1; mode=block
+
+# Strict referrer policy
+
+Referrer-Policy: strict-origin-when-cross-origin
+
+# Content Security Policy
+
+Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com https://formspree.io;
+
+# Permissions Policy (formerly Feature-Policy)
+
+Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+
+# Cache control for HTML (no cache - always check for updates)
+
+Cache-Control: no-cache, no-store, must-revalidate
 
 # Cache static assets aggressively
-/assets/*
-  Cache-Control: public, max-age=31536000, immutable
+
+/assets/\*
+Cache-Control: public, max-age=31536000, immutable
 
 # Fonts can be cached for a long time
-*.woff2
-  Cache-Control: public, max-age=31536000, immutable
+
+\*.woff2
+Cache-Control: public, max-age=31536000, immutable

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Cache bust: 2026-01-28-19:39 -->
+<!-- Cache bust: 2026-01-28-20:00 -->
 <html lang="en">
 
 <head>
@@ -1152,7 +1152,7 @@
                         </div>
                     </div>
                 </div>
-                <form class="contact-form" id="contact-form" action="#" method="POST">
+                <form class="contact-form" id="contact-form">
                     <div class="form-group">
                         <label for="name">Name</label>
                         <input type="text" id="name" name="name" required placeholder="Your name">
@@ -1365,14 +1365,14 @@
             // 9. Contact form submission via mailto
             const contactForm = document.getElementById('contact-form');
             if (contactForm) {
-                contactForm.addEventListener('submit', function(e) {
+                contactForm.addEventListener('submit', function (e) {
                     e.preventDefault();
-                    
+
                     const name = document.getElementById('name').value;
                     const email = document.getElementById('email').value;
                     const project = document.getElementById('project').value;
                     const message = document.getElementById('message').value;
-                    
+
                     const subject = encodeURIComponent('New Project Inquiry - Good Flippin Design');
                     const body = encodeURIComponent(
                         `Name: ${name}\n` +
@@ -1380,10 +1380,10 @@
                         `Project Type: ${project}\n\n` +
                         `Message:\n${message}`
                     );
-                    
+
                     // Open default email client
                     window.location.href = `mailto:getsome@goodflippinvibes.com?subject=${subject}&body=${body}`;
-                    
+
                     // Show confirmation
                     const submitBtn = this.querySelector('.form-submit');
                     submitBtn.textContent = 'Opening email client...';
