@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Cache bust: 2026-01-28-19:10 -->
+<!-- Cache bust: 2026-01-28-19:35 -->
 <html lang="en">
 
 <head>
@@ -433,6 +433,27 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            font-size: 0.6875rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .status-badge.live {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .status-badge.demo {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
         }
 
         .portfolio-info h3 {
@@ -885,7 +906,6 @@
                 Good Flippin Design
             </a>
             <ul class="nav-links">
-                <li><a href="#about">About</a></li>
                 <li><a href="#services">Services</a></li>
                 <li><a href="#work">Work</a></li>
                 <li><a href="#process">Process</a></li>
@@ -957,47 +977,12 @@
             </div>
         </section>
 
-        <section id="about">
-            <div class="container">
-                <div class="about-content">
-                    <div class="about-photo">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='400' viewBox='0 0 300 400'%3E%3Crect fill='%231a1a1a' width='300' height='400'/%3E%3Ctext x='150' y='200' font-family='Inter, sans-serif' font-size='14' fill='%23999' text-anchor='middle'%3EBrett Weaver%3C/text%3E%3C/svg%3E" alt="Brett Weaver - Strategic Web Development Consultant" loading="lazy">
-                    </div>
-                    <div class="about-text">
-                        <h2>Hi, I'm Brett Weaver</h2>
-                        <p class="role">Strategic Web Development Consultant</p>
-                        <p>
-                            I work with organizations that need more than a website—they need strategic technology partnerships.
-                            My approach combines full-stack development expertise with business intelligence to deliver solutions
-                            that create competitive advantage.
-                        </p>
-                        <p>
-                            With a background spanning healthcare analytics, business intelligence platforms, and AI-enhanced
-                            applications, I help clients navigate complex technical decisions and execute on data-driven strategies.
-                        </p>
-                        <p><strong>How I Work:</strong></p>
-                        <ul>
-                            <li>Scoping & Discovery: Define real needs vs. perceived wants</li>
-                            <li>Priority Assessment: Rank opportunities by business impact</li>
-                            <li>Solutions Pairing: Match technology to actual problems</li>
-                            <li>Recommendations: Clear options with transparent cost analysis</li>
-                            <li>Managed Support: Retainer-based ongoing partnership</li>
-                        </ul>
-                        <p>
-                            I take on a limited number of projects to ensure each client gets proper attention.
-                            If you're looking for a strategic partner rather than just a developer, let's connect.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <section id="work">
             <div class="container">
                 <div class="section-header">
                     <p class="section-label">Selected Work</p>
-                    <h2 class="section-title">Live projects</h2>
-                    <p class="section-subtitle">A selection of platforms currently in production.</p>
+                    <h2 class="section-title">Live projects & capabilities</h2>
+                    <p class="section-subtitle">Production platforms and technical demonstrations. Live projects available for acquisition.</p>
                 </div>
                 <div class="portfolio-grid">
                     <a href="https://culturesherpa.org" target="_blank" rel="noopener" class="portfolio-card">
@@ -1005,7 +990,11 @@
                             <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800&q=80" alt="CultureSherpa">
                         </div>
                         <div class="portfolio-info">
-                            <p class="portfolio-category">Cultural Data Platform</p>
+                            <p class="portfolio-category">
+                                Cultural Data Platform
+                                <span class="status-badge live">LIVE</span>
+                                <span class="status-badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">FOR SALE</span>
+                            </p>
                             <h3>CultureSherpa</h3>
                             <p>470 cultures mapped with interactive exploration. MapboxGL visualization, AI-enriched profiles, PWA architecture.</p>
                             <div class="portfolio-tech">
@@ -1020,7 +1009,11 @@
                             <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80" alt="AI Aimate">
                         </div>
                         <div class="portfolio-info">
-                            <p class="portfolio-category">AI Education</p>
+                            <p class="portfolio-category">
+                                AI Education
+                                <span class="status-badge live">LIVE</span>
+                                <span class="status-badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">FOR SALE</span>
+                            </p>
                             <h3>AI Aimate</h3>
                             <p>Foundations of Artificial Intelligence. RAG-powered Q&A, interactive visualizations, structured learning paths.</p>
                             <div class="portfolio-tech">
@@ -1035,7 +1028,11 @@
                             <img src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80" alt="Good Flippin Vibes">
                         </div>
                         <div class="portfolio-info">
-                            <p class="portfolio-category">Wellness Platform</p>
+                            <p class="portfolio-category">
+                                Wellness Platform
+                                <span class="status-badge live">LIVE</span>
+                                <span class="status-badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">FOR SALE</span>
+                            </p>
                             <h3>Good Flippin Vibes</h3>
                             <p>Holistic wellness platform. The original venture that started it all.</p>
                             <div class="portfolio-tech">
@@ -1049,7 +1046,10 @@
                             <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="Market Intelligence">
                         </div>
                         <div class="portfolio-info">
-                            <p class="portfolio-category">Business Intelligence</p>
+                            <p class="portfolio-category">
+                                Business Intelligence
+                                <span class="status-badge demo">DEMO</span>
+                            </p>
                             <h3>Enterprise Market Research</h3>
                             <p>AI-powered market research portal. Pipeline intelligence across emerging technology sectors.</p>
                             <div class="portfolio-tech">
@@ -1064,7 +1064,10 @@
                             <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80" alt="Medical Compliance">
                         </div>
                         <div class="portfolio-info">
-                            <p class="portfolio-category">Compliance Portal</p>
+                            <p class="portfolio-category">
+                                Compliance Portal
+                                <span class="status-badge demo">DEMO</span>
+                            </p>
                             <h3>Medical Compliance Hub</h3>
                             <p>Section 1557, HIPAA, EMTALA compliance guides. Role-based access for healthcare leadership.</p>
                             <div class="portfolio-tech">
@@ -1078,7 +1081,10 @@
                             <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80" alt="Healthcare Analytics">
                         </div>
                         <div class="portfolio-info">
-                            <p class="portfolio-category">Healthcare Analytics</p>
+                            <p class="portfolio-category">
+                                Healthcare Analytics
+                                <span class="status-badge demo">DEMO</span>
+                            </p>
                             <h3>Healthcare Network Intelligence</h3>
                             <p>Executive insights into nationwide healthcare networks. Big data analytics with ethical AI approach.</p>
                             <div class="portfolio-tech">
