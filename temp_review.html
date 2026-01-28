@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Cache bust: 2026-01-28-19:37 -->
+<!-- Cache bust: 2026-01-28-19:39 -->
 <html lang="en">
 
 <head>
@@ -1152,9 +1152,7 @@
                         </div>
                     </div>
                 </div>
-                <form class="contact-form" action="https://formspree.io/f/mvgogqoo" method="POST">
-                    <input type="hidden" name="_subject" value="New Contact Form Submission - Good Flippin Design">
-                    <input type="hidden" name="_replyto" value="">
+                <form class="contact-form" id="contact-form" action="#" method="POST">
                     <div class="form-group">
                         <label for="name">Name</label>
                         <input type="text" id="name" name="name" required placeholder="Your name">
@@ -1364,7 +1362,39 @@
                 });
             }
 
-            // 9. Email obfuscation to prevent Cloudflare bot protection
+            // 9. Contact form submission via mailto
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('name').value;
+                    const email = document.getElementById('email').value;
+                    const project = document.getElementById('project').value;
+                    const message = document.getElementById('message').value;
+                    
+                    const subject = encodeURIComponent('New Project Inquiry - Good Flippin Design');
+                    const body = encodeURIComponent(
+                        `Name: ${name}\n` +
+                        `Email: ${email}\n` +
+                        `Project Type: ${project}\n\n` +
+                        `Message:\n${message}`
+                    );
+                    
+                    // Open default email client
+                    window.location.href = `mailto:getsome@goodflippinvibes.com?subject=${subject}&body=${body}`;
+                    
+                    // Show confirmation
+                    const submitBtn = this.querySelector('.form-submit');
+                    submitBtn.textContent = 'Opening email client...';
+                    setTimeout(() => {
+                        submitBtn.textContent = 'Send message';
+                        this.reset();
+                    }, 2000);
+                });
+            }
+
+            // 10. Email obfuscation to prevent Cloudflare bot protection
             const emailLink = document.getElementById('email-link');
             const emailLinkAlt = document.getElementById('email-link-alt');
             const footerEmailLink = document.getElementById('footer-email-link');
