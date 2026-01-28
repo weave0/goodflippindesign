@@ -967,12 +967,12 @@
                         <h2>Hi, I'm Brett Weaver</h2>
                         <p class="role">Strategic Web Development Consultant</p>
                         <p>
-                            I work with organizations that need more than a website—they need strategic technology partnerships. 
-                            My approach combines full-stack development expertise with business intelligence to deliver solutions 
+                            I work with organizations that need more than a website—they need strategic technology partnerships.
+                            My approach combines full-stack development expertise with business intelligence to deliver solutions
                             that create competitive advantage.
                         </p>
                         <p>
-                            With a background spanning healthcare analytics, business intelligence platforms, and AI-enhanced 
+                            With a background spanning healthcare analytics, business intelligence platforms, and AI-enhanced
                             applications, I help clients navigate complex technical decisions and execute on data-driven strategies.
                         </p>
                         <p><strong>How I Work:</strong></p>
@@ -984,7 +984,7 @@
                             <li>Managed Support: Retainer-based ongoing partnership</li>
                         </ul>
                         <p>
-                            I take on a limited number of projects to ensure each client gets proper attention. 
+                            I take on a limited number of projects to ensure each client gets proper attention.
                             If you're looking for a strategic partner rather than just a developer, let's connect.
                         </p>
                     </div>
@@ -1130,7 +1130,11 @@
                     <div class="contact-details">
                         <div class="contact-item">
                             <span class="icon">→</span>
-                            <a href="javascript:void(0)" id="email-link">getsome@goodflippinvibes.com</a>
+                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                <a href="javascript:void(0)" id="email-link">getsome@goodflippinvibes.com</a>
+                                <a href="javascript:void(0)" id="email-link-alt" style="opacity: 0.8;">getsome@goodflippindesign.com</a>
+                                <span style="font-size: 0.8125rem; font-style: italic; opacity: 0.6;">either or, we'll find them! :)</span>
+                            </div>
                         </div>
                         <div class="contact-item">
                             <span class="icon">◎</span>
@@ -1354,12 +1358,12 @@
 
             // 9. Email obfuscation to prevent Cloudflare bot protection
             const emailLink = document.getElementById('email-link');
+            const emailLinkAlt = document.getElementById('email-link-alt');
             const footerEmailLink = document.getElementById('footer-email-link');
 
-            function openEmail(e) {
+            function openEmail(e, domain = 'goodflippinvibes.com') {
                 e.preventDefault();
                 const user = 'getsome';
-                const domain = 'goodflippinvibes.com';
                 const mailtoLink = 'mailto:' + user + '@' + domain;
                 // Use a hidden link to open email without navigating away
                 const tempLink = document.createElement('a');
@@ -1372,10 +1376,13 @@
             }
 
             if (emailLink) {
-                emailLink.addEventListener('click', openEmail);
+                emailLink.addEventListener('click', (e) => openEmail(e, 'goodflippinvibes.com'));
+            }
+            if (emailLinkAlt) {
+                emailLinkAlt.addEventListener('click', (e) => openEmail(e, 'goodflippindesign.com'));
             }
             if (footerEmailLink) {
-                footerEmailLink.addEventListener('click', openEmail);
+                footerEmailLink.addEventListener('click', (e) => openEmail(e, 'goodflippinvibes.com'));
             }
 
         })();
