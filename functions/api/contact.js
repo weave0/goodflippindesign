@@ -2,7 +2,7 @@
 /**
  * Simple contact form handler using Cloudflare Workers (FREE)
  * Alternative to Formspree - no external service needed
- * 
+ *
  * Deploy this as a Cloudflare Worker to handle form submissions
  * Route: /api/contact
  */

@@ -1,28 +1,28 @@
 name: CI - Tests (Cost Optimized)
 
 on:
-  pull_request:
-    branches: [main]
-  # Removed push trigger - Cloudflare Pages handles deployment (free)
+    pull_request:
+        branches: [main]
+    # Removed push trigger - Cloudflare Pages handles deployment (free)
 
 jobs:
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 10  # Cost control: max 10 minutes
+    test:
+        name: Run Tests
+        runs-on: ubuntu-latest
+        timeout-minutes: 10 # Cost control: max 10 minutes
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
 
-      - name: Install
-        run: npm ci
+            - name: Install
+              run: npm ci
 
-      - name: Test (auto-syncs via pretest hook)
-        run: npm test
+            - name: Test (auto-syncs via pretest hook)
+              run: npm test
