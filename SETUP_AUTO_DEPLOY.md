@@ -1,6 +1,6 @@
 # Enable GitHub Auto-Deployment (One-Time Setup)
 
-**Status**: ⚠️ Currently deploying via CLI (`wrangler pages deploy`)  
+**Status**: ⚠️ Currently deploying via CLI (`wrangler pages deploy`)
 **Goal**: Enable FREE auto-deployment from GitHub (no manual deploys)
 
 ---
@@ -10,6 +10,7 @@
 ### Option 1: Cloudflare Dashboard (Easiest)
 
 1. **Open Dashboard**:
+
    ```
    https://dash.cloudflare.com/?to=/:account/pages/view/goodflippindesign/settings/builds-deployments
    ```
@@ -18,13 +19,13 @@
    - Click **"Connect to Git"** button
    - Authorize Cloudflare to access GitHub
    - Select: **weave0/goodflippindesign** repository
-   
+
 3. **Configure Build**:
    - Production branch: `main`
    - Build command: `npm run build`
    - Build output directory: `.` (current directory)
    - Root directory: `/` (leave empty)
-   
+
 4. **Save** → ✅ Done!
 
 ### Option 2: CLI (For Automation Lovers)
@@ -39,11 +40,13 @@
 ## What You Get
 
 ### Before (Current State)
+
 - Manual deployment: `wrangler pages deploy .`
 - Must remember to deploy after changes
 - No automation
 
 ### After (Auto-Deploy)
+
 - Push to GitHub → Auto-deploys (FREE)
 - No manual steps
 - No GitHub Actions needed
@@ -89,10 +92,10 @@ wrangler pages deploy . --project-name=goodflippindesign
 
 ## Why This Matters
 
-**Cost**: $0 (Cloudflare Pages is free)  
-**Time Saved**: 2-3 minutes per deployment  
-**Automation**: 100% hands-off after push  
-**Reliability**: No forgotten deployments  
+**Cost**: $0 (Cloudflare Pages is free)
+**Time Saved**: 2-3 minutes per deployment
+**Automation**: 100% hands-off after push
+**Reliability**: No forgotten deployments
 
 ---
 
