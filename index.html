@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Cache bust: 2026-01-28-16:14 -->
+<!-- Cache bust: 2026-01-28-19:10 -->
 <html lang="en">
 
 <head>
@@ -291,6 +291,82 @@
             color: var(--text-secondary);
             font-size: 0.9375rem;
             line-height: 1.6;
+        }
+
+        /* About Section */
+        #about {
+            background: var(--bg-elevated);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .about-photo {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .about-photo img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .about-text h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .about-text .role {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .about-text p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-text ul {
+            list-style: none;
+            margin: 2rem 0;
+        }
+
+        .about-text ul li {
+            color: var(--text-secondary);
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .about-text ul li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        @media (max-width: 900px) {
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .about-photo {
+                max-width: 300px;
+                margin: 0 auto;
+            }
         }
 
         /* Portfolio */
@@ -809,6 +885,7 @@
                 Good Flippin Design
             </a>
             <ul class="nav-links">
+                <li><a href="#about">About</a></li>
                 <li><a href="#services">Services</a></li>
                 <li><a href="#work">Work</a></li>
                 <li><a href="#process">Process</a></li>
@@ -875,6 +952,41 @@
                     <div class="service-card">
                         <h3>Accessibility & Compliance</h3>
                         <p>WCAG 2.1 AA+, Section 508, HIPAA-aware development. Inclusive design as a foundation, not an afterthought.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about">
+            <div class="container">
+                <div class="about-content">
+                    <div class="about-photo">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='400' viewBox='0 0 300 400'%3E%3Crect fill='%231a1a1a' width='300' height='400'/%3E%3Ctext x='150' y='200' font-family='Inter, sans-serif' font-size='14' fill='%23999' text-anchor='middle'%3EBrett Weaver%3C/text%3E%3C/svg%3E" alt="Brett Weaver - Strategic Web Development Consultant" loading="lazy">
+                    </div>
+                    <div class="about-text">
+                        <h2>Hi, I'm Brett Weaver</h2>
+                        <p class="role">Strategic Web Development Consultant</p>
+                        <p>
+                            I work with organizations that need more than a website—they need strategic technology partnerships. 
+                            My approach combines full-stack development expertise with business intelligence to deliver solutions 
+                            that create competitive advantage.
+                        </p>
+                        <p>
+                            With a background spanning healthcare analytics, business intelligence platforms, and AI-enhanced 
+                            applications, I help clients navigate complex technical decisions and execute on data-driven strategies.
+                        </p>
+                        <p><strong>How I Work:</strong></p>
+                        <ul>
+                            <li>Scoping & Discovery: Define real needs vs. perceived wants</li>
+                            <li>Priority Assessment: Rank opportunities by business impact</li>
+                            <li>Solutions Pairing: Match technology to actual problems</li>
+                            <li>Recommendations: Clear options with transparent cost analysis</li>
+                            <li>Managed Support: Retainer-based ongoing partnership</li>
+                        </ul>
+                        <p>
+                            I take on a limited number of projects to ensure each client gets proper attention. 
+                            If you're looking for a strategic partner rather than just a developer, let's connect.
+                        </p>
                     </div>
                 </div>
             </div>
