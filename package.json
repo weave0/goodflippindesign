@@ -1,5 +1,34 @@
 {
+  "name": "good-flippin-design",
+  "version": "1.0.0",
+  "description": "Strategic web development portfolio for GFV LLC",
+  "scripts": {
+    "dev": "npx http-server . -p 3000 -o",
+    "test": "node tests/run-all-tests.js",
+    "test:watch": "nodemon --watch index.html --watch temp_review.html --watch tests/ --exec npm test",
+    "test:a11y": "node tests/accessibility.test.js",
+    "test:responsive": "node tests/responsive.test.js",
+    "sync": "node scripts/sync-review.js",
+    "cache-bust": "node scripts/update-cache-bust.js",
+    "build": "npm run cache-bust && npm run sync",
+    "pretest": "npm run sync"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weave0/goodflippindesign"
+  },
+  "keywords": [
+    "portfolio",
+    "web-development",
+    "accessibility",
+    "wcag"
+  ],
+  "author": "Brett Weaver <brett.l.weaver@gmail.com>",
+  "license": "UNLICENSED",
+  "private": true,
   "devDependencies": {
-    "puppeteer": "^24.32.0"
+    "puppeteer": "^24.32.0",
+    "http-server": "^14.1.1",
+    "nodemon": "^3.0.2"
   }
 }

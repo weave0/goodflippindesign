@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Cache bust: 2026-01-28-16:14 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -692,7 +693,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="https://goodflippinvibes.com" target="_blank" rel="noopener" class="portfolio-card">
+                <a href="https://www.goodflippinvibes.com" target="_blank" rel="noopener" class="portfolio-card">
                     <div class="portfolio-preview">
                         <img src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80" alt="Good Flippin Vibes">
                     </div>
@@ -1018,7 +1019,15 @@
                 e.preventDefault();
                 const user = 'getsome';
                 const domain = 'goodflippinvibes.com';
-                window.location.href = 'mailto:' + user + '@' + domain;
+                const mailtoLink = 'mailto:' + user + '@' + domain;
+                // Use a hidden link to open email without navigating away
+                const tempLink = document.createElement('a');
+                tempLink.href = mailtoLink;
+                tempLink.target = '_blank';
+                tempLink.rel = 'noopener';
+                document.body.appendChild(tempLink);
+                tempLink.click();
+                document.body.removeChild(tempLink);
             }
             
             if (emailLink) {
