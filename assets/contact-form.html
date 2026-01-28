@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,13 +17,13 @@
             --success: #10b981;
             --error: #ef4444;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-dark);
@@ -33,7 +34,7 @@
             justify-content: center;
             padding: 2rem;
         }
-        
+
         .form-container {
             max-width: 600px;
             width: 100%;
@@ -43,12 +44,12 @@
             border: 1px solid var(--border);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        
+
         .form-header {
             text-align: center;
             margin-bottom: 2rem;
         }
-        
+
         .form-header h1 {
             font-size: 1.75rem;
             margin-bottom: 0.5rem;
@@ -56,29 +57,31 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
         .form-header p {
             color: var(--text-muted);
             font-size: 0.95rem;
         }
-        
+
         .form-group {
             margin-bottom: 1.5rem;
         }
-        
+
         label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
             font-size: 0.9rem;
         }
-        
+
         .required::after {
             content: ' *';
             color: var(--error);
         }
-        
-        input, select, textarea {
+
+        input,
+        select,
+        textarea {
             width: 100%;
             padding: 0.875rem 1rem;
             background: rgba(0, 0, 0, 0.3);
@@ -88,17 +91,20 @@
             font-size: 1rem;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        
-        input:focus, select:focus, textarea:focus {
+
+        input:focus,
+        select:focus,
+        textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
         }
-        
-        input::placeholder, textarea::placeholder {
+
+        input::placeholder,
+        textarea::placeholder {
             color: var(--text-muted);
         }
-        
+
         select {
             cursor: pointer;
             appearance: none;
@@ -107,36 +113,36 @@
             background-position: right 1rem center;
             background-size: 1.25rem;
         }
-        
+
         select option {
             background: var(--bg-card);
             color: var(--text-primary);
         }
-        
+
         textarea {
             resize: vertical;
             min-height: 120px;
         }
-        
+
         .char-count {
             text-align: right;
             font-size: 0.8rem;
             color: var(--text-muted);
             margin-top: 0.25rem;
         }
-        
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
         }
-        
+
         @media (max-width: 500px) {
             .form-row {
                 grid-template-columns: 1fr;
             }
         }
-        
+
         .submit-btn {
             width: 100%;
             padding: 1rem 2rem;
@@ -149,57 +155,57 @@
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        
+
         .submit-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
         }
-        
+
         .submit-btn:active {
             transform: translateY(0);
         }
-        
+
         .form-footer {
             text-align: center;
             margin-top: 1.5rem;
             font-size: 0.85rem;
             color: var(--text-muted);
         }
-        
+
         .form-footer a {
             color: var(--primary);
             text-decoration: none;
         }
-        
+
         .success-message {
             display: none;
             text-align: center;
             padding: 3rem 2rem;
         }
-        
+
         .success-message.show {
             display: block;
         }
-        
+
         .success-message svg {
             width: 64px;
             height: 64px;
             color: var(--success);
             margin-bottom: 1rem;
         }
-        
+
         .success-message h2 {
             margin-bottom: 0.5rem;
         }
-        
+
         .success-message p {
             color: var(--text-muted);
         }
-        
+
         form.hidden {
             display: none;
         }
-        
+
         .portfolio-link {
             display: inline-flex;
             align-items: center;
@@ -209,12 +215,13 @@
             font-size: 0.9rem;
             margin-top: 1rem;
         }
-        
+
         .portfolio-link:hover {
             text-decoration: underline;
         }
     </style>
 </head>
+
 <body>
     <div class="form-container">
         <div class="form-header">
@@ -224,12 +231,12 @@
                 View Portfolio →
             </a>
         </div>
-        
+
         <form id="inquiry-form" action="/api/contact" method="POST">
             <!-- Hidden field to redirect email to brett.l.weaver@gmail.com -->
             <input type="hidden" name="_replyto" value="">
             <input type="hidden" name="_subject" value="New Project Inquiry from Website">
-            
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="name" class="required">Name</label>
@@ -240,12 +247,12 @@
                     <input type="email" id="email" name="email" required placeholder="you@company.com">
                 </div>
             </div>
-            
+
             <div class="form-group">
                 <label for="company">Company/Organization</label>
                 <input type="text" id="company" name="company" placeholder="Optional">
             </div>
-            
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="project-type" class="required">Project Type</label>
@@ -271,7 +278,7 @@
                     </select>
                 </div>
             </div>
-            
+
             <div class="form-group">
                 <label for="timeline" class="required">Timeline</label>
                 <select id="timeline" name="timeline" required>
@@ -282,32 +289,31 @@
                     <option value="flexible">Flexible</option>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label for="description" class="required">Brief Project Description</label>
-                <textarea 
-                    id="description" 
-                    name="description" 
-                    required 
+                <textarea
+                    id="description"
+                    name="description"
+                    required
                     maxlength="500"
-                    placeholder="Describe your project goals, current challenges, and what success looks like..."
-                ></textarea>
+                    placeholder="Describe your project goals, current challenges, and what success looks like..."></textarea>
                 <div class="char-count"><span id="char-count">0</span>/500</div>
             </div>
-            
+
             <div class="form-group">
                 <label for="referral">How did you find me?</label>
                 <input type="text" id="referral" name="referral" placeholder="e.g., LinkedIn, referral, Google">
             </div>
-            
+
             <button type="submit" class="submit-btn">Submit Inquiry</button>
-            
+
             <div class="form-footer">
                 I only take on select projects that align with my expertise.<br>
                 <a href="mailto:brett.l.weaver@gmail.com">Prefer email?</a>
             </div>
         </form>
-        
+
         <div class="success-message" id="success-message">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -319,25 +325,25 @@
             </a>
         </div>
     </div>
-    
+
     <script>
         // Character counter
         const description = document.getElementById('description');
         const charCount = document.getElementById('char-count');
-        
+
         description.addEventListener('input', () => {
             charCount.textContent = description.value.length;
         });
-        
+
         // Form submission handling (for Formspree)
         const form = document.getElementById('inquiry-form');
         const successMessage = document.getElementById('success-message');
-        
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const formData = new FormData(form);
-            
+
             try {
                 const response = await fetch(form.action, {
                     method: 'POST',
@@ -346,7 +352,7 @@
                         'Accept': 'application/json'
                     }
                 });
-                
+
                 if (response.ok) {
                     form.classList.add('hidden');
                     successMessage.classList.add('show');
@@ -359,4 +365,5 @@
         });
     </script>
 </body>
+
 </html>
