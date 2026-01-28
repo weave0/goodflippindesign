@@ -38,7 +38,8 @@
 
 1. Edit code locally
 2. `git push origin main`
-3. **✨ LIVE in 2 minutes** (Cloudflare auto-deploys)
+3. **✨ LIVE in 2 minutes** (Cloudflare auto-deploys from GitHub)
+4. No GitHub Actions needed (Cloudflare watches repo directly)
 
 ### Quality Assurance ✅
 
