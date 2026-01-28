@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Cache bust: 2026-01-28-20:00 -->
+<!-- Cache bust: 2026-01-28-20:02 -->
 <html lang="en">
 
 <head>
@@ -1235,24 +1235,6 @@
                         this.style.borderColor = '';
                     });
                 });
-
-                // Form submission handling
-                contactForm.addEventListener('submit', function (e) {
-                    const submitBtn = this.querySelector('.form-submit');
-                    const originalText = submitBtn.textContent;
-
-                    // Visual feedback
-                    submitBtn.textContent = 'Sending...';
-                    submitBtn.style.opacity = '0.7';
-                    submitBtn.disabled = true;
-
-                    // Re-enable after timeout (Formspree handles actual submission)
-                    setTimeout(() => {
-                        submitBtn.textContent = originalText;
-                        submitBtn.style.opacity = '';
-                        submitBtn.disabled = false;
-                    }, 3000);
-                });
             }
 
             // 2. Smooth reveal on scroll for cards
@@ -1363,7 +1345,6 @@
             }
 
             // 9. Contact form submission via mailto
-            const contactForm = document.getElementById('contact-form');
             if (contactForm) {
                 contactForm.addEventListener('submit', function (e) {
                     e.preventDefault();
