@@ -1,12 +1,46 @@
 {
   "recommendations": [
+    // ============================================
+    // THEME & APPEARANCE (Dark Space Vibes) 🌌
+    // ============================================
+    "dracula-theme.theme-dracula",
+    "GitHub.github-vscode-theme",
+    "arcticicestudio.nord-visual-studio-code",
+    "enkia.tokyo-night",
+
+    // ============================================
+    // CODE QUALITY & FORMATTING
+    // ============================================
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
-    "ms-playwright.playwright",
-    "ritwickdey.liveserver",
     "streetsidesoftware.code-spell-checker",
+
+    // ============================================
+    // TESTING & QA
+    // ============================================
+    "ms-playwright.playwright",
+    "ms-vscode.test-adapter-converter",
+
+    // ============================================
+    // DEVELOPMENT & PRODUCTIVITY
+    // ============================================
+    "ritwickdey.liveserver",
     "github.copilot",
-    "github.copilot-chat"
+    "github.copilot-chat",
+    "eamodio.gitlens",
+
+    // ============================================
+    // ICONS & UI
+    // ============================================
+    "dracula-theme.theme-dracula-icon-theme",
+    "PKief.material-icon-theme",
+
+    // ============================================
+    // HELPFUL UTILITIES
+    // ============================================
+    "mhutchie.git-graph",
+    "DavidAnson.vscode-markdownlint",
+    "Gruntfuggly.todo-tree"
   ],
   "unwantedRecommendations": []
 }
