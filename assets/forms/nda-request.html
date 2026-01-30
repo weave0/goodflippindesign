@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request NDA - Good Flippin Design</title>
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --bg-elevated: #151515;
+            --bg-card: #1a1a1a;
+            --text: #f5f5f5;
+            --text-secondary: #999;
+            --text-muted: #8a8a8a;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.12);
+            --accent: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        label .required {
+            color: #ef4444;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9375rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #10b981;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Good Flippin Design</a>
+
+        <h1>Request Non-Disclosure Agreement</h1>
+        <p class="subtitle">Mutual NDA for confidential business discussions. Typically generated within minutes and emailed to all parties.</p>
+
+        <div id="success-message" class="success-message">
+            <strong>✓ NDA Request Submitted!</strong><br>
+            Document ID: <span id="doc-id"></span><br>
+            You'll receive the NDA via email within 5 minutes. Check your spam folder if you don't see it.
+        </div>
+
+        <div id="error-message" class="error-message">
+            <strong>Error:</strong> <span id="error-text"></span>
+        </div>
+
+        <form id="nda-form">
+            <div class="form-group">
+                <label>Your Name <span class="required">*</span></label>
+                <input type="text" name="name" required placeholder="John Smith">
+            </div>
+
+            <div class="form-group">
+                <label>Your Email <span class="required">*</span></label>
+                <input type="email" name="email" required placeholder="john@company.com">
+                <div class="form-hint">Where we'll send the NDA</div>
+            </div>
+
+            <div class="form-group">
+                <label>Your Company <span class="required">*</span></label>
+                <input type="text" name="company" required placeholder="Acme Corp">
+            </div>
+
+            <div class="form-group">
+                <label>Your Title</label>
+                <input type="text" name="title" placeholder="CEO, CTO, etc.">
+            </div>
+
+            <div class="form-group">
+                <label>Company Address</label>
+                <input type="text" name="address" placeholder="123 Main St, City, State ZIP">
+            </div>
+
+            <div class="form-group">
+                <label>NDA Type <span class="required">*</span></label>
+                <select name="nda_type" required aria-label="NDA Type">
+                    <option value="">Select NDA type</option>
+                    <option value="mutual">Mutual NDA (both parties share confidential info)</option>
+                    <option value="one-way">One-Way NDA (only one party shares info)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Purpose of NDA <span class="required">*</span></label>
+                <textarea name="purpose" required placeholder="Briefly describe what you'll be discussing (e.g., 'Exploring partnership opportunity for AI-powered dashboard development')"></textarea>
+                <div class="form-hint">One sentence is fine</div>
+            </div>
+
+            <div class="form-group">
+                <label>Term (Years) <span class="required">*</span></label>
+                <select name="term_years" required aria-label="NDA Term in Years">
+                    <option value="2">2 years</option>
+                    <option value="3" selected>3 years (recommended)</option>
+                    <option value="5">5 years</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-primary">Generate NDA</button>
+        </form>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'https://sd7ug3ha16.execute-api.us-east-1.amazonaws.com/prod/api/legal-forms';
+
+        document.getElementById('nda-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const data = {
+                PARTY_NAME: formData.get('name'),
+                PARTY_EMAIL: formData.get('email'),
+                PARTY_COMPANY: formData.get('company'),
+                PARTY_TITLE: formData.get('title') || 'Authorized Signatory',
+                PARTY_ADDRESS: formData.get('address') || '[Address to be provided]',
+                PURPOSE: formData.get('purpose'),
+                TERM_YEARS: formData.get('term_years'),
+            };
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Generating...';
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'nda', data })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    document.getElementById('doc-id').textContent = result.documentId;
+                    document.getElementById('success-message').classList.add('show');
+                    document.getElementById('error-message').classList.remove('show');
+                    e.target.reset();
+                } else {
+                    throw new Error(result.error || 'Failed to generate NDA');
+                }
+            } catch (error) {
+                document.getElementById('error-text').textContent = error.message;
+                document.getElementById('error-message').classList.add('show');
+                document.getElementById('success-message').classList.remove('show');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Generate NDA';
+            }
+        });
+    </script>
+</body>
+
+</html>
