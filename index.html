@@ -53,6 +53,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         :root {
             --bg: #0d0d0d;
@@ -567,6 +568,157 @@
             line-height: 1.6;
         }
 
+        /* Support (Donations) */
+        #support {
+            background: var(--bg);
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .support-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .support-eyebrow {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1rem;
+        }
+
+        .support-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .support-copy p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .support-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .support-toggle button {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .support-toggle button.active {
+            background: var(--bg-elevated);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .support-amounts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .donation-amount {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .donation-amount.active {
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+        }
+
+        .support-custom {
+            grid-column: span 3;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .support-custom input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9375rem;
+        }
+
+        .support-payment {
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+            display: none;
+        }
+
+        .support-payment.active {
+            display: block;
+        }
+
+        .support-payment-actions {
+            margin-top: 1rem;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .support-note {
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+            line-height: 1.6;
+        }
+
+        .support-success {
+            margin-top: 1rem;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #10b981;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .support-success.active {
+            display: block;
+        }
+
+        @media (max-width: 900px) {
+            .support-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* Contact */
         #contact {
             background: var(--bg-elevated);
@@ -692,6 +844,175 @@
 
         .form-submit:hover {
             opacity: 0.9;
+        }
+
+        /* Legal Forms Section */
+        #legal-forms {
+            background: var(--bg-elevated);
+        }
+
+        .legal-forms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .legal-form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            will-change: transform;
+        }
+
+        .legal-form-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-hover);
+        }
+
+        .form-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            line-height: 1;
+        }
+
+        .legal-form-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
+        }
+
+        .legal-form-card p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-features {
+            list-style: none;
+            margin: 0 0 1.5rem 0;
+            padding: 0;
+            flex-grow: 1;
+        }
+
+        .form-features li {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            padding-left: 0;
+        }
+
+        .form-btn {
+            margin-top: auto;
+            text-align: center;
+            display: block;
+        }
+
+        .form-process {
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .form-process h3 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .process-steps-horizontal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .process-step-mini {
+            text-align: center;
+            max-width: 180px;
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--text-muted), var(--text-secondary));
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin: 0 auto 0.75rem;
+        }
+
+        .process-step-mini h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
+        }
+
+        .process-step-mini p {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .step-arrow {
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .trust-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            padding: 1.5rem;
+            background: var(--bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .trust-indicators span {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 900px) {
+            .process-steps-horizontal {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .step-arrow {
+                transform: rotate(90deg);
+            }
+
+            .trust-indicators {
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .legal-forms-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .trust-indicators {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+            }
         }
 
         /* Footer */
@@ -1010,6 +1331,8 @@
                 <li><a href="#services">Services</a></li>
                 <li><a href="#work">Work</a></li>
                 <li><a href="#process">Process</a></li>
+                <li><a href="#legal-forms">Legal Forms</a></li>
+                <li><a href="#support">Support</a></li>
             </ul>
             <a href="#contact" class="nav-cta">Get in Touch</a>
         </div>
@@ -1224,6 +1547,147 @@
                         <p class="process-number">04</p>
                         <h3>Launch</h3>
                         <p>Deployment, documentation, and 30 days of post-launch support.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="legal-forms">
+            <div class="container">
+                <div class="section-header">
+                    <p class="section-label">Legal Documents</p>
+                    <h2 class="section-title">Automated Document Generation</h2>
+                    <p class="section-subtitle">Request NDAs, agreements, and other legal documents instantly. Automated generation with email delivery and permanent archival.</p>
+                </div>
+
+                <div class="legal-forms-grid">
+                    <div class="legal-form-card">
+                        <div class="form-icon">📄</div>
+                        <h3>Non-Disclosure Agreement</h3>
+                        <p>Protect confidential information for partnerships, client projects, or business discussions.</p>
+                        <ul class="form-features">
+                            <li>✓ Mutual or One-Way options</li>
+                            <li>✓ Minnesota law compliance</li>
+                            <li>✓ Generated within minutes</li>
+                        </ul>
+                        <a href="#" class="btn-primary form-btn" data-form-type="nda">Request NDA</a>
+                    </div>
+
+                    <div class="legal-form-card">
+                        <div class="form-icon">📋</div>
+                        <h3>Service Agreement</h3>
+                        <p>Master contract for client engagements with scope, payment terms, and IP ownership.</p>
+                        <ul class="form-features">
+                            <li>✓ Customized to project type</li>
+                            <li>✓ Clear payment terms</li>
+                            <li>✓ IP protection included</li>
+                        </ul>
+                        <a href="#" class="btn-primary form-btn" data-form-type="service">Request Agreement</a>
+                    </div>
+
+                    <div class="legal-form-card">
+                        <div class="form-icon">📊</div>
+                        <h3>Statement of Work</h3>
+                        <p>Detailed project specifications, deliverables, milestones, and acceptance criteria.</p>
+                        <ul class="form-features">
+                            <li>✓ Specific deliverables</li>
+                            <li>✓ Timeline milestones</li>
+                            <li>✓ Budget breakdown</li>
+                        </ul>
+                        <a href="#" class="btn-primary form-btn" data-form-type="sow">Request SOW</a>
+                    </div>
+
+                    <div class="legal-form-card">
+                        <div class="form-icon">🔄</div>
+                        <h3>Change Order</h3>
+                        <p>Document scope changes, budget adjustments, and timeline modifications for active projects.</p>
+                        <ul class="form-features">
+                            <li>✓ Links to original SOW</li>
+                            <li>✓ Impact analysis</li>
+                            <li>✓ Approval tracking</li>
+                        </ul>
+                        <a href="#" class="btn-primary form-btn" data-form-type="change">Request Change Order</a>
+                    </div>
+                </div>
+
+                <div class="form-process">
+                    <h3>How It Works</h3>
+                    <div class="process-steps-horizontal">
+                        <div class="process-step-mini">
+                            <div class="step-number">1</div>
+                            <h4>Fill Form</h4>
+                            <p>Complete simple request form with your details</p>
+                        </div>
+                        <div class="step-arrow">→</div>
+                        <div class="process-step-mini">
+                            <div class="step-number">2</div>
+                            <h4>Auto-Generate</h4>
+                            <p>Document created instantly from templates</p>
+                        </div>
+                        <div class="step-arrow">→</div>
+                        <div class="process-step-mini">
+                            <div class="step-number">3</div>
+                            <h4>Email Delivery</h4>
+                            <p>Receive Google Doc + PDF via email</p>
+                        </div>
+                        <div class="step-arrow">→</div>
+                        <div class="process-step-mini">
+                            <div class="step-number">4</div>
+                            <h4>Review & Sign</h4>
+                            <p>Review, suggest edits, and execute when ready</p>
+                        </div>
+                    </div>
+
+                    <div class="trust-indicators">
+                        <span>🔒 Secure processing</span>
+                        <span>📧 Email copies to all parties</span>
+                        <span>🗄️ Permanent archive</span>
+                        <span>⚖️ Attorney-reviewed templates</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="support">
+            <div class="container">
+                <div class="section-header">
+                    <p class="section-label">Support</p>
+                    <h2 class="section-title">Fuel independent work</h2>
+                    <p class="section-subtitle">Project-specific donations help keep research, accessibility improvements, and open resources moving forward.</p>
+                </div>
+                <div class="support-grid">
+                    <div class="support-copy">
+                        <p class="support-eyebrow">Good Flippin Design</p>
+                        <h3 class="support-title">Keep the momentum alive</h3>
+                        <div class="support-copy">
+                            <p>Every contribution goes directly to product research, design iterations, and the systems that make client work more resilient.</p>
+                            <p>If you’re supporting a specific initiative, you can note the project name in the payment message.</p>
+                        </div>
+                    </div>
+                    <div class="support-card" aria-live="polite">
+                        <div class="support-toggle" role="group" aria-label="Donation frequency">
+                            <button type="button" class="support-toggle-btn active" data-mode="one-time">One-time</button>
+                            <button type="button" class="support-toggle-btn" data-mode="monthly">Monthly</button>
+                        </div>
+                        <div class="support-amounts" role="group" aria-label="Donation amount">
+                            <button type="button" class="donation-amount" data-amount="10">$10</button>
+                            <button type="button" class="donation-amount" data-amount="25">$25</button>
+                            <button type="button" class="donation-amount" data-amount="50">$50</button>
+                            <button type="button" class="donation-amount" data-amount="100">$100</button>
+                            <label class="support-custom" for="support-custom-amount">
+                                Custom amount
+                                <input id="support-custom-amount" type="number" min="1" step="1" placeholder="Enter amount in USD">
+                            </label>
+                        </div>
+                        <button type="button" class="btn-primary support-continue">Continue to payment</button>
+                        <div class="support-success" id="support-success">Thank you! Your support keeps the mission moving.</div>
+                        <div class="support-payment" id="support-payment">
+                            <div id="donation-payment-element"></div>
+                            <div class="support-payment-actions">
+                                <button type="button" class="btn-primary support-pay">Donate now</button>
+                                <p class="support-note">Secure payment via Stripe. You’ll receive a receipt by email.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1476,7 +1940,163 @@
                 });
             }
 
-            // 10. Email obfuscation to prevent Cloudflare bot protection
+            // 10. Stripe donation workflow
+            const donationConfig = {
+                publishableKey: 'pk_live_51So70wBL2ppdbQKqOR38V1sZW6oFrVYkKmsxYxHTIOQ7yXYU1oT2qQtXHdKo9eBx2vxvotcYt5L6ZQXoXfYrx5Wg00X1VibSRz',
+                apiBaseUrl: 'https://sd7ug3ha16.execute-api.us-east-1.amazonaws.com/prod',
+                projectLabel: 'Good Flippin Design'
+            };
+
+            const supportSection = document.getElementById('support');
+            if (supportSection) {
+                const toggleButtons = supportSection.querySelectorAll('.support-toggle-btn');
+                const amountButtons = supportSection.querySelectorAll('.donation-amount');
+                const customAmountInput = document.getElementById('support-custom-amount');
+                const continueButton = supportSection.querySelector('.support-continue');
+                const paymentContainer = document.getElementById('support-payment');
+                const payButton = supportSection.querySelector('.support-pay');
+                const successMessage = document.getElementById('support-success');
+                const paymentElementContainer = document.getElementById('donation-payment-element');
+
+                let donationMode = 'one-time';
+                let selectedAmount = 0;
+                let stripe;
+                let elements;
+
+                const queryParams = new URLSearchParams(window.location.search);
+                if (queryParams.get('support') === 'success') {
+                    successMessage.classList.add('active');
+                }
+
+                const setActiveButton = (buttons, activeButton) => {
+                    buttons.forEach(button => button.classList.remove('active'));
+                    if (activeButton) {
+                        activeButton.classList.add('active');
+                    }
+                };
+
+                const setAmount = (amount, activeButton) => {
+                    selectedAmount = amount;
+                    setActiveButton(amountButtons, activeButton);
+                    if (customAmountInput && activeButton) {
+                        customAmountInput.value = '';
+                    }
+                };
+
+                toggleButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        donationMode = button.dataset.mode || 'one-time';
+                        setActiveButton(toggleButtons, button);
+                    });
+                });
+
+                amountButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const amountValue = parseFloat(button.dataset.amount || '0');
+                        setAmount(amountValue, button);
+                    });
+                });
+
+                if (customAmountInput) {
+                    customAmountInput.addEventListener('input', () => {
+                        const customValue = parseFloat(customAmountInput.value || '0');
+                        if (!Number.isNaN(customValue)) {
+                            selectedAmount = customValue;
+                            setActiveButton(amountButtons, null);
+                        }
+                    });
+                }
+
+                const initializeStripe = async () => {
+                    if (!donationConfig.publishableKey.startsWith('pk_')) {
+                        console.warn('Stripe publishable key missing. Update donationConfig.publishableKey.');
+                        return null;
+                    }
+                    if (!window.Stripe) {
+                        console.warn('Stripe.js not available.');
+                        return null;
+                    }
+                    if (!stripe) {
+                        stripe = window.Stripe(donationConfig.publishableKey);
+                    }
+                    return stripe;
+                };
+
+                const createPaymentIntent = async (amount) => {
+                    const response = await fetch(`${donationConfig.apiBaseUrl}/api/create-payment-intent`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            amount: Math.round(amount * 100),
+                            recurring: donationMode === 'monthly',
+                            project: donationConfig.projectLabel
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Unable to create payment intent');
+                    }
+
+                    return response.json();
+                };
+
+                const mountPaymentElement = async (clientSecret) => {
+                    if (!stripe) return;
+                    if (elements) {
+                        elements.update({ clientSecret });
+                    } else {
+                        elements = stripe.elements({ clientSecret });
+                    }
+
+                    paymentElementContainer.innerHTML = '';
+                    const paymentElement = elements.create('payment');
+                    paymentElement.mount(paymentElementContainer);
+                };
+
+                if (continueButton) {
+                    continueButton.addEventListener('click', async () => {
+                        if (!donationConfig.apiBaseUrl.startsWith('https://')) {
+                            alert('Donation system not configured yet.');
+                            return;
+                        }
+                        if (selectedAmount < 1) {
+                            alert('Please select a donation amount.');
+                            return;
+                        }
+                        const stripeInstance = await initializeStripe();
+                        if (!stripeInstance) {
+                            alert('Stripe configuration is missing.');
+                            return;
+                        }
+                        try {
+                            const { clientSecret } = await createPaymentIntent(selectedAmount);
+                            await mountPaymentElement(clientSecret);
+                            paymentContainer.classList.add('active');
+                        } catch (error) {
+                            console.error(error);
+                            alert('Unable to start donation. Please try again.');
+                        }
+                    });
+                }
+
+                if (payButton) {
+                    payButton.addEventListener('click', async () => {
+                        if (!stripe || !elements) return;
+                        const { error } = await stripe.confirmPayment({
+                            elements,
+                            confirmParams: {
+                                return_url: `${window.location.origin}${window.location.pathname}?support=success`
+                            }
+                        });
+
+                        if (error) {
+                            alert(error.message || 'Payment failed. Please try again.');
+                        }
+                    });
+                }
+            }
+
+            // 11. Email obfuscation to prevent Cloudflare bot protection
             const emailLink = document.getElementById('email-link');
             const emailLinkAlt = document.getElementById('email-link-alt');
             const footerEmailLink = document.getElementById('footer-email-link');
