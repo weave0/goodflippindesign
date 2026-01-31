@@ -1,8 +1,18 @@
 <!DOCTYPE html>
-<!-- Cache bust: 2026-01-29-03:21 -->
+<!-- Cache bust: 2026-01-30-19:35 -->
 <html lang="en">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QPPVJM1B60"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-QPPVJM1B60');
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -1053,6 +1063,12 @@
             gap: 2rem;
         }
 
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
         .footer-links a {
             color: var(--text-secondary);
             text-decoration: none;
@@ -1062,6 +1078,20 @@
 
         .footer-links a:hover {
             color: var(--text);
+        }
+
+        .footer-ecosystem {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .footer-ecosystem-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
         }
 
         /* Responsive */
@@ -1345,7 +1375,7 @@
                 <h1>Building digital platforms that create competitive advantage</h1>
                 <p class="hero-subtitle">
                     Full-stack development for organizations that need more than templates.
-                    Data platforms, AI integration, and interfaces built for impact.
+                    From AI education platforms (aiaimate.com) to cultural data visualization (culturesherpa.org) — interfaces built for impact.
                 </p>
                 <div class="hero-ctas">
                     <a href="#contact" class="btn-primary">Start a conversation</a>
@@ -1353,13 +1383,13 @@
                 </div>
 
                 <div class="clients-bar">
-                    <p class="clients-label">Domains of expertise</p>
+                    <p class="clients-label">Live Production Ecosystem</p>
                     <div class="clients-list">
+                        <span>AI Education Platforms</span>
+                        <span>Cultural Data Visualization</span>
                         <span>Healthcare Analytics</span>
                         <span>Market Intelligence</span>
-                        <span>Cultural Data</span>
-                        <span>AI Education</span>
-                        <span>Compliance Platforms</span>
+                        <span>Compliance Portals</span>
                     </div>
                 </div>
             </div>
@@ -1409,59 +1439,62 @@
                     <p class="section-subtitle">Production platforms and technical demonstrations. Live projects available for acquisition.</p>
                 </div>
                 <div class="portfolio-grid">
+                    <a href="https://aiaimate.com" target="_blank" rel="noopener" class="portfolio-card">
+                        <div class="portfolio-preview">
+                            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80" alt="AI Aimate - AI Education Platform">
+                        </div>
+                        <div class="portfolio-info">
+                            <p class="portfolio-category">
+                                AI Education Platform
+                                <span class="status-badge live">LIVE</span>
+                                <span class="status-badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6; font-weight: 700;">AVAILABLE FOR ACQUISITION</span>
+                            </p>
+                            <h3>AI Aimate</h3>
+                            <p>Production-ready AI education platform with RAG-powered search, semantic knowledge base, and interactive learning modules. Next.js 14, vector embeddings, and adaptive content delivery serving active user base.</p>
+                            <div class="portfolio-tech">
+                                <span class="tech-tag">RAG Architecture</span>
+                                <span class="tech-tag">Next.js 14</span>
+                                <span class="tech-tag">Vector DB</span>
+                                <span class="tech-tag">OpenAI</span>
+                            </div>
+                        </div>
+                    </a>
                     <a href="https://culturesherpa.org" target="_blank" rel="noopener" class="portfolio-card">
                         <div class="portfolio-preview">
-                            <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800&q=80" alt="CultureSherpa">
+                            <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800&q=80" alt="CultureSherpa - Interactive Cultural Atlas">
                         </div>
                         <div class="portfolio-info">
                             <p class="portfolio-category">
                                 Cultural Data Platform
                                 <span class="status-badge live">LIVE</span>
-                                <span class="status-badge" style="background: rgba(168, 162, 158, 0.15); color: #a8a29e; display: inline-flex; align-items: center; gap: 0.25rem;">◆ Preserved</span>
+                                <span class="status-badge" style="background: rgba(168, 162, 158, 0.15); color: #a8a29e; display: inline-flex; align-items: center; gap: 0.25rem;">◆ Cultural Preservation</span>
                             </p>
                             <h3>CultureSherpa</h3>
-                            <p>470 cultures mapped with interactive exploration. MapboxGL visualization, AI-enriched profiles, PWA architecture.</p>
+                            <p>Interactive atlas mapping 470+ cultures with AI-synthesized profiles, geographic visualization via MapboxGL, and offline-first PWA architecture. Demonstrates complex data visualization and cultural API integration at scale.</p>
                             <div class="portfolio-tech">
                                 <span class="tech-tag">MapboxGL</span>
-                                <span class="tech-tag">React</span>
+                                <span class="tech-tag">React 18</span>
+                                <span class="tech-tag">PWA</span>
                                 <span class="tech-tag">AI Synthesis</span>
-                            </div>
-                        </div>
-                    </a>
-                    <a href="https://aiaimate.com" target="_blank" rel="noopener" class="portfolio-card">
-                        <div class="portfolio-preview">
-                            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80" alt="AI Aimate">
-                        </div>
-                        <div class="portfolio-info">
-                            <p class="portfolio-category">
-                                AI Education
-                                <span class="status-badge live">LIVE</span>
-                                <span class="status-badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">FOR SALE</span>
-                            </p>
-                            <h3>AI Aimate</h3>
-                            <p>Foundations of Artificial Intelligence. RAG-powered Q&A, interactive visualizations, structured learning paths.</p>
-                            <div class="portfolio-tech">
-                                <span class="tech-tag">RAG</span>
-                                <span class="tech-tag">Next.js</span>
-                                <span class="tech-tag">Vector Search</span>
                             </div>
                         </div>
                     </a>
                     <a href="https://www.goodflippinvibes.com" target="_blank" rel="noopener" class="portfolio-card">
                         <div class="portfolio-preview">
-                            <img src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80" alt="Good Flippin Vibes">
+                            <img src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80" alt="Good Flippin Vibes - Wellness Platform">
                         </div>
                         <div class="portfolio-info">
                             <p class="portfolio-category">
                                 Wellness Platform
                                 <span class="status-badge live">LIVE</span>
-                                <span class="status-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">For Healing</span>
+                                <span class="status-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Origin Story</span>
                             </p>
                             <h3>Good Flippin Vibes</h3>
-                            <p>Holistic wellness platform. The original venture that started it all.</p>
+                            <p>Community-driven holistic wellness platform. The original venture that launched our mission to create meaningful digital experiences. Showcases content management, community features, and responsive design.</p>
                             <div class="portfolio-tech">
                                 <span class="tech-tag">React</span>
                                 <span class="tech-tag">Community</span>
+                                <span class="tech-tag">CMS</span>
                             </div>
                         </div>
                     </a>
@@ -1760,6 +1793,14 @@
             <p class="footer-text">© 2025 GFV LLC</p>
             <div class="footer-links">
                 <a href="javascript:void(0)" id="footer-email-link">getsome@goodflippinvibes.com</a>
+            </div>
+        </div>
+        <div class="footer-content" style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+            <div class="footer-ecosystem">
+                <span class="footer-ecosystem-label">Our Ecosystem:</span>
+                <a href="https://aiaimate.com" target="_blank" rel="noopener">AI Aimate</a>
+                <a href="https://culturesherpa.org" target="_blank" rel="noopener">CultureSherpa</a>
+                <a href="https://goodflippinvibes.com" target="_blank" rel="noopener">Good Flippin Vibes</a>
             </div>
         </div>
     </footer>
