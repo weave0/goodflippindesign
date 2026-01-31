@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Change Order - Good Flippin Design</title>
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --bg-elevated: #151515;
+            --bg-card: #1a1a1a;
+            --text: #f5f5f5;
+            --text-secondary: #999;
+            --text-muted: #8a8a8a;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.12);
+            --accent: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        label .required {
+            color: #ef4444;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9375rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 550;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .success-message,
+        .error-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .success-message.show,
+        .error-message.show {
+            display: block;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="/index.html#legal-forms" class="back-link">← Back to Legal Forms</a>
+
+        <h1>Request Change Order</h1>
+        <p class="subtitle">Document scope changes, budget adjustments, and timeline modifications for active projects.</p>
+
+        <form id="change-order-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Your Name <span class="required">*</span></label>
+                    <input type="text" name="name" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Email <span class="required">*</span></label>
+                    <input type="email" name="email" required placeholder="you@company.com">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Company/Organization <span class="required">*</span></label>
+                    <input type="text" name="company" required placeholder="ACME Corp">
+                </div>
+                <div class="form-group">
+                    <label>Original SOW/Project ID</label>
+                    <input type="text" name="original_sow_id" placeholder="e.g., SOW-20260115-ABC123">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Project Name <span class="required">*</span></label>
+                <input type="text" name="project_name" required placeholder="Original project name">
+            </div>
+
+            <div class="form-group">
+                <label>Change Type <span class="required">*</span></label>
+                <select name="change_type" required>
+                    <option value="">Select change type</option>
+                    <option value="scope-addition">Scope Addition</option>
+                    <option value="scope-reduction">Scope Reduction</option>
+                    <option value="timeline-extension">Timeline Extension</option>
+                    <option value="budget-increase">Budget Increase</option>
+                    <option value="technical-change">Technical Approach Change</option>
+                    <option value="resource-change">Resource/Staffing Change</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Reason for Change <span class="required">*</span></label>
+                <textarea name="reason" required placeholder="Describe why this change is necessary..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Detailed Description of Changes <span class="required">*</span></label>
+                <textarea name="change_description" required placeholder="What specifically is changing? Be as detailed as possible..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Impact on Scope</label>
+                <textarea name="scope_impact" placeholder="How does this affect deliverables, features, or functionality?"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Impact on Timeline</label>
+                    <select name="timeline_impact">
+                        <option value="">Select impact</option>
+                        <option value="no-change">No change</option>
+                        <option value="1-week">+1 week delay</option>
+                        <option value="2-weeks">+2 weeks delay</option>
+                        <option value="1-month">+1 month delay</option>
+                        <option value="accelerated">Timeline acceleration</option>
+                        <option value="tbd">To be determined</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Impact on Budget</label>
+                    <select name="budget_impact">
+                        <option value="">Select impact</option>
+                        <option value="no-change">No change</option>
+                        <option value="increase-minor">Minor increase (&lt;10%)</option>
+                        <option value="increase-moderate">Moderate increase (10-25%)</option>
+                        <option value="increase-major">Major increase (&gt;25%)</option>
+                        <option value="reduction">Budget reduction</option>
+                        <option value="tbd">To be determined</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Estimated Additional Cost</label>
+                <input type="text" name="additional_cost" placeholder="e.g., $5,000 or 20 hours">
+            </div>
+
+            <div class="form-group">
+                <label>New Target Completion Date</label>
+                <input type="date" name="new_completion_date">
+            </div>
+
+            <div class="form-group">
+                <label>Risk Assessment</label>
+                <textarea name="risks" placeholder="What are the risks if this change is not approved?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Alternatives Considered</label>
+                <textarea name="alternatives" placeholder="What other options were evaluated?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Approval Status</label>
+                <select name="approval_status">
+                    <option value="">Select status</option>
+                    <option value="requesting">Requesting approval</option>
+                    <option value="pre-approved">Pre-approved by stakeholder</option>
+                    <option value="urgent">Urgent - needs immediate review</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Additional Notes</label>
+                <textarea name="notes" placeholder="Any other relevant information..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Generate Change Order</button>
+
+            <div class="success-message" id="success-message">
+                ✓ Change Order generated and sent to your email!
+            </div>
+            <div class="error-message" id="error-message">
+                Error generating document. Please try again or contact support.
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'https://0k023ei145.execute-api.us-east-1.amazonaws.com/api/generate';
+
+        document.getElementById('change-order-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = e.target.querySelector('.submit-btn');
+            const successMsg = document.getElementById('success-message');
+            const errorMsg = document.getElementById('error-message');
+
+            // Reset messages
+            successMsg.classList.remove('show');
+            errorMsg.classList.remove('show');
+
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Generating...';
+
+            // Collect form data
+            const formData = new FormData(e.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        documentType: 'change_order',
+                        formData: data
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    successMsg.classList.add('show');
+                    e.target.reset();
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorMsg.textContent = `Error: ${error.message}`;
+                errorMsg.classList.add('show');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Generate Change Order';
+            }
+        });
+    </script>
+</body>
+
+</html>

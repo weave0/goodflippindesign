@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Statement of Work - Good Flippin Design</title>
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --bg-elevated: #151515;
+            --bg-card: #1a1a1a;
+            --text: #f5f5f5;
+            --text-secondary: #999;
+            --text-muted: #8a8a8a;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.12);
+            --accent: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        label .required {
+            color: #ef4444;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9375rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 550;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .success-message,
+        .error-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .success-message.show,
+        .error-message.show {
+            display: block;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="/index.html#legal-forms" class="back-link">← Back to Legal Forms</a>
+
+        <h1>Request Statement of Work</h1>
+        <p class="subtitle">Generate a detailed project specification document with deliverables, milestones, and budget breakdown.</p>
+
+        <form id="sow-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Your Name <span class="required">*</span></label>
+                    <input type="text" name="name" required placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Email <span class="required">*</span></label>
+                    <input type="email" name="email" required placeholder="you@company.com">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Company/Organization <span class="required">*</span></label>
+                    <input type="text" name="company" required placeholder="ACME Corp">
+                </div>
+                <div class="form-group">
+                    <label>Your Title</label>
+                    <input type="text" name="title" placeholder="CTO">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Project Name <span class="required">*</span></label>
+                <input type="text" name="project_name" required placeholder="e.g., Customer Portal Redesign">
+            </div>
+
+            <div class="form-group">
+                <label>Project Type <span class="required">*</span></label>
+                <select name="project_type" required>
+                    <option value="">Select project type</option>
+                    <option value="data-platform">Data Platform / Dashboard</option>
+                    <option value="ai-integration">AI Integration</option>
+                    <option value="web-application">Web Application</option>
+                    <option value="research-portal">Research / Intelligence Portal</option>
+                    <option value="website">Website / Landing Page</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Project Objectives <span class="required">*</span></label>
+                <textarea name="objectives" required placeholder="Describe the main goals and what success looks like..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Key Deliverables <span class="required">*</span></label>
+                <textarea name="deliverables" required placeholder="List specific deliverables (e.g., dashboard interface, API endpoints, documentation)..."></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Project Timeline <span class="required">*</span></label>
+                    <select name="timeline" required>
+                        <option value="">Select timeline</option>
+                        <option value="2-4-weeks">2-4 weeks</option>
+                        <option value="1-2-months">1-2 months</option>
+                        <option value="2-3-months">2-3 months</option>
+                        <option value="3-6-months">3-6 months</option>
+                        <option value="6-plus-months">6+ months</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Budget Range <span class="required">*</span></label>
+                    <select name="budget_range" required>
+                        <option value="">Select budget</option>
+                        <option value="5k-15k">$5,000 - $15,000</option>
+                        <option value="15k-50k">$15,000 - $50,000</option>
+                        <option value="50k-100k">$50,000 - $100,000</option>
+                        <option value="100k-plus">$100,000+</option>
+                        <option value="discuss">Let's discuss</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Milestones / Phases</label>
+                <textarea name="milestones" placeholder="Optional: Describe key milestones or project phases..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Acceptance Criteria <span class="required">*</span></label>
+                <textarea name="acceptance_criteria" required placeholder="How will you know the project is complete? What must be true?"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" name="start_date">
+                </div>
+                <div class="form-group">
+                    <label>Target Completion Date</label>
+                    <input type="date" name="completion_date">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Payment Terms Preference</label>
+                <select name="payment_terms">
+                    <option value="">Select preference</option>
+                    <option value="50-50">50% upfront, 50% on completion</option>
+                    <option value="milestone">Milestone-based payments</option>
+                    <option value="monthly">Monthly retainer</option>
+                    <option value="hourly">Hourly billing</option>
+                    <option value="discuss">Let's discuss</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Additional Notes</label>
+                <textarea name="notes" placeholder="Any other details, constraints, or requirements..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Generate Statement of Work</button>
+
+            <div class="success-message" id="success-message">
+                ✓ Statement of Work generated and sent to your email!
+            </div>
+            <div class="error-message" id="error-message">
+                Error generating document. Please try again or contact support.
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'https://0k023ei145.execute-api.us-east-1.amazonaws.com/api/generate';
+
+        document.getElementById('sow-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = e.target.querySelector('.submit-btn');
+            const successMsg = document.getElementById('success-message');
+            const errorMsg = document.getElementById('error-message');
+
+            // Reset messages
+            successMsg.classList.remove('show');
+            errorMsg.classList.remove('show');
+
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Generating...';
+
+            // Collect form data
+            const formData = new FormData(e.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        documentType: 'sow',
+                        formData: data
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    successMsg.classList.add('show');
+                    e.target.reset();
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorMsg.textContent = `Error: ${error.message}`;
+                errorMsg.classList.add('show');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Generate Statement of Work';
+            }
+        });
+    </script>
+</body>
+
+</html>
