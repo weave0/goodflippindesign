@@ -1,6 +1,6 @@
 # Legal Forms Automation - Deployment Guide
 
-**Status:** ✅ Code Complete | 🟡 AWS Setup Required  
+**Status:** ✅ Code Complete | 🟡 AWS Setup Required
 **Created:** January 29, 2026
 
 ---
@@ -10,12 +10,14 @@
 Automated legal document generation system that replaces manual email exchanges with instant form-to-email workflow.
 
 ### **Live Forms**
+
 1. **NDA Request** - `/assets/forms/nda-request.html`
 2. **Service Agreement** - `/assets/forms/service-agreement-request.html`
 3. **SOW Request** - _Coming Soon_
 4. **Change Order** - _Coming Soon_
 
 ### **Backend**
+
 - `functions/api/legal-forms.js` - AWS Lambda handler
 - Templates for 4 document types (NDA, Service Agreement, SOW, Change Order)
 - Email delivery via AWS SES
@@ -63,7 +65,7 @@ Automated legal document generation system that replaces manual email exchanges 
 7. **Update Form URLs**
    - Edit `assets/forms/nda-request.html` line 213:
      ```javascript
-     const API_ENDPOINT = 'YOUR_API_ENDPOINT_HERE';
+     const API_ENDPOINT = "YOUR_API_ENDPOINT_HERE";
      ```
    - Replace with your Lambda API URL
    - Do same for `service-agreement-request.html`
@@ -119,20 +121,20 @@ aws apigatewayv2 create-api \
 
 ```javascript
 // Test Lambda function locally with Node.js
-const handler = require('./functions/api/legal-forms.js');
+const handler = require("./functions/api/legal-forms.js");
 
 const testEvent = {
-  httpMethod: 'POST',
+  httpMethod: "POST",
   body: JSON.stringify({
-    type: 'nda',
+    type: "nda",
     data: {
-      PARTY_NAME: 'Test User',
-      PARTY_EMAIL: 'test@example.com',
-      PARTY_COMPANY: 'Test Corp',
-      PURPOSE: 'Testing automation',
-      TERM_YEARS: '3'
-    }
-  })
+      PARTY_NAME: "Test User",
+      PARTY_EMAIL: "test@example.com",
+      PARTY_COMPANY: "Test Corp",
+      PURPOSE: "Testing automation",
+      TERM_YEARS: "3",
+    },
+  }),
 };
 
 handler.handler(testEvent).then(console.log);
@@ -156,10 +158,12 @@ handler.handler(testEvent).then(console.log);
 ## 📧 Email Configuration
 
 Your emails will come from **getsome@goodflippinvibes.com** and BCC to:
+
 - `getsome@goodflippinvibes.com`
 - `brett.l.weaver@gmail.com`
 
 ### **Email Template**
+
 ```
 Subject: Your [Document Type] is Ready - Document [ID]
 
@@ -181,17 +185,20 @@ Next Steps:
 ## 🔧 Troubleshooting
 
 ### **Email Not Sending**
+
 - ✅ Verify SES email addresses
 - ✅ Check Lambda has SES permissions
 - ✅ Look at CloudWatch logs for errors
 - ✅ SES might be in sandbox (limits to verified addresses only)
 
 ### **Form Submit Fails**
+
 - ✅ Check browser console for CORS errors
 - ✅ Verify API Gateway has CORS enabled
 - ✅ Check Lambda timeout (needs 30s not 3s)
 
 ### **Document Missing Fields**
+
 - ✅ Check form field names match template `{{FIELDS}}`
 - ✅ Verify data object in JavaScript matches backend expectations
 
@@ -206,7 +213,7 @@ Edit `functions/api/legal-forms.js` function `sendEmail()`:
 ```javascript
 Body: {
   Text: {
-    Data: `Your custom email message here...`
+    Data: `Your custom email message here...`;
   }
 }
 ```
@@ -221,6 +228,7 @@ Body: {
 ### **Switch to Google Docs**
 
 Future upgrade: Replace `fillTemplate()` function with Google Docs API call to:
+
 - Use Google Doc templates with nicer formatting
 - Generate PDFs automatically
 - Store in Google Drive
@@ -233,10 +241,12 @@ See: `Legal/Automation/GOOGLE_WORKSPACE_AUTOMATION_GUIDE.md`
 ## 💰 Cost Estimate
 
 **AWS Lambda:**
+
 - First 1M requests/month: **FREE**
 - After: $0.20 per 1M requests
 
 **AWS SES:**
+
 - First 62,000 emails/month (via Lambda): **FREE**
 - After: $0.10 per 1,000 emails
 
@@ -247,11 +257,13 @@ See: `Legal/Automation/GOOGLE_WORKSPACE_AUTOMATION_GUIDE.md`
 ## 📊 Monitoring
 
 ### **Track Form Submissions**
+
 - CloudWatch Logs: See every form submission
 - SES Dashboard: Email delivery stats
 - Consider adding Google Analytics events
 
 ### **Metrics to Watch**
+
 - Forms submitted vs emails sent (should match)
 - Email bounce rate (should be < 5%)
 - CloudWatch errors/warnings
@@ -261,18 +273,21 @@ See: `Legal/Automation/GOOGLE_WORKSPACE_AUTOMATION_GUIDE.md`
 ## 🔄 Next Steps
 
 ### **Immediate (This Week)**
+
 - [ ] Deploy Lambda to AWS
 - [ ] Test NDA form end-to-end
 - [ ] Verify emails arriving correctly
 - [ ] Move SES out of sandbox (production access)
 
 ### **Short-term (This Month)**
+
 - [ ] Create SOW request form
 - [ ] Create Change Order form
 - [ ] Add Google Analytics tracking
 - [ ] Set up email templates in SES
 
 ### **Long-term (Next Quarter)**
+
 - [ ] Upgrade to Google Docs API for PDF generation
 - [ ] Add DocuSign integration for e-signatures
 - [ ] Build admin dashboard to view all requests
