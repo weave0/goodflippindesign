@@ -3,3 +3,22 @@ node_modules/
 *.log
 .env
 .DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.venv-*/
+.mypy_cache/
+
+# Brand Assets (large files - use Git LFS if needed)
+Brand Assets Development/Final Assets/**/*.png
+Brand Assets Development/Final Assets/**/*.psd
+Brand Assets Development/Final Assets/**/*.ai
+Brand Assets Development/Final Assets/**/*.fig
+Brand Assets Development/Final Assets/**/*.jpg
+Brand Assets Development/Final Assets/**/*.jpeg
+# Allow small preview PNGs
+!Brand Assets Development/Final Assets/**/*-preview-*.png
+!Brand Assets Development/Final Assets/**/*-thumb-*.png

@@ -1,0 +1,38 @@
+PLATFORM: YouTube Channel Banner
+TARGET SIZE: 2560x1440
+GENERATED: 20260131_143805
+
+ORIGINAL PROMPT:
+================================================================================
+YouTube channel banner for Good Flippin Design (web development consultancy).
+
+EXACT LAYOUT:
+- Dimensions: 2560x1440 pixels (16:9 ratio, TV-safe zones)
+- Center: Circular glowing logo (TV-safe zone)
+- Left and right wings: Abstract tech patterns (visible on desktop)
+- Text: "Good Flippin Design | Strategic Web Development" centered
+- Background: Dark with flowing purple-teal gradient
+
+AESTHETIC:
+- Dark charcoal base (#0d0d0d)
+- Logo in center (TV-safe: 1546x423px area)
+- Wide gradient wings for desktop viewing
+- Purple (#8b5cf6) and teal (#10b981) flowing waves
+- Technical abstract elements on sides (data nodes, circuits)
+- Professional YouTube channel aesthetic
+- Cinematic, wide-screen composition
+
+CRITICAL:
+- Must work at multiple viewport sizes (TV, desktop, mobile, tablet)
+- Center 1546x423px is TV-safe zone - keep logo and text here
+- Outer areas visible on desktop (2560x1440 full)
+- Mobile crops to 1546x423px center
+- Logo must be clear and centered
+- Text must be readable across all devices
+- Professional tech channel aesthetic
+
+Style: Cinematic tech visualization, wide-screen format, multi-device optimized
+
+DALL-E REVISED PROMPT:
+================================================================================
+Create a YouTube channel banner with a dimension of 2560x1440 pixels in a 16:9 ratio. The layout should contain the following: A circular glowing logo placed at the center, abstract tech patterns like data nodes and circuits on the left and right flanks, visible on a desktop screen. The channel name 'Good Flippin Design' and tagline 'Strategic Web Development' should be displayed in a centered position. The background should comprise a flowing gradient of purple (#8b5cf6) and teal (#10b981) over a dark charcoal base (#0d0d0d). The overall aesthetic should have a professional cinematic appearance with the structure optimized for different devices such as TV, desktop, mobile, and tablet. The central part measured at 1546x423px is known as the TV-safe zone housing the logo and text. This same section will appear on mobile screens. For desktop screens, the full dimension of the banner will be visible. It is essential that the logo stays clear and centered within the safe zone, and the text remains legible across all devices. Lastly, this comprehensive design must resonate with the aesthetics of a professional tech channel.

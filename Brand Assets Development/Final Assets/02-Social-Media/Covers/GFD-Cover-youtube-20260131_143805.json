@@ -1,0 +1,12 @@
+{
+  "platform": "youtube",
+  "target_size": "2560x1440",
+  "generated_size": "1792x1024",
+  "generated_at": "20260131_143805",
+  "model": "dall-e-3",
+  "quality": "hd",
+  "style": "vivid",
+  "original_url": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-YpuuZ5bXS9qzoNlm0CxptEbC/user-QhYFgXJNC1scpsvoizRP6pgA/img-Ol9JSxWz7i8GdOReJd4UEiIt.png?st=2026-01-31T19%3A38%3A05Z&se=2026-01-31T21%3A38%3A05Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=35890473-cca8-4a54-8305-05a39e0bc9c3&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-01-31T20%3A38%3A05Z&ske=2026-02-01T20%3A38%3A05Z&sks=b&skv=2024-08-04&sig=wk9%2B9YNJZKFI3mk3ijziNg356/3CUe454GjOr9yoeL8%3D",
+  "file_size": "3.2 MB",
+  "revised_prompt": "Create a YouTube channel banner with a dimension of 2560x1440 pixels in a 16:9 ratio. The layout should contain the following: A circular glowing logo placed at the center, abstract tech patterns like data nodes and circuits on the left and right flanks, visible on a desktop screen. The channel name 'Good Flippin Design' and tagline 'Strategic Web Development' should be displayed in a centered position. The background should comprise a flowing gradient of purple (#8b5cf6) and teal (#10b981) over a dark charcoal base (#0d0d0d). The overall aesthetic should have a professional cinematic appearance with the structure optimized for different devices such as TV, desktop, mobile, and tablet. The central part measured at 1546x423px is known as the TV-safe zone housing the logo and text. This same section will appear on mobile screens. For desktop screens, the full dimension of the banner will be visible. It is essential that the logo stays clear and centered within the safe zone, and the text remains legible across all devices. Lastly, this comprehensive design must resonate with the aesthetics of a professional tech channel."
+}

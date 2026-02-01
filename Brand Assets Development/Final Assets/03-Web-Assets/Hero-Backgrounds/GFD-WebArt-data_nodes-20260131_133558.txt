@@ -1,0 +1,17 @@
+CONCEPT: data_nodes
+
+ORIGINAL PROMPT:
+
+    Abstract geometric pattern of glowing interconnected nodes on dark background.
+    
+    Style: Minimalist network visualization with 5-7 glowing nodes connected by subtle lines.
+    Colors: Teal (#10b981) nodes with soft glow on deep charcoal (#0d0d0d).
+    Mood: Intelligent, connected, global reach.
+    Technical: Clean geometry, soft glows, spacious composition.
+    Use: Background for "Services" or "Process" section.
+    
+    EXCLUDE: No realistic imagery, no text, no clichés.
+    
+
+DALL-E REVISED PROMPT:
+Create an abstract image showcasing a minimalist network visualization style. The image should highlight 5 to 7 glowing nodes interconnected by subtle lines, placed against a deep charcoal (#0d0d0d) background. The nodes themselves should be in a vivid teal (#10b981) color and exhibit a soft glow. The overarching mood of the image should evoke feelings of intelligence, connectivity, and global reach, presenting a spacious and clean geometric composition. The image will be used as a background in the 'Services' or 'Process' sections of a website design. Exclude any realistic imagery, text, or clichés to keep the abstract and minimalist approach.

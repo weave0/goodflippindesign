@@ -1,0 +1,37 @@
+PLATFORM: Open Graph Meta Image
+TARGET SIZE: 1200x630
+GENERATED: 20260131_143842
+
+ORIGINAL PROMPT:
+================================================================================
+Open Graph meta image for Good Flippin Design website (1200x630px).
+
+EXACT LAYOUT:
+- Dimensions: 1200x630 pixels (1.91:1 ratio)
+- Center: Large circular glowing logo
+- Top: "Good Flippin Design" company name
+- Bottom: "Strategic Web Development" tagline
+- Background: Dark with subtle gradient
+
+AESTHETIC:
+- Dark charcoal background (#0d0d0d to #1a1a1a)
+- Centered glowing logo (purple #8b5cf6 and teal #10b981)
+- Text in clean white (#f5f5f5)
+- Balanced, symmetrical composition
+- Professional social media share image
+- Recognizable when small (Facebook, LinkedIn thumbnails)
+
+CRITICAL:
+- Must be readable at thumbnail size (200px wide)
+- Logo prominence
+- Clear brand name
+- Tagline visible
+- No text in extreme edges (may be cropped)
+- Professional, polished aesthetic
+- Works on both light and dark social feeds
+
+Style: Professional brand social card, clean layout, optimized for small previews
+
+DALL-E REVISED PROMPT:
+================================================================================
+Generate an image following the dimensions of 1200x630 pixels (1.91:1 ratio). At the center of the image, place a large, circular, glowing logo, with colors purple (#8b5cf6) and teal (#10b981). Towards the top, overlay the text 'Good Flippin Design', representing the company's name. Below the logo, towards the bottom, add the tagline, 'Strategic Web Development'. The background should be dark with a subtle gradient, transitioning from dark charcoal (#0d0d0d) to slightly lighter charcoal (#1a1a1a). The text should be written in clean white (#f5f5f5). The composition must be balanced and symmetrical, creating a professional social card. The image should be designed to be recognizable at a smaller scale, such as on Facebook or LinkedIn thumbnails, ensuring the logo, brand name, and tagline are all clear and visible. Text should distance itself from extreme edges to avoid cropping. Overall, aim for a professional, polished aesthetic that works well on both light and dark social feeds.

@@ -1,0 +1,17 @@
+CONCEPT: hero_gradient
+
+ORIGINAL PROMPT:
+
+    Abstract flowing gradient background for a modern tech website hero section. 
+    
+    Style: Smooth flowing waves of luminous purple (#8b5cf6) blending into deep charcoal (#0d0d0d).
+    Mood: Premium, intelligent, warm, inviting.
+    Technical: Soft organic gradients, subtle glow effects, no harsh edges.
+    Use: Full-width hero background (1920x1080 landscape).
+    Aesthetic: Like Stripe or Linear hero sections - premium but approachable.
+    
+    EXCLUDE: No text, no logos, no realistic imagery, no complex patterns.
+    
+
+DALL-E REVISED PROMPT:
+Create a full-width (1920x1080 landscape) hero section background for a website. The style should emulate the feel of premium but approachable tech websites like Stripe or Linear. The design should feature soft, smooth flowing wave-like gradients. The colours should transition from luminous purple (#8b5cf6) to deep charcoal (#0d0d0d), giving the impression of a warm and inviting, yet intelligent aesthetic. Enhance the images with subtle glow effects, ensuring there are no harsh edges, and maintaining an abstract feel. The image should not contain text, logos, realistic imagery, or complex patterns.

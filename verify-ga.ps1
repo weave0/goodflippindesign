@@ -12,7 +12,8 @@ Write-Host "1. Checking HTML for GA tag..." -ForegroundColor Yellow
 $html = Invoke-WebRequest -Uri $siteUrl -UseBasicParsing
 if ($html.Content -match $gaId) {
     Write-Host "   ✅ GA tag found in HTML" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "   ❌ GA tag NOT found in HTML" -ForegroundColor Red
 }
 
@@ -22,21 +23,23 @@ $headers = $html.Headers
 if ($headers['Content-Security-Policy']) {
     $csp = $headers['Content-Security-Policy']
     Write-Host "   CSP Header found:" -ForegroundColor Gray
-    
+
     # Check for required domains
     $requiredDomains = @(
         "googletagmanager.com",
         "google-analytics.com"
     )
-    
+
     foreach ($domain in $requiredDomains) {
         if ($csp -match $domain) {
             Write-Host "   ✅ $domain allowed in CSP" -ForegroundColor Green
-        } else {
+        }
+        else {
             Write-Host "   ❌ $domain NOT in CSP" -ForegroundColor Red
         }
     }
-} else {
+}
+else {
     Write-Host "   ⚠️  No CSP header found (permissive)" -ForegroundColor Yellow
 }
 
@@ -48,7 +51,8 @@ try {
     if ($gtagResponse.StatusCode -eq 200) {
         Write-Host "   ✅ gtag.js script is accessible" -ForegroundColor Green
     }
-} catch {
+}
+catch {
     Write-Host "   ❌ gtag.js script NOT accessible" -ForegroundColor Red
 }
 
@@ -58,7 +62,8 @@ if ($headers['Cache-Control']) {
     Write-Host "   Cache-Control: $($headers['Cache-Control'])" -ForegroundColor Gray
     if ($headers['Cache-Control'] -match "no-cache|no-store") {
         Write-Host "   ✅ HTML not cached (good for testing)" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "   ⚠️  HTML may be cached - clear CDN cache if changes not visible" -ForegroundColor Yellow
     }
 }

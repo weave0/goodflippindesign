@@ -1,0 +1,37 @@
+PLATFORM: Twitter Card Meta Image
+TARGET SIZE: 1200x675
+GENERATED: 20260131_143913
+
+ORIGINAL PROMPT:
+================================================================================
+Twitter Card meta image for Good Flippin Design website (1200x675px).
+
+EXACT LAYOUT:
+- Dimensions: 1200x675 pixels (16:9 ratio)
+- Center-left: Circular glowing logo
+- Right side: Flowing gradient background
+- Text overlay: "Good Flippin Design" + "Strategic Web Development"
+- Modern, horizontal composition
+
+AESTHETIC:
+- Dark background (#0d0d0d)
+- Logo positioned left of center
+- Purple-to-teal gradient flowing right
+- White text with subtle glow
+- Twitter-optimized 16:9 ratio
+- Modern, digital aesthetic
+- Readable at Twitter card size (~440px wide)
+
+CRITICAL:
+- 16:9 aspect ratio (standard Twitter card)
+- Logo visible and recognizable
+- Text readable when small
+- Gradient provides visual interest
+- Professional tech brand aesthetic
+- Works in Twitter timeline preview
+
+Style: Modern digital card, gradient background, Twitter-optimized layout
+
+DALL-E REVISED PROMPT:
+================================================================================
+Create a modern digital card optimized for Twitter with a size of 1200x675 pixels, maintaining a 16:9 aspect ratio. Use a dark background with color code #0d0d0d. To the left of center, position a circular glowing logo. The right side of the card should feature a flowing purple-to-teal gradient, which strikes a balance of adding visual interest without distracting from the main elements. Overlay the image with the text 'Good Flippin Design' and 'Strategic Web Development' in white with a subtle glow, ensuring the text remains readable even when the image size is reduced. The overall aesthetic should evoke a professional tech brand, and should look good within a Twitter timeline preview.

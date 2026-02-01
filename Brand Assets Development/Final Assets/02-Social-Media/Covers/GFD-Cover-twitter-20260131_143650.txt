@@ -1,0 +1,37 @@
+PLATFORM: Twitter/X Header
+TARGET SIZE: 1500x500
+GENERATED: 20260131_143650
+
+ORIGINAL PROMPT:
+================================================================================
+Twitter/X profile header for Good Flippin Design (web development consultancy).
+
+EXACT LAYOUT:
+- Dimensions: 1500x500 pixels (3:1 ratio)
+- Left portion: Circular glowing geometric logo symbol
+- Right side: Flowing abstract gradient from purple to teal
+- Text overlay: "Good Flippin Design" in modern typography
+- Subtle technical pattern background (faint circuit/node network)
+
+AESTHETIC:
+- Dark background (#0d0d0d) with luminous gradient overlay
+- Purple (#8b5cf6) flowing into teal (#10b981) waves
+- Logo placement: left 1/3 of banner
+- Gradient flows left-to-right
+- Modern, digital, tech-forward aesthetic
+- Twitter-optimized horizontal composition
+- Vibrant yet professional
+
+CRITICAL:
+- Wide horizontal format (3:1 aspect ratio)
+- Safe zone awareness (profile picture won't cover logo)
+- Logo positioned left of center
+- Gradient background with movement
+- Clean, bold design
+- Readable at desktop and mobile sizes
+
+Style: Digital art, smooth gradient, modern tech brand header
+
+DALL-E REVISED PROMPT:
+================================================================================
+Create a modern tech brand header with a 3:1 aspect ratio. The composition should be oriented horizontally, optimized for Twitter, with an emphasis on a dark background (#0d0d0d) subtly patterned with a faint technical circuit/node network. The left third of the image should contain a glowing geometric logo symbol, ensuring to be positioned in the zone safe from profile picture overlap. The gradient, composed of vibrant shades of purple (#8b5cf6) and teal (#10b981), should flow from the left to right forming a wave-like pattern. Overlay 'Good Flippin Design' over this using modern typography, ensuring readability at both desktop and mobile sizes, offering a professional yet vibrant digital art aesthetic.
