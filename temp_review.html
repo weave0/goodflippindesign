@@ -26,17 +26,21 @@
     <link rel="canonical" href="https://goodflippindesign.com/">
 
     <!-- Favicons -->
-    <link rel="icon" type="image/png" href="/assets/coin_gd_master.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/coin_gd_master.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/coin_gd_master.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/coin_gd_master.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://goodflippindesign.com/">
     <meta property="og:title" content="Good Flippin Design | Strategic Web Development & AI Integration">
     <meta property="og:description" content="Strategic web development specializing in data platforms, AI-integrated applications, and business intelligence dashboards. Enterprise-quality code with startup agility.">
-    <meta property="og:image" content="https://goodflippindesign.com/assets/coin_gd_master.png">
+    <meta property="og:image" content="https://goodflippindesign.com/assets/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:locale" content="en_US">
     <meta property="og:site_name" content="Good Flippin Design">
 
@@ -45,7 +49,7 @@
     <meta name="twitter:url" content="https://goodflippindesign.com/">
     <meta name="twitter:title" content="Good Flippin Design | Strategic Web Development & AI Integration">
     <meta name="twitter:description" content="Strategic web development specializing in data platforms, AI-integrated applications, and business intelligence dashboards.">
-    <meta name="twitter:image" content="https://goodflippindesign.com/assets/coin_gd_master.png">
+    <meta name="twitter:image" content="https://goodflippindesign.com/assets/twitter-card.png">
     <!-- Geo Tags -->
     <meta name="geo.region" content="US-MN">
     <meta name="geo.placename" content="Minneapolis">
@@ -132,17 +136,30 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            position: relative;
+        }
+
+        .logo-text {
+            background: linear-gradient(135deg, #8b5cf6 0%, #10b981 50%, #fbbf24 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5)) drop-shadow(0 0 12px rgba(16, 185, 129, 0.3));
+            font-weight: 700;
+            letter-spacing: -0.01em;
         }
 
         .logo svg {
-            height: 28px;
+            height: 32px;
             width: auto;
+            filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.6)) drop-shadow(0 0 10px rgba(16, 185, 129, 0.4)) drop-shadow(0 0 15px rgba(251, 191, 36, 0.3));
         }
 
         .logo img {
-            height: 32px;
-            width: 32px;
+            height: 42px;
+            width: auto;
             object-fit: contain;
+            filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.6)) drop-shadow(0 0 10px rgba(16, 185, 129, 0.4)) drop-shadow(0 0 15px rgba(251, 191, 36, 0.3));
         }
 
         .nav-links {
@@ -184,12 +201,29 @@
             display: flex;
             align-items: center;
             padding: 8rem 2rem 6rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.03) 0%, rgba(16, 185, 129, 0.02) 100%);
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('assets/backgrounds/GFD-WebArt-hero_gradient-20260131_133525.png') center/cover;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
         }
 
         .hero-content {
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
+            position: relative;
+            z-index: 1;
         }
 
         .hero-eyebrow {
@@ -356,6 +390,25 @@
         /* About Section */
         #about {
             background: var(--bg-elevated);
+            position: relative;
+        }
+
+        #about::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('assets/backgrounds/GFD-WebArt-data_nodes-20260131_133558.png') center/cover;
+            opacity: 0.05;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #about .container {
+            position: relative;
+            z-index: 1;
         }
 
         .about-content {
@@ -737,12 +790,29 @@
             max-width: calc(1200px - 4rem);
             margin-left: auto;
             margin-right: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #contact::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('assets/backgrounds/GFD-WebArt-warm_ambient-20260131_133628.png') center/cover;
+            opacity: 0.08;
+            z-index: 0;
+            pointer-events: none;
         }
 
         .contact-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 4rem;
+            position: relative;
+            z-index: 1;
         }
 
         .contact-info h2 {
@@ -859,6 +929,25 @@
         /* Legal Forms Section */
         #legal-forms {
             background: var(--bg-elevated);
+            position: relative;
+        }
+
+        #legal-forms::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('assets/backgrounds/GFD-WebArt-portfolio_texture-20260131_133658.png') center/cover;
+            opacity: 0.04;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        #legal-forms .container {
+            position: relative;
+            z-index: 1;
         }
 
         .legal-forms-grid {
@@ -888,6 +977,14 @@
             font-size: 3rem;
             margin-bottom: 1rem;
             line-height: 1;
+        }
+
+        .form-icon-img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
         }
 
         .legal-form-card h3 {
@@ -1300,8 +1397,8 @@
         "name": "Good Flippin Design",
         "alternateName": "GFV LLC DBA Good Flippin Design",
         "url": "https://goodflippindesign.com",
-        "logo": "https://goodflippindesign.com/assets/coin_gd_master.png",
-        "image": "https://goodflippindesign.com/assets/coin_gd_master.png",
+        "logo": "https://goodflippindesign.com/assets/logo-master.png",
+        "image": "https://goodflippindesign.com/assets/logo-master.png",
         "description": "Strategic web development specializing in data platforms, AI-integrated applications, and business intelligence dashboards. Enterprise-quality code with startup agility.",
         "telephone": "",
         "email": "getsome@goodflippinvibes.com",
@@ -1354,8 +1451,8 @@
     <nav>
         <div class="nav-content">
             <a href="/" class="logo">
-                <img src="/assets/coin_gd_master.png" alt="Good Flippin Design">
-                Good Flippin Design
+                <img src="assets/logo-vector.png" alt="Good Flippin Design Logo">
+                <span class="logo-text">Good Flippin Design</span>
             </a>
             <ul class="nav-links">
                 <li><a href="#services">Services</a></li>
@@ -1595,7 +1692,7 @@
 
                 <div class="legal-forms-grid">
                     <div class="legal-form-card">
-                        <div class="form-icon">📄</div>
+                        <img src="assets/icons/GFD-Icon-NDA-20260131_191422.png" alt="NDA Icon" class="form-icon-img">
                         <h3>Non-Disclosure Agreement</h3>
                         <p>Protect confidential information for partnerships, client projects, or business discussions.</p>
                         <ul class="form-features">
@@ -1607,7 +1704,7 @@
                     </div>
 
                     <div class="legal-form-card">
-                        <div class="form-icon">📋</div>
+                        <img src="assets/icons/GFD-Icon-Service_Agreement-20260131_191445.png" alt="Service Agreement Icon" class="form-icon-img">
                         <h3>Service Agreement</h3>
                         <p>Master contract for client engagements with scope, payment terms, and IP ownership.</p>
                         <ul class="form-features">
@@ -1619,7 +1716,7 @@
                     </div>
 
                     <div class="legal-form-card">
-                        <div class="form-icon">📊</div>
+                        <img src="assets/icons/GFD-Icon-Statement_of_Work-20260131_191512.png" alt="Statement of Work Icon" class="form-icon-img">
                         <h3>Statement of Work</h3>
                         <p>Detailed project specifications, deliverables, milestones, and acceptance criteria.</p>
                         <ul class="form-features">
@@ -1631,7 +1728,7 @@
                     </div>
 
                     <div class="legal-form-card">
-                        <div class="form-icon">🔄</div>
+                        <img src="assets/icons/GFD-Icon-Statement_of_Work-20260131_191512.png" alt="Change Order Icon" class="form-icon-img">
                         <h3>Change Order</h3>
                         <p>Document scope changes, budget adjustments, and timeline modifications for active projects.</p>
                         <ul class="form-features">
