@@ -1,0 +1,12 @@
+{
+  "platform": "twitter",
+  "target_size": "1500x500",
+  "generated_size": "1792x1024",
+  "generated_at": "20260131_143650",
+  "model": "dall-e-3",
+  "quality": "hd",
+  "style": "vivid",
+  "original_url": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-YpuuZ5bXS9qzoNlm0CxptEbC/user-QhYFgXJNC1scpsvoizRP6pgA/img-6QMrmSGTlVf9anV0a3AjT9WZ.png?st=2026-01-31T19%3A36%3A49Z&se=2026-01-31T21%3A36%3A49Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=8b33a531-2df9-46a3-bc02-d4b1430a422c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-01-31T20%3A36%3A49Z&ske=2026-02-01T20%3A36%3A49Z&sks=b&skv=2024-08-04&sig=Dkyp2BQwdS10rIYG6GazjJP4/ta0xPfjcedqP6nC4/o%3D",
+  "file_size": "2.8 MB",
+  "revised_prompt": "Create a modern tech brand header with a 3:1 aspect ratio. The composition should be oriented horizontally, optimized for Twitter, with an emphasis on a dark background (#0d0d0d) subtly patterned with a faint technical circuit/node network. The left third of the image should contain a glowing geometric logo symbol, ensuring to be positioned in the zone safe from profile picture overlap. The gradient, composed of vibrant shades of purple (#8b5cf6) and teal (#10b981), should flow from the left to right forming a wave-like pattern. Overlay 'Good Flippin Design' over this using modern typography, ensuring readability at both desktop and mobile sizes, offering a professional yet vibrant digital art aesthetic."
+}

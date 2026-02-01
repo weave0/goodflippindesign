@@ -1,0 +1,38 @@
+PLATFORM: Facebook Page Cover
+TARGET SIZE: 820x312
+GENERATED: 20260131_143725
+
+ORIGINAL PROMPT:
+================================================================================
+Facebook business page cover for Good Flippin Design (web development consultancy).
+
+EXACT LAYOUT:
+- Dimensions: 820x312 pixels (Facebook cover ratio)
+- Center-focused: Large circular glowing logo
+- Background: Dark with subtle geometric pattern
+- Text below logo: "Strategic Web Development" tagline
+- Warm, inviting composition
+
+AESTHETIC:
+- Deep charcoal background (#0d0d0d)
+- Centered glowing logo (purple #8b5cf6 and teal #10b981 glow)
+- Symmetrical, balanced composition
+- Ambient warm lighting (subtle amber #fbbf24 accents)
+- Professional yet approachable feel
+- Facebook-optimized dimensions
+- Clear hierarchy: logo first, text second
+
+CRITICAL:
+- Horizontal banner (roughly 8:3 ratio)
+- Centered composition
+- Logo prominence
+- Tagline readable
+- Avoid corners (may be cropped on mobile)
+- Professional business aesthetic
+- Warm, inviting glow
+
+Style: 3D render, centered composition, warm professional lighting
+
+DALL-E REVISED PROMPT:
+================================================================================
+Create a 3D-rendered Facebook cover for a web development consultancy named Good Flippin Design. The dimensions should adhere to a horizontal banner about an 8:3 ratio, akin to the Facebook cover ratio of 820x312 pixels. The composition should focus on a large, centered circular logo glowing in hues of purple (#8b5cf6) and teal (#10b981) against a deep charcoal background (#0d0d0d) punctuated by a subtle geometric pattern. The ambient lighting should give off a warm and inviting feel, created through subtle amber accents (#fbbf24). Below the logo, there should be clear, readable text that says 'Strategic Web Development'. The overall feel should be professional yet approachable. Note to avoid placing crucial elements in corners to prevent cropping on mobile devices.

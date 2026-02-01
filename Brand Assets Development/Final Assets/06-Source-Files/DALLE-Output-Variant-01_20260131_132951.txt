@@ -1,0 +1,60 @@
+=== ORIGINAL PROMPT ===
+
+CRITICAL: Create ONLY the isolated logo icon - NOT a mockup, NOT on devices. Just the raw symbol on dark background.
+
+Design a glowing circular logo icon for "Good Flippin Design" (GFD) web consultancy - blending Fortune 500 technical excellence with warm human approachability.
+
+VISUAL CONCEPT:
+Luminous geometric symbol representing:
+• Technical Precision (clean geometric forms)
+• Human Warmth (soft glowing effect)  
+• Global Reach (circular wholeness)
+• Innovation (intelligent architecture)
+
+STYLE:
+- Minimalist with emotional warmth (NOT cold/sterile)
+- Dark mode: deep charcoal background (#0d0d0d)
+- Single vibrant accent with soft glow - choose BEST from:
+  • Wellness Teal (#10b981)
+  • Innovation Purple (#8b5cf6)  
+  • Warm Amber (#fbbf24)
+- Geometric foundation with organic flow
+- High contrast for scalability (16px to 1024px)
+
+SYMBOLIC OPTIONS (AI choose strongest):
+
+A) Luminous Lettermark: Stylized "GFD" where one letter glows
+
+B) Global Intelligence Node: 3-5 interconnected nodes in circular pattern with glowing connections
+
+C) Human-Tech Fusion: Organic element (fingerprint/wave) merged with geometric circuit paths, unified by warm glow
+
+TECHNICAL:
+✓ Dark background (#0d0d0d)
+✓ Circular Instagram/Twitter crop safe
+✓ Scalable 16px-1024px maintaining clarity
+✓ Vector-friendly (clean edges, geometric)
+✓ Max 2 colors: dark + ONE vibrant glowing accent
+✓ Monochrome compatible
+
+TONE: Trustworthy • Intelligent • Welcoming • Premium • Approachable
+
+COMPOSITION:
+- Center symbol with 10-15% margin
+- Soft glow (not harsh neon)
+- Balanced, modern aesthetic
+- "Friendly expert making enterprise tech accessible"
+
+EXCLUDE:
+✗ NO mockups/presentations/devices
+✗ NO realistic imagery
+✗ NO harsh neon/cyberpunk  
+✗ NO complex gradients
+✗ NO text within icon
+✗ NO cliché tech symbols
+
+OUTPUT: Isolated icon centered on dark background, square 1:1, premium modern memorable, ready to extract as raw asset
+
+=== DALL-E 3 REVISED PROMPT ===
+
+Create an isolated, glowing, circular logo icon for a fictional web consultancy named 'Good Flippin Design' (GFD). The logo should merge technical precision in the form of clean geometric forms, human warmth through a soft glowing effect, global reach implied by a circular wholeness, and innovation suggested by intelligent architecture. It should be a minimalist design on a deep charcoal background (#0d0d0d), with one vibrant accent displaying soft glow - choose the best out of Wellness Teal (#10b981), Innovation Purple (#8b5cf6), or Warm Amber (#fbbf24). The logo should be either a luminous lettermark with stylized 'GFD' where one letter glows, interconnected nodes in a circular pattern with glowing connections, or an organic element merged with geometric circuit paths unified by warm glow. It should be vector-friendly and monochrome compatible. It should communicate a feeling of trustworthiness, intelligence, welcoming, premium, and approachability. It should avoid mockups, presentations, devices, realistic imagery, harsh neon, complex gradients, text within the icon, and cliché tech symbols. The final output should be a centered icon on a dark background, in a square 1:1 format.

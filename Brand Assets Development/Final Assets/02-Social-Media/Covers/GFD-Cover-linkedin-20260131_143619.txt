@@ -1,0 +1,37 @@
+PLATFORM: LinkedIn Company Cover
+TARGET SIZE: 1128x191
+GENERATED: 20260131_143619
+
+ORIGINAL PROMPT:
+================================================================================
+Professional LinkedIn company cover banner for Good Flippin Design (web development consultancy).
+
+EXACT LAYOUT:
+- Dimensions: 1128x191 pixels (wide banner format)
+- Left side: Circular glowing geometric logo symbol (from Good Flippin Design brand)
+- Center-right: Text "GOOD FLIPPIN DESIGN" in modern sans-serif (Inter font style)
+- Subtitle: "Strategic Web Development" in smaller text below
+- Right side: Subtle data visualization or node network graphic
+
+AESTHETIC:
+- Dark charcoal background (#0d0d0d to #1a1a1a gradient)
+- Logo glows with purple (#8b5cf6) and teal (#10b981) luminescence
+- Professional, technical, premium feel
+- Horizontal layout optimized for LinkedIn banner
+- Clean, modern, minimal design
+- Text in crisp white (#f5f5f5)
+
+CRITICAL:
+- Must be horizontal banner format (wide, not tall)
+- Logo on left third
+- Company name center
+- Tagline below name
+- Avoid cluttered design
+- Professional corporate aesthetic
+- Ensure text is readable at small sizes
+
+Style: Photorealistic 3D render, professional brand banner, clean layout
+
+DALL-E REVISED PROMPT:
+================================================================================
+Create a professional, horizontal LinkedIn company cover banner supporting a web development consultancy named Good Flippin Design. Dimensions: wide banner format of 1128x191 pixels. Dark charcoal background (#0d0d0d to #1a1a1a gradient). On the left side, place a circular glowing geometric logo symbol glowing with purple (#8b5cf6) and teal (#10b981) luminescence. In the center-right, have the text 'GOOD FLIPPIN DESIGN' in a modern, sans-serif style similar to the Inter font. A subtitle 'Strategic Web Development' in smaller, crisp white (#f5f5f5) text is to be placed below. The right side should feature a subtle data visualization or node network graphic. Overall aesthetic should be professional, technical, and premium with a clean, modern, minimal design. Ensure text readability at small sizes. The style should convey a photorealistic 3D render, professional brand banner, and clean layout.

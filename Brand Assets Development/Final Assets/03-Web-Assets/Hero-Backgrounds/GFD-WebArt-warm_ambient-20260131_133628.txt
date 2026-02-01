@@ -1,0 +1,17 @@
+CONCEPT: warm_ambient
+
+ORIGINAL PROMPT:
+
+    Abstract warm ambient background for contact/closing section.
+    
+    Style: Soft golden-amber (#fbbf24) glow dispersing across dark surface.
+    Mood: Welcoming, warm, inviting, human-centered.
+    Technical: Organic soft glow, no harsh edges, gradient blur effect.
+    Use: Background for contact form or testimonial section.
+    Aesthetic: Warm conclusion to the user journey.
+    
+    EXCLUDE: No text, no logos, no realistic elements.
+    
+
+DALL-E REVISED PROMPT:
+An abstract ambient background suitable for a website's contact or closing section. The style should evoke a warm and inviting mood through a soft golden-amber glow (#fbbf24) spreading across a dark surface. The glow should have an organic look to it, with no harsh edges, and should gradually blur out towards the border. This aesthetic aims to provide visitors with a warm conclusion to their journey through the site. Please exclude any text, logos, and realistic elements.

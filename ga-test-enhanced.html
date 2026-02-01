@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,72 +8,72 @@
     <!-- Google tag (gtag.js) - MUST be exactly as Google provides -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-QPPVJM1B60"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-QPPVJM1B60');
-      
-      // Send a test event
-      gtag('event', 'page_view', {
-        page_title: 'GA Test Page',
-        page_location: window.location.href,
-        page_path: window.location.pathname
-      });
-      
-      // Diagnostic checks
-      window.addEventListener('load', function() {
-          setTimeout(function() {
-              const statusEl = document.getElementById('status');
-              const detailsEl = document.getElementById('details');
-              
-              let checks = [];
-              
-              // Check 1: gtag function
-              if (typeof gtag === 'function') {
-                  checks.push('✅ gtag function exists');
-              } else {
-                  checks.push('❌ gtag function NOT found');
-              }
-              
-              // Check 2: dataLayer
-              if (window.dataLayer && window.dataLayer.length > 0) {
-                  checks.push(`✅ dataLayer initialized (${window.dataLayer.length} events)`);
-              } else {
-                  checks.push('❌ dataLayer empty or missing');
-              }
-              
-              // Check 3: Script loaded
-              const gaScript = document.querySelector('script[src*="googletagmanager"]');
-              if (gaScript) {
-                  checks.push('✅ Google Tag Manager script tag found');
-              } else {
-                  checks.push('❌ Script tag missing');
-              }
-              
-              // Overall status
-              if (checks.filter(c => c.startsWith('✅')).length === 3) {
-                  statusEl.innerHTML = '<strong style="color: #10b981;">✅ GOOGLE ANALYTICS IS WORKING!</strong>';
-                  statusEl.style.background = 'rgba(16, 185, 129, 0.1)';
-                  statusEl.style.padding = '20px';
-                  statusEl.style.borderRadius = '8px';
-                  statusEl.style.border = '2px solid #10b981';
-              } else {
-                  statusEl.innerHTML = '<strong style="color: #ef4444;">❌ ISSUES DETECTED</strong>';
-                  statusEl.style.background = 'rgba(239, 68, 68, 0.1)';
-                  statusEl.style.padding = '20px';
-                  statusEl.style.borderRadius = '8px';
-                  statusEl.style.border = '2px solid #ef4444';
-              }
-              
-              detailsEl.innerHTML = checks.map(c => `<li>${c}</li>`).join('');
-          }, 2000);
-      });
-      
-      // Monitor network requests
-      console.log('%c🔍 GA Debug Mode Active', 'background: #10b981; color: white; padding: 5px 10px; border-radius: 3px;');
-      console.log('Check Network tab for requests to:');
-      console.log('  • https://www.googletagmanager.com/gtag/js');
-      console.log('  • https://www.google-analytics.com/g/collect');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-QPPVJM1B60');
+
+        // Send a test event
+        gtag('event', 'page_view', {
+            page_title: 'GA Test Page',
+            page_location: window.location.href,
+            page_path: window.location.pathname
+        });
+
+        // Diagnostic checks
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                const statusEl = document.getElementById('status');
+                const detailsEl = document.getElementById('details');
+
+                let checks = [];
+
+                // Check 1: gtag function
+                if (typeof gtag === 'function') {
+                    checks.push('✅ gtag function exists');
+                } else {
+                    checks.push('❌ gtag function NOT found');
+                }
+
+                // Check 2: dataLayer
+                if (window.dataLayer && window.dataLayer.length > 0) {
+                    checks.push(`✅ dataLayer initialized (${window.dataLayer.length} events)`);
+                } else {
+                    checks.push('❌ dataLayer empty or missing');
+                }
+
+                // Check 3: Script loaded
+                const gaScript = document.querySelector('script[src*="googletagmanager"]');
+                if (gaScript) {
+                    checks.push('✅ Google Tag Manager script tag found');
+                } else {
+                    checks.push('❌ Script tag missing');
+                }
+
+                // Overall status
+                if (checks.filter(c => c.startsWith('✅')).length === 3) {
+                    statusEl.innerHTML = '<strong style="color: #10b981;">✅ GOOGLE ANALYTICS IS WORKING!</strong>';
+                    statusEl.style.background = 'rgba(16, 185, 129, 0.1)';
+                    statusEl.style.padding = '20px';
+                    statusEl.style.borderRadius = '8px';
+                    statusEl.style.border = '2px solid #10b981';
+                } else {
+                    statusEl.innerHTML = '<strong style="color: #ef4444;">❌ ISSUES DETECTED</strong>';
+                    statusEl.style.background = 'rgba(239, 68, 68, 0.1)';
+                    statusEl.style.padding = '20px';
+                    statusEl.style.borderRadius = '8px';
+                    statusEl.style.border = '2px solid #ef4444';
+                }
+
+                detailsEl.innerHTML = checks.map(c => `<li>${c}</li>`).join('');
+            }, 2000);
+        });
+
+        // Monitor network requests
+        console.log('%c🔍 GA Debug Mode Active', 'background: #10b981; color: white; padding: 5px 10px; border-radius: 3px;');
+        console.log('Check Network tab for requests to:');
+        console.log('  • https://www.googletagmanager.com/gtag/js');
+        console.log('  • https://www.google-analytics.com/g/collect');
     </script>
     <style>
         body {
@@ -82,54 +83,66 @@
             padding: 40px;
             margin: 0;
         }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
         }
+
         h1 {
             margin-bottom: 10px;
         }
+
         .subtitle {
             color: #94a3b8;
             margin-bottom: 30px;
         }
+
         #status {
             margin: 30px 0;
             font-size: 1.2em;
         }
+
         .checks {
             background: #1e293b;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
         }
+
         .checks ul {
             list-style: none;
             padding: 0;
         }
+
         .checks li {
             padding: 8px 0;
             font-family: 'Courier New', monospace;
         }
+
         .instructions {
             background: #1e293b;
             padding: 20px;
             border-radius: 8px;
             border-left: 4px solid #8b5cf6;
         }
+
         .instructions h3 {
             margin-top: 0;
             color: #8b5cf6;
         }
+
         .instructions ol {
             line-height: 1.8;
         }
+
         .instructions code {
             background: #0a0e1a;
             padding: 2px 6px;
             border-radius: 3px;
             color: #fbbf24;
         }
+
         .warning {
             background: rgba(251, 191, 36, 0.1);
             border: 1px solid #fbbf24;
@@ -139,24 +152,25 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>🔍 Google Analytics Test Page</h1>
         <p class="subtitle">Diagnostic tool for GA4 implementation</p>
-        
+
         <div id="status">⏳ Running diagnostics...</div>
-        
+
         <div class="checks">
             <h3>Diagnostic Checks:</h3>
             <ul id="details">
                 <li>⏳ Checking...</li>
             </ul>
         </div>
-        
+
         <div class="warning">
             <strong>⚠️ Note:</strong> Google's tag verification tool may take 24-48 hours to detect your tag, even if it's working correctly. This page tests real-time functionality.
         </div>
-        
+
         <div class="instructions">
             <h3>How to Verify:</h3>
             <ol>
@@ -172,7 +186,7 @@
                 <li>Visit <a href="https://www.goodflippindesign.com" style="color: #8b5cf6;">your main site</a> to test there too</li>
             </ol>
         </div>
-        
+
         <div style="margin-top: 30px; padding: 15px; background: #1e293b; border-radius: 8px;">
             <strong>Alternative Verification:</strong>
             <ul style="margin: 10px 0; line-height: 1.8;">
@@ -183,4 +197,5 @@
         </div>
     </div>
 </body>
+
 </html>

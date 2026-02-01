@@ -1,0 +1,12 @@
+{
+  "platform": "linkedin",
+  "target_size": "1128x191",
+  "generated_size": "1792x1024",
+  "generated_at": "20260131_143619",
+  "model": "dall-e-3",
+  "quality": "hd",
+  "style": "vivid",
+  "original_url": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-YpuuZ5bXS9qzoNlm0CxptEbC/user-QhYFgXJNC1scpsvoizRP6pgA/img-sl9Zdn8SqP3VvoNtC0OFJsD5.png?st=2026-01-31T19%3A36%3A19Z&se=2026-01-31T21%3A36%3A19Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=13da7400-b3f7-4f8c-9cba-908fecbd114c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-01-31T20%3A36%3A19Z&ske=2026-02-01T20%3A36%3A19Z&sks=b&skv=2024-08-04&sig=%2BhhHfbya740oD/mVPueRFZYTkUuxReP6aW%2B3OQoqlHA%3D",
+  "file_size": "2.6 MB",
+  "revised_prompt": "Create a professional, horizontal LinkedIn company cover banner supporting a web development consultancy named Good Flippin Design. Dimensions: wide banner format of 1128x191 pixels. Dark charcoal background (#0d0d0d to #1a1a1a gradient). On the left side, place a circular glowing geometric logo symbol glowing with purple (#8b5cf6) and teal (#10b981) luminescence. In the center-right, have the text 'GOOD FLIPPIN DESIGN' in a modern, sans-serif style similar to the Inter font. A subtitle 'Strategic Web Development' in smaller, crisp white (#f5f5f5) text is to be placed below. The right side should feature a subtle data visualization or node network graphic. Overall aesthetic should be professional, technical, and premium with a clean, modern, minimal design. Ensure text readability at small sizes. The style should convey a photorealistic 3D render, professional brand banner, and clean layout."
+}

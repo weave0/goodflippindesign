@@ -1,0 +1,12 @@
+{
+  "platform": "twitter_card",
+  "target_size": "1200x675",
+  "generated_size": "1792x1024",
+  "generated_at": "20260131_143913",
+  "model": "dall-e-3",
+  "quality": "hd",
+  "style": "vivid",
+  "original_url": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-YpuuZ5bXS9qzoNlm0CxptEbC/user-QhYFgXJNC1scpsvoizRP6pgA/img-CLTwqk9sPlBT1DD4SZR5eziP.png?st=2026-01-31T19%3A39%3A12Z&se=2026-01-31T21%3A39%3A12Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=9346e9b9-5d29-4d37-a0a9-c6f95f09f79d&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-01-31T19%3A35%3A36Z&ske=2026-02-01T19%3A35%3A36Z&sks=b&skv=2024-08-04&sig=IShjojMtsOoW916EDeLMhlY0E1blOCrHUNAW2yoAhOU%3D",
+  "file_size": "3.0 MB",
+  "revised_prompt": "Create a modern digital card optimized for Twitter with a size of 1200x675 pixels, maintaining a 16:9 aspect ratio. Use a dark background with color code #0d0d0d. To the left of center, position a circular glowing logo. The right side of the card should feature a flowing purple-to-teal gradient, which strikes a balance of adding visual interest without distracting from the main elements. Overlay the image with the text 'Good Flippin Design' and 'Strategic Web Development' in white with a subtle glow, ensuring the text remains readable even when the image size is reduced. The overall aesthetic should evoke a professional tech brand, and should look good within a Twitter timeline preview."
+}
