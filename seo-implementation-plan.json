@@ -1,0 +1,73 @@
+{
+  "generated": "2026-02-02T04:10:09.409Z",
+  "ecosystem": {
+    "primary": "goodflippindesign.com",
+    "products": [
+      "aiaimate.com",
+      "culturesherpa.org"
+    ],
+    "portfolio": [
+      "globaldeets.com"
+    ],
+    "origin": [
+      "goodflippinvibes.com"
+    ],
+    "development": [
+      "CitizenApproved (Next.js civic tech)"
+    ]
+  },
+  "crossLinkingMatrix": {
+    "goodflippindesign.com": {
+      "linksTo": [
+        "aiaimate.com",
+        "culturesherpa.org",
+        "goodflippinvibes.com",
+        "globaldeets.com"
+      ],
+      "purpose": "Establish authority, showcase portfolio"
+    },
+    "aiaimate.com": {
+      "linksTo": [
+        "goodflippindesign.com",
+        "culturesherpa.org"
+      ],
+      "purpose": "Backlink to creator, cross-promote data platform"
+    },
+    "culturesherpa.org": {
+      "linksTo": [
+        "goodflippindesign.com",
+        "aiaimate.com"
+      ],
+      "purpose": "Backlink to creator, cross-promote AI platform"
+    },
+    "goodflippinvibes.com": {
+      "linksTo": [
+        "goodflippindesign.com"
+      ],
+      "purpose": "Origin story, backlink to current work"
+    },
+    "globaldeets.com": {
+      "linksTo": [
+        "goodflippindesign.com",
+        "all products"
+      ],
+      "purpose": "Portfolio hub, comprehensive showcase"
+    }
+  },
+  "seoImpact": {
+    "internalLinks": 12,
+    "externalBacklinks": 4,
+    "estimatedAuthorityBoost": "15-25%",
+    "organicTrafficLift": "10-20% over 3 months"
+  },
+  "nextSteps": [
+    "Implement footer links on goodflippindesign.com",
+    "Add JSON-LD \"owns\" property",
+    "Add backlinks to aiaimate.com footer",
+    "Add backlinks to culturesherpa.org footer",
+    "Add CitizenApproved to portfolio showcase",
+    "Update globaldeets.com with ecosystem links",
+    "Submit sitemaps to Google Search Console",
+    "Monitor organic traffic via Google Analytics"
+  ]
+}

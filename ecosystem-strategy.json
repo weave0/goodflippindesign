@@ -1,0 +1,135 @@
+{
+  "primary": "goodflippindesign.com",
+  "sites": {
+    "goodflippindesign.com": {
+      "type": "primary",
+      "tech": "Vanilla HTML/CSS/JS",
+      "purpose": "Web development consultancy portfolio",
+      "keywords": [
+        "web development",
+        "AI integration",
+        "business intelligence",
+        "React",
+        "Next.js"
+      ],
+      "linksTo": [
+        "aiaimate.com",
+        "culturesherpa.org",
+        "goodflippinvibes.com",
+        "globaldeets.com"
+      ],
+      "linkedFrom": [],
+      "seoValue": 60
+    },
+    "aiaimate.com": {
+      "type": "product",
+      "tech": "Next.js 14, RAG, Vector DB",
+      "purpose": "AI education platform",
+      "keywords": [
+        "AI education",
+        "RAG",
+        "semantic search",
+        "learning platform",
+        "AI tools"
+      ],
+      "linksTo": [
+        "goodflippindesign.com",
+        "culturesherpa.org"
+      ],
+      "linkedFrom": [],
+      "seoValue": 50
+    },
+    "culturesherpa.org": {
+      "type": "product",
+      "tech": "React 18, MapboxGL, PWA",
+      "purpose": "Interactive cultural atlas",
+      "keywords": [
+        "cultural data",
+        "world cultures",
+        "geographic visualization",
+        "anthropology",
+        "travel"
+      ],
+      "linksTo": [
+        "goodflippindesign.com",
+        "aiaimate.com"
+      ],
+      "linkedFrom": [],
+      "seoValue": 50
+    },
+    "goodflippinvibes.com": {
+      "type": "origin",
+      "tech": "Python Flask (assumed)",
+      "purpose": "Wellness platform - origin story",
+      "keywords": [
+        "wellness",
+        "holistic health",
+        "community",
+        "lifestyle"
+      ],
+      "linksTo": [
+        "goodflippindesign.com",
+        "goodflippindesign.com"
+      ],
+      "linkedFrom": [],
+      "seoValue": 0
+    },
+    "globaldeets.com": {
+      "type": "portfolio",
+      "tech": "Vanilla JS, PWA",
+      "purpose": "Project portfolio hub",
+      "keywords": [
+        "portfolio",
+        "web development",
+        "projects",
+        "case studies"
+      ],
+      "linksTo": [
+        "goodflippindesign.com"
+      ],
+      "linkedFrom": [],
+      "seoValue": 40
+    }
+  },
+  "recommendations": [
+    {
+      "priority": "HIGH",
+      "action": "Add footer ecosystem links to goodflippindesign.com",
+      "sites": [
+        "aiaimate.com",
+        "culturesherpa.org",
+        "goodflippinvibes.com"
+      ],
+      "impact": "Establishes site authority and internal link equity"
+    },
+    {
+      "priority": "HIGH",
+      "action": "Add \"Built by Good Flippin Design\" footer to all products",
+      "sites": [
+        "aiaimate.com",
+        "culturesherpa.org"
+      ],
+      "impact": "Backlinks to primary, establishes credibility"
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "Create /portfolio page on primary site with detailed case studies",
+      "sites": [
+        "goodflippindesign.com"
+      ],
+      "impact": "Deep linking to live projects with context"
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "Add structured data (JSON-LD) to all sites",
+      "sites": "ALL",
+      "impact": "Google rich snippets, knowledge graph eligibility"
+    },
+    {
+      "priority": "LOW",
+      "action": "Cross-reference blog posts if content exists",
+      "sites": "ALL",
+      "impact": "Contextual backlinks, establishes expertise"
+    }
+  ]
+}
