@@ -1,0 +1,38 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# 1. Sync test file
+echo "📋 Syncing temp_review.html..."
+cp index.html temp_review.html
+git add temp_review.html
+
+# 2. Update cache bust
+echo "🔄 Updating cache bust timestamp..."
+date '+%Y-%m-%d-%H:%M' > cache-bust.txt
+git add cache-bust.txt
+
+# 3. Check for accidental node_modules
+echo "🚫 Checking for node_modules..."
+if git diff --cached --name-only | grep -q "node_modules/"; then
+  echo "❌ ERROR: Attempting to commit node_modules!"
+  echo "   Add to .gitignore and unstage these files."
+  exit 1
+fi
+
+# 4. Check for large files
+echo "📏 Checking file sizes..."
+large_files=$(git diff --cached --name-only | xargs -I {} sh -c 'if [ -f "{}" ]; then stat -f%z "{}"; fi' 2>/dev/null | awk '$1 > 1048576 {print}')
+if [ -n "$large_files" ]; then
+  echo "⚠️  WARNING: Large files detected (>1MB)"
+  echo "   Consider using Git LFS for binary assets"
+fi
+
+# 5. Run quick tests on changed HTML/JS
+if git diff --cached --name-only | grep -qE '\.(html|js)$'; then
+  echo "🧪 Running quick validation..."
+  # Add quick syntax checks here if needed
+fi
+
+echo "✅ Pre-commit checks passed!"

@@ -11,7 +11,11 @@
     "sync": "node scripts/sync-review.js",
     "cache-bust": "node scripts/update-cache-bust.js",
     "build": "npm run cache-bust && npm run sync",
-    "pretest": "npm run sync"
+    "pretest": "npm run sync",
+    "prepare": "husky install",
+    "format": "prettier --write \"*.html\" \"tests/**/*.js\" \"scripts/**/*.js\"",
+    "lint:html": "html-validate index.html",
+    "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf"
   },
   "repository": {
     "type": "git",
@@ -29,6 +33,9 @@
   "devDependencies": {
     "puppeteer": "^24.32.0",
     "http-server": "^14.1.1",
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "husky": "^9.0.0",
+    "prettier": "^3.2.0",
+    "html-validate": "^8.18.0"
   }
 }
