@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Cache bust: 2026-01-31-20:10 -->
+<!-- Cache bust: 2026-02-02-05:10 -->
 <html lang="en">
 
 <head>
@@ -68,6 +68,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
+
+    <!-- GFD Ecosystem Navigation -->
+    <link rel="stylesheet" href="shared/ecosystem-nav.css">
     <style>
         :root {
             --bg: #0d0d0d;
@@ -106,16 +109,17 @@
             padding: 0 2rem;
         }
 
-        /* Nav */
-        nav {
+        /* Nav (main site nav, below ecosystem nav) */
+        body>nav:not(.gfd-ecosystem-nav) {
             position: fixed;
-            top: 0;
+            top: 60px;
             left: 0;
             right: 0;
             z-index: 100;
             padding: 1.25rem 2rem;
             background: rgba(13, 13, 13, 0.85);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
         }
 
@@ -200,7 +204,7 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
-            padding: 8rem 2rem 6rem;
+            padding: 9rem 2rem 6rem;
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.03) 0%, rgba(16, 185, 129, 0.02) 100%);
             position: relative;
         }
@@ -560,13 +564,13 @@
         }
 
         .status-badge.live {
-            background: rgba(16, 185, 129, 0.15);
-            color: #10b981;
+            background: rgba(5, 46, 32, 0.9);
+            color: #6ee7b7;
         }
 
         .status-badge.demo {
-            background: rgba(251, 191, 36, 0.15);
-            color: #fbbf24;
+            background: rgba(68, 52, 10, 0.9);
+            color: #fcd34d;
         }
 
         .portfolio-info h3 {
@@ -1184,6 +1188,17 @@
             align-items: center;
         }
 
+        .footer-ecosystem a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8125rem;
+            transition: color 0.2s;
+        }
+
+        .footer-ecosystem a:hover {
+            color: var(--text);
+        }
+
         .footer-ecosystem-label {
             color: var(--text-muted);
             font-size: 0.75rem;
@@ -1362,7 +1377,7 @@
             }
 
             a {
-                color: black;
+                color: black !important;
                 text-decoration: underline;
             }
 
@@ -1477,6 +1492,97 @@
 
 <body>
     <a href="#main" class="skip-link">Skip to main content</a>
+
+    <!-- GFD Ecosystem Navigation -->
+    <nav class="gfd-ecosystem-nav" aria-label="Ecosystem navigation">
+        <div class="ecosystem-nav-container">
+            <div class="ecosystem-brand">
+                <svg viewBox="324 324 1352 1352" fill="currentColor" class="ecosystem-logo" aria-hidden="true">
+                    <path transform="matrix(1.542,0,0,1.542,-480.343,167.307)" d="M896.648,101.831L1398.17,101.831L1304.42,289.331L1154.42,289.331L1185.67,226.831L984.148,226.831L859.148,476.831L859.331,476.831L960,678.169L990,618.169L1065,768.169L960,978.169L709.24,476.648L896.648,101.831Z" />
+                    <path transform="matrix(1.542,0,0,1.542,-480.343,167.307)" d="M521.831,101.831L836.648,101.831L679.24,416.648L521.831,101.831Z" />
+                    <path transform="matrix(1.542,0,0,1.542,-480.343,167.307)" d="M1273.17,351.831L1095,708.169L1020,558.169L1060.67,476.831L919.331,476.831L919.24,476.648L981.648,351.831L1273.17,351.831Z" />
+                </svg>
+                <span class="ecosystem-title">GFD Ecosystem</span>
+            </div>
+
+            <button
+                class="ecosystem-toggle"
+                aria-label="Open ecosystem menu"
+                aria-expanded="false"
+                aria-controls="ecosystem-dropdown">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="ecosystem-dropdown" id="ecosystem-dropdown" role="menu" aria-hidden="true">
+            <div class="dropdown-content">
+                <div class="nav-section">
+                    <h3 class="nav-section-title">Production Platforms</h3>
+                    <a href="https://goodflippindesign.com" class="nav-link" role="menuitem" target="_blank" rel="noopener">
+                        <span class="nav-icon" aria-hidden="true">🎨</span>
+                        <div class="nav-link-content">
+                            <strong class="nav-link-title">Good Flippin Design</strong>
+                            <small class="nav-link-subtitle">Strategic Web Development</small>
+                        </div>
+                    </a>
+                    <a href="https://aiaimate.com" class="nav-link" role="menuitem" target="_blank" rel="noopener">
+                        <span class="nav-icon" aria-hidden="true">🧠</span>
+                        <div class="nav-link-content">
+                            <strong class="nav-link-title">AI Aimate</strong>
+                            <small class="nav-link-subtitle">AI Education Platform</small>
+                        </div>
+                    </a>
+                    <a href="https://culturesherpa.org" class="nav-link" role="menuitem" target="_blank" rel="noopener">
+                        <span class="nav-icon" aria-hidden="true">🌍</span>
+                        <div class="nav-link-content">
+                            <strong class="nav-link-title">CultureSherpa</strong>
+                            <small class="nav-link-subtitle">Interactive Cultural Atlas</small>
+                        </div>
+                    </a>
+                    <a href="https://goodflippinvibes.com" class="nav-link" role="menuitem" target="_blank" rel="noopener">
+                        <span class="nav-icon" aria-hidden="true">✨</span>
+                        <div class="nav-link-content">
+                            <strong class="nav-link-title">Good Flippin Vibes</strong>
+                            <small class="nav-link-subtitle">Holistic Wellness Platform</small>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <h3 class="nav-section-title">Research & Intelligence</h3>
+                    <a href="https://globaldeets.com" class="nav-link" role="menuitem" target="_blank" rel="noopener">
+                        <span class="nav-icon" aria-hidden="true">📊</span>
+                        <div class="nav-link-content">
+                            <strong class="nav-link-title">GlobalDeets</strong>
+                            <small class="nav-link-subtitle">Visualization & Research Platform</small>
+                        </div>
+                    </a>
+                    <a href="https://citizenapproved.com" class="nav-link" role="menuitem" target="_blank" rel="noopener">
+                        <span class="nav-icon" aria-hidden="true">🗳️</span>
+                        <div class="nav-link-content">
+                            <strong class="nav-link-title">CitizenApproved</strong>
+                            <small class="nav-link-subtitle">U.S. Citizenship Pathways</small>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="nav-section nav-cta-section">
+                    <a href="#support" class="nav-cta-link" role="menuitem">
+                        <span class="nav-icon" aria-hidden="true">❤️</span>
+                        <div class="nav-link-content">
+                            <strong class="nav-link-title">Support Our Work</strong>
+                            <small class="nav-link-subtitle">Help us build more amazing projects</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
     <nav>
         <div class="nav-content">
             <a href="/" class="logo">
@@ -1573,7 +1679,7 @@
                             <p class="portfolio-category">
                                 AI Education Platform
                                 <span class="status-badge live">LIVE</span>
-                                <span class="status-badge" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6; font-weight: 700;">AVAILABLE FOR ACQUISITION</span>
+                                <span class="status-badge" style="background: rgba(31, 22, 66, 0.9); color: #c4b5fd; font-weight: 700;">AVAILABLE FOR ACQUISITION</span>
                             </p>
                             <h3>AI Aimate</h3>
                             <p>Production-ready AI education platform with RAG-powered search, semantic knowledge base, and interactive learning modules. Next.js 14, vector embeddings, and adaptive content delivery serving active user base.</p>
@@ -1593,7 +1699,7 @@
                             <p class="portfolio-category">
                                 Cultural Data Platform
                                 <span class="status-badge live">LIVE</span>
-                                <span class="status-badge" style="background: rgba(168, 162, 158, 0.15); color: #a8a29e; display: inline-flex; align-items: center; gap: 0.25rem;">◆ Cultural Preservation</span>
+                                <span class="status-badge" style="background: rgba(41, 37, 36, 0.9); color: #d6d3d1; display: inline-flex; align-items: center; gap: 0.25rem;">◆ Cultural Preservation</span>
                             </p>
                             <h3>CultureSherpa</h3>
                             <p>Interactive atlas mapping 470+ cultures with AI-synthesized profiles, geographic visualization via MapboxGL, and offline-first PWA architecture. Demonstrates complex data visualization and cultural API integration at scale.</p>
@@ -1613,7 +1719,7 @@
                             <p class="portfolio-category">
                                 Wellness Platform
                                 <span class="status-badge live">LIVE</span>
-                                <span class="status-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Origin Story</span>
+                                <span class="status-badge" style="background: rgba(5, 46, 32, 0.9); color: #6ee7b7;">Origin Story</span>
                             </p>
                             <h3>Good Flippin Vibes</h3>
                             <p>Community-driven holistic wellness platform. The original venture that launched our mission to create meaningful digital experiences. Showcases content management, community features, and responsive design.</p>
@@ -2293,8 +2399,98 @@
                 footerEmailLink.addEventListener('click', (e) => openEmail(e, 'goodflippinvibes.com'));
             }
 
+            // 12. Web Vitals Monitoring (Privacy-first)
+            // Track Core Web Vitals for performance monitoring
+            if ('PerformanceObserver' in window) {
+                const vitalsData = {};
+
+                // Largest Contentful Paint (LCP)
+                try {
+                    const lcpObserver = new PerformanceObserver((list) => {
+                        const entries = list.getEntries();
+                        const lastEntry = entries[entries.length - 1];
+                        vitalsData.lcp = Math.round(lastEntry.renderTime || lastEntry.loadTime);
+
+                        if (vitalsData.lcp > 2500) {
+                            console.warn('⚠️ LCP is slow:', vitalsData.lcp + 'ms (target: <2500ms)');
+                        }
+                    });
+                    lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+                } catch (e) {
+                    // LCP not supported
+                }
+
+                // First Input Delay (FID) - Interaction to Next Paint (INP)
+                try {
+                    const fidObserver = new PerformanceObserver((list) => {
+                        list.getEntries().forEach((entry) => {
+                            vitalsData.fid = Math.round(entry.processingStart - entry.startTime);
+
+                            if (vitalsData.fid > 100) {
+                                console.warn('⚠️ FID is slow:', vitalsData.fid + 'ms (target: <100ms)');
+                            }
+                        });
+                    });
+                    fidObserver.observe({ type: 'first-input', buffered: true });
+                } catch (e) {
+                    // FID not supported
+                }
+
+                // Cumulative Layout Shift (CLS)
+                try {
+                    let clsValue = 0;
+                    const clsObserver = new PerformanceObserver((list) => {
+                        list.getEntries().forEach((entry) => {
+                            if (!entry.hadRecentInput) {
+                                clsValue += entry.value;
+                            }
+                        });
+                        vitalsData.cls = Math.round(clsValue * 1000) / 1000;
+
+                        if (vitalsData.cls > 0.1) {
+                            console.warn('⚠️ CLS is high:', vitalsData.cls + ' (target: <0.1)');
+                        }
+                    });
+                    clsObserver.observe({ type: 'layout-shift', buffered: true });
+                } catch (e) {
+                    // CLS not supported
+                }
+
+                // Time to First Byte (TTFB)
+                try {
+                    const navigationEntry = performance.getEntriesByType('navigation')[0];
+                    if (navigationEntry) {
+                        vitalsData.ttfb = Math.round(navigationEntry.responseStart - navigationEntry.requestStart);
+
+                        if (vitalsData.ttfb > 600) {
+                            console.warn('⚠️ TTFB is slow:', vitalsData.ttfb + 'ms (target: <600ms)');
+                        }
+                    }
+                } catch (e) {
+                    // TTFB not supported
+                }
+
+                // Report vitals after page fully loaded
+                window.addEventListener('load', () => {
+                    setTimeout(() => {
+                        // Log vitals for development (can be sent to analytics in production)
+                        if (Object.keys(vitalsData).length > 0) {
+                            console.log('📊 Core Web Vitals:', vitalsData);
+
+                            // Optional: Send to analytics endpoint
+                            // if (window.gtag) {
+                            //     gtag('event', 'web_vitals', vitalsData);
+                            // }
+                        }
+                    }, 2000);
+                });
+            }
+
         })();
     </script>
+
+    <!-- GFD Ecosystem Navigation JavaScript -->
+    <script src="shared/ecosystem-nav.js"></script>
 </body>
 
 </html>
