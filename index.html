@@ -1488,6 +1488,102 @@
         "priceRange": "$$$"
     }
     </script>
+
+    <!-- Enhanced Schema: WebSite with Search Action -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Good Flippin Design",
+        "url": "https://goodflippindesign.com",
+        "description": "Strategic web development specializing in data platforms, AI-integrated applications, and business intelligence dashboards",
+        "publisher": {
+            "@type": "Organization",
+            "name": "GFV LLC DBA Good Flippin Design"
+        },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://goodflippindesign.com/#work?search={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+
+    <!-- Enhanced Schema: Person (Brett Weaver) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Brett Weaver",
+        "jobTitle": "Full-Stack Developer & AI Integration Specialist",
+        "worksFor": {
+            "@type": "Organization",
+            "name": "GFV LLC DBA Good Flippin Design",
+            "url": "https://goodflippindesign.com"
+        },
+        "url": "https://goodflippindesign.com",
+        "sameAs": [
+            "https://globaldeets.com",
+            "https://github.com/weave0"
+        ],
+        "knowsAbout": [
+            "Web Development",
+            "AI Integration",
+            "React",
+            "Next.js",
+            "Node.js",
+            "PostgreSQL",
+            "Business Intelligence",
+            "WCAG Accessibility",
+            "Data Visualization",
+            "Cloud Infrastructure"
+        ],
+        "email": "getsome@goodflippinvibes.com",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Minneapolis",
+            "addressRegion": "MN",
+            "addressCountry": "US"
+        }
+    }
+    </script>
+
+    <!-- Enhanced Schema: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://goodflippindesign.com"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Services",
+                "item": "https://goodflippindesign.com#services"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Portfolio",
+                "item": "https://goodflippindesign.com#work"
+            },
+            {
+                "@type": "ListItem",
+                "position": 4,
+                "name": "Contact",
+                "item": "https://goodflippindesign.com#contact"
+            }
+        ]
+    }
+    </script>
 </head>
 
 <body>
