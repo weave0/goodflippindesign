@@ -1,0 +1,160 @@
+name: Connect GitHub to Cloudflare Pages
+
+on:
+    workflow_dispatch: # Manual trigger
+
+jobs:
+    connect-git:
+        name: Connect Git Integration
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            
+            - name: Connect GitHub to Cloudflare Pages
+              env:
+                  CF_API_TOKEN: ${{ secrets.CF_FULL_ITHINK }}
+                  CF_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
+                  CF_PROJECT_NAME: goodflippindesign
+                  GITHUB_REPO: weave0/goodflippindesign
+              run: |
+                  echo "🔗 Connecting GitHub to Cloudflare Pages..."
+                  echo "   Project: $CF_PROJECT_NAME"
+                  echo "   GitHub Repo: $GITHUB_REPO"
+                  echo ""
+                  
+                  # Update project to use GitHub as source
+                  UPDATE_RESPONSE=$(curl -s -X PATCH \
+                    "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME" \
+                    -H "Authorization: Bearer $CF_API_TOKEN" \
+                    -H "Content-Type: application/json" \
+                    -d '{
+                      "deployment_configs": {
+                        "production": {
+                          "compatibility_date": "2024-01-01",
+                          "compatibility_flags": [],
+                          "env_vars": {},
+                          "build_command": "npm run build",
+                          "build_output_directory": "."
+                        }
+                      },
+                      "build_config": {
+                        "build_command": "npm run build",
+                        "destination_dir": ".",
+                        "root_dir": "",
+                        "web_analytics_tag": "",
+                        "web_analytics_token": ""
+                      },
+                      "source": {
+                        "type": "github",
+                        "config": {
+                          "owner": "weave0",
+                          "repo_name": "goodflippindesign",
+                          "production_branch": "main",
+                          "pr_comments_enabled": true,
+                          "deployments_enabled": true,
+                          "production_deployments_enabled": true,
+                          "preview_deployment_setting": "all",
+                          "preview_branch_includes": ["*"],
+                          "preview_branch_excludes": []
+                        }
+                      }
+                    }')
+                  
+                  echo "$UPDATE_RESPONSE" | jq '.'
+                  
+                  if [ "$(echo $UPDATE_RESPONSE | jq -r '.success')" = "true" ]; then
+                    echo ""
+                    echo "✅ SUCCESS! GitHub connected to Cloudflare Pages!"
+                    echo ""
+                    echo "📋 Configuration:"
+                    echo "   Source: GitHub"
+                    echo "   Repository: $GITHUB_REPO"
+                    echo "   Production branch: main"
+                    echo "   Build command: npm run build"
+                    echo "   Output directory: ."
+                    echo ""
+                    echo "🚀 Triggering initial deployment..."
+                    
+                    # Trigger a deployment
+                    DEPLOY_RESPONSE=$(curl -s -X POST \
+                      "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/deployments" \
+                      -H "Authorization: Bearer $CF_API_TOKEN" \
+                      -H "Content-Type: application/json" \
+                      -d '{
+                        "branch": "main"
+                      }')
+                    
+                    echo "$DEPLOY_RESPONSE" | jq '.'
+                    
+                    if [ "$(echo $DEPLOY_RESPONSE | jq -r '.success')" = "true" ]; then
+                      echo ""
+                      echo "✅ Deployment triggered!"
+                      echo "🌐 Monitor at: https://dash.cloudflare.com/$CF_ACCOUNT_ID/pages/view/$CF_PROJECT_NAME"
+                    else
+                      echo ""
+                      echo "⚠️  Note: You may need to authorize Cloudflare's GitHub App"
+                      echo "🔗 Go to: https://github.com/settings/installations"
+                      echo "   Find 'Cloudflare Pages' and grant access to $GITHUB_REPO"
+                    fi
+                  else
+                    echo ""
+                    echo "❌ Failed to update project configuration"
+                    echo ""
+                    
+                    ERRORS=$(echo $UPDATE_RESPONSE | jq -r '.errors[]?.message' 2>/dev/null)
+                    if [ ! -z "$ERRORS" ]; then
+                      echo "Errors:"
+                      echo "$ERRORS"
+                      echo ""
+                    fi
+                    
+                    echo "📋 Manual steps required:"
+                    echo ""
+                    echo "1. Go to Cloudflare Dashboard:"
+                    echo "   https://dash.cloudflare.com/$CF_ACCOUNT_ID/pages/view/$CF_PROJECT_NAME/settings/builds"
+                    echo ""
+                    echo "2. Under 'Source', click 'Change source' or 'Connect to Git'"
+                    echo ""
+                    echo "3. Select GitHub and authorize if needed"
+                    echo ""
+                    echo "4. Select repository: $GITHUB_REPO"
+                    echo ""
+                    echo "5. Configure:"
+                    echo "   Production branch: main"
+                    echo "   Build command: npm run build"
+                    echo "   Build output directory: ."
+                    echo ""
+                    echo "6. Click 'Save and Deploy'"
+                    
+                    exit 1
+                  fi
+            
+            - name: Wait for deployment
+              run: |
+                  echo "⏳ Waiting 2 minutes for deployment to complete..."
+                  sleep 120
+            
+            - name: Verify deployment
+              run: |
+                  echo "🧪 Checking deployed site..."
+                  
+                  CACHE_BUST=$(curl -s https://goodflippindesign.pages.dev/ | grep -oP '<!-- Cache bust: \K[0-9-:]+' || echo "not found")
+                  echo "📅 Live cache bust: $CACHE_BUST"
+                  
+                  EXPECTED_BUST=$(grep -oP '<!-- Cache bust: \K[0-9-:]+' index.html)
+                  echo "📅 Expected cache bust: $EXPECTED_BUST"
+                  
+                  if [ "$CACHE_BUST" = "$EXPECTED_BUST" ]; then
+                    echo ""
+                    echo "✅ ✅ ✅ SUCCESS! Site is LIVE with fresh code! ✅ ✅ ✅"
+                    echo ""
+                    echo "🎉 Your donations page is now working!"
+                    echo "🌐 Visit: https://www.goodflippindesign.com/donate.html"
+                  else
+                    echo ""
+                    echo "⏳ Deployment in progress or needs more time..."
+                    echo "🔄 Check again in a few minutes at:"
+                    echo "   https://goodflippindesign.pages.dev/"
+                  fi
