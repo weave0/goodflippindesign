@@ -13,7 +13,7 @@
     "cache-bust": "node scripts/update-cache-bust.js",
     "build": "npm run cache-bust && npm run sync",
     "pretest": "npm run sync",
-    "prepare": "husky install",
+    "prepare": "node -e \"if (process.env.CI !== 'true') { require('child_process').execSync('husky install', {stdio: 'inherit'}) }\"",
     "format": "prettier --write \"*.html\" \"tests/**/*.js\" \"scripts/**/*.js\"",
     "lint:html": "html-validate index.html",
     "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf"
