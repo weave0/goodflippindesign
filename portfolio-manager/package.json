@@ -1,0 +1,42 @@
+{
+    "name": "portfolio-manager",
+    "version": "1.0.0",
+    "description": "Desktop tool for managing Brett Weaver's 34.6M line portfolio ecosystem",
+    "main": "src/main.js",
+    "scripts": {
+        "start": "electron .",
+        "dev": "electron . --dev",
+        "build": "electron-builder",
+        "test": "echo \"Tests coming soon\""
+    },
+    "keywords": [
+        "portfolio",
+        "management",
+        "electron",
+        "developer-tools"
+    ],
+    "author": "Brett Weaver (Good Flippin Design)",
+    "license": "MIT",
+    "devDependencies": {
+        "electron": "^28.1.0",
+        "electron-builder": "^24.9.1"
+    },
+    "dependencies": {
+        "chart.js": "^4.4.1",
+        "sqlite3": "^5.1.7"
+    },
+    "build": {
+        "appId": "com.goodflippindesign.portfoliomanager",
+        "productName": "Portfolio Manager",
+        "directories": {
+            "output": "dist"
+        },
+        "files": [
+            "src/**/*",
+            "package.json"
+        ],
+        "win": {
+            "target": "portable"
+        }
+    }
+}

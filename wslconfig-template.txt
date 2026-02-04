@@ -1,0 +1,34 @@
+# WSL2 Resource Limits
+#
+# IMPORTANT: This file must be placed at: %UserProfile%\.wslconfig
+# (Example: C:\Users\YourName\.wslconfig)
+#
+# After creating/editing this file, run: wsl --shutdown
+# to apply the changes.
+#
+# Adjust these values based on your total system RAM:
+# - If you have 16GB: memory=4GB, processors=2
+# - If you have 32GB: memory=8GB, processors=4
+# - If you have 64GB: memory=12GB, processors=6
+
+[wsl2]
+# Limits VM memory (prevents WSL from eating all RAM)
+memory=4GB
+
+# Limits VM CPU cores
+processors=2
+
+# Swap size (0 = no swap, 2GB = moderate swap)
+swap=2GB
+
+# Localhost forwarding (needed for Docker/dev servers)
+localhostForwarding=true
+
+# Prevents excessive disk I/O
+pageReporting=false
+
+# Network mode (NAT is safer for most cases)
+networkingMode=NAT
+
+# Optional: Set swapfile location (comment out if not needed)
+# swapFile=C:\\temp\\wsl-swap.vhdx
