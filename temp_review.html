@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Cache bust: 2026-02-02-05:10 -->
+<!-- Cache bust: 2026-02-04-11:48 -->
 <html lang="en">
 
 <head>
@@ -82,6 +82,23 @@
             --accent: #e0e0e0;
             --border: rgba(255, 255, 255, 0.06);
             --border-hover: rgba(255, 255, 255, 0.12);
+
+            /* Futuristic Gradients */
+            --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #10b981 50%, #fbbf24 100%);
+            --gradient-card: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
+            --gradient-glow: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15), transparent 70%);
+            --gradient-accent-1: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%);
+            --gradient-accent-2: linear-gradient(135deg, #10b981 0%, #fbbf24 100%);
+
+            /* Glassmorphism */
+            --glass-bg: rgba(26, 26, 26, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+            /* Glow Effects */
+            --glow-purple: 0 0 20px rgba(139, 92, 246, 0.5);
+            --glow-green: 0 0 20px rgba(16, 185, 129, 0.5);
+            --glow-gold: 0 0 20px rgba(251, 191, 36, 0.5);
         }
 
         * {
@@ -216,10 +233,26 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('assets/backgrounds/GFD-WebArt-hero_gradient-20260131_133525.png') center/cover;
+            background:
+                url('assets/backgrounds/GFD-WebArt-hero_gradient-20260131_133525.png') center/cover,
+                var(--gradient-glow);
+            background-size: cover, 200% 200%;
             opacity: 0.15;
             z-index: 0;
             pointer-events: none;
+            animation: gradientShift 12s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                background-position: 0% 50%, 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%, 100% 50%;
+            }
         }
 
         .hero-content {
@@ -263,38 +296,70 @@
         }
 
         .btn-primary {
-            background: var(--text);
+            background: var(--gradient-primary);
             color: var(--bg);
             padding: 0.875rem 1.75rem;
-            border-radius: 6px;
+            border-radius: 8px;
             text-decoration: none;
-            font-weight: 550;
+            font-weight: 600;
             font-size: 0.9375rem;
-            transition: opacity 0.2s;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            box-shadow:
+                0 4px 15px rgba(139, 92, 246, 0.4),
+                0 2px 8px rgba(16, 185, 129, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
         }
 
         .btn-primary:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow:
+                0 8px 25px rgba(139, 92, 246, 0.5),
+                0 4px 12px rgba(16, 185, 129, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+        }
+
+        .btn-primary:hover::before {
+            transform: translateX(100%);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
         .btn-secondary {
-            background: transparent;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             color: var(--text);
             padding: 0.875rem 1.75rem;
-            border-radius: 6px;
+            border-radius: 8px;
             text-decoration: none;
             font-weight: 500;
             font-size: 0.9375rem;
-            border: 1px solid var(--border-hover);
-            transition: background-color 0.2s ease, border-color 0.2s ease;
+            border: 1px solid var(--glass-border);
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            position: relative;
         }
 
         .btn-secondary:hover {
-            background: var(--bg-elevated);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(26, 26, 26, 0.85);
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
         }
 
         /* Clients bar */
@@ -349,6 +414,10 @@
             font-weight: 600;
             letter-spacing: -0.02em;
             margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--text) 0%, rgba(139, 92, 246, 0.9) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .section-subtitle {
@@ -369,13 +438,34 @@
         }
 
         .service-card {
-            background: var(--bg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 2rem;
-            transition: background 0.2s;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .service-card:hover {
-            background: var(--bg-elevated);
+            background: rgba(26, 26, 26, 0.9);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.15);
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
         }
 
         .service-card h3 {
@@ -494,20 +584,43 @@
         }
 
         .portfolio-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
             overflow: hidden;
-            transition: transform 0.3s ease, border-color 0.3s ease;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
             text-decoration: none;
             color: inherit;
             display: block;
             will-change: transform;
+            position: relative;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .portfolio-card::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: var(--gradient-primary);
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+            filter: blur(12px);
         }
 
         .portfolio-card:hover {
-            border-color: var(--border-hover);
-            transform: translateY(-2px);
+            border-color: rgba(139, 92, 246, 0.3);
+            transform: translateY(-6px);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(139, 92, 246, 0.2);
+        }
+
+        .portfolio-card:hover::before {
+            opacity: 0.4;
         }
 
         .portfolio-card.no-link {
@@ -648,10 +761,38 @@
         }
 
         .support-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
             padding: 2rem;
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .support-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: var(--gradient-card);
+            opacity: 0.5;
+            pointer-events: none;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .support-eyebrow {
@@ -1206,10 +1347,179 @@
             letter-spacing: 0.08em;
         }
 
+        /* Mobile Menu Button */
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: transparent;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            z-index: 110;
+            transition: transform 0.3s ease;
+        }
+
+        .hamburger-line {
+            width: 24px;
+            height: 2px;
+            background: linear-gradient(135deg, #8b5cf6, #10b981);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-toggle:hover .hamburger-line {
+            box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+        }
+
+        .mobile-menu-toggle.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(7px, 7px);
+        }
+
+        .mobile-menu-toggle.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-toggle.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        /* Mobile Nav Overlay */
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(13, 13, 13, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 105;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .mobile-nav-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-nav-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease 0.1s;
+        }
+
+        .mobile-nav-overlay.active .mobile-nav-content {
+            transform: translateY(0);
+        }
+
+        .mobile-nav-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+            color: var(--text);
+        }
+
+        .mobile-nav-close:hover {
+            background: rgba(26, 26, 26, 0.9);
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: rotate(90deg);
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .mobile-nav-link {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            width: 100%;
+            text-align: center;
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .mobile-nav-link:hover,
+        .mobile-nav-link:focus {
+            background: rgba(26, 26, 26, 0.9);
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateX(8px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .mobile-nav-link:hover::before {
+            left: 100%;
+        }
+
+        .mobile-nav-cta {
+            background: var(--gradient-primary);
+            color: var(--bg);
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            margin-top: 1rem;
+        }
+
+        .mobile-nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+        }
+
         /* Responsive */
         @media (max-width: 900px) {
             .nav-links {
                 display: none;
+            }
+
+            .nav-cta {
+                display: none;
+            }
+
+            .mobile-menu-toggle {
+                display: flex;
             }
 
             .contact-content {
@@ -1455,7 +1765,8 @@
             "https://culturesherpa.org",
             "https://aiaimate.com",
             "https://goodflippinvibes.com",
-            "https://globaldeets.com"
+            "https://globaldeets.com",
+            "https://citizenapproved.org"
         ],
         "owns": [
             {
@@ -1483,6 +1794,12 @@
                 "name": "GlobalDeets",
                 "url": "https://globaldeets.com",
                 "description": "Portfolio hub with PWA capabilities"
+            },
+            {
+                "@type": "WebSite",
+                "name": "CitizenApproved",
+                "url": "https://citizenapproved.org",
+                "description": "U.S. citizenship pathway guide with interactive resources, legal information, and community support"
             }
         ],
         "priceRange": "$$$"
@@ -1593,11 +1910,7 @@
     <nav class="gfd-ecosystem-nav" aria-label="Ecosystem navigation">
         <div class="ecosystem-nav-container">
             <div class="ecosystem-brand">
-                <svg viewBox="324 324 1352 1352" fill="currentColor" class="ecosystem-logo" aria-hidden="true">
-                    <path transform="matrix(1.542,0,0,1.542,-480.343,167.307)" d="M896.648,101.831L1398.17,101.831L1304.42,289.331L1154.42,289.331L1185.67,226.831L984.148,226.831L859.148,476.831L859.331,476.831L960,678.169L990,618.169L1065,768.169L960,978.169L709.24,476.648L896.648,101.831Z" />
-                    <path transform="matrix(1.542,0,0,1.542,-480.343,167.307)" d="M521.831,101.831L836.648,101.831L679.24,416.648L521.831,101.831Z" />
-                    <path transform="matrix(1.542,0,0,1.542,-480.343,167.307)" d="M1273.17,351.831L1095,708.169L1020,558.169L1060.67,476.831L919.331,476.831L919.24,476.648L981.648,351.831L1273.17,351.831Z" />
-                </svg>
+                <img src="assets/logo-vector.png" alt="Good Flippin Design Logo" class="ecosystem-logo" />
                 <span class="ecosystem-title">GFD Ecosystem</span>
             </div>
 
@@ -1657,7 +1970,7 @@
                             <small class="nav-link-subtitle">Visualization & Research Platform</small>
                         </div>
                     </a>
-                    <a href="https://citizenapproved.com" class="nav-link" role="menuitem" target="_blank" rel="noopener">
+                    <a href="https://citizenapproved.org" class="nav-link" role="menuitem" target="_blank" rel="noopener">
                         <span class="nav-icon" aria-hidden="true">🗳️</span>
                         <div class="nav-link-content">
                             <strong class="nav-link-title">CitizenApproved</strong>
@@ -1667,7 +1980,7 @@
                 </div>
 
                 <div class="nav-section nav-cta-section">
-                    <a href="#support" class="nav-cta-link" role="menuitem">
+                    <a href="donate.html" class="nav-cta-link" role="menuitem">
                         <span class="nav-icon" aria-hidden="true">❤️</span>
                         <div class="nav-link-content">
                             <strong class="nav-link-title">Support Our Work</strong>
@@ -1690,11 +2003,36 @@
                 <li><a href="#work">Work</a></li>
                 <li><a href="#process">Process</a></li>
                 <li><a href="#legal-forms">Legal Forms</a></li>
-                <li><a href="#support">Support</a></li>
+                <li><a href="donate.html">Donate</a></li>
             </ul>
             <a href="#contact" class="nav-cta">Get in Touch</a>
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
         </div>
     </nav>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay" aria-hidden="true">
+        <div class="mobile-nav-content">
+            <button class="mobile-nav-close" aria-label="Close mobile menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <nav class="mobile-nav-links">
+                <a href="#services" class="mobile-nav-link">Services</a>
+                <a href="#work" class="mobile-nav-link">Work</a>
+                <a href="#process" class="mobile-nav-link">Process</a>
+                <a href="#legal-forms" class="mobile-nav-link">Legal Forms</a>
+                <a href="donate.html" class="mobile-nav-link">Donate</a>
+                <a href="#contact" class="mobile-nav-link mobile-nav-cta">Get in Touch</a>
+            </nav>
+        </div>
+    </div>
 
     <main id="main">
         <header class="hero">
@@ -1769,7 +2107,7 @@
                 <div class="portfolio-grid">
                     <a href="https://aiaimate.com" target="_blank" rel="noopener" class="portfolio-card">
                         <div class="portfolio-preview">
-                            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80" alt="AI Aimate - AI Education Platform">
+                            <img src="assets/portfolio/ai-aimate.webp" alt="AI Aimate - AI Education Platform">
                         </div>
                         <div class="portfolio-info">
                             <p class="portfolio-category">
@@ -1789,7 +2127,7 @@
                     </a>
                     <a href="https://culturesherpa.org" target="_blank" rel="noopener" class="portfolio-card">
                         <div class="portfolio-preview">
-                            <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800&q=80" alt="CultureSherpa - Interactive Cultural Atlas">
+                            <img src="assets/portfolio/culturesherpa.webp" alt="CultureSherpa - Interactive Cultural Atlas">
                         </div>
                         <div class="portfolio-info">
                             <p class="portfolio-category">
@@ -1809,7 +2147,7 @@
                     </a>
                     <a href="https://www.goodflippinvibes.com" target="_blank" rel="noopener" class="portfolio-card">
                         <div class="portfolio-preview">
-                            <img src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&q=80" alt="Good Flippin Vibes - Wellness Platform">
+                            <img src="assets/portfolio/good-flippin-vibes.webp" alt="Good Flippin Vibes - Wellness Platform">
                         </div>
                         <div class="portfolio-info">
                             <p class="portfolio-category">
@@ -1828,7 +2166,7 @@
                     </a>
                     <a href="https://eliassen.globaldeets.com" target="_blank" rel="noopener" class="portfolio-card">
                         <div class="portfolio-preview">
-                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" alt="Market Intelligence">
+                            <img src="assets/portfolio/globaldeets.webp" alt="Market Intelligence">
                         </div>
                         <div class="portfolio-info">
                             <p class="portfolio-category">
@@ -1841,6 +2179,24 @@
                                 <span class="tech-tag">DuckDB</span>
                                 <span class="tech-tag">React</span>
                                 <span class="tech-tag">AI Research</span>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="https://citizenapproved.org" target="_blank" rel="noopener" class="portfolio-card">
+                        <div class="portfolio-preview">
+                            <img src="assets/portfolio/citizenapproved.webp" alt="CitizenApproved - U.S. Citizenship Pathways">
+                        </div>
+                        <div class="portfolio-info">
+                            <p class="portfolio-category">
+                                Civic Tech Platform
+                                <span class="status-badge live">LIVE</span>
+                            </p>
+                            <h3>CitizenApproved</h3>
+                            <p>Comprehensive U.S. citizenship pathway guide with interactive resources, legal information, and community support. Helping immigrants navigate the naturalization process with clarity and confidence.</p>
+                            <div class="portfolio-tech">
+                                <span class="tech-tag">Next.js 14</span>
+                                <span class="tech-tag">Immigration Law</span>
+                                <span class="tech-tag">Community</span>
                             </div>
                         </div>
                     </a>
@@ -2009,51 +2365,6 @@
             </div>
         </section>
 
-        <section id="support">
-            <div class="container">
-                <div class="section-header">
-                    <p class="section-label">Support</p>
-                    <h2 class="section-title">Fuel independent work</h2>
-                    <p class="section-subtitle">Project-specific donations help keep research, accessibility improvements, and open resources moving forward.</p>
-                </div>
-                <div class="support-grid">
-                    <div class="support-copy">
-                        <p class="support-eyebrow">Good Flippin Design</p>
-                        <h3 class="support-title">Keep the momentum alive</h3>
-                        <div class="support-copy">
-                            <p>Every contribution goes directly to product research, design iterations, and the systems that make client work more resilient.</p>
-                            <p>If you’re supporting a specific initiative, you can note the project name in the payment message.</p>
-                        </div>
-                    </div>
-                    <div class="support-card" aria-live="polite">
-                        <div class="support-toggle" role="group" aria-label="Donation frequency">
-                            <button type="button" class="support-toggle-btn active" data-mode="one-time">One-time</button>
-                            <button type="button" class="support-toggle-btn" data-mode="monthly">Monthly</button>
-                        </div>
-                        <div class="support-amounts" role="group" aria-label="Donation amount">
-                            <button type="button" class="donation-amount" data-amount="10">$10</button>
-                            <button type="button" class="donation-amount" data-amount="25">$25</button>
-                            <button type="button" class="donation-amount" data-amount="50">$50</button>
-                            <button type="button" class="donation-amount" data-amount="100">$100</button>
-                            <label class="support-custom" for="support-custom-amount">
-                                Custom amount
-                                <input id="support-custom-amount" type="number" min="1" step="1" placeholder="Enter amount in USD">
-                            </label>
-                        </div>
-                        <button type="button" class="btn-primary support-continue">Continue to payment</button>
-                        <div class="support-success" id="support-success">Thank you! Your support keeps the mission moving.</div>
-                        <div class="support-payment" id="support-payment">
-                            <div id="donation-payment-element"></div>
-                            <div class="support-payment-actions">
-                                <button type="button" class="btn-primary support-pay">Donate now</button>
-                                <p class="support-note">Secure payment via Stripe. You’ll receive a receipt by email.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <section id="contact">
             <div class="contact-content container">
                 <div class="contact-info">
@@ -2111,11 +2422,7 @@
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
-                <svg viewBox="324 324 1352 1352" fill="currentColor">
-                    <path transform="matrix(1.542,0,0,1.542,-480.343,167.307)" d="M896.648,101.831L1398.17,101.831L1304.42,289.331L1154.42,289.331L1185.67,226.831L984.148,226.831L859.148,476.831L859.331,476.831L960,678.169L990,618.169L1065,768.169L960,978.169L709.24,476.648L896.648,101.831Z" />
-                    <path transform="matrix(1.542,0,0,1.542,-480.343,167.307)" d="M521.831,101.831L836.648,101.831L679.24,416.648L521.831,101.831Z" />
-                    <path transform="matrix(1.542,0,0,1.542,-480.343,167.307)" d="M1273.17,351.831L1095,708.169L1020,558.169L1060.67,476.831L919.331,476.831L919.24,476.648L981.648,351.831L1273.17,351.831Z" />
-                </svg>
+                <img src="assets/logo-vector.png" alt="Good Flippin Design Logo" style="height: 24px; width: auto; opacity: 0.7;" />
                 <span>Good Flippin Design</span>
             </div>
             <p class="footer-text">© 2025 GFV LLC</p>
@@ -2130,6 +2437,7 @@
                 <a href="https://culturesherpa.org" target="_blank" rel="noopener" title="Interactive Cultural Atlas">CultureSherpa</a>
                 <a href="https://goodflippinvibes.com" target="_blank" rel="noopener" title="Wellness Platform">Good Flippin Vibes</a>
                 <a href="https://globaldeets.com" target="_blank" rel="noopener" title="Portfolio Hub">GlobalDeets</a>
+                <a href="https://citizenapproved.org" target="_blank" rel="noopener" title="U.S. Citizenship Pathways">CitizenApproved</a>
             </div>
         </div>
     </footer>
@@ -2495,7 +2803,64 @@
                 footerEmailLink.addEventListener('click', (e) => openEmail(e, 'goodflippinvibes.com'));
             }
 
-            // 12. Web Vitals Monitoring (Privacy-first)
+            // 12. Mobile Menu Toggle
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const mobileNavOverlay = document.getElementById('mobile-nav-overlay');
+            const mobileNavClose = document.querySelector('.mobile-nav-close');
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+            // Open mobile menu
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', function () {
+                    const isActive = mobileNavOverlay.classList.contains('active');
+
+                    if (!isActive) {
+                        mobileNavOverlay.classList.add('active');
+                        mobileMenuToggle.classList.add('active');
+                        mobileMenuToggle.setAttribute('aria-expanded', 'true');
+                        mobileNavOverlay.setAttribute('aria-hidden', 'false');
+                        document.body.style.overflow = 'hidden'; // Prevent background scroll
+                    } else {
+                        closeMobileMenu();
+                    }
+                });
+            }
+
+            // Close mobile menu
+            function closeMobileMenu() {
+                mobileNavOverlay.classList.remove('active');
+                mobileMenuToggle.classList.remove('active');
+                mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                mobileNavOverlay.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            if (mobileNavClose) {
+                mobileNavClose.addEventListener('click', closeMobileMenu);
+            }
+
+            // Close menu when clicking a link
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    closeMobileMenu();
+                });
+            });
+
+            // Close menu on ESC key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && mobileNavOverlay.classList.contains('active')) {
+                    closeMobileMenu();
+                }
+            });
+
+            // Close menu when clicking overlay background
+            mobileNavOverlay.addEventListener('click', function (e) {
+                if (e.target === mobileNavOverlay) {
+                    closeMobileMenu();
+                }
+            });
+
+            // 13. Web Vitals Monitoring (Privacy-first)
             // Track Core Web Vitals for performance monitoring
             if ('PerformanceObserver' in window) {
                 const vitalsData = {};

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Our Work - Good Flippin Design</title>
+    <meta name="description" content="Support the GFD ecosystem. Your donations fuel research, accessibility improvements, and open resources across AI education, cultural preservation, and civic tech.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --bg-elevated: #151515;
+            --bg-card: #1a1a1a;
+            --text: #f5f5f5;
+            --text-secondary: #999;
+            --text-muted: #8a8a8a;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.12);
+            --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #10b981 50%, #fbbf24 100%);
+            --glass-bg: rgba(26, 26, 26, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+
+        header {
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo img {
+            height: 36px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 1rem;
+            font-weight: 600;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        main {
+            flex: 1;
+            padding: 4rem 0;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.7;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .impact-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .impact-card .icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .impact-card h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .impact-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .donation-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .donation-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .donation-toggle button {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .donation-toggle button.active {
+            background: var(--bg-elevated);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .donation-amounts {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .donation-amount {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.875rem 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .donation-amount.active {
+            border-color: rgba(139, 92, 246, 0.5);
+            background: rgba(139, 92, 246, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .custom-amount {
+            grid-column: span 4;
+            margin-top: 0.5rem;
+        }
+
+        .custom-amount label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .custom-amount input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--gradient-primary);
+            color: var(--bg);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .payment-element {
+            margin: 1.5rem 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: none;
+        }
+
+        .payment-element.active {
+            display: block;
+        }
+
+        .note {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        .success-message .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-message h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .success-message p {
+            color: var(--text-secondary);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--text);
+        }
+
+        @media (max-width: 600px) {
+            .donation-amounts {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <a href="/" class="logo">
+                <img src="assets/logo-vector.png" alt="Good Flippin Design">
+                <span class="logo-text">Good Flippin Design</span>
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="hero">
+                <h1>Support Our Mission</h1>
+                <p>Your donations fuel research, accessibility improvements, and open resources across our entire ecosystem—from AI education to cultural preservation to civic tech.</p>
+            </div>
+
+            <div class="impact-grid">
+                <div class="impact-card">
+                    <div class="icon">🧠</div>
+                    <h3>AI Education</h3>
+                    <p>Free AI learning resources</p>
+                </div>
+                <div class="impact-card">
+                    <div class="icon">🌍</div>
+                    <h3>Cultural Data</h3>
+                    <p>470+ cultures preserved</p>
+                </div>
+                <div class="impact-card">
+                    <div class="icon">🗳️</div>
+                    <h3>Civic Tech</h3>
+                    <p>Citizenship guidance</p>
+                </div>
+            </div>
+
+            <div id="donation-form">
+                <div class="donation-card">
+                    <div class="donation-toggle">
+                        <button type="button" class="active" data-mode="one-time">One-time</button>
+                        <button type="button" data-mode="monthly">Monthly</button>
+                    </div>
+
+                    <div class="donation-amounts">
+                        <button type="button" class="donation-amount" data-amount="5">$5</button>
+                        <button type="button" class="donation-amount" data-amount="10">$10</button>
+                        <button type="button" class="donation-amount" data-amount="25">$25</button>
+                        <button type="button" class="donation-amount" data-amount="50">$50</button>
+                        <div class="custom-amount">
+                            <label for="custom-amount">Custom amount</label>
+                            <input type="number" id="custom-amount" min="1" step="1" placeholder="Enter amount in USD">
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-primary" id="continue-btn">Continue to Payment</button>
+
+                    <div class="payment-element" id="payment-element">
+                        <div id="stripe-payment-element"></div>
+                        <button type="button" class="btn-primary" id="submit-btn">Donate Now</button>
+                    </div>
+
+                    <p class="note">Secure payment via Stripe. You'll receive a receipt by email.</p>
+                </div>
+            </div>
+
+            <div class="success-message" id="success-message">
+                <div class="icon">✅</div>
+                <h2>Thank You!</h2>
+                <p>Your support keeps our mission moving forward. You'll receive a confirmation email shortly.</p>
+                <p style="margin-top: 1rem;"><a href="/">← Return to homepage</a></p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2025 GFV LLC • <a href="/">Good Flippin Design</a></p>
+        </div>
+    </footer>
+
+    <script>
+        const config = {
+            publishableKey: 'pk_live_51So70wBL2ppdbQKqOR38V1sZW6oFrVYkKmsxYxHTIOQ7yXYU1oT2qQtXHdKo9eBx2vxvotcYt5L6ZQXoXfYrx5Wg00X1VibSRz',
+            apiBaseUrl: 'https://sd7ug3ha16.execute-api.us-east-1.amazonaws.com/prod'
+        };
+
+        let donationMode = 'one-time';
+        let selectedAmount = 0;
+        let stripe, elements;
+
+        // Check for success parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            document.getElementById('donation-form').style.display = 'none';
+            document.getElementById('success-message').classList.add('active');
+        }
+
+        // Toggle buttons
+        document.querySelectorAll('.donation-toggle button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.donation-toggle button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                donationMode = btn.dataset.mode;
+            });
+        });
+
+        // Amount buttons
+        document.querySelectorAll('.donation-amount').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.donation-amount').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedAmount = parseFloat(btn.dataset.amount);
+                document.getElementById('custom-amount').value = '';
+            });
+        });
+
+        // Custom amount
+        document.getElementById('custom-amount').addEventListener('input', (e) => {
+            document.querySelectorAll('.donation-amount').forEach(b => b.classList.remove('active'));
+            selectedAmount = parseFloat(e.target.value) || 0;
+        });
+
+        // Continue to payment
+        document.getElementById('continue-btn').addEventListener('click', async () => {
+            if (selectedAmount < 1) {
+                alert('Please select a donation amount');
+                return;
+            }
+
+            // Prevent duplicate clicks
+            const continueBtn = document.getElementById('continue-btn');
+            if (continueBtn.disabled) return;
+            continueBtn.disabled = true;
+            continueBtn.textContent = 'Loading...';
+
+            try {
+                const response = await fetch(`${config.apiBaseUrl}/api/create-payment-intent`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: Math.round(selectedAmount * 100),
+                        recurring: donationMode === 'monthly',
+                        project: 'Good Flippin Design Ecosystem'
+                    })
+                });
+
+                const { clientSecret } = await response.json();
+
+                if (!stripe) {
+                    stripe = Stripe(config.publishableKey);
+                }
+
+                // Clear existing payment element if it exists
+                const paymentContainer = document.getElementById('stripe-payment-element');
+                paymentContainer.innerHTML = '';
+
+                // Create fresh elements
+                elements = stripe.elements({ clientSecret });
+                const paymentElement = elements.create('payment');
+                paymentElement.mount('#stripe-payment-element');
+
+                document.getElementById('payment-element').classList.add('active');
+                continueBtn.textContent = 'Continue to Payment';
+            } catch (error) {
+                console.error(error);
+                alert('Unable to initialize payment. Please try again.');
+                continueBtn.disabled = false;
+                continueBtn.textContent = 'Continue to Payment';
+            }
+        });
+
+        // Submit payment
+        document.getElementById('submit-btn').addEventListener('click', async () => {
+            if (!stripe || !elements) return;
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
+            const { error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: `${window.location.origin}${window.location.pathname}?success=true`
+                }
+            });
+
+            if (error) {
+                alert(error.message || 'Payment failed. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Donate Now';
+            }
+        });
+    </script>
+</body>
+
+</html>
