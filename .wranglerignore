@@ -1,0 +1,51 @@
+# Wrangler ignore file - exclude large/unnecessary files from Cloudflare Pages deployment
+
+# Development projects (too large, not needed for main site)
+
+GFD Dev Projects/
+node_modules/
+.venv/
+.git/
+
+# Large files
+
+_.json
+_.log
+_.zip
+_.tar.gz
+_.mp4
+_.mov
+\*.avi
+
+# Test files
+
+tests/
+temp\_\*
+_.test.js
+_.test.html
+
+# Documentation (not needed on live site)
+
+\*.md
+!README.md
+
+# IDE files
+
+.vscode/
+.idea/
+_.swp
+_.swo
+.DS_Store
+
+# Python
+
+**pycache**/
+_.pyc
+_.pyo
+_.pyd
+.Python
+_.so
+
+# Screenshots
+
+assets/portfolio/screenshots/\*.png

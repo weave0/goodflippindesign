@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+<!-- Cache bust: 2026-02-04-10:45 -->
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support Our Work - Good Flippin Design</title>
-    <meta name="description" content="Support the GFD ecosystem. Your donations fuel research, accessibility improvements, and open resources across AI education, cultural preservation, and civic tech.">
+    <title>♥ Support the GFD Ecosystem - Make an Impact Today</title>
+    <meta name="description" content="Join 1000+ supporters powering free AI education, cultural preservation, and civic tech resources. Every donation creates real impact.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,13 +17,31 @@
             --bg-elevated: #151515;
             --bg-card: #1a1a1a;
             --text: #f5f5f5;
-            --text-secondary: #999;
-            --text-muted: #8a8a8a;
-            --border: rgba(255, 255, 255, 0.06);
-            --border-hover: rgba(255, 255, 255, 0.12);
+            --text-secondary: #b8b8b8;
+            --text-muted: #999;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
             --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #10b981 50%, #fbbf24 100%);
+            --gradient-purple: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-green: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            --gradient-gold: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
             --glass-bg: rgba(26, 26, 26, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glow-purple: 0 0 20px rgba(139, 92, 246, 0.4);
+            --glow-green: 0 0 20px rgba(16, 185, 129, 0.4);
+            --glow-gold: 0 0 20px rgba(251, 191, 36, 0.4);
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
         }
 
         * {
@@ -33,7 +52,9 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a0d2e 50%, #0d1a1a 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
@@ -86,10 +107,15 @@
         }
 
         .hero h1 {
-            font-size: clamp(2rem, 4vw, 2.5rem);
-            font-weight: 600;
-            letter-spacing: -0.02em;
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
             margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(139, 92, 246, 0.3);
         }
 
         .hero p {
@@ -111,34 +137,76 @@
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border-radius: 16px;
+            padding: 1.75rem;
             text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .impact-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .impact-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.2);
+        }
+
+        .impact-card:hover::before {
+            transform: scaleX(1);
         }
 
         .impact-card .icon {
-            font-size: 2rem;
+            font-size: 2.5rem;
             margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80px;
+        }
+
+        .impact-card .icon svg {
+            width: 64px;
+            height: 64px;
+            filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.6));
         }
 
         .impact-card h3 {
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 1rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .impact-card p {
-            font-size: 0.875rem;
-            color: var(--text-muted);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
         .donation-card {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 2rem;
+            border-radius: 20px;
+            padding: 2.5rem;
             margin-bottom: 2rem;
+            box-shadow: 0 8px 40px rgba(139, 92, 246, 0.15),
+                0 0 1px rgba(139, 92, 246, 0.5) inset;
         }
 
         .donation-toggle {
@@ -149,20 +217,36 @@
         }
 
         .donation-toggle button {
-            background: transparent;
+            background: rgba(13, 13, 13, 0.5);
             color: var(--text-secondary);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .donation-toggle button::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .donation-toggle button.active {
-            background: var(--bg-elevated);
-            border-color: var(--border-hover);
+            background: rgba(139, 92, 246, 0.15);
+            border-color: rgba(139, 92, 246, 0.5);
             color: var(--text);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .donation-toggle button.active::before {
+            opacity: 0.1;
         }
 
         .donation-amounts {
@@ -173,21 +257,46 @@
         }
 
         .donation-amount {
-            background: var(--bg);
+            background: rgba(13, 13, 13, 0.8);
             color: var(--text);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.875rem 0.5rem;
-            font-weight: 600;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 0.5rem;
+            font-weight: 700;
+            font-size: 1.125rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             text-align: center;
+            position: relative;
+        }
+
+        .donation-amount:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
         }
 
         .donation-amount.active {
-            border-color: rgba(139, 92, 246, 0.5);
-            background: rgba(139, 92, 246, 0.1);
-            transform: translateY(-2px);
+            border-color: rgba(139, 92, 246, 0.8);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4),
+                0 0 0 2px rgba(139, 92, 246, 0.2);
+            color: #fff;
+        }
+
+        .donation-amount.recommended::after {
+            content: '⭐ Popular';
+            position: absolute;
+            top: -10px;
+            right: -8px;
+            background: var(--gradient-gold);
+            color: var(--bg);
+            font-size: 0.65rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
         }
 
         .custom-amount {
@@ -215,20 +324,44 @@
         .btn-primary {
             width: 100%;
             background: var(--gradient-primary);
-            color: var(--bg);
-            padding: 1rem 2rem;
+            background-size: 200% 200%;
+            color: #fff;
+            padding: 1.125rem 2rem;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(139, 92, 246, 0.6),
+                0 0 0 2px rgba(139, 92, 246, 0.3);
+            animation: gradientShift 2s ease infinite;
+        }
+
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-primary:disabled {
@@ -315,25 +448,126 @@
     <main>
         <div class="container">
             <div class="hero">
-                <h1>Support Our Mission</h1>
-                <p>Your donations fuel research, accessibility improvements, and open resources across our entire ecosystem—from AI education to cultural preservation to civic tech.</p>
+                <h1><svg width="48" height="48" viewBox="0 0 64 64" style="display: inline-block; vertical-align: middle; margin-right: 8px; filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.8));">
+                        <defs>
+                            <linearGradient id="rocketGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#8b5cf6" />
+                                <stop offset="50%" style="stop-color:#10b981" />
+                                <stop offset="100%" style="stop-color:#fbbf24" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M32 4 L40 28 L48 24 L32 60 L24 28 L16 24 Z" fill="url(#rocketGrad)" opacity="0.9" />
+                        <circle cx="32" cy="18" r="4" fill="#fff" opacity="0.8" />
+                        <path d="M28 28 Q32 32 36 28" stroke="#fbbf24" stroke-width="2" fill="none" opacity="0.7" />
+                    </svg> Power the Future of Open Knowledge</h1>
+                <p>Join <strong>1,000+ supporters</strong> creating real impact. Your contribution fuels <strong>free AI education</strong>, preserves <strong>470+ cultures</strong>, and empowers <strong>citizenship seekers</strong> worldwide. Together, we're building a more accessible, informed future.</p>
             </div>
 
             <div class="impact-grid">
                 <div class="impact-card">
-                    <div class="icon">🧠</div>
-                    <h3>AI Education</h3>
-                    <p>Free AI learning resources</p>
+                    <div class="icon">
+                        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="brainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#8b5cf6" />
+                                    <stop offset="100%" style="stop-color:#a78bfa" />
+                                </linearGradient>
+                                <radialGradient id="glowGrad">
+                                    <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.8" />
+                                    <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:0" />
+                                </radialGradient>
+                            </defs>
+                            <!-- Glow effect -->
+                            <circle cx="32" cy="32" r="28" fill="url(#glowGrad)" opacity="0.3" />
+                            <!-- Brain -->
+                            <path d="M32 12 Q24 12 20 18 Q16 24 18 30 Q16 36 20 42 Q24 48 32 48 Q40 48 44 42 Q48 36 46 30 Q48 24 44 18 Q40 12 32 12 Z" fill="url(#brainGrad)" opacity="0.8" />
+                            <!-- Neural connections -->
+                            <circle cx="24" cy="22" r="2" fill="#10b981" opacity="0.9" />
+                            <circle cx="32" cy="20" r="2" fill="#10b981" opacity="0.9" />
+                            <circle cx="40" cy="22" r="2" fill="#10b981" opacity="0.9" />
+                            <circle cx="26" cy="32" r="2" fill="#fbbf24" opacity="0.9" />
+                            <circle cx="38" cy="32" r="2" fill="#fbbf24" opacity="0.9" />
+                            <circle cx="32" cy="40" r="2" fill="#10b981" opacity="0.9" />
+                            <!-- Connection lines -->
+                            <line x1="24" y1="22" x2="32" y2="20" stroke="#10b981" stroke-width="1" opacity="0.5" />
+                            <line x1="32" y1="20" x2="40" y2="22" stroke="#10b981" stroke-width="1" opacity="0.5" />
+                            <line x1="26" y1="32" x2="38" y2="32" stroke="#fbbf24" stroke-width="1" opacity="0.5" />
+                        </svg>
+                    </div>
+                    <h3>AI for Everyone</h3>
+                    <p><strong>127K</strong> learners educated</p>
                 </div>
                 <div class="impact-card">
-                    <div class="icon">🌍</div>
-                    <h3>Cultural Data</h3>
-                    <p>470+ cultures preserved</p>
+                    <div class="icon">
+                        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="globeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#10b981" />
+                                    <stop offset="100%" style="stop-color:#34d399" />
+                                </linearGradient>
+                                <radialGradient id="orbitGlow">
+                                    <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.6" />
+                                    <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:0" />
+                                </radialGradient>
+                            </defs>
+                            <!-- Glow background -->
+                            <circle cx="32" cy="32" r="30" fill="url(#orbitGlow)" opacity="0.2" />
+                            <!-- Globe -->
+                            <circle cx="32" cy="32" r="18" fill="url(#globeGrad)" opacity="0.7" />
+                            <!-- Continents -->
+                            <path d="M28 24 Q30 22 34 24 L36 26 L34 30 L30 28 Z" fill="#34d399" opacity="0.9" />
+                            <path d="M24 32 L28 34 L26 38 L22 36 Z" fill="#34d399" opacity="0.9" />
+                            <!-- Orbital ring 1 -->
+                            <ellipse cx="32" cy="32" rx="24" ry="12" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.4" transform="rotate(20 32 32)" />
+                            <!-- Orbital ring 2 -->
+                            <ellipse cx="32" cy="32" rx="24" ry="12" fill="none" stroke="#8b5cf6" stroke-width="1.5" opacity="0.4" transform="rotate(-20 32 32)" />
+                            <!-- Sparkles -->
+                            <circle cx="48" cy="20" r="2" fill="#fbbf24" opacity="0.8" />
+                            <circle cx="16" cy="44" r="2" fill="#fbbf24" opacity="0.8" />
+                            <path d="M50 42 L51 44 L53 45 L51 46 L50 48 L49 46 L47 45 L49 44 Z" fill="#fff" opacity="0.7" />
+                        </svg>
+                    </div>
+                    <h3>Cultural Preservation</h3>
+                    <p><strong>470+</strong> cultures documented</p>
                 </div>
                 <div class="impact-card">
-                    <div class="icon">🗳️</div>
-                    <h3>Civic Tech</h3>
-                    <p>Citizenship guidance</p>
+                    <div class="icon">
+                        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="torchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#8b5cf6" />
+                                    <stop offset="50%" style="stop-color:#ec4899" />
+                                    <stop offset="100%" style="stop-color:#fbbf24" />
+                                </linearGradient>
+                                <linearGradient id="flameGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#fbbf24" />
+                                    <stop offset="50%" style="stop-color:#f59e0b" />
+                                    <stop offset="100%" style="stop-color:#fef3c7" />
+                                </linearGradient>
+                                <radialGradient id="flameBurst">
+                                    <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.8" />
+                                    <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:0" />
+                                </radialGradient>
+                            </defs>
+                            <!-- Glow -->
+                            <circle cx="32" cy="18" r="16" fill="url(#flameBurst)" opacity="0.4" />
+                            <!-- Torch base/pedestal -->
+                            <rect x="28" y="42" width="8" height="16" fill="url(#torchGrad)" opacity="0.7" rx="2" />
+                            <rect x="26" y="38" width="12" height="4" fill="url(#torchGrad)" opacity="0.8" rx="1" />
+                            <!-- Torch handle -->
+                            <rect x="30" y="24" width="4" height="18" fill="url(#torchGrad)" opacity="0.8" rx="1" />
+                            <!-- Flame -->
+                            <path d="M32 8 Q28 12 30 18 Q28 20 32 24 Q36 20 34 18 Q36 12 32 8 Z" fill="url(#flameGrad)" opacity="0.9" />
+                            <!-- Inner flame -->
+                            <path d="M32 12 Q30 14 31 18 Q30 19 32 21 Q34 19 33 18 Q34 14 32 12 Z" fill="#fef3c7" opacity="0.8" />
+                            <!-- Rainbow arc -->
+                            <path d="M20 30 Q32 20 44 30" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.5" />
+                            <path d="M22 32 Q32 24 42 32" fill="none" stroke="#10b981" stroke-width="2" opacity="0.5" />
+                            <path d="M24 34 Q32 28 40 34" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.5" />
+                        </svg>
+                    </div>
+                    <h3>Civic Empowerment</h3>
+                    <p><strong>25K+</strong> citizens guided</p>
                 </div>
             </div>
 
@@ -345,39 +579,103 @@
                     </div>
 
                     <div class="donation-amounts">
-                        <button type="button" class="donation-amount" data-amount="5">$5</button>
                         <button type="button" class="donation-amount" data-amount="10">$10</button>
-                        <button type="button" class="donation-amount" data-amount="25">$25</button>
+                        <button type="button" class="donation-amount recommended" data-amount="25">$25</button>
                         <button type="button" class="donation-amount" data-amount="50">$50</button>
+                        <button type="button" class="donation-amount" data-amount="100">$100</button>
                         <div class="custom-amount">
                             <label for="custom-amount">Custom amount</label>
                             <input type="number" id="custom-amount" min="1" step="1" placeholder="Enter amount in USD">
                         </div>
                     </div>
 
-                    <button type="button" class="btn-primary" id="continue-btn">Continue to Payment</button>
+                    <button type="button" class="btn-primary" id="continue-btn"><svg width="16" height="16" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 6px;">
+                            <rect x="6" y="10" width="12" height="10" rx="2" fill="#10b981" opacity="0.8" />
+                            <path d="M8 10 V7 C8 4.8 9.8 3 12 3 C14.2 3 16 4.8 16 7 V10" fill="none" stroke="#fbbf24" stroke-width="2" />
+                        </svg> Continue to Secure Payment →</button>
 
                     <div class="payment-element" id="payment-element">
                         <div id="stripe-payment-element"></div>
-                        <button type="button" class="btn-primary" id="submit-btn">Donate Now</button>
+                        <button type="button" class="btn-primary" id="submit-btn"><svg width="16" height="16" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 6px;">
+                                <defs>
+                                    <linearGradient id="btnHeartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#ec4899" />
+                                        <stop offset="100%" style="stop-color:#8b5cf6" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M16 28 C16 28 4 18 4 11 C4 6 7 4 10 4 C12 4 14 5 16 8 C18 5 20 4 22 4 C25 4 28 6 28 11 C28 18 16 28 16 28 Z" fill="url(#btnHeartGrad)" />
+                            </svg> Complete Your Donation</button>
                     </div>
 
-                    <p class="note">Secure payment via Stripe. You'll receive a receipt by email.</p>
+                    <p class="note"><svg width="14" height="14" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                            <rect x="6" y="10" width="12" height="10" rx="2" fill="#10b981" opacity="0.7" />
+                            <path d="M8 10 V7 C8 4.8 9.8 3 12 3 C14.2 3 16 4.8 16 7 V10" fill="none" stroke="#fbbf24" stroke-width="2" />
+                        </svg> Powered by Stripe • Bank-level security • Instant tax receipt via email</p>
                 </div>
             </div>
 
             <div class="success-message" id="success-message">
-                <div class="icon">✅</div>
-                <h2>Thank You!</h2>
-                <p>Your support keeps our mission moving forward. You'll receive a confirmation email shortly.</p>
-                <p style="margin-top: 1rem;"><a href="/">← Return to homepage</a></p>
+                <div class="icon">
+                    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style="width: 80px; height: 80px;">
+                        <defs>
+                            <linearGradient id="celebrationGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#8b5cf6" />
+                                <stop offset="50%" style="stop-color:#10b981" />
+                                <stop offset="100%" style="stop-color:#fbbf24" />
+                            </linearGradient>
+                            <radialGradient id="burstGlow">
+                                <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.9" />
+                                <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0" />
+                            </radialGradient>
+                        </defs>
+                        <!-- Glow center -->
+                        <circle cx="32" cy="32" r="24" fill="url(#burstGlow)" opacity="0.4" />
+                        <!-- Star burst rays -->
+                        <path d="M32 8 L34 28 L32 32 L30 28 Z" fill="url(#celebrationGrad)" opacity="0.8" />
+                        <path d="M56 32 L36 34 L32 32 L36 30 Z" fill="url(#celebrationGrad)" opacity="0.8" />
+                        <path d="M32 56 L30 36 L32 32 L34 36 Z" fill="url(#celebrationGrad)" opacity="0.8" />
+                        <path d="M8 32 L28 30 L32 32 L28 34 Z" fill="url(#celebrationGrad)" opacity="0.8" />
+                        <!-- Diagonal rays -->
+                        <path d="M48 16 L36 28 L32 32 L34 26 Z" fill="#10b981" opacity="0.6" transform="rotate(45 32 32)" />
+                        <path d="M48 48 L36 36 L32 32 L34 38 Z" fill="#fbbf24" opacity="0.6" transform="rotate(45 32 32)" />
+                        <!-- Sparkles -->
+                        <circle cx="44" cy="20" r="2" fill="#fbbf24" opacity="0.9" />
+                        <circle cx="20" cy="44" r="2" fill="#8b5cf6" opacity="0.9" />
+                        <circle cx="50" cy="50" r="2" fill="#10b981" opacity="0.9" />
+                        <path d="M14 14 L15 16 L17 17 L15 18 L14 20 L13 18 L11 17 L13 16 Z" fill="#fbbf24" opacity="0.8" />
+                    </svg>
+                </div>
+                <h2><svg width="28" height="28" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 6px; filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.7));">
+                        <defs>
+                            <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ec4899" />
+                                <stop offset="100%" style="stop-color:#8b5cf6" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M16 28 C16 28 4 18 4 11 C4 6 7 4 10 4 C12 4 14 5 16 8 C18 5 20 4 22 4 C25 4 28 6 28 11 C28 18 16 28 16 28 Z" fill="url(#heartGrad)" opacity="0.9" />
+                    </svg> Thank You, Changemaker!</h2>
+                <p>Your generosity is powering free education, cultural preservation, and civic empowerment worldwide. You're part of something bigger.</p>
+                <p style="margin-top: 1.5rem; font-weight: 600;"><svg width="20" height="20" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                        <rect x="2" y="6" width="20" height="14" rx="2" fill="none" stroke="#10b981" stroke-width="2" />
+                        <path d="M2 8 L12 14 L22 8" fill="none" stroke="#fbbf24" stroke-width="2" />
+                    </svg> Check your email for your tax receipt</p>
+                <p style="margin-top: 1rem;"><a href="/" style="color: #8b5cf6; text-decoration: none; font-weight: 600;">← Return to homepage</a></p>
             </div>
         </div>
     </main>
 
     <footer>
         <div class="container">
-            <p>© 2025 GFV LLC • <a href="/">Good Flippin Design</a></p>
+            <p><svg width="16" height="16" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                    <defs>
+                        <linearGradient id="footerHeartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ec4899" />
+                            <stop offset="100%" style="stop-color:#8b5cf6" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M16 28 C16 28 4 18 4 11 C4 6 7 4 10 4 C12 4 14 5 16 8 C18 5 20 4 22 4 C25 4 28 6 28 11 C28 18 16 28 16 28 Z" fill="url(#footerHeartGrad)" opacity="0.8" />
+                </svg> Made with purpose by <a href="/" style="color: #8b5cf6;">Good Flippin Design</a> • GFV LLC © 2026</p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">501(c)(3) pending • Donations power free resources for all • <a href="/privacy" style="color: var(--text-muted);">Privacy</a></p>
         </div>
     </footer>
 
@@ -465,12 +763,12 @@
 
                 document.getElementById('payment-element').classList.add('active');
                 continueBtn.disabled = false;
-                continueBtn.textContent = 'Continue to Payment';
+                continueBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 6px;"><rect x="6" y="10" width="12" height="10" rx="2" fill="#10b981" opacity="0.8"/><path d="M8 10 V7 C8 4.8 9.8 3 12 3 C14.2 3 16 4.8 16 7 V10" fill="none" stroke="#fbbf24" stroke-width="2"/></svg> Continue to Secure Payment →';
             } catch (error) {
                 console.error(error);
                 alert('Unable to initialize payment. Please try again.');
                 continueBtn.disabled = false;
-                continueBtn.textContent = 'Continue to Payment';
+                continueBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 6px;"><rect x="6" y="10" width="12" height="10" rx="2" fill="#10b981" opacity="0.8"/><path d="M8 10 V7 C8 4.8 9.8 3 12 3 C14.2 3 16 4.8 16 7 V10" fill="none" stroke="#fbbf24" stroke-width="2"/></svg> Continue to Secure Payment →';
             }
         });
 
@@ -492,7 +790,7 @@
             if (error) {
                 alert(error.message || 'Payment failed. Please try again.');
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Donate Now';
+                submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 32 32" style="display: inline-block; vertical-align: middle; margin-right: 6px;"><defs><linearGradient id="btnHeartGrad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ec4899"/><stop offset="100%" style="stop-color:#8b5cf6"/></linearGradient></defs><path d="M16 28 C16 28 4 18 4 11 C4 6 7 4 10 4 C12 4 14 5 16 8 C18 5 20 4 22 4 C25 4 28 6 28 11 C28 18 16 28 16 28 Z" fill="url(#btnHeartGrad2)"/></svg> Complete Your Donation';
             }
         });
     </script>

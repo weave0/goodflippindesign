@@ -4,6 +4,13 @@ node_modules/
 .env
 .DS_Store
 
+# Security - NEVER commit these!
+*_SECURE_KEYS/
+**/_SECURE_KEYS/
+
+# Development projects (too large for main repo)
+GFD Dev Projects/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -11,6 +18,16 @@ __pycache__/
 .venv/
 .venv-*/
 .mypy_cache/
+
+# Large analysis files
+PORTFOLIO_ANALYSIS.json
+*.json.bak
+
+# Large image files
+assets/portfolio/*-hero.png
+Brand Assets Development/**/*.png
+!Brand Assets Development/**/favicon*.png
+!Brand Assets Development/**/apple-touch-icon.png
 
 # Brand Assets (large files - use Git LFS if needed)
 Brand Assets Development/Final Assets/**/*.png
