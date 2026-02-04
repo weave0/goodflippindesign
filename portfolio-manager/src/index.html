@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Manager - Good Flippin Design</title>
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --bg-elevated: #151515;
+            --bg-card: #1a1a1a;
+            --text: #f5f5f5;
+            --text-secondary: #999;
+            --text-muted: #666;
+            --accent: #8b5cf6;
+            --accent-hover: #7c3aed;
+            --border: rgba(255, 255, 255, 0.06);
+            --success: #10b981;
+            --warning: #fbbf24;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        .app {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-elevated);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(139, 92, 246, 0.2);
+            border-left: 3px solid var(--accent);
+            padding-left: calc(1.5rem - 3px);
+        }
+
+        .nav-icon {
+            font-size: 1.25rem;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-elevated);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        /* Project Grid */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .project-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .project-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            font-size: 0.875rem;
+        }
+
+        .stat {
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .tech-tag {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--accent);
+            padding: 0.25rem 0.625rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 0.25rem 0.625rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-badge.warning {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--warning);
+        }
+
+        .status-badge.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        /* View sections */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Charts container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading" id="loading">
+        Loading portfolio data...
+    </div>
+
+    <div class="app" id="app" style="display: none;">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">Portfolio Manager</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Good Flippin Design
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-view="overview">
+                    <span class="nav-icon">📊</span>
+                    <span>Overview</span>
+                </div>
+                <div class="nav-item" data-view="projects">
+                    <span class="nav-icon">📁</span>
+                    <span>Projects</span>
+                </div>
+                <div class="nav-item" data-view="storage">
+                    <span class="nav-icon">💾</span>
+                    <span>Storage Analysis</span>
+                </div>
+                <div class="nav-item" data-view="duplicates">
+                    <span class="nav-icon">🔄</span>
+                    <span>Duplicates</span>
+                </div>
+                <div class="nav-item" data-view="technologies">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Technologies</span>
+                </div>
+                <div class="nav-item" data-view="tests">
+                    <span class="nav-icon">✅</span>
+                    <span>Test Coverage</span>
+                </div>
+            </nav>
+        </div>
+
+        <div class="main">
+            <div class="header">
+                <h1 id="page-title">Portfolio Overview</h1>
+                <div class="header-stats">
+                    <div><strong id="total-projects">0</strong> projects</div>
+                    <div><strong id="total-files">0</strong> files</div>
+                    <div><strong id="total-size">0</strong> MB</div>
+                    <div><strong id="total-lines">0</strong> lines</div>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- Overview View -->
+                <div class="view active" id="view-overview">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Quick Stats</div>
+                        </div>
+                        <div id="overview-content"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Storage Breakdown</div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="storage-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects View -->
+                <div class="view" id="view-projects">
+                    <div class="project-grid" id="projects-grid"></div>
+                </div>
+
+                <!-- Storage View -->
+                <div class="view" id="view-storage">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Storage Analysis</div>
+                        </div>
+                        <div id="storage-content"></div>
+                    </div>
+                </div>
+
+                <!-- Duplicates View -->
+                <div class="view" id="view-duplicates">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Duplicate Files</div>
+                            <button class="btn btn-primary" onclick="cleanupDuplicates()">
+                                Clean Up
+                            </button>
+                        </div>
+                        <div id="duplicates-content"></div>
+                    </div>
+                </div>
+
+                <!-- Technologies View -->
+                <div class="view" id="view-technologies">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Technology Stack</div>
+                        </div>
+                        <div id="tech-content"></div>
+                    </div>
+                </div>
+
+                <!-- Tests View -->
+                <div class="view" id="view-tests">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Test Coverage</div>
+                        </div>
+                        <div id="tests-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+
+</html>
