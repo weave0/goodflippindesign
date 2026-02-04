@@ -1,0 +1,54 @@
+# robots.txt for Good Flippin Design
+# Updated: February 3, 2026
+
+# Allow all search engines
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://goodflippindesign.com/sitemap.xml
+
+# Block test files and development artifacts
+Disallow: /temp_review.html
+Disallow: /test-*.html
+Disallow: /test-*.js
+Disallow: /debug-*.js
+Disallow: /ga-test-*.html
+Disallow: /_headers
+Disallow: /.git/
+Disallow: /.github/
+Disallow: /node_modules/
+
+# Block sensitive directories (if they somehow end up on production)
+Disallow: /secrets/
+Disallow: /.env
+Disallow: /.venv/
+
+# Allow critical assets
+Allow: /assets/
+Allow: /shared/
+Allow: /favicon.ico
+Allow: /sitemap.xml
+Allow: /robots.txt
+
+# Block duplicate HTML file
+Disallow: /main.html
+
+# Specific bot instructions
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Block AI scrapers if desired (optional - uncomment if needed)
+# User-agent: GPTBot
+# Disallow: /
+# User-agent: ChatGPT-User
+# Disallow: /
+# User-agent: anthropic-ai
+# Disallow: /
+
+# Crawl delay for aggressive bots
+User-agent: *
+Crawl-delay: 1

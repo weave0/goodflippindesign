@@ -226,11 +226,31 @@
   },
   "files.exclude": {
     "node_modules": true,
-    ".wrangler": true
+    ".wrangler": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/desktop.ini": true
   },
   "search.exclude": {
     "node_modules": true,
-    ".wrangler": true
+    ".wrangler": true,
+    "**/package-lock.json": true,
+    "**/.venv": true,
+    "**/assets/portfolio/**": true,
+    "**/assets/backgrounds/**": true
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.venv/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.pytest_cache/**": true,
+    "**/__pycache__/**": true,
+    "**/assets/portfolio/**": true,
+    "**/assets/backgrounds/**": true
   },
   "html.format.wrapLineLength": 0,
   "html.format.wrapAttributes": "preserve",

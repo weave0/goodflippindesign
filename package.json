@@ -4,11 +4,12 @@
   "description": "Strategic web development portfolio for GFV LLC",
   "scripts": {
     "dev": "npx http-server . -p 3000 -o",
+    "sync": "node scripts/sync-review.js",
+    "test:quick": "npm run sync && node tests/accessibility.test.js",
     "test": "node tests/run-all-tests.js",
     "test:watch": "nodemon --watch index.html --watch temp_review.html --watch tests/ --exec npm test",
     "test:a11y": "node tests/accessibility.test.js",
     "test:responsive": "node tests/responsive.test.js",
-    "sync": "node scripts/sync-review.js",
     "cache-bust": "node scripts/update-cache-bust.js",
     "build": "npm run cache-bust && npm run sync",
     "pretest": "npm run sync",
@@ -31,11 +32,12 @@
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
-    "puppeteer": "^24.32.0",
+    "html-validate": "^8.18.0",
     "http-server": "^14.1.1",
-    "nodemon": "^3.0.2",
     "husky": "^9.0.0",
+    "nodemon": "^3.0.2",
     "prettier": "^3.2.0",
-    "html-validate": "^8.18.0"
+    "puppeteer": "^24.32.0",
+    "sharp": "^0.34.5"
   }
 }
