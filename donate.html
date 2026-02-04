@@ -425,6 +425,7 @@
 
         // Continue to payment
         document.getElementById('continue-btn').addEventListener('click', async () => {
+            // Check amount BEFORE disabling button
             if (selectedAmount < 1) {
                 alert('Please select a donation amount');
                 return;
@@ -463,6 +464,7 @@
                 paymentElement.mount('#stripe-payment-element');
 
                 document.getElementById('payment-element').classList.add('active');
+                continueBtn.disabled = false;
                 continueBtn.textContent = 'Continue to Payment';
             } catch (error) {
                 console.error(error);
