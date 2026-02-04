@@ -157,7 +157,7 @@ async function runStructureTests() {
         // ============================================
         try {
             const navStructure = await page.evaluate(() => {
-                const nav = document.querySelector('nav');
+                const nav = document.querySelector('nav.main-nav');
                 if (!nav) return null;
                 
                 const links = Array.from(nav.querySelectorAll('a'));
