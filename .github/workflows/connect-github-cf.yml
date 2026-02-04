@@ -19,7 +19,31 @@ jobs:
                   CF_PROJECT_NAME: goodflippindesign
                   GITHUB_REPO: weave0/goodflippindesign
               run: |
-                  echo "🗑️  Step 1: Deleting existing Direct Upload project..."
+                  echo "🗑️  Step 1: Removing custom domains from project..."
+                  echo ""
+                  
+                  # Get all custom domains
+                  DOMAINS_RESPONSE=$(curl -s -X GET \
+                    "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/domains" \
+                    -H "Authorization: Bearer $CF_API_TOKEN")
+                  
+                  # Delete each custom domain
+                  echo "$DOMAINS_RESPONSE" | jq -r '.result[].name' | while read domain; do
+                    if [ ! -z "$domain" ]; then
+                      echo "🗑️  Removing domain: $domain"
+                      curl -s -X DELETE \
+                        "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/domains/$domain" \
+                        -H "Authorization: Bearer $CF_API_TOKEN" > /dev/null
+                      echo "✅ Removed: $domain"
+                    fi
+                  done
+                  
+                  echo ""
+                  echo "⏳ Waiting 3 seconds..."
+                  sleep 3
+                  echo ""
+                  
+                  echo "🗑️  Step 2: Deleting existing Direct Upload project..."
                   echo "   Project: $CF_PROJECT_NAME"
                   echo ""
                   
@@ -40,7 +64,7 @@ jobs:
                   sleep 5
                   echo ""
                   
-                  echo "🔗 Step 2: Creating new project with GitHub integration..."
+                  echo "🔗 Step 3: Creating new project with GitHub integration..."
                   echo "   Repository: $GITHUB_REPO"
                   echo "   Production branch: main"
                   echo ""
@@ -90,8 +114,28 @@ jobs:
                     echo "   Build command: npm run build"
                     echo "   Output directory: ."
                     echo ""
-                    echo "🚀 Deployment will trigger automatically from GitHub!"
-                    echo "🌐 Monitor at: https://dash.cloudflare.com/$CF_ACCOUNT_ID/pages/view/$CF_PROJECT_NAME"
+                    echo "🚀 First deployment will trigger automatically from GitHub!"
+                    echo ""
+                    
+                    # Re-add custom domain
+                    echo "🌐 Step 4: Re-adding custom domain..."
+                    DOMAIN_RESPONSE=$(curl -s -X POST \
+                      "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/domains" \
+                      -H "Authorization: Bearer $CF_API_TOKEN" \
+                      -H "Content-Type: application/json" \
+                      -d '{
+                        "name": "www.goodflippindesign.com"
+                      }')
+                    
+                    if [ "$(echo $DOMAIN_RESPONSE | jq -r '.success')" = "true" ]; then
+                      echo "✅ Custom domain re-added: www.goodflippindesign.com"
+                    else
+                      echo "⚠️  Domain re-add response:"
+                      echo "$DOMAIN_RESPONSE" | jq '.'
+                    fi
+                    
+                    echo ""
+                    echo "🌐 Monitor deployment at: https://dash.cloudflare.com/$CF_ACCOUNT_ID/pages/view/$CF_PROJECT_NAME"
                   else
                     echo ""
                     echo "❌ Failed to create project with GitHub integration"
