@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-QPPVJM1B60"></script>
@@ -58,13 +59,27 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         @keyframes glow-pulse {
-            0%, 100% { filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.6)); }
-            50% { filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.9)); }
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.6));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.9));
+            }
         }
 
         h1 {
@@ -144,48 +159,110 @@
             color: #10b981;
             margin: 0;
         }
+
+        .social-share {
+            margin: 2rem 0 1rem;
+            text-align: center;
+        }
+
+        .social-share-heading {
+            font-size: 0.875rem;
+            color: #8a8a8a;
+            margin-bottom: 1rem;
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .social-btn-twitter {
+            background: #1DA1F2;
+            color: white;
+        }
+
+        .social-btn-twitter:hover {
+            box-shadow: 0 4px 20px rgba(29, 161, 242, 0.4);
+        }
+
+        .social-btn-linkedin {
+            background: #0077B5;
+            color: white;
+        }
+
+        .social-btn-linkedin:hover {
+            box-shadow: 0 4px 20px rgba(0, 119, 181, 0.4);
+        }
+
+        .social-btn-facebook {
+            background: #1877F2;
+            color: white;
+        }
+
+        .social-btn-facebook:hover {
+            box-shadow: 0 4px 20px rgba(24, 119, 242, 0.4);
+        }
     </style>
 </head>
+
 <body>
     <div class="success-container">
         <div class="success-icon">
             <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="100" cy="100" r="30" fill="url(#successGradient)" opacity="0.9"/>
+                <circle cx="100" cy="100" r="30" fill="url(#successGradient)" opacity="0.9" />
                 <path d="M100 100 L100 20" stroke="url(#beamGradient1)" stroke-width="4" stroke-linecap="round" opacity="0.8">
-                    <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite" />
                 </path>
                 <path d="M100 100 L170 40" stroke="url(#beamGradient2)" stroke-width="3" stroke-linecap="round" opacity="0.7">
-                    <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite" />
                 </path>
                 <path d="M100 100 L180 100" stroke="url(#beamGradient3)" stroke-width="4" stroke-linecap="round" opacity="0.8">
-                    <animate attributeName="opacity" values="0.8;1;0.8" dur="1.6s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.8;1;0.8" dur="1.6s" repeatCount="indefinite" />
                 </path>
                 <path d="M100 100 L170 160" stroke="url(#beamGradient1)" stroke-width="3" stroke-linecap="round" opacity="0.7">
-                    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" />
                 </path>
                 <path d="M100 100 L100 180" stroke="url(#beamGradient2)" stroke-width="4" stroke-linecap="round" opacity="0.8">
-                    <animate attributeName="opacity" values="0.8;1;0.8" dur="1.7s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.8;1;0.8" dur="1.7s" repeatCount="indefinite" />
                 </path>
                 <path d="M100 100 L30 160" stroke="url(#beamGradient3)" stroke-width="3" stroke-linecap="round" opacity="0.7">
-                    <animate attributeName="opacity" values="0.7;1;0.7" dur="1.9s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.7;1;0.7" dur="1.9s" repeatCount="indefinite" />
                 </path>
                 <path d="M100 100 L20 100" stroke="url(#beamGradient1)" stroke-width="4" stroke-linecap="round" opacity="0.8">
-                    <animate attributeName="opacity" values="0.8;1;0.8" dur="1.4s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.8;1;0.8" dur="1.4s" repeatCount="indefinite" />
                 </path>
                 <path d="M100 100 L30 40" stroke="url(#beamGradient2)" stroke-width="3" stroke-linecap="round" opacity="0.7">
-                    <animate attributeName="opacity" values="0.7;1;0.7" dur="2.1s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.7;1;0.7" dur="2.1s" repeatCount="indefinite" />
                 </path>
                 <circle cx="100" cy="50" r="4" fill="#10b981" opacity="0.9">
-                    <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="4s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="4s" repeatCount="indefinite" />
                 </circle>
                 <circle cx="150" cy="80" r="3" fill="#8b5cf6" opacity="0.8">
-                    <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="5s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="5s" repeatCount="indefinite" />
                 </circle>
                 <circle cx="140" cy="140" r="4" fill="#fbbf24" opacity="0.9">
-                    <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="3.5s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="3.5s" repeatCount="indefinite" />
                 </circle>
                 <circle cx="60" cy="120" r="3" fill="#10b981" opacity="0.8">
-                    <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="4.5s" repeatCount="indefinite"/>
+                    <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="4.5s" repeatCount="indefinite" />
                 </circle>
                 <defs>
                     <radialGradient id="successGradient" cx="50%" cy="50%">
@@ -209,9 +286,18 @@
             </svg>
         </div>
 
-        <h1>Welcome to the Movement!</h1>
+        <h1 id="thankYouHeading">Welcome to the Movement!</h1>
+
+        <p id="impactMessage">Your contribution just powered free AI education for thousands. Your vision shapes our roadmap. Together, we're building the future.</p>
         
-        <p>Your contribution just powered free AI education for thousands. Your vision shapes our roadmap. Together, we're building the future.</p>
+        <div id="donationDetails" style="display: none; margin: 2rem 0; padding: 1.5rem; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px;">
+            <div style="font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #8b5cf6 0%, #10b981 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem;">
+                $<span id="donationAmount">25</span>
+            </div>
+            <div style="color: #8a8a8a; font-size: 0.875rem;">
+                <span id="donationType">One-time</span> contribution
+            </div>
+        </div>
 
         <div class="impact-stats">
             <div class="stat">
@@ -232,7 +318,109 @@
             <p>✅ Confirmation email sent to your inbox (check spam if not visible within 2 minutes)</p>
         </div>
 
+        <div class="social-share">
+            <div class="social-share-heading">📢 Spread the word about free AI education</div>
+            <div class="social-buttons">
+                <a href="#" id="twitterShare" class="social-btn social-btn-twitter" target="_blank" rel="noopener">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    Share
+                </a>
+                <a href="#" id="linkedinShare" class="social-btn social-btn-linkedin" target="_blank" rel="noopener"> 
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"/></svg>
+                    Share
+                </a>
+                <a href="#" id="facebookShare" class="social-btn social-btn-facebook" target="_blank" rel="noopener">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    Share
+                </a>
+            </div>
+        </div>
+
         <a href="../index.html" class="btn-primary">Return Home</a>
     </div>
+
+    <script>
+        // Fetch actual donation details from Stripe
+        (async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id');
+            
+            if (!sessionId) {
+                console.warn('No session_id found in URL');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/get-session?session_id=${sessionId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch session: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Update donation details
+                if (data.amount) {
+                    document.getElementById('donationAmount').textContent = data.amount.toFixed(0);
+                    document.getElementById('donationType').textContent = 
+                        data.mode === 'subscription' ? 'Monthly recurring' : 'One-time';
+                    document.getElementById('donationDetails').style.display = 'block';
+                    
+                    // Update GA with actual amount
+                    if (window.gtag) {
+                        gtag('event', 'purchase', {
+                            event_category: 'ecommerce',
+                            transaction_id: sessionId,
+                            currency: data.currency,
+                            value: data.amount
+                        });
+                    }
+                }
+
+                // Personalize heading if we have customer name
+                if (data.customerName) {
+                    document.getElementById('thankYouHeading').textContent = 
+                        `Thank You, ${data.customerName.split(' ')[0]}!`;
+                }
+
+                // Update impact message based on amount
+                const amount = data.amount;
+                let impactMsg = '';
+                if (amount >= 100) {
+                    impactMsg = 'Your incredible generosity just funded AI education for 200+ students this month. You\'re powering real change.';
+                } else if (amount >= 50) {
+                    impactMsg = 'Your support just funded AI education for 100+ students. Together, we\'re democratizing AI knowledge.';
+                } else if (amount >= 25) {
+                    impactMsg = 'Your contribution just powered free AI education for 50+ students. Your vision shapes our roadmap.';
+                } else {
+                    impactMsg = 'Your support just enabled AI education for 20+ students. Every contribution makes a real difference.';
+                }
+                
+                if (data.mode === 'subscription') {
+                    impactMsg += ' As a monthly supporter, you\'re sustaining our mission long-term. Thank you!';
+                }
+                
+                document.getElementById('impactMessage').textContent = impactMsg;
+
+                // Update social share links
+                const shareText = data.mode === 'subscription' 
+                    ? `I just became a monthly supporter of free AI education! Join me in making AI accessible to everyone. 🚀`
+                    : `I just supported free AI education for thousands of students! Help democratize AI knowledge. 🌍`;
+                const shareUrl = 'https://www.goodflippindesign.com/donate';
+
+                document.getElementById('twitterShare').href = 
+                    `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+                document.getElementById('linkedinShare').href = 
+                    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+                document.getElementById('facebookShare').href = 
+                    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+
+            } catch (error) {
+                console.error('Failed to fetch session details:', error);
+                // Page still works with default content
+            }
+        })();
+    </script>
 </body>
+
 </html>
