@@ -216,6 +216,59 @@
             opacity: 0.9;
         }
 
+        .nav-donate-cta {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 0.625rem 1.25rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+            margin-left: 0.75rem;
+        }
+
+        .nav-donate-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Floating Donate Button */
+        .floating-donate {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 999;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .floating-donate:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 24px rgba(239, 68, 68, 0.5);
+        }
+
+        .floating-donate .heart-icon {
+            font-size: 1.125rem;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
         /* Hero */
         .hero {
             min-height: 100vh;
@@ -1514,12 +1567,20 @@
                 display: none;
             }
 
-            .nav-cta {
+            .nav-cta,
+            .nav-donate-cta {
                 display: none;
             }
 
             .mobile-menu-toggle {
                 display: flex;
+            }
+
+            .floating-donate {
+                bottom: 1.25rem;
+                right: 1.25rem;
+                padding: 0.75rem 1.25rem;
+                font-size: 0.875rem;
             }
 
             .contact-content {
@@ -2029,8 +2090,8 @@
                 <li><a href="#work">Work</a></li>
                 <li><a href="#process">Process</a></li>
                 <li><a href="#legal-forms">Legal Forms</a></li>
-                <li><a href="donate.html">Donate</a></li>
             </ul>
+            <a href="donate.html" class="nav-donate-cta">❤️ Donate</a>
             <a href="#contact" class="nav-cta">Get in Touch</a>
             <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
                 <span class="hamburger-line"></span>
@@ -2975,6 +3036,12 @@
 
         })();
     </script>
+
+    <!-- Floating Donate Button -->
+    <a href="donate.html" class="floating-donate" aria-label="Support our mission">
+        <span class="heart-icon">❤️</span>
+        <span>Support Our Work</span>
+    </a>
 
     <!-- GFD Ecosystem Navigation JavaScript -->
     <script src="shared/ecosystem-nav.js"></script>
