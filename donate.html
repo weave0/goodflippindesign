@@ -1061,6 +1061,15 @@
                 this.classList.add('active');
                 selectedAmount = parseInt(this.dataset.amount);
                 document.getElementById('customAmount').value = '';
+                
+                // Track amount selection
+                if (window.gtag) {
+                    gtag('event', 'donation_amount_selected', {
+                        event_category: 'donation',
+                        event_label: `$${selectedAmount}`,
+                        value: selectedAmount
+                    });
+                }
             });
         });
 
@@ -1069,6 +1078,15 @@
             if (this.value) {
                 document.querySelectorAll('.donation-amount').forEach(b => b.classList.remove('active'));
                 selectedAmount = parseInt(this.value) || 0;
+                
+                // Track custom amount on blur (when user finishes typing)
+                if (selectedAmount >= 5 && window.gtag) {
+                    gtag('event', 'donation_custom_amount', {
+                        event_category: 'donation',
+                        event_label: `Custom $${selectedAmount}`,
+                        value: selectedAmount
+                    });
+                }
             }
         });
 
@@ -1076,7 +1094,32 @@
         document.getElementById('donateBtn').addEventListener('click', async function () {
             if (selectedAmount < 5) {
                 alert('Minimum donation is $5. Every bit helps!');
+                
+                // Track insufficient amount attempt
+                if (window.gtag) {
+                    gtag('event', 'donation_insufficient_amount', {
+                        event_category: 'donation',
+                        event_label: `Attempted $${selectedAmount}`,
+                        value: selectedAmount
+                    });
+                }
                 return;
+            }
+
+            // Track checkout initiation
+            if (window.gtag) {
+                gtag('event', 'begin_checkout', {
+                    event_category: 'ecommerce',
+                    event_label: donationType,
+                    value: selectedAmount,
+                    currency: 'USD',
+                    items: [{
+                        item_name: `${donationType} donation`,
+                        item_category: 'donation',
+                        price: selectedAmount,
+                        quantity: 1
+                    }]
+                });
             }
 
             // TODO: Integrate actual Stripe payment flow
@@ -1086,16 +1129,50 @@
             // Simulate payment success
             setTimeout(() => {
                 document.getElementById('successOverlay').classList.add('active');
+                
+                // Track conversion (simulated - move to actual success callback)
+                if (window.gtag) {
+                    gtag('event', 'purchase', {
+                        event_category: 'ecommerce',
+                        transaction_id: 'DEMO_' + Date.now(),
+                        value: selectedAmount,
+                        currency: 'USD',
+                        items: [{
+                            item_name: `${donationType} donation`,
+                            item_category: 'donation',
+                            price: selectedAmount,
+                            quantity: 1
+                        }]
+                    });
+                }
             }, 1000);
         });
 
         // Vision form submission (Formspree handles this)
         document.getElementById('visionForm').addEventListener('submit', function (e) {
+            // Track vision form submission
+            if (window.gtag) {
+                gtag('event', 'generate_lead', {
+                    event_category: 'engagement',
+                    event_label: 'Vision Form Submission',
+                    value: 0
+                });
+            }
+            
             // Formspree will handle the submission
             // Show a quick success message
             setTimeout(() => {
                 alert('🌟 Thank you for sharing your vision! We read every submission and will be in touch.');
                 this.reset();
+                
+                // Track form completion
+                if (window.gtag) {
+                    gtag('event', 'form_submit_success', {
+                        event_category: 'engagement',
+                        event_label: 'Vision Form',
+                        value: 1
+                    });
+                }
             }, 500);
         });
     </script>

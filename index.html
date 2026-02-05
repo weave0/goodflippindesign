@@ -265,8 +265,15 @@
         }
 
         @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
         }
 
         /* Hero */
@@ -2091,7 +2098,7 @@
                 <li><a href="#process">Process</a></li>
                 <li><a href="#legal-forms">Legal Forms</a></li>
             </ul>
-            <a href="donate.html" class="nav-donate-cta">❤️ Donate</a>
+            <a href="donate.html" class="nav-donate-cta" onclick="if(window.gtag){gtag('event','donate_click',{event_category:'donation',event_label:'Nav CTA Button',entry_point:'desktop_nav'})}">❤️ Donate</a>
             <a href="#contact" class="nav-cta">Get in Touch</a>
             <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
                 <span class="hamburger-line"></span>
@@ -2115,7 +2122,7 @@
                 <a href="#work" class="mobile-nav-link">Work</a>
                 <a href="#process" class="mobile-nav-link">Process</a>
                 <a href="#legal-forms" class="mobile-nav-link">Legal Forms</a>
-                <a href="donate.html" class="mobile-nav-link">Donate</a>
+                <a href="donate.html" class="mobile-nav-link" onclick="if(window.gtag){gtag('event','donate_click',{event_category:'donation',event_label:'Mobile Nav Link',entry_point:'mobile_nav'})}">Donate</a>
                 <a href="#contact" class="mobile-nav-link mobile-nav-cta">Get in Touch</a>
             </nav>
         </div>
@@ -3038,7 +3045,7 @@
     </script>
 
     <!-- Floating Donate Button -->
-    <a href="donate.html" class="floating-donate" aria-label="Support our mission">
+    <a href="donate.html" class="floating-donate" aria-label="Support our mission" onclick="if(window.gtag){gtag('event','donate_click',{event_category:'donation',event_label:'Floating Sticky Button',entry_point:'floating_button'})}">
         <span class="heart-icon">❤️</span>
         <span>Support Our Work</span>
     </a>
