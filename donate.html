@@ -786,8 +786,15 @@
         }
 
         @keyframes glow-pulse {
-            0%, 100% { filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.6)); }
-            50% { filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.9)); }
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.6));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.9));
+            }
         }
 
         .success-content h2 {
@@ -1040,44 +1047,44 @@
             <div class="success-icon">
                 <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <!-- Central burst -->
-                    <circle cx="100" cy="100" r="30" fill="url(#successGradient)" opacity="0.9"/>
+                    <circle cx="100" cy="100" r="30" fill="url(#successGradient)" opacity="0.9" />
                     <!-- Radiating energy beams -->
                     <path d="M100 100 L100 20" stroke="url(#beamGradient1)" stroke-width="4" stroke-linecap="round" opacity="0.8">
-                        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite" />
                     </path>
                     <path d="M100 100 L170 40" stroke="url(#beamGradient2)" stroke-width="3" stroke-linecap="round" opacity="0.7">
-                        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite" />
                     </path>
                     <path d="M100 100 L180 100" stroke="url(#beamGradient3)" stroke-width="4" stroke-linecap="round" opacity="0.8">
-                        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.6s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.6s" repeatCount="indefinite" />
                     </path>
                     <path d="M100 100 L170 160" stroke="url(#beamGradient1)" stroke-width="3" stroke-linecap="round" opacity="0.7">
-                        <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" />
                     </path>
                     <path d="M100 100 L100 180" stroke="url(#beamGradient2)" stroke-width="4" stroke-linecap="round" opacity="0.8">
-                        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.7s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.7s" repeatCount="indefinite" />
                     </path>
                     <path d="M100 100 L30 160" stroke="url(#beamGradient3)" stroke-width="3" stroke-linecap="round" opacity="0.7">
-                        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.9s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.9s" repeatCount="indefinite" />
                     </path>
                     <path d="M100 100 L20 100" stroke="url(#beamGradient1)" stroke-width="4" stroke-linecap="round" opacity="0.8">
-                        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.4s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.4s" repeatCount="indefinite" />
                     </path>
                     <path d="M100 100 L30 40" stroke="url(#beamGradient2)" stroke-width="3" stroke-linecap="round" opacity="0.7">
-                        <animate attributeName="opacity" values="0.7;1;0.7" dur="2.1s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.7;1;0.7" dur="2.1s" repeatCount="indefinite" />
                     </path>
                     <!-- Orbiting particles -->
                     <circle cx="100" cy="50" r="4" fill="#10b981" opacity="0.9">
-                        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="4s" repeatCount="indefinite"/>
+                        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="4s" repeatCount="indefinite" />
                     </circle>
                     <circle cx="150" cy="80" r="3" fill="#8b5cf6" opacity="0.8">
-                        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="5s" repeatCount="indefinite"/>
+                        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="5s" repeatCount="indefinite" />
                     </circle>
                     <circle cx="140" cy="140" r="4" fill="#fbbf24" opacity="0.9">
-                        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="3.5s" repeatCount="indefinite"/>
+                        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="3.5s" repeatCount="indefinite" />
                     </circle>
                     <circle cx="60" cy="120" r="3" fill="#10b981" opacity="0.8">
-                        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="4.5s" repeatCount="indefinite"/>
+                        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="4.5s" repeatCount="indefinite" />
                     </circle>
                     <!-- Gradient definitions -->
                     <defs>
@@ -1191,48 +1198,43 @@
                 });
             }
 
-            // CRITICAL: Real Stripe Checkout integration
-            // Using Stripe Payment Links for immediate functionality
-            
-            // Payment Link mapping (create these in Stripe Dashboard → Payment Links)
-            // These are placeholder URLs - replace with your actual Payment Links
-            const paymentLinks = {
-                'one-time': {
-                    10: 'https://donate.stripe.com/REPLACE_WITH_10_LINK',
-                    25: 'https://donate.stripe.com/REPLACE_WITH_25_LINK',
-                    50: 'https://donate.stripe.com/REPLACE_WITH_50_LINK',
-                    100: 'https://donate.stripe.com/REPLACE_WITH_100_LINK',
-                    custom: 'https://donate.stripe.com/REPLACE_WITH_CUSTOM_LINK'
-                },
-                'recurring': {
-                    10: 'https://donate.stripe.com/REPLACE_WITH_10_MONTHLY_LINK',
-                    25: 'https://donate.stripe.com/REPLACE_WITH_25_MONTHLY_LINK',
-                    50: 'https://donate.stripe.com/REPLACE_WITH_50_MONTHLY_LINK',
-                    100: 'https://donate.stripe.com/REPLACE_WITH_100_MONTHLY_LINK',
-                    custom: 'https://donate.stripe.com/REPLACE_WITH_CUSTOM_MONTHLY_LINK'
+            // CRITICAL: Real Stripe Checkout integration via Cloudflare Function
+            // Zero manual configuration - fully automated
+
+            this.disabled = true;
+            this.textContent = 'Creating checkout...';
+
+            try {
+                // Call Cloudflare Function to create Stripe Checkout Session
+                const response = await fetch('/create-checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: selectedAmount,
+                        type: donationType
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to create checkout session');
                 }
-            };
 
-            // Find matching payment link or use custom
-            let paymentUrl;
-            if (paymentLinks[donationType][selectedAmount]) {
-                paymentUrl = paymentLinks[donationType][selectedAmount];
-            } else {
-                paymentUrl = paymentLinks[donationType]['custom'];
+                // Redirect to Stripe Checkout
+                console.log(`Redirecting to Stripe Checkout: $${selectedAmount} (${donationType})`);
+                window.location.href = data.url;
+
+            } catch (error) {
+                console.error('Checkout error:', error);
+                alert(`Error: ${error.message}\n\nPlease try again or contact getsome@goodflippindesign.com`);
+                this.disabled = false;
+                this.textContent = 'Power The Mission ⚡';
             }
 
-            // TEMPORARY: Show alert until Payment Links are configured
-            if (paymentUrl.includes('REPLACE_WITH')) {
-                alert(`⚠️ CONFIGURATION REQUIRED\n\nStripe Payment Links not yet configured.\n\nTo fix:\n1. Go to Stripe Dashboard → Payment Links\n2. Create links for $10, $25, $50, $100 (one-time + monthly)\n3. Replace URLs in donate.html (search: REPLACE_WITH)\n\nAmount: $${selectedAmount}\nType: ${donationType}\n\nSee MANUAL_CONFIGURATION_STEPS.md for instructions.`);
-                return;
-            }
-
-            // Redirect to Stripe Checkout
-            console.log(`Redirecting to Stripe Checkout: $${selectedAmount} (${donationType})`);
-            window.location.href = paymentUrl;
-            
-            // Note: Success tracking will happen on return from Stripe (via success_url parameter)
-            // Configure success_url in Payment Link to: https://goodflippindesign.com/donate/success?session_id={CHECKOUT_SESSION_ID}
+            // Note: Success tracking happens on return from Stripe (via success_url parameter)
         });
 
         // Vision form submission (Formspree handles this)
