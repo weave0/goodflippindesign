@@ -1,19 +1,35 @@
 /**
  * Cloudflare Pages Function: Create Stripe Checkout Session
- * 
+ *
  * Endpoint: POST /create-checkout
- * 
+ *
  * Handles Stripe Checkout Session creation for donations
  * - One-time donations
  * - Recurring monthly subscriptions
  * - Custom amounts (minimum $5)
+ * 
+ * Required Environment Variables:
+ * - STRIPE_SECRET_KEY: Stripe live secret key (sk_live_...)
  */
 
-const STRIPE_SECRET_KEY = 'mk_1So71wBL2ppdbQKqalkrbvd0';
 const STRIPE_API_VERSION = '2023-10-16';
 
 export async function onRequestPost(context) {
     try {
+        // Get Stripe secret key from environment variables
+        const STRIPE_SECRET_KEY = context.env.STRIPE_SECRET_KEY;
+        
+        if (!STRIPE_SECRET_KEY) {
+            console.error('STRIPE_SECRET_KEY environment variable not set');
+            return new Response(JSON.stringify({ 
+                error: 'Payment system configuration error',
+                details: 'Missing Stripe credentials'
+            }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
         const { amount, type } = await context.request.json();
 
         // Validate inputs
@@ -32,7 +48,7 @@ export async function onRequestPost(context) {
         }
 
         // Create Checkout Session
-        const session = await createCheckoutSession(amount, type);
+        const session = await createCheckoutSession(amount, type, STRIPE_SECRET_KEY);
 
         return new Response(JSON.stringify({ sessionId: session.id, url: session.url }), {
             status: 200,
@@ -44,9 +60,9 @@ export async function onRequestPost(context) {
 
     } catch (error) {
         console.error('Checkout error:', error);
-        return new Response(JSON.stringify({ 
+        return new Response(JSON.stringify({
             error: 'Failed to create checkout session',
-            details: error.message 
+            details: error.message
         }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
@@ -54,10 +70,10 @@ export async function onRequestPost(context) {
     }
 }
 
-async function createCheckoutSession(amount, type) {
+async function createCheckoutSession(amount, type, STRIPE_SECRET_KEY) {
     const amountInCents = Math.round(amount * 100);
-    
-    const lineItems = type === 'recurring' 
+
+    const lineItems = type === 'recurring'
         ? [{
             price_data: {
                 currency: 'usd',
