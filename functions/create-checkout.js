@@ -7,9 +7,9 @@
  * - One-time donations
  * - Recurring monthly subscriptions
  * - Custom amounts (minimum $5)
- * 
+ *
  * Required Environment Variables:
- * - STRIPE_SECRET_KEY: Stripe live secret key (sk_live_...)
+ * - STRIPE: Stripe live secret key (sk_live_...)
  */
 
 const STRIPE_API_VERSION = '2023-10-16';
@@ -17,11 +17,11 @@ const STRIPE_API_VERSION = '2023-10-16';
 export async function onRequestPost(context) {
     try {
         // Get Stripe secret key from environment variables
-        const STRIPE_SECRET_KEY = context.env.STRIPE_SECRET_KEY;
-        
+        const STRIPE_SECRET_KEY = context.env.STRIPE;
+
         if (!STRIPE_SECRET_KEY) {
-            console.error('STRIPE_SECRET_KEY environment variable not set');
-            return new Response(JSON.stringify({ 
+            console.error('STRIPE environment variable not set');
+            return new Response(JSON.stringify({
                 error: 'Payment system configuration error',
                 details: 'Missing Stripe credentials'
             }), {
