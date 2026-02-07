@@ -1,12 +1,13 @@
 # 📋 Manual Configuration Steps - Donation System Final Setup
 
-**Updated:** 2026-02-05 20:15 CT  
-**Status:** Code complete, manual configs pending  
+**Updated:** 2026-02-05 20:15 CT
+**Status:** Code complete, manual configs pending
 **Time Required:** 30-40 minutes
 
 ## 🎯 What's Already Done (Automated)
 
 ✅ **Google Analytics Tracking** (Comprehensive Event Tracking)
+
 - Page views on donate.html
 - All donate button clicks (3 entry points tracked separately)
 - Donation amount selections ($10, $25, $50, $100, custom)
@@ -16,11 +17,13 @@
 - Full ecommerce conversion funnel
 
 ✅ **Donate Button Visibility**
+
 - Desktop nav CTA (red gradient, heart icon)
 - Floating sticky button (bottom-right, all pages)
 - Mobile nav link
 
 ✅ **Infrastructure**
+
 - Formspree endpoint: `xjgebazl`
 - Stripe live key: `pk_live_51So70wBL2ppdbQKq...`
 - Security headers configured in `_headers`
@@ -34,7 +37,8 @@
 **Purpose:** Automatically send professional receipts after donations
 
 **Steps:**
-1. Go to https://dashboard.stripe.com/settings/emails
+
+1. Go to <https://dashboard.stripe.com/settings/emails>
 2. **Login with:** `getsome@goodflippindesign.com` (or whichever email manages Stripe)
 3. Navigate to: **Settings** → **Emails** → **Customer emails**
 4. Enable: **"Successful payments"** toggle ON
@@ -43,26 +47,28 @@
    - **Reply-to email:** `getsome@goodflippindesign.com`
    - **Subject line:** "Thank you for supporting Good Flippin Design! 🌍"
    - **Body customization:**
+
      ```
      Thank you for your generous donation of {{amount}}!
-     
+
      Your contribution directly funds:
      • Free AI education (aiaimate.com)
      • Cultural preservation (culturesherpa.org)
      • Civic engagement tools (citizenapproved.org)
-     
+
      Every dollar you give creates real impact.
-     
+
      Receipt Details:
      {{receipt_details}}
-     
+
      Together we're building technology that serves humanity.
-     
+
      With gratitude,
      Brett Weaver
      Good Flippin Design
      https://goodflippindesign.com
      ```
+
 6. **Test:**
    - Make a $1 donation using test mode
    - Verify receipt arrives at your email
@@ -78,7 +84,8 @@
 **Purpose:** Welcome email when people share their vision
 
 **Steps:**
-1. Go to https://formspree.io/forms
+
+1. Go to <https://formspree.io/forms>
 2. **Login with:** `getsome@goodflippindesign.com` (or whichever email manages Formspree)
 3. Find form: **"Vision Form"** (ID: `xjgebazl`)
 4. Click form → **Settings** tab
@@ -88,6 +95,7 @@
    - **From name:** "Good Flippin Design"
    - **Reply-to:** `getsome@goodflippindesign.com`
    - **Body:**
+
      ```
      Hi there,
 
@@ -113,12 +121,13 @@
      Brett Weaver
      Founder, Good Flippin Design
      https://goodflippindesign.com
-     
+
      ---
      Want to stay updated? Follow our journey:
      • Newsletter: [Coming soon]
      • GitHub: github.com/weave0
      ```
+
 7. **Test:**
    - Submit test vision form at donate.html
    - Verify auto-reply arrives within 1-2 minutes
@@ -136,7 +145,8 @@
 **Why:** Cloudflare Pages doesn't respect `_headers` file for security headers (quirk of their platform)
 
 **Steps:**
-1. Go to https://dash.cloudflare.com
+
+1. Go to <https://dash.cloudflare.com>
 2. **Login with:** `getsome@goodflippindesign.com` (or Cloudflare account email)
 3. Select account → **goodflippindesign** Pages project
 4. Navigate to: **Settings** → **Custom Headers** (or **Transform Rules**)
@@ -146,6 +156,7 @@
    - Create new rule: "Security Headers"
    - When: `hostname eq "www.goodflippindesign.com"`
    - Then set headers:
+
      ```
      X-Frame-Options: DENY
      X-Content-Type-Options: nosniff
@@ -153,20 +164,22 @@
      Referrer-Policy: strict-origin-when-cross-origin
      Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
      ```
-   
+
    **Content-Security-Policy** (separate rule due to length):
+
    ```
-   default-src 'self'; 
-   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
-   font-src 'self' https://fonts.gstatic.com; 
-   img-src 'self' https: data:; 
-   script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://js.stripe.com https://www.googletagmanager.com; 
-   connect-src 'self' https://cloudflareinsights.com https://formspree.io https://api.stripe.com https://*.execute-api.us-east-1.amazonaws.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com; 
+   default-src 'self';
+   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+   font-src 'self' https://fonts.gstatic.com;
+   img-src 'self' https: data:;
+   script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://js.stripe.com https://www.googletagmanager.com;
+   connect-src 'self' https://cloudflareinsights.com https://formspree.io https://api.stripe.com https://*.execute-api.us-east-1.amazonaws.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com;
    frame-src https://js.stripe.com https://hooks.stripe.com;
    ```
 
 6. **Save and deploy**
 7. **Verify** headers are applied:
+
    ```powershell
    curl.exe -I https://www.goodflippindesign.com | findstr "X-Frame-Options"
    ```
@@ -180,7 +193,8 @@
 **Purpose:** Track donation conversion funnel end-to-end
 
 **Steps:**
-1. Go to https://analytics.google.com
+
+1. Go to <https://analytics.google.com>
 2. **Login with:** `getsome@goodflippindesign.com`
 3. Select property: **goodflippindesign.com** (or whichever property has ID `G-QPPVJM1B60`)
 4. Navigate to: **Admin** → **Data Streams** → Select web stream
@@ -211,7 +225,8 @@
 
 **Checklist:**
 
-**Homepage (www.goodflippindesign.com):**
+**Homepage (<www.goodflippindesign.com>):**
+
 - [ ] Desktop nav donate CTA visible (red gradient + ❤️)
 - [ ] Hover over nav CTA → lifts + glows
 - [ ] Click nav CTA → redirects to donate.html
@@ -222,6 +237,7 @@
 - [ ] Click mobile nav "Donate" → redirects to donate.html
 
 **Donate Page (donate.html):**
+
 - [ ] Page loads with urgency banner "Critical Funding Needed"
 - [ ] Click $25 amount → button highlights, others deselect
 - [ ] Click $50 → switches selection
@@ -232,6 +248,7 @@
 - [ ] Success message appears "Thank you for sharing your vision!"
 
 **Google Analytics Real-Time:**
+
 - [ ] Open GA Real-Time dashboard in separate tab
 - [ ] Perform above tests in incognito window
 - [ ] Verify events appear in real-time:
@@ -243,6 +260,7 @@
   - `form_submit_success`
 
 **Email Tests:**
+
 - [ ] Make $1 Stripe donation (live mode) → receipt arrives within 1-2 min
 - [ ] Submit vision form → auto-reply arrives within 1-2 min
 - [ ] Check both emails render correctly on mobile
@@ -253,17 +271,18 @@
 
 All events are now tracking in GA4. Here's what each means:
 
-| Event Name | Trigger | Category | Label | Value |
-|------------|---------|----------|-------|-------|
-| `donate_click` | Any donate button clicked | `donation` | Button type | - |
-| `donation_amount_selected` | Preset amount clicked | `donation` | `$25` | `25` |
-| `donation_custom_amount` | Custom amount entered | `donation` | `Custom $75` | `75` |
-| `begin_checkout` | "Power The Mission" clicked | `ecommerce` | `one-time`/`recurring` | Amount |
-| `purchase` | Donation completed | `ecommerce` | - | Amount |
-| `generate_lead` | Vision form submitted | `engagement` | `Vision Form Submission` | `0` |
-| `form_submit_success` | Form submission success | `engagement` | `Vision Form` | `1` |
+| Event Name                 | Trigger                     | Category     | Label                    | Value  |
+| -------------------------- | --------------------------- | ------------ | ------------------------ | ------ |
+| `donate_click`             | Any donate button clicked   | `donation`   | Button type              | -      |
+| `donation_amount_selected` | Preset amount clicked       | `donation`   | `$25`                    | `25`   |
+| `donation_custom_amount`   | Custom amount entered       | `donation`   | `Custom $75`             | `75`   |
+| `begin_checkout`           | "Power The Mission" clicked | `ecommerce`  | `one-time`/`recurring`   | Amount |
+| `purchase`                 | Donation completed          | `ecommerce`  | -                        | Amount |
+| `generate_lead`            | Vision form submitted       | `engagement` | `Vision Form Submission` | `0`    |
+| `form_submit_success`      | Form submission success     | `engagement` | `Vision Form`            | `1`    |
 
 **Custom Parameters:**
+
 - `entry_point`: Which button was clicked (`desktop_nav`, `mobile_nav`, `floating_button`)
 - `donation_type`: `one-time` or `recurring`
 - `items`: Array with donation details (for ecommerce tracking)
@@ -273,6 +292,7 @@ All events are now tracking in GA4. Here's what each means:
 ## 🎯 Success Metrics to Track (First Week)
 
 ### Engagement Metrics
+
 - **Donate Button CTR:** (donate page visits / homepage visits) × 100
   - **Target:** 2-5% (vs. industry avg 0.5%)
 - **Entry Point Breakdown:** Which button drives most clicks?
@@ -281,6 +301,7 @@ All events are now tracking in GA4. Here's what each means:
   - **Target:** < 40%
 
 ### Conversion Metrics
+
 - **Donation Completion Rate:** (purchases / begin_checkout) × 100
   - **Target:** > 30% (Stripe checkout reduces friction)
 - **Average Donation Amount:** Total $ / number of donations
@@ -289,6 +310,7 @@ All events are now tracking in GA4. Here's what each means:
   - **Target:** 5-10 per week initially
 
 ### Revenue Metrics
+
 - **Total Donations:** Weekly/monthly totals
 - **Donation Frequency:** One-time vs recurring ratio
 - **Revenue Per Visitor (RPV):** Total $ / total visitors
@@ -301,18 +323,21 @@ All events are now tracking in GA4. Here's what each means:
 Once you have data, test these improvements:
 
 ### A/B Tests
+
 1. **Button Text:** "Donate" vs "Support Our Work" vs "Join the Movement"
 2. **Button Color:** Red vs Purple vs Green gradient
 3. **Floating Button Position:** Right vs Left side
 4. **Urgency Messaging:** "Critical Funding Needed" vs "Every $25 Changes Lives"
 
 ### Social Proof Additions
+
 - [ ] Live donation counter ("$1,247 raised this month")
 - [ ] Recent donor names/avatars (with permission)
 - [ ] Impact metrics ("Your donations funded 47 students this week")
 - [ ] Testimonials from beneficiaries
 
 ### Technical Enhancements
+
 - [ ] Real Stripe Payment Elements integration (replace simulated checkout)
 - [ ] Recurring donation setup (Stripe subscriptions)
 - [ ] Donor recognition page (public thank you wall)
@@ -324,48 +349,46 @@ Once you have data, test these improvements:
 ## 🚨 Critical Next Steps (Do These First)
 
 **Priority 1 (This Hour):**
+
 1. ✅ Stripe email receipts configured
 2. ✅ Formspree auto-responder configured
 3. ✅ Full donation flow tested
 4. ✅ GA events verified firing
 
-**Priority 2 (This Week):**
-5. Security headers applied via Cloudflare
-6. GA enhanced ecommerce conversion goals set up
-7. Real Stripe checkout integration (replace simulation)
-8. Monitor analytics for 48 hours, identify bottlenecks
+**Priority 2 (This Week):** 5. Security headers applied via Cloudflare 6. GA enhanced ecommerce conversion goals set up 7. Real Stripe checkout integration (replace simulation) 8. Monitor analytics for 48 hours, identify bottlenecks
 
-**Priority 3 (Next Week):**
-9. A/B test button text based on data
-10. Add social proof elements
-11. Set up recurring donation option
-12. Create donor recognition system
+**Priority 3 (Next Week):** 9. A/B test button text based on data 10. Add social proof elements 11. Set up recurring donation option 12. Create donor recognition system
 
 ---
 
 ## 📞 Support Resources
 
 **Stripe Documentation:**
-- Email receipts: https://stripe.com/docs/receipts
-- Checkout integration: https://stripe.com/docs/payments/checkout
+
+- Email receipts: <https://stripe.com/docs/receipts>
+- Checkout integration: <https://stripe.com/docs/payments/checkout>
 
 **Formspree Documentation:**
-- Auto-responder: https://help.formspree.io/hc/en-us/articles/360056076314
-- Form settings: https://formspree.io/forms
+
+- Auto-responder: <https://help.formspree.io/hc/en-us/articles/360056076314>
+- Form settings: <https://formspree.io/forms>
 
 **Google Analytics:**
-- GA4 events: https://support.google.com/analytics/answer/9267735
-- Enhanced ecommerce: https://support.google.com/analytics/answer/9268036
+
+- GA4 events: <https://support.google.com/analytics/answer/9267735>
+- Enhanced ecommerce: <https://support.google.com/analytics/answer/9268036>
 
 **Cloudflare:**
-- Transform rules: https://developers.cloudflare.com/rules/transform/
-- Headers: https://developers.cloudflare.com/pages/platform/headers/
+
+- Transform rules: <https://developers.cloudflare.com/rules/transform/>
+- Headers: <https://developers.cloudflare.com/pages/platform/headers/>
 
 ---
 
 ## ✅ Completion Checklist
 
 **Code (Automated - DONE):**
+
 - [x] GA tracking code on donate.html
 - [x] Event tracking for all donate buttons
 - [x] Conversion funnel tracking (begin_checkout → purchase)
@@ -375,6 +398,7 @@ Once you have data, test these improvements:
 - [x] Responsive design (mobile + desktop)
 
 **Configuration (Manual - YOUR TODO):**
+
 - [ ] Stripe email receipts enabled and tested
 - [ ] Formspree auto-responder enabled and tested
 - [ ] Security headers applied via Cloudflare
@@ -384,8 +408,8 @@ Once you have data, test these improvements:
 
 ---
 
-**Time to Complete:** 30-40 minutes  
-**Difficulty:** Easy (mostly UI clicks, minimal technical)  
+**Time to Complete:** 30-40 minutes
+**Difficulty:** Easy (mostly UI clicks, minimal technical)
 **Impact:** HIGH - Professional donor experience + data-driven optimization
 
 **Questions?** Check the support resources above or review the deployed code for implementation details.

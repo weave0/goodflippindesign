@@ -1,8 +1,8 @@
 /**
  * Cloudflare Pages Function: Retrieve Stripe Checkout Session
- * 
+ *
  * Endpoint: GET /get-session?session_id={CHECKOUT_SESSION_ID}
- * 
+ *
  * Returns donation details for the success page
  */
 
@@ -58,9 +58,9 @@ export async function onRequestGet(context) {
 
     } catch (error) {
         console.error('Session retrieval error:', error);
-        return new Response(JSON.stringify({ 
+        return new Response(JSON.stringify({
             error: 'Failed to retrieve session',
-            details: error.message 
+            details: error.message
         }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }

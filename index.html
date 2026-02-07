@@ -450,6 +450,267 @@
             opacity: 0.7;
         }
 
+        /* Fundraising Counter */
+        .fundraising-section {
+            padding: 4rem 0;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .fundraising-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fundraising-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gradient-primary);
+            opacity: 0.6;
+        }
+
+        .fundraising-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .fundraising-icon {
+            font-size: 2rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            border-radius: 12px;
+            box-shadow: var(--glow-purple);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .fundraising-text h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .fundraising-text p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.9375rem;
+        }
+
+        .fundraising-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 500;
+        }
+
+        .stat-divider {
+            width: 1px;
+            height: 40px;
+            background: var(--border);
+            margin: 0 1rem;
+        }
+
+        .goal-item .stat-value {
+            background: var(--gradient-accent-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress-container {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 6px;
+            transition: width 2s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            50% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .progress-percentage {
+            position: absolute;
+            top: -1.75rem;
+            right: 0;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .fundraising-cta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-donate {
+            background: var(--gradient-primary);
+            color: var(--bg);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--glow-purple);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-donate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .btn-donate:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-gold);
+        }
+
+        .btn-donate:hover::before {
+            transform: translateX(100%);
+        }
+
+        .recent-activity {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Mobile responsive for fundraising */
+        @media (max-width: 768px) {
+            .fundraising-card {
+                padding: 1.5rem;
+            }
+
+            .fundraising-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.75rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .fundraising-stats {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .stat-divider {
+                width: 60%;
+                height: 1px;
+                margin: 0;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .fundraising-cta {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.75rem;
+            }
+
+            .progress-percentage {
+                position: static;
+                margin-top: 0.5rem;
+                text-align: center;
+            }
+        }
+
         /* Sections */
         section {
             padding: 6rem 2rem;
@@ -2081,6 +2342,13 @@
                             <small class="nav-link-subtitle">Help us build more amazing projects</small>
                         </div>
                     </a>
+                    <a href="https://gofund.me/f07ea3faf" class="nav-cta-link" role="menuitem" target="_blank" rel="noopener" aria-label="Donate via GoFundMe (opens in a new tab)">
+                        <span class="nav-icon" aria-hidden="true">🤝</span>
+                        <div class="nav-link-content">
+                            <strong class="nav-link-title">GoFundMe</strong>
+                            <small class="nav-link-subtitle">Another way to support the ecosystem</small>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -2154,6 +2422,49 @@
                 </div>
             </div>
         </header>
+
+        <!-- Fundraising Progress Counter -->
+        <section id="fundraising-counter" class="fundraising-section">
+            <div class="container">
+                <div class="fundraising-card">
+                    <div class="fundraising-content">
+                        <div class="fundraising-header">
+                            <div class="fundraising-icon">🚀</div>
+                            <div class="fundraising-text">
+                                <h3>Community-Powered Innovation</h3>
+                                <p>Supporting zero-cost AI education, cultural preservation, and civic tech</p>
+                            </div>
+                        </div>
+                        <div class="fundraising-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="total-raised">$1,247</div>
+                                <div class="stat-label">Total Raised</div>
+                            </div>
+                            <div class="stat-divider"></div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="total-supporters">23</div>
+                                <div class="stat-label">Supporters</div>
+                            </div>
+                            <div class="stat-divider"></div>
+                            <div class="stat-item goal-item">
+                                <div class="stat-value">$10,000</div>
+                                <div class="stat-label">Initial Goal</div>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <div class="progress-percentage" id="progress-percentage">12.5%</div>
+                        </div>
+                        <div class="fundraising-cta">
+                            <a href="donate.html" class="btn-donate">Support Our Mission</a>
+                            <span class="recent-activity" id="recent-activity">Last donation: 2 hours ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <section id="services">
             <div class="container">
@@ -3040,6 +3351,174 @@
                     }, 2000);
                 });
             }
+
+            // 11. Fundraising Counter Management
+            const fundraisingCounter = {
+                // Configuration - easy to update manually or via API
+                config: {
+                    totalRaised: 1247,        // Update this manually
+                    totalSupporters: 23,      // Update this manually
+                    goal: 10000,              // Initial funding goal
+                    lastDonationTime: '2 hours ago', // Update manually
+                    apiEndpoint: null,        // Set this when you have a backend endpoint
+                    updateInterval: 30000     // Check for updates every 30 seconds
+                },
+
+                elements: {
+                    totalRaised: document.getElementById('total-raised'),
+                    totalSupporters: document.getElementById('total-supporters'),
+                    progressFill: document.getElementById('progress-fill'),
+                    progressPercentage: document.getElementById('progress-percentage'),
+                    recentActivity: document.getElementById('recent-activity')
+                },
+
+                // Initialize the counter with animations
+                init() {
+                    if (!this.elements.totalRaised) return; // Exit if fundraising section not present
+
+                    this.updateDisplay();
+                    this.animateCountUp();
+
+                    // Set up periodic updates if API endpoint is configured
+                    if (this.config.apiEndpoint) {
+                        this.startAutoRefresh();
+                    }
+
+                    // Listen for manual updates (for testing or instant updates)
+                    window.updateFundraising = this.update.bind(this);
+                },
+
+                // Animate numbers counting up
+                animateCountUp() {
+                    const duration = 2000; // 2 seconds
+                    const steps = 60;
+                    let step = 0;
+
+                    const countUp = (element, target) => {
+                        const increment = target / steps;
+                        let current = 0;
+
+                        const timer = setInterval(() => {
+                            current += increment;
+                            step++;
+
+                            if (step >= steps) {
+                                current = target;
+                                clearInterval(timer);
+                            }
+
+                            if (element === this.elements.totalRaised) {
+                                element.textContent = '$' + Math.floor(current).toLocaleString();
+                            } else {
+                                element.textContent = Math.floor(current).toLocaleString();
+                            }
+                        }, duration / steps);
+                    };
+
+                    // Start animations with slight delay
+                    setTimeout(() => countUp(this.elements.totalRaised, this.config.totalRaised), 500);
+                    setTimeout(() => countUp(this.elements.totalSupporters, this.config.totalSupporters), 800);
+                },
+
+                // Update all display elements
+                updateDisplay() {
+                    const percentage = Math.min((this.config.totalRaised / this.config.goal) * 100, 100);
+
+                    // Update progress bar
+                    this.elements.progressFill.style.width = percentage + '%';
+                    this.elements.progressPercentage.textContent = percentage.toFixed(1) + '%';
+
+                    // Update recent activity
+                    this.elements.recentActivity.textContent = `Last donation: ${this.config.lastDonationTime}`;
+                },
+
+                // Update with new values (can be called manually or via API)
+                update(newData) {
+                    const oldRaised = this.config.totalRaised;
+                    const oldSupporters = this.config.totalSupporters;
+
+                    // Update config with new data
+                    if (newData.totalRaised !== undefined) this.config.totalRaised = newData.totalRaised;
+                    if (newData.totalSupporters !== undefined) this.config.totalSupporters = newData.totalSupporters;
+                    if (newData.lastDonationTime !== undefined) this.config.lastDonationTime = newData.lastDonationTime;
+                    if (newData.goal !== undefined) this.config.goal = newData.goal;
+
+                    // Animate to new values if they changed
+                    if (newData.totalRaised > oldRaised) {
+                        this.animateIncrease(this.elements.totalRaised, oldRaised, this.config.totalRaised, '$');
+                    }
+                    if (newData.totalSupporters > oldSupporters) {
+                        this.animateIncrease(this.elements.totalSupporters, oldSupporters, this.config.totalSupporters);
+                    }
+
+                    this.updateDisplay();
+
+                    // Trigger celebration animation for significant increases
+                    if (newData.totalRaised && newData.totalRaised > oldRaised + 50) {
+                        this.triggerCelebration();
+                    }
+                },
+
+                // Animate incremental increases
+                animateIncrease(element, from, to, prefix = '') {
+                    const duration = 1000;
+                    const difference = to - from;
+                    const increment = difference / 50;
+                    let current = from;
+
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= to) {
+                            current = to;
+                            clearInterval(timer);
+                        }
+                        element.textContent = prefix + Math.floor(current).toLocaleString();
+                    }, duration / 50);
+                },
+
+                // Celebration animation for milestones
+                triggerCelebration() {
+                    const fundraisingCard = document.querySelector('.fundraising-card');
+                    if (fundraisingCard) {
+                        fundraisingCard.style.animation = 'none';
+                        fundraisingCard.offsetHeight; // Trigger reflow
+                        fundraisingCard.style.animation = 'pulse 0.6s ease-in-out';
+
+                        setTimeout(() => {
+                            fundraisingCard.style.animation = '';
+                        }, 600);
+                    }
+                },
+
+                // Fetch updates from API endpoint
+                async fetchUpdates() {
+                    if (!this.config.apiEndpoint) return;
+
+                    try {
+                        const response = await fetch(this.config.apiEndpoint);
+                        const data = await response.json();
+
+                        if (data && data.success) {
+                            this.update(data);
+                        }
+                    } catch (error) {
+                        console.log('Fundraising API not available:', error.message);
+                    }
+                },
+
+                // Start automatic refresh
+                startAutoRefresh() {
+                    setInterval(() => {
+                        this.fetchUpdates();
+                    }, this.config.updateInterval);
+
+                    // Initial fetch
+                    this.fetchUpdates();
+                }
+            };
+
+            // Initialize fundraising counter
+            fundraisingCounter.init();
 
         })();
     </script>

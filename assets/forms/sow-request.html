@@ -149,15 +149,23 @@
         }
 
         .back-link {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             color: var(--text-secondary);
             text-decoration: none;
-            margin-bottom: 1rem;
+            min-height: 44px;
             font-size: 0.875rem;
         }
 
         .back-link:hover {
             color: var(--text);
+        }
+
+        .top-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
         }
 
         @media (max-width: 600px) {
@@ -182,7 +190,10 @@
 
 <body>
     <div class="container">
-        <a href="/index.html#legal-forms" class="back-link">← Back to Legal Forms</a>
+        <div class="top-links">
+            <a href="/index.html#legal-forms" class="back-link">← Back to Legal Forms</a>
+            <a href="https://gofund.me/f07ea3faf" class="back-link" target="_blank" rel="noopener">GoFundMe →</a>
+        </div>
 
         <h1>Request Statement of Work</h1>
         <p class="subtitle">Generate a detailed project specification document with deliverables, milestones, and budget breakdown.</p>
@@ -217,7 +228,7 @@
 
             <div class="form-group">
                 <label>Project Type <span class="required">*</span></label>
-                <select name="project_type" required>
+                <select name="project_type" required aria-label="Project Type">
                     <option value="">Select project type</option>
                     <option value="data-platform">Data Platform / Dashboard</option>
                     <option value="ai-integration">AI Integration</option>
@@ -241,7 +252,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Project Timeline <span class="required">*</span></label>
-                    <select name="timeline" required>
+                    <select name="timeline" required aria-label="Project Timeline">
                         <option value="">Select timeline</option>
                         <option value="2-4-weeks">2-4 weeks</option>
                         <option value="1-2-months">1-2 months</option>
@@ -252,7 +263,7 @@
                 </div>
                 <div class="form-group">
                     <label>Budget Range <span class="required">*</span></label>
-                    <select name="budget_range" required>
+                    <select name="budget_range" required aria-label="Budget Range">
                         <option value="">Select budget</option>
                         <option value="5k-15k">$5,000 - $15,000</option>
                         <option value="15k-50k">$15,000 - $50,000</option>
@@ -276,17 +287,17 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Start Date</label>
-                    <input type="date" name="start_date">
+                    <input type="date" name="start_date" aria-label="Start Date">
                 </div>
                 <div class="form-group">
                     <label>Target Completion Date</label>
-                    <input type="date" name="completion_date">
+                    <input type="date" name="completion_date" aria-label="Target Completion Date">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Payment Terms Preference</label>
-                <select name="payment_terms">
+                <select name="payment_terms" aria-label="Payment Terms Preference">
                     <option value="">Select preference</option>
                     <option value="50-50">50% upfront, 50% on completion</option>
                     <option value="milestone">Milestone-based payments</option>
