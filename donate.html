@@ -192,6 +192,14 @@
             color: var(--text);
         }
 
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
         /* Hero Section */
         .hero {
             padding: 4rem 0 3rem;
@@ -568,6 +576,277 @@
             font-style: italic;
         }
 
+        /* Payment Method Selection */
+        .payment-method-selector {
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .payment-tab {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .payment-tab.active {
+            background: var(--gradient-primary);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .payment-tab-icon {
+            font-size: 1.125rem;
+        }
+
+        .payment-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-option {
+            display: none;
+        }
+
+        .payment-option.active {
+            display: block;
+        }
+
+        /* PayPal Container */
+        #paypal-button-container {
+            margin-bottom: 1rem;
+        }
+
+        /* PayPal Simple Form */
+        .paypal-simple-form {
+            padding: 1rem;
+        }
+
+        .paypal-amount-input {
+            margin-bottom: 1.5rem;
+        }
+
+        .paypal-amount-input label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .amount-input-group {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .amount-input-group:focus-within {
+            border-color: var(--border-glow);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+        }
+
+        .currency-symbol {
+            background: var(--bg);
+            color: var(--text-secondary);
+            padding: 0.75rem;
+            font-weight: 600;
+            border-right: 1px solid var(--border);
+        }
+
+        .amount-input-group input {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .amount-input-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-paypal {
+            width: 100%;
+            background: var(--gradient-purple);
+            background-size: 200% 200%;
+            color: #fff;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.35);
+        }
+
+        .btn-paypal:hover {
+            animation: gradientFlow 2s ease infinite;
+            transform: translateY(-1px);
+            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5);
+        }
+
+        .paypal-logo {
+            font-size: 1.25rem;
+        }
+
+        .paypal-note {
+            margin-top: 0.75rem;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* PayPal Simple Form */
+        .paypal-simple-form {
+            padding: 1rem;
+        }
+
+        .paypal-amount-input {
+            margin-bottom: 1.5rem;
+        }
+
+        .paypal-amount-input label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .amount-input-group {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .amount-input-group:focus-within {
+            border-color: var(--border-glow);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+        }
+
+        .currency-symbol {
+            background: var(--bg);
+            color: var(--text-secondary);
+            padding: 0.75rem;
+            font-weight: 600;
+            border-right: 1px solid var(--border);
+        }
+
+        .amount-input-group input {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .amount-input-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-paypal {
+            width: 100%;
+            background: var(--gradient-purple);
+            background-size: 200% 200%;
+            color: #fff;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.35);
+        }
+
+        .btn-paypal:hover {
+            animation: gradientFlow 2s ease infinite;
+            transform: translateY(-1px);
+            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5);
+        }
+
+        .paypal-link-preview {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .paypal-link-label {
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .paypal-link-preview a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8125rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .paypal-link-preview a:hover {
+            color: var(--text);
+        }
+
+        .paypal-logo {
+            font-size: 1.25rem;
+        }
+
+        .paypal-note {
+            margin-top: 0.75rem;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
         /* Buttons */
         .btn-primary {
             width: 100%;
@@ -851,7 +1130,10 @@
                     <img src="assets/logo-nav.png" alt="GFD Logo">
                     <span class="logo-text">Good Flippin Design</span>
                 </a>
-                <a href="index.html" class="back-link">← Back to Home</a>
+                <div class="header-actions">
+                    <a href="https://gofund.me/f07ea3faf" target="_blank" rel="noopener" class="back-link">GoFundMe →</a>
+                    <a href="index.html" class="back-link">← Back to Home</a>
+                </div>
             </div>
         </div>
     </header>
@@ -944,13 +1226,54 @@
                             <input type="number" id="customAmount" placeholder="Or enter custom amount..." min="5" step="5">
                         </div>
 
-                        <div id="payment-element" class="payment-element"></div>
+                        <!-- Payment Method Selection -->
+                        <div class="payment-method-selector">
+                            <div class="payment-tabs">
+                                <button class="payment-tab active" id="stripe-tab" data-method="stripe">
+                                    <span class="payment-tab-icon">💳</span>
+                                    <span>Card</span>
+                                </button>
+                                <button class="payment-tab" id="paypal-tab" data-method="paypal">
+                                    <span class="payment-tab-icon">🅿️</span>
+                                    <span>PayPal</span>
+                                </button>
+                            </div>
+                        </div>
 
-                        <button class="btn-primary" id="donateBtn">
-                            <span id="donateBtnText">Continue to Payment</span>
-                        </button>
+                        <!-- Payment Containers -->
+                        <div class="payment-container">
+                            <!-- Stripe Payment -->
+                            <div class="payment-option active" id="stripe-payment">
+                                <div id="payment-element" class="payment-element"></div>
+                                <button class="btn-primary" id="donateBtn">
+                                    <span id="donateBtnText">Continue with Card</span>
+                                </button>
+                            </div>
 
-                        <p class="note">Secure payment via Stripe. Tax-deductible receipt provided.</p>
+                            <!-- PayPal Payment -->
+                            <div class="payment-option" id="paypal-payment">
+                                <div class="paypal-simple-form">
+                                    <div class="paypal-amount-input">
+                                        <label for="paypalAmount">Enter Amount:</label>
+                                        <div class="amount-input-group">
+                                            <span class="currency-symbol">$</span>
+                                            <input type="number" id="paypalAmount" min="5" step="1" value="25" placeholder="25">
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-paypal" id="paypalOpenBtn">
+                                        <span class="paypal-logo">🅿️</span>
+                                        <span>Open PayPal to Donate</span>
+                                    </button>
+                                    <div class="paypal-link-preview" aria-live="polite">
+                                        <span class="paypal-link-label">PayPal link</span>
+                                        <a id="paypalLink" href="#" target="_blank" rel="noopener">Configure PayPal.me to enable</a>
+                                    </div>
+                                    <p class="paypal-note">You’ll confirm the amount inside PayPal before paying.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="note">Secure payment processing. Tax-deductible receipt provided.</p>
                     </div>
 
                     <!-- Vision Column -->
@@ -1115,11 +1438,162 @@
     </div>
 
     <script>
-        // Stripe initialization (requires publishable key)
+        // Payment system initialization
         const stripe = Stripe('pk_live_51So70wBL2ppdbQKqOR38V1sZW6oFrVYkKmsxYxHTIOQ7yXYU1oT2qQtXHdKo9eBx2vxvotcYt5L6ZQXoXfYrx5Wg00X1VibSRz');
         let elements;
         let selectedAmount = 25;
         let donationType = 'one-time';
+        let selectedPaymentMethod = 'stripe';
+
+        // Thin PayPal (no SDK): uses PayPal.Me link building
+        // Set this to your PayPal.Me handle (the part after https://www.paypal.com/paypalme/)
+        // Example: 'BrettWeaver'
+        const PAYPAL_ME_HANDLE = 'goodlippindesign';
+
+        function getPayPalMeUrl(amount) {
+            const numericAmount = Number(amount);
+            if (!PAYPAL_ME_HANDLE) return null;
+            if (!Number.isFinite(numericAmount) || numericAmount < 5) return null;
+            const safeAmount = Math.round(numericAmount);
+            return `https://www.paypal.com/paypalme/${encodeURIComponent(PAYPAL_ME_HANDLE)}/${safeAmount}?currencyCode=USD`;
+        }
+
+        function updatePayPalQuickDonateUI() {
+            const paypalAmountEl = document.getElementById('paypalAmount');
+            const paypalLinkEl = document.getElementById('paypalLink');
+            const paypalOpenBtn = document.getElementById('paypalOpenBtn');
+            if (!paypalAmountEl || !paypalLinkEl || !paypalOpenBtn) return;
+
+            const url = getPayPalMeUrl(paypalAmountEl.value);
+
+            if (!PAYPAL_ME_HANDLE) {
+                paypalLinkEl.textContent = 'Add your PayPal.me handle in donate.html to enable';
+                paypalLinkEl.href = '#';
+                paypalOpenBtn.disabled = true;
+                paypalOpenBtn.style.opacity = '0.6';
+                paypalOpenBtn.style.cursor = 'not-allowed';
+                return;
+            }
+
+            if (!url) {
+                paypalLinkEl.textContent = 'Enter an amount of at least $5';
+                paypalLinkEl.href = '#';
+                paypalOpenBtn.disabled = true;
+                paypalOpenBtn.style.opacity = '0.6';
+                paypalOpenBtn.style.cursor = 'not-allowed';
+                return;
+            }
+
+            paypalLinkEl.textContent = url;
+            paypalLinkEl.href = url;
+            paypalOpenBtn.disabled = false;
+            paypalOpenBtn.style.opacity = '1';
+            paypalOpenBtn.style.cursor = 'pointer';
+        }
+
+        // Initialize thin PayPal UI on load
+        document.addEventListener('DOMContentLoaded', function () {
+            updatePayPalQuickDonateUI();
+
+            const paypalOpenBtn = document.getElementById('paypalOpenBtn');
+            if (paypalOpenBtn) {
+                paypalOpenBtn.addEventListener('click', function () {
+                    const url = getPayPalMeUrl(selectedAmount);
+                    if (!url) {
+                        updatePayPalQuickDonateUI();
+                        return;
+                    }
+
+                    if (window.gtag) {
+                        gtag('event', 'paypal_link_opened', {
+                            event_category: 'donation',
+                            event_label: `paypalme_${donationType}`,
+                            value: selectedAmount
+                        });
+                    }
+
+                    window.open(url, '_blank', 'noopener');
+                });
+            }
+        });
+
+        // Payment method switching
+        document.querySelectorAll('.payment-tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                // Update active tab
+                document.querySelectorAll('.payment-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // Update selected payment method
+                selectedPaymentMethod = this.dataset.method;
+
+                // Show/hide payment options
+                document.querySelectorAll('.payment-option').forEach(option => {
+                    option.classList.remove('active');
+                });
+                document.getElementById(`${selectedPaymentMethod}-payment`).classList.add('active');
+
+                // Track payment method selection
+                if (window.gtag) {
+                    gtag('event', 'payment_method_selected', {
+                        event_category: 'donation',
+                        event_label: selectedPaymentMethod,
+                        value: 0
+                    });
+                }
+
+                // Initialize PayPal if selected and not already initialized
+                if (selectedPaymentMethod === 'paypal') {
+                    updatePayPalQuickDonateUI();
+                }
+            });
+        });
+
+        // Success message function
+        function showSuccessMessage(paymentMethod, transactionId) {
+            // Create success overlay
+            const successOverlay = document.createElement('div');
+            successOverlay.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    background: rgba(0,0,0,0.9);
+                    display: flex; align-items: center; justify-content: center;
+                    z-index: 10000;
+                    animation: fadeIn 0.3s ease;
+                ">
+                    <div style="
+                        background: var(--bg-card);
+                        padding: 3rem;
+                        border-radius: 16px;
+                        text-align: center;
+                        max-width: 500px;
+                        border: 1px solid var(--border);
+                        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+                    ">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+                        <h2 style="color: var(--text); margin-bottom: 1rem;">Thank You!</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                            Your $${selectedAmount} ${donationType} donation via ${paymentMethod} was successful!
+                        </p>
+                        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem;">
+                            Transaction ID: ${transactionId}
+                        </p>
+                        <button onclick="location.href='index.html'" style="
+                            background: var(--gradient-primary);
+                            color: #fff;
+                            border: none;
+                            padding: 0.75rem 2rem;
+                            border-radius: 8px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            font-size: 1rem;
+                        ">Return Home</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(successOverlay);
+        }
 
         // Donation type toggle
         document.querySelectorAll('.donation-type-toggle button').forEach(btn => {
@@ -1138,6 +1612,10 @@
                 selectedAmount = parseInt(this.dataset.amount);
                 document.getElementById('customAmount').value = '';
 
+                // Sync with PayPal amount fields
+                document.getElementById('paypalAmount').value = selectedAmount;
+                updatePayPalQuickDonateUI();
+
                 // Track amount selection
                 if (window.gtag) {
                     gtag('event', 'donation_amount_selected', {
@@ -1155,6 +1633,10 @@
                 document.querySelectorAll('.donation-amount').forEach(b => b.classList.remove('active'));
                 selectedAmount = parseInt(this.value) || 0;
 
+                // Sync with PayPal amount fields
+                document.getElementById('paypalAmount').value = selectedAmount;
+                updatePayPalQuickDonateUI();
+
                 // Track custom amount on blur (when user finishes typing)
                 if (selectedAmount >= 5 && window.gtag) {
                     gtag('event', 'donation_custom_amount', {
@@ -1166,7 +1648,18 @@
             }
         });
 
-        // Donate button
+        // PayPal amount sync (when user changes PayPal input directly)
+        document.getElementById('paypalAmount').addEventListener('input', function () {
+            const amount = parseInt(this.value) || 0;
+            selectedAmount = amount;
+            updatePayPalQuickDonateUI();
+
+            // Clear preset selections
+            document.querySelectorAll('.donation-amount').forEach(b => b.classList.remove('active'));
+            document.getElementById('customAmount').value = '';
+        });
+
+        // Donate button (Stripe)
         document.getElementById('donateBtn').addEventListener('click', async function () {
             if (selectedAmount < 5) {
                 alert('Minimum donation is $5. Every bit helps!');
@@ -1186,11 +1679,11 @@
             if (window.gtag) {
                 gtag('event', 'begin_checkout', {
                     event_category: 'ecommerce',
-                    event_label: donationType,
+                    event_label: `stripe_${donationType}`,
                     value: selectedAmount,
                     currency: 'USD',
                     items: [{
-                        item_name: `${donationType} donation`,
+                        item_name: `${donationType} donation via Stripe`,
                         item_category: 'donation',
                         price: selectedAmount,
                         quantity: 1
@@ -1199,8 +1692,6 @@
             }
 
             // CRITICAL: Real Stripe Checkout integration via Cloudflare Function
-            // Zero manual configuration - fully automated
-
             this.disabled = true;
             this.textContent = 'Creating checkout...';
 
@@ -1231,7 +1722,7 @@
                 console.error('Checkout error:', error);
                 alert(`Error: ${error.message}\n\nPlease try again or contact getsome@goodflippindesign.com`);
                 this.disabled = false;
-                this.textContent = 'Power The Mission ⚡';
+                this.textContent = 'Continue with Card';
             }
 
             // Note: Success tracking happens on return from Stripe (via success_url parameter)

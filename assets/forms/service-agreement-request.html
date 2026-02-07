@@ -152,22 +152,33 @@
         }
 
         .back-link {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             color: var(--text-secondary);
             text-decoration: none;
-            margin-bottom: 2rem;
+            min-height: 44px;
             font-size: 0.875rem;
         }
 
         .back-link:hover {
             color: var(--text);
         }
+
+        .top-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            margin-bottom: 2rem;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <a href="/" class="back-link">← Back to Good Flippin Design</a>
+        <div class="top-links">
+            <a href="/" class="back-link">← Back to Good Flippin Design</a>
+            <a href="https://gofund.me/f07ea3faf" class="back-link" target="_blank" rel="noopener">GoFundMe →</a>
+        </div>
 
         <h1>Request Service Agreement</h1>
         <p class="subtitle">Master service contract for client engagements. Generated within minutes. business discussions. Typically generated within minutes and emailed to all parties.</p>

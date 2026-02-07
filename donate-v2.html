@@ -179,6 +179,14 @@
             transition: color 0.3s ease;
         }
 
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
         .back-link:hover {
             color: var(--text);
         }
@@ -829,7 +837,11 @@
                     <img src="assets/logo-nav.png" alt="GFD Logo">
                     <span class="logo-text">Good Flippin Design</span>
                 </a>
-                <a href="index.html" class="back-link">← Back to Home</a>
+                <div class="header-actions">
+                    <a href="https://gofund.me/f07ea3faf" target="_blank" rel="noopener" class="back-link">GoFundMe →</a>
+                    <a href="donate.html" class="back-link">Updated Donate (PayPal + Stripe) →</a>
+                    <a href="index.html" class="back-link">← Back to Home</a>
+                </div>
             </div>
         </div>
     </header>

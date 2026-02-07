@@ -5,7 +5,8 @@
 ## Problem Identified
 
 The payment system was failing with "Error: Failed to create checkout session" because:
-- Invalid Stripe secret key hardcoded in `functions/create-checkout.js` 
+
+- Invalid Stripe secret key hardcoded in `functions/create-checkout.js`
 - Key format was `mk_1So71wBL...` (invalid) instead of `sk_live_...` (valid)
 - Secret key must be stored as environment variable, not in source code (security)
 
@@ -20,7 +21,7 @@ The payment system was failing with "Error: Failed to create checkout session" b
 ### Step 1: Get Stripe Secret Key
 
 1. Go to [Stripe Dashboard → API Keys](https://dashboard.stripe.com/apikeys)
-2. In **Standard keys** section, find your **Secret key** 
+2. In **Standard keys** section, find your **Secret key**
 3. Click **Reveal live key token** (should start with `sk_live_`)
 4. Copy the full key (DO NOT share this with anyone)
 
@@ -40,20 +41,23 @@ The payment system was failing with "Error: Failed to create checkout session" b
 After adding the environment variable:
 
 **Option A - Automatic (via git push):**
+
 ```bash
 git add .
 git commit -m "fix: configure Stripe secret key via environment variables"
 git push origin main
 ```
+
 Cloudflare Pages will auto-deploy in 2-3 minutes.
 
 **Option B - Manual redeploy:**
+
 1. In Cloudflare Dashboard → Pages → goodflippindesign → Deployments
 2. Click **...** on latest deployment → **Retry deployment**
 
 ### Step 4: Test Payment Flow
 
-1. Go to https://www.goodflippindesign.com/donate
+1. Go to <https://www.goodflippindesign.com/donate>
 2. Select donation amount ($25 recommended)
 3. Choose donation type (one-time or recurring)
 4. Click **Donate** button
@@ -63,7 +67,7 @@ Cloudflare Pages will auto-deploy in 2-3 minutes.
 
 ### ✅ Success States
 
-- Clicking donate button shows "Creating checkout..." 
+- Clicking donate button shows "Creating checkout..."
 - Redirects to `https://checkout.stripe.com/...`
 - After payment, redirects to `/donate/success?session_id=...`
 - If cancelled, redirects to `/donate?canceled=true`
@@ -84,7 +88,7 @@ Cloudflare Pages will auto-deploy in 2-3 minutes.
 
 - ✅ Secret key stored in Cloudflare environment variables (encrypted at rest)
 - ✅ Never committed to git repository
-- ✅ Not exposed to client-side JavaScript 
+- ✅ Not exposed to client-side JavaScript
 - ✅ Only accessible to Cloudflare Functions (server-side)
 - ⚠️ Rotate key immediately if accidentally exposed
 
@@ -100,6 +104,7 @@ curl -X POST https://www.goodflippindesign.com/create-checkout \
 ```
 
 Expected response:
+
 ```json
 {
   "sessionId": "cs_test_...",
@@ -124,7 +129,8 @@ Expected response:
 ### Problem: Still getting "Missing Stripe credentials" error
 
 **Cause**: Environment variable not set or not deployed
-**Fix**: 
+**Fix**:
+
 1. Verify environment variable exists in Cloudflare dashboard
 2. Redeploy the site (env vars only apply to new deployments)
 3. Check deployment logs for errors
@@ -133,6 +139,7 @@ Expected response:
 
 **Cause**: Invalid secret key format or test key used in production
 **Fix**:
+
 1. Verify key starts with `sk_live_` (not `sk_test_`)
 2. Regenerate key in Stripe dashboard if corrupted
 3. Update Cloudflare environment variable with new key
@@ -141,10 +148,11 @@ Expected response:
 
 **Cause**: Using test keys instead of live keys
 **Fix**:
-1. Ensure `STRIPE_SECRET_KEY` uses `sk_live_...` 
+
+1. Ensure `STRIPE_SECRET_KEY` uses `sk_live_...`
 2. Ensure `donate.html` uses matching `pk_live_...` (already configured correctly)
 
 ---
 
-**Last Updated**: 2026-02-05  
+**Last Updated**: 2026-02-05
 **Status**: Ready for deployment pending Cloudflare environment variable configuration

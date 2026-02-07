@@ -1,7 +1,7 @@
 # 🚨 CRITICAL: Stripe Payment Links Setup
 
-**Status:** ⚠️ Required IMMEDIATELY - donations currently blocked  
-**Time:** 15-20 minutes  
+**Status:** ⚠️ Required IMMEDIATELY - donations currently blocked
+**Time:** 15-20 minutes
 **Impact:** Enables real payment processing (vs fake success splash)
 
 ---
@@ -9,11 +9,13 @@
 ## 🐛 What Was Wrong
 
 **Before (20:30 CT):**
+
 - Donate button showed "success" overlay **WITHOUT processing payment**
 - $0 collected from clicks
 - Generic 🎉 emoji icon
 
 **After (21:30 CT):**
+
 - ✅ Custom glowing SVG artwork (animated energy burst)
 - ✅ Real Stripe redirect integration (via Payment Links)
 - ⚠️ **Blocked until you configure Payment Links**
@@ -31,6 +33,7 @@ Stripe Payment Links are hosted checkout pages - no backend code required.
 **Create these 8 links:**
 
 #### One-Time Donations
+
 1. **$10 One-Time**
    - Product name: "Support Good Flippin Design - $10"
    - Price: $10 USD (one-time)
@@ -42,6 +45,7 @@ Stripe Payment Links are hosted checkout pages - no backend code required.
 4. **$100 One-Time**
 
 #### Recurring Monthly Donations
+
 5. **$10/month**
    - Product name: "Sustaining Member - $10/month"
    - Price: $10 USD (recurring monthly)
@@ -58,28 +62,30 @@ Stripe Payment Links are hosted checkout pages - no backend code required.
 Once you have the 8 Payment Link URLs, edit `donate.html`:
 
 **Find this section** (around line 1130):
+
 ```javascript
 const paymentLinks = {
-    'one-time': {
-        10: 'https://donate.stripe.com/REPLACE_WITH_10_LINK',
-        25: 'https://donate.stripe.com/REPLACE_WITH_25_LINK',
-        50: 'https://donate.stripe.com/REPLACE_WITH_50_LINK',
-        100: 'https://donate.stripe.com/REPLACE_WITH_100_LINK',
-        custom: 'https://donate.stripe.com/REPLACE_WITH_CUSTOM_LINK'
-    },
-    'recurring': {
-        10: 'https://donate.stripe.com/REPLACE_WITH_10_MONTHLY_LINK',
-        25: 'https://donate.stripe.com/REPLACE_WITH_25_MONTHLY_LINK',
-        50: 'https://donate.stripe.com/REPLACE_WITH_50_MONTHLY_LINK',
-        100: 'https://donate.stripe.com/REPLACE_WITH_100_MONTHLY_LINK',
-        custom: 'https://donate.stripe.com/REPLACE_WITH_CUSTOM_MONTHLY_LINK'
-    }
+  "one-time": {
+    10: "https://donate.stripe.com/REPLACE_WITH_10_LINK",
+    25: "https://donate.stripe.com/REPLACE_WITH_25_LINK",
+    50: "https://donate.stripe.com/REPLACE_WITH_50_LINK",
+    100: "https://donate.stripe.com/REPLACE_WITH_100_LINK",
+    custom: "https://donate.stripe.com/REPLACE_WITH_CUSTOM_LINK",
+  },
+  recurring: {
+    10: "https://donate.stripe.com/REPLACE_WITH_10_MONTHLY_LINK",
+    25: "https://donate.stripe.com/REPLACE_WITH_25_MONTHLY_LINK",
+    50: "https://donate.stripe.com/REPLACE_WITH_50_MONTHLY_LINK",
+    100: "https://donate.stripe.com/REPLACE_WITH_100_MONTHLY_LINK",
+    custom: "https://donate.stripe.com/REPLACE_WITH_CUSTOM_MONTHLY_LINK",
+  },
 };
 ```
 
 **Replace each `REPLACE_WITH_...` with your actual Payment Link URLs.**
 
 **For custom amounts:**
+
 - One-time custom: Create a Payment Link that allows customer to enter amount
 - Recurring custom: Create a recurring link that allows custom amount
 - (Or duplicate the $25 links and users can adjust on Stripe's checkout page)
@@ -89,6 +95,7 @@ const paymentLinks = {
 ## 🧪 Test After Configuration
 
 1. **Deploy updated donate.html:**
+
    ```powershell
    git add donate.html
    git commit -m "feat: Add Stripe Payment Link URLs"
@@ -117,6 +124,7 @@ const paymentLinks = {
 **New custom success page at:** `www.goodflippindesign.com/donate/success`
 
 **Features:**
+
 - ✅ Custom glowing energy burst SVG (no emojis)
 - ✅ Animated particles orbiting center
 - ✅ Pulsing glow effect
@@ -192,6 +200,7 @@ Stripe Payment Links support **customer-adjustable pricing**:
 3. Users can enter any amount at checkout
 
 **Recommended:**
+
 - Use this for "custom" links
 - Let users enter exact amount they want
 - Track in GA with actual value from Stripe
@@ -201,19 +210,21 @@ Stripe Payment Links support **customer-adjustable pricing**:
 ## 📞 Stripe Support
 
 **If you hit issues:**
+
 - Stripe docs: https://stripe.com/docs/payment-links
 - Dashboard: https://dashboard.stripe.com/payment-links
 - Support: https://support.stripe.com
 
 **Common issues:**
+
 - **"Payment Link requires Live mode"**: Switch Stripe dashboard to Live (not Test)
 - **"Success URL invalid"**: Must be HTTPS and full URL
 - **"No receipt email"**: Enable in Stripe → Settings → Emails → Customer emails
 
 ---
 
-**Time estimate:** 15-20 min total  
-**Blocker removed:** Donations will process for real  
+**Time estimate:** 15-20 min total
+**Blocker removed:** Donations will process for real
 **Visual upgrade:** Custom glowing artwork (no generic emojis)
 
 **Do this ASAP to start accepting donations!**

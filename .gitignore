@@ -4,6 +4,11 @@ node_modules/
 .env
 .DS_Store
 
+# Office temp files
+~$*.docx
+~$*.pptx
+~$*.xlsx
+
 # Security - NEVER commit these!
 *_SECURE_KEYS/
 **/_SECURE_KEYS/
@@ -39,3 +44,6 @@ Brand Assets Development/Final Assets/**/*.jpeg
 # Allow small preview PNGs
 !Brand Assets Development/Final Assets/**/*-preview-*.png
 !Brand Assets Development/Final Assets/**/*-thumb-*.png
+
+# Local Netlify folder
+.netlify
