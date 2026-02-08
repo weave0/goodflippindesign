@@ -12,6 +12,7 @@ node_modules/
 # Security - NEVER commit these!
 *_SECURE_KEYS/
 **/_SECURE_KEYS/
+STRIPE_API_KEY.txt
 
 # Development projects (too large for main repo)
 GFD Dev Projects/
