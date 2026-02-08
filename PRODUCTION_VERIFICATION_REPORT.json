@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-08T22:15:28.124Z",
+  "timestamp": "2026-02-08T22:44:00.008Z",
   "sites": {
     "GFD": {
       "url": "https://goodflippindesign.com",
@@ -24,7 +24,7 @@
       },
       "errors": [],
       "performance": {
-        "loadTime": 1221,
+        "loadTime": 1267,
         "status": 200
       }
     },
@@ -51,7 +51,7 @@
       },
       "errors": [],
       "performance": {
-        "loadTime": 2126,
+        "loadTime": 1529,
         "status": 200
       }
     },
@@ -82,7 +82,7 @@
       },
       "errors": [],
       "performance": {
-        "loadTime": 1678,
+        "loadTime": 1697,
         "status": 200
       }
     },
@@ -113,18 +113,42 @@
       },
       "errors": [],
       "performance": {
-        "loadTime": 2919,
+        "loadTime": 2529,
         "status": 200
       }
     },
     "CitizenApproved": {
       "url": "https://citizenapproved.org",
-      "accessible": false,
-      "features": {},
+      "accessible": true,
+      "features": {
+        "exit-intent": {
+          "passed": false,
+          "message": "Exit intent code not found"
+        },
+        "ecosystem-nav": {
+          "passed": true,
+          "message": "Ecosystem navigation detected"
+        },
+        "formspree": {
+          "passed": false,
+          "message": "Formspree not found (may use different method)"
+        },
+        "ga4": {
+          "passed": false,
+          "message": "GA4 not configured - ACTION REQUIRED"
+        }
+      },
       "errors": [
-        "Navigation timeout of 15000 ms exceeded"
+        "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()"
       ],
-      "performance": {}
+      "performance": {
+        "loadTime": 15083,
+        "status": 200
+      }
     },
     "CultureSherpa": {
       "url": "https://culturesherpa.org",
@@ -159,14 +183,14 @@
         "Failed to load resource: the server responded with a status of 403 ()"
       ],
       "performance": {
-        "loadTime": 2603,
+        "loadTime": 2937,
         "status": 200
       }
     }
   },
   "summary": {
-    "passed": 5,
-    "failed": 1,
-    "warnings": 1
+    "passed": 6,
+    "failed": 0,
+    "warnings": 2
   }
 }

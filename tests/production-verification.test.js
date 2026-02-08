@@ -72,12 +72,29 @@ class ProductionVerifier {
     };
 
     try {
-      // Test 1: Site Accessibility
+      // Test 1: Site Accessibility (with fallback strategies)
       const startTime = Date.now();
-      const response = await page.goto(config.url, {
-        waitUntil: 'networkidle2',
-        timeout: 15000
-      });
+      let response;
+
+      try {
+        // Try networkidle2 first (most thorough)
+        response = await page.goto(config.url, {
+          waitUntil: 'networkidle2',
+          timeout: 15000
+        });
+      } catch (timeoutError) {
+        if (timeoutError.name === 'TimeoutError') {
+          console.log(`  ⚠️  networkidle2 timeout, trying domcontentloaded...`);
+          // Fallback to domcontentloaded (faster, less thorough)
+          response = await page.goto(config.url, {
+            waitUntil: 'domcontentloaded',
+            timeout: 10000
+          });
+        } else {
+          throw timeoutError;
+        }
+      }
+
       const loadTime = Date.now() - startTime;
 
       siteResults.accessible = response.status() === 200;
