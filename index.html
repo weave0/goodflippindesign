@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Cache bust: 2026-02-05-19:07 -->
+<!-- Cache bust: 2026-02-08-10:30 -->
 <html lang="en">
 
 <head>
@@ -282,6 +282,7 @@
             display: flex;
             align-items: center;
             padding: 9rem 2rem 6rem;
+            /* Adjusted for desktop nav height */
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.03) 0%, rgba(16, 185, 129, 0.02) 100%);
             position: relative;
         }
@@ -1715,7 +1716,8 @@
             background: rgba(13, 13, 13, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            z-index: 105;
+            z-index: 160;
+            /* Above ecosystem nav (150) for proper overlay hierarchy */
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -1885,6 +1887,15 @@
         }
 
         @media (max-width: 600px) {
+
+            /* Reduce main nav positioning to match smaller ecosystem nav */
+            body>nav:not(.gfd-ecosystem-nav) {
+                top: 46px;
+                /* Reduced from 60px to match compact ecosystem nav */
+                padding: 0.75rem 1.5rem;
+                /* Reduced padding for mobile */
+            }
+
             .process-grid {
                 grid-template-columns: 1fr;
             }
@@ -1902,6 +1913,12 @@
             /* Ensure minimum 14px font on mobile */
             body {
                 font-size: 16px;
+            }
+
+            /* Adjust hero padding for reduced mobile nav height */
+            .hero {
+                padding: 7rem 2rem 6rem;
+                /* Reduced from 9rem to account for smaller nav */
             }
 
             p,

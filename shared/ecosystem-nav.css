@@ -247,15 +247,30 @@
 
 @media (max-width: 600px) {
   .gfd-ecosystem-nav {
-    padding: 0.5rem 1rem;
+    padding: 0.25rem 1rem; /* Reduced from 0.5rem for compact mobile header */
   }
 
   .dropdown-content {
     padding: 1.5rem 1rem;
   }
 
+  .ecosystem-logo {
+    height: 20px; /* Reduced from 24px for more compact header */
+  }
+
   .ecosystem-title {
     display: none; /* Hide text on very small screens, show only logo */
+  }
+
+  .ecosystem-toggle {
+    min-width: 44px; /* Maintain WCAG touch target */
+    min-height: 44px;
+    padding: 0.375rem;
+  }
+
+  .nav-link {
+    min-height: 44px; /* Ensure WCAG compliant touch targets */
+    padding: 0.75rem 1rem;
   }
 
   .nav-link-title {
