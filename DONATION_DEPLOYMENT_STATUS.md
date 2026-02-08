@@ -1,6 +1,6 @@
 # 🎯 Donation System Deployment Status
 
-**Generated**: February 7, 2026  
+**Generated**: February 7, 2026
 **Status**: Partial Deployment Complete
 
 ---
@@ -9,7 +9,7 @@
 
 ### GFD (goodflippindesign.com)
 
-- ✅ Donation page **LIVE**: https://goodflippindesign.com/donate.html
+- ✅ Donation page **LIVE**: <https://goodflippindesign.com/donate.html>
 - ✅ Stripe integration present
 - ⏳ **NEEDS**: STRIPE env var in Cloudflare Pages
 - 📝 **Action**: Add `STRIPE` environment variable
@@ -24,7 +24,7 @@
 ### GFV (goodflippinvibes.com)
 
 - ✅ donate.html committed to Git (commit 825da93)
-- ✅ Pushed to GitHub  
+- ✅ Pushed to GitHub
 - ✅ **STRIPE env var configured** (you already added this!)
 - ❌ **404 on live site** - Cloudflare Pages hasn't deployed it
 - ⏳ **NEEDS**: Manual deployment trigger only
@@ -54,15 +54,15 @@ The files are in GitHub but Cloudflare Pages hasn't deployed them. You need to m
 
 **Steps:**
 
-1. Go to: https://dash.cloudflare.com/pages
+1. Go to: <https://dash.cloudflare.com/pages>
 2. Find **"globaldeets"** project → click it
 3. Go to **Deployments** tab
 4. Find the latest deployment → click **"..."** menu → **"Retry deployment"**
 5. Wait 2-3 minutes for deployment to complete
-6. Test: https://globaldeets.com/donate.html (should work)
+6. Test: <https://globaldeets.com/donate.html> (should work)
 7. Repeat for **"goodflippinvibes"** project:
    - Deployments → Retry latest deployment
-   - Test: https://goodflippinvibes.com/donate.html
+   - Test: <https://goodflippinvibes.com/donate.html>
 
 **Why this happens**: Git push usually auto-triggers deployment, but sometimes Cloudflare's webhook doesn't fire or there's a queue delay.
 
@@ -76,7 +76,7 @@ After deployments complete, add STRIPE keys to enable payment processing.
 
 **Required for**: GFD, GlobalDeets (GFV already has it ✅)
 
-1. Go to: https://dash.cloudflare.com/pages
+1. Go to: <https://dash.cloudflare.com/pages>
 2. Click on project (e.g., **"goodflippindesign"**)
 3. Go to **Settings** → **Environment variables**
 4. Click **"Add variable"**
@@ -91,7 +91,7 @@ Repeat for **"globaldeets"** project.
 
 #### B. Vercel Configuration (AI Aimate - if needed later)
 
-1. Go to: https://vercel.com/dashboard
+1. Go to: <https://vercel.com/dashboard>
 2. Find **"ai-aimate"** project (or similar name)
 3. Go to **Settings** → **Environment Variables**
 4. Add variable:
@@ -106,11 +106,11 @@ Repeat for **"globaldeets"** project.
 
 After completing steps 1-2, test each donation page:
 
-| Site | URL to Test | Expected Result |
-|------|-------------|-----------------|
-| GFD | https://goodflippindesign.com/donate.html | ✅ Already working, test payment after STRIPE added |
-| GlobalDeets | https://globaldeets.com/donate.html | Should load after retry deployment |
-| GFV | https://goodflippinvibes.com/donate.html | Should load + accept payments (STRIPE configured ✅) |
+| Site        | URL to Test                               | Expected Result                                      |
+| ----------- | ----------------------------------------- | ---------------------------------------------------- |
+| GFD         | <https://goodflippindesign.com/donate.html> | ✅ Already working, test payment after STRIPE added  |
+| GlobalDeets | <https://globaldeets.com/donate.html>       | Should load after retry deployment                   |
+| GFV         | <https://goodflippinvibes.com/donate.html>  | Should load + accept payments (STRIPE configured ✅) |
 
 **Test Payment Flow**:
 
@@ -129,10 +129,10 @@ After completing steps 1-2, test each donation page:
 ### Deployment Status
 
 - [ ] **GlobalDeets**: Retry Cloudflare Pages deployment
-- [ ] **GFV**: Retry Cloudflare Pages deployment  
+- [ ] **GFV**: Retry Cloudflare Pages deployment
 - [ ] Wait 2-3 minutes for deployments to complete
-- [ ] Verify https://globaldeets.com/donate.html loads
-- [ ] Verify https://goodflippinvibes.com/donate.html loads
+- [ ] Verify <https://globaldeets.com/donate.html> loads
+- [ ] Verify <https://goodflippinvibes.com/donate.html> loads
 
 ### STRIPE Configuration
 
@@ -195,14 +195,14 @@ Projects might be named differently. Look for:
 
 ## 📊 Ecosystem-Wide Status
 
-| Site | Donation Page | Stripe Config | Payment Ready | Priority |
-|------|---------------|---------------|---------------|----------|
-| **GFD** | ✅ Live | ⏳ Need to add | ⏳ After config | 🔥 HIGH |
-| **GlobalDeets** | ⏳ Deploying | ⏳ Need to add | ⏳ After both | 🔥 HIGH |
-| **GFV** | ⏳ Deploying | ✅ Configured | ✅ After deploy | 🔥 HIGH |
-| **AI Aimate** | N/A | ⏳ Optional | N/A | 🔵 LOW |
-| **CitizenApproved** | N/A | ✅ Configured | N/A | 🔵 LOW |
-| **CultureSherpa** | N/A | N/A (S3 only) | N/A | 🔵 LOW |
+| Site                | Donation Page | Stripe Config  | Payment Ready   | Priority |
+| ------------------- | ------------- | -------------- | --------------- | -------- |
+| **GFD**             | ✅ Live       | ⏳ Need to add | ⏳ After config | 🔥 HIGH  |
+| **GlobalDeets**     | ⏳ Deploying  | ⏳ Need to add | ⏳ After both   | 🔥 HIGH  |
+| **GFV**             | ⏳ Deploying  | ✅ Configured  | ✅ After deploy | 🔥 HIGH  |
+| **AI Aimate**       | N/A           | ⏳ Optional    | N/A             | 🔵 LOW   |
+| **CitizenApproved** | N/A           | ✅ Configured  | N/A             | 🔵 LOW   |
+| **CultureSherpa**   | N/A           | N/A (S3 only)  | N/A             | 🔵 LOW   |
 
 ---
 
