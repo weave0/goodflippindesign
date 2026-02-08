@@ -487,17 +487,33 @@
             box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
         }
 
+        .donation-amount.recommended {
+            border-color: rgba(16, 185, 129, 0.8);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(139, 92, 246, 0.10) 100%);
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            animation: recommended-pulse 3s ease-in-out infinite;
+        }
+
         .donation-amount.recommended::after {
-            content: '⭐';
+            content: '💖 RECOMMENDED';
             position: absolute;
-            top: -8px;
-            right: -8px;
-            background: var(--gradient-gold);
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-green);
             color: #0a0a0a;
-            font-size: 0.875rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            box-shadow: var(--glow-gold);
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(16, 185, 129, 0.6);
+            white-space: nowrap;
+        }
+
+        @keyframes recommended-pulse {
+            0%, 100% { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 6px 30px rgba(16, 185, 129, 0.6); }
         }
 
         .custom-amount input {
@@ -924,8 +940,8 @@
                         </div>
 
                         <div class="donation-amounts">
-                            <button class="donation-amount" data-amount="10">$10</button>
-                            <button class="donation-amount recommended" data-amount="25">$25</button>
+                            <button class="donation-amount recommended" data-amount="10">$10</button>
+                            <button class="donation-amount" data-amount="25">$25</button>
                             <button class="donation-amount" data-amount="50">$50</button>
                             <button class="donation-amount" data-amount="100">$100</button>
                         </div>
