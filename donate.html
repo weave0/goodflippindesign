@@ -496,17 +496,33 @@
             box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
         }
 
+        .donation-amount.recommended {
+            border-color: rgba(16, 185, 129, 0.8);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(139, 92, 246, 0.10) 100%);
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            animation: recommended-pulse 3s ease-in-out infinite;
+        }
+
         .donation-amount.recommended::after {
-            content: '⭐';
+            content: '💖 RECOMMENDED';
             position: absolute;
-            top: -8px;
-            right: -8px;
-            background: var(--gradient-gold);
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-green);
             color: #0a0a0a;
-            font-size: 0.875rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            box-shadow: var(--glow-gold);
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(16, 185, 129, 0.6);
+            white-space: nowrap;
+        }
+
+        @keyframes recommended-pulse {
+            0%, 100% { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 6px 30px rgba(16, 185, 129, 0.6); }
         }
 
         .custom-amount input {
@@ -1188,7 +1204,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div style="background: rgba(10, 10, 10, 0.5); padding: 2rem; border-radius: 12px; border-left: 4px solid #10b981; margin-bottom: 2rem;">
                     <h3 style="color: var(--text); font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">💬 The Founder's Story</h3>
                     <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem; font-size: 0.9375rem;">
@@ -1202,7 +1218,7 @@
                     </p>
                     <p style="color: var(--text-muted); text-align: right; margin-top: 1.5rem; font-size: 0.875rem; font-weight: 600;">— Brett Weaver, Founder & Creator</p>
                 </div>
-                
+
                 <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
                     <a href="https://gofund.me/f07ea3faf" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.75rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 1rem 2rem; border-radius: 999px; font-weight: 700; font-size: 1rem; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 30px rgba(16, 185, 129, 0.6)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(16, 185, 129, 0.4)';">
                         🤝 View GoFundMe Campaign ($300K Goal)
@@ -1264,8 +1280,8 @@
                         </div>
 
                         <div class="donation-amounts">
-                            <button class="donation-amount" data-amount="10">$10</button>
-                            <button class="donation-amount recommended" data-amount="25">$25</button>
+                            <button class="donation-amount recommended" data-amount="10">$10</button>
+                            <button class="donation-amount" data-amount="25">$25</button>
                             <button class="donation-amount" data-amount="50">$50</button>
                             <button class="donation-amount" data-amount="100">$100</button>
                         </div>

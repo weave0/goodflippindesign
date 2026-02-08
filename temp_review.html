@@ -3552,10 +3552,10 @@
             <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-white/10 rounded-2xl p-8 max-w-md w-full relative" style="animation: slideUp 0.4s ease;">
                 <button id="exit-intent-close" class="absolute top-4 right-4 text-white/40 hover:text-white transition-colors" aria-label="Close">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                
+
                 <div class="text-center mb-6">
                     <div class="text-4xl mb-4">⚡</div>
                     <h3 class="font-bold text-2xl mb-2 text-white">Before you go...</h3>
@@ -3626,7 +3626,7 @@
                 </div>
                 <button id="social-proof-close" class="text-white/30 hover:text-white/50 transition-colors" aria-label="Hide notifications">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
@@ -3635,25 +3635,52 @@
 
     <style>
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
+
         @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
+
         @keyframes slideInLeft {
-            from { transform: translateX(-100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
+
         @media (max-width: 768px) {
-            #social-proof-feed { bottom: 80px; left: 1rem; right: 1rem; max-width: none; }
+            #social-proof-feed {
+                bottom: 80px;
+                left: 1rem;
+                right: 1rem;
+                max-width: none;
+            }
         }
     </style>
 
     <!-- CONVERSION FEATURES JAVASCRIPT -->
     <script>
-        (function() {
+        (function () {
             'use strict';
 
             // ── Exit Intent Detection ──
@@ -3666,18 +3693,18 @@
             function showExitIntent() {
                 if (exitIntentShown || !exitOverlay) return;
                 if (sessionStorage.getItem('gfd_exit_intent_seen')) return;
-                
+
                 exitIntentShown = true;
                 exitOverlay.classList.remove('hidden');
                 sessionStorage.setItem('gfd_exit_intent_seen', '1');
-                
+
                 if (typeof gtag === 'function') {
                     gtag('event', 'exit_intent_shown', { category: 'conversion' });
                 }
             }
 
             // Desktop: cursor leaves viewport at top
-            document.addEventListener('mouseout', function(e) {
+            document.addEventListener('mouseout', function (e) {
                 if (!e.relatedTarget && e.clientY < 10 && !exitIntentShown) {
                     setTimeout(showExitIntent, 100);
                 }
@@ -3686,7 +3713,7 @@
             // Mobile: rapid upward scroll (back gesture intent)
             let lastScrollY = window.scrollY;
             let scrollVelocity = 0;
-            window.addEventListener('scroll', function() {
+            window.addEventListener('scroll', function () {
                 const currentScrollY = window.scrollY;
                 scrollVelocity = lastScrollY - currentScrollY;
                 if (currentScrollY < 100 && scrollVelocity > 50 && !exitIntentShown) {
@@ -3697,42 +3724,42 @@
 
             // Close exit intent
             if (exitClose) {
-                exitClose.addEventListener('click', function() {
+                exitClose.addEventListener('click', function () {
                     exitOverlay.classList.add('hidden');
                 });
             }
             if (exitOverlay) {
-                exitOverlay.addEventListener('click', function(e) {
+                exitOverlay.addEventListener('click', function (e) {
                     if (e.target === exitOverlay) exitOverlay.classList.add('hidden');
                 });
             }
 
             // Handle exit intent form submission (Formspree integration)
             if (exitForm) {
-                exitForm.addEventListener('submit', async function(e) {
+                exitForm.addEventListener('submit', async function (e) {
                     e.preventDefault();
                     const email = document.getElementById('exit-email').value;
-                    
+
                     try {
                         // Formspree endpoint for GFD Newsletter
                         const response = await fetch('https://formspree.io/f/xanyedqp', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ 
+                            body: JSON.stringify({
                                 email: email,
                                 source: 'exit_intent',
                                 site: 'Good Flippin Design'
                             })
                         });
-                        
+
                         if (response.ok) {
                             exitForm.classList.add('hidden');
                             exitSuccess.classList.remove('hidden');
-                            
+
                             if (typeof gtag === 'function') {
                                 gtag('event', 'exit_intent_conversion', { category: 'conversion', value: 1 });
                             }
-                            
+
                             setTimeout(() => exitOverlay.classList.add('hidden'), 3000);
                         }
                     } catch (error) {
@@ -3753,7 +3780,7 @@
                 if (stickyBarShown || stickyBarDismissed || !stickyBar) return;
                 stickyBarShown = true;
                 stickyBar.style.transform = 'translateY(0)';
-                
+
                 if (typeof gtag === 'function') {
                     gtag('event', 'sticky_cta_shown', { category: 'conversion' });
                 }
@@ -3761,9 +3788,9 @@
 
             // Show after 10 seconds OR 50% scroll
             setTimeout(showStickyBar, 10000);
-            
+
             let scrollTriggered = false;
-            window.addEventListener('scroll', function() {
+            window.addEventListener('scroll', function () {
                 if (scrollTriggered) return;
                 const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
                 if (scrollPercent > 50) {
@@ -3773,8 +3800,8 @@
             });
 
             // Context-aware CTA text based on current section
-            const sectionObserver = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
+            const sectionObserver = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
                     if (entry.isIntersecting && stickyText) {
                         const section = entry.target.id;
                         const messages = {
@@ -3790,12 +3817,12 @@
                 });
             }, { threshold: 0.5 });
 
-            document.querySelectorAll('section[id]').forEach(function(section) {
+            document.querySelectorAll('section[id]').forEach(function (section) {
                 sectionObserver.observe(section);
             });
 
             if (stickyClose) {
-                stickyClose.addEventListener('click', function() {
+                stickyClose.addEventListener('click', function () {
                     stickyBar.style.transform = 'translateY(100%)';
                     sessionStorage.setItem('gfd_sticky_dismissed', '1');
                 });
@@ -3807,7 +3834,7 @@
             const socialText = document.getElementById('social-proof-text');
             const socialTime = document.getElementById('social-proof-time');
             const socialClose = document.getElementById('social-proof-close');
-            
+
             const activities = [
                 { icon: '💼', text: 'Someone just viewed the portfolio', time: '2m ago' },
                 { icon: '📧', text: 'New inquiry about web development', time: '5m ago' },
@@ -3823,14 +3850,14 @@
 
             function showSocialProof() {
                 if (socialProofDismissed || !socialProof) return;
-                
+
                 const activity = activities[activityIndex % activities.length];
                 socialIcon.textContent = activity.icon;
                 socialText.textContent = activity.text;
                 socialTime.textContent = activity.time;
-                
+
                 socialProof.classList.remove('hidden');
-                
+
                 setTimeout(() => socialProof.classList.add('hidden'), 6000);
                 activityIndex++;
             }
@@ -3840,7 +3867,7 @@
             setInterval(showSocialProof, 45000);
 
             if (socialClose) {
-                socialClose.addEventListener('click', function() {
+                socialClose.addEventListener('click', function () {
                     socialProof.classList.add('hidden');
                     sessionStorage.setItem('gfd_social_dismissed', '1');
                 });
