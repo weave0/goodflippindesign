@@ -1,0 +1,172 @@
+{
+  "timestamp": "2026-02-08T22:15:28.124Z",
+  "sites": {
+    "GFD": {
+      "url": "https://goodflippindesign.com",
+      "accessible": true,
+      "features": {
+        "exit-intent": {
+          "passed": false,
+          "message": "Exit intent code not found"
+        },
+        "ecosystem-nav": {
+          "passed": true,
+          "message": "Ecosystem navigation detected"
+        },
+        "formspree": {
+          "passed": false,
+          "message": "Formspree not found (may use different method)"
+        },
+        "ga4": {
+          "passed": true,
+          "message": "GA4 tracking configured"
+        }
+      },
+      "errors": [],
+      "performance": {
+        "loadTime": 1221,
+        "status": 200
+      }
+    },
+    "GoodFlippinVibes": {
+      "url": "https://goodflippinvibes.com",
+      "accessible": true,
+      "features": {
+        "exit-intent": {
+          "passed": false,
+          "message": "Exit intent code not found"
+        },
+        "ecosystem-nav": {
+          "passed": true,
+          "message": "Ecosystem navigation detected"
+        },
+        "formspree": {
+          "passed": false,
+          "message": "Formspree not found (may use different method)"
+        },
+        "ga4": {
+          "passed": true,
+          "message": "GA4 tracking configured"
+        }
+      },
+      "errors": [],
+      "performance": {
+        "loadTime": 2126,
+        "status": 200
+      }
+    },
+    "GlobalDeets": {
+      "url": "https://globaldeets.com",
+      "accessible": true,
+      "features": {
+        "sticky-cta": {
+          "passed": false,
+          "message": "No sticky CTA detected"
+        },
+        "social-proof": {
+          "passed": false,
+          "message": "Social proof not triggered"
+        },
+        "ecosystem-nav": {
+          "passed": true,
+          "message": "Ecosystem navigation detected"
+        },
+        "formspree": {
+          "passed": false,
+          "message": "Formspree not found (may use different method)"
+        },
+        "ga4": {
+          "passed": true,
+          "message": "GA4 tracking configured"
+        }
+      },
+      "errors": [],
+      "performance": {
+        "loadTime": 1678,
+        "status": 200
+      }
+    },
+    "AIAimate": {
+      "url": "https://aiaimate.com/support",
+      "accessible": true,
+      "features": {
+        "recommended-tier": {
+          "passed": false,
+          "message": "RECOMMENDED badge not found on $10 tier"
+        },
+        "social-proof": {
+          "passed": false,
+          "message": "Social proof not triggered"
+        },
+        "ecosystem-nav": {
+          "passed": true,
+          "message": "Ecosystem navigation detected"
+        },
+        "formspree": {
+          "passed": false,
+          "message": "Formspree not found (may use different method)"
+        },
+        "ga4": {
+          "passed": true,
+          "message": "GA4 tracking configured"
+        }
+      },
+      "errors": [],
+      "performance": {
+        "loadTime": 2919,
+        "status": 200
+      }
+    },
+    "CitizenApproved": {
+      "url": "https://citizenapproved.org",
+      "accessible": false,
+      "features": {},
+      "errors": [
+        "Navigation timeout of 15000 ms exceeded"
+      ],
+      "performance": {}
+    },
+    "CultureSherpa": {
+      "url": "https://culturesherpa.org",
+      "accessible": true,
+      "features": {
+        "exit-intent": {
+          "passed": false,
+          "message": "Exit intent code not found"
+        },
+        "social-proof": {
+          "passed": false,
+          "message": "Social proof not triggered"
+        },
+        "ecosystem-nav": {
+          "passed": true,
+          "message": "Ecosystem navigation detected"
+        },
+        "formspree": {
+          "passed": false,
+          "message": "Formspree not found (may use different method)"
+        },
+        "ga4": {
+          "passed": true,
+          "message": "GA4 tracking configured"
+        }
+      },
+      "errors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Manifest fetch from https://culturesherpa.org/site.webmanifest failed, code 404",
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ],
+      "performance": {
+        "loadTime": 2603,
+        "status": 200
+      }
+    }
+  },
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "warnings": 1
+  }
+}
