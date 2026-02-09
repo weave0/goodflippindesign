@@ -6,12 +6,12 @@ Write-Host "================================================" -ForegroundColor C
 Write-Host ""
 
 $sites = @(
-    @{Name="Good Flippin Design"; URL="https://goodflippindesign.com"},
-    @{Name="Good Flippin Vibes"; URL="https://goodflippinvibes.com"},
-    @{Name="GlobalDeets"; URL="https://globaldeets.com"},
-    @{Name="CitizenApproved"; URL="https://citizenapproved.org"},
-    @{Name="AI Aimate"; URL="https://aiaimate.com"},
-    @{Name="CultureSherpa"; URL="https://culturesherpa.org"}
+    @{Name = "Good Flippin Design"; URL = "https://goodflippindesign.com" },
+    @{Name = "Good Flippin Vibes"; URL = "https://goodflippinvibes.com" },
+    @{Name = "GlobalDeets"; URL = "https://globaldeets.com" },
+    @{Name = "CitizenApproved"; URL = "https://citizenapproved.org" },
+    @{Name = "AI Aimate"; URL = "https://aiaimate.com" },
+    @{Name = "CultureSherpa"; URL = "https://culturesherpa.org" }
 )
 
 $measurementId = "G-WM6Q66W9W0"
@@ -20,44 +20,47 @@ $results = @()
 foreach ($site in $sites) {
     Write-Host "Testing: $($site.Name)" -ForegroundColor Yellow
     Write-Host "  URL: $($site.URL)" -ForegroundColor Gray
-    
+
     try {
         # Fetch homepage
         $response = Invoke-WebRequest -Uri $site.URL -UseBasicParsing -TimeoutSec 10
-        
+
         # Check if measurement ID is in HTML
         if ($response.Content -match $measurementId) {
             Write-Host "  ✅ GA4 $measurementId found in HTML" -ForegroundColor Green
-            
+
             # Check if gtag.js is loaded
             if ($response.Content -match "googletagmanager.com/gtag/js\?id=$measurementId") {
                 Write-Host "  ✅ gtag.js script tag present" -ForegroundColor Green
                 $status = "PASS"
-            } else {
+            }
+            else {
                 Write-Host "  ⚠️  Measurement ID found but gtag.js script missing" -ForegroundColor Yellow
                 $status = "PARTIAL"
             }
-        } else {
+        }
+        else {
             Write-Host "  ❌ GA4 $measurementId NOT FOUND" -ForegroundColor Red
             $status = "FAIL"
         }
-        
+
         # Check status code
         if ($response.StatusCode -eq 200) {
             Write-Host "  ✅ Site accessible (HTTP $($response.StatusCode))" -ForegroundColor Green
         }
-        
-    } catch {
+
+    }
+    catch {
         Write-Host "  ❌ Error fetching site: $($_.Exception.Message)" -ForegroundColor Red
         $status = "ERROR"
     }
-    
+
     $results += @{
-        Site = $site.Name
-        URL = $site.URL
+        Site   = $site.Name
+        URL    = $site.URL
         Status = $status
     }
-    
+
     Write-Host ""
 }
 
@@ -67,10 +70,10 @@ Write-Host "📊 VERIFICATION SUMMARY" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host ""
 
-$passCount = ($results | Where-Object {$_.Status -eq "PASS"}).Count
-$failCount = ($results | Where-Object {$_.Status -eq "FAIL"}).Count
-$partialCount = ($results | Where-Object {$_.Status -eq "PARTIAL"}).Count
-$errorCount = ($results | Where-Object {$_.Status -eq "ERROR"}).Count
+$passCount = ($results | Where-Object { $_.Status -eq "PASS" }).Count
+$failCount = ($results | Where-Object { $_.Status -eq "FAIL" }).Count
+$partialCount = ($results | Where-Object { $_.Status -eq "PARTIAL" }).Count
+$errorCount = ($results | Where-Object { $_.Status -eq "ERROR" }).Count
 
 Write-Host "Results:"
 Write-Host "  ✅ PASS: $passCount" -ForegroundColor Green
@@ -114,7 +117,8 @@ if ($failCount -gt 0 -or $errorCount -gt 0) {
     Write-Host "2. Redeploy affected sites to pick up env var changes" -ForegroundColor White
     Write-Host ""
     Write-Host "3. Verify CultureSherpa S3/CloudFront deployment is live" -ForegroundColor White
-} else {
+}
+else {
     Write-Host "✅ All sites verified! Ready for GA4 DebugView testing:" -ForegroundColor Green
     Write-Host ""
     Write-Host "1. Install Google Analytics Debugger Chrome extension" -ForegroundColor White
