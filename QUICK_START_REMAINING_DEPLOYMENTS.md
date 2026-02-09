@@ -1,7 +1,7 @@
 # 🚀 Quick Start: Complete Remaining Deployments
 
-**Current Status**: 2/6 sites live with GA4 tracking  
-**Time to Complete**: 20-30 minutes  
+**Current Status**: 2/6 sites live with GA4 tracking
+**Time to Complete**: 20-30 minutes
 **Updated**: 2026-02-09 12:22 PST
 
 ---
@@ -37,6 +37,7 @@ vercel --prod
 **Issue**: Cloudflare Pages not auto-deploying
 
 **Option A: Cloudflare Dashboard**
+
 1. Go to https://dash.cloudflare.com/pages
 2. Find "goodflippinvibes" project
 3. Click **Create deployment**
@@ -44,6 +45,7 @@ vercel --prod
 5. Click **Deploy**
 
 **Option B: Cloudflare CLI**
+
 ```powershell
 cd z:\good-flippin-vibes
 wrangler pages deploy . --project-name=goodflippinvibes
@@ -56,11 +58,13 @@ wrangler pages deploy . --project-name=goodflippinvibes
 **Same as Good Flippin Vibes above**
 
 **Cloudflare Dashboard**:
+
 1. Go to https://dash.cloudflare.com/pages
 2. Find "globaldeets" project
 3. **Create deployment** → **Production**
 
 **OR CLI**:
+
 ```powershell
 cd z:\globaldeets
 wrangler pages deploy . --project-name=globaldeets
@@ -82,6 +86,7 @@ cd z:\CultureSherpa
 ```
 
 **OR manually**:
+
 ```powershell
 # After build above
 aws s3 sync dist/ s3://culturesherpa-bucket/ --delete
@@ -108,34 +113,40 @@ cd z:\GFD
 ### Check Deployment Logs
 
 **Vercel**:
+
 ```powershell
 vercel ls  # List recent deployments
 vercel inspect <url>  # Check specific deployment
 ```
 
 **Cloudflare Pages**:
+
 - Go to dashboard → Deployments tab
 - Check build logs for errors
 
 **CultureSherpa**:
+
 - Check PowerShell output from deploy script
 - AWS CloudFront console for invalidation status
 
 ### Common Issues
 
 **"vercel: command not found"**
+
 ```powershell
 npm install -g vercel
 vercel login
 ```
 
 **"wrangler: command not found"**
+
 ```powershell
 npm install -g wrangler
 wrangler login
 ```
 
 **"aws: command not found"**
+
 - Install AWS CLI: https://aws.amazon.com/cli/
 - Configure: `aws configure`
 
