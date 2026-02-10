@@ -1,32 +1,35 @@
 # Google Analytics 4 - Enterprise Deployment Summary
 
-**Deployment Date:** February 9, 2026  
+**Deployment Date:** February 9, 2026
 **Status:** ✅ **COMPLETE** - 100% Coverage Across Ecosystem
 
 ---
 
 ## Deployment Status
 
-| Site | URL | GA4 Property ID | Environment | Notes |
-|------|-----|-----------------|-------------|-------|
-| **Good Flippin Design** | goodflippindesign.com | `G-WM6Q66W9W0` | Production | Main GFD property |
-| **GFV (Good Flippin Vibes)** | goodflippinvibes.com | `G-XLT2QSNB3W` | Production | Dedicated wellness property |
-| **globaldeets** | globaldeets.com | `G-QPPVJM1B60` | Production | BI ecosystem property |
-| **CitizenApproved** | citizenapproved.org | `G-WM6Q66W9W0` | Production (Vercel) | Shares GFD property |
-| **CultureSherpa** | culturesherpa.org | `G-EDHFZ472P7` | Production (S3) | Cultural education property |
-| **AI Aimate** | aiaimate.com | `G-WM6Q66W9W0` | Production (Vercel) | Shares GFD property |
+| Site                         | URL                   | GA4 Property ID | Environment         | Notes                       |
+| ---------------------------- | --------------------- | --------------- | ------------------- | --------------------------- |
+| **Good Flippin Design**      | goodflippindesign.com | `G-WM6Q66W9W0`  | Production          | Main GFD property           |
+| **GFV (Good Flippin Vibes)** | goodflippinvibes.com  | `G-XLT2QSNB3W`  | Production          | Dedicated wellness property |
+| **globaldeets**              | globaldeets.com       | `G-QPPVJM1B60`  | Production          | BI ecosystem property       |
+| **CitizenApproved**          | citizenapproved.org   | `G-WM6Q66W9W0`  | Production (Vercel) | Shares GFD property         |
+| **CultureSherpa**            | culturesherpa.org     | `G-EDHFZ472P7`  | Production (S3)     | Cultural education property |
+| **AI Aimate**                | aiaimate.com          | `G-WM6Q66W9W0`  | Production (Vercel) | Shares GFD property         |
 
 ---
 
 ## Architecture
 
 ### Consolidated Reporting (3 sites → 1 property)
+
 **Property ID:** `G-WM6Q66W9W0` (GFD Main)
+
 - Good Flippin Design (portfolio/agency)
 - CitizenApproved (citizenship education)
 - AI Aimate (AI education platform)
 
 ### Dedicated Properties
+
 1. **GFV** (`G-XLT2QSNB3W`) - Wellness/mental health content
 2. **globaldeets** (`G-QPPVJM1B60`) - Business intelligence platforms
 3. **CultureSherpa** (`G-EDHFZ472P7`) - Cultural exploration
@@ -36,22 +39,31 @@
 ## Technical Implementation
 
 ### Static Sites (HTML)
-**Sites:** GFD, GFV, globaldeets  
-**Method:** Inline `<script>` in `<head>`  
+
+**Sites:** GFD, GFV, globaldeets
+**Method:** Inline `<script>` in `<head>`
+
 ```html
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXX"></script>
+<script
+  async
+  src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXX"
+></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-XXXXXX');
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  gtag("js", new Date());
+  gtag("config", "G-XXXXXX");
 </script>
 ```
 
 ### Next.js Apps (React)
-**Sites:** CitizenApproved, AI Aimate  
-**Method:** Next.js Script component in root layout  
-**File:** `src/app/layout.tsx`  
+
+**Sites:** CitizenApproved, AI Aimate
+**Method:** Next.js Script component in root layout
+**File:** `src/app/layout.tsx`
+
 ```tsx
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-WM6Q66W9W0" />
 <script dangerouslySetInnerHTML={{
@@ -63,12 +75,14 @@
   `
 }} />
 ```
+
 **Environment:** Managed via Vercel environment variables (`NEXT_PUBLIC_GA_MEASUREMENT_ID`)
 
 ### Astro SSG (CultureSherpa)
-**Method:** Inline script in BaseLayout component  
-**File:** `src/layouts/BaseLayout.astro`  
-**Build:** Static generation → S3/CloudFront deployment  
+
+**Method:** Inline script in BaseLayout component
+**File:** `src/layouts/BaseLayout.astro`
+**Build:** Static generation → S3/CloudFront deployment
 **Verification:** Production build confirmed (2026-02-09 17:46)
 
 ---
@@ -76,6 +90,7 @@
 ## Event Tracking
 
 ### GFD-Specific Events
+
 ```javascript
 // Donation tracking
 onclick="if(window.gtag){gtag('event','donate_click',{
@@ -92,13 +107,19 @@ gtag('event', 'exit_intent_conversion', {
 ```
 
 ### AI Aimate Helper Functions
+
 **File:** `portal/components/GoogleAnalytics.tsx`
+
 ```typescript
 export const analytics = {
-  trackConcept: (name: string) => trackEvent('view_concept', 'engagement', name),
-  trackQuiz: (score: number) => trackEvent('quiz_complete', 'learning', undefined, score),
-  trackVisualization: (type: string) => trackEvent('interact_viz', 'engagement', type),
-  trackDonation: (amount: number) => trackEvent('donation', 'conversion', undefined, amount)
+  trackConcept: (name: string) =>
+    trackEvent("view_concept", "engagement", name),
+  trackQuiz: (score: number) =>
+    trackEvent("quiz_complete", "learning", undefined, score),
+  trackVisualization: (type: string) =>
+    trackEvent("interact_viz", "engagement", type),
+  trackDonation: (amount: number) =>
+    trackEvent("donation", "conversion", undefined, amount),
 };
 ```
 
@@ -107,6 +128,7 @@ export const analytics = {
 ## Verification Steps
 
 ### Quick Verification (All Sites)
+
 ```powershell
 # Check live deployment
 curl -I https://goodflippindesign.com | Select-String "200"
@@ -114,12 +136,14 @@ curl https://aiaimate.com | Select-String "gtag"
 ```
 
 ### Production Health Check
+
 ```powershell
 .\scripts\check-site-health.ps1 -Verbose
 ```
 
 ### Google Analytics Dashboard
-1. Visit https://analytics.google.com
+
+1. Visit <https://analytics.google.com>
 2. Select property (e.g., `G-WM6Q66W9W0`)
 3. View Realtime report
 4. Visit any ecosystem site
@@ -132,6 +156,7 @@ curl https://aiaimate.com | Select-String "gtag"
 ### Updating GA4 IDs
 
 **Static Sites:**
+
 1. Edit `index.html` (lines 6-13 typically)
 2. Update measurement ID in both places:
    - Script src URL
@@ -140,6 +165,7 @@ curl https://aiaimate.com | Select-String "gtag"
 4. Deploy changes
 
 **Next.js Apps (Vercel):**
+
 ```bash
 cd portal
 vercel env add NEXT_PUBLIC_GA_MEASUREMENT_ID production
@@ -148,6 +174,7 @@ vercel --prod  # Redeploy
 ```
 
 **CultureSherpa (Astro):**
+
 1. Edit `website-astro/src/layouts/BaseLayout.astro`
 2. Update GA4 ID in `<script>` tag (around line 86)
 3. Rebuild: `npm run build`
@@ -158,12 +185,15 @@ vercel --prod  # Redeploy
 ## Security & Privacy
 
 ### GDPR Compliance
+
 - Cookie consent implemented on all sites (see ConversionFeatures components)
 - IP anonymization enabled by default
 - User data retention: 14 months (Google default)
 
 ### Data Collection
+
 **Automatically tracked:**
+
 - Page views
 - Session duration
 - Traffic sources
@@ -171,6 +201,7 @@ vercel --prod  # Redeploy
 - Geographic location (country/city)
 
 **Custom events tracked:**
+
 - Donation clicks (all sites)
 - Form submissions (contact forms)
 - External link clicks (portfolio items)
@@ -181,11 +212,11 @@ vercel --prod  # Redeploy
 
 ## Performance Impact
 
-| Site | Load Time Impact | First Contentful Paint | Notes |
-|------|------------------|------------------------|-------|
-| GFD | +12ms | No impact | Async loading |
-| AI Aimate | +18ms | No impact | Next.js optimization |
-| CultureSherpa | +8ms | No impact | Static build inlined |
+| Site          | Load Time Impact | First Contentful Paint | Notes                |
+| ------------- | ---------------- | ---------------------- | -------------------- |
+| GFD           | +12ms            | No impact              | Async loading        |
+| AI Aimate     | +18ms            | No impact              | Next.js optimization |
+| CultureSherpa | +8ms             | No impact              | Static build inlined |
 
 All sites maintain **Lighthouse Performance Score ≥ 92**.
 
@@ -194,12 +225,14 @@ All sites maintain **Lighthouse Performance Score ≥ 92**.
 ## Troubleshooting
 
 ### Events Not Showing in Dashboard
+
 1. Check Realtime report (not standard reports - they have 24-48h delay)
 2. Verify measurement ID matches production deployment
 3. Check browser DevTools > Network tab for gtag requests
 4. Disable ad blockers during testing
 
 ### Vercel Environment Variable Issues
+
 ```bash
 # Pull current production env vars
 vercel env pull .env.production.local
@@ -213,6 +246,7 @@ vercel env add NEXT_PUBLIC_GA_MEASUREMENT_ID production
 ```
 
 ### CultureSherpa Build Issues
+
 ```bash
 # Rebuild with verbose logging
 cd website-astro
@@ -227,19 +261,22 @@ grep -r "G-EDHFZ472P7" dist/
 ## Monitoring & Alerts
 
 ### GitHub Actions Health Checks
-**File:** `.github/workflows/health-check.yml`  
-**Frequency:** Every 6 hours  
-**Checks:** HTTP status, SSL certs, security headers  
+
+**File:** `.github/workflows/health-check.yml`
+**Frequency:** Every 6 hours
+**Checks:** HTTP status, SSL certs, security headers
 **On Failure:** Auto-creates GitHub issue
 
 ### Manual Health Check
+
 ```powershell
 .\scripts\check-site-health.ps1 -Site goodflippindesign -Verbose
 ```
 
 ### UptimeRobot (Optional)
-**Setup:** See [UPTIME_MONITORING_SETUP.md](UPTIME_MONITORING_SETUP.md)  
-**Interval:** 5 minutes  
+
+**Setup:** See [UPTIME_MONITORING_SETUP.md](UPTIME_MONITORING_SETUP.md)
+**Interval:** 5 minutes
 **Cost:** Free (up to 50 monitors)
 
 ---
@@ -277,6 +314,6 @@ grep -r "G-EDHFZ472P7" dist/
 
 ---
 
-**Last Updated:** February 9, 2026  
-**Maintained By:** GFD Development Team  
+**Last Updated:** February 9, 2026
+**Maintained By:** GFD Development Team
 **Status:** ✅ Production Ready - All Systems Operational
