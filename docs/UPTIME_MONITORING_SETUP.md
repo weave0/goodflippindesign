@@ -2,14 +2,14 @@
 
 ## Production Sites to Monitor
 
-| Site | URL | Status | Priority |
-|------|-----|--------|----------|
-| **Good Flippin Design** | https://goodflippindesign.com | ✅ Live (Cloudflare Pages) | Critical |
-| **AI Aimate** | https://aiaimate.com | ✅ Live (Vercel) | Critical |
-| **globaldeets** | https://globaldeets.com | ✅ Live | High |
-| **Eliassen globaldeets** | https://eliassen.globaldeets.com | ✅ Live | Medium |
-| **CitizenApproved** | TBD | 🚧 Deploying soon | High |
-| **CultureSherpa** | TBD | 📋 Manual deploy pending | Medium |
+| Site                     | URL                              | Status                     | Priority |
+| ------------------------ | -------------------------------- | -------------------------- | -------- |
+| **Good Flippin Design**  | https://goodflippindesign.com    | ✅ Live (Cloudflare Pages) | Critical |
+| **AI Aimate**            | https://aiaimate.com             | ✅ Live (Vercel)           | Critical |
+| **globaldeets**          | https://globaldeets.com          | ✅ Live                    | High     |
+| **Eliassen globaldeets** | https://eliassen.globaldeets.com | ✅ Live                    | Medium   |
+| **CitizenApproved**      | TBD                              | 🚧 Deploying soon          | High     |
+| **CultureSherpa**        | TBD                              | 📋 Manual deploy pending   | Medium   |
 
 ---
 
@@ -71,6 +71,7 @@
 Since GFD is on Cloudflare Pages, you already have access to:
 
 **Cloudflare Dashboard → Analytics → Web Analytics**
+
 - Real-time traffic monitoring
 - Error rate tracking (4xx, 5xx responses)
 - Geographic distribution
@@ -85,6 +86,7 @@ Since GFD is on Cloudflare Pages, you already have access to:
 Created: `scripts/check-site-health.ps1`
 
 **Usage:**
+
 ```powershell
 # Check all sites
 .\scripts\check-site-health.ps1
@@ -97,6 +99,7 @@ Created: `scripts/check-site-health.ps1`
 ```
 
 **Features:**
+
 - HTTP status code verification
 - Response time measurement
 - SSL certificate expiry check
@@ -116,20 +119,20 @@ name: Scheduled Uptime Check
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
-  workflow_dispatch:  # Manual trigger
+    - cron: "0 */6 * * *" # Every 6 hours
+  workflow_dispatch: # Manual trigger
 
 jobs:
   health-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Check site health
         run: |
           curl -f -s -o /dev/null -w "%{http_code}" https://goodflippindesign.com || exit 1
           curl -f -s -o /dev/null -w "%{http_code}" https://aiaimate.com || exit 1
-          
+
       - name: Notify on failure
         if: failure()
         uses: actions/github-script@v7
@@ -149,17 +152,20 @@ jobs:
 ## Status Page Options
 
 ### Option 1: UptimeRobot Public Status Page (Free)
+
 - Auto-generated from monitors
 - URL: `https://stats.uptimerobot.com/[your-id]`
 - Displays uptime %, response times, incident history
 - Custom domain support (paid)
 
 ### Option 2: Cloudflare Workers (DIY)
+
 - Deploy status page as Cloudflare Worker
 - Check all sites, return JSON status
 - Display on goodflippindesign.com/status
 
 ### Option 3: GitHub Actions + GitHub Pages
+
 - Run health checks via Actions
 - Generate static status page
 - Deploy to GitHub Pages (free)
@@ -168,14 +174,14 @@ jobs:
 
 ## Recommended Monitoring Stack (Complete Setup)
 
-| Service | Purpose | Cost | Setup Time |
-|---------|---------|------|------------|
-| **UptimeRobot** | Proactive uptime monitoring | Free | 10 min |
-| **Cloudflare Analytics** | Traffic & performance metrics | Free (included) | 0 min (already active) |
-| **GitHub Actions** | Scheduled health checks | Free | 5 min |
-| **Local Script** | On-demand diagnostics | Free | 0 min (already created) |
+| Service                  | Purpose                       | Cost            | Setup Time              |
+| ------------------------ | ----------------------------- | --------------- | ----------------------- |
+| **UptimeRobot**          | Proactive uptime monitoring   | Free            | 10 min                  |
+| **Cloudflare Analytics** | Traffic & performance metrics | Free (included) | 0 min (already active)  |
+| **GitHub Actions**       | Scheduled health checks       | Free            | 5 min                   |
+| **Local Script**         | On-demand diagnostics         | Free            | 0 min (already created) |
 
-**Total Setup Time:** ~15 minutes  
+**Total Setup Time:** ~15 minutes
 **Monthly Cost:** $0
 
 ---
@@ -197,15 +203,18 @@ jobs:
 ## Maintenance
 
 **Weekly:**
+
 - Review UptimeRobot email summaries
 - Check Cloudflare Analytics for anomalies
 
 **Monthly:**
+
 - Verify SSL certificate expiry dates (auto-renewed by Cloudflare/Vercel)
 - Review response time trends
 - Update monitor list if new sites deployed
 
 **Quarterly:**
+
 - Test alert delivery (UptimeRobot → "Test Alert" feature)
 - Audit monitored URLs for accuracy
 
