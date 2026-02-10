@@ -122,6 +122,19 @@
             font-size: 16px;
         }
 
+        /* Screen reader only - visually hidden but accessible */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
         /* Layout */
         .container {
             max-width: 1200px;
@@ -3565,6 +3578,7 @@
 
                 <form id="exit-intent-form" class="space-y-4">
                     <div>
+                        <label for="exit-email" class="sr-only">Email address</label>
                         <input
                             type="email"
                             id="exit-email"

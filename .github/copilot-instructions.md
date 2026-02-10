@@ -216,17 +216,17 @@ emailInput.addEventListener(
 
 Every item originally listed as "missing" has been implemented:
 
-| Component | Status | Files |
-|-----------|--------|-------|
-| CI/CD Pipeline | ✅ 5 workflows | `.github/workflows/ci.yml`, `deploy.yml`, `lighthouse.yml`, `force-deploy.yml`, `connect-github-cf.yml` |
-| Pre-commit hooks | ✅ Husky | `.husky/pre-commit` — auto-syncs temp_review.html, updates cache bust, blocks node_modules |
-| Cache bust automation | ✅ | `scripts/update-cache-bust.js`, auto-runs in pre-commit |
-| File sync | ✅ | `scripts/sync-review.js`, `sync-review.sh`, `sync-review.ps1` |
-| Build script | ✅ | `scripts/build.js` |
-| Security headers | ✅ | `_headers` (Cloudflare Pages) |
-| Config management | ✅ | `.env.example`, `wrangler.toml` |
-| VS Code workspace | ✅ | `.vscode/settings.json` (266 lines), `.vscode/extensions.json` (47 lines) |
-| npm scripts | ✅ 12 scripts | `dev`, `sync`, `test`, `test:quick`, `test:watch`, `test:a11y`, `test:responsive`, `cache-bust`, `build`, `format`, `lint:html`, `clean` |
+| Component             | Status         | Files                                                                                                                                    |
+| --------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| CI/CD Pipeline        | ✅ 5 workflows | `.github/workflows/ci.yml`, `deploy.yml`, `lighthouse.yml`, `force-deploy.yml`, `connect-github-cf.yml`                                  |
+| Pre-commit hooks      | ✅ Husky       | `.husky/pre-commit` — auto-syncs temp_review.html, updates cache bust, blocks node_modules                                               |
+| Cache bust automation | ✅             | `scripts/update-cache-bust.js`, auto-runs in pre-commit                                                                                  |
+| File sync             | ✅             | `scripts/sync-review.js`, `sync-review.sh`, `sync-review.ps1`                                                                            |
+| Build script          | ✅             | `scripts/build.js`                                                                                                                       |
+| Security headers      | ✅             | `_headers` (Cloudflare Pages)                                                                                                            |
+| Config management     | ✅             | `.env.example`, `wrangler.toml`                                                                                                          |
+| VS Code workspace     | ✅             | `.vscode/settings.json` (266 lines), `.vscode/extensions.json` (47 lines)                                                                |
+| npm scripts           | ✅ 12 scripts  | `dev`, `sync`, `test`, `test:quick`, `test:watch`, `test:a11y`, `test:responsive`, `cache-bust`, `build`, `format`, `lint:html`, `clean` |
 
 ### Architecture Decision: Single-File (Confirmed)
 
