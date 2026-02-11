@@ -2479,25 +2479,19 @@
                         </div>
                         <div class="fundraising-stats">
                             <div class="stat-item">
-                                <div class="stat-value" id="total-raised">$1,247</div>
-                                <div class="stat-label">Total Raised</div>
+                                <div class="stat-value" id="total-supporters">Growing</div>
+                                <div class="stat-label">Community Support</div>
                             </div>
                             <div class="stat-divider"></div>
                             <div class="stat-item">
-                                <div class="stat-value" id="total-supporters">23</div>
-                                <div class="stat-label">Supporters</div>
+                                <div class="stat-value">Active</div>
+                                <div class="stat-label">Fundraising</div>
                             </div>
                             <div class="stat-divider"></div>
                             <div class="stat-item goal-item">
-                                <div class="stat-value">$10,000</div>
-                                <div class="stat-label">Initial Goal</div>
+                                <div class="stat-value">100%</div>
+                                <div class="stat-label">Community Driven</div>
                             </div>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progress-fill"></div>
-                            </div>
-                            <div class="progress-percentage" id="progress-percentage">12.5%</div>
                         </div>
                         <div class="fundraising-cta">
                             <a href="donate.html" class="btn-donate">Support Our Mission</a>
@@ -3499,168 +3493,42 @@
                 });
             }
 
-            // 11. Fundraising Counter Management
+            // 11. Fundraising Counter Management - Generic version (no financial figures)
             const fundraisingCounter = {
-                // Configuration - easy to update manually or via API
+                // Configuration - generic support tracking
                 config: {
-                    totalRaised: 1247,        // Update this manually
-                    totalSupporters: 23,      // Update this manually
-                    goal: 10000,              // Initial funding goal
-                    lastDonationTime: '2 hours ago', // Update manually
+                    lastDonationTime: 'Recently', // Update manually
                     apiEndpoint: null,        // Set this when you have a backend endpoint
                     updateInterval: 30000     // Check for updates every 30 seconds
                 },
 
                 elements: {
-                    totalRaised: document.getElementById('total-raised'),
                     totalSupporters: document.getElementById('total-supporters'),
-                    progressFill: document.getElementById('progress-fill'),
-                    progressPercentage: document.getElementById('progress-percentage'),
                     recentActivity: document.getElementById('recent-activity')
                 },
 
-                // Initialize the counter with animations
+                // Initialize the counter
                 init() {
-                    if (!this.elements.totalRaised) return; // Exit if fundraising section not present
+                    if (!this.elements.recentActivity) return; // Exit if fundraising section not present
 
-                    this.updateDisplay();
-                    this.animateCountUp();
-
-                    // Set up periodic updates if API endpoint is configured
-                    if (this.config.apiEndpoint) {
-                        this.startAutoRefresh();
+                    // Simple display update
+                    if (this.elements.recentActivity) {
+                        this.elements.recentActivity.textContent = `Last donation: ${this.config.lastDonationTime}`;
                     }
 
                     // Listen for manual updates (for testing or instant updates)
                     window.updateFundraising = this.update.bind(this);
                 },
 
-                // Animate numbers counting up
-                animateCountUp() {
-                    const duration = 2000; // 2 seconds
-                    const steps = 60;
-                    let step = 0;
-
-                    const countUp = (element, target) => {
-                        const increment = target / steps;
-                        let current = 0;
-
-                        const timer = setInterval(() => {
-                            current += increment;
-                            step++;
-
-                            if (step >= steps) {
-                                current = target;
-                                clearInterval(timer);
-                            }
-
-                            if (element === this.elements.totalRaised) {
-                                element.textContent = '$' + Math.floor(current).toLocaleString();
-                            } else {
-                                element.textContent = Math.floor(current).toLocaleString();
-                            }
-                        }, duration / steps);
-                    };
-
-                    // Start animations with slight delay
-                    setTimeout(() => countUp(this.elements.totalRaised, this.config.totalRaised), 500);
-                    setTimeout(() => countUp(this.elements.totalSupporters, this.config.totalSupporters), 800);
-                },
-
-                // Update all display elements
-                updateDisplay() {
-                    const percentage = Math.min((this.config.totalRaised / this.config.goal) * 100, 100);
-
-                    // Update progress bar
-                    this.elements.progressFill.style.width = percentage + '%';
-                    this.elements.progressPercentage.textContent = percentage.toFixed(1) + '%';
-
-                    // Update recent activity
-                    this.elements.recentActivity.textContent = `Last donation: ${this.config.lastDonationTime}`;
-                },
-
-                // Update with new values (can be called manually or via API)
+                // Update with new values (can be called manually)
                 update(newData) {
-                    const oldRaised = this.config.totalRaised;
-                    const oldSupporters = this.config.totalSupporters;
-
-                    // Update config with new data
-                    if (newData.totalRaised !== undefined) this.config.totalRaised = newData.totalRaised;
-                    if (newData.totalSupporters !== undefined) this.config.totalSupporters = newData.totalSupporters;
-                    if (newData.lastDonationTime !== undefined) this.config.lastDonationTime = newData.lastDonationTime;
-                    if (newData.goal !== undefined) this.config.goal = newData.goal;
-
-                    // Animate to new values if they changed
-                    if (newData.totalRaised > oldRaised) {
-                        this.animateIncrease(this.elements.totalRaised, oldRaised, this.config.totalRaised, '$');
-                    }
-                    if (newData.totalSupporters > oldSupporters) {
-                        this.animateIncrease(this.elements.totalSupporters, oldSupporters, this.config.totalSupporters);
-                    }
-
-                    this.updateDisplay();
-
-                    // Trigger celebration animation for significant increases
-                    if (newData.totalRaised && newData.totalRaised > oldRaised + 50) {
-                        this.triggerCelebration();
-                    }
-                },
-
-                // Animate incremental increases
-                animateIncrease(element, from, to, prefix = '') {
-                    const duration = 1000;
-                    const difference = to - from;
-                    const increment = difference / 50;
-                    let current = from;
-
-                    const timer = setInterval(() => {
-                        current += increment;
-                        if (current >= to) {
-                            current = to;
-                            clearInterval(timer);
+                    // Update last donation time if provided
+                    if (newData.lastDonationTime) {
+                        this.config.lastDonationTime = newData.lastDonationTime;
+                        if (this.elements.recentActivity) {
+                            this.elements.recentActivity.textContent = `Last donation: ${this.config.lastDonationTime}`;
                         }
-                        element.textContent = prefix + Math.floor(current).toLocaleString();
-                    }, duration / 50);
-                },
-
-                // Celebration animation for milestones
-                triggerCelebration() {
-                    const fundraisingCard = document.querySelector('.fundraising-card');
-                    if (fundraisingCard) {
-                        fundraisingCard.style.animation = 'none';
-                        fundraisingCard.offsetHeight; // Trigger reflow
-                        fundraisingCard.style.animation = 'pulse 0.6s ease-in-out';
-
-                        setTimeout(() => {
-                            fundraisingCard.style.animation = '';
-                        }, 600);
                     }
-                },
-
-                // Fetch updates from API endpoint
-                async fetchUpdates() {
-                    if (!this.config.apiEndpoint) return;
-
-                    try {
-                        const response = await fetch(this.config.apiEndpoint);
-                        const data = await response.json();
-
-                        if (data && data.success) {
-                            this.update(data);
-                        }
-                    } catch (error) {
-                        console.log('Fundraising API not available:', error.message);
-                    }
-                },
-
-                // Start automatic refresh
-                startAutoRefresh() {
-                    setInterval(() => {
-                        this.fetchUpdates();
-                    }, this.config.updateInterval);
-
-                    // Initial fetch
-                    this.fetchUpdates();
                 }
             };
 
