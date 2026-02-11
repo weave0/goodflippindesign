@@ -80,8 +80,8 @@
             --bg-elevated: #151515;
             --bg-card: #1a1a1a;
             --text: #f5f5f5;
-            --text-secondary: #999;
-            --text-muted: #8a8a8a;
+            --text-secondary: #a0a0a0;
+            --text-muted: #999999;
             --accent: #e0e0e0;
             --border: rgba(255, 255, 255, 0.06);
             --border-hover: rgba(255, 255, 255, 0.12);
@@ -211,6 +211,10 @@
             font-size: 0.875rem;
             font-weight: 450;
             transition: color 0.2s;
+            padding: 0.625rem 0;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
         }
 
         .nav-links a:hover {
@@ -1047,11 +1051,14 @@
         .tech-tag {
             background: var(--bg-elevated);
             color: var(--text-muted);
-            padding: 0.25rem 0.625rem;
+            padding: 0.5rem 0.875rem;
             border-radius: 4px;
             font-size: 0.875rem;
             font-family: 'JetBrains Mono', monospace;
             letter-spacing: 0.02em;
+            min-height: 32px;
+            display: inline-flex;
+            align-items: center;
         }
 
         /* Process */
@@ -1654,6 +1661,10 @@
             text-decoration: none;
             font-size: 0.8125rem;
             transition: color 0.2s;
+            padding: 0.5rem 0;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
         }
 
         .footer-links a:hover {
@@ -2295,7 +2306,7 @@
                     <h3 class="nav-section-title">Production Platforms</h3>
                     <a href="https://goodflippindesign.com" class="nav-link" role="menuitem" target="_blank" rel="noopener">
                         <span class="nav-icon" aria-hidden="true">
-                            <img src="assets/logo-nav.png" alt="" width="24" height="24" />
+                            <img src="assets/logo-nav.png" alt="Good Flippin Design logo" width="24" height="24" />
                         </span>
                         <div class="nav-link-content">
                             <strong class="nav-link-title">Good Flippin Design</strong>
@@ -2356,7 +2367,7 @@
                     </a>
                     <a href="https://citizenapproved.org" class="nav-link" role="menuitem" target="_blank" rel="noopener">
                         <span class="nav-icon" aria-hidden="true">
-                            <img src="assets/logos/citizenapproved/citizenapproved-icon-32x32.png" alt="" width="24" height="24" style="border-radius: 4px; object-fit: contain;">
+                            <img src="assets/logos/citizenapproved/citizenapproved-icon-32x32.png" alt="CitizenApproved logo" width="24" height="24" style="border-radius: 4px; object-fit: contain;">
                         </span>
                         <div class="nav-link-content">
                             <strong class="nav-link-title">CitizenApproved</strong>
@@ -2462,7 +2473,7 @@
                         <div class="fundraising-header">
                             <div class="fundraising-icon">🚀</div>
                             <div class="fundraising-text">
-                                <h3>Community-Powered Innovation</h3>
+                                <h2>Community-Powered Innovation</h2>
                                 <p>Supporting zero-cost AI education, cultural preservation, and civic tech</p>
                             </div>
                         </div>
@@ -2700,6 +2711,111 @@
                         <p class="process-number">04</p>
                         <h3>Launch</h3>
                         <p>Deployment, documentation, and 30 days of post-launch support.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Social Media Feed Section -->
+        <section id="social-feed" style="background: var(--bg-elevated); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+            <div class="container">
+                <div class="section-header">
+                    <p class="section-label">Social Updates</p>
+                    <h2 class="section-title">Follow Our Journey</h2>
+                    <p class="section-subtitle">Behind-the-scenes builds, client wins, and ecosystem updates across our platforms.</p>
+                </div>
+
+                <!-- Instagram Feed Embed -->
+                <div style="max-width: 1000px; margin: 0 auto;">
+                    <!-- Option 1: EmbedSocial Instagram Feed (Free tier available) -->
+                    <div id="embedsocial-instagram-feed" style="min-height: 400px; background: var(--bg-card); border-radius: 12px; padding: 2rem; text-align: center;">
+                        <!-- Placeholder content - replace with actual embed code -->
+                        <div style="opacity: 0.7;">
+                            <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">@goodflippindesign</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Follow us on Instagram for daily updates, project showcases, and ecosystem news.</p>
+
+                            <!-- Manual feed display (will be replaced by embed) -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                                <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; text-decoration: none; color: var(--text); transition: border-color 0.2s; display: block;">
+                                    <div style="font-size: 2rem; margin-bottom: 1rem;">📸</div>
+                                    <h4 style="margin-bottom: 0.5rem;">Latest Projects</h4>
+                                    <p style="font-size: 0.875rem; color: var(--text-secondary);">See what we're building</p>
+                                </a>
+                                <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; text-decoration: none; color: var(--text); transition: border-color 0.2s; display: block;">
+                                    <div style="font-size: 2rem; margin-bottom: 1rem;">🎨</div>
+                                    <h4 style="margin-bottom: 0.5rem;">Design Process</h4>
+                                    <p style="font-size: 0.875rem; color: var(--text-secondary);">Behind-the-scenes content</p>
+                                </a>
+                                <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; text-decoration: none; color: var(--text); transition: border-color 0.2s; display: block;">
+                                    <div style="font-size: 2rem; margin-bottom: 1rem;">🚀</div>
+                                    <h4 style="margin-bottom: 0.5rem;">Client Wins</h4>
+                                    <p style="font-size: 0.875rem; color: var(--text-secondary);">Success stories & launches</p>
+                                </a>
+                            </div>
+
+                            <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener" class="btn-primary" style="margin-top: 2rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                                </svg>
+                                Follow on Instagram
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Instructions for embedding (HTML comment for reference) -->
+                    <!--
+                        TO EMBED INSTAGRAM FEED:
+
+                        Option 1: EmbedSocial (Recommended - Free tier available)
+                        1. Sign up at https://embedsocial.com/products/embedfeed/
+                        2. Connect Instagram account
+                        3. Customize feed style (grid, carousel, slider)
+                        4. Copy embed code
+                        5. Replace the placeholder div above with embed code
+
+                        Option 2: Instagram Basic Display API
+                        1. Create Facebook App at developers.facebook.com
+                        2. Add Instagram Basic Display product
+                        3. Get Access Token
+                        4. Use JS to fetch posts: https://graph.instagram.com/me/media
+                        5. Render posts dynamically
+
+                        Option 3: Third-party widgets
+                        - Juicer.io (free tier: 1 source, limited posts)
+                        - Taggbox (free trial)
+                        - Flockler (paid)
+                        - Behold (Instagram only, $10/mo)
+                    -->
+                </div>
+
+                <!-- Social Media Links -->
+                <div style="text-align: center; margin-top: 3rem; padding-top: 3rem; border-top: 1px solid var(--border);">
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.875rem;">Connect With Us</p>
+                    <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s; display: flex; align-items: center; gap: 0.5rem; min-height: 44px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                            </svg>
+                            Instagram
+                        </a>
+                        <a href="https://linkedin.com/company/good-flippin-design" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s; display: flex; align-items: center; gap: 0.5rem; min-height: 44px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                                <rect x="2" y="9" width="4" height="12"></rect>
+                                <circle cx="4" cy="4" r="2"></circle>
+                            </svg>
+                            LinkedIn
+                        </a>
+                        <a href="https://github.com/weave0" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s; display: flex; align-items: center; gap: 0.5rem; min-height: 44px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                            </svg>
+                            GitHub
+                        </a>
                     </div>
                 </div>
             </div>
