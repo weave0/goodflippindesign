@@ -323,12 +323,9 @@ async function handleListBlogPosts(request, env) {
       query += ` WHERE status = 'published'`;
     }
 
-    query += ` ORDER BY published_at DESC`;
+    query += ` ORDER BY published_at DESC LIMIT 50`;
 
     const { results } = await env.DB.prepare(query).all();
-      ORDER BY published_at DESC
-      LIMIT 50
-    `).all();
 
     return new Response(JSON.stringify(results), {
       headers: { 'Content-Type': 'application/json' },
@@ -466,16 +463,9 @@ async function handleUpdateBlogPost(request, user, env) {
   try {
     await env.DB.prepare(`
       UPDATE blog_posts
-      SET title = ?, content = ?, excerpt = ?, status = ?, tags = ?, featured_image = ?, published_at = ?
+      SET title = ?, content = ?, excerpt = ?, status = ?, tags = ?, featured_image = ?, published_at = ?, updated_at = ?
       WHERE id = ?
-    `).bind(title, content, excerpt, status, tags || '', featured_image || '', publishedAt, id).run();
-
-  try {
-    await env.DB.prepare(`
-      UPDATE blog_posts
-      SET title = ?, content = ?, excerpt = ?, status = ?, published_at = ?, updated_at = ?
-      WHERE id = ?
-    `).bind(title, content, excerpt, status, publishedAt, now, id).run();
+    `).bind(title, content, excerpt, status, tags || '', featured_image || '', publishedAt, now, id).run();
 
     return {
       body: JSON.stringify({ message: 'Post updated' }),
