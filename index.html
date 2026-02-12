@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Cache bust: 2026-02-12-05:49 -->
+<!-- Cache bust: 2026-02-12-06:06 -->
 <html lang="en">
 
 <head>
@@ -73,10 +73,10 @@
     <script src="https://js.stripe.com/v3/"></script>
 
     <!-- Clerk Auth SDK (Phase 3: Community Features) -->
-    <!-- Replace CLERK_PUBLISHABLE_KEY with actual key from Clerk dashboard -->
+    <!-- Clerk publishable key configured for proper-civet-82.clerk.accounts.dev -->
     <script>
-        window.CLERK_PUBLISHABLE_KEY = 'YOUR_CLERK_PUBLISHABLE_KEY_HERE'; // TODO: Replace with real key
-        window.WORKER_API_URL = 'https://gfd-auth.YOUR_SUBDOMAIN.workers.dev'; // TODO: Replace with deployed worker URL
+        window.CLERK_PUBLISHABLE_KEY = 'pk_test_cHJvcGVyLWNpdmV0LTgyLmNsZXJrLmFjY291bnRzLmRldiQ';
+        window.WORKER_API_URL = ''; // Empty string = relative paths for Pages Functions
     </script>
     <script src="https://cdn.clerk.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" crossorigin="anonymous"></script>
 
