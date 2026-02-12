@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Cache bust: 2026-02-08-18:49 -->
+<!-- Cache bust: 2026-02-12-05:49 -->
 <html lang="en">
 
 <head>
@@ -69,8 +69,16 @@
     <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
+
+    <!-- Clerk Auth SDK (Phase 3: Community Features) -->
+    <!-- Replace CLERK_PUBLISHABLE_KEY with actual key from Clerk dashboard -->
+    <script>
+        window.CLERK_PUBLISHABLE_KEY = 'YOUR_CLERK_PUBLISHABLE_KEY_HERE'; // TODO: Replace with real key
+        window.WORKER_API_URL = 'https://gfd-auth.YOUR_SUBDOMAIN.workers.dev'; // TODO: Replace with deployed worker URL
+    </script>
+    <script src="https://cdn.clerk.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" crossorigin="anonymous"></script>
 
     <!-- GFD Ecosystem Navigation -->
     <link rel="stylesheet" href="shared/ecosystem-nav.css">
@@ -102,6 +110,11 @@
             --glow-purple: 0 0 20px rgba(139, 92, 246, 0.5);
             --glow-green: 0 0 20px rgba(16, 185, 129, 0.5);
             --glow-gold: 0 0 20px rgba(251, 191, 36, 0.5);
+
+            /* Neon Effects (Phase 3 Visual Polish) */
+            --neon-purple: 0 0 10px rgba(139, 92, 246, 0.6), 0 0 20px rgba(139, 92, 246, 0.4), 0 0 30px rgba(139, 92, 246, 0.2);
+            --neon-green: 0 0 10px rgba(16, 185, 129, 0.6), 0 0 20px rgba(16, 185, 129, 0.4), 0 0 30px rgba(16, 185, 129, 0.2);
+            --neon-gold: 0 0 10px rgba(251, 191, 36, 0.6), 0 0 20px rgba(251, 191, 36, 0.4), 0 0 30px rgba(251, 191, 36, 0.2);
         }
 
         * {
@@ -756,6 +769,7 @@
             font-weight: 600;
             letter-spacing: -0.02em;
             margin-bottom: 1rem;
+            font-family: 'Orbitron', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, var(--text) 0%, rgba(139, 92, 246, 0.9) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -945,12 +959,30 @@
             content: '';
             position: absolute;
             inset: -2px;
-            background: var(--gradient-primary);
+            background: linear-gradient(90deg,
+                    #8b5cf6,
+                    #10b981,
+                    #fbbf24,
+                    #8b5cf6);
+            background-size: 300% 100%;
             border-radius: inherit;
             opacity: 0;
             transition: opacity 0.3s ease;
             z-index: -1;
             filter: blur(12px);
+            animation: gradientShift 4s ease infinite;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
         }
 
         .portfolio-card:hover {
@@ -1061,6 +1093,39 @@
             align-items: center;
         }
 
+        .portfolio-share {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .portfolio-share-btn {
+            min-height: 44px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .portfolio-share-btn:hover {
+            transform: translateY(-1px);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .portfolio-share-status {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
         /* Process */
         .process-grid {
             display: grid;
@@ -1093,6 +1158,1111 @@
             line-height: 1.6;
         }
 
+        /* Social Hub (Social feed + on-site updates) */
+        .social-feed {
+            background: var(--bg-elevated);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .social-hub {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            gap: 2rem;
+        }
+
+        .social-panel {
+            background: var(--glass-bg);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .social-panel h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 0.5rem;
+        }
+
+        .social-panel .panel-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+        }
+
+        .social-feed-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.25rem;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .social-feed-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.875rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .social-feed-item .item-icon {
+            flex: 0 0 auto;
+            font-size: 1.25rem;
+            line-height: 1;
+            margin-top: 0.1rem;
+        }
+
+        .social-feed-item .item-body {
+            min-width: 0;
+        }
+
+        .social-feed-item .item-title {
+            font-weight: 700;
+            font-size: 0.9375rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .social-feed-item .item-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.55;
+        }
+
+        .social-follow-links {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .social-follow-links a {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            color: var(--text);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .social-follow-links a:hover {
+            transform: translateY(-1px);
+            border-color: var(--border-hover);
+        }
+
+        .updates-feed {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .update-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .update-meta {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+            letter-spacing: 0.02em;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .update-title {
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            margin-bottom: 0.375rem;
+        }
+
+        .update-body {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.65;
+        }
+
+        .update-actions {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .share-btn {
+            min-height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            padding: 0.6rem 0.9rem;
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-1px);
+            border-color: var(--border-hover);
+        }
+
+        .share-status {
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        /* Library (curated index) */
+        .library-section {
+            background: var(--bg);
+        }
+
+        .library-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .library-card {
+            display: block;
+            text-decoration: none;
+            background: var(--glass-bg);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: var(--glass-shadow);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .library-card:hover {
+            transform: translateY(-1px);
+            border-color: var(--border-hover);
+        }
+
+        .library-card-title {
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .library-card-desc {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+        .library-card-meta {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            letter-spacing: 0.02em;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Blog Section (Phase 4: Content Evolution) */
+        .blog-section {
+            background: var(--bg);
+            position: relative;
+        }
+
+        .blog-admin-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .blog-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.25rem;
+        }
+
+        .blog-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .blog-tab:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .blog-tab.active {
+            background: var(--glass-bg);
+            color: var(--text);
+            border: 1px solid var(--border-hover);
+        }
+
+        .blog-editor {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .editor-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            transition: color 0.2s ease;
+        }
+
+        .btn-icon:hover {
+            color: var(--text);
+        }
+
+        .blog-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .blog-form label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .blog-form input[type="text"],
+        .blog-form textarea {
+            width: 100%;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.875rem 1rem;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .blog-form input[type="text"]:focus,
+        .blog-form textarea:focus {
+            outline: none;
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .blog-form textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+
+        .char-count {
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .help-text {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.375rem;
+            font-style: italic;
+        }
+
+        .file-input {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-elevated);
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-input:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card);
+        }
+
+        .file-input::-webkit-file-upload-button {
+            background: var(--glass-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .file-input::-webkit-file-upload-button:hover {
+            background: var(--bg-card);
+            border-color: var(--border-hover);
+        }
+
+        .image-preview {
+            position: relative;
+            margin-top: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-preview .btn-icon {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--text);
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background: var(--bg);
+            border-radius: 6px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.375rem 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--bg-card);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .status-controls {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .status-controls label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            text-transform: none;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+
+        .status-controls input[type="radio"] {
+            accent-color: var(--neon-purple);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+
+        .blog-posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .blog-post-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            will-change: transform;
+        }
+
+        .blog-post-card::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(90deg,
+                    #10b981,
+                    #fbbf24,
+                    #8b5cf6,
+                    #10b981);
+            background-size: 300% 100%;
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+            filter: blur(12px);
+            animation: gradientShift 4s ease infinite;
+        }
+
+        .blog-post-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-hover);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .blog-post-card:hover::before {
+            opacity: 1;
+        }
+
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .post-tag {
+            display: inline-block;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.25rem 0.625rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s ease;
+        }
+
+        .post-tag:hover {
+            background: var(--glass-bg);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .blog-post-card:hover::before {
+            opacity: 1;
+        }
+
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .post-tag {
+            display: inline-block;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.25rem 0.625rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s ease;
+        }
+
+        .post-tag:hover {
+            background: var(--glass-bg);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .blog-post-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 0 0 0.75rem 0;
+            color: var(--text);
+        }
+
+        .blog-post-card .post-excerpt {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .loading-text {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 3rem 0;
+        }
+
+        .blog-post-detail {
+            max-width: 800px;
+            margin: 2rem auto 0;
+        }
+
+        .btn-link {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            margin-bottom: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.2s ease;
+        }
+
+        .btn-link:hover {
+            color: var(--text);
+        }
+
+        .blog-post-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: var(--glass-shadow);
+        }
+
+        .post-header {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .post-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin: 0 0 1rem 0;
+            line-height: 1.2;
+        }
+
+        .post-header .post-meta {
+            margin: 0;
+        }
+
+        .blog-post-content .post-excerpt {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .post-body {
+            color: var(--text);
+            font-size: 1.0625rem;
+            line-height: 1.8;
+        }
+
+        .post-body p {
+            margin-bottom: 1.5rem;
+        }
+
+        .post-body h2,
+        .post-body h3 {
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .post-body code {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.125rem 0.375rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .post-body pre {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .post-body pre code {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .post-admin-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .blog-share-buttons {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .share-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .share-button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .share-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .share-btn:hover {
+            background: var(--bg-elevated);
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+        }
+
+        .share-btn svg {
+            flex-shrink: 0;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 2px solid var(--border);
+        }
+
+        .comments-heading {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text);
+        }
+
+        .comments-heading span {
+            color: var(--accent);
+        }
+
+        /* Comment Form */
+        .comment-form-container {
+            margin-bottom: 3rem;
+        }
+
+        .comment-login-prompt {
+            background: var(--glass-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .comment-login-prompt p {
+            font-size: 1.0625rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .comment-form {
+            background: var(--glass-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .comment-form-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border);
+        }
+
+        .comment-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comment-user-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .comment-form textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .comment-form textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .comment-form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .char-counter {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Comments List */
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .comment-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .comment-item:hover {
+            border-color: var(--border-hover);
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .comment-author-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.125rem 0.5rem;
+            background: linear-gradient(135deg, var(--accent) 0%, #10b981 100%);
+            color: var(--bg);
+            font-size: 0.6875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(132, 94, 247, 0.3);
+        }
+
+        .comment-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .comment-date {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .comment-actions-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .comment-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .comment-action-btn:hover {
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .comment-action-btn.delete:hover {
+            color: var(--error);
+        }
+
+        .comment-content {
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 0.9375rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .comment-edit-form {
+            margin-top: 1rem;
+        }
+
+        .comment-edit-form textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        .comment-edit-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .comments-empty {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .comments-empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 900px) {
+            .blog-posts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .blog-post-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .post-header h2 {
+                font-size: 2rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+
+            .action-buttons {
+                width: 100%;
+            }
+
+            .action-buttons button {
+                flex: 1;
+            }
+        }
+
+        /* Social Hub: featured video */
+        .social-video {
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .social-video-title {
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            margin-bottom: 0.375rem;
+        }
+
+        .social-video-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: 0.875rem;
+        }
+
+        .social-video-player {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        @media (max-width: 900px) {
+            .social-hub {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* Support (Donations) */
         #support {
             background: var(--bg);
@@ -1107,8 +2277,8 @@
 
         .support-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 16px;
             padding: 2rem;
@@ -1741,8 +2911,8 @@
             width: 100%;
             height: 100vh;
             background: rgba(13, 13, 13, 0.95);
-            backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
             z-index: 160;
             /* Above ecosystem nav (150) for proper overlay hierarchy */
             opacity: 0;
@@ -1777,6 +2947,7 @@
             top: 2rem;
             right: 2rem;
             background: var(--glass-bg);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border);
             border-radius: 8px;
@@ -1813,6 +2984,7 @@
             padding: 1rem 2rem;
             border-radius: 12px;
             background: var(--glass-bg);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border);
             width: 100%;
@@ -2083,6 +3255,365 @@
             h2,
             h3 {
                 color: black;
+            }
+        }
+
+        /* ========================================
+           PHASE 3: AUTH & COMMUNITY UI
+        ======================================== */
+
+        /* Auth Navigation Components */
+        .auth-nav-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-menu-container {
+            position: relative;
+        }
+
+        .user-menu-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 0.4rem 0.75rem 0.4rem 0.4rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .user-menu-btn:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+        }
+
+        .user-name {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--glass-bg);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.5rem;
+            min-width: 160px;
+            box-shadow: var(--glass-shadow);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .user-dropdown[aria-hidden="false"] {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-dropdown-link {
+            display: block;
+            padding: 0.6rem 0.8rem;
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .user-dropdown-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Comment System */
+        .comments-section {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+        }
+
+        .comments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .comments-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .comments-count {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .comment-form {
+            margin-bottom: 2rem;
+        }
+
+        .comment-form-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .comment-user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+        }
+
+        .comment-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.875rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .comment-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .comment-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .comment-form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+        }
+
+        .comment-char-count {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .comment-submit-btn {
+            padding: 0.6rem 1.5rem;
+            background: var(--gradient-primary);
+            color: var(--bg);
+            font-weight: 600;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .comment-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--neon-purple);
+        }
+
+        .comment-submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .comment {
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .comment:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--border-hover);
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+        }
+
+        .comment-author-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .comment-author-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .comment-admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.125rem 0.5rem;
+            background: var(--gradient-primary);
+            color: var(--bg);
+            font-size: 0.6875rem;
+            font-weight: 700;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .comment-timestamp {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .comment-text {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .comment-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .comment-action-btn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .comment-login-cta {
+            padding: 2rem;
+            text-align: center;
+            background: var(--gradient-glow);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .comment-login-cta p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .comment-login-btn {
+            padding: 0.75rem 2rem;
+            background: var(--gradient-primary);
+            color: var(--bg);
+            font-weight: 600;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .comment-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--neon-purple);
+        }
+
+        /* Neon Glow Effects (Visual Polish) */
+        .nav-cta:hover,
+        .cta-button:hover,
+        .comment-submit-btn:hover,
+        .comment-login-btn:hover {
+            text-shadow: var(--neon-purple);
+        }
+
+        .section-label {
+            text-shadow: var(--neon-green);
+        }
+
+        h1,
+        h2 {
+            transition: text-shadow 0.3s ease;
+        }
+
+        h1:hover {
+            text-shadow: var(--neon-gold);
+        }
+
+        h2:hover {
+            text-shadow: var(--neon-green);
+        }
+
+        /* Responsive: Mobile */
+        @media (max-width: 900px) {
+            .auth-nav-container {
+                display: none;
+            }
+
+            .comments-section {
+                padding: 1.5rem;
+            }
+
+            .comment {
+                padding: 1rem;
             }
         }
     </style>
@@ -2406,9 +3937,25 @@
                 <li><a href="#services">Services</a></li>
                 <li><a href="#work">Work</a></li>
                 <li><a href="#process">Process</a></li>
+                <li><a href="#social-feed">Social</a></li>
+                <li><a href="#library">Library</a></li>
                 <li><a href="#legal-forms">Legal Forms</a></li>
             </ul>
             <a href="donate.html" class="nav-donate-cta" onclick="if(window.gtag){gtag('event','donate_click',{event_category:'donation',event_label:'Nav CTA Button',entry_point:'desktop_nav'})}">❤️ Donate</a>
+            <!-- Auth UI: Show user menu if logged in, sign-in button if not -->
+            <div id="auth-nav-container" class="auth-nav-container">
+                <button id="sign-in-btn" class="nav-cta" style="display: none;">Sign In</button>
+                <div id="user-menu-container" class="user-menu-container" style="display: none;">
+                    <button id="user-menu-btn" class="user-menu-btn" aria-label="User menu" aria-expanded="false">
+                        <img id="user-avatar" class="user-avatar" src="" alt="User avatar" />
+                        <span id="user-name" class="user-name"></span>
+                    </button>
+                    <div id="user-dropdown" class="user-dropdown" role="menu" aria-hidden="true">
+                        <a href="#profile" class="user-dropdown-link" role="menuitem">Profile</a>
+                        <button id="sign-out-btn" class="user-dropdown-link" role="menuitem">Sign Out</button>
+                    </div>
+                </div>
+            </div>
             <a href="#contact" class="nav-cta">Get in Touch</a>
             <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
                 <span class="hamburger-line"></span>
@@ -2431,6 +3978,12 @@
                 <a href="#services" class="mobile-nav-link">Services</a>
                 <a href="#work" class="mobile-nav-link">Work</a>
                 <a href="#process" class="mobile-nav-link">Process</a>
+                <a href="#social-feed" class="mobile-nav-link">Social</a>
+                <a href="#library" class="mobile-nav-link">Library</a>
+                <!-- Mobile Auth -->
+                <button id="mobile-sign-in-btn" class="mobile-nav-link" style="display: none;">Sign In</button>
+                <a href="#profile" id="mobile-profile-link" class="mobile-nav-link" style="display: none;">Profile</a>
+                <button id="mobile-sign-out-btn" class="mobile-nav-link" style="display: none;">Sign Out</button>
                 <a href="#legal-forms" class="mobile-nav-link">Legal Forms</a>
                 <a href="donate.html" class="mobile-nav-link" onclick="if(window.gtag){gtag('event','donate_click',{event_category:'donation',event_label:'Mobile Nav Link',entry_point:'mobile_nav'})}">Donate</a>
                 <a href="#contact" class="mobile-nav-link mobile-nav-cta">Get in Touch</a>
@@ -2445,7 +3998,7 @@
                 <h1>Building digital platforms that create competitive advantage</h1>
                 <p class="hero-subtitle">
                     Full-stack development for organizations that need more than templates.
-                    From AI education platforms (aiaimate.com) to cultural data visualization (culturesherpa.org) — interfaces built for impact.
+                    AI education platforms to cultural data visualization — interfaces built for impact and user engagement.
                 </p>
                 <div class="hero-ctas">
                     <a href="#contact" class="btn-primary">Start a conversation</a>
@@ -2546,7 +4099,7 @@
                     <p class="section-subtitle">Production platforms and technical demonstrations. Live projects available for acquisition.</p>
                 </div>
                 <div class="portfolio-grid">
-                    <a href="https://aiaimate.com" target="_blank" rel="noopener" class="portfolio-card">
+                    <a href="https://aiaimate.com" target="_blank" rel="noopener" class="portfolio-card" id="work-aiaimate">
                         <div class="portfolio-preview">
                             <img src="assets/portfolio/ai-aimate.webp" alt="AI Aimate - AI Education Platform">
                         </div>
@@ -2564,9 +4117,13 @@
                                 <span class="tech-tag">Vector DB</span>
                                 <span class="tech-tag">OpenAI</span>
                             </div>
+                            <div class="portfolio-share">
+                                <button type="button" class="portfolio-share-btn" data-project="aiaimate" aria-label="Share AI Aimate project">Share Project</button>
+                                <span class="portfolio-share-status" aria-live="polite"></span>
+                            </div>
                         </div>
                     </a>
-                    <a href="https://culturesherpa.org" target="_blank" rel="noopener" class="portfolio-card">
+                    <a href="https://culturesherpa.org" target="_blank" rel="noopener" class="portfolio-card" id="work-culturesherpa">
                         <div class="portfolio-preview">
                             <img src="assets/portfolio/culturesherpa.webp" alt="CultureSherpa - Interactive Cultural Atlas">
                         </div>
@@ -2584,9 +4141,13 @@
                                 <span class="tech-tag">PWA</span>
                                 <span class="tech-tag">AI Synthesis</span>
                             </div>
+                            <div class="portfolio-share">
+                                <button type="button" class="portfolio-share-btn" data-project="culturesherpa" aria-label="Share CultureSherpa project">Share Project</button>
+                                <span class="portfolio-share-status" aria-live="polite"></span>
+                            </div>
                         </div>
                     </a>
-                    <a href="https://www.goodflippinvibes.com" target="_blank" rel="noopener" class="portfolio-card">
+                    <a href="https://www.goodflippinvibes.com" target="_blank" rel="noopener" class="portfolio-card" id="work-gfv">
                         <div class="portfolio-preview">
                             <img src="assets/portfolio/good-flippin-vibes.webp" alt="Good Flippin Vibes - Wellness Platform">
                         </div>
@@ -2603,9 +4164,13 @@
                                 <span class="tech-tag">Community</span>
                                 <span class="tech-tag">CMS</span>
                             </div>
+                            <div class="portfolio-share">
+                                <button type="button" class="portfolio-share-btn" data-project="gfv" aria-label="Share Good Flippin Vibes project">Share Project</button>
+                                <span class="portfolio-share-status" aria-live="polite"></span>
+                            </div>
                         </div>
                     </a>
-                    <a href="https://eliassen.globaldeets.com" target="_blank" rel="noopener" class="portfolio-card">
+                    <a href="https://eliassen.globaldeets.com" target="_blank" rel="noopener" class="portfolio-card" id="work-globaldeets">
                         <div class="portfolio-preview">
                             <img src="assets/portfolio/globaldeets.webp" alt="Market Intelligence">
                         </div>
@@ -2621,9 +4186,13 @@
                                 <span class="tech-tag">React</span>
                                 <span class="tech-tag">AI Research</span>
                             </div>
+                            <div class="portfolio-share">
+                                <button type="button" class="portfolio-share-btn" data-project="globaldeets" aria-label="Share Enterprise Market Research project">Share Project</button>
+                                <span class="portfolio-share-status" aria-live="polite"></span>
+                            </div>
                         </div>
                     </a>
-                    <a href="https://citizenapproved.org" target="_blank" rel="noopener" class="portfolio-card">
+                    <a href="https://citizenapproved.org" target="_blank" rel="noopener" class="portfolio-card" id="work-citizenapproved">
                         <div class="portfolio-preview">
                             <img src="assets/portfolio/citizenapproved.webp" alt="CitizenApproved - U.S. Citizenship Pathways">
                         </div>
@@ -2639,9 +4208,13 @@
                                 <span class="tech-tag">Immigration Law</span>
                                 <span class="tech-tag">Community</span>
                             </div>
+                            <div class="portfolio-share">
+                                <button type="button" class="portfolio-share-btn" data-project="citizenapproved" aria-label="Share CitizenApproved project">Share Project</button>
+                                <span class="portfolio-share-status" aria-live="polite"></span>
+                            </div>
                         </div>
                     </a>
-                    <a href="https://medical.globaldeets.com" target="_blank" rel="noopener" class="portfolio-card">
+                    <a href="https://medical.globaldeets.com" target="_blank" rel="noopener" class="portfolio-card" id="work-medical">
                         <div class="portfolio-preview">
                             <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80" alt="Medical Compliance">
                         </div>
@@ -2656,9 +4229,13 @@
                                 <span class="tech-tag">Health Equity</span>
                                 <span class="tech-tag">RBAC</span>
                             </div>
+                            <div class="portfolio-share">
+                                <button type="button" class="portfolio-share-btn" data-project="medical" aria-label="Share Medical Compliance Hub project">Share Project</button>
+                                <span class="portfolio-share-status" aria-live="polite"></span>
+                            </div>
                         </div>
                     </a>
-                    <div class="portfolio-card no-link">
+                    <div class="portfolio-card no-link" id="work-healthcare">
                         <div class="portfolio-preview">
                             <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80" alt="Healthcare Analytics">
                         </div>
@@ -2672,6 +4249,10 @@
                             <div class="portfolio-tech">
                                 <span class="tech-tag">DuckDB</span>
                                 <span class="tech-tag">Big Data</span>
+                            </div>
+                            <div class="portfolio-share">
+                                <button type="button" class="portfolio-share-btn" data-project="healthcare" aria-label="Share Healthcare Network Intelligence project">Share Project</button>
+                                <span class="portfolio-share-status" aria-live="polite"></span>
                             </div>
                         </div>
                     </div>
@@ -2710,8 +4291,8 @@
             </div>
         </section>
 
-        <!-- Social Media Feed Section -->
-        <section id="social-feed" style="background: var(--bg-elevated); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <!-- Social Hub (Feed + On-site Updates) -->
+        <section id="social-feed" class="social-feed">
             <div class="container">
                 <div class="section-header">
                     <p class="section-label">Social Updates</p>
@@ -2719,97 +4300,274 @@
                     <p class="section-subtitle">Behind-the-scenes builds, client wins, and ecosystem updates across our platforms.</p>
                 </div>
 
-                <!-- Instagram Feed Embed -->
-                <div style="max-width: 1000px; margin: 0 auto;">
-                    <!-- Option 1: EmbedSocial Instagram Feed (Free tier available) -->
-                    <div id="embedsocial-instagram-feed" style="min-height: 400px; background: var(--bg-card); border-radius: 12px; padding: 2rem; text-align: center;">
-                        <!-- Placeholder content - replace with actual embed code -->
-                        <div style="opacity: 0.7;">
-                            <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">@goodflippindesign</h3>
-                            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Follow us on Instagram for daily updates, project showcases, and ecosystem news.</p>
+                <div class="social-hub">
+                    <aside class="social-panel" aria-label="Social feed">
+                        <h3>Social feed</h3>
+                        <p class="panel-subtitle">A quick, on-site view of what we're shipping and sharing — without sending visitors away for a simple update.</p>
 
-                            <!-- Manual feed display (will be replaced by embed) -->
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
-                                <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; text-decoration: none; color: var(--text); transition: border-color 0.2s; display: block;">
-                                    <div style="font-size: 2rem; margin-bottom: 1rem;">📸</div>
-                                    <h4 style="margin-bottom: 0.5rem;">Latest Projects</h4>
-                                    <p style="font-size: 0.875rem; color: var(--text-secondary);">See what we're building</p>
-                                </a>
-                                <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; text-decoration: none; color: var(--text); transition: border-color 0.2s; display: block;">
-                                    <div style="font-size: 2rem; margin-bottom: 1rem;">🎨</div>
-                                    <h4 style="margin-bottom: 0.5rem;">Design Process</h4>
-                                    <p style="font-size: 0.875rem; color: var(--text-secondary);">Behind-the-scenes content</p>
-                                </a>
-                                <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; text-decoration: none; color: var(--text); transition: border-color 0.2s; display: block;">
-                                    <div style="font-size: 2rem; margin-bottom: 1rem;">🚀</div>
-                                    <h4 style="margin-bottom: 0.5rem;">Client Wins</h4>
-                                    <p style="font-size: 0.875rem; color: var(--text-secondary);">Success stories & launches</p>
-                                </a>
-                            </div>
+                        <ul class="social-feed-list">
+                            <li class="social-feed-item">
+                                <span class="item-icon" aria-hidden="true">🚀</span>
+                                <div class="item-body">
+                                    <div class="item-title">Ecosystem builds</div>
+                                    <div class="item-text">Recent updates across AI education, culture mapping, and civic tech.</div>
+                                </div>
+                            </li>
+                            <li class="social-feed-item">
+                                <span class="item-icon" aria-hidden="true">🧩</span>
+                                <div class="item-body">
+                                    <div class="item-title">Navigation + clarity</div>
+                                    <div class="item-text">Make it effortless to move between portfolio, donations, and community.</div>
+                                </div>
+                            </li>
+                            <li class="social-feed-item">
+                                <span class="item-icon" aria-hidden="true">🎥</span>
+                                <div class="item-body">
+                                    <div class="item-title">Video, embedded</div>
+                                    <div class="item-text">Short clips belong here — visitors shouldn't have to bounce to YouTube for a quick watch.</div>
+                                </div>
+                            </li>
+                        </ul>
 
-                            <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener" class="btn-primary" style="margin-top: 2rem; display: inline-flex; align-items: center; gap: 0.5rem;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                                </svg>
-                                Follow on Instagram
+                        <div class="social-follow-links" aria-label="Follow links">
+                            <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener">
+                                <span aria-hidden="true">📸</span>
+                                Instagram
+                            </a>
+                            <a href="https://linkedin.com/company/good-flippin-design" target="_blank" rel="noopener">
+                                <span aria-hidden="true">💼</span>
+                                LinkedIn
+                            </a>
+                            <a href="https://github.com/weave0" target="_blank" rel="noopener">
+                                <span aria-hidden="true">🧑‍💻</span>
+                                GitHub
                             </a>
                         </div>
+                    </aside>
+
+                    <div class="social-panel" aria-label="On-site updates">
+                        <h3>Updates (blog-style)</h3>
+                        <p class="panel-subtitle">Short posts that live on this site, can be shared socially, and can evolve into a full CMS later.</p>
+
+                        <div id="gfd-updates-feed" class="updates-feed" aria-live="polite"></div>
+
+                        <div class="social-video" aria-label="Featured on-site video">
+                            <h4 class="social-video-title">Featured clip (on-site)</h4>
+                            <p class="social-video-subtitle">A short clip you can watch here — no external bounce required.</p>
+                            <video class="social-video-player" controls preload="metadata">
+                                <source src="assets/videos/cat-strutting-and-dancing.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </section>
 
-                    <!-- Instructions for embedding (HTML comment for reference) -->
-                    <!--
-                        TO EMBED INSTAGRAM FEED:
-
-                        Option 1: EmbedSocial (Recommended - Free tier available)
-                        1. Sign up at https://embedsocial.com/products/embedfeed/
-                        2. Connect Instagram account
-                        3. Customize feed style (grid, carousel, slider)
-                        4. Copy embed code
-                        5. Replace the placeholder div above with embed code
-
-                        Option 2: Instagram Basic Display API
-                        1. Create Facebook App at developers.facebook.com
-                        2. Add Instagram Basic Display product
-                        3. Get Access Token
-                        4. Use JS to fetch posts: https://graph.instagram.com/me/media
-                        5. Render posts dynamically
-
-                        Option 3: Third-party widgets
-                        - Juicer.io (free tier: 1 source, limited posts)
-                        - Taggbox (free trial)
-                        - Flockler (paid)
-                        - Behold (Instagram only, $10/mo)
-                    -->
+        <section id="library" class="library-section">
+            <div class="container">
+                <div class="section-header">
+                    <p class="section-label">Library</p>
+                    <h2 class="section-title">Docs & resources</h2>
+                    <p class="section-subtitle">A curated index of documents that support how we build: accessibility, performance, strategy, and execution.</p>
                 </div>
 
-                <!-- Social Media Links -->
-                <div style="text-align: center; margin-top: 3rem; padding-top: 3rem; border-top: 1px solid var(--border);">
-                    <p style="color: var(--text-muted); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.875rem;">Connect With Us</p>
-                    <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
-                        <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s; display: flex; align-items: center; gap: 0.5rem; min-height: 44px;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                            </svg>
-                            Instagram
-                        </a>
-                        <a href="https://linkedin.com/company/good-flippin-design" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s; display: flex; align-items: center; gap: 0.5rem; min-height: 44px;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                                <rect x="2" y="9" width="4" height="12"></rect>
-                                <circle cx="4" cy="4" r="2"></circle>
-                            </svg>
-                            LinkedIn
-                        </a>
-                        <a href="https://github.com/weave0" target="_blank" rel="noopener" style="color: var(--text-secondary); text-decoration: none; transition: color 0.2s; display: flex; align-items: center; gap: 0.5rem; min-height: 44px;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-                            </svg>
-                            GitHub
-                        </a>
+                <div id="gfd-library-grid" class="library-grid" aria-live="polite"></div>
+            </div>
+        </section>
+
+        <!-- Blog Section (Phase 4: Content Evolution) -->
+        <section id="blog" class="blog-section">
+            <div class="container">
+                <div class="section-header">
+                    <p class="section-label">Blog</p>
+                    <h2 class="section-title">Latest insights</h2>
+                    <p class="section-subtitle">Technical deep-dives, project retrospectives, and lessons learned from the field.</p>
+                </div>
+
+                <!-- Admin Controls (visible only to admins) -->
+                <div id="blog-admin-controls" class="blog-admin-controls" style="display: none;">
+                    <div class="blog-tabs">
+                        <button id="published-tab" class="blog-tab active" data-tab="published">Published</button>
+                        <button id="drafts-tab" class="blog-tab" data-tab="drafts">Drafts</button>
+                    </div>
+                    <button id="new-post-btn" class="btn-primary">
+                        <span>✍️</span> New Post
+                    </button>
+                </div>
+
+                <!-- Blog Post Editor (hidden until "New Post" clicked) -->
+                <div id="blog-editor" class="blog-editor" style="display: none;">
+                    <div class="editor-header">
+                        <h3 id="editor-title-text">Create New Post</h3>
+                        <button id="close-editor-btn" class="btn-icon" aria-label="Close editor">✕</button>
+                    </div>
+
+                    <form id="blog-post-form" class="blog-form">
+                        <input type="hidden" id="post-id" value="">
+
+                        <div class="form-group">
+                            <label for="post-title">Title *</label>
+                            <input type="text" id="post-title" name="title" placeholder="Write an engaging title..." required maxlength="120">
+                            <span class="char-count"><span id="title-count">0</span>/120</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="post-excerpt">Excerpt</label>
+                            <textarea id="post-excerpt" name="excerpt" placeholder="Brief summary for blog listing (optional)..." rows="2" maxlength="280"></textarea>
+                            <span class="char-count"><span id="excerpt-count">0</span>/280</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="post-tags">Tags</label>
+                            <input type="text" id="post-tags" name="tags" placeholder="web-development, ai, react (comma-separated)" maxlength="200">
+                            <span class="help-text">Separate tags with commas. Max 5 tags.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="post-image">Featured Image</label>
+                            <input type="file" id="post-image" accept="image/*" class="file-input">
+                            <div id="image-preview" class="image-preview" style="display: none;">
+                                <img id="preview-img" src="" alt="Preview">
+                                <button type="button" id="remove-image-btn" class="btn-icon">✕</button>
+                            </div>
+                            <span class="help-text">Optional. Recommended size: 1200x630px (16:9 ratio)</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="post-content">Content *</label>
+                            <textarea id="post-content" name="content" placeholder="Write your post content here... (Markdown supported)" rows="20" required></textarea>
+                            <div class="editor-toolbar">
+                                <button type="button" class="toolbar-btn" data-markdown="**bold**" title="Bold">𝐁</button>
+                                <button type="button" class="toolbar-btn" data-markdown="*italic*" title="Italic"><em>I</em></button>
+                                <button type="button" class="toolbar-btn" data-markdown="[link](url)" title="Link">🔗</button>
+                                <button type="button" class="toolbar-btn" data-markdown="```code```" title="Code">{ }</button>
+                                <button type="button" class="toolbar-btn" data-markdown="- list item" title="List">☰</button>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <div class="status-controls">
+                                <label>
+                                    <input type="radio" name="status" value="draft" checked>
+                                    <span>Save as Draft</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="status" value="published">
+                                    <span>Publish Now</span>
+                                </label>
+                            </div>
+                            <div class="action-buttons">
+                                <button type="button" id="cancel-post-btn" class="btn-secondary">Cancel</button>
+                                <button type="submit" id="save-post-btn" class="btn-primary">Save Post</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Blog Post Listing -->
+                <div id="blog-posts-container" class="blog-posts-grid">
+                    <p class="loading-text">Loading posts...</p>
+                </div>
+
+                <!-- Blog Post Detail View (hidden until post clicked) -->
+                <div id="blog-post-detail" class="blog-post-detail" style="display: none;">
+                    <button id="back-to-blog-btn" class="btn-link">← Back to all posts</button>
+                    <article class="blog-post-content">
+                        <header class="post-header">
+                            <h2 id="detail-post-title"></h2>
+                            <div class="post-meta">
+                                <time id="detail-post-date"></time>
+                                <span id="detail-post-author"></span>
+                            </div>
+                        </header>
+                        <div id="detail-post-excerpt" class="post-excerpt"></div>
+                        <div id="detail-post-content" class="post-body"></div>
+
+                        <!-- Social Share Buttons -->
+                        <div class="blog-share-buttons">
+                            <h3 class="share-title">Share this post</h3>
+                            <div class="share-button-group">
+                                <button id="blog-share-native" class="share-btn" title="Share via...">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="18" cy="5" r="3"></circle>
+                                        <circle cx="6" cy="12" r="3"></circle>
+                                        <circle cx="18" cy="19" r="3"></circle>
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                    </svg>
+                                    Share
+                                </button>
+                                <button id="blog-share-twitter" class="share-btn" title="Share on Twitter">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                    </svg>
+                                    Twitter
+                                </button>
+                                <button id="blog-share-linkedin" class="share-btn" title="Share on LinkedIn">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                                    </svg>
+                                    LinkedIn
+                                </button>
+                                <button id="blog-share-clipboard" class="share-btn" title="Copy link">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                    Copy Link
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="detail-admin-actions" class="post-admin-actions" style="display: none;">
+                            <button id="edit-post-btn" class="btn-secondary">Edit</button>
+                            <button id="delete-post-btn" class="btn-danger">Delete</button>
+                        </div>
+                    </article>
+
+                    <!-- Comments Section -->
+                    <div id="blog-comments-section" class="comments-section" style="display: none;">
+                        <h3 class="comments-heading">
+                            <span id="comments-count">0</span> Comments
+                        </h3>
+
+                        <!-- Comment Form (auth required) -->
+                        <div id="comment-form-container" class="comment-form-container">
+                            <!-- Shown when user is NOT authenticated -->
+                            <div id="comment-login-prompt" class="comment-login-prompt">
+                                <p>Sign in to join the conversation</p>
+                                <button id="comment-signin-btn" class="btn-primary">Sign In</button>
+                            </div>
+
+                            <!-- Shown when user IS authenticated -->
+                            <form id="comment-form" class="comment-form" style="display: none;">
+                                <div class="comment-form-header">
+                                    <img id="comment-user-avatar" src="" alt="Your avatar" class="comment-avatar">
+                                    <div class="comment-user-info">
+                                        <span id="comment-user-name" class="comment-user-name"></span>
+                                    </div>
+                                </div>
+                                <textarea
+                                    id="comment-textarea"
+                                    name="content"
+                                    placeholder="Share your thoughts..."
+                                    rows="4"
+                                    required
+                                    maxlength="2000"
+                                    aria-label="Comment content"></textarea>
+                                <div class="comment-form-footer">
+                                    <span id="comment-char-count" class="char-counter">0 / 2000</span>
+                                    <div class="comment-actions">
+                                        <button type="button" id="cancel-comment-btn" class="btn-link" style="display: none;">Cancel</button>
+                                        <button type="submit" id="submit-comment-btn" class="btn-primary">Post Comment</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Comments List -->
+                        <div id="comments-list" class="comments-list"></div>
                     </div>
                 </div>
             </div>
@@ -3005,6 +4763,268 @@
                     timeout = setTimeout(later, wait);
                 };
             }
+
+            // 0. Social hub: on-site updates (blog-style) + share
+            const updatesFeed = document.getElementById('gfd-updates-feed');
+            const libraryGrid = document.getElementById('gfd-library-grid');
+            const siteBaseUrl = window.location.href.split('#')[0];
+
+            const updates = [
+                {
+                    id: 'update-social-hub-foundation',
+                    date: '2026-02-11',
+                    title: 'Social hub foundation',
+                    body: 'An on-site social hub: a feed-style panel plus updates that live on this site (shareable without forcing a YouTube/Instagram bounce).',
+                    tags: ['UX', 'Social', 'Platform']
+                },
+                {
+                    id: 'update-navigation-smoothing',
+                    date: '2026-02-11',
+                    title: 'Make navigation feel effortless',
+                    body: 'Prioritize clarity: portfolio, donation, and community touchpoints should be obvious and fast to reach from anywhere.',
+                    tags: ['Navigation', 'Clarity']
+                },
+                {
+                    id: 'update-share-everything',
+                    date: '2026-02-11',
+                    title: 'Share everything (with backlinks)',
+                    body: 'Every “artifact” (work, art, posts) should be easy to share and should link back here — build distribution without losing the audience.',
+                    tags: ['Growth', 'SEO']
+                }
+            ];
+
+            async function copyToClipboard(text) {
+                if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                    await navigator.clipboard.writeText(text);
+                    return;
+                }
+
+                // Fallback: temporary textarea
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.setAttribute('readonly', '');
+                textarea.style.position = 'absolute';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+
+            async function shareUpdate(update) {
+                const url = `${siteBaseUrl}#${update.id}`;
+                const title = update.title;
+                const text = `${update.title} — ${update.body}`;
+
+                if (navigator.share && typeof navigator.share === 'function') {
+                    try {
+                        await navigator.share({ title, text, url });
+                        return { ok: true, mode: 'native' };
+                    } catch (err) {
+                        // User may cancel; fall through to clipboard.
+                    }
+                }
+
+                await copyToClipboard(url);
+                return { ok: true, mode: 'clipboard' };
+            }
+
+            async function sharePortfolioItem(projectId) {
+                const url = `${siteBaseUrl}#work-${projectId}`;
+                const projectNames = {
+                    'aiaimate': 'AI Aimate - AI Education Platform',
+                    'culturesherpa': 'CultureSherpa - Interactive Cultural Atlas',
+                    'gfv': 'Good Flippin Vibes - Wellness Platform',
+                    'globaldeets': 'Enterprise Market Research',
+                    'citizenapproved': 'CitizenApproved - U.S. Citizenship Pathways',
+                    'medical': 'Medical Compliance Hub',
+                    'healthcare': 'Healthcare Network Intelligence'
+                };
+                const title = projectNames[projectId] || 'Portfolio Project';
+                const text = `Check out ${title} by Good Flippin Design`;
+
+                if (navigator.share && typeof navigator.share === 'function') {
+                    try {
+                        await navigator.share({ title, text, url });
+                        return { ok: true, mode: 'native' };
+                    } catch (err) {
+                        // User may cancel; fall through to clipboard.
+                    }
+                }
+
+                await copyToClipboard(url);
+                return { ok: true, mode: 'clipboard' };
+            }
+
+            function renderUpdates() {
+                if (!updatesFeed) return;
+                updatesFeed.innerHTML = '';
+
+                updates.forEach(update => {
+                    const card = document.createElement('article');
+                    card.className = 'update-card';
+                    card.id = update.id;
+
+                    const meta = document.createElement('div');
+                    meta.className = 'update-meta';
+                    meta.textContent = update.date;
+
+                    const title = document.createElement('div');
+                    title.className = 'update-title';
+                    title.textContent = update.title;
+
+                    const body = document.createElement('div');
+                    body.className = 'update-body';
+                    body.textContent = update.body;
+
+                    const actions = document.createElement('div');
+                    actions.className = 'update-actions';
+
+                    const shareBtn = document.createElement('button');
+                    shareBtn.type = 'button';
+                    shareBtn.className = 'share-btn';
+                    shareBtn.textContent = 'Share';
+                    shareBtn.setAttribute('aria-label', `Share: ${update.title}`);
+
+                    const status = document.createElement('span');
+                    status.className = 'share-status';
+                    status.setAttribute('aria-live', 'polite');
+
+                    shareBtn.addEventListener('click', async () => {
+                        status.textContent = '…';
+                        try {
+                            const result = await shareUpdate(update);
+                            status.textContent = result.mode === 'native' ? 'Shared' : 'Link copied';
+                            window.setTimeout(() => { status.textContent = ''; }, 2500);
+                        } catch (e) {
+                            status.textContent = 'Could not share';
+                            window.setTimeout(() => { status.textContent = ''; }, 2500);
+                        }
+                    });
+
+                    actions.appendChild(shareBtn);
+                    actions.appendChild(status);
+
+                    card.appendChild(meta);
+                    card.appendChild(title);
+                    card.appendChild(body);
+                    card.appendChild(actions);
+                    updatesFeed.appendChild(card);
+                });
+            }
+
+            renderUpdates();
+
+            // 0b. Library: curated index (static JSON, safe fallback for file://)
+            const fallbackLibraryIndex = {
+                version: 1,
+                generatedAt: '2026-02-12T00:00:00.000Z',
+                items: [
+                    {
+                        id: 'doc-readme-md',
+                        type: 'doc',
+                        title: 'Good Flippin Design - Production Portfolio',
+                        description: 'Quick start, testing, workflow, and deployment notes.',
+                        href: '/README.md',
+                        updatedAt: '2026-02-11'
+                    },
+                    {
+                        id: 'doc-roadmap-md',
+                        type: 'doc',
+                        title: 'Good Flippin Design — Full Roadmap',
+                        description: 'Sequenced phases that translate the directive transcript into buildable work.',
+                        href: '/ROADMAP.md',
+                        updatedAt: '2026-02-11'
+                    },
+                    {
+                        id: 'doc-ux-performance-improvements-md',
+                        type: 'doc',
+                        title: 'UX Performance Improvements - Complete Report',
+                        description: 'What was fixed to hit WCAG + performance and keep animations GPU-friendly.',
+                        href: '/UX_PERFORMANCE_IMPROVEMENTS.md',
+                        updatedAt: '2026-02-11'
+                    }
+                ]
+            };
+
+            function renderLibrary(index) {
+                if (!libraryGrid) return;
+                const items = (index && Array.isArray(index.items)) ? index.items : [];
+
+                libraryGrid.innerHTML = '';
+
+                if (items.length === 0) {
+                    const empty = document.createElement('div');
+                    empty.className = 'library-card';
+                    empty.innerHTML = '<div class="library-card-title">Library coming online</div><div class="library-card-desc">This section will expand as we standardize the master index and publishing flow.</div><div class="library-card-meta">Status: initializing</div>';
+                    libraryGrid.appendChild(empty);
+                    return;
+                }
+
+                items.forEach((item) => {
+                    const card = document.createElement('a');
+                    card.className = 'library-card';
+                    card.href = item.href || '#';
+
+                    const isExternal = /^https?:\/\//i.test(card.href);
+                    if (isExternal) {
+                        card.target = '_blank';
+                        card.rel = 'noopener';
+                    }
+
+                    const title = document.createElement('div');
+                    title.className = 'library-card-title';
+                    title.textContent = item.title || 'Document';
+
+                    const desc = document.createElement('div');
+                    desc.className = 'library-card-desc';
+                    desc.textContent = item.description || 'A curated document from the GFD library.';
+
+                    const meta = document.createElement('div');
+                    meta.className = 'library-card-meta';
+                    const updated = item.updatedAt ? `Updated: ${item.updatedAt}` : 'Updated: —';
+                    meta.textContent = `${(item.type || 'doc').toUpperCase()} • ${updated}`;
+
+                    card.appendChild(title);
+                    card.appendChild(desc);
+                    card.appendChild(meta);
+
+                    libraryGrid.appendChild(card);
+                });
+            }
+
+            async function loadLibrary() {
+                if (!libraryGrid) return;
+                try {
+                    const res = await fetch('assets/data/library-index.json', { cache: 'no-store' });
+                    if (!res.ok) throw new Error('Bad response');
+                    const json = await res.json();
+                    renderLibrary(json);
+                } catch (err) {
+                    renderLibrary(fallbackLibraryIndex);
+                }
+            }
+
+            loadLibrary();
+
+            // Initialize portfolio share buttons
+            document.querySelectorAll('.portfolio-share-btn').forEach(btn => {
+                const statusEl = btn.nextElementSibling;
+                btn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const projectId = btn.getAttribute('data-project');
+                    statusEl.textContent = '…';
+                    try {
+                        const result = await sharePortfolioItem(projectId);
+                        statusEl.textContent = result.mode === 'native' ? 'Shared' : 'Link copied';
+                        window.setTimeout(() => { statusEl.textContent = ''; }, 2500);
+                    } catch (err) {
+                        statusEl.textContent = 'Could not share';
+                        window.setTimeout(() => { statusEl.textContent = ''; }, 2500);
+                    }
+                });
+            });
 
             // 1. Form enhancement with real-time feedback
             const contactForm = document.querySelector('.contact-form');
@@ -3873,6 +5893,1223 @@
             }
 
         })();
+    </script>
+
+    <!-- PHASE 3: Clerk Auth & Comment System Initialization -->
+    <script>
+        (function () {
+            'use strict';
+
+            // ═══════════════════════════════════════════════════════════
+            // CLERK AUTH INITIALIZATION
+            // ═══════════════════════════════════════════════════════════
+
+            let clerkInstance = null;
+            let currentUser = null;
+
+            async function initializeClerk() {
+                // Skip if keys not configured
+                if (!window.CLERK_PUBLISHABLE_KEY || window.CLERK_PUBLISHABLE_KEY === 'YOUR_CLERK_PUBLISHABLE_KEY_HERE') {
+                    console.warn('[Auth] Clerk keys not configured. Auth features disabled.');
+                    showSignInButtons();
+                    loadBlogPosts(); // Still load blog posts (public)
+                    return;
+                }
+
+                try {
+                    clerkInstance = window.Clerk(window.CLERK_PUBLISHABLE_KEY);
+                    await clerkInstance.load();
+
+                    if (clerkInstance.user) {
+                        currentUser = clerkInstance.user;
+                        showUserMenu(currentUser);
+                        enableCommentForms();
+                        enableBlogAdminFeatures(); // Show blog admin controls if admin
+                    } else {
+                        showSignInButtons();
+                        showLoginCTAs();
+                    }
+
+                    // Listen for auth state changes
+                    clerkInstance.addListener(({ user }) => {
+                        currentUser = user;
+                        if (user) {
+                            showUserMenu(user);
+                            enableCommentForms();
+                            enableBlogAdminFeatures(); // Update blog admin UI on auth change
+                        } else {
+                            showSignInButtons();
+                            showLoginCTAs();
+                        }
+                    });
+
+                    loadBlogPosts(); // Load blog posts after auth check
+
+                } catch (error) {
+                    console.error('[Auth] Clerk initialization failed:', error);
+                    showSignInButtons();
+                    loadBlogPosts(); // Still load blog posts even if auth fails
+                }
+            }
+        }
+
+            function showUserMenu(user) {
+            // Desktop nav
+            const signInBtn = document.getElementById('sign-in-btn');
+            const userMenuContainer = document.getElementById('user-menu-container');
+            const userAvatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
+
+            if (signInBtn) signInBtn.style.display = 'none';
+            if (userMenuContainer) {
+                userMenuContainer.style.display = 'block';
+                if (userAvatar) userAvatar.src = user.imageUrl || generateInitialsAvatar(user);
+                if (userName) userName.textContent = user.publicMetadata?.displayName || user.firstName || `User_${user.id.slice(0, 8)}`;
+            }
+
+            // Mobile nav
+            const mobileSignInBtn = document.getElementById('mobile-sign-in-btn');
+            const mobileProfileLink = document.getElementById('mobile-profile-link');
+            const mobileSignOutBtn = document.getElementById('mobile-sign-out-btn');
+
+            if (mobileSignInBtn) mobileSignInBtn.style.display = 'none';
+            if (mobileProfileLink) mobileProfileLink.style.display = 'block';
+            if (mobileSignOutBtn) mobileSignOutBtn.style.display = 'block';
+        }
+
+        function showSignInButtons() {
+            // Desktop nav
+            const signInBtn = document.getElementById('sign-in-btn');
+            const userMenuContainer = document.getElementById('user-menu-container');
+
+            if (signInBtn) signInBtn.style.display = 'inline-block';
+            if (userMenuContainer) userMenuContainer.style.display = 'none';
+
+            // Mobile nav
+            const mobileSignInBtn = document.getElementById('mobile-sign-in-btn');
+            const mobileProfileLink = document.getElementById('mobile-profile-link');
+            const mobileSignOutBtn = document.getElementById('mobile-sign-out-btn');
+
+            if (mobileSignInBtn) mobileSignInBtn.style.display = 'block';
+            if (mobileProfileLink) mobileProfileLink.style.display = 'none';
+            if (mobileSignOutBtn) mobileSignOutBtn.style.display = 'none';
+        }
+
+        function generateInitialsAvatar(user) {
+            const name = user.publicMetadata?.displayName || user.firstName || 'U';
+            const initials = name.charAt(0).toUpperCase();
+            const canvas = document.createElement('canvas');
+            canvas.width = 40;
+            canvas.height = 40;
+            const ctx = canvas.getContext('2d');
+
+            // Gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 40, 40);
+            gradient.addColorStop(0, '#8b5cf6');
+            gradient.addColorStop(1, '#10b981');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 40, 40);
+
+            // Initials
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(initials, 20, 20);
+
+            return canvas.toDataURL();
+        }
+
+        // User menu dropdown toggle
+        document.addEventListener('click', function (e) {
+            const userMenuBtn = document.getElementById('user-menu-btn');
+            const userDropdown = document.getElementById('user-dropdown');
+
+            if (userMenuBtn && e.target.closest('#user-menu-btn')) {
+                const isExpanded = userMenuBtn.getAttribute('aria-expanded') === 'true';
+                userMenuBtn.setAttribute('aria-expanded', !isExpanded);
+                userDropdown.setAttribute('aria-hidden', isExpanded);
+            } else if (userDropdown && !e.target.closest('.user-menu-container')) {
+                if (userMenuBtn) userMenuBtn.setAttribute('aria-expanded', 'false');
+                userDropdown.setAttribute('aria-hidden', 'true');
+            }
+        });
+
+        // Sign-in button click
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('#sign-in-btn') || e.target.closest('#mobile-sign-in-btn') || e.target.classList.contains('comment-login-btn')) {
+                if (clerkInstance) {
+                    clerkInstance.openSignIn();
+                }
+            }
+        });
+
+        // Sign-out button click
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('#sign-out-btn') || e.target.closest('#mobile-sign-out-btn')) {
+                if (clerkInstance) {
+                    clerkInstance.signOut();
+                }
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════
+        // COMMENT SYSTEM
+        // ═══════════════════════════════════════════════════════════
+
+        const WORKER_API_URL = window.WORKER_API_URL || 'https://gfd-auth.YOUR_SUBDOMAIN.workers.dev';
+
+        function enableCommentForms() {
+            document.querySelectorAll('.comment-form').forEach(form => {
+                form.style.display = 'block';
+            });
+            document.querySelectorAll('.comment-login-cta').forEach(cta => {
+                cta.style.display = 'none';
+            });
+        }
+
+        function showLoginCTAs() {
+            document.querySelectorAll('.comment-form').forEach(form => {
+                form.style.display = 'none';
+            });
+            document.querySelectorAll('.comment-login-cta').forEach(cta => {
+                cta.style.display = 'block';
+            });
+        }
+
+        async function loadComments(articleId) {
+            try {
+                const response = await fetch(`${WORKER_API_URL}/api/comments?articleId=${encodeURIComponent(articleId)}`);
+                if (!response.ok) throw new Error('Failed to load comments');
+
+                const comments = await response.json();
+                renderComments(articleId, comments);
+            } catch (error) {
+                console.error('[Comments] Load failed:', error);
+            }
+        }
+
+        function renderComments(articleId, comments) {
+            const listEl = document.querySelector(`.comments-list[data-article-id="${articleId}"]`);
+            const countEl = document.querySelector(`.comments-count[data-article-id="${articleId}"]`);
+
+            if (countEl) {
+                countEl.textContent = `${comments.length} ${comments.length === 1 ? 'comment' : 'comments'}`;
+            }
+
+            if (!listEl) return;
+
+            if (comments.length === 0) {
+                listEl.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No comments yet. Be the first to share your thoughts!</p>';
+                return;
+            }
+
+            listEl.innerHTML = comments.map(comment => {
+                const isOwn = currentUser && comment.user_id === currentUser.id;
+                const isAdmin = currentUser && currentUser.publicMetadata?.role === 'admin';
+                const showActions = isOwn || isAdmin;
+
+                return `
+                        <div class="comment" data-comment-id="${comment.id}">
+                            <div class="comment-header">
+                                <div class="comment-author-info">
+                                    <div class="comment-user-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #10b981); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                        ${comment.user_name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <span class="comment-author-name">${escapeHtml(comment.user_name)}</span>
+                                        ${isAdmin ? '<span class="comment-admin-badge">⭐ Admin</span>' : ''}
+                                        <div class="comment-timestamp">${formatCommentDate(comment.created_at)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="comment-text">${escapeHtml(comment.text)}</div>
+                            ${showActions ? `
+                                <div class="comment-actions">
+                                    ${isOwn ? '<button class="comment-action-btn comment-edit-btn" data-comment-id="' + comment.id + '">Edit</button>' : ''}
+                                    <button class="comment-action-btn comment-delete-btn" data-comment-id="${comment.id}">Delete</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+            }).join('');
+        }
+
+        async function postComment(articleId, text) {
+            if (!currentUser || !clerkInstance) {
+                console.error('[Comments] User not authenticated');
+                return;
+            }
+
+            try {
+                const session = await clerkInstance.session.getToken();
+
+                const response = await fetch(`${WORKER_API_URL}/api/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session}`
+                    },
+                    body: JSON.stringify({ articleId, text })
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(error);
+                }
+
+                await loadComments(articleId);
+            } catch (error) {
+                console.error('[Comments] Post failed:', error);
+                alert(`Failed to post comment: ${error.message}`);
+            }
+        }
+
+        async function deleteComment(commentId, articleId) {
+            if (!currentUser || !clerkInstance) return;
+
+            if (!confirm('Are you sure you want to delete this comment?')) return;
+
+            try {
+                const session = await clerkInstance.session.getToken();
+
+                const response = await fetch(`${WORKER_API_URL}/api/comments`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session}`
+                    },
+                    body: JSON.stringify({ commentId })
+                });
+
+                if (!response.ok) throw new Error('Failed to delete comment');
+
+                await loadComments(articleId);
+            } catch (error) {
+                console.error('[Comments] Delete failed:', error);
+                alert(`Failed to delete comment: ${error.message}`);
+            }
+        }
+
+        // Comment form submission
+        document.addEventListener('submit', function (e) {
+            if (e.target.classList.contains('comment-form')) {
+                e.preventDefault();
+                const form = e.target;
+                const articleId = form.dataset.articleId;
+                const textarea = form.querySelector('.comment-textarea');
+                const text = textarea.value.trim();
+
+                if (!text) return;
+
+                postComment(articleId, text).then(() => {
+                    textarea.value = '';
+                });
+            }
+        });
+
+        // Comment delete
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('comment-delete-btn')) {
+                const commentId = e.target.dataset.commentId;
+                const commentEl = e.target.closest('.comment');
+                const listEl = commentEl.closest('.comments-list');
+                const articleId = listEl.dataset.articleId;
+
+                deleteComment(commentId, articleId);
+            }
+        });
+
+        // Character counter for comment textarea
+        document.addEventListener('input', function (e) {
+            if (e.target.classList.contains('comment-textarea')) {
+                const form = e.target.closest('.comment-form');
+                const counter = form.querySelector('.comment-char-count');
+                if (counter) {
+                    const length = e.target.value.length;
+                    counter.textContent = `${length}/2000`;
+                    if (length > 2000) {
+                        counter.style.color = '#ef4444';
+                    } else {
+                        counter.style.color = 'var(--text-muted)';
+                    }
+                }
+            }
+        });
+
+        // Utility functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatCommentDate(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // ========================================
+        // BLOG CMS (Phase 4: Content Evolution)
+        // ========================================
+
+        let currentEditingPostId = null;
+
+        // Show admin controls if user is admin
+        function enableBlogAdminFeatures() {
+            const adminControls = document.getElementById('blog-admin-controls');
+            if (adminControls && currentUser?.publicMetadata?.role === 'admin') {
+                adminControls.style.display = 'flex';
+            }
+        }
+
+        // Show blog editor
+        function showBlogEditor(postData = null) {
+            const editor = document.getElementById('blog-editor');
+            const titleEl = document.getElementById('editor-title-text');
+            const postsContainer = document.getElementById('blog-posts-container');
+            const detailView = document.getElementById('blog-post-detail');
+
+            // Hide listing and detail views
+            postsContainer.style.display = 'none';
+            detailView.style.display = 'none';
+
+            if (postData) {
+                // Edit mode
+                titleEl.textContent = 'Edit Post';
+                document.getElementById('post-id').value = postData.id;
+                document.getElementById('post-title').value = postData.title;
+                document.getElementById('post-excerpt').value = postData.excerpt || '';
+                document.getElementById('post-content').value = postData.content;
+                document.querySelector(`input[name="status"][value="${postData.status}"]`).checked = true;
+                currentEditingPostId = postData.id;
+            } else {
+                // New post mode
+                titleEl.textContent = 'Create New Post';
+                document.getElementById('blog-post-form').reset();
+                document.getElementById('post-id').value = '';
+                currentEditingPostId = null;
+            }
+
+            editor.style.display = 'block';
+            updateCharCounts();
+        }
+
+        // Hide blog editor
+        function hideBlogEditor() {
+            const editor = document.getElementById('blog-editor');
+            const postsContainer = document.getElementById('blog-posts-container');
+            editor.style.display = 'none';
+            postsContainer.style.display = 'grid';
+            document.getElementById('blog-post-form').reset();
+            currentEditingPostId = null;
+        }
+
+        // Update character counters
+        function updateCharCounts() {
+            const titleInput = document.getElementById('post-title');
+            const excerptInput = document.getElementById('post-excerpt');
+            const titleCount = document.getElementById('title-count');
+            const excerptCount = document.getElementById('excerpt-count');
+
+            if (titleCount) titleCount.textContent = titleInput.value.length;
+            if (excerptCount) excerptCount.textContent = excerptInput.value.length;
+        }
+
+        // Create or update blog post
+        async function saveBlogPost(formData) {
+            if (!currentUser) {
+                alert('You must be signed in to post.');
+                return;
+            }
+
+            const token = await clerkInstance.session.getToken();
+            const method = currentEditingPostId ? 'PUT' : 'POST';
+
+            // Parse tags from comma-separated input
+            const tagsInput = formData.get('tags') || '';
+            const tags = tagsInput
+                .split(',')
+                .map(tag => tag.trim())
+                .filter(tag => tag.length > 0 && tag.length <= 40)
+                .slice(0, 5); // Max 5 tags
+
+            const data = {
+                title: formData.get('title'),
+                content: formData.get('content'),
+                excerpt: formData.get('excerpt'),
+                status: formData.get('status'),
+                tags: tags.join(','), // Store as comma-separated string
+            };
+
+            // Handle image upload (base64 for now, or integrate R2)
+            const imageInput = document.getElementById('post-image');
+            if (imageInput && imageInput.files && imageInput.files[0]) {
+                const file = imageInput.files[0];
+                const reader = new FileReader();
+                const imageData = await new Promise((resolve) => {
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+                data.featured_image = imageData; // Base64 for now
+            }
+
+            if (currentEditingPostId) {
+                data.id = currentEditingPostId;
+            }
+
+            try {
+                const response = await fetch(`${window.WORKER_API_URL}/api/blog`, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Failed to save post');
+                }
+
+                const result = await response.json();
+                console.log('[Blog] Post saved:', result);
+
+                hideBlogEditor();
+                loadBlogPosts(); // Refresh post list
+            } catch (error) {
+                console.error('[Blog] Save failed:', error);
+                alert('Failed to save post: ' + error.message);
+            }
+        }
+
+        // Delete blog post
+        async function deleteBlogPost(postId) {
+            if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) {
+                return;
+            }
+
+            const token = await clerkInstance.session.getToken();
+
+            try {
+                const response = await fetch(`${window.WORKER_API_URL}/api/blog?id=${postId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete post');
+                }
+
+                console.log('[Blog] Post deleted');
+                hideBlogDetail();
+                loadBlogPosts(); // Refresh post list
+            } catch (error) {
+                console.error('[Blog] Delete failed:', error);
+                alert('Failed to delete post: ' + error.message);
+            }
+        }
+
+        // Load and display blog posts
+        async function loadBlogPosts(status = 'published') {
+            const container = document.getElementById('blog-posts-container');
+            container.innerHTML = '<p class="loading-text">Loading posts...</p>';
+
+            try {
+                const url = status === 'draft'
+                    ? `${window.WORKER_API_URL}/api/blog?status=draft`
+                    : `${window.WORKER_API_URL}/api/blog`;
+
+                const headers = {};
+                if (status === 'draft' && currentUser) {
+                    const token = await clerkInstance.session.getToken();
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                const response = await fetch(url, { headers });
+                const posts = await response.json();
+
+                if (posts.length === 0) {
+                    container.innerHTML = '<p class="loading-text">No posts yet. Check back soon!</p>';
+                    return;
+                }
+
+                container.innerHTML = posts.map(post => {
+                    const tags = post.tags ? post.tags.split(',').filter(t => t.trim()) : [];
+                    const tagsHtml = tags.length > 0
+                        ? `<div class="post-tags">${tags.map(tag => `<span class="post-tag">${escapeHtml(tag.trim())}</span>`).join('')}</div>`
+                        : '';
+
+                    return `
+                        <div class="blog-post-card" data-post-slug="${escapeHtml(post.slug)}" role="button" tabindex="0">
+                            <div class="post-meta">
+                                <time>${formatCommentDate(post.published_at)}</time>
+                            </div>
+                            <h3>${escapeHtml(post.title)}</h3>
+                            ${tagsHtml}
+                            <p class="post-excerpt">${escapeHtml(post.excerpt || 'Click to read more...')}</p>
+                        </div>
+                    `;
+                }).join('');
+
+                // Add click handlers
+                container.querySelectorAll('.blog-post-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const slug = card.dataset.postSlug;
+                        loadBlogPost(slug);
+                    });
+
+                    card.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            const slug = card.dataset.postSlug;
+                            loadBlogPost(slug);
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error('[Blog] Failed to load posts:', error);
+                container.innerHTML = '<p class="loading-text">Failed to load posts. Please try again later.</p>';
+            }
+        }
+
+        // Load single blog post
+        async function loadBlogPost(slug) {
+            try {
+                const response = await fetch(`${window.WORKER_API_URL}/api/blog/post?slug=${encodeURIComponent(slug)}`);
+
+                if (!response.ok) {
+                    throw new Error('Post not found');
+                }
+
+                const post = await response.json();
+                showBlogDetail(post);
+
+            } catch (error) {
+                console.error('[Blog] Failed to load post:', error);
+                alert('Failed to load post: ' + error.message);
+            }
+        }
+
+        // Show blog post detail view
+        function showBlogDetail(post) {
+            const postsContainer = document.getElementById('blog-posts-container');
+            const detailView = document.getElementById('blog-post-detail');
+            const adminActions = document.getElementById('detail-admin-actions');
+
+            postsContainer.style.display = 'none';
+            detailView.style.display = 'block';
+
+            document.getElementById('detail-post-title').textContent = post.title;
+            document.getElementById('detail-post-date').textContent = new Date(post.published_at).toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            const excerptEl = document.getElementById('detail-post-excerpt');
+            if (post.excerpt) {
+                excerptEl.textContent = post.excerpt;
+                excerptEl.style.display = 'block';
+            } else {
+                excerptEl.style.display = 'none';
+            }
+
+            // Simple markdown-ish rendering (basic support)
+            const contentEl = document.getElementById('detail-post-content');
+            contentEl.innerHTML = renderMarkdown(post.content);
+
+            // Show admin actions if user is admin
+            if (currentUser?.publicMetadata?.role === 'admin') {
+                adminActions.style.display = 'flex';
+                document.getElementById('edit-post-btn').onclick = () => showBlogEditor(post);
+                document.getElementById('delete-post-btn').onclick = () => deleteBlogPost(post.id);
+            } else {
+                adminActions.style.display = 'none';
+            }
+
+            // Load comments for this post
+            loadComments(post.id);
+
+            // Show comments section
+            const commentsSection = document.getElementById('blog-comments-section');
+            commentsSection.style.display = 'block';
+        }
+
+        // Hide blog detail view
+        function hideBlogDetail() {
+            const postsContainer = document.getElementById('blog-posts-container');
+            const detailView = document.getElementById('blog-post-detail');
+
+            detailView.style.display = 'none';
+            postsContainer.style.display = 'grid';
+        }
+
+        // Basic markdown rendering
+        function renderMarkdown(text) {
+            let html = escapeHtml(text);
+
+            // Code blocks
+            html = html.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
+
+            // Inline code
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+            // Bold
+            html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+            // Italic
+            html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+            // Links
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+            // Headings
+            html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+            html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+
+            // Lists
+            html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+
+            // Paragraphs
+            html = html.split('\n\n').map(para => {
+                if (para.trim() && !para.startsWith('<') && !para.startsWith('</')) {
+                    return `<p>${para.trim()}</p>`;
+                }
+                return para;
+            }).join('\n');
+
+            return html;
+        }
+
+        // Event listeners for blog UI
+        document.getElementById('new-post-btn')?.addEventListener('click', () => showBlogEditor());
+        document.getElementById('close-editor-btn')?.addEventListener('click', hideBlogEditor);
+        document.getElementById('cancel-post-btn')?.addEventListener('click', hideBlogEditor);
+        document.getElementById('back-to-blog-btn')?.addEventListener('click', hideBlogDetail);
+
+        // Blog form submission
+        document.getElementById('blog-post-form')?.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            await saveBlogPost(formData);
+        });
+
+        // Character counters for blog form
+        document.getElementById('post-title')?.addEventListener('input', updateCharCounts);
+        document.getElementById('post-excerpt')?.addEventListener('input', updateCharCounts);
+
+        // Markdown toolbar buttons
+        document.querySelectorAll('.toolbar-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const markdown = this.dataset.markdown;
+                const textarea = document.getElementById('post-content');
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+                const before = text.substring(0, start);
+                const selected = text.substring(start, end);
+                const after = text.substring(end);
+
+                let insertion = markdown;
+                let cursorOffset = 0;
+
+                // Handle different markdown types
+                if (markdown === '**bold**') {
+                    insertion = `**${selected || 'text'}**`;
+                    cursorOffset = selected ? insertion.length : 2;
+                } else if (markdown === '*italic*') {
+                    insertion = `*${selected || 'text'}*`;
+                    cursorOffset = selected ? insertion.length : 1;
+                } else if (markdown === '[link](url)') {
+                    insertion = `[${selected || 'link text'}](url)`;
+                    cursorOffset = selected ? insertion.length - 4 : 1;
+                } else if (markdown === '```code```') {
+                    insertion = `\`\`\`\n${selected || 'code here'}\n\`\`\``;
+                    cursorOffset = selected ? insertion.length - 4 : 4;
+                } else if (markdown === '- list item') {
+                    insertion = `- ${selected || 'list item'}`;
+                    cursorOffset = insertion.length;
+                }
+
+                textarea.value = before + insertion + after;
+                textarea.focus();
+                textarea.setSelectionRange(start + cursorOffset, start + cursorOffset);
+            });
+        });
+
+        // Initialize on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeClerk);
+        } else {
+            initializeClerk();
+        }
+
+        // Load comments for all comment sections
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.comments-list').forEach(listEl => {
+                const articleId = listEl.dataset.articleId;
+                if (articleId) {
+                    loadComments(articleId);
+                }
+            });
+
+            // ── BLOG ENHANCEMENTS: Draft Tabs, Image Upload, Social Share ──
+
+            // ── Draft/Published Tab Switching ──
+            const publishedTabBtn = document.getElementById('published-tab');
+            const draftsTabBtn = document.getElementById('drafts-tab');
+
+            if (publishedTabBtn && draftsTabBtn) {
+                publishedTabBtn.addEventListener('click', function () {
+                    publishedTabBtn.classList.add('active');
+                    draftsTabBtn.classList.remove('active');
+                    loadBlogPosts('published');
+                });
+
+                draftsTabBtn.addEventListener('click', function () {
+                    if (!currentUser || currentUser.publicMetadata?.role !== 'admin') {
+                        alert('Only admins can view drafts.');
+                        return;
+                    }
+                    draftsTabBtn.classList.add('active');
+                    publishedTabBtn.classList.remove('active');
+                    loadBlogPosts('draft');
+                });
+            }
+
+            // ── Image Upload Preview ──
+            const imageInput = document.getElementById('post-image');
+            const imagePreview = document.getElementById('image-preview');
+            const previewImg = document.getElementById('preview-img');
+            const removeImageBtn = document.getElementById('remove-image-btn');
+
+            if (imageInput && imagePreview) {
+                imageInput.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function (event) {
+                            previewImg.src = event.target.result;
+                            imagePreview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                if (removeImageBtn) {
+                    removeImageBtn.addEventListener('click', function () {
+                        imageInput.value = '';
+                        previewImg.src = '';
+                        imagePreview.style.display = 'none';
+                    });
+                }
+            }
+
+            // ── Social Share Buttons ──
+            const nativeShareBtn = document.getElementById('blog-share-native');
+            const twitterShareBtn = document.getElementById('blog-share-twitter');
+            const linkedinShareBtn = document.getElementById('blog-share-linkedin');
+            const clipboardShareBtn = document.getElementById('blog-share-clipboard');
+
+            if (nativeShareBtn) {
+                nativeShareBtn.addEventListener('click', async function () {
+                    const postTitle = document.getElementById('detail-post-title')?.textContent || 'Blog Post';
+                    const shareData = {
+                        title: postTitle,
+                        text: 'Check out this post from Good Flippin Design',
+                        url: window.location.href
+                    };
+
+                    if (navigator.share) {
+                        try {
+                            await navigator.share(shareData);
+                        } catch (err) {
+                            if (err.name !== 'AbortError') {
+                                console.log('Share failed:', err);
+                            }
+                        }
+                    } else {
+                        alert('Web Share API not supported. Try copying the link instead.');
+                    }
+                });
+            }
+
+            if (twitterShareBtn) {
+                twitterShareBtn.addEventListener('click', function () {
+                    const postTitle = document.getElementById('detail-post-title')?.textContent || 'Blog Post';
+                    const url = encodeURIComponent(window.location.href);
+                    const text = encodeURIComponent(postTitle);
+                    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+                });
+            }
+
+            if (linkedinShareBtn) {
+                linkedinShareBtn.addEventListener('click', function () {
+                    const url = encodeURIComponent(window.location.href);
+                    window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${url}`, '_blank');
+                });
+            }
+
+            if (clipboardShareBtn) {
+                clipboardShareBtn.addEventListener('click', async function () {
+                    try {
+                        await navigator.clipboard.writeText(window.location.href);
+                        const originalText = clipboardShareBtn.innerHTML;
+                        clipboardShareBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+                        setTimeout(() => {
+                            clipboardShareBtn.innerHTML = originalText;
+                        }, 2000);
+                    } catch (err) {
+                        console.log('Copy failed:', err);
+                        alert('Failed to copy link. Please copy manually.');
+                    }
+                });
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════════
+        // COMMENT SYSTEM
+        // ═══════════════════════════════════════════════════════════════
+
+        let currentPostId = null; // Track which post's comments we're viewing
+
+        // Load comments for a specific article/post
+        async function loadComments(articleId) {
+            currentPostId = articleId;
+            const commentsList = document.getElementById('comments-list');
+            const commentsCount = document.getElementById('comments-count');
+
+            try {
+                const response = await fetch(`${window.WORKER_API_URL}/api/comments?article_id=${articleId}`);
+                const comments = await response.json();
+
+                commentsCount.textContent = comments.length;
+
+                if (comments.length === 0) {
+                    commentsList.innerHTML = `
+                        <div class="comments-empty">
+                            <div class="comments-empty-icon">💬</div>
+                            <p>No comments yet. Be the first to share your thoughts!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                commentsList.innerHTML = comments.map(comment => renderComment(comment)).join('');
+
+                // Add event listeners to edit/delete buttons
+                comments.forEach(comment => {
+                    const editBtn = document.getElementById(`edit-comment-${comment.id}`);
+                    const deleteBtn = document.getElementById(`delete-comment-${comment.id}`);
+
+                    if (editBtn) {
+                        editBtn.addEventListener('click', () => startEditComment(comment.id));
+                    }
+
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', () => deleteComment(comment.id));
+                    }
+                });
+
+            } catch (error) {
+                console.error('[Comments] Failed to load comments:', error);
+                commentsList.innerHTML = '<p class="comments-empty">Failed to load comments.</p>';
+            }
+        }
+
+        // Render a single comment
+        function renderComment(comment) {
+            const isAdmin = comment.user_role === 'admin';
+            const canModerate = currentUser?.publicMetadata?.role === 'admin';
+            const canEdit = currentUser?.userId === comment.user_id || canModerate;
+
+            const adminBadge = isAdmin ? '<span class="admin-badge">ADMIN</span>' : '';
+
+            const actionButtons = canEdit ? `
+                <div class="comment-actions-btns">
+                    <button id="edit-comment-${comment.id}" class="comment-action-btn edit" title="Edit comment">Edit</button>
+                    <button id="delete-comment-${comment.id}" class="comment-action-btn delete" title="Delete comment">Delete</button>
+                </div>
+            ` : '';
+
+            return `
+                <div class="comment-item" id="comment-${comment.id}">
+                    <div class="comment-header">
+                        <div class="comment-author-section">
+                            <img src="${escapeHtml(comment.user_avatar || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(comment.user_name))}" alt="${escapeHtml(comment.user_name)}'s avatar" class="comment-avatar">
+                            <div class="comment-meta">
+                                <div class="comment-author">
+                                    ${escapeHtml(comment.user_name)}
+                                    ${adminBadge}
+                                </div>
+                                <time class="comment-date">${formatCommentDate(comment.created_at)}</time>
+                            </div>
+                        </div>
+                        ${actionButtons}
+                    </div>
+                    <div class="comment-content" id="comment-content-${comment.id}">${escapeHtml(comment.content)}</div>
+                </div>
+            `;
+        }
+
+        // Format comment date (e.g., "3 hours ago", "2 days ago")
+        function formatCommentDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMins < 1) return 'just now';
+            if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+            });
+        }
+
+        // Post a new comment
+        async function postComment(articleId, content) {
+            if (!currentUser) {
+                alert('Please sign in to comment.');
+                return;
+            }
+
+            if (!content.trim()) {
+                alert('Comment cannot be empty.');
+                return;
+            }
+
+            try {
+                const token = await clerkInstance.session.getToken();
+                const response = await fetch(`${window.WORKER_API_URL}/api/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        article_id: articleId,
+                        content: content.trim()
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to post comment');
+                }
+
+                // Clear form and reload comments
+                document.getElementById('comment-textarea').value = '';
+                document.getElementById('comment-char-count').textContent = '0 / 2000';
+                await loadComments(articleId);
+
+            } catch (error) {
+                console.error('[Comments] Post failed:', error);
+                alert('Failed to post comment: ' + error.message);
+            }
+        }
+
+        // Start editing a comment
+        async function startEditComment(commentId) {
+            const commentItem = document.getElementById(`comment-${commentId}`);
+            const contentEl = document.getElementById(`comment-content-${commentId}`);
+            const currentContent = contentEl.textContent;
+
+            const editForm = `
+                <div class="comment-edit-form">
+                    <textarea id="edit-textarea-${commentId}" class="comment-edit-textarea">${currentContent}</textarea>
+                    <div class="comment-edit-actions">
+                        <button id="save-edit-${commentId}" class="btn-primary btn-small">Save</button>
+                        <button id="cancel-edit-${commentId}" class="btn-link btn-small">Cancel</button>
+                    </div>
+                </div>
+            `;
+
+            contentEl.innerHTML = editForm;
+
+            // Save button
+            document.getElementById(`save-edit-${commentId}`).addEventListener('click', async () => {
+                const newContent = document.getElementById(`edit-textarea-${commentId}`).value;
+                await updateComment(commentId, newContent);
+            });
+
+            // Cancel button
+            document.getElementById(`cancel-edit-${commentId}`).addEventListener('click', () => {
+                contentEl.textContent = currentContent;
+            });
+        }
+
+        // Update a comment
+        async function updateComment(commentId, content) {
+            if (!currentUser) {
+                alert('Please sign in to edit comments.');
+                return;
+            }
+
+            if (!content.trim()) {
+                alert('Comment cannot be empty.');
+                return;
+            }
+
+            try {
+                const token = await clerkInstance.session.getToken();
+                const response = await fetch(`${window.WORKER_API_URL}/api/comments/${commentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content: content.trim() })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to update comment');
+                }
+
+                // Reload comments to show updated content
+                await loadComments(currentPostId);
+
+            } catch (error) {
+                console.error('[Comments] Update failed:', error);
+                alert('Failed to update comment: ' + error.message);
+            }
+        }
+
+        // Delete a comment
+        async function deleteComment(commentId) {
+            if (!currentUser) {
+                alert('Please sign in to delete comments.');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this comment?')) {
+                return;
+            }
+
+            try {
+                const token = await clerkInstance.session.getToken();
+                const response = await fetch(`${window.WORKER_API_URL}/api/comments/${commentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to delete comment');
+                }
+
+                // Reload comments
+                await loadComments(currentPostId);
+
+            } catch (error) {
+                console.error('[Comments] Delete failed:', error);
+                alert('Failed to delete comment: ' + error.message);
+            }
+        }
+
+        // Comment form event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            const commentForm = document.getElementById('comment-form');
+            const commentTextarea = document.getElementById('comment-textarea');
+            const commentCharCount = document.getElementById('comment-char-count');
+            const commentSignInBtn = document.getElementById('comment-signin-btn');
+
+            // Character counter
+            if (commentTextarea) {
+                commentTextarea.addEventListener('input', function () {
+                    const length = this.value.length;
+                    commentCharCount.textContent = `${length} / 2000`;
+                });
+            }
+
+            // Comment form submission
+            if (commentForm) {
+                commentForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    if (!currentPostId) {
+                        console.error('[Comments] No post ID set');
+                        return;
+                    }
+
+                    const content = commentTextarea.value;
+                    await postComment(currentPostId, content);
+                });
+            }
+
+            // Sign-in button in comment section
+            if (commentSignInBtn) {
+                commentSignInBtn.addEventListener('click', function () {
+                    if (clerkInstance) {
+                        clerkInstance.openSignIn();
+                    }
+                });
+            }
+
+            // Update comment form visibility based on auth status
+            function updateCommentFormVisibility() {
+                const loginPrompt = document.getElementById('comment-login-prompt');
+                const commentForm = document.getElementById('comment-form');
+                const userAvatar = document.getElementById('comment-user-avatar');
+                const userName = document.getElementById('comment-user-name');
+
+                if (currentUser) {
+                    if (loginPrompt) loginPrompt.style.display = 'none';
+                    if (commentForm) commentForm.style.display = 'block';
+
+                    // Set user info
+                    if (userAvatar) {
+                        userAvatar.src = currentUser.imageUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser.firstName || currentUser.username || 'User')}`;
+                    }
+                    if (userName) {
+                        userName.textContent = currentUser.firstName || currentUser.username || 'Anonymous';
+                    }
+                } else {
+                    if (loginPrompt) loginPrompt.style.display = 'block';
+                    if (commentForm) commentForm.style.display = 'none';
+                }
+            }
+
+            // Call on load and auth state changes
+            updateCommentFormVisibility();
+
+            // Listen for Clerk auth state changes
+            if (window.clerkInstance) {
+                window.clerkInstance.addListener((resources) => {
+                    if (resources.session) {
+                        updateCommentFormVisibility();
+                    }
+                });
+            }
+        });
+
+        }) ();
     </script>
 
     <!-- GFD Ecosystem Navigation JavaScript -->

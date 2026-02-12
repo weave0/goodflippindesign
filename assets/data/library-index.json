@@ -1,0 +1,78 @@
+{
+    "version": 1,
+    "generatedAt": "2026-02-12T00:49:06.069Z",
+    "items": [
+        {
+            "id": "doc-docs-art-pipeline-md",
+            "type": "doc",
+            "title": "Art & Media Pipeline (MVP)",
+            "description": "This repo is a single-file website (`index.html`) backed by a growing asset library. This document standardizes **where media lives** and **how it should be prepared** so performance + accessibility stay consistent.",
+            "href": "/docs/ART_PIPELINE.md",
+            "path": "docs/ART_PIPELINE.md",
+            "updatedAt": "2026-02-12"
+        },
+        {
+            "id": "doc-docs-content-guidelines-md",
+            "type": "doc",
+            "title": "Content Guidelines — Messaging Tact",
+            "description": "_Last updated: 2026-02-11_",
+            "href": "/docs/CONTENT_GUIDELINES.md",
+            "path": "docs/CONTENT_GUIDELINES.md",
+            "updatedAt": "2026-02-12"
+        },
+        {
+            "id": "doc-docs-directive-checklist-md",
+            "type": "doc",
+            "title": "Directive Checklist (2-11)",
+            "description": "Created: 2026-02-11",
+            "href": "/docs/DIRECTIVE_CHECKLIST.md",
+            "path": "docs/DIRECTIVE_CHECKLIST.md",
+            "updatedAt": "2026-02-12"
+        },
+        {
+            "id": "doc-readme-md",
+            "type": "doc",
+            "title": "Good Flippin Design - Production Portfolio",
+            "description": "**Live Site**: [goodflippindesign.com](https://goodflippindesign.com)",
+            "href": "/README.md",
+            "path": "README.md",
+            "updatedAt": "2026-02-02"
+        },
+        {
+            "id": "doc-roadmap-md",
+            "type": "doc",
+            "title": "Good Flippin Design — Full Roadmap",
+            "description": "**Updated**: 2026-02-12",
+            "href": "/ROADMAP.md",
+            "path": "ROADMAP.md",
+            "updatedAt": "2026-02-12"
+        },
+        {
+            "id": "doc-docs-navigation-audit-md",
+            "type": "doc",
+            "title": "Navigation Clarity Audit — Phase 1.3",
+            "description": "_Completed: 2026-02-11_",
+            "href": "/docs/NAVIGATION_AUDIT.md",
+            "path": "docs/NAVIGATION_AUDIT.md",
+            "updatedAt": "2026-02-12"
+        },
+        {
+            "id": "doc-docs-phase-1-completion-report-md",
+            "type": "doc",
+            "title": "Phase 1 Completion Report — Quick Wins",
+            "description": "**Completed**: 2026-02-11",
+            "href": "/docs/PHASE_1_COMPLETION_REPORT.md",
+            "path": "docs/PHASE_1_COMPLETION_REPORT.md",
+            "updatedAt": "2026-02-12"
+        },
+        {
+            "id": "doc-ux-performance-improvements-md",
+            "type": "doc",
+            "title": "UX Performance Improvements - Complete Report",
+            "description": "**Date:** December 6, 2025",
+            "href": "/UX_PERFORMANCE_IMPROVEMENTS.md",
+            "path": "UX_PERFORMANCE_IMPROVEMENTS.md",
+            "updatedAt": "2025-12-06"
+        }
+    ]
+}

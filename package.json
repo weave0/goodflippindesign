@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "npx http-server . -p 3000 -o",
     "sync": "node scripts/sync-review.js",
+    "library:index": "node scripts/generate-library-index.js",
     "test:quick": "npm run sync && node tests/accessibility.test.js",
     "test": "node tests/run-all-tests.js",
     "test:watch": "nodemon --watch index.html --watch temp_review.html --watch tests/ --exec npm test",
@@ -32,6 +33,7 @@
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
+    "@sentry/cloudflare": "^8.0.0",
     "html-validate": "^8.18.0",
     "http-server": "^14.1.1",
     "husky": "^9.0.0",

@@ -1,87 +1,101 @@
 {
-  "portfolio": [
-    {
-      "id": "aiaimate",
-      "title": "AI Aimate",
-      "description": "Zero-cost AI education platform democratizing access to advanced AI tools. Built for students, educators, and lifelong learners.",
-      "category": "AI Platform",
-      "tech": ["Next.js", "TypeScript", "OpenAI API", "Vercel"],
-      "url": "https://aiaimate.com",
-      "image": "assets/portfolio/aiaimate-screenshot.png",
-      "status": "Live",
-      "statusBadge": {
-        "text": "Free Education",
-        "style": "background: rgba(31, 22, 66, 0.9); color: #c4b5fd;"
-      },
-      "featured": true,
-      "launchDate": "2024"
-    },
-    {
-      "id": "culturesherpa",
-      "title": "CultureSherpa",
-      "description": "Interactive cultural atlas preserving global traditions through data visualization and storytelling.",
-      "category": "Data Visualization",
-      "tech": ["React", "D3.js", "Mapbox", "S3"],
-      "url": "https://culturesherpa.org",
-      "image": "assets/portfolio/culturesherpa-screenshot.png",
-      "status": "Live",
-      "statusBadge": {
-        "text": "◆ Cultural Preservation",
-        "style": "background: rgba(41, 37, 36, 0.9); color: #d6d3d1;"
-      },
-      "featured": true,
-      "launchDate": "2024"
-    },
-    {
-      "id": "gfv",
-      "title": "Good Flippin Vibes",
-      "description": "Holistic wellness platform connecting mind, body, and community through evidence-based practices.",
-      "category": "Wellness Platform",
-      "tech": ["HTML5", "CSS3", "Vanilla JS"],
-      "url": "https://goodflippinvibes.com",
-      "image": "assets/portfolio/gfv-screenshot.png",
-      "status": "Live",
-      "statusBadge": {
-        "text": "Origin Story",
-        "style": "background: rgba(5, 46, 32, 0.9); color: #6ee7b7;"
-      },
-      "featured": true,
-      "launchDate": "2023"
+    "portfolio": [
+        {
+            "id": "aiaimate",
+            "title": "AI Aimate",
+            "description": "Zero-cost AI education platform democratizing access to advanced AI tools. Built for students, educators, and lifelong learners.",
+            "category": "AI Platform",
+            "tech": [
+                "Next.js",
+                "TypeScript",
+                "OpenAI API",
+                "Vercel"
+            ],
+            "url": "https://aiaimate.com",
+            "image": "assets/portfolio/aiaimate-screenshot.png",
+            "status": "Live",
+            "statusBadge": {
+                "text": "Free Education",
+                "style": "background: rgba(31, 22, 66, 0.9); color: #c4b5fd;"
+            },
+            "featured": true,
+            "launchDate": "2024"
+        },
+        {
+            "id": "culturesherpa",
+            "title": "CultureSherpa",
+            "description": "Interactive cultural atlas preserving global traditions through data visualization and storytelling.",
+            "category": "Data Visualization",
+            "tech": [
+                "React",
+                "D3.js",
+                "Mapbox",
+                "S3"
+            ],
+            "url": "https://culturesherpa.org",
+            "image": "assets/portfolio/culturesherpa-screenshot.png",
+            "status": "Live",
+            "statusBadge": {
+                "text": "◆ Cultural Preservation",
+                "style": "background: rgba(41, 37, 36, 0.9); color: #d6d3d1;"
+            },
+            "featured": true,
+            "launchDate": "2024"
+        },
+        {
+            "id": "gfv",
+            "title": "Good Flippin Vibes",
+            "description": "Holistic wellness platform connecting mind, body, and community through evidence-based practices.",
+            "category": "Wellness Platform",
+            "tech": [
+                "HTML5",
+                "CSS3",
+                "Vanilla JS"
+            ],
+            "url": "https://goodflippinvibes.com",
+            "image": "assets/portfolio/gfv-screenshot.png",
+            "status": "Live",
+            "statusBadge": {
+                "text": "Origin Story",
+                "style": "background: rgba(5, 46, 32, 0.9); color: #6ee7b7;"
+            },
+            "featured": true,
+            "launchDate": "2023"
+        }
+    ],
+    "mediaGallery": [
+        {
+            "id": "demo-platform",
+            "title": "Platform Walkthrough",
+            "type": "video",
+            "url": "https://www.youtube.com/embed/YOUR_VIDEO_ID",
+            "thumbnail": "assets/videos/demo-thumb.jpg",
+            "description": "See how we build enterprise-grade platforms",
+            "duration": "3:42"
+        },
+        {
+            "id": "client-testimonial",
+            "title": "Client Success Story",
+            "type": "video",
+            "url": "https://www.youtube.com/embed/YOUR_VIDEO_ID",
+            "thumbnail": "assets/videos/testimonial-thumb.jpg",
+            "description": "How we helped transform their business",
+            "duration": "2:15"
+        }
+    ],
+    "socialFeeds": {
+        "instagram": {
+            "enabled": true,
+            "handle": "@goodflippindesign",
+            "embedCode": "<!-- Paste EmbedSocial code here -->"
+        },
+        "linkedin": {
+            "enabled": true,
+            "companyUrl": "https://linkedin.com/company/good-flippin-design"
+        },
+        "github": {
+            "enabled": true,
+            "username": "weave0"
+        }
     }
-  ],
-  "mediaGallery": [
-    {
-      "id": "demo-platform",
-      "title": "Platform Walkthrough",
-      "type": "video",
-      "url": "https://www.youtube.com/embed/YOUR_VIDEO_ID",
-      "thumbnail": "assets/videos/demo-thumb.jpg",
-      "description": "See how we build enterprise-grade platforms",
-      "duration": "3:42"
-    },
-    {
-      "id": "client-testimonial",
-      "title": "Client Success Story",
-      "type": "video", 
-      "url": "https://www.youtube.com/embed/YOUR_VIDEO_ID",
-      "thumbnail": "assets/videos/testimonial-thumb.jpg",
-      "description": "How we helped transform their business",
-      "duration": "2:15"
-    }
-  ],
-  "socialFeeds": {
-    "instagram": {
-      "enabled": true,
-      "handle": "@goodflippindesign",
-      "embedCode": "<!-- Paste EmbedSocial code here -->"
-    },
-    "linkedin": {
-      "enabled": true,
-      "companyUrl": "https://linkedin.com/company/good-flippin-design"
-    },
-    "github": {
-      "enabled": true,
-      "username": "weave0"
-    }
-  }
 }
