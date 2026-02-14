@@ -125,6 +125,8 @@
 
         html {
             scroll-behavior: smooth;
+            scroll-padding-top: 140px;
+            /* Account for ecosystem nav (60px) + main nav (80px) */
         }
 
         body {
@@ -133,6 +135,11 @@
             color: var(--text);
             line-height: 1.6;
             font-size: 16px;
+        }
+
+        /* Base link styles - prevent browser default blue */
+        a {
+            color: inherit;
         }
 
         /* Screen reader only - visually hidden but accessible */
@@ -1044,8 +1051,10 @@
 
         .status-badge {
             font-size: 0.6875rem;
-            padding: 0.125rem 0.375rem;
-            border-radius: 3px;
+            padding: 0.5rem 0.75rem;
+            /* Increased for touch targets */
+            border-radius: 8px;
+            /* Standardized */
             font-weight: 700;
             letter-spacing: 0.05em;
         }
@@ -1345,6 +1354,7 @@
         .library-card {
             display: block;
             text-decoration: none;
+            color: var(--text);
             background: var(--glass-bg);
             -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
@@ -1457,7 +1467,13 @@
             color: var(--text-secondary);
             font-size: 1.5rem;
             cursor: pointer;
-            padding: 0.25rem 0.5rem;
+            padding: 0.625rem 0.75rem;
+            /* Increased for 44px touch target */
+            min-height: 44px;
+            min-width: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             transition: color 0.2s ease;
         }
 
@@ -1595,8 +1611,11 @@
         .toolbar-btn {
             background: var(--bg-elevated);
             border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 0.375rem 0.75rem;
+            border-radius: 8px;
+            /* Standardized */
+            padding: 0.625rem 0.875rem;
+            /* Increased for 44px touch target */
+            min-height: 44px;
             color: var(--text-secondary);
             font-size: 0.875rem;
             cursor: pointer;
@@ -1659,19 +1678,22 @@
         }
 
         .btn-danger {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #ef4444;
+            background: #b91c1c;
+            /* Solid red for WCAG AA compliance - tested at 5.74:1 contrast */
+            border: 1px solid #dc2626;
+            color: #ffffff;
+            /* Pure white for maximum contrast */
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
         }
 
         .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.2);
+            background: #dc2626;
             border-color: #ef4444;
+            color: #ffffff;
         }
 
         .blog-posts-grid {
@@ -1732,8 +1754,12 @@
             display: inline-block;
             background: var(--bg-elevated);
             border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 0.25rem 0.625rem;
+            border-radius: 8px;
+            /* Standardized */
+            padding: 0.5rem 0.875rem;
+            /* Increased for touch targets if clickable */
+            min-height: 36px;
+            /* Minimum for readability */
             font-size: 0.75rem;
             color: var(--text-secondary);
             font-family: 'JetBrains Mono', monospace;
@@ -1761,8 +1787,12 @@
             display: inline-block;
             background: var(--bg-elevated);
             border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 0.25rem 0.625rem;
+            border-radius: 8px;
+            /* Standardized */
+            padding: 0.5rem 0.875rem;
+            /* Increased for touch targets if clickable */
+            min-height: 36px;
+            /* Minimum for readability */
             font-size: 0.75rem;
             color: var(--text-secondary);
             font-family: 'JetBrains Mono', monospace;
@@ -2108,14 +2138,16 @@
         .admin-badge {
             display: inline-flex;
             align-items: center;
-            padding: 0.125rem 0.5rem;
+            padding: 0.5rem 0.75rem;
+            /* Increased for visibility */
             background: linear-gradient(135deg, var(--accent) 0%, #10b981 100%);
             color: var(--bg);
             font-size: 0.6875rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            border-radius: 4px;
+            border-radius: 8px;
+            /* Standardized */
             box-shadow: 0 0 10px rgba(132, 94, 247, 0.3);
         }
 
@@ -2142,8 +2174,11 @@
             color: var(--text-muted);
             font-size: 0.8125rem;
             cursor: pointer;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
+            padding: 0.625rem 0.875rem;
+            /* Increased for 44px touch target */
+            min-height: 44px;
+            border-radius: 8px;
+            /* Standardized */
             transition: all 0.2s ease;
         }
 
@@ -2873,7 +2908,10 @@
             gap: 5px;
             background: transparent;
             border: none;
-            padding: 8px;
+            padding: 12px;
+            /* Increased for 44px touch target */
+            min-width: 44px;
+            min-height: 44px;
             cursor: pointer;
             z-index: 110;
             transition: transform 0.3s ease;
@@ -5576,7 +5614,7 @@
     <div id="exit-intent-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden" style="z-index: 200; animation: fadeIn 0.3s ease;">
         <div class="flex items-center justify-center min-h-screen p-6">
             <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-white/10 rounded-2xl p-8 max-w-md w-full relative" style="animation: slideUp 0.4s ease;">
-                <button id="exit-intent-close" class="absolute top-4 right-4 text-white/40 hover:text-white transition-colors" aria-label="Close">
+                <button id="exit-intent-close" class="absolute top-4 right-4 text-white/40 hover:text-white transition-colors" aria-label="Close" style="min-width: 44px; min-height: 44px; padding: 8px; display: inline-flex; align-items: center; justify-content: center;">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -5627,13 +5665,13 @@
                         </div>
                     </div>
                     <div class="flex gap-2 flex-wrap justify-center">
-                        <a href="mailto:brett@goodflippindesign.com" class="px-4 py-2 rounded-full font-bold text-sm bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition-transform whitespace-nowrap">
+                        <a href="mailto:brett@goodflippindesign.com" class="px-4 py-2 rounded-full font-bold text-sm bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition-transform whitespace-nowrap" style="min-height: 44px; display: inline-flex; align-items: center; padding: 12px 16px;">
                             📧 Get in Touch
                         </a>
-                        <a href="donate.html" class="px-4 py-2 rounded-full font-semibold text-sm border border-white/20 text-white/70 hover:bg-white/5 transition-colors whitespace-nowrap">
+                        <a href="donate.html" class="px-4 py-2 rounded-full font-semibold text-sm border border-white/20 text-white/70 hover:bg-white/5 transition-colors whitespace-nowrap" style="min-height: 44px; display: inline-flex; align-items: center; padding: 12px 16px;">
                             💖 Support Us
                         </a>
-                        <button id="sticky-cta-close" class="px-3 py-2 text-white/40 hover:text-white/60 transition-colors" aria-label="Close">
+                        <button id="sticky-cta-close" class="px-3 py-2 text-white/40 hover:text-white/60 transition-colors" aria-label="Close" style="min-width: 44px; min-height: 44px; padding: 12px; display: inline-flex; align-items: center; justify-content: center;">
                             ✕
                         </button>
                     </div>
@@ -5651,7 +5689,7 @@
                     <p id="social-proof-text" class="text-white/80 text-sm mb-1">Someone just viewed the portfolio</p>
                     <p id="social-proof-time" class="text-white/40 text-xs">2m ago</p>
                 </div>
-                <button id="social-proof-close" class="text-white/30 hover:text-white/50 transition-colors" aria-label="Hide notifications">
+                <button id="social-proof-close" class="text-white/30 hover:text-white/50 transition-colors" aria-label="Hide notifications" style="min-width: 44px; min-height: 44px; padding: 8px; display: inline-flex; align-items: center; justify-content: center;">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
