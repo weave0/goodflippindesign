@@ -1,7 +1,9 @@
 # Cloudflare Pages deployment ignore
+
 # Exclude development projects and assets not needed in production
 
 # Development projects
+
 GFD Dev Projects/
 Brand Assets Development/
 Business Registration/
@@ -11,15 +13,18 @@ Organization Docs/
 portfolio-manager/
 
 # Large video assets (host externally if needed)
+
 *.mp4
 *.mov
 *.avi
 
 # Archives and documentation
+
 archives/
 docs/
 tests/
 
 # Node modules and build artifacts
+
 node_modules/
 .venv/
