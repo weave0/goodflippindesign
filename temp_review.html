@@ -3951,7 +3951,7 @@
                         <span id="user-name" class="user-name"></span>
                     </button>
                     <div id="user-dropdown" class="user-dropdown" role="menu" aria-hidden="true">
-                        <a href="#profile" class="user-dropdown-link" role="menuitem">Profile</a>
+                        <a href="#user-profile" class="user-dropdown-link" role="menuitem">Profile</a>
                         <button id="sign-out-btn" class="user-dropdown-link" role="menuitem">Sign Out</button>
                     </div>
                 </div>
@@ -3982,7 +3982,7 @@
                 <a href="#library" class="mobile-nav-link">Library</a>
                 <!-- Mobile Auth -->
                 <button id="mobile-sign-in-btn" class="mobile-nav-link" style="display: none;">Sign In</button>
-                <a href="#profile" id="mobile-profile-link" class="mobile-nav-link" style="display: none;">Profile</a>
+                <a href="#user-profile" id="mobile-profile-link" class="mobile-nav-link" style="display: none;">Profile</a>
                 <button id="mobile-sign-out-btn" class="mobile-nav-link" style="display: none;">Sign Out</button>
                 <a href="#legal-forms" class="mobile-nav-link">Legal Forms</a>
                 <a href="donate.html" class="mobile-nav-link" onclick="if(window.gtag){gtag('event','donate_click',{event_category:'donation',event_label:'Mobile Nav Link',entry_point:'mobile_nav'})}">Donate</a>
@@ -4719,6 +4719,14 @@
                     </div>
                     <button type="submit" class="form-submit">Send message</button>
                 </form>
+            </div>
+        </section>
+
+        <!-- User Profile Section (Auth-gated) -->
+        <section id="user-profile" style="display: none;">
+            <div class="container">
+                <h2>User Profile</h2>
+                <p>Profile features coming soon. Stay tuned for authentication and personalized features.</p>
             </div>
         </section>
     </main>
@@ -5951,165 +5959,164 @@
                     loadBlogPosts(); // Still load blog posts even if auth fails
                 }
             }
-        }
 
             function showUserMenu(user) {
-            // Desktop nav
-            const signInBtn = document.getElementById('sign-in-btn');
-            const userMenuContainer = document.getElementById('user-menu-container');
-            const userAvatar = document.getElementById('user-avatar');
-            const userName = document.getElementById('user-name');
+                // Desktop nav
+                const signInBtn = document.getElementById('sign-in-btn');
+                const userMenuContainer = document.getElementById('user-menu-container');
+                const userAvatar = document.getElementById('user-avatar');
+                const userName = document.getElementById('user-name');
 
-            if (signInBtn) signInBtn.style.display = 'none';
-            if (userMenuContainer) {
-                userMenuContainer.style.display = 'block';
-                if (userAvatar) userAvatar.src = user.imageUrl || generateInitialsAvatar(user);
-                if (userName) userName.textContent = user.publicMetadata?.displayName || user.firstName || `User_${user.id.slice(0, 8)}`;
+                if (signInBtn) signInBtn.style.display = 'none';
+                if (userMenuContainer) {
+                    userMenuContainer.style.display = 'block';
+                    if (userAvatar) userAvatar.src = user.imageUrl || generateInitialsAvatar(user);
+                    if (userName) userName.textContent = user.publicMetadata?.displayName || user.firstName || `User_${user.id.slice(0, 8)}`;
+                }
+
+                // Mobile nav
+                const mobileSignInBtn = document.getElementById('mobile-sign-in-btn');
+                const mobileProfileLink = document.getElementById('mobile-profile-link');
+                const mobileSignOutBtn = document.getElementById('mobile-sign-out-btn');
+
+                if (mobileSignInBtn) mobileSignInBtn.style.display = 'none';
+                if (mobileProfileLink) mobileProfileLink.style.display = 'block';
+                if (mobileSignOutBtn) mobileSignOutBtn.style.display = 'block';
             }
 
-            // Mobile nav
-            const mobileSignInBtn = document.getElementById('mobile-sign-in-btn');
-            const mobileProfileLink = document.getElementById('mobile-profile-link');
-            const mobileSignOutBtn = document.getElementById('mobile-sign-out-btn');
+            function showSignInButtons() {
+                // Desktop nav
+                const signInBtn = document.getElementById('sign-in-btn');
+                const userMenuContainer = document.getElementById('user-menu-container');
 
-            if (mobileSignInBtn) mobileSignInBtn.style.display = 'none';
-            if (mobileProfileLink) mobileProfileLink.style.display = 'block';
-            if (mobileSignOutBtn) mobileSignOutBtn.style.display = 'block';
-        }
+                if (signInBtn) signInBtn.style.display = 'inline-block';
+                if (userMenuContainer) userMenuContainer.style.display = 'none';
 
-        function showSignInButtons() {
-            // Desktop nav
-            const signInBtn = document.getElementById('sign-in-btn');
-            const userMenuContainer = document.getElementById('user-menu-container');
+                // Mobile nav
+                const mobileSignInBtn = document.getElementById('mobile-sign-in-btn');
+                const mobileProfileLink = document.getElementById('mobile-profile-link');
+                const mobileSignOutBtn = document.getElementById('mobile-sign-out-btn');
 
-            if (signInBtn) signInBtn.style.display = 'inline-block';
-            if (userMenuContainer) userMenuContainer.style.display = 'none';
-
-            // Mobile nav
-            const mobileSignInBtn = document.getElementById('mobile-sign-in-btn');
-            const mobileProfileLink = document.getElementById('mobile-profile-link');
-            const mobileSignOutBtn = document.getElementById('mobile-sign-out-btn');
-
-            if (mobileSignInBtn) mobileSignInBtn.style.display = 'block';
-            if (mobileProfileLink) mobileProfileLink.style.display = 'none';
-            if (mobileSignOutBtn) mobileSignOutBtn.style.display = 'none';
-        }
-
-        function generateInitialsAvatar(user) {
-            const name = user.publicMetadata?.displayName || user.firstName || 'U';
-            const initials = name.charAt(0).toUpperCase();
-            const canvas = document.createElement('canvas');
-            canvas.width = 40;
-            canvas.height = 40;
-            const ctx = canvas.getContext('2d');
-
-            // Gradient background
-            const gradient = ctx.createLinearGradient(0, 0, 40, 40);
-            gradient.addColorStop(0, '#8b5cf6');
-            gradient.addColorStop(1, '#10b981');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 40, 40);
-
-            // Initials
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 18px Inter';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(initials, 20, 20);
-
-            return canvas.toDataURL();
-        }
-
-        // User menu dropdown toggle
-        document.addEventListener('click', function (e) {
-            const userMenuBtn = document.getElementById('user-menu-btn');
-            const userDropdown = document.getElementById('user-dropdown');
-
-            if (userMenuBtn && e.target.closest('#user-menu-btn')) {
-                const isExpanded = userMenuBtn.getAttribute('aria-expanded') === 'true';
-                userMenuBtn.setAttribute('aria-expanded', !isExpanded);
-                userDropdown.setAttribute('aria-hidden', isExpanded);
-            } else if (userDropdown && !e.target.closest('.user-menu-container')) {
-                if (userMenuBtn) userMenuBtn.setAttribute('aria-expanded', 'false');
-                userDropdown.setAttribute('aria-hidden', 'true');
+                if (mobileSignInBtn) mobileSignInBtn.style.display = 'block';
+                if (mobileProfileLink) mobileProfileLink.style.display = 'none';
+                if (mobileSignOutBtn) mobileSignOutBtn.style.display = 'none';
             }
-        });
 
-        // Sign-in button click
-        document.addEventListener('click', function (e) {
-            if (e.target.closest('#sign-in-btn') || e.target.closest('#mobile-sign-in-btn') || e.target.classList.contains('comment-login-btn')) {
-                if (clerkInstance) {
-                    clerkInstance.openSignIn();
+            function generateInitialsAvatar(user) {
+                const name = user.publicMetadata?.displayName || user.firstName || 'U';
+                const initials = name.charAt(0).toUpperCase();
+                const canvas = document.createElement('canvas');
+                canvas.width = 40;
+                canvas.height = 40;
+                const ctx = canvas.getContext('2d');
+
+                // Gradient background
+                const gradient = ctx.createLinearGradient(0, 0, 40, 40);
+                gradient.addColorStop(0, '#8b5cf6');
+                gradient.addColorStop(1, '#10b981');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 40, 40);
+
+                // Initials
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 18px Inter';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(initials, 20, 20);
+
+                return canvas.toDataURL();
+            }
+
+            // User menu dropdown toggle
+            document.addEventListener('click', function (e) {
+                const userMenuBtn = document.getElementById('user-menu-btn');
+                const userDropdown = document.getElementById('user-dropdown');
+
+                if (userMenuBtn && e.target.closest('#user-menu-btn')) {
+                    const isExpanded = userMenuBtn.getAttribute('aria-expanded') === 'true';
+                    userMenuBtn.setAttribute('aria-expanded', !isExpanded);
+                    userDropdown.setAttribute('aria-hidden', isExpanded);
+                } else if (userDropdown && !e.target.closest('.user-menu-container')) {
+                    if (userMenuBtn) userMenuBtn.setAttribute('aria-expanded', 'false');
+                    userDropdown.setAttribute('aria-hidden', 'true');
+                }
+            });
+
+            // Sign-in button click
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('#sign-in-btn') || e.target.closest('#mobile-sign-in-btn') || e.target.classList.contains('comment-login-btn')) {
+                    if (clerkInstance) {
+                        clerkInstance.openSignIn();
+                    }
+                }
+            });
+
+            // Sign-out button click
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('#sign-out-btn') || e.target.closest('#mobile-sign-out-btn')) {
+                    if (clerkInstance) {
+                        clerkInstance.signOut();
+                    }
+                }
+            });
+
+            // ═══════════════════════════════════════════════════════════
+            // COMMENT SYSTEM
+            // ═══════════════════════════════════════════════════════════
+
+            const WORKER_API_URL = window.WORKER_API_URL || 'https://gfd-auth.YOUR_SUBDOMAIN.workers.dev';
+
+            function enableCommentForms() {
+                document.querySelectorAll('.comment-form').forEach(form => {
+                    form.style.display = 'block';
+                });
+                document.querySelectorAll('.comment-login-cta').forEach(cta => {
+                    cta.style.display = 'none';
+                });
+            }
+
+            function showLoginCTAs() {
+                document.querySelectorAll('.comment-form').forEach(form => {
+                    form.style.display = 'none';
+                });
+                document.querySelectorAll('.comment-login-cta').forEach(cta => {
+                    cta.style.display = 'block';
+                });
+            }
+
+            async function loadComments(articleId) {
+                try {
+                    const response = await fetch(`${WORKER_API_URL}/api/comments?articleId=${encodeURIComponent(articleId)}`);
+                    if (!response.ok) throw new Error('Failed to load comments');
+
+                    const comments = await response.json();
+                    renderComments(articleId, comments);
+                } catch (error) {
+                    console.error('[Comments] Load failed:', error);
                 }
             }
-        });
 
-        // Sign-out button click
-        document.addEventListener('click', function (e) {
-            if (e.target.closest('#sign-out-btn') || e.target.closest('#mobile-sign-out-btn')) {
-                if (clerkInstance) {
-                    clerkInstance.signOut();
+            function renderComments(articleId, comments) {
+                const listEl = document.querySelector(`.comments-list[data-article-id="${articleId}"]`);
+                const countEl = document.querySelector(`.comments-count[data-article-id="${articleId}"]`);
+
+                if (countEl) {
+                    countEl.textContent = `${comments.length} ${comments.length === 1 ? 'comment' : 'comments'}`;
                 }
-            }
-        });
 
-        // ═══════════════════════════════════════════════════════════
-        // COMMENT SYSTEM
-        // ═══════════════════════════════════════════════════════════
+                if (!listEl) return;
 
-        const WORKER_API_URL = window.WORKER_API_URL || 'https://gfd-auth.YOUR_SUBDOMAIN.workers.dev';
+                if (comments.length === 0) {
+                    listEl.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No comments yet. Be the first to share your thoughts!</p>';
+                    return;
+                }
 
-        function enableCommentForms() {
-            document.querySelectorAll('.comment-form').forEach(form => {
-                form.style.display = 'block';
-            });
-            document.querySelectorAll('.comment-login-cta').forEach(cta => {
-                cta.style.display = 'none';
-            });
-        }
+                listEl.innerHTML = comments.map(comment => {
+                    const isOwn = currentUser && comment.user_id === currentUser.id;
+                    const isAdmin = currentUser && currentUser.publicMetadata?.role === 'admin';
+                    const showActions = isOwn || isAdmin;
 
-        function showLoginCTAs() {
-            document.querySelectorAll('.comment-form').forEach(form => {
-                form.style.display = 'none';
-            });
-            document.querySelectorAll('.comment-login-cta').forEach(cta => {
-                cta.style.display = 'block';
-            });
-        }
-
-        async function loadComments(articleId) {
-            try {
-                const response = await fetch(`${WORKER_API_URL}/api/comments?articleId=${encodeURIComponent(articleId)}`);
-                if (!response.ok) throw new Error('Failed to load comments');
-
-                const comments = await response.json();
-                renderComments(articleId, comments);
-            } catch (error) {
-                console.error('[Comments] Load failed:', error);
-            }
-        }
-
-        function renderComments(articleId, comments) {
-            const listEl = document.querySelector(`.comments-list[data-article-id="${articleId}"]`);
-            const countEl = document.querySelector(`.comments-count[data-article-id="${articleId}"]`);
-
-            if (countEl) {
-                countEl.textContent = `${comments.length} ${comments.length === 1 ? 'comment' : 'comments'}`;
-            }
-
-            if (!listEl) return;
-
-            if (comments.length === 0) {
-                listEl.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No comments yet. Be the first to share your thoughts!</p>';
-                return;
-            }
-
-            listEl.innerHTML = comments.map(comment => {
-                const isOwn = currentUser && comment.user_id === currentUser.id;
-                const isAdmin = currentUser && currentUser.publicMetadata?.role === 'admin';
-                const showActions = isOwn || isAdmin;
-
-                return `
+                    return `
                         <div class="comment" data-comment-id="${comment.id}">
                             <div class="comment-header">
                                 <div class="comment-author-info">
@@ -6132,329 +6139,329 @@
                             ` : ''}
                         </div>
                     `;
-            }).join('');
-        }
-
-        async function postComment(articleId, text) {
-            if (!currentUser || !clerkInstance) {
-                console.error('[Comments] User not authenticated');
-                return;
+                }).join('');
             }
 
-            try {
-                const session = await clerkInstance.session.getToken();
-
-                const response = await fetch(`${WORKER_API_URL}/api/comments`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session}`
-                    },
-                    body: JSON.stringify({ articleId, text })
-                });
-
-                if (!response.ok) {
-                    const error = await response.text();
-                    throw new Error(error);
-                }
-
-                await loadComments(articleId);
-            } catch (error) {
-                console.error('[Comments] Post failed:', error);
-                alert(`Failed to post comment: ${error.message}`);
-            }
-        }
-
-        async function deleteComment(commentId, articleId) {
-            if (!currentUser || !clerkInstance) return;
-
-            if (!confirm('Are you sure you want to delete this comment?')) return;
-
-            try {
-                const session = await clerkInstance.session.getToken();
-
-                const response = await fetch(`${WORKER_API_URL}/api/comments`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session}`
-                    },
-                    body: JSON.stringify({ commentId })
-                });
-
-                if (!response.ok) throw new Error('Failed to delete comment');
-
-                await loadComments(articleId);
-            } catch (error) {
-                console.error('[Comments] Delete failed:', error);
-                alert(`Failed to delete comment: ${error.message}`);
-            }
-        }
-
-        // Comment form submission
-        document.addEventListener('submit', function (e) {
-            if (e.target.classList.contains('comment-form')) {
-                e.preventDefault();
-                const form = e.target;
-                const articleId = form.dataset.articleId;
-                const textarea = form.querySelector('.comment-textarea');
-                const text = textarea.value.trim();
-
-                if (!text) return;
-
-                postComment(articleId, text).then(() => {
-                    textarea.value = '';
-                });
-            }
-        });
-
-        // Comment delete
-        document.addEventListener('click', function (e) {
-            if (e.target.classList.contains('comment-delete-btn')) {
-                const commentId = e.target.dataset.commentId;
-                const commentEl = e.target.closest('.comment');
-                const listEl = commentEl.closest('.comments-list');
-                const articleId = listEl.dataset.articleId;
-
-                deleteComment(commentId, articleId);
-            }
-        });
-
-        // Character counter for comment textarea
-        document.addEventListener('input', function (e) {
-            if (e.target.classList.contains('comment-textarea')) {
-                const form = e.target.closest('.comment-form');
-                const counter = form.querySelector('.comment-char-count');
-                if (counter) {
-                    const length = e.target.value.length;
-                    counter.textContent = `${length}/2000`;
-                    if (length > 2000) {
-                        counter.style.color = '#ef4444';
-                    } else {
-                        counter.style.color = 'var(--text-muted)';
-                    }
-                }
-            }
-        });
-
-        // Utility functions
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function formatCommentDate(dateStr) {
-            const date = new Date(dateStr);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            const diffDays = Math.floor(diffMs / 86400000);
-
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins}m ago`;
-            if (diffHours < 24) return `${diffHours}h ago`;
-            if (diffDays < 7) return `${diffDays}d ago`;
-
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        }
-
-        // ========================================
-        // BLOG CMS (Phase 4: Content Evolution)
-        // ========================================
-
-        let currentEditingPostId = null;
-
-        // Show admin controls if user is admin
-        function enableBlogAdminFeatures() {
-            const adminControls = document.getElementById('blog-admin-controls');
-            if (adminControls && currentUser?.publicMetadata?.role === 'admin') {
-                adminControls.style.display = 'flex';
-            }
-        }
-
-        // Show blog editor
-        function showBlogEditor(postData = null) {
-            const editor = document.getElementById('blog-editor');
-            const titleEl = document.getElementById('editor-title-text');
-            const postsContainer = document.getElementById('blog-posts-container');
-            const detailView = document.getElementById('blog-post-detail');
-
-            // Hide listing and detail views
-            postsContainer.style.display = 'none';
-            detailView.style.display = 'none';
-
-            if (postData) {
-                // Edit mode
-                titleEl.textContent = 'Edit Post';
-                document.getElementById('post-id').value = postData.id;
-                document.getElementById('post-title').value = postData.title;
-                document.getElementById('post-excerpt').value = postData.excerpt || '';
-                document.getElementById('post-content').value = postData.content;
-                document.querySelector(`input[name="status"][value="${postData.status}"]`).checked = true;
-                currentEditingPostId = postData.id;
-            } else {
-                // New post mode
-                titleEl.textContent = 'Create New Post';
-                document.getElementById('blog-post-form').reset();
-                document.getElementById('post-id').value = '';
-                currentEditingPostId = null;
-            }
-
-            editor.style.display = 'block';
-            updateCharCounts();
-        }
-
-        // Hide blog editor
-        function hideBlogEditor() {
-            const editor = document.getElementById('blog-editor');
-            const postsContainer = document.getElementById('blog-posts-container');
-            editor.style.display = 'none';
-            postsContainer.style.display = 'grid';
-            document.getElementById('blog-post-form').reset();
-            currentEditingPostId = null;
-        }
-
-        // Update character counters
-        function updateCharCounts() {
-            const titleInput = document.getElementById('post-title');
-            const excerptInput = document.getElementById('post-excerpt');
-            const titleCount = document.getElementById('title-count');
-            const excerptCount = document.getElementById('excerpt-count');
-
-            if (titleCount) titleCount.textContent = titleInput.value.length;
-            if (excerptCount) excerptCount.textContent = excerptInput.value.length;
-        }
-
-        // Create or update blog post
-        async function saveBlogPost(formData) {
-            if (!currentUser) {
-                alert('You must be signed in to post.');
-                return;
-            }
-
-            const token = await clerkInstance.session.getToken();
-            const method = currentEditingPostId ? 'PUT' : 'POST';
-
-            // Parse tags from comma-separated input
-            const tagsInput = formData.get('tags') || '';
-            const tags = tagsInput
-                .split(',')
-                .map(tag => tag.trim())
-                .filter(tag => tag.length > 0 && tag.length <= 40)
-                .slice(0, 5); // Max 5 tags
-
-            const data = {
-                title: formData.get('title'),
-                content: formData.get('content'),
-                excerpt: formData.get('excerpt'),
-                status: formData.get('status'),
-                tags: tags.join(','), // Store as comma-separated string
-            };
-
-            // Handle image upload (base64 for now, or integrate R2)
-            const imageInput = document.getElementById('post-image');
-            if (imageInput && imageInput.files && imageInput.files[0]) {
-                const file = imageInput.files[0];
-                const reader = new FileReader();
-                const imageData = await new Promise((resolve) => {
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.readAsDataURL(file);
-                });
-                data.featured_image = imageData; // Base64 for now
-            }
-
-            if (currentEditingPostId) {
-                data.id = currentEditingPostId;
-            }
-
-            try {
-                const response = await fetch(`${window.WORKER_API_URL}/api/blog`, {
-                    method,
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data),
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText || 'Failed to save post');
-                }
-
-                const result = await response.json();
-                console.log('[Blog] Post saved:', result);
-
-                hideBlogEditor();
-                loadBlogPosts(); // Refresh post list
-            } catch (error) {
-                console.error('[Blog] Save failed:', error);
-                alert('Failed to save post: ' + error.message);
-            }
-        }
-
-        // Delete blog post
-        async function deleteBlogPost(postId) {
-            if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) {
-                return;
-            }
-
-            const token = await clerkInstance.session.getToken();
-
-            try {
-                const response = await fetch(`${window.WORKER_API_URL}/api/blog?id=${postId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to delete post');
-                }
-
-                console.log('[Blog] Post deleted');
-                hideBlogDetail();
-                loadBlogPosts(); // Refresh post list
-            } catch (error) {
-                console.error('[Blog] Delete failed:', error);
-                alert('Failed to delete post: ' + error.message);
-            }
-        }
-
-        // Load and display blog posts
-        async function loadBlogPosts(status = 'published') {
-            const container = document.getElementById('blog-posts-container');
-            container.innerHTML = '<p class="loading-text">Loading posts...</p>';
-
-            try {
-                const url = status === 'draft'
-                    ? `${window.WORKER_API_URL}/api/blog?status=draft`
-                    : `${window.WORKER_API_URL}/api/blog`;
-
-                const headers = {};
-                if (status === 'draft' && currentUser) {
-                    const token = await clerkInstance.session.getToken();
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-
-                const response = await fetch(url, { headers });
-                const posts = await response.json();
-
-                if (posts.length === 0) {
-                    container.innerHTML = '<p class="loading-text">No posts yet. Check back soon!</p>';
+            async function postComment(articleId, text) {
+                if (!currentUser || !clerkInstance) {
+                    console.error('[Comments] User not authenticated');
                     return;
                 }
 
-                container.innerHTML = posts.map(post => {
-                    const tags = post.tags ? post.tags.split(',').filter(t => t.trim()) : [];
-                    const tagsHtml = tags.length > 0
-                        ? `<div class="post-tags">${tags.map(tag => `<span class="post-tag">${escapeHtml(tag.trim())}</span>`).join('')}</div>`
-                        : '';
+                try {
+                    const session = await clerkInstance.session.getToken();
 
-                    return `
+                    const response = await fetch(`${WORKER_API_URL}/api/comments`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session}`
+                        },
+                        body: JSON.stringify({ articleId, text })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.text();
+                        throw new Error(error);
+                    }
+
+                    await loadComments(articleId);
+                } catch (error) {
+                    console.error('[Comments] Post failed:', error);
+                    alert(`Failed to post comment: ${error.message}`);
+                }
+            }
+
+            async function deleteComment(commentId, articleId) {
+                if (!currentUser || !clerkInstance) return;
+
+                if (!confirm('Are you sure you want to delete this comment?')) return;
+
+                try {
+                    const session = await clerkInstance.session.getToken();
+
+                    const response = await fetch(`${WORKER_API_URL}/api/comments`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${session}`
+                        },
+                        body: JSON.stringify({ commentId })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to delete comment');
+
+                    await loadComments(articleId);
+                } catch (error) {
+                    console.error('[Comments] Delete failed:', error);
+                    alert(`Failed to delete comment: ${error.message}`);
+                }
+            }
+
+            // Comment form submission
+            document.addEventListener('submit', function (e) {
+                if (e.target.classList.contains('comment-form')) {
+                    e.preventDefault();
+                    const form = e.target;
+                    const articleId = form.dataset.articleId;
+                    const textarea = form.querySelector('.comment-textarea');
+                    const text = textarea.value.trim();
+
+                    if (!text) return;
+
+                    postComment(articleId, text).then(() => {
+                        textarea.value = '';
+                    });
+                }
+            });
+
+            // Comment delete
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('comment-delete-btn')) {
+                    const commentId = e.target.dataset.commentId;
+                    const commentEl = e.target.closest('.comment');
+                    const listEl = commentEl.closest('.comments-list');
+                    const articleId = listEl.dataset.articleId;
+
+                    deleteComment(commentId, articleId);
+                }
+            });
+
+            // Character counter for comment textarea
+            document.addEventListener('input', function (e) {
+                if (e.target.classList.contains('comment-textarea')) {
+                    const form = e.target.closest('.comment-form');
+                    const counter = form.querySelector('.comment-char-count');
+                    if (counter) {
+                        const length = e.target.value.length;
+                        counter.textContent = `${length}/2000`;
+                        if (length > 2000) {
+                            counter.style.color = '#ef4444';
+                        } else {
+                            counter.style.color = 'var(--text-muted)';
+                        }
+                    }
+                }
+            });
+
+            // Utility functions
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function formatCommentDate(dateStr) {
+                const date = new Date(dateStr);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                if (diffDays < 7) return `${diffDays}d ago`;
+
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+
+            // ========================================
+            // BLOG CMS (Phase 4: Content Evolution)
+            // ========================================
+
+            let currentEditingPostId = null;
+
+            // Show admin controls if user is admin
+            function enableBlogAdminFeatures() {
+                const adminControls = document.getElementById('blog-admin-controls');
+                if (adminControls && currentUser?.publicMetadata?.role === 'admin') {
+                    adminControls.style.display = 'flex';
+                }
+            }
+
+            // Show blog editor
+            function showBlogEditor(postData = null) {
+                const editor = document.getElementById('blog-editor');
+                const titleEl = document.getElementById('editor-title-text');
+                const postsContainer = document.getElementById('blog-posts-container');
+                const detailView = document.getElementById('blog-post-detail');
+
+                // Hide listing and detail views
+                postsContainer.style.display = 'none';
+                detailView.style.display = 'none';
+
+                if (postData) {
+                    // Edit mode
+                    titleEl.textContent = 'Edit Post';
+                    document.getElementById('post-id').value = postData.id;
+                    document.getElementById('post-title').value = postData.title;
+                    document.getElementById('post-excerpt').value = postData.excerpt || '';
+                    document.getElementById('post-content').value = postData.content;
+                    document.querySelector(`input[name="status"][value="${postData.status}"]`).checked = true;
+                    currentEditingPostId = postData.id;
+                } else {
+                    // New post mode
+                    titleEl.textContent = 'Create New Post';
+                    document.getElementById('blog-post-form').reset();
+                    document.getElementById('post-id').value = '';
+                    currentEditingPostId = null;
+                }
+
+                editor.style.display = 'block';
+                updateCharCounts();
+            }
+
+            // Hide blog editor
+            function hideBlogEditor() {
+                const editor = document.getElementById('blog-editor');
+                const postsContainer = document.getElementById('blog-posts-container');
+                editor.style.display = 'none';
+                postsContainer.style.display = 'grid';
+                document.getElementById('blog-post-form').reset();
+                currentEditingPostId = null;
+            }
+
+            // Update character counters
+            function updateCharCounts() {
+                const titleInput = document.getElementById('post-title');
+                const excerptInput = document.getElementById('post-excerpt');
+                const titleCount = document.getElementById('title-count');
+                const excerptCount = document.getElementById('excerpt-count');
+
+                if (titleCount) titleCount.textContent = titleInput.value.length;
+                if (excerptCount) excerptCount.textContent = excerptInput.value.length;
+            }
+
+            // Create or update blog post
+            async function saveBlogPost(formData) {
+                if (!currentUser) {
+                    alert('You must be signed in to post.');
+                    return;
+                }
+
+                const token = await clerkInstance.session.getToken();
+                const method = currentEditingPostId ? 'PUT' : 'POST';
+
+                // Parse tags from comma-separated input
+                const tagsInput = formData.get('tags') || '';
+                const tags = tagsInput
+                    .split(',')
+                    .map(tag => tag.trim())
+                    .filter(tag => tag.length > 0 && tag.length <= 40)
+                    .slice(0, 5); // Max 5 tags
+
+                const data = {
+                    title: formData.get('title'),
+                    content: formData.get('content'),
+                    excerpt: formData.get('excerpt'),
+                    status: formData.get('status'),
+                    tags: tags.join(','), // Store as comma-separated string
+                };
+
+                // Handle image upload (base64 for now, or integrate R2)
+                const imageInput = document.getElementById('post-image');
+                if (imageInput && imageInput.files && imageInput.files[0]) {
+                    const file = imageInput.files[0];
+                    const reader = new FileReader();
+                    const imageData = await new Promise((resolve) => {
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+                    data.featured_image = imageData; // Base64 for now
+                }
+
+                if (currentEditingPostId) {
+                    data.id = currentEditingPostId;
+                }
+
+                try {
+                    const response = await fetch(`${window.WORKER_API_URL}/api/blog`, {
+                        method,
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText || 'Failed to save post');
+                    }
+
+                    const result = await response.json();
+                    console.log('[Blog] Post saved:', result);
+
+                    hideBlogEditor();
+                    loadBlogPosts(); // Refresh post list
+                } catch (error) {
+                    console.error('[Blog] Save failed:', error);
+                    alert('Failed to save post: ' + error.message);
+                }
+            }
+
+            // Delete blog post
+            async function deleteBlogPost(postId) {
+                if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) {
+                    return;
+                }
+
+                const token = await clerkInstance.session.getToken();
+
+                try {
+                    const response = await fetch(`${window.WORKER_API_URL}/api/blog?id=${postId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to delete post');
+                    }
+
+                    console.log('[Blog] Post deleted');
+                    hideBlogDetail();
+                    loadBlogPosts(); // Refresh post list
+                } catch (error) {
+                    console.error('[Blog] Delete failed:', error);
+                    alert('Failed to delete post: ' + error.message);
+                }
+            }
+
+            // Load and display blog posts
+            async function loadBlogPosts(status = 'published') {
+                const container = document.getElementById('blog-posts-container');
+                container.innerHTML = '<p class="loading-text">Loading posts...</p>';
+
+                try {
+                    const url = status === 'draft'
+                        ? `${window.WORKER_API_URL}/api/blog?status=draft`
+                        : `${window.WORKER_API_URL}/api/blog`;
+
+                    const headers = {};
+                    if (status === 'draft' && currentUser) {
+                        const token = await clerkInstance.session.getToken();
+                        headers['Authorization'] = `Bearer ${token}`;
+                    }
+
+                    const response = await fetch(url, { headers });
+                    const posts = await response.json();
+
+                    if (posts.length === 0) {
+                        container.innerHTML = '<p class="loading-text">No posts yet. Check back soon!</p>';
+                        return;
+                    }
+
+                    container.innerHTML = posts.map(post => {
+                        const tags = post.tags ? post.tags.split(',').filter(t => t.trim()) : [];
+                        const tagsHtml = tags.length > 0
+                            ? `<div class="post-tags">${tags.map(tag => `<span class="post-tag">${escapeHtml(tag.trim())}</span>`).join('')}</div>`
+                            : '';
+
+                        return `
                         <div class="blog-post-card" data-post-slug="${escapeHtml(post.slug)}" role="button" tabindex="0">
                             <div class="post-meta">
                                 <time>${formatCommentDate(post.published_at)}</time>
@@ -6464,392 +6471,392 @@
                             <p class="post-excerpt">${escapeHtml(post.excerpt || 'Click to read more...')}</p>
                         </div>
                     `;
-                }).join('');
+                    }).join('');
 
-                // Add click handlers
-                container.querySelectorAll('.blog-post-card').forEach(card => {
-                    card.addEventListener('click', () => {
-                        const slug = card.dataset.postSlug;
-                        loadBlogPost(slug);
-                    });
-
-                    card.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
+                    // Add click handlers
+                    container.querySelectorAll('.blog-post-card').forEach(card => {
+                        card.addEventListener('click', () => {
                             const slug = card.dataset.postSlug;
                             loadBlogPost(slug);
-                        }
-                    });
-                });
+                        });
 
-            } catch (error) {
-                console.error('[Blog] Failed to load posts:', error);
-                container.innerHTML = '<p class="loading-text">Failed to load posts. Please try again later.</p>';
-            }
-        }
-
-        // Load single blog post
-        async function loadBlogPost(slug) {
-            try {
-                const response = await fetch(`${window.WORKER_API_URL}/api/blog/post?slug=${encodeURIComponent(slug)}`);
-
-                if (!response.ok) {
-                    throw new Error('Post not found');
-                }
-
-                const post = await response.json();
-                showBlogDetail(post);
-
-            } catch (error) {
-                console.error('[Blog] Failed to load post:', error);
-                alert('Failed to load post: ' + error.message);
-            }
-        }
-
-        // Show blog post detail view
-        function showBlogDetail(post) {
-            const postsContainer = document.getElementById('blog-posts-container');
-            const detailView = document.getElementById('blog-post-detail');
-            const adminActions = document.getElementById('detail-admin-actions');
-
-            postsContainer.style.display = 'none';
-            detailView.style.display = 'block';
-
-            document.getElementById('detail-post-title').textContent = post.title;
-            document.getElementById('detail-post-date').textContent = new Date(post.published_at).toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-            });
-
-            const excerptEl = document.getElementById('detail-post-excerpt');
-            if (post.excerpt) {
-                excerptEl.textContent = post.excerpt;
-                excerptEl.style.display = 'block';
-            } else {
-                excerptEl.style.display = 'none';
-            }
-
-            // Simple markdown-ish rendering (basic support)
-            const contentEl = document.getElementById('detail-post-content');
-            contentEl.innerHTML = renderMarkdown(post.content);
-
-            // Show admin actions if user is admin
-            if (currentUser?.publicMetadata?.role === 'admin') {
-                adminActions.style.display = 'flex';
-                document.getElementById('edit-post-btn').onclick = () => showBlogEditor(post);
-                document.getElementById('delete-post-btn').onclick = () => deleteBlogPost(post.id);
-            } else {
-                adminActions.style.display = 'none';
-            }
-
-            // Load comments for this post
-            loadComments(post.id);
-
-            // Show comments section
-            const commentsSection = document.getElementById('blog-comments-section');
-            commentsSection.style.display = 'block';
-        }
-
-        // Hide blog detail view
-        function hideBlogDetail() {
-            const postsContainer = document.getElementById('blog-posts-container');
-            const detailView = document.getElementById('blog-post-detail');
-
-            detailView.style.display = 'none';
-            postsContainer.style.display = 'grid';
-        }
-
-        // Basic markdown rendering
-        function renderMarkdown(text) {
-            let html = escapeHtml(text);
-
-            // Code blocks
-            html = html.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
-
-            // Inline code
-            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-            // Bold
-            html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-
-            // Italic
-            html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-
-            // Links
-            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-
-            // Headings
-            html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-            html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-
-            // Lists
-            html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
-            html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
-
-            // Paragraphs
-            html = html.split('\n\n').map(para => {
-                if (para.trim() && !para.startsWith('<') && !para.startsWith('</')) {
-                    return `<p>${para.trim()}</p>`;
-                }
-                return para;
-            }).join('\n');
-
-            return html;
-        }
-
-        // Event listeners for blog UI
-        document.getElementById('new-post-btn')?.addEventListener('click', () => showBlogEditor());
-        document.getElementById('close-editor-btn')?.addEventListener('click', hideBlogEditor);
-        document.getElementById('cancel-post-btn')?.addEventListener('click', hideBlogEditor);
-        document.getElementById('back-to-blog-btn')?.addEventListener('click', hideBlogDetail);
-
-        // Blog form submission
-        document.getElementById('blog-post-form')?.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            await saveBlogPost(formData);
-        });
-
-        // Character counters for blog form
-        document.getElementById('post-title')?.addEventListener('input', updateCharCounts);
-        document.getElementById('post-excerpt')?.addEventListener('input', updateCharCounts);
-
-        // Markdown toolbar buttons
-        document.querySelectorAll('.toolbar-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const markdown = this.dataset.markdown;
-                const textarea = document.getElementById('post-content');
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-                const text = textarea.value;
-                const before = text.substring(0, start);
-                const selected = text.substring(start, end);
-                const after = text.substring(end);
-
-                let insertion = markdown;
-                let cursorOffset = 0;
-
-                // Handle different markdown types
-                if (markdown === '**bold**') {
-                    insertion = `**${selected || 'text'}**`;
-                    cursorOffset = selected ? insertion.length : 2;
-                } else if (markdown === '*italic*') {
-                    insertion = `*${selected || 'text'}*`;
-                    cursorOffset = selected ? insertion.length : 1;
-                } else if (markdown === '[link](url)') {
-                    insertion = `[${selected || 'link text'}](url)`;
-                    cursorOffset = selected ? insertion.length - 4 : 1;
-                } else if (markdown === '```code```') {
-                    insertion = `\`\`\`\n${selected || 'code here'}\n\`\`\``;
-                    cursorOffset = selected ? insertion.length - 4 : 4;
-                } else if (markdown === '- list item') {
-                    insertion = `- ${selected || 'list item'}`;
-                    cursorOffset = insertion.length;
-                }
-
-                textarea.value = before + insertion + after;
-                textarea.focus();
-                textarea.setSelectionRange(start + cursorOffset, start + cursorOffset);
-            });
-        });
-
-        // Initialize on page load
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeClerk);
-        } else {
-            initializeClerk();
-        }
-
-        // Load comments for all comment sections
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.comments-list').forEach(listEl => {
-                const articleId = listEl.dataset.articleId;
-                if (articleId) {
-                    loadComments(articleId);
-                }
-            });
-
-            // ── BLOG ENHANCEMENTS: Draft Tabs, Image Upload, Social Share ──
-
-            // ── Draft/Published Tab Switching ──
-            const publishedTabBtn = document.getElementById('published-tab');
-            const draftsTabBtn = document.getElementById('drafts-tab');
-
-            if (publishedTabBtn && draftsTabBtn) {
-                publishedTabBtn.addEventListener('click', function () {
-                    publishedTabBtn.classList.add('active');
-                    draftsTabBtn.classList.remove('active');
-                    loadBlogPosts('published');
-                });
-
-                draftsTabBtn.addEventListener('click', function () {
-                    if (!currentUser || currentUser.publicMetadata?.role !== 'admin') {
-                        alert('Only admins can view drafts.');
-                        return;
-                    }
-                    draftsTabBtn.classList.add('active');
-                    publishedTabBtn.classList.remove('active');
-                    loadBlogPosts('draft');
-                });
-            }
-
-            // ── Image Upload Preview ──
-            const imageInput = document.getElementById('post-image');
-            const imagePreview = document.getElementById('image-preview');
-            const previewImg = document.getElementById('preview-img');
-            const removeImageBtn = document.getElementById('remove-image-btn');
-
-            if (imageInput && imagePreview) {
-                imageInput.addEventListener('change', function (e) {
-                    const file = e.target.files[0];
-                    if (file && file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = function (event) {
-                            previewImg.src = event.target.result;
-                            imagePreview.style.display = 'block';
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-
-                if (removeImageBtn) {
-                    removeImageBtn.addEventListener('click', function () {
-                        imageInput.value = '';
-                        previewImg.src = '';
-                        imagePreview.style.display = 'none';
-                    });
-                }
-            }
-
-            // ── Social Share Buttons ──
-            const nativeShareBtn = document.getElementById('blog-share-native');
-            const twitterShareBtn = document.getElementById('blog-share-twitter');
-            const linkedinShareBtn = document.getElementById('blog-share-linkedin');
-            const clipboardShareBtn = document.getElementById('blog-share-clipboard');
-
-            if (nativeShareBtn) {
-                nativeShareBtn.addEventListener('click', async function () {
-                    const postTitle = document.getElementById('detail-post-title')?.textContent || 'Blog Post';
-                    const shareData = {
-                        title: postTitle,
-                        text: 'Check out this post from Good Flippin Design',
-                        url: window.location.href
-                    };
-
-                    if (navigator.share) {
-                        try {
-                            await navigator.share(shareData);
-                        } catch (err) {
-                            if (err.name !== 'AbortError') {
-                                console.log('Share failed:', err);
+                        card.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                const slug = card.dataset.postSlug;
+                                loadBlogPost(slug);
                             }
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('[Blog] Failed to load posts:', error);
+                    container.innerHTML = '<p class="loading-text">Failed to load posts. Please try again later.</p>';
+                }
+            }
+
+            // Load single blog post
+            async function loadBlogPost(slug) {
+                try {
+                    const response = await fetch(`${window.WORKER_API_URL}/api/blog/post?slug=${encodeURIComponent(slug)}`);
+
+                    if (!response.ok) {
+                        throw new Error('Post not found');
+                    }
+
+                    const post = await response.json();
+                    showBlogDetail(post);
+
+                } catch (error) {
+                    console.error('[Blog] Failed to load post:', error);
+                    alert('Failed to load post: ' + error.message);
+                }
+            }
+
+            // Show blog post detail view
+            function showBlogDetail(post) {
+                const postsContainer = document.getElementById('blog-posts-container');
+                const detailView = document.getElementById('blog-post-detail');
+                const adminActions = document.getElementById('detail-admin-actions');
+
+                postsContainer.style.display = 'none';
+                detailView.style.display = 'block';
+
+                document.getElementById('detail-post-title').textContent = post.title;
+                document.getElementById('detail-post-date').textContent = new Date(post.published_at).toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+
+                const excerptEl = document.getElementById('detail-post-excerpt');
+                if (post.excerpt) {
+                    excerptEl.textContent = post.excerpt;
+                    excerptEl.style.display = 'block';
+                } else {
+                    excerptEl.style.display = 'none';
+                }
+
+                // Simple markdown-ish rendering (basic support)
+                const contentEl = document.getElementById('detail-post-content');
+                contentEl.innerHTML = renderMarkdown(post.content);
+
+                // Show admin actions if user is admin
+                if (currentUser?.publicMetadata?.role === 'admin') {
+                    adminActions.style.display = 'flex';
+                    document.getElementById('edit-post-btn').onclick = () => showBlogEditor(post);
+                    document.getElementById('delete-post-btn').onclick = () => deleteBlogPost(post.id);
+                } else {
+                    adminActions.style.display = 'none';
+                }
+
+                // Load comments for this post
+                loadComments(post.id);
+
+                // Show comments section
+                const commentsSection = document.getElementById('blog-comments-section');
+                commentsSection.style.display = 'block';
+            }
+
+            // Hide blog detail view
+            function hideBlogDetail() {
+                const postsContainer = document.getElementById('blog-posts-container');
+                const detailView = document.getElementById('blog-post-detail');
+
+                detailView.style.display = 'none';
+                postsContainer.style.display = 'grid';
+            }
+
+            // Basic markdown rendering
+            function renderMarkdown(text) {
+                let html = escapeHtml(text);
+
+                // Code blocks
+                html = html.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
+
+                // Inline code
+                html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+                // Bold
+                html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+                // Italic
+                html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+                // Links
+                html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+                // Headings
+                html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+                html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+
+                // Lists
+                html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+                html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+
+                // Paragraphs
+                html = html.split('\n\n').map(para => {
+                    if (para.trim() && !para.startsWith('<') && !para.startsWith('</')) {
+                        return `<p>${para.trim()}</p>`;
+                    }
+                    return para;
+                }).join('\n');
+
+                return html;
+            }
+
+            // Event listeners for blog UI
+            document.getElementById('new-post-btn')?.addEventListener('click', () => showBlogEditor());
+            document.getElementById('close-editor-btn')?.addEventListener('click', hideBlogEditor);
+            document.getElementById('cancel-post-btn')?.addEventListener('click', hideBlogEditor);
+            document.getElementById('back-to-blog-btn')?.addEventListener('click', hideBlogDetail);
+
+            // Blog form submission
+            document.getElementById('blog-post-form')?.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                await saveBlogPost(formData);
+            });
+
+            // Character counters for blog form
+            document.getElementById('post-title')?.addEventListener('input', updateCharCounts);
+            document.getElementById('post-excerpt')?.addEventListener('input', updateCharCounts);
+
+            // Markdown toolbar buttons
+            document.querySelectorAll('.toolbar-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const markdown = this.dataset.markdown;
+                    const textarea = document.getElementById('post-content');
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const text = textarea.value;
+                    const before = text.substring(0, start);
+                    const selected = text.substring(start, end);
+                    const after = text.substring(end);
+
+                    let insertion = markdown;
+                    let cursorOffset = 0;
+
+                    // Handle different markdown types
+                    if (markdown === '**bold**') {
+                        insertion = `**${selected || 'text'}**`;
+                        cursorOffset = selected ? insertion.length : 2;
+                    } else if (markdown === '*italic*') {
+                        insertion = `*${selected || 'text'}*`;
+                        cursorOffset = selected ? insertion.length : 1;
+                    } else if (markdown === '[link](url)') {
+                        insertion = `[${selected || 'link text'}](url)`;
+                        cursorOffset = selected ? insertion.length - 4 : 1;
+                    } else if (markdown === '```code```') {
+                        insertion = `\`\`\`\n${selected || 'code here'}\n\`\`\``;
+                        cursorOffset = selected ? insertion.length - 4 : 4;
+                    } else if (markdown === '- list item') {
+                        insertion = `- ${selected || 'list item'}`;
+                        cursorOffset = insertion.length;
+                    }
+
+                    textarea.value = before + insertion + after;
+                    textarea.focus();
+                    textarea.setSelectionRange(start + cursorOffset, start + cursorOffset);
+                });
+            });
+
+            // Initialize on page load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeClerk);
+            } else {
+                initializeClerk();
+            }
+
+            // Load comments for all comment sections
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.comments-list').forEach(listEl => {
+                    const articleId = listEl.dataset.articleId;
+                    if (articleId) {
+                        loadComments(articleId);
+                    }
+                });
+
+                // ── BLOG ENHANCEMENTS: Draft Tabs, Image Upload, Social Share ──
+
+                // ── Draft/Published Tab Switching ──
+                const publishedTabBtn = document.getElementById('published-tab');
+                const draftsTabBtn = document.getElementById('drafts-tab');
+
+                if (publishedTabBtn && draftsTabBtn) {
+                    publishedTabBtn.addEventListener('click', function () {
+                        publishedTabBtn.classList.add('active');
+                        draftsTabBtn.classList.remove('active');
+                        loadBlogPosts('published');
+                    });
+
+                    draftsTabBtn.addEventListener('click', function () {
+                        if (!currentUser || currentUser.publicMetadata?.role !== 'admin') {
+                            alert('Only admins can view drafts.');
+                            return;
                         }
-                    } else {
-                        alert('Web Share API not supported. Try copying the link instead.');
+                        draftsTabBtn.classList.add('active');
+                        publishedTabBtn.classList.remove('active');
+                        loadBlogPosts('draft');
+                    });
+                }
+
+                // ── Image Upload Preview ──
+                const imageInput = document.getElementById('post-image');
+                const imagePreview = document.getElementById('image-preview');
+                const previewImg = document.getElementById('preview-img');
+                const removeImageBtn = document.getElementById('remove-image-btn');
+
+                if (imageInput && imagePreview) {
+                    imageInput.addEventListener('change', function (e) {
+                        const file = e.target.files[0];
+                        if (file && file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = function (event) {
+                                previewImg.src = event.target.result;
+                                imagePreview.style.display = 'block';
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+
+                    if (removeImageBtn) {
+                        removeImageBtn.addEventListener('click', function () {
+                            imageInput.value = '';
+                            previewImg.src = '';
+                            imagePreview.style.display = 'none';
+                        });
                     }
-                });
-            }
+                }
 
-            if (twitterShareBtn) {
-                twitterShareBtn.addEventListener('click', function () {
-                    const postTitle = document.getElementById('detail-post-title')?.textContent || 'Blog Post';
-                    const url = encodeURIComponent(window.location.href);
-                    const text = encodeURIComponent(postTitle);
-                    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-                });
-            }
+                // ── Social Share Buttons ──
+                const nativeShareBtn = document.getElementById('blog-share-native');
+                const twitterShareBtn = document.getElementById('blog-share-twitter');
+                const linkedinShareBtn = document.getElementById('blog-share-linkedin');
+                const clipboardShareBtn = document.getElementById('blog-share-clipboard');
 
-            if (linkedinShareBtn) {
-                linkedinShareBtn.addEventListener('click', function () {
-                    const url = encodeURIComponent(window.location.href);
-                    window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${url}`, '_blank');
-                });
-            }
+                if (nativeShareBtn) {
+                    nativeShareBtn.addEventListener('click', async function () {
+                        const postTitle = document.getElementById('detail-post-title')?.textContent || 'Blog Post';
+                        const shareData = {
+                            title: postTitle,
+                            text: 'Check out this post from Good Flippin Design',
+                            url: window.location.href
+                        };
 
-            if (clipboardShareBtn) {
-                clipboardShareBtn.addEventListener('click', async function () {
-                    try {
-                        await navigator.clipboard.writeText(window.location.href);
-                        const originalText = clipboardShareBtn.innerHTML;
-                        clipboardShareBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
-                        setTimeout(() => {
-                            clipboardShareBtn.innerHTML = originalText;
-                        }, 2000);
-                    } catch (err) {
-                        console.log('Copy failed:', err);
-                        alert('Failed to copy link. Please copy manually.');
-                    }
-                });
-            }
-        });
+                        if (navigator.share) {
+                            try {
+                                await navigator.share(shareData);
+                            } catch (err) {
+                                if (err.name !== 'AbortError') {
+                                    console.log('Share failed:', err);
+                                }
+                            }
+                        } else {
+                            alert('Web Share API not supported. Try copying the link instead.');
+                        }
+                    });
+                }
 
-        // ═══════════════════════════════════════════════════════════════
-        // COMMENT SYSTEM
-        // ═══════════════════════════════════════════════════════════════
+                if (twitterShareBtn) {
+                    twitterShareBtn.addEventListener('click', function () {
+                        const postTitle = document.getElementById('detail-post-title')?.textContent || 'Blog Post';
+                        const url = encodeURIComponent(window.location.href);
+                        const text = encodeURIComponent(postTitle);
+                        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+                    });
+                }
 
-        let currentPostId = null; // Track which post's comments we're viewing
+                if (linkedinShareBtn) {
+                    linkedinShareBtn.addEventListener('click', function () {
+                        const url = encodeURIComponent(window.location.href);
+                        window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${url}`, '_blank');
+                    });
+                }
 
-        // Load comments for a specific article/post
-        async function loadComments(articleId) {
-            currentPostId = articleId;
-            const commentsList = document.getElementById('comments-list');
-            const commentsCount = document.getElementById('comments-count');
+                if (clipboardShareBtn) {
+                    clipboardShareBtn.addEventListener('click', async function () {
+                        try {
+                            await navigator.clipboard.writeText(window.location.href);
+                            const originalText = clipboardShareBtn.innerHTML;
+                            clipboardShareBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+                            setTimeout(() => {
+                                clipboardShareBtn.innerHTML = originalText;
+                            }, 2000);
+                        } catch (err) {
+                            console.log('Copy failed:', err);
+                            alert('Failed to copy link. Please copy manually.');
+                        }
+                    });
+                }
+            });
 
-            try {
-                const response = await fetch(`${window.WORKER_API_URL}/api/comments?article_id=${articleId}`);
-                const comments = await response.json();
+            // ═══════════════════════════════════════════════════════════════
+            // COMMENT SYSTEM
+            // ═══════════════════════════════════════════════════════════════
 
-                commentsCount.textContent = comments.length;
+            let currentPostId = null; // Track which post's comments we're viewing
 
-                if (comments.length === 0) {
-                    commentsList.innerHTML = `
+            // Load comments for a specific article/post
+            async function loadComments(articleId) {
+                currentPostId = articleId;
+                const commentsList = document.getElementById('comments-list');
+                const commentsCount = document.getElementById('comments-count');
+
+                try {
+                    const response = await fetch(`${window.WORKER_API_URL}/api/comments?article_id=${articleId}`);
+                    const comments = await response.json();
+
+                    commentsCount.textContent = comments.length;
+
+                    if (comments.length === 0) {
+                        commentsList.innerHTML = `
                         <div class="comments-empty">
                             <div class="comments-empty-icon">💬</div>
                             <p>No comments yet. Be the first to share your thoughts!</p>
                         </div>
                     `;
-                    return;
+                        return;
+                    }
+
+                    commentsList.innerHTML = comments.map(comment => renderComment(comment)).join('');
+
+                    // Add event listeners to edit/delete buttons
+                    comments.forEach(comment => {
+                        const editBtn = document.getElementById(`edit-comment-${comment.id}`);
+                        const deleteBtn = document.getElementById(`delete-comment-${comment.id}`);
+
+                        if (editBtn) {
+                            editBtn.addEventListener('click', () => startEditComment(comment.id));
+                        }
+
+                        if (deleteBtn) {
+                            deleteBtn.addEventListener('click', () => deleteComment(comment.id));
+                        }
+                    });
+
+                } catch (error) {
+                    console.error('[Comments] Failed to load comments:', error);
+                    commentsList.innerHTML = '<p class="comments-empty">Failed to load comments.</p>';
                 }
-
-                commentsList.innerHTML = comments.map(comment => renderComment(comment)).join('');
-
-                // Add event listeners to edit/delete buttons
-                comments.forEach(comment => {
-                    const editBtn = document.getElementById(`edit-comment-${comment.id}`);
-                    const deleteBtn = document.getElementById(`delete-comment-${comment.id}`);
-
-                    if (editBtn) {
-                        editBtn.addEventListener('click', () => startEditComment(comment.id));
-                    }
-
-                    if (deleteBtn) {
-                        deleteBtn.addEventListener('click', () => deleteComment(comment.id));
-                    }
-                });
-
-            } catch (error) {
-                console.error('[Comments] Failed to load comments:', error);
-                commentsList.innerHTML = '<p class="comments-empty">Failed to load comments.</p>';
             }
-        }
 
-        // Render a single comment
-        function renderComment(comment) {
-            const isAdmin = comment.user_role === 'admin';
-            const canModerate = currentUser?.publicMetadata?.role === 'admin';
-            const canEdit = currentUser?.userId === comment.user_id || canModerate;
+            // Render a single comment
+            function renderComment(comment) {
+                const isAdmin = comment.user_role === 'admin';
+                const canModerate = currentUser?.publicMetadata?.role === 'admin';
+                const canEdit = currentUser?.userId === comment.user_id || canModerate;
 
-            const adminBadge = isAdmin ? '<span class="admin-badge">ADMIN</span>' : '';
+                const adminBadge = isAdmin ? '<span class="admin-badge">ADMIN</span>' : '';
 
-            const actionButtons = canEdit ? `
+                const actionButtons = canEdit ? `
                 <div class="comment-actions-btns">
                     <button id="edit-comment-${comment.id}" class="comment-action-btn edit" title="Edit comment">Edit</button>
                     <button id="delete-comment-${comment.id}" class="comment-action-btn delete" title="Delete comment">Delete</button>
                 </div>
             ` : '';
 
-            return `
+                return `
                 <div class="comment-item" id="comment-${comment.id}">
                     <div class="comment-header">
                         <div class="comment-author-section">
@@ -6867,78 +6874,78 @@
                     <div class="comment-content" id="comment-content-${comment.id}">${escapeHtml(comment.content)}</div>
                 </div>
             `;
-        }
-
-        // Format comment date (e.g., "3 hours ago", "2 days ago")
-        function formatCommentDate(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMins / 60);
-            const diffDays = Math.floor(diffHours / 24);
-
-            if (diffMins < 1) return 'just now';
-            if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-            if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-
-            return date.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-            });
-        }
-
-        // Post a new comment
-        async function postComment(articleId, content) {
-            if (!currentUser) {
-                alert('Please sign in to comment.');
-                return;
             }
 
-            if (!content.trim()) {
-                alert('Comment cannot be empty.');
-                return;
-            }
+            // Format comment date (e.g., "3 hours ago", "2 days ago")
+            function formatCommentDate(dateString) {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMins / 60);
+                const diffDays = Math.floor(diffHours / 24);
 
-            try {
-                const token = await clerkInstance.session.getToken();
-                const response = await fetch(`${window.WORKER_API_URL}/api/comments`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        article_id: articleId,
-                        content: content.trim()
-                    })
+                if (diffMins < 1) return 'just now';
+                if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+                if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+                if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+                return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
                 });
+            }
 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to post comment');
+            // Post a new comment
+            async function postComment(articleId, content) {
+                if (!currentUser) {
+                    alert('Please sign in to comment.');
+                    return;
                 }
 
-                // Clear form and reload comments
-                document.getElementById('comment-textarea').value = '';
-                document.getElementById('comment-char-count').textContent = '0 / 2000';
-                await loadComments(articleId);
+                if (!content.trim()) {
+                    alert('Comment cannot be empty.');
+                    return;
+                }
 
-            } catch (error) {
-                console.error('[Comments] Post failed:', error);
-                alert('Failed to post comment: ' + error.message);
+                try {
+                    const token = await clerkInstance.session.getToken();
+                    const response = await fetch(`${window.WORKER_API_URL}/api/comments`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            article_id: articleId,
+                            content: content.trim()
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to post comment');
+                    }
+
+                    // Clear form and reload comments
+                    document.getElementById('comment-textarea').value = '';
+                    document.getElementById('comment-char-count').textContent = '0 / 2000';
+                    await loadComments(articleId);
+
+                } catch (error) {
+                    console.error('[Comments] Post failed:', error);
+                    alert('Failed to post comment: ' + error.message);
+                }
             }
-        }
 
-        // Start editing a comment
-        async function startEditComment(commentId) {
-            const commentItem = document.getElementById(`comment-${commentId}`);
-            const contentEl = document.getElementById(`comment-content-${commentId}`);
-            const currentContent = contentEl.textContent;
+            // Start editing a comment
+            async function startEditComment(commentId) {
+                const commentItem = document.getElementById(`comment-${commentId}`);
+                const contentEl = document.getElementById(`comment-content-${commentId}`);
+                const currentContent = contentEl.textContent;
 
-            const editForm = `
+                const editForm = `
                 <div class="comment-edit-form">
                     <textarea id="edit-textarea-${commentId}" class="comment-edit-textarea">${currentContent}</textarea>
                     <div class="comment-edit-actions">
@@ -6948,168 +6955,168 @@
                 </div>
             `;
 
-            contentEl.innerHTML = editForm;
+                contentEl.innerHTML = editForm;
 
-            // Save button
-            document.getElementById(`save-edit-${commentId}`).addEventListener('click', async () => {
-                const newContent = document.getElementById(`edit-textarea-${commentId}`).value;
-                await updateComment(commentId, newContent);
-            });
-
-            // Cancel button
-            document.getElementById(`cancel-edit-${commentId}`).addEventListener('click', () => {
-                contentEl.textContent = currentContent;
-            });
-        }
-
-        // Update a comment
-        async function updateComment(commentId, content) {
-            if (!currentUser) {
-                alert('Please sign in to edit comments.');
-                return;
-            }
-
-            if (!content.trim()) {
-                alert('Comment cannot be empty.');
-                return;
-            }
-
-            try {
-                const token = await clerkInstance.session.getToken();
-                const response = await fetch(`${window.WORKER_API_URL}/api/comments/${commentId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ content: content.trim() })
+                // Save button
+                document.getElementById(`save-edit-${commentId}`).addEventListener('click', async () => {
+                    const newContent = document.getElementById(`edit-textarea-${commentId}`).value;
+                    await updateComment(commentId, newContent);
                 });
 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to update comment');
+                // Cancel button
+                document.getElementById(`cancel-edit-${commentId}`).addEventListener('click', () => {
+                    contentEl.textContent = currentContent;
+                });
+            }
+
+            // Update a comment
+            async function updateComment(commentId, content) {
+                if (!currentUser) {
+                    alert('Please sign in to edit comments.');
+                    return;
                 }
 
-                // Reload comments to show updated content
-                await loadComments(currentPostId);
-
-            } catch (error) {
-                console.error('[Comments] Update failed:', error);
-                alert('Failed to update comment: ' + error.message);
-            }
-        }
-
-        // Delete a comment
-        async function deleteComment(commentId) {
-            if (!currentUser) {
-                alert('Please sign in to delete comments.');
-                return;
-            }
-
-            if (!confirm('Are you sure you want to delete this comment?')) {
-                return;
-            }
-
-            try {
-                const token = await clerkInstance.session.getToken();
-                const response = await fetch(`${window.WORKER_API_URL}/api/comments/${commentId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to delete comment');
+                if (!content.trim()) {
+                    alert('Comment cannot be empty.');
+                    return;
                 }
 
-                // Reload comments
-                await loadComments(currentPostId);
+                try {
+                    const token = await clerkInstance.session.getToken();
+                    const response = await fetch(`${window.WORKER_API_URL}/api/comments/${commentId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ content: content.trim() })
+                    });
 
-            } catch (error) {
-                console.error('[Comments] Delete failed:', error);
-                alert('Failed to delete comment: ' + error.message);
-            }
-        }
-
-        // Comment form event listeners
-        document.addEventListener('DOMContentLoaded', function () {
-            const commentForm = document.getElementById('comment-form');
-            const commentTextarea = document.getElementById('comment-textarea');
-            const commentCharCount = document.getElementById('comment-char-count');
-            const commentSignInBtn = document.getElementById('comment-signin-btn');
-
-            // Character counter
-            if (commentTextarea) {
-                commentTextarea.addEventListener('input', function () {
-                    const length = this.value.length;
-                    commentCharCount.textContent = `${length} / 2000`;
-                });
-            }
-
-            // Comment form submission
-            if (commentForm) {
-                commentForm.addEventListener('submit', async function (e) {
-                    e.preventDefault();
-
-                    if (!currentPostId) {
-                        console.error('[Comments] No post ID set');
-                        return;
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to update comment');
                     }
 
-                    const content = commentTextarea.value;
-                    await postComment(currentPostId, content);
-                });
+                    // Reload comments to show updated content
+                    await loadComments(currentPostId);
+
+                } catch (error) {
+                    console.error('[Comments] Update failed:', error);
+                    alert('Failed to update comment: ' + error.message);
+                }
             }
 
-            // Sign-in button in comment section
-            if (commentSignInBtn) {
-                commentSignInBtn.addEventListener('click', function () {
-                    if (clerkInstance) {
-                        clerkInstance.openSignIn();
+            // Delete a comment
+            async function deleteComment(commentId) {
+                if (!currentUser) {
+                    alert('Please sign in to delete comments.');
+                    return;
+                }
+
+                if (!confirm('Are you sure you want to delete this comment?')) {
+                    return;
+                }
+
+                try {
+                    const token = await clerkInstance.session.getToken();
+                    const response = await fetch(`${window.WORKER_API_URL}/api/comments/${commentId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to delete comment');
                     }
-                });
+
+                    // Reload comments
+                    await loadComments(currentPostId);
+
+                } catch (error) {
+                    console.error('[Comments] Delete failed:', error);
+                    alert('Failed to delete comment: ' + error.message);
+                }
             }
 
-            // Update comment form visibility based on auth status
-            function updateCommentFormVisibility() {
-                const loginPrompt = document.getElementById('comment-login-prompt');
+            // Comment form event listeners
+            document.addEventListener('DOMContentLoaded', function () {
                 const commentForm = document.getElementById('comment-form');
-                const userAvatar = document.getElementById('comment-user-avatar');
-                const userName = document.getElementById('comment-user-name');
+                const commentTextarea = document.getElementById('comment-textarea');
+                const commentCharCount = document.getElementById('comment-char-count');
+                const commentSignInBtn = document.getElementById('comment-signin-btn');
 
-                if (currentUser) {
-                    if (loginPrompt) loginPrompt.style.display = 'none';
-                    if (commentForm) commentForm.style.display = 'block';
-
-                    // Set user info
-                    if (userAvatar) {
-                        userAvatar.src = currentUser.imageUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser.firstName || currentUser.username || 'User')}`;
-                    }
-                    if (userName) {
-                        userName.textContent = currentUser.firstName || currentUser.username || 'Anonymous';
-                    }
-                } else {
-                    if (loginPrompt) loginPrompt.style.display = 'block';
-                    if (commentForm) commentForm.style.display = 'none';
+                // Character counter
+                if (commentTextarea) {
+                    commentTextarea.addEventListener('input', function () {
+                        const length = this.value.length;
+                        commentCharCount.textContent = `${length} / 2000`;
+                    });
                 }
-            }
 
-            // Call on load and auth state changes
-            updateCommentFormVisibility();
+                // Comment form submission
+                if (commentForm) {
+                    commentForm.addEventListener('submit', async function (e) {
+                        e.preventDefault();
 
-            // Listen for Clerk auth state changes
-            if (window.clerkInstance) {
-                window.clerkInstance.addListener((resources) => {
-                    if (resources.session) {
-                        updateCommentFormVisibility();
+                        if (!currentPostId) {
+                            console.error('[Comments] No post ID set');
+                            return;
+                        }
+
+                        const content = commentTextarea.value;
+                        await postComment(currentPostId, content);
+                    });
+                }
+
+                // Sign-in button in comment section
+                if (commentSignInBtn) {
+                    commentSignInBtn.addEventListener('click', function () {
+                        if (clerkInstance) {
+                            clerkInstance.openSignIn();
+                        }
+                    });
+                }
+
+                // Update comment form visibility based on auth status
+                function updateCommentFormVisibility() {
+                    const loginPrompt = document.getElementById('comment-login-prompt');
+                    const commentForm = document.getElementById('comment-form');
+                    const userAvatar = document.getElementById('comment-user-avatar');
+                    const userName = document.getElementById('comment-user-name');
+
+                    if (currentUser) {
+                        if (loginPrompt) loginPrompt.style.display = 'none';
+                        if (commentForm) commentForm.style.display = 'block';
+
+                        // Set user info
+                        if (userAvatar) {
+                            userAvatar.src = currentUser.imageUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser.firstName || currentUser.username || 'User')}`;
+                        }
+                        if (userName) {
+                            userName.textContent = currentUser.firstName || currentUser.username || 'Anonymous';
+                        }
+                    } else {
+                        if (loginPrompt) loginPrompt.style.display = 'block';
+                        if (commentForm) commentForm.style.display = 'none';
                     }
-                });
-            }
-        });
+                }
 
-        }) ();
+                // Call on load and auth state changes
+                updateCommentFormVisibility();
+
+                // Listen for Clerk auth state changes
+                if (window.clerkInstance) {
+                    window.clerkInstance.addListener((resources) => {
+                        if (resources.session) {
+                            updateCommentFormVisibility();
+                        }
+                    });
+                }
+            });
+
+        })();
     </script>
 
     <!-- GFD Ecosystem Navigation JavaScript -->
