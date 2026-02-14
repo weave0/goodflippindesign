@@ -156,8 +156,21 @@ async function runNavigationTests() {
             });
             
             for (const link of navLinks) {
-                // Click the link
-                await page.click(`nav a[href="${link.href}"]`);
+                // Click the link (target desktop nav only, not mobile)
+                const linkElement = await page.$(`nav.primary-nav a[href="${link.href}"], .nav-links a[href="${link.href}"]`);
+                if (!linkElement) {
+                    // Fallback: try any visible nav link
+                    await page.evaluate((href) => {
+                        const links = Array.from(document.querySelectorAll(`nav a[href="${href}"]`));
+                        const visibleLink = links.find(link => {
+                            const rect = link.getBoundingClientRect();
+                            return rect.width > 0 && rect.height > 0;
+                        });
+                        if (visibleLink) visibleLink.click();
+                    }, link.href);
+                } else {
+                    await linkElement.click();
+                }
                 await delay(600); // Wait for smooth scroll
                 
                 // Verify the target section is in view
