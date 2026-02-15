@@ -76,7 +76,7 @@
     <!-- Clerk publishable key configured for proper-civet-82.clerk.accounts.dev -->
     <script>
         window.CLERK_PUBLISHABLE_KEY = 'pk_test_cHJvcGVyLWNpdmV0LTgyLmNsZXJrLmFjY291bnRzLmRldiQ';
-        window.WORKER_API_URL = ''; // Empty string = relative paths for Pages Functions
+        window.WORKER_API_URL = 'https://gfd-auth.weave0.workers.dev';
     </script>
     <script src="https://cdn.clerk.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" crossorigin="anonymous"></script>
 
@@ -4340,29 +4340,29 @@
 
                 <div class="social-hub">
                     <aside class="social-panel" aria-label="Social feed">
-                        <h3>Social feed</h3>
-                        <p class="panel-subtitle">A quick, on-site view of what we're shipping and sharing — without sending visitors away for a simple update.</p>
+                        <h3>Recent work</h3>
+                        <p class="panel-subtitle">Updates on what we're building, shipping, and improving across the GFD ecosystem.</p>
 
                         <ul class="social-feed-list">
                             <li class="social-feed-item">
-                                <span class="item-icon" aria-hidden="true">🚀</span>
+                                <span class="item-icon" aria-hidden="true">⚡</span>
                                 <div class="item-body">
-                                    <div class="item-title">Ecosystem builds</div>
-                                    <div class="item-text">Recent updates across AI education, culture mapping, and civic tech.</div>
+                                    <div class="item-title">CitizenApproved</div>
+                                    <div class="item-text">Next.js 14 platform helping immigrants navigate U.S. citizenship pathways with legal resources and community support.</div>
                                 </div>
                             </li>
                             <li class="social-feed-item">
-                                <span class="item-icon" aria-hidden="true">🧩</span>
+                                <span class="item-icon" aria-hidden="true">📊</span>
                                 <div class="item-body">
-                                    <div class="item-title">Navigation + clarity</div>
-                                    <div class="item-text">Make it effortless to move between portfolio, donations, and community.</div>
+                                    <div class="item-title">GlobalDeets Intelligence</div>
+                                    <div class="item-text">AI-powered market research and healthcare analytics portals. DuckDB-backed dashboards for enterprise pipeline intelligence.</div>
                                 </div>
                             </li>
                             <li class="social-feed-item">
-                                <span class="item-icon" aria-hidden="true">🎥</span>
+                                <span class="item-icon" aria-hidden="true">🎯</span>
                                 <div class="item-body">
-                                    <div class="item-title">Video, embedded</div>
-                                    <div class="item-text">Short clips belong here — visitors shouldn't have to bounce to YouTube for a quick watch.</div>
+                                    <div class="item-title">Infrastructure buildout</div>
+                                    <div class="item-text">5 CI/CD workflows, automated cache busting, Puppeteer test suite (144 tests, 97.2% coverage), WCAG 2.1 AA compliance.</div>
                                 </div>
                             </li>
                         </ul>
@@ -4384,19 +4384,10 @@
                     </aside>
 
                     <div class="social-panel" aria-label="On-site updates">
-                        <h3>Updates (blog-style)</h3>
-                        <p class="panel-subtitle">Short posts that live on this site, can be shared socially, and can evolve into a full CMS later.</p>
+                        <h3>Updates</h3>
+                        <p class="panel-subtitle">Project milestones, infrastructure improvements, and technical deep-dives.</p>
 
                         <div id="gfd-updates-feed" class="updates-feed" aria-live="polite"></div>
-
-                        <div class="social-video" aria-label="Featured on-site video">
-                            <h4 class="social-video-title">Featured clip (on-site)</h4>
-                            <p class="social-video-subtitle">A short clip you can watch here — no external bounce required.</p>
-                            <video class="social-video-player" controls preload="metadata">
-                                <source src="assets/videos/cat-strutting-and-dancing.mp4" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
                     </div>
                 </div>
             </div>
