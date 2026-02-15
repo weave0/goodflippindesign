@@ -10,13 +10,12 @@ CREATE TABLE IF NOT EXISTS comments (
   user_name TEXT NOT NULL,
   text TEXT NOT NULL,
   created_at TEXT NOT NULL,
-  updated_at TEXT,
-
-  -- Indexes for performance
-  INDEX idx_article_id (article_id),
-  INDEX idx_user_id (user_id),
-  INDEX idx_created_at (created_at DESC)
+  updated_at TEXT
 );
+
+CREATE INDEX IF NOT EXISTS idx_comments_article_id ON comments(article_id);
+CREATE INDEX IF NOT EXISTS idx_comments_user_id ON comments(user_id);
+CREATE INDEX IF NOT EXISTS idx_comments_created_at ON comments(created_at DESC);
 
 -- User Metadata Table (supplement to Clerk data)
 CREATE TABLE IF NOT EXISTS user_metadata (
@@ -28,10 +27,10 @@ CREATE TABLE IF NOT EXISTS user_metadata (
   is_anonymous BOOLEAN DEFAULT 0,
   comment_count INTEGER DEFAULT 0,
   last_active TEXT,
-  created_at TEXT NOT NULL,
-
-  INDEX idx_last_active (last_active DESC)
+  created_at TEXT NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_user_metadata_last_active ON user_metadata(last_active DESC);
 
 -- Blog Posts Table (for Phase 4: Content Evolution)
 CREATE TABLE IF NOT EXISTS blog_posts (
@@ -41,48 +40,46 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   content TEXT NOT NULL,
   excerpt TEXT,
   author_id TEXT NOT NULL,
-  status TEXT DEFAULT 'draft', -- draft, published, archived
-  tags TEXT, -- comma-separated tags (max 5)
-  featured_image TEXT, -- URL or base64 data
+  status TEXT DEFAULT 'draft',
+  tags TEXT,
+  featured_image TEXT,
   published_at TEXT,
   created_at TEXT NOT NULL,
-  updated_at TEXT,
-
-  INDEX idx_slug (slug),
-  INDEX idx_status (status),
-  INDEX idx_published_at (published_at DESC)
+  updated_at TEXT
 );
+
+CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_published_at ON blog_posts(published_at DESC);
 
 -- Reactions Table (likes, hearts, etc.)
 CREATE TABLE IF NOT EXISTS reactions (
   id TEXT PRIMARY KEY,
-  target_type TEXT NOT NULL, -- 'comment', 'blog_post', 'update'
+  target_type TEXT NOT NULL,
   target_id TEXT NOT NULL,
   user_id TEXT NOT NULL,
-  reaction_type TEXT NOT NULL, -- 'like', 'heart', 'celebrate', etc.
+  reaction_type TEXT NOT NULL,
   created_at TEXT NOT NULL,
-
-  -- Prevent duplicate reactions
-  UNIQUE(target_type, target_id, user_id, reaction_type),
-
-  INDEX idx_target (target_type, target_id),
-  INDEX idx_user_id (user_id)
+  UNIQUE(target_type, target_id, user_id, reaction_type)
 );
+
+CREATE INDEX IF NOT EXISTS idx_reactions_target ON reactions(target_type, target_id);
+CREATE INDEX IF NOT EXISTS idx_reactions_user_id ON reactions(user_id);
 
 -- Moderation Log (for admin tracking)
 CREATE TABLE IF NOT EXISTS moderation_log (
   id TEXT PRIMARY KEY,
-  action TEXT NOT NULL, -- 'delete_comment', 'ban_user', 'edit_post', etc.
+  action TEXT NOT NULL,
   target_type TEXT NOT NULL,
   target_id TEXT NOT NULL,
   moderator_id TEXT NOT NULL,
   moderator_email TEXT NOT NULL,
   reason TEXT,
-  created_at TEXT NOT NULL,
-
-  INDEX idx_moderator (moderator_id),
-  INDEX idx_created_at (created_at DESC)
+  created_at TEXT NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_moderation_log_moderator ON moderation_log(moderator_id);
+CREATE INDEX IF NOT EXISTS idx_moderation_log_created_at ON moderation_log(created_at DESC);
 
 -- Insert sample admin user (for testing)
 -- Replace with actual Clerk user ID after first login
