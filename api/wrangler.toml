@@ -1,0 +1,29 @@
+# Cloudflare Worker: Fundraising Counter API
+# Handles donation webhooks from Stripe/PayPal and provides real-time counter
+# Deploy: wrangler deploy --config api/wrangler.toml
+
+name = "gfd-fundraising-counter"
+main = "fundraising-counter.js"
+compatibility_date = "2024-01-01"
+
+# Worker routes (will be available at fundraising-counter.goodflippindesign.workers.dev)
+# Custom domain can be added via Cloudflare dashboard: Workers > Triggers > Custom Domains
+
+# Environment variables
+[vars]
+NODE_ENV = "production"
+ALLOWED_ORIGINS = "https://goodflippindesign.com,https://aiaimate.com,https://culturesherpa.org"
+
+# Secrets (set via: wrangler secret put STRIPE_WEBHOOK_SECRET --config api/wrangler.toml)
+# STRIPE_WEBHOOK_SECRET - Webhook signature verification (get from Stripe dashboard)
+# PAYPAL_WEBHOOK_ID - PayPal webhook verification (get from PayPal developer dashboard)
+
+# Production environment
+[env.production]
+name = "gfd-fundraising-counter"
+vars = { NODE_ENV = "production" }
+
+# Development environment
+[env.dev]
+name = "gfd-fundraising-counter-dev"
+vars = { NODE_ENV = "development", ALLOWED_ORIGINS = "http://localhost:3000,http://localhost:8080" }

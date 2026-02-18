@@ -10,7 +10,12 @@
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
 
-        gtag('config', 'G-WM6Q66W9W0');
+        // Cross-domain tracking for ecosystem attribution
+        gtag('config', 'G-WM6Q66W9W0', {
+            'linker': {
+                'domains': ['goodflippindesign.com', 'aiaimate.com', 'culturesherpa.org', 'goodflippinvibes.com', 'globaldeets.com']
+            }
+        });
     </script>
 
     <meta charset="UTF-8">
