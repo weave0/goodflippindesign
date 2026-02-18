@@ -6,121 +6,46 @@
     <!-- Homepage -->
     <url>
         <loc>https://goodflippindesign.com/</loc>
-        <lastmod>2026-02-03</lastmod>
+        <lastmod>2026-02-17</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
-    </url>
-
-    <!-- Main Sections (via anchor links - important for single-page apps) -->
-    <url>
-        <loc>https://goodflippindesign.com/#services</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.9</priority>
-    </url>
-
-    <url>
-        <loc>https://goodflippindesign.com/#work</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.9</priority>
-    </url>
-
-    <url>
-        <loc>https://goodflippindesign.com/#process</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>
-
-    <url>
-        <loc>https://goodflippindesign.com/#legal-forms</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
-    </url>
-
-    <url>
-        <loc>https://goodflippindesign.com/#support</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.6</priority>
-    </url>
-
-    <url>
-        <loc>https://goodflippindesign.com/#contact</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
     </url>
 
     <!-- Legal Forms Pages -->
     <url>
         <loc>https://goodflippindesign.com/assets/forms/nda-request.html</loc>
-        <lastmod>2026-02-02</lastmod>
+        <lastmod>2026-02-17</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
 
     <url>
         <loc>https://goodflippindesign.com/assets/forms/service-agreement-request.html</loc>
-        <lastmod>2026-02-02</lastmod>
+        <lastmod>2026-02-17</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
 
     <url>
         <loc>https://goodflippindesign.com/assets/forms/sow-request.html</loc>
-        <lastmod>2026-02-02</lastmod>
+        <lastmod>2026-02-17</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
 
     <url>
         <loc>https://goodflippindesign.com/assets/forms/change-order-request.html</loc>
-        <lastmod>2026-02-02</lastmod>
+        <lastmod>2026-02-17</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
 
-    <!-- Contact Form (separate page if exists) -->
+    <!-- Contact Form -->
     <url>
         <loc>https://goodflippindesign.com/assets/contact-form.html</loc>
-        <lastmod>2025-12-06</lastmod>
+        <lastmod>2026-02-17</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
-    </url>
-
-    <!-- Portfolio Projects (external links, but good for reference) -->
-    <!-- Note: These are external but referenced on our site -->
-
-    <!-- Ecosystem Sites (for crawler awareness) -->
-    <url>
-        <loc>https://aiaimate.com/</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>0.9</priority>
-    </url>
-
-    <url>
-        <loc>https://culturesherpa.org/</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.9</priority>
-    </url>
-
-    <url>
-        <loc>https://goodflippinvibes.com/</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-
-    <url>
-        <loc>https://globaldeets.com/</loc>
-        <lastmod>2026-02-03</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
     </url>
 
 </urlset>
