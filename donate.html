@@ -1511,7 +1511,9 @@
 
     <script>
         // Payment system initialization
-        const stripe = Stripe('pk_live_51So70wBL2ppdbQKqOR38V1sZW6oFrVYkKmsxYxHTIOQ7yXYU1oT2qQtXHdKo9eBx2vxvotcYt5L6ZQXoXfYrx5Wg00X1VibSRz');
+        // Stripe key injected via Cloudflare Worker (see _worker.js)
+        const stripeKey = window.ENV?.STRIPE_PUBLISHABLE_KEY || 'pk_live_51So70wBL2ppdbQKqOR38V1sZW6oFrVYkKmsxYxHTIOQ7yXYU1oT2qQtXHdKo9eBx2vxvotcYt5L6ZQXoXfYrx5Wg00X1VibSRz';
+        const stripe = Stripe(stripeKey);
         let elements;
         let selectedAmount = 25;
         let donationType = 'one-time';

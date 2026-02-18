@@ -3708,7 +3708,12 @@
             "https://aiaimate.com",
             "https://goodflippinvibes.com",
             "https://globaldeets.com",
-            "https://citizenapproved.org"
+            "https://citizenapproved.org",
+            "https://facebook.com/profile.php?id=61566870218978",
+            "https://twitter.com/goodflippinvibes",
+            "https://instagram.com/goodflippindesign",
+            "https://linkedin.com/company/good-flippin-design",
+            "https://github.com/weave0"
         ],
         "owns": [
             {
@@ -4368,6 +4373,14 @@
                         </ul>
 
                         <div class="social-follow-links" aria-label="Follow links">
+                            <a href="https://facebook.com/profile.php?id=61566870218978" target="_blank" rel="noopener">
+                                <span aria-hidden="true">👍</span>
+                                Facebook
+                            </a>
+                            <a href="https://twitter.com/goodflippinvibes" target="_blank" rel="noopener">
+                                <span aria-hidden="true">𝕏</span>
+                                Twitter/X
+                            </a>
                             <a href="https://instagram.com/goodflippindesign" target="_blank" rel="noopener">
                                 <span aria-hidden="true">📸</span>
                                 Instagram
@@ -5223,7 +5236,8 @@
 
             // 10. Stripe donation workflow
             const donationConfig = {
-                publishableKey: 'pk_live_51So70wBL2ppdbQKqOR38V1sZW6oFrVYkKmsxYxHTIOQ7yXYU1oT2qQtXHdKo9eBx2vxvotcYt5L6ZQXoXfYrx5Wg00X1VibSRz',
+                // Stripe key injected via Cloudflare Worker (see _worker.js)
+                publishableKey: window.ENV?.STRIPE_PUBLISHABLE_KEY || 'pk_live_51So70wBL2ppdbQKqOR38V1sZW6oFrVYkKmsxYxHTIOQ7yXYU1oT2qQtXHdKo9eBx2vxvotcYt5L6ZQXoXfYrx5Wg00X1VibSRz',
                 apiBaseUrl: 'https://sd7ug3ha16.execute-api.us-east-1.amazonaws.com/prod',
                 projectLabel: 'Good Flippin Design'
             };
@@ -5537,14 +5551,21 @@
                 // Report vitals after page fully loaded
                 window.addEventListener('load', () => {
                     setTimeout(() => {
-                        // Log vitals for development (can be sent to analytics in production)
+                        // Log vitals for development
                         if (Object.keys(vitalsData).length > 0) {
                             console.log('📊 Core Web Vitals:', vitalsData);
 
-                            // Optional: Send to analytics endpoint
-                            // if (window.gtag) {
-                            //     gtag('event', 'web_vitals', vitalsData);
-                            // }
+                            // Send to Google Analytics for performance monitoring
+                            if (window.gtag) {
+                                gtag('event', 'web_vitals', {
+                                    event_category: 'Performance',
+                                    lcp: vitalsData.lcp || null,
+                                    fid: vitalsData.fid || null,
+                                    cls: vitalsData.cls || null,
+                                    ttfb: vitalsData.ttfb || null,
+                                    non_interaction: true
+                                });
+                            }
                         }
                     }, 2000);
                 });
