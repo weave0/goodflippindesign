@@ -16,34 +16,8 @@ export default {
       return authWorker.fetch(request, env, ctx);
     }
 
-    const isCacheableMethod = request.method === 'GET' || request.method === 'HEAD';
-    const acceptHeader = request.headers.get('Accept') || '';
-    const likelyHtmlRequest =
-      acceptHeader.includes('text/html') || url.pathname === '/' || url.pathname.endsWith('.html');
-    const bypassEdgeCache =
-      !isCacheableMethod ||
-      !likelyHtmlRequest ||
-      request.headers.has('Cookie') ||
-      request.headers.has('Authorization') ||
-      url.searchParams.has('nocache');
-
-    // Edge caching strategy for public HTML
-    const cache = caches.default;
-    const cacheKey = new Request(url.toString(), { method: 'GET' });
-
-    // Check edge cache first (significant performance boost for global traffic)
-    let response;
-    if (!bypassEdgeCache) {
-      response = await cache.match(cacheKey);
-      if (response) {
-        response = new Response(response.body, response);
-        response.headers.set('X-Cache', 'HIT');
-        return response;
-      }
-    }
-
-    // Cache miss (or bypass) - get from origin
-    response = await env.ASSETS.fetch(request);
+    // Get response from static assets
+    let response = await env.ASSETS.fetch(request);
 
     // Inject environment variables into HTML responses
     if (response.headers.get('content-type')?.includes('text/html')) {
@@ -62,13 +36,7 @@ export default {
       });
 
       // Cache HTML at edge for 5 minutes (balance freshness vs speed)
-      response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300');
-      response.headers.set('X-Cache', bypassEdgeCache ? 'BYPASS' : 'MISS');
-
-      // Store in edge cache (non-blocking)
-      if (!bypassEdgeCache && response.ok) {
-        ctx.waitUntil(cache.put(cacheKey, response.clone()));
-      }
+      response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
     }
 
     return response;

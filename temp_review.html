@@ -5581,7 +5581,7 @@
                 // Configuration - generic support tracking
                 config: {
                     lastDonationTime: 'Recently', // Update manually
-                    apiEndpoint: 'https://gfd-fundraising-counter.weave0.workers.dev/api/fundraising',
+                    apiEndpoint: null,        // Embedded mode: no backend polling
                     updateInterval: 30000     // Check for updates every 30 seconds
                 },
 
@@ -5601,37 +5601,6 @@
 
                     // Listen for manual updates (for testing or instant updates)
                     window.updateFundraising = this.update.bind(this);
-
-                    // Fetch live updates (if endpoint configured)
-                    if (this.config.apiEndpoint) {
-                        this.fetchLatest();
-                        setInterval(() => this.fetchLatest(), this.config.updateInterval);
-                    }
-                },
-
-                async fetchLatest() {
-                    if (!this.config.apiEndpoint) return;
-
-                    try {
-                        const response = await fetch(this.config.apiEndpoint, {
-                            method: 'GET',
-                            headers: { 'Accept': 'application/json' }
-                        });
-                        if (!response.ok) return;
-
-                        const data = await response.json();
-                        if (!data || !data.success) return;
-
-                        if (typeof data.totalSupporters === 'number' && this.elements.totalSupporters) {
-                            this.elements.totalSupporters.textContent = data.totalSupporters.toLocaleString();
-                        }
-
-                        if (data.lastDonationTime) {
-                            this.update({ lastDonationTime: data.lastDonationTime });
-                        }
-                    } catch (e) {
-                        // Silent fail: keep UI stable if endpoint is unavailable
-                    }
                 },
 
                 // Update with new values (can be called manually)
