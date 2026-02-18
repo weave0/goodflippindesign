@@ -12,9 +12,18 @@ let fundraisingData = {
 
 export default {
   async fetch(request, env, ctx) {
-    // CORS headers for all responses
+    // CORS headers for all responses (allows ecosystem cross-site requests)
+    const allowedOrigins = (env.ALLOWED_ORIGINS || 'https://goodflippindesign.com')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+    const requestOrigin = request.headers.get('Origin') || '';
+    const allowOrigin = allowedOrigins.includes(requestOrigin)
+      ? requestOrigin
+      : 'https://goodflippindesign.com';
+
     const corsHeaders = {
-      'Access-Control-Allow-Origin': 'https://goodflippindesign.com',
+      'Access-Control-Allow-Origin': allowOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     };
@@ -71,7 +80,7 @@ export default {
         const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
 
         if (!webhookSecret) {
-          return new Response('Webhook secret not configured', { status: 500 });
+          return new Response('Webhook secret not configured', { status: 500, headers: corsHeaders });
         }
 
         // In a real implementation, you'd validate the Stripe signature here
@@ -99,17 +108,17 @@ export default {
               newTotal: fundraisingData.totalRaised,
               source: 'stripe'
             }), {
-              headers: { 'Content-Type': 'application/json' }
+              headers: { 'Content-Type': 'application/json', ...corsHeaders }
             });
           }
 
           return new Response(JSON.stringify({ received: true }), {
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json', ...corsHeaders }
           });
 
         } catch (error) {
           console.error('Stripe webhook processing error:', error);
-          return new Response('Webhook error', { status: 400 });
+          return new Response('Webhook error', { status: 400, headers: corsHeaders });
         }
       }
 
@@ -157,22 +166,17 @@ export default {
           }
 
           return new Response(JSON.stringify({ received: true }), {
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json', ...corsHeaders }
           });
 
         } catch (error) {
           console.error('PayPal webhook processing error:', error);
-          return new Response('PayPal webhook error', { status: 400 });
-        }), {
-          headers: {
-            'Content-Type': 'application/json',
-            ...corsHeaders
-          }
-        });
+          return new Response('PayPal webhook error', { status: 400, headers: corsHeaders });
+        }
       }
 
       // Default response
-      return new Response('Fundraising Counter API', { status: 404 });
+      return new Response('Fundraising Counter API', { status: 404, headers: corsHeaders });
 
     } catch (error) {
       console.error('API Error:', error);
