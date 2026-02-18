@@ -31,8 +31,11 @@ Allow: /favicon.ico
 Allow: /sitemap.xml
 Allow: /robots.txt
 
-# Block duplicate HTML file
+# Block duplicate HTML files
 Disallow: /main.html
+Disallow: /donate-v2.html
+Disallow: /globaldeets-*.html
+Disallow: /community-portal.html
 
 # Specific bot instructions
 User-agent: Googlebot
