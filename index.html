@@ -674,6 +674,57 @@
             gap: 1rem;
         }
 
+        .donate-qr {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: inherit;
+            padding: 0.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            transition:
+                transform 0.3s ease,
+                border-color 0.3s ease;
+            will-change: transform;
+        }
+
+        .donate-qr:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .donate-qr:focus-visible {
+            outline: 2px solid rgba(251, 191, 36, 0.7);
+            outline-offset: 2px;
+        }
+
+        .donate-qr img {
+            width: 72px;
+            height: 72px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+        }
+
+        .donate-qr-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+            line-height: 1.2;
+        }
+
+        .donate-qr-text strong {
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .donate-qr-text span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
         .btn-donate {
             background: var(--gradient-primary);
             color: var(--bg);
@@ -748,6 +799,11 @@
                 flex-direction: column;
                 text-align: center;
                 gap: 0.75rem;
+            }
+
+            .donate-qr {
+                width: 100%;
+                justify-content: center;
             }
 
             .progress-percentage {
@@ -4096,6 +4152,13 @@
                         </div>
                         <div class="fundraising-cta">
                             <a href="donate.html" class="btn-donate">Support Our Mission</a>
+                            <a class="donate-qr" href="donate.html" aria-label="Scan the QR code to donate">
+                                <img src="/assets/389ecd25-3180-4ca0-916b-a59f5b5806db.png" alt="Donate QR code" width="72" height="72" loading="lazy" decoding="async">
+                                <span class="donate-qr-text">
+                                    <strong>Scan to donate</strong>
+                                    <span>Opens the donation page</span>
+                                </span>
+                            </a>
                             <span class="recent-activity" id="recent-activity">Last donation: 2 hours ago</span>
                         </div>
                     </div>
