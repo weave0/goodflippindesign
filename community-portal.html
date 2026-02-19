@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Portal | Good Flippin Design</title>
+    <meta name="description" content="Join the Good Flippin Design community - connect with developers, share insights, and collaborate on projects.">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!--Clerk Auth SDK -->
+    <script>
+        window.CLERK_PUBLISHABLE_KEY = 'pk_test_cHJvcGVyLWNpdmV0LTgyLmNsZXJrLmFjY291bnRzLmRldiQ';
+        window.WORKER_API_URL = 'https://gfd-auth.weave0.workers.dev';
+    </script>
+    <script src="https://cdn.clerk.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --bg-elevated: #151515;
+            --bg-card: #1a1a1a;
+            --text: #f5f5f5;
+            --text-secondary: #a0a0a0;
+            --text-muted: #999999;
+            --accent: #e0e0e0;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.12);
+            --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #10b981 50%, #fbbf24 100%);
+            --gradient-glow: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15), transparent 70%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 1.125rem;
+            font-weight: 600;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 44px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #10b981);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: var(--gradient-glow);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(16, 185, 129, 0.15));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 4rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .cta-section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1.125rem;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .social-btn:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card);
+            transform: translateY(-2px);
+        }
+
+        .social-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem 0;
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--text);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            background: rgba(139, 92, 246, 0.15);
+            color: #c4b5fd;
+            margin-left: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <img src="assets/logo-vector.png" alt="Good Flippin Design">
+                    <span class="logo-text">Good Flippin Design</span>
+                </a>
+                <div class="auth-status">
+                    <a href="/" class="btn btn-secondary">← Back to Main Site</a>
+                    <button id="auth-btn" class="btn btn-primary" style="display: none;"></button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero">
+                <h1>Community Portal <span class="status-badge">Coming Soon</span></h1>
+                <p>Connect with developers, share insights, participate in discussions, and collaborate on projects in the Good Flippin Design ecosystem.</p>
+            </section>
+
+            <section>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">💬</div>
+                        <h3>Discussion Forums</h3>
+                        <p>Engage in technical discussions, ask questions, and share knowledge with fellow developers and tech enthusiasts.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📚</div>
+                        <h3>Blog & Resources</h3>
+                        <p>Read and comment on technical articles, case studies, and deep-dives into web development and AI integration.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">👤</div>
+                        <h3>User Profiles</h3>
+                        <p>Create your profile, showcase your expertise, track your contributions, and build your reputation in the community.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Project Showcases</h3>
+                        <p>Share your projects, get feedback, discover collaboration opportunities, and learn from others' work.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🏆</div>
+                        <h3>Achievements & Badges</h3>
+                        <p>Earn badges for contributions, milestones, and community engagement. Level up your developer journey.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔔</div>
+                        <h3>Notifications & Updates</h3>
+                        <p>Stay informed about discussions you're involved in, new content, and ecosystem updates.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>Join the Community</h2>
+                <p>Sign in with your preferred account to get started</p>
+
+                <div class="auth-buttons">
+                    <button class="social-btn" onclick="handleSocialLogin('google')">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
+                        Continue with Google
+                    </button>
+
+                    <button class="social-btn" onclick="handleSocialLogin('github')">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                        </svg>
+                        Continue with GitHub
+                    </button>
+
+                    <button class="social-btn" onclick="handleSocialLogin('email')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
+                            <polyline points="3 7 12 13 21 7" />
+                        </svg>
+                        Continue with Email
+                    </button>
+                </div>
+
+                <p style="margin-top: 2rem; font-size: 0.875rem; color: var(--text-muted);">
+                    By signing in, you agree to our <a href="#" style="color: var(--text-secondary);">Terms of Service</a> and <a href="#" style="color: var(--text-secondary);">Privacy Policy</a>
+                </p>
+            </section>
+
+            <section style="margin-top: 4rem; padding: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem;">
+                <h2 style="margin-bottom: 1rem;">Current Features (Available Now)</h2>
+                <ul style="color: var(--text-secondary); line-height: 2;">
+                    <li>✅ <strong>Blog Comments</strong> - Visit our <a href="/#blog" style="color: #10b981;">blog section</a> to read articles and leave comments</li>
+                    <li>✅ <strong>User Authentication</strong> - Sign in with Google, GitHub, or email via Clerk</li>
+                    <li>✅ <strong>User Profiles</strong> - Basic profile management and avatars</li>
+                    <li>⏳ <strong>Discussion Forums</strong> - Coming in Phase 2 (Q2 2026)</li>
+                    <li>⏳ <strong>Project Showcases</strong> - Coming in Phase 3 (Q3 2026)</li>
+                    <li>⏳ <strong>Achievements System</strong> - Coming in Phase 4 (Q4 2026)</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Good Flippin Design (GFV LLC). Built with care in Minneapolis.</p>
+            <p style="margin-top: 0.5rem;">
+                <a href="/">Home</a> ·
+                <a href="/#services">Services</a> ·
+                <a href="/#work">Portfolio</a> ·
+                <a href="/#contact">Contact</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Clerk when available
+        let clerk;
+
+        async function initializeAuth() {
+            if (window.Clerk) {
+                try {
+                    clerk = new window.Clerk(window.CLERK_PUBLISHABLE_KEY);
+                    await clerk.load();
+
+                    const authBtn = document.getElementById('auth-btn');
+
+                    if (clerk.user) {
+                        // User is signed in
+                        authBtn.textContent = 'Sign Out';
+                        authBtn.onclick = () => clerk.signOut();
+                    } else {
+                        // User is not signed in
+                        authBtn.textContent = 'Sign In';
+                        authBtn.onclick = () => clerk.openSignIn();
+                    }
+
+                    authBtn.style.display = 'inline-flex';
+                } catch (error) {
+                    console.error('Clerk initialization error:', error);
+                }
+            }
+        }
+
+        function handleSocialLogin(provider) {
+            if (clerk) {
+                clerk.openSignIn();
+            } else {
+                alert('Authentication is being initialized. Please try again in a moment.');
+                initializeAuth();
+            }
+        }
+
+        // Initialize on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeAuth);
+        } else {
+            initializeAuth();
+        }
+
+        // Listen for Clerk loaded event
+        window.addEventListener('clerk:loaded', initializeAuth);
+    </script>
+</body>
+
+</html>

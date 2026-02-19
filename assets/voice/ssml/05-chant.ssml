@@ -1,0 +1,8 @@
+<speak>
+  <prosody rate="82%" pitch="-9%" volume="medium">
+    X is the set
+    <break time="450ms"/>
+    of all things
+    <break time="450ms"/>
+  </prosody>
+</speak>

@@ -1,0 +1,211 @@
+/* ============================================
+   GFV Community Platform: Auth UI Styles
+   Copy this into your <style> section
+   ============================================ */
+
+/* Auth Container */
+.auth-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* User Menu Container */
+.user-menu-container {
+  position: relative;
+}
+
+/* User Menu Button */
+.user-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(124, 152, 133, 0.1); /* GFV sage green tint */
+  border: 1px solid rgba(124, 152, 133, 0.3);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.user-menu-btn:hover {
+  background: rgba(124, 152, 133, 0.2);
+  border-color: rgba(124, 152, 133, 0.5);
+  transform: translateY(-1px);
+}
+
+/* User Avatar */
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(124, 152, 133, 0.3);
+}
+
+/* User Name */
+.user-name {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--gfv-text, #2c2c2c);
+  letter-spacing: 0.01em;
+}
+
+/* User Dropdown */
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  right: 0;
+  min-width: 200px;
+  background: var(--gfv-bg-light, #f5f1e8);
+  border: 1px solid rgba(124, 152, 133, 0.2);
+  border-radius: 12px;
+  padding: 0.75rem;
+  display: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+}
+
+.user-dropdown[aria-hidden="false"] {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dropdown Links */
+.user-dropdown-link {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--gfv-text, #2c2c2c);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.user-dropdown-link:hover {
+  background: rgba(124, 152, 133, 0.1);
+  color: #7c9885; /* GFV sage green */
+}
+
+/* Sign In Button */
+#sign-in-btn,
+#mobile-sign-in-btn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #7c9885 0%, #8faa98 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(124, 152, 133, 0.25);
+}
+
+#sign-in-btn:hover,
+#mobile-sign-in-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(124, 152, 133, 0.35);
+}
+
+/* Mobile Navigation Auth */
+.mobile-auth-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(124, 152, 133, 0.2);
+}
+
+#mobile-profile-link,
+#mobile-sign-out-btn {
+  padding: 0.875rem 1rem;
+  background: none;
+  border: none;
+  color: var(--gfv-text, #2c2c2c);
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  text-decoration: none;
+}
+
+#mobile-profile-link:hover,
+#mobile-sign-out-btn:hover {
+  background: rgba(124, 152, 133, 0.1);
+}
+
+/* Admin Badge (shown for admin users) */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  background: linear-gradient(135deg, #e8b4b8 0%, #f5c2c6 100%);
+  color: #2c2c2c;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .auth-container {
+    display: none; /* Hide desktop auth on mobile */
+  }
+
+  .user-menu-btn {
+    padding: 0.5rem 0.875rem;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .user-name {
+    display: none; /* Show only avatar on small screens */
+  }
+}
+
+@media (max-width: 600px) {
+  .user-dropdown {
+    right: -1rem;
+    left: auto;
+    min-width: 180px;
+  }
+}
+
+/* ============================================
+   GFV Color Variables (if not already defined)
+   ============================================ */
+
+:root {
+  --gfv-primary: #7c9885; /* sage green */
+  --gfv-accent: #e8b4b8; /* soft rose */
+  --gfv-bg-light: #f5f1e8; /* warm cream */
+  --gfv-text: #2c2c2c; /* charcoal */
+  --gfv-text-muted: #6b6b6b; /* muted gray */
+}

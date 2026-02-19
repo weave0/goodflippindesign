@@ -1,0 +1,7 @@
+<speak>
+  <prosody rate="95%" pitch="-8%">
+    X is the <emphasis level="moderate">set</emphasis>.
+    <break time="400ms"/>
+    Of all things.
+  </prosody>
+</speak>

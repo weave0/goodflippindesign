@@ -48,3 +48,17 @@ Brand Assets Development/Final Assets/**/*.jpeg
 
 # Local Netlify folder
 .netlify
+
+# Build output
+dist/
+
+# Generated audio/TTS output
+assets/voice/out/
+
+# Test & debug artifacts
+test-results.txt
+latest-test.json
+contrast-test.json
+final-contrast.json
+verified-contrast.json
+*-contrast.json
