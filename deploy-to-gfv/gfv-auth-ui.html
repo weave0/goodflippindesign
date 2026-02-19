@@ -1,0 +1,57 @@
+<!-- ========================================
+     GFV Community Platform: Auth UI Components
+     Copy this into your GFV navigation
+     ======================================== -->
+
+<!-- Desktop Navigation Auth -->
+<div id="auth-container" class="auth-container">
+    <!-- Sign In Button (shown when logged out) -->
+    <button id="sign-in-btn" class="nav-cta" style="display: none;">
+        Sign In
+    </button>
+
+    <!-- User Menu (shown when logged in) -->
+    <div id="user-menu-container" class="user-menu-container" style="display: none;">
+        <button id="user-menu-btn" class="user-menu-btn" aria-label="User menu" aria-expanded="false">
+            <img id="user-avatar" class="user-avatar" src="" alt="User avatar" />
+            <span id="user-name" class="user-name"></span>
+        </button>
+        <div id="user-dropdown" class="user-dropdown" role="menu" aria-hidden="true">
+            <a href="#profile" class="user-dropdown-link" role="menuitem">Profile</a>
+            <button id="sign-out-btn" class="user-dropdown-link" role="menuitem">Sign Out</button>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Navigation Auth (add to mobile menu) -->
+<div id="mobile-auth-container" class="mobile-auth-container">
+    <button id="mobile-sign-in-btn" class="mobile-nav-link" style="display: none;">Sign In</button>
+    <a href="#profile" id="mobile-profile-link" class="mobile-nav-link" style="display: none;">Profile</a>
+    <button id="mobile-sign-out-btn" class="mobile-nav-link" style="display: none;">Sign Out</button>
+</div>
+
+<!-- ========================================
+     INTEGRATION INSTRUCTIONS
+     ======================================== -->
+
+<!--
+1. In your main <nav> element, add #auth-container after your existing nav links:
+
+   <nav>
+       <a href="#home">Home</a>
+       <a href="#wellness">Wellness</a>
+       <!-- ADD HERE: -->
+<div id="auth-container">...</div>
+</nav>
+
+2. In your mobile navigation menu, add #mobile-auth-container:
+
+<div class="mobile-nav">
+    <a href="#home">Home</a>
+    <a href="#wellness">Wellness</a>
+    <!-- ADD HERE: -->
+    <div id="mobile-auth-container">...</div>
+</div>
+
+3. Make sure you've added gfv-auth-styles.css to your <style>
+    section 4. Add the Clerk SDK before closing </head>: <script src="https://cdn.clerk.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>5. Add gfv-auth-script.js before closing </body>-->
