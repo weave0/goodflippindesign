@@ -32,8 +32,10 @@
   "author": "Brett Weaver <brett.l.weaver@gmail.com>",
   "license": "UNLICENSED",
   "private": true,
+  "dependencies": {
+    "@sentry/cloudflare": "^8.0.0"
+  },
   "devDependencies": {
-    "@sentry/cloudflare": "^8.0.0",
     "html-validate": "^8.18.0",
     "http-server": "^14.1.1",
     "husky": "^9.0.0",

@@ -3,17 +3,41 @@
  * Routes API requests to auth worker, serves static assets for everything else
  * Injects environment variables into HTML for secure key management
  * Implements edge caching for global performance
+ *
+ * NOTE: authWorker is loaded dynamically so that a missing/broken dependency
+ * (e.g. @sentry/cloudflare not available in a dev build) does NOT crash the
+ * entire worker and cause Cloudflare Pages to fall back to SPA-mode
+ * (serving index.html for every URL including /donate, /community-portal, etc.)
  */
 
-import authWorker from './workers/auth.js';
+let _authWorker = null;
+
+async function getAuthWorker() {
+  if (_authWorker) return _authWorker;
+  try {
+    const mod = await import('./workers/auth.js');
+    _authWorker = mod.default;
+  } catch (e) {
+    console.warn('[_worker] Auth worker unavailable:', e.message);
+    _authWorker = null;
+  }
+  return _authWorker;
+}
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // Route API requests to auth worker
+    // Route API requests to auth worker (gracefully degrade if unavailable)
     if (url.pathname.startsWith('/api/')) {
-      return authWorker.fetch(request, env, ctx);
+      const authWorker = await getAuthWorker();
+      if (authWorker) {
+        return authWorker.fetch(request, env, ctx);
+      }
+      return new Response(JSON.stringify({ error: 'API temporarily unavailable' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // Get response from static assets
