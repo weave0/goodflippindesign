@@ -116,7 +116,10 @@ const SITES = {
     // Cache-control rules per path pattern
     cacheRules: [
       { path: '/*.html',  value: 'public, max-age=0, must-revalidate' },
-      { path: '/assets/*', value: 'public, max-age=31536000, immutable' },
+      // NOTE: Do NOT use `immutable` for /assets/* — logos and images are updated
+      // between deployments. `immutable` causes edge nodes to cache stale content
+      // permanently. Use stale-while-revalidate instead.
+      { path: '/assets/*', value: 'public, max-age=86400, stale-while-revalidate=604800' },
       { path: '/*.woff2',  value: 'public, max-age=31536000, immutable' },
       { path: '/*.woff',   value: 'public, max-age=31536000, immutable' },
     ],
