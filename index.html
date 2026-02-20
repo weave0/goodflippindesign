@@ -2962,6 +2962,43 @@
             letter-spacing: 0.08em;
         }
 
+        /* Admin bar (owner-only, bottom of page) */
+        .footer-admin-bar {
+            text-align: center;
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .footer-admin-link {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.6875rem;
+            opacity: 0.2;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            font-family: inherit;
+            transition: opacity 0.2s;
+            text-decoration: none;
+        }
+
+        .footer-admin-link:hover {
+            opacity: 0.65;
+        }
+
+        .footer-admin-user {
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-admin-name {
+            color: var(--text-muted);
+            font-size: 0.6875rem;
+            opacity: 0.45;
+        }
+
         /* Mobile Menu Button */
         .mobile-menu-toggle {
             display: none;
@@ -3918,7 +3955,7 @@
     <nav class="gfd-ecosystem-nav" aria-label="Ecosystem navigation">
         <div class="ecosystem-nav-container">
             <div class="ecosystem-brand">
-                <img src="/assets/logo-vector.png" alt="Good Flippin Design Logo" class="ecosystem-logo" height="28" loading="eager" />
+                <img src="/assets/logo-nav.png" alt="Good Flippin Design Logo" class="ecosystem-logo" height="28" loading="eager" />
                 <span class="ecosystem-title">GFD Ecosystem</span>
             </div>
 
@@ -3950,9 +3987,7 @@
                     </a>
                     <a href="https://aiaimate.com" class="nav-link" role="menuitem" target="_blank" rel="noopener">
                         <span class="nav-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
+                            <span class="nav-icon-badge nav-icon-badge-ai">AI</span>
                         </span>
                         <div class="nav-link-content">
                             <strong class="nav-link-title">AI Aimate</strong>
@@ -3961,11 +3996,7 @@
                     </a>
                     <a href="https://culturesherpa.org" class="nav-link" role="menuitem" target="_blank" rel="noopener">
                         <span class="nav-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                                <circle cx="12" cy="12" r="10" />
-                                <line x1="2" y1="12" x2="22" y2="12" />
-                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                            </svg>
+                            <span class="nav-icon-badge nav-icon-badge-cs">CS</span>
                         </span>
                         <div class="nav-link-content">
                             <strong class="nav-link-title">CultureSherpa</strong>
@@ -3974,9 +4005,7 @@
                     </a>
                     <a href="https://goodflippinvibes.com" class="nav-link" role="menuitem" target="_blank" rel="noopener">
                         <span class="nav-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                            </svg>
+                            <span class="nav-icon-badge nav-icon-badge-gfv">GFV</span>
                         </span>
                         <div class="nav-link-content">
                             <strong class="nav-link-title">Good Flippin Vibes</strong>
@@ -3989,11 +4018,7 @@
                     <h3 class="nav-section-title">Research & Intelligence</h3>
                     <a href="https://globaldeets.com" class="nav-link" role="menuitem" target="_blank" rel="noopener">
                         <span class="nav-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                                <line x1="18" y1="20" x2="18" y2="10" />
-                                <line x1="12" y1="20" x2="12" y2="4" />
-                                <line x1="6" y1="20" x2="6" y2="14" />
-                            </svg>
+                            <span class="nav-icon-badge nav-icon-badge-gd">GD</span>
                         </span>
                         <div class="nav-link-content">
                             <strong class="nav-link-title">GlobalDeets</strong>
@@ -4034,7 +4059,7 @@
     <nav class="main-nav">
         <div class="nav-content">
             <a href="/" class="logo">
-                <img src="/assets/logo-vector.png" alt="Good Flippin Design Logo" height="42" loading="eager">
+                <img src="/assets/logo-nav.png" alt="Good Flippin Design Logo" height="42" loading="eager">
                 <span class="logo-text">Good Flippin Design</span>
             </a>
             <ul class="nav-links">
@@ -4046,20 +4071,6 @@
                 <li><a href="#legal-forms">Legal Forms</a></li>
             </ul>
             <a href="donate.html" class="nav-donate-cta" onclick="if(window.gtag){gtag('event','donate_click',{event_category:'donation',event_label:'Nav CTA Button',entry_point:'desktop_nav'})}">❤️ Donate</a>
-            <!-- Auth UI: Show user menu if logged in, sign-in button if not -->
-            <div id="auth-nav-container" class="auth-nav-container">
-                <button id="sign-in-btn" class="nav-cta" style="display: none;">Sign In</button>
-                <div id="user-menu-container" class="user-menu-container" style="display: none;">
-                    <button id="user-menu-btn" class="user-menu-btn" aria-label="User menu" aria-expanded="false">
-                        <img id="user-avatar" class="user-avatar" src="" alt="User avatar" />
-                        <span id="user-name" class="user-name"></span>
-                    </button>
-                    <div id="user-dropdown" class="user-dropdown" role="menu" aria-hidden="true">
-                        <a href="#user-profile" class="user-dropdown-link" role="menuitem">Profile</a>
-                        <button id="sign-out-btn" class="user-dropdown-link" role="menuitem">Sign Out</button>
-                    </div>
-                </div>
-            </div>
             <a href="#contact" class="nav-cta">Get in Touch</a>
             <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
                 <span class="hamburger-line"></span>
@@ -4084,10 +4095,6 @@
                 <a href="#process" class="mobile-nav-link">Process</a>
                 <a href="#social-feed" class="mobile-nav-link">Social</a>
                 <a href="#library" class="mobile-nav-link">Library</a>
-                <!-- Mobile Auth -->
-                <button id="mobile-sign-in-btn" class="mobile-nav-link" style="display: none;">Sign In</button>
-                <a href="#user-profile" id="mobile-profile-link" class="mobile-nav-link" style="display: none;">Profile</a>
-                <button id="mobile-sign-out-btn" class="mobile-nav-link" style="display: none;">Sign Out</button>
                 <a href="#legal-forms" class="mobile-nav-link">Legal Forms</a>
                 <a href="donate.html" class="mobile-nav-link" onclick="if(window.gtag){gtag('event','donate_click',{event_category:'donation',event_label:'Mobile Nav Link',entry_point:'mobile_nav'})}">Donate</a>
                 <a href="#contact" class="mobile-nav-link mobile-nav-cta">Get in Touch</a>
@@ -4844,7 +4851,7 @@
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
-                <img src="assets/logo-vector.png" alt="Good Flippin Design Logo" style="height: 24px; width: auto; opacity: 0.7;" />
+                <img src="/assets/logo-footer.png" alt="Good Flippin Design Logo" style="height: 24px; width: auto; opacity: 0.7;" />
                 <span>Good Flippin Design</span>
             </div>
             <p class="footer-text">© 2025 GFV LLC</p>
@@ -4860,6 +4867,15 @@
                 <a href="https://goodflippinvibes.com" target="_blank" rel="noopener" title="Wellness Platform">Good Flippin Vibes</a>
                 <a href="https://globaldeets.com" target="_blank" rel="noopener" title="Portfolio Hub">GlobalDeets</a>
                 <a href="https://citizenapproved.org" target="_blank" rel="noopener" title="U.S. Citizenship Pathways">CitizenApproved</a>
+            </div>
+        </div>
+        <!-- Owner admin access (not for public) -->
+        <div class="footer-admin-bar">
+            <button id="footer-sign-in-btn" class="footer-admin-link" style="display: none;">Admin</button>
+            <div id="footer-admin-user" class="footer-admin-user" style="display: none; gap: 0.5rem; align-items: center; justify-content: center;">
+                <span id="footer-user-name" class="footer-admin-name"></span>
+                <span aria-hidden="true" class="footer-admin-link" style="cursor: default; padding: 0 0.125rem;">·</span>
+                <button id="footer-sign-out-btn" class="footer-admin-link">Sign out</button>
             </div>
         </div>
     </footer>
@@ -6079,45 +6095,26 @@
             }
 
             function showUserMenu(user) {
-                // Desktop nav
-                const signInBtn = document.getElementById('sign-in-btn');
-                const userMenuContainer = document.getElementById('user-menu-container');
-                const userAvatar = document.getElementById('user-avatar');
-                const userName = document.getElementById('user-name');
+                const footerSignIn = document.getElementById('footer-sign-in-btn');
+                const footerAdminUser = document.getElementById('footer-admin-user');
+                const footerUserName = document.getElementById('footer-user-name');
 
-                if (signInBtn) signInBtn.style.display = 'none';
-                if (userMenuContainer) {
-                    userMenuContainer.style.display = 'block';
-                    if (userAvatar) userAvatar.src = user.imageUrl || generateInitialsAvatar(user);
-                    if (userName) userName.textContent = user.publicMetadata?.displayName || user.firstName || `User_${user.id.slice(0, 8)}`;
+                if (footerSignIn) footerSignIn.style.display = 'none';
+                if (footerAdminUser) footerAdminUser.style.display = 'flex';
+                if (footerUserName) {
+                    footerUserName.textContent = user.publicMetadata?.displayName
+                        || user.firstName
+                        || user.primaryEmailAddress?.emailAddress
+                        || 'Admin';
                 }
-
-                // Mobile nav
-                const mobileSignInBtn = document.getElementById('mobile-sign-in-btn');
-                const mobileProfileLink = document.getElementById('mobile-profile-link');
-                const mobileSignOutBtn = document.getElementById('mobile-sign-out-btn');
-
-                if (mobileSignInBtn) mobileSignInBtn.style.display = 'none';
-                if (mobileProfileLink) mobileProfileLink.style.display = 'block';
-                if (mobileSignOutBtn) mobileSignOutBtn.style.display = 'block';
             }
 
             function showSignInButtons() {
-                // Desktop nav
-                const signInBtn = document.getElementById('sign-in-btn');
-                const userMenuContainer = document.getElementById('user-menu-container');
+                const footerSignIn = document.getElementById('footer-sign-in-btn');
+                const footerAdminUser = document.getElementById('footer-admin-user');
 
-                if (signInBtn) signInBtn.style.display = 'inline-block';
-                if (userMenuContainer) userMenuContainer.style.display = 'none';
-
-                // Mobile nav
-                const mobileSignInBtn = document.getElementById('mobile-sign-in-btn');
-                const mobileProfileLink = document.getElementById('mobile-profile-link');
-                const mobileSignOutBtn = document.getElementById('mobile-sign-out-btn');
-
-                if (mobileSignInBtn) mobileSignInBtn.style.display = 'block';
-                if (mobileProfileLink) mobileProfileLink.style.display = 'none';
-                if (mobileSignOutBtn) mobileSignOutBtn.style.display = 'none';
+                if (footerSignIn) footerSignIn.style.display = 'inline-block';
+                if (footerAdminUser) footerAdminUser.style.display = 'none';
             }
 
             function generateInitialsAvatar(user) {
@@ -6145,24 +6142,9 @@
                 return canvas.toDataURL();
             }
 
-            // User menu dropdown toggle
+            // Sign-in button click (footer admin link + comment sections)
             document.addEventListener('click', function (e) {
-                const userMenuBtn = document.getElementById('user-menu-btn');
-                const userDropdown = document.getElementById('user-dropdown');
-
-                if (userMenuBtn && e.target.closest('#user-menu-btn')) {
-                    const isExpanded = userMenuBtn.getAttribute('aria-expanded') === 'true';
-                    userMenuBtn.setAttribute('aria-expanded', !isExpanded);
-                    userDropdown.setAttribute('aria-hidden', isExpanded);
-                } else if (userDropdown && !e.target.closest('.user-menu-container')) {
-                    if (userMenuBtn) userMenuBtn.setAttribute('aria-expanded', 'false');
-                    userDropdown.setAttribute('aria-hidden', 'true');
-                }
-            });
-
-            // Sign-in button click
-            document.addEventListener('click', function (e) {
-                if (e.target.closest('#sign-in-btn') || e.target.closest('#mobile-sign-in-btn') || e.target.classList.contains('comment-login-btn')) {
+                if (e.target.closest('#footer-sign-in-btn') || e.target.classList.contains('comment-login-btn')) {
                     if (clerkInstance) {
                         clerkInstance.openSignIn();
                     }
@@ -6171,7 +6153,7 @@
 
             // Sign-out button click
             document.addEventListener('click', function (e) {
-                if (e.target.closest('#sign-out-btn') || e.target.closest('#mobile-sign-out-btn')) {
+                if (e.target.closest('#footer-sign-out-btn')) {
                     if (clerkInstance) {
                         clerkInstance.signOut();
                     }
@@ -6182,7 +6164,7 @@
             // COMMENT SYSTEM
             // ═══════════════════════════════════════════════════════════
 
-            const WORKER_API_URL = window.WORKER_API_URL || 'https://gfd-auth.YOUR_SUBDOMAIN.workers.dev';
+            const WORKER_API_URL = window.WORKER_API_URL || 'https://gfd-auth.weave0.workers.dev';
 
             function enableCommentForms() {
                 document.querySelectorAll('.comment-form').forEach(form => {
@@ -6393,8 +6375,10 @@
 
             // Show admin controls if user is admin
             function enableBlogAdminFeatures() {
+                // Show admin controls for any authenticated user.
+                // The Worker API enforces server-side authorization — this is UI-only.
                 const adminControls = document.getElementById('blog-admin-controls');
-                if (adminControls && currentUser?.publicMetadata?.role === 'admin') {
+                if (adminControls && currentUser) {
                     adminControls.style.display = 'flex';
                 }
             }
