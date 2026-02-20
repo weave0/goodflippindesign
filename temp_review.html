@@ -6202,64 +6202,6 @@
                 });
             }
 
-            async function loadComments(articleId) {
-                try {
-                    const response = await fetch(`${WORKER_API_URL}/api/comments?articleId=${encodeURIComponent(articleId)}`);
-                    if (!response.ok) throw new Error('Failed to load comments');
-
-                    const comments = await response.json();
-                    renderComments(articleId, comments);
-                } catch (error) {
-                    console.error('[Comments] Load failed:', error);
-                }
-            }
-
-            function renderComments(articleId, comments) {
-                const listEl = document.querySelector(`.comments-list[data-article-id="${articleId}"]`);
-                const countEl = document.querySelector(`.comments-count[data-article-id="${articleId}"]`);
-
-                if (countEl) {
-                    countEl.textContent = `${comments.length} ${comments.length === 1 ? 'comment' : 'comments'}`;
-                }
-
-                if (!listEl) return;
-
-                if (comments.length === 0) {
-                    listEl.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No comments yet. Be the first to share your thoughts!</p>';
-                    return;
-                }
-
-                listEl.innerHTML = comments.map(comment => {
-                    const isOwn = currentUser && comment.user_id === currentUser.id;
-                    const isAdmin = currentUser && currentUser.publicMetadata?.role === 'admin';
-                    const showActions = isOwn || isAdmin;
-
-                    return `
-                        <div class="comment" data-comment-id="${comment.id}">
-                            <div class="comment-header">
-                                <div class="comment-author-info">
-                                    <div class="comment-user-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #10b981); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                                        ${comment.user_name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div>
-                                        <span class="comment-author-name">${escapeHtml(comment.user_name)}</span>
-                                        ${isAdmin ? '<span class="comment-admin-badge">⭐ Admin</span>' : ''}
-                                        <div class="comment-timestamp">${formatCommentDate(comment.created_at)}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="comment-text">${escapeHtml(comment.text)}</div>
-                            ${showActions ? `
-                                <div class="comment-actions">
-                                    ${isOwn ? '<button class="comment-action-btn comment-edit-btn" data-comment-id="' + comment.id + '">Edit</button>' : ''}
-                                    <button class="comment-action-btn comment-delete-btn" data-comment-id="${comment.id}">Delete</button>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                }).join('');
-            }
-
             async function postComment(articleId, text) {
                 if (!currentUser || !clerkInstance) {
                     console.error('[Comments] User not authenticated');
