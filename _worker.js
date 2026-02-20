@@ -49,7 +49,7 @@ export default {
 
       // Inject ENV object with sensitive keys (never commit to git)
       const envScript = `<script>window.ENV = ${JSON.stringify({
-        STRIPE_PUBLISHABLE_KEY: env.STRIPE_PUBLISHABLE_KEY || 'pk_live_51So70wBL2ppdbQKqOR38V1sZW6oFrVYkKmsxYxHTIOQ7yXYU1oT2qQtXHdKo9eBx2vxvotcYt5L6ZQXoXfYrx5Wg00X1VibSRz'
+        STRIPE_PUBLISHABLE_KEY: env.STRIPE_PUBLISHABLE_KEY || null
       })}</script>`;
 
       const injectedHtml = html.replace('</head>', `${envScript}</head>`);
