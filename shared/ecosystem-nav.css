@@ -43,7 +43,7 @@
 .ecosystem-logo {
   height: 28px;
   width: auto;
-  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.6))
+  filter: brightness(0) invert(1) drop-shadow(0 0 6px rgba(139, 92, 246, 0.6))
     drop-shadow(0 0 8px rgba(16, 185, 129, 0.3));
 }
 
@@ -196,13 +196,25 @@
   font-size: 0.5625rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   flex-shrink: 0;
 }
-.nav-icon-badge-ai  { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); }
-.nav-icon-badge-cs  { background: linear-gradient(135deg, #0d9488 0%, #059669 100%); }
-.nav-icon-badge-gfv { background: linear-gradient(135deg, #d97706 0%, #ea580c 100%); }
-.nav-icon-badge-gd  { background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%); }
+.nav-icon-badge-ai {
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+}
+.nav-icon-badge-cs {
+  background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+}
+.nav-icon-badge-gfv {
+  background: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
+}
+.nav-icon-badge-gd {
+  background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+}
+.nav-icon-badge-gfd {
+  background: linear-gradient(135deg, #8b5cf6 0%, #10b981 100%);
+  font-size: 0.5rem;
+}
 
 .nav-link-content {
   display: flex;
