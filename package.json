@@ -17,6 +17,8 @@
     "prepare": "node -e \"if (process.env.CI !== 'true') { require('child_process').execSync('husky install', {stdio: 'inherit'}) }\"",
     "format": "prettier --write \"*.html\" \"tests/**/*.js\" \"scripts/**/*.js\"",
     "lint:html": "html-validate index.html",
+    "gen:csp": "node scripts/generate-csp.js",
+    "gen:csp:dry": "node scripts/generate-csp.js --dry-run",
     "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf"
   },
   "repository": {
