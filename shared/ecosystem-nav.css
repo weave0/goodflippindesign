@@ -215,6 +215,9 @@
   background: linear-gradient(135deg, #8b5cf6 0%, #10b981 100%);
   font-size: 0.5rem;
 }
+.nav-icon-badge-ca {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+}
 
 .nav-link-content {
   display: flex;
