@@ -43,7 +43,7 @@
 .ecosystem-logo {
   height: 28px;
   width: auto;
-  filter: brightness(0) invert(1) drop-shadow(0 0 6px rgba(139, 92, 246, 0.6))
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.6))
     drop-shadow(0 0 8px rgba(16, 185, 129, 0.3));
 }
 
