@@ -27,5 +27,15 @@ jobs:
       - name: Sync index.html → temp_review.html
         run: cp index.html temp_review.html
 
+      - name: Verify CSP headers are up to date
+        run: |
+          node scripts/generate-csp.js
+          git diff --exit-code _headers || (
+            echo ""
+            echo "❌ _headers is out of sync with scripts/csp-config.js"
+            echo "   Run: npm run gen:csp  then commit _headers"
+            exit 1
+          )
+
       - name: Run Tests
         run: npm test
