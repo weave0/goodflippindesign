@@ -62,3 +62,12 @@ contrast-test.json
 final-contrast.json
 verified-contrast.json
 *-contrast.json
+
+# One-off / side sites (keep out of GFD)
+mediation-site/
+jamie-rigling-mediation.html
+JAMIE_RIGLING_SETUP.md
+JAMIE_MEDIATION_LIVE.md
+
+# Local scratch
+assets/VECTOR/
