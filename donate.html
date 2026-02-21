@@ -15,7 +15,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://goodflippindesign.com/donate">
-    <title>🌍 Join the Movement - Power World-Changing Tech</title>
+    <title>Join the Movement - Power World-Changing Tech</title>
     <meta name="description" content="Every contribution funds zero-cost AI education, cultural preservation, and civic tech. Your vision + your support = real change. Join us.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -224,8 +224,12 @@
         }
 
         .urgency-badge::before {
-            content: '⚡';
-            font-size: 1.125rem;
+            content: '';
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: currentColor;
+            display: inline-block;
             animation: pulse 2s ease-in-out infinite;
         }
 
@@ -364,12 +368,25 @@
         }
 
         .impact-card .icon {
-            font-size: 3rem;
             margin-bottom: 1rem;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 80px;
+            color: var(--text-secondary);
+        }
+
+        .impact-card .icon svg {
+            width: 52px;
+            height: 52px;
+            stroke: currentColor;
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .impact-card:hover .icon {
+            color: var(--text);
         }
 
         .impact-card h3 {
@@ -428,7 +445,19 @@
         }
 
         .column-card h2 .icon {
-            font-size: 1.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .column-card h2 .icon svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .column-card p {
@@ -506,7 +535,7 @@
         }
 
         .donation-amount.recommended::after {
-            content: '💖 RECOMMENDED';
+            content: 'RECOMMENDED';
             position: absolute;
             top: -12px;
             left: 50%;
@@ -637,7 +666,18 @@
         }
 
         .payment-tab-icon {
-            font-size: 1.125rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .payment-tab-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .payment-container {
@@ -738,7 +778,18 @@
         }
 
         .paypal-logo {
-            font-size: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .paypal-logo svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .paypal-note {
@@ -861,7 +912,9 @@
         }
 
         .paypal-logo {
-            font-size: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .paypal-note {
@@ -1189,7 +1242,7 @@
 
             <!-- Mission Statement -->
             <div class="mission-statement">
-                <h2>🌍 Why Your Support Matters Right Now</h2>
+                <h2>Why Your Support Matters Right Now</h2>
                 <p>
                     <strong>Zero funding = Zero progress.</strong> Every tool you see in our ecosystem—AI Aimate, CultureSherpa, GlobalDeets, Good Flippin Vibes, CitizenApproved—exists because we believe technology should <em>empower everyone</em>, not just those who can pay.
                 </p>
@@ -1219,7 +1272,7 @@
                 </div>
 
                 <div style="background: rgba(10, 10, 10, 0.5); padding: 2rem; border-radius: 12px; border-left: 4px solid #10b981; margin-bottom: 2rem;">
-                    <h3 style="color: var(--text); font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">💬 The Founder's Story</h3>
+                    <h3 style="color: var(--text); font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">The Founder's Story</h3>
                     <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem; font-size: 0.9375rem;">
                         Having spent 30+ years humbly exploring and researching complex subjects through interpersonal connection, digital exploration, and countless rabbit holes, I've found myself uniquely equipped to share this work openly.
                     </p>
@@ -1234,12 +1287,12 @@
 
                 <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
                     <a href="https://gofund.me/f07ea3faf" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.75rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 1rem 2rem; border-radius: 999px; font-weight: 700; font-size: 1rem; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 30px rgba(16, 185, 129, 0.6)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(16, 185, 129, 0.4)';">
-                        🤝 Support on GoFundMe
+                        Support on GoFundMe
                     </a>
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
-                        <a href="#payment-gateway" style="color: var(--text-muted); font-size: 0.875rem; text-decoration: underline; transition: color 0.3s ease;" onmouseover="this.style.color='var(--text-secondary)';" onmouseout="this.style.color='var(--text-muted)';">💳 Direct Stripe/PayPal Donations</a>
+                        <a href="#payment-gateway" style="color: var(--text-muted); font-size: 0.875rem; text-decoration: underline; transition: color 0.3s ease;" onmouseover="this.style.color='var(--text-secondary)';" onmouseout="this.style.color='var(--text-muted)';">Direct Stripe/PayPal Donations</a>
                         <span style="color: var(--border);">|</span>
-                        <a href="#impact" style="color: var(--text-muted); font-size: 0.875rem; text-decoration: underline; transition: color 0.3s ease;" onmouseover="this.style.color='var(--text-secondary)';" onmouseout="this.style.color='var(--text-muted)';">🎯 See Impact Breakdown</a>
+                        <a href="#impact" style="color: var(--text-muted); font-size: 0.875rem; text-decoration: underline; transition: color 0.3s ease;" onmouseover="this.style.color='var(--text-secondary)';" onmouseout="this.style.color='var(--text-muted)';">See Impact Breakdown</a>
                     </div>
                 </div>
             </div>
@@ -1252,22 +1305,56 @@
                 </div>
                 <div class="impact-grid">
                     <div class="impact-card">
-                        <div class="icon">🧠</div>
+                        <div class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                                <circle cx="12" cy="12" r="8" />
+                                <path d="M7.5 12.5l3-3 3.5 3.5 2-5" />
+                                <circle cx="10.5" cy="9.5" r="1" fill="currentColor" stroke="none" />
+                                <circle cx="7.5" cy="12.5" r="1" fill="currentColor" stroke="none" />
+                                <circle cx="14" cy="13" r="1" fill="currentColor" stroke="none" />
+                                <circle cx="16" cy="8.5" r="1" fill="currentColor" stroke="none" />
+                            </svg>
+                        </div>
                         <h3>AI Education Access</h3>
                         <p>Free AI training courses, interactive tutorials, and cutting-edge research—accessible to anyone, anywhere.</p>
                     </div>
                     <div class="impact-card">
-                        <div class="icon">🌍</div>
+                        <div class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M3 12h18" />
+                                <path d="M12 3c3.5 3.5 3.5 14 0 18" />
+                                <path d="M12 3c-3.5 3.5-3.5 14 0 18" />
+                                <path d="M5.5 8.5c2 .9 4.2 1.4 6.5 1.4s4.5-.5 6.5-1.4" />
+                                <path d="M5.5 15.5c2-.9 4.2-1.4 6.5-1.4s4.5.5 6.5 1.4" />
+                            </svg>
+                        </div>
                         <h3>Cultural Preservation</h3>
                         <p>Translate indigenous languages, preserve disappearing cultures, and connect communities worldwide.</p>
                     </div>
                     <div class="impact-card">
-                        <div class="icon">📊</div>
+                        <div class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                                <circle cx="10" cy="10" r="6.5" />
+                                <path d="M15.5 15.5L21 21" />
+                                <path d="M7.5 12.5v-3" />
+                                <path d="M10 12.5V8.2" />
+                                <path d="M12.5 12.5V7.4" />
+                            </svg>
+                        </div>
                         <h3>Data Truth & Transparency</h3>
                         <p>Business intelligence dashboards that reveal patterns, expose corruption, and empower decision-makers.</p>
                     </div>
                     <div class="impact-card">
-                        <div class="icon">🗳️</div>
+                        <div class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                                <path d="M7 9h10" />
+                                <path d="M5 10.5h14v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-8z" />
+                                <path d="M9 6.5l3-3 3 3" />
+                                <path d="M12 3.5v6" />
+                                <path d="M9.3 14.2l2 2 4.2-4.2" />
+                            </svg>
+                        </div>
                         <h3>Democracy Tech</h3>
                         <p>Civic engagement tools that strengthen communities, increase participation, and restore trust in governance.</p>
                     </div>
@@ -1284,7 +1371,15 @@
                 <div class="dual-columns">
                     <!-- Donation Column -->
                     <div class="column-card">
-                        <h2><span class="icon">💎</span> Fund the Mission</h2>
+                        <h2>
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                                    <path d="M12 2L20 9l-8 13L4 9l8-7z" />
+                                    <path d="M4 9h16" />
+                                </svg>
+                            </span>
+                            Fund the Mission
+                        </h2>
                         <p>Every dollar keeps servers running, tools improving, and access free for millions.</p>
 
                         <div class="donation-type-toggle">
@@ -1307,11 +1402,23 @@
                         <div class="payment-method-selector">
                             <div class="payment-tabs">
                                 <button class="payment-tab active" id="stripe-tab" data-method="stripe">
-                                    <span class="payment-tab-icon">💳</span>
+                                    <span class="payment-tab-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                                            <path d="M4 7h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" />
+                                            <path d="M2 11h20" />
+                                            <path d="M6 15h4" />
+                                        </svg>
+                                    </span>
                                     <span>Card</span>
                                 </button>
                                 <button class="payment-tab" id="paypal-tab" data-method="paypal">
-                                    <span class="payment-tab-icon">🅿️</span>
+                                    <span class="payment-tab-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                                            <path d="M6 8h12a2 2 0 0 1 2 2v8H8a2 2 0 0 1-2-2V8z" />
+                                            <path d="M6 8V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2" />
+                                            <path d="M9 12h6" />
+                                        </svg>
+                                    </span>
                                     <span>PayPal</span>
                                 </button>
                             </div>
@@ -1338,7 +1445,13 @@
                                         </div>
                                     </div>
                                     <button type="button" class="btn-paypal" id="paypalOpenBtn">
-                                        <span class="paypal-logo">🅿️</span>
+                                        <span class="paypal-logo" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                                                <path d="M6 8h12a2 2 0 0 1 2 2v8H8a2 2 0 0 1-2-2V8z" />
+                                                <path d="M6 8V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2" />
+                                                <path d="M9 12h6" />
+                                            </svg>
+                                        </span>
                                         <span>Open PayPal to Donate</span>
                                     </button>
                                     <div class="paypal-link-preview" aria-live="polite">
@@ -1355,7 +1468,16 @@
 
                     <!-- Vision Column -->
                     <div class="column-card">
-                        <h2><span class="icon">✨</span> Share Your Vision</h2>
+                        <h2>
+                            <span class="icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                                    <path d="M12 2l1.4 4.2L18 8l-4.6 1.8L12 14l-1.4-4.2L6 8l4.6-1.8L12 2z" />
+                                    <path d="M19 12l.9 2.7L23 16l-3.1 1.3L19 20l-.9-2.7L15 16l3.1-1.3L19 12z" />
+                                    <path d="M4.5 13l.7 2.1L7.5 16l-2.3.9L4.5 19l-.7-2.1L1.5 16l2.3-.9.7-2.1z" />
+                                </svg>
+                            </span>
+                            Share Your Vision
+                        </h2>
                         <p>Your ideas shape our roadmap. Tell us what you want to see, what problems you're solving, or how you'd use these tools.</p>
 
                         <form class="vision-form" id="visionForm" action="https://formspree.io/f/xjgebazl" method="POST">
@@ -1412,7 +1534,7 @@
 
             <!-- Contributor Wall (Visions) -->
             <section class="contributor-wall">
-                <h2>🌟 Voices from the Movement</h2>
+                <h2>Voices from the Movement</h2>
                 <p>Contributors who shared their vision for a better world</p>
 
                 <div class="vision-showcase">
@@ -1821,7 +1943,7 @@
             // Formspree will handle the submission
             // Show a quick success message
             setTimeout(() => {
-                alert('🌟 Thank you for sharing your vision! We read every submission and will be in touch.');
+                alert('Thank you for sharing your vision! We read every submission and will be in touch.');
                 this.reset();
 
                 // Track form completion

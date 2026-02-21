@@ -117,8 +117,21 @@
         }
 
         .impact-card .icon {
-            font-size: 2rem;
             margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 44px;
+            color: var(--text-secondary);
+        }
+
+        .impact-card .icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: currentColor;
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .impact-card h3 {
@@ -266,8 +279,20 @@
         }
 
         .success-message .icon {
-            font-size: 4rem;
             margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text);
+        }
+
+        .success-message .icon svg {
+            width: 64px;
+            height: 64px;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .success-message h2 {
@@ -321,17 +346,38 @@
 
             <div class="impact-grid">
                 <div class="impact-card">
-                    <div class="icon">🧠</div>
+                    <div class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                            <circle cx="12" cy="12" r="8" />
+                            <path d="M7.5 12.5l3-3 3.5 3.5 2-5" />
+                            <circle cx="10.5" cy="9.5" r="1" fill="currentColor" stroke="none" />
+                            <circle cx="7.5" cy="12.5" r="1" fill="currentColor" stroke="none" />
+                            <circle cx="14" cy="13" r="1" fill="currentColor" stroke="none" />
+                        </svg>
+                    </div>
                     <h3>AI Education</h3>
                     <p>Free AI learning resources</p>
                 </div>
                 <div class="impact-card">
-                    <div class="icon">🌍</div>
+                    <div class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M3 12h18" />
+                            <path d="M12 3c3.5 3.5 3.5 14 0 18" />
+                            <path d="M12 3c-3.5 3.5-3.5 14 0 18" />
+                        </svg>
+                    </div>
                     <h3>Cultural Data</h3>
                     <p>470+ cultures preserved</p>
                 </div>
                 <div class="impact-card">
-                    <div class="icon">🗳️</div>
+                    <div class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                            <path d="M7 9h10" />
+                            <path d="M5 10.5h14v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-8z" />
+                            <path d="M9.3 14.2l2 2 4.2-4.2" />
+                        </svg>
+                    </div>
                     <h3>Civic Tech</h3>
                     <p>Citizenship guidance</p>
                 </div>
@@ -367,7 +413,12 @@
             </div>
 
             <div class="success-message" id="success-message">
-                <div class="icon">✅</div>
+                <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M8 12.5l2.5 2.5L16.5 9" />
+                    </svg>
+                </div>
                 <h2>Thank You!</h2>
                 <p>Your support keeps our mission moving forward. You'll receive a confirmation email shortly.</p>
                 <p style="margin-top: 1rem;"><a href="/">← Return to homepage</a></p>
