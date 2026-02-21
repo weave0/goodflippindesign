@@ -1,0 +1,53 @@
+# Dev projects - ML models, training data, venvs, etc.
+GFD Dev Projects/
+
+# Python virtual environments
+.venv/
+venv/
+**/.venv/
+**/venv/
+
+# Node modules
+node_modules/
+**/node_modules/
+portfolio-manager/
+
+# Archives
+archives/
+
+# Build artifacts
+.next/
+dist/
+build/
+**/.next/
+**/dist/
+**/build/
+
+# ML / binary assets
+**/*.safetensors
+**/*.pkl
+**/*.dll
+**/*.lib
+**/*.exe
+**/*.pyd
+**/*.mp4
+**/models/
+
+# Logs and temp files
+*.log
+**/*.log
+deployment-log-*.txt
+wrangler-*.log
+
+# Dev/test files
+debug-*.js
+diagnose-*.js
+test-*.js
+capture-*.js
+convert-*.js
+extract-*.js
+generate_*.py
+
+# Misc
+desktop.ini
+*.txt.bak
