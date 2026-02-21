@@ -48,6 +48,9 @@ convert-*.js
 extract-*.js
 generate_*.py
 
+# One-off / side sites
+mediation-site/
+
 # Misc
 desktop.ini
 *.txt.bak
