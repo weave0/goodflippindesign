@@ -556,6 +556,14 @@
             animation: pulse 3s ease-in-out infinite;
         }
 
+        .fundraising-icon img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            display: block;
+            filter: brightness(0) invert(1);
+        }
+
         .fundraising-text h3 {
             font-size: 1.5rem;
             font-weight: 600;
@@ -712,8 +720,8 @@
         }
 
         .donate-qr img {
-            width: 72px;
-            height: 72px;
+            width: 120px;
+            height: 120px;
             border-radius: 10px;
             border: 1px solid var(--border);
             background: #fff;
@@ -3966,7 +3974,7 @@
     <nav class="gfd-ecosystem-nav" aria-label="Ecosystem navigation">
         <div class="ecosystem-nav-container">
             <div class="ecosystem-brand">
-                <img src="/assets/logo-nav.png?v=2026" alt="Good Flippin Design Logo" class="ecosystem-logo" height="28" loading="eager" />
+                <img src="/assets/logo-vector.png?v=2026-02-21" alt="Good Flippin Design Logo" class="ecosystem-logo" height="28" loading="eager" decoding="async" />
                 <span class="ecosystem-title">GFD Ecosystem</span>
             </div>
 
@@ -4070,7 +4078,7 @@
     <nav class="main-nav">
         <div class="nav-content">
             <a href="/" class="logo">
-                <img src="/assets/logo-nav.png?v=2026" alt="Good Flippin Design Logo" height="42" loading="eager">
+                <img src="/assets/logo-vector.png?v=2026-02-21" alt="Good Flippin Design Logo" height="42" loading="eager" decoding="async">
                 <span class="logo-text">Good Flippin Design</span>
             </a>
             <ul class="nav-links">
@@ -4142,7 +4150,9 @@
                 <div class="fundraising-card">
                     <div class="fundraising-content">
                         <div class="fundraising-header">
-                            <div class="fundraising-icon">🚀</div>
+                            <div class="fundraising-icon" aria-hidden="true">
+                                <img src="/assets/logo-vector.png?v=2026-02-21" alt="" width="34" height="34" loading="eager" decoding="async">
+                            </div>
                             <div class="fundraising-text">
                                 <h2>Community-Powered Innovation</h2>
                                 <p>Supporting zero-cost AI education, cultural preservation, and civic tech</p>
@@ -4167,7 +4177,7 @@
                         <div class="fundraising-cta">
                             <a href="donate.html" class="btn-donate">Support Our Mission</a>
                             <a class="donate-qr" href="donate.html" aria-label="Scan the QR code to donate">
-                                <img src="/assets/389ecd25-3180-4ca0-916b-a59f5b5806db.png" alt="Donate QR code" width="72" height="72" loading="lazy" decoding="async">
+                                <img src="/assets/389ecd25-3180-4ca0-916b-a59f5b5806db.png" alt="Donate QR code" width="120" height="120" loading="lazy" decoding="async">
                                 <span class="donate-qr-text">
                                     <strong>Scan to donate</strong>
                                     <span>Opens the donation page</span>
