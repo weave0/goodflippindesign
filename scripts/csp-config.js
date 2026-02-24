@@ -86,7 +86,7 @@ const SITES = {
         'https://*.cloudflareinsights.com',
         'https://formspree.io',
         ...SHARED.stripe.connect,
-        'https://*.execute-api.us-east-1.amazonaws.com',
+        'https://gfd-stripe.weave0.workers.dev', // Stripe payments CF Worker (replaces AWS Lambda)
         'https://www.google-analytics.com',
         'https://analytics.google.com',
         'https://region1.google-analytics.com',
