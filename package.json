@@ -19,6 +19,8 @@
     "lint:html": "html-validate index.html",
     "gen:csp": "node scripts/generate-csp.js",
     "gen:csp:dry": "node scripts/generate-csp.js --dry-run",
+    "deploy:stripe": "wrangler deploy --config workers/wrangler-stripe.toml",
+    "stripe:secret": "wrangler secret put STRIPE_SECRET_KEY --config workers/wrangler-stripe.toml",
     "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf"
   },
   "repository": {

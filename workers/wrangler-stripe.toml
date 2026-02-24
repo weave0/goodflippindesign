@@ -1,0 +1,20 @@
+name = "gfd-stripe"
+main = "stripe-payments.js"
+compatibility_date = "2024-01-01"
+
+# Deployed URL: https://gfd-stripe.weave0.workers.dev
+# Custom route (optional): https://pay.goodflippindesign.com/*
+#
+# Deploy:
+#   wrangler deploy --config workers/wrangler-stripe.toml
+#
+# Set secret (one-time):
+#   wrangler secret put STRIPE_SECRET_KEY --config workers/wrangler-stripe.toml
+#
+# Test locally:
+#   wrangler dev --config workers/wrangler-stripe.toml
+
+[vars]
+NODE_ENV = "production"
+
+# No D1/KV bindings needed — stateless Stripe proxy
