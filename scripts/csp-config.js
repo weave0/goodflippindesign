@@ -163,7 +163,7 @@ const SITES = {
         "'self'",
         'https://unpkg.com',
         'https://*.basemaps.cartocdn.com',
-        'https://62p7kwc2jh.execute-api.us-east-1.amazonaws.com',
+        // 62p7kwc2jh API Gateway deleted 2026-02-23 (was pointing to nonexistent Lambda)
         'https://ms2ffkzdoolhryqmmws7dxezzu0mgegt.lambda-url.us-east-1.on.aws',
         'https://hr3gjmuapsa3jbbzepuo35sonu0lyrfz.lambda-url.us-east-1.on.aws',
         'https://psbfpk2cuya7s37vuv3rqthjyq0ewjxt.lambda-url.us-east-1.on.aws',
