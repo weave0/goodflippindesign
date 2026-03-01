@@ -411,7 +411,6 @@
                 <p style="margin-top: 2rem; font-size: 0.875rem; color: var(--text-muted);">
                     By signing in, you agree to our <a href="#" style="color: var(--text-secondary);">Terms of Service</a> and <a href="#" style="color: var(--text-secondary);">Privacy Policy</a>
                 </p>
-                <p id="auth-error" style="display:none; margin-top: 1rem; padding: 0.75rem 1rem; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 0.5rem; font-size: 0.875rem; color: #f87171;"></p>
             </section>
 
             <section style="margin-top: 4rem; padding: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem;">
@@ -450,6 +449,12 @@
             try {
                 clerk = new window.Clerk(window.CLERK_PUBLISHABLE_KEY);
                 await clerk.load();
+
+                // Enable auth buttons now that Clerk is ready
+                ['btn-google', 'btn-linkedin', 'btn-email'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) btn.disabled = false;
+                });
 
                 // Handle OAuth return (LinkedIn/Google callback)
                 const params = new URLSearchParams(window.location.search);
@@ -499,9 +504,15 @@
                     redirectUrl: _baseUrl,
                     redirectUrlComplete: _baseUrl,
                 }).catch((err) => {
-                    console.error('OAuth redirect failed:', err);
+                    console.error('OAuth redirect failed:', provider, err);
+                    const details = (err.errors && err.errors.length)
+                        ? err.errors.map(e => '[' + e.code + '] ' + e.long_message).join(' | ')
+                        : (err.message || JSON.stringify(err));
                     const errDiv = document.getElementById('auth-error');
-                    if (errDiv) { errDiv.textContent = 'Sign-in failed: ' + (err.message || err); errDiv.style.display = 'block'; }
+                    if (errDiv) {
+                        errDiv.textContent = provider.charAt(0).toUpperCase() + provider.slice(1) + ' sign-in failed: ' + details;
+                        errDiv.style.display = 'block';
+                    }
                 });
             } else {
                 clerk.redirectToSignIn({ redirectUrl: _baseUrl });
