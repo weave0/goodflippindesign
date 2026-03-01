@@ -78,7 +78,7 @@
     <script src="https://js.stripe.com/v3/"></script>
 
     <!-- Clerk Auth SDK (Phase 3: Community Features) -->
-    <!-- Clerk publishable key configured for proper-civet-82.clerk.accounts.dev -->
+    <!-- Clerk publishable key configured for goodflippinvibes.com (production) -->
     <script>
         window.CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuZ29vZGZsaXBwaW52aWJlcy5jb20k';
         window.WORKER_API_URL = 'https://gfd-auth.weave0.workers.dev';
@@ -6098,7 +6098,7 @@
                 }
 
                 try {
-                    clerkInstance = window.Clerk(window.CLERK_PUBLISHABLE_KEY);
+                    clerkInstance = new window.Clerk(window.CLERK_PUBLISHABLE_KEY);
                     await clerkInstance.load();
 
                     if (clerkInstance.user) {
@@ -6230,7 +6230,7 @@
                 }
 
                 try {
-                    const session = await clerkInstance.session.getToken();
+                    const session = await clerkInstance.session?.getToken();
 
                     const response = await fetch(`${WORKER_API_URL}/api/comments`, {
                         method: 'POST',
@@ -6259,7 +6259,7 @@
                 if (!confirm('Are you sure you want to delete this comment?')) return;
 
                 try {
-                    const session = await clerkInstance.session.getToken();
+                    const session = await clerkInstance.session?.getToken();
 
                     const response = await fetch(`${WORKER_API_URL}/api/comments`, {
                         method: 'DELETE',
@@ -6424,7 +6424,7 @@
                     return;
                 }
 
-                const token = await clerkInstance.session.getToken();
+                const token = await clerkInstance.session?.getToken();
                 const method = currentEditingPostId ? 'PUT' : 'POST';
 
                 // Parse tags from comma-separated input
@@ -6491,7 +6491,7 @@
                     return;
                 }
 
-                const token = await clerkInstance.session.getToken();
+                const token = await clerkInstance.session?.getToken();
 
                 try {
                     const response = await fetch(`${window.WORKER_API_URL}/api/blog?id=${postId}`, {
@@ -6526,7 +6526,7 @@
 
                     const headers = {};
                     if (status === 'draft' && currentUser) {
-                        const token = await clerkInstance.session.getToken();
+                        const token = await clerkInstance.session?.getToken();
                         headers['Authorization'] = `Bearer ${token}`;
                     }
 
@@ -6993,7 +6993,7 @@
                 }
 
                 try {
-                    const token = await clerkInstance.session.getToken();
+                    const token = await clerkInstance.session?.getToken();
                     const response = await fetch(`${window.WORKER_API_URL}/api/comments`, {
                         method: 'POST',
                         headers: {
@@ -7065,7 +7065,7 @@
                 }
 
                 try {
-                    const token = await clerkInstance.session.getToken();
+                    const token = await clerkInstance.session?.getToken();
                     const response = await fetch(`${window.WORKER_API_URL}/api/comments/${commentId}`, {
                         method: 'PUT',
                         headers: {
@@ -7101,7 +7101,7 @@
                 }
 
                 try {
-                    const token = await clerkInstance.session.getToken();
+                    const token = await clerkInstance.session?.getToken();
                     const response = await fetch(`${window.WORKER_API_URL}/api/comments/${commentId}`, {
                         method: 'DELETE',
                         headers: {
