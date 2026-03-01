@@ -461,11 +461,18 @@
                 if (params.has('__clerk_status') || params.has('__clerk_handshake')) {
                     try {
                         await clerk.handleRedirectCallback({
-                            afterSignInUrl: _baseUrl,
-                            afterSignUpUrl: _baseUrl,
+                            fallbackRedirectUrl: _baseUrl,
                         });
                     } catch (cbErr) {
                         console.error('OAuth callback error:', cbErr);
+                        const errDiv = document.getElementById('auth-error');
+                        if (errDiv) {
+                            const details = (cbErr.errors && cbErr.errors.length)
+                                ? cbErr.errors.map(e => '[' + e.code + '] ' + (e.long_message || e.message)).join(' ')
+                                : (cbErr.message || String(cbErr));
+                            errDiv.textContent = 'Sign-in failed: ' + details;
+                            errDiv.style.display = 'block';
+                        }
                     }
                 }
 
