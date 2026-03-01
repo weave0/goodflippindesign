@@ -44,6 +44,7 @@ const SHARED = {
       'https://clerk.goodflippinvibes.com',
       'https://api.clerk.com',
     ],
+    frame: ['https://accounts.goodflippinvibes.com'],
   },
   cdnLibs: [
     'https://d3js.org',
@@ -94,7 +95,7 @@ const SITES = {
         'https://gfd-auth.weave0.workers.dev',
         ...SHARED.clerk.connect,
       ],
-      'frame-src': [...SHARED.stripe.frame],
+      'frame-src': [...SHARED.stripe.frame, ...SHARED.clerk.frame],
     },
 
     // Non-CSP security headers
