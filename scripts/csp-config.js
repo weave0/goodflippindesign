@@ -41,8 +41,8 @@ const SHARED = {
   clerk: {
     script: ['https://cdn.clerk.dev'],
     connect: [
-      'https://*.clerk.accounts.dev',
-      'https://clerk.goodflippindesign.com',
+      'https://clerk.goodflippinvibes.com',
+      'https://api.clerk.com',
     ],
   },
   cdnLibs: [
