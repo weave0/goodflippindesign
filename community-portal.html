@@ -5,15 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Community Portal | Good Flippin Design</title>
-    <meta name="description" content="Join the Good Flippin Design community - connect with developers, share insights, and collaborate on projects.">
+    <meta name="description"
+        content="Join the Good Flippin Design community — connect with developers, share insights, and collaborate on projects.">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
 
-    <!--Clerk Auth SDK -->
+    <!-- Clerk Auth SDK -->
     <script>
         window.CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuZ29vZGZsaXBwaW52aWJlcy5jb20k';
         window.WORKER_API_URL = 'https://gfd-auth.weave0.workers.dev';
@@ -33,9 +36,13 @@
             --border-hover: rgba(255, 255, 255, 0.12);
             --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #10b981 50%, #fbbf24 100%);
             --gradient-glow: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15), transparent 70%);
+            --success: #10b981;
+            --error: #ef4444;
         }
 
-        * {
+        *,
+        *::before,
+        *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -55,6 +62,7 @@
             padding: 2rem 1.5rem;
         }
 
+        /* ── Header ─────────────────────────────────────────── */
         header {
             border-bottom: 1px solid var(--border);
             padding: 1.5rem 0;
@@ -89,19 +97,39 @@
             background-clip: text;
         }
 
-        .auth-status {
+        .header-actions {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
 
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .header-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .header-name {
+            font-size: 0.9375rem;
+            font-weight: 500;
+        }
+
+        /* ── Buttons ────────────────────────────────────────── */
         .btn {
             padding: 0.625rem 1.25rem;
             border-radius: 0.5rem;
             font-weight: 500;
             font-size: 0.9375rem;
             text-decoration: none;
-            transition: all 0.3s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
             border: none;
             cursor: pointer;
             display: inline-flex;
@@ -132,6 +160,24 @@
             background: var(--bg-card);
         }
 
+        .btn-danger {
+            background: transparent;
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error);
+        }
+
+        .btn-lg {
+            padding: 0.875rem 2rem;
+            font-size: 1.0625rem;
+            min-height: 52px;
+        }
+
+        /* ── Hero ───────────────────────────────────────────── */
         .hero {
             text-align: center;
             padding: 3rem 0;
@@ -165,9 +211,289 @@
             font-size: 1.25rem;
             color: var(--text-secondary);
             max-width: 600px;
-            margin: 0 auto 2rem;
+            margin: 0 auto;
         }
 
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            background: rgba(139, 92, 246, 0.15);
+            color: #c4b5fd;
+            margin-left: 0.5rem;
+            -webkit-text-fill-color: #c4b5fd;
+        }
+
+        /* ── Welcome Banner (new members) ───────────────────── */
+        .welcome-banner {
+            display: none;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(16, 185, 129, 0.08));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .welcome-banner h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-banner p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .welcome-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 1rem;
+            border-radius: 2rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(251, 191, 36, 0.2));
+            color: #fbbf24;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        /* ── Profile Dashboard ──────────────────────────────── */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .profile-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            overflow: hidden;
+            text-align: center;
+            align-self: start;
+        }
+
+        .profile-card-banner {
+            height: 80px;
+            background: var(--gradient-primary);
+            opacity: 0.2;
+        }
+
+        .profile-avatar {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            border: 4px solid var(--bg-card);
+            margin-top: -48px;
+            position: relative;
+            object-fit: cover;
+            background: var(--bg-elevated);
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 0.75rem;
+            padding: 0 1.5rem;
+        }
+
+        .profile-email {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            padding: 0 1.5rem;
+        }
+
+        .profile-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        .profile-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .profile-provider-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .profile-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-founding {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(251, 191, 36, 0.15));
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .badge-verified {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .profile-card-actions {
+            padding: 0 1.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        /* ── Profile Details (right column) ─────────────────── */
+        .profile-details {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+        }
+
+        .profile-details h3 {
+            font-size: 1.125rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .profile-field {
+            margin-bottom: 1.25rem;
+        }
+
+        .profile-field label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.375rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .profile-field input,
+        .profile-field textarea {
+            width: 100%;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            padding: 0.625rem 0.875rem;
+            font-family: inherit;
+            font-size: 0.9375rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .profile-field input:focus,
+        .profile-field textarea:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .profile-field textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .profile-save-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .profile-status {
+            display: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .profile-status.success {
+            display: block;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .profile-status.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* ── Stats Grid ─────────────────────────────────────── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.8125rem;
+            margin-top: 0.25rem;
+        }
+
+        /* ── Features Grid ──────────────────────────────────── */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -180,7 +506,7 @@
             border: 1px solid var(--border);
             border-radius: 1rem;
             padding: 2rem;
-            transition: all 0.3s ease;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .feature-card:hover {
@@ -204,7 +530,6 @@
         .feature-card h3 {
             font-size: 1.25rem;
             margin-bottom: 0.75rem;
-            color: var(--text);
         }
 
         .feature-card p {
@@ -213,6 +538,7 @@
             line-height: 1.6;
         }
 
+        /* ── Auth CTA Section ───────────────────────────────── */
         .cta-section {
             text-align: center;
             padding: 4rem 0;
@@ -238,33 +564,51 @@
             flex-wrap: wrap;
         }
 
-        .social-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1.5rem;
+        .auth-error {
+            display: none;
+            margin-top: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.3);
             border-radius: 0.5rem;
-            border: 1px solid var(--border);
-            background: var(--bg-elevated);
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            min-height: 44px;
-            min-width: 44px;
+            color: #f87171;
+            font-size: 0.875rem;
         }
 
-        .social-btn:hover {
-            border-color: var(--border-hover);
+        .terms-text {
+            margin-top: 2rem;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .terms-text a {
+            color: var(--text-secondary);
+        }
+
+        /* ── Current Features Section ───────────────────────── */
+        .current-features {
+            margin-top: 4rem;
+            padding: 2rem;
             background: var(--bg-card);
-            transform: translateY(-2px);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
         }
 
-        .social-btn svg {
-            width: 20px;
-            height: 20px;
+        .current-features h2 {
+            margin-bottom: 1rem;
         }
 
+        .current-features ul {
+            color: var(--text-secondary);
+            line-height: 2;
+            list-style: none;
+        }
+
+        .current-features a {
+            color: var(--success);
+        }
+
+        /* ── Footer ─────────────────────────────────────────── */
         footer {
             border-top: 1px solid var(--border);
             padding: 2rem 0;
@@ -282,17 +626,7 @@
             color: var(--text);
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 0.375rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.8125rem;
-            font-weight: 600;
-            background: rgba(139, 92, 246, 0.15);
-            color: #c4b5fd;
-            margin-left: 0.5rem;
-        }
-
+        /* ── Responsive ─────────────────────────────────────── */
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 2rem;
@@ -306,10 +640,23 @@
                 grid-template-columns: 1fr;
             }
 
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
             .header-content {
                 flex-direction: column;
                 gap: 1rem;
                 text-align: center;
+            }
+
+            .header-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -323,105 +670,179 @@
                     <img src="assets/logo-vector.png" alt="Good Flippin Design">
                     <span class="logo-text">Good Flippin Design</span>
                 </a>
-                <div class="auth-status">
-                    <a href="/" class="btn btn-secondary">← Back to Main Site</a>
-                    <button id="auth-btn" class="btn btn-primary" style="display: none;"></button>
+                <div class="header-actions">
+                    <a href="/" class="btn btn-secondary">&#8592; Back to Main Site</a>
+                    <div id="header-user" class="header-user" style="display:none;">
+                        <img id="header-avatar" class="header-avatar" alt="" src="">
+                        <span id="header-name" class="header-name"></span>
+                    </div>
+                    <button id="auth-btn" class="btn btn-primary" style="display:none;"></button>
                 </div>
             </div>
         </header>
 
         <main>
+            <!-- ── Hero ─────────────────────────────────── -->
             <section class="hero">
-                <h1>Community Portal <span class="status-badge">Coming Soon</span></h1>
-                <p>Connect with developers, share insights, participate in discussions, and collaborate on projects in the Good Flippin Design ecosystem.</p>
+                <h1 id="hero-title">Community Portal <span class="status-badge">Beta</span></h1>
+                <p id="hero-desc">Connect with developers, share insights, participate in discussions, and collaborate
+                    on projects in the Good Flippin Design ecosystem.</p>
             </section>
 
+            <!-- ── Welcome Banner (new members) ─────────── -->
+            <div id="welcome-banner" class="welcome-banner" role="status"></div>
+
+            <!-- ── Profile Dashboard (authenticated) ────── -->
+            <section id="profile-section" style="display:none;" aria-label="Your Profile">
+                <div class="profile-grid">
+                    <!-- Left: Profile Card -->
+                    <div class="profile-card">
+                        <div class="profile-card-banner"></div>
+                        <img id="profile-avatar" class="profile-avatar" alt="Your avatar" src="">
+                        <h2 id="profile-name" class="profile-name"></h2>
+                        <p id="profile-email" class="profile-email"></p>
+                        <div class="profile-meta">
+                            <span class="profile-meta-item" id="profile-member-since"></span>
+                            <span class="profile-meta-item" id="profile-provider"></span>
+                        </div>
+                        <div id="profile-badges" class="profile-badges"></div>
+                        <div class="profile-card-actions">
+                            <button class="btn btn-secondary" onclick="openManageAccount()"
+                                aria-label="Manage your Clerk account settings">
+                                &#9881; Manage Account
+                            </button>
+                            <button class="btn btn-danger" onclick="handleSignOut()"
+                                aria-label="Sign out of your account">
+                                Sign Out
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Profile Details / Edit -->
+                    <div class="profile-details">
+                        <h3>&#9998; Customize Your Profile</h3>
+                        <div class="profile-field">
+                            <label for="profile-title">Title / Role</label>
+                            <input id="profile-title" type="text" placeholder="e.g. Full Stack Developer"
+                                maxlength="80">
+                        </div>
+                        <div class="profile-field">
+                            <label for="profile-location">Location</label>
+                            <input id="profile-location" type="text" placeholder="e.g. Minneapolis, MN"
+                                maxlength="100">
+                        </div>
+                        <div class="profile-field">
+                            <label for="profile-website">Website</label>
+                            <input id="profile-website" type="url" placeholder="https://your-site.com">
+                        </div>
+                        <div class="profile-field">
+                            <label for="profile-bio">Bio</label>
+                            <textarea id="profile-bio"
+                                placeholder="Tell the community about yourself, your expertise, and what you're working on..."
+                                maxlength="500"></textarea>
+                        </div>
+                        <div class="profile-save-row">
+                            <button class="btn btn-primary" onclick="saveProfile()">Save Profile</button>
+                            <div id="profile-status" class="profile-status"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Discussions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Comments</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-badges">1</div>
+                        <div class="stat-label">Badges</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">&#8212;</div>
+                        <div class="stat-label">Reputation</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Features Grid (always visible) ───────── -->
             <section>
                 <div class="features-grid">
                     <div class="feature-card">
-                        <div class="feature-icon">💬</div>
+                        <div class="feature-icon">&#128172;</div>
                         <h3>Discussion Forums</h3>
-                        <p>Engage in technical discussions, ask questions, and share knowledge with fellow developers and tech enthusiasts.</p>
+                        <p>Engage in technical discussions, ask questions, and share knowledge with fellow developers
+                            and tech enthusiasts.</p>
                     </div>
-
                     <div class="feature-card">
-                        <div class="feature-icon">📚</div>
-                        <h3>Blog & Resources</h3>
-                        <p>Read and comment on technical articles, case studies, and deep-dives into web development and AI integration.</p>
+                        <div class="feature-icon">&#128218;</div>
+                        <h3>Blog &amp; Resources</h3>
+                        <p>Read and comment on technical articles, case studies, and deep-dives into web development and
+                            AI integration.</p>
                     </div>
-
                     <div class="feature-card">
-                        <div class="feature-icon">👤</div>
+                        <div class="feature-icon">&#128100;</div>
                         <h3>User Profiles</h3>
-                        <p>Create your profile, showcase your expertise, track your contributions, and build your reputation in the community.</p>
+                        <p>Create your profile, showcase your expertise, track your contributions, and build your
+                            reputation in the community.</p>
                     </div>
-
                     <div class="feature-card">
-                        <div class="feature-icon">🎯</div>
+                        <div class="feature-icon">&#127919;</div>
                         <h3>Project Showcases</h3>
-                        <p>Share your projects, get feedback, discover collaboration opportunities, and learn from others' work.</p>
+                        <p>Share your projects, get feedback, discover collaboration opportunities, and learn from
+                            others' work.</p>
                     </div>
-
                     <div class="feature-card">
-                        <div class="feature-icon">🏆</div>
-                        <h3>Achievements & Badges</h3>
-                        <p>Earn badges for contributions, milestones, and community engagement. Level up your developer journey.</p>
+                        <div class="feature-icon">&#127942;</div>
+                        <h3>Achievements &amp; Badges</h3>
+                        <p>Earn badges for contributions, milestones, and community engagement. Level up your developer
+                            journey.</p>
                     </div>
-
                     <div class="feature-card">
-                        <div class="feature-icon">🔔</div>
-                        <h3>Notifications & Updates</h3>
+                        <div class="feature-icon">&#128276;</div>
+                        <h3>Notifications &amp; Updates</h3>
                         <p>Stay informed about discussions you're involved in, new content, and ecosystem updates.</p>
                     </div>
                 </div>
             </section>
 
-            <section class="cta-section">
+            <!-- ── Auth CTA (unauthenticated) ───────────── -->
+            <section id="auth-section" class="cta-section">
                 <h2>Join the Community</h2>
-                <p>Sign in with your preferred account to get started</p>
-
+                <p>Create your account to connect with developers and start collaborating</p>
                 <div class="auth-buttons">
-                    <button id="btn-google" class="social-btn" disabled onclick="handleSocialLogin('google')">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                        </svg>
-                        Continue with Google
+                    <button class="btn btn-primary btn-lg" onclick="openAuth('signUp')">
+                        Create Account
                     </button>
-
-                    <button id="btn-linkedin" class="social-btn" disabled onclick="handleSocialLogin('linkedin')">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                        </svg>
-                        Continue with LinkedIn
-                    </button>
-
-                    <button id="btn-email" class="social-btn" disabled onclick="handleSocialLogin('email')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
-                            <polyline points="3 7 12 13 21 7" />
-                        </svg>
-                        Continue with Email
+                    <button class="btn btn-secondary btn-lg" onclick="openAuth('signIn')">
+                        Already a member? Sign In
                     </button>
                 </div>
-                <div id="auth-error" role="alert" style="display:none; margin-top:1rem; padding:0.75rem 1rem; background:#2e0d0d; border:1px solid #7a1a1a; border-radius:0.5rem; color:#f87171; font-size:0.875rem;"></div>
-
-                <p style="margin-top: 2rem; font-size: 0.875rem; color: var(--text-muted);">
-                    By signing in, you agree to our <a href="#" style="color: var(--text-secondary);">Terms of Service</a> and <a href="#" style="color: var(--text-secondary);">Privacy Policy</a>
+                <div id="auth-error" class="auth-error" role="alert"></div>
+                <p class="terms-text">
+                    By signing in, you agree to our
+                    <a href="#">Terms of Service</a> and
+                    <a href="#">Privacy Policy</a>
                 </p>
             </section>
 
-            <section style="margin-top: 4rem; padding: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem;">
-                <h2 style="margin-bottom: 1rem;">Current Features (Available Now)</h2>
-                <ul style="color: var(--text-secondary); line-height: 2;">
-                    <li>✅ <strong>Blog Comments</strong> - Visit our <a href="/#blog" style="color: #10b981;">blog section</a> to read articles and leave comments</li>
-                    <li>✅ <strong>User Authentication</strong> - Sign in with Google, LinkedIn, or email via Clerk</li>
-                    <li>✅ <strong>User Profiles</strong> - Basic profile management and avatars</li>
-                    <li>⏳ <strong>Discussion Forums</strong> - Coming in Phase 2 (Q2 2026)</li>
-                    <li>⏳ <strong>Project Showcases</strong> - Coming in Phase 3 (Q3 2026)</li>
-                    <li>⏳ <strong>Achievements System</strong> - Coming in Phase 4 (Q4 2026)</li>
+            <!-- ── Roadmap ──────────────────────────────── -->
+            <section class="current-features">
+                <h2>Roadmap</h2>
+                <ul>
+                    <li>&#9989; <strong>User Authentication</strong> &mdash; Sign in with Google, LinkedIn, or email
+                        via Clerk</li>
+                    <li>&#9989; <strong>Custom Profiles</strong> &mdash; Avatar, bio, title, links &mdash; your
+                        identity in the community</li>
+                    <li>&#9989; <strong>Blog Comments</strong> &mdash; Visit our <a href="/#blog">blog section</a> to
+                        read articles and leave comments</li>
+                    <li>&#9203; <strong>Discussion Forums</strong> &mdash; Coming in Phase 2 (Q2 2026)</li>
+                    <li>&#9203; <strong>Project Showcases</strong> &mdash; Coming in Phase 3 (Q3 2026)</li>
+                    <li>&#9203; <strong>Achievements System</strong> &mdash; Coming in Phase 4 (Q4 2026)</li>
                 </ul>
             </section>
         </main>
@@ -429,103 +850,348 @@
         <footer>
             <p>&copy; 2026 Good Flippin Design (GFV LLC). Built with care in Minneapolis.</p>
             <p style="margin-top: 0.5rem;">
-                <a href="/">Home</a> ·
-                <a href="/#services">Services</a> ·
-                <a href="/#work">Portfolio</a> ·
+                <a href="/">Home</a> &middot;
+                <a href="/#services">Services</a> &middot;
+                <a href="/#work">Portfolio</a> &middot;
                 <a href="/#contact">Contact</a>
             </p>
         </footer>
     </div>
 
     <script>
-        // Clean canonical URL (no Clerk callback params)
+        /* ──────────────────────────────────────────────────────
+         *  Community Portal · Auth & Profile Logic
+         *  Uses Clerk JS v5 openSignIn / openSignUp modals
+         *  to avoid cross-domain cookie loss with OAuth redirects
+         * ────────────────────────────────────────────────────── */
         const _baseUrl = window.location.origin + window.location.pathname;
         let clerk;
         let _authInitialized = false;
 
+        /* ── Clerk appearance theme (dark, matches site) ───── */
+        const clerkTheme = {
+            variables: {
+                colorPrimary: '#8b5cf6',
+                colorBackground: '#1a1a1a',
+                colorInputBackground: '#151515',
+                colorInputText: '#f5f5f5',
+                colorText: '#f5f5f5',
+                colorTextSecondary: '#a0a0a0',
+                colorDanger: '#ef4444',
+                borderRadius: '0.75rem',
+                fontFamily: "'Inter', -apple-system, sans-serif",
+            },
+            elements: {
+                card: {
+                    backgroundColor: '#1a1a1a',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    boxShadow: '0 24px 48px rgba(0,0,0,0.6)',
+                },
+                socialButtonsBlockButton: {
+                    backgroundColor: '#151515',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    color: '#f5f5f5',
+                },
+                socialButtonsBlockButtonText: { color: '#f5f5f5' },
+                formFieldInput: {
+                    backgroundColor: '#151515',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    color: '#f5f5f5',
+                },
+                footerActionLink: { color: '#8b5cf6' },
+                headerTitle: { color: '#f5f5f5' },
+                headerSubtitle: { color: '#a0a0a0' },
+                dividerLine: { backgroundColor: 'rgba(255,255,255,0.06)' },
+                dividerText: { color: '#999' },
+            },
+        };
+
+        /* ── Initialization ─────────────────────────────────── */
         async function initializeAuth() {
             if (_authInitialized || !window.Clerk) return;
             _authInitialized = true;
+
             try {
                 clerk = new window.Clerk(window.CLERK_PUBLISHABLE_KEY);
-                await clerk.load();
+                await clerk.load({ appearance: clerkTheme });
 
-                // Enable auth buttons now that Clerk is ready
-                ['btn-google', 'btn-linkedin', 'btn-email'].forEach(id => {
-                    const btn = document.getElementById(id);
-                    if (btn) btn.disabled = false;
-                });
-
-                // Handle OAuth return (LinkedIn/Google callback)
-                const params = new URLSearchParams(window.location.search);
+                /* Handle OAuth redirect callback (fallback if modal was bypassed) */
+                var params = new URLSearchParams(window.location.search);
                 if (params.has('__clerk_status') || params.has('__clerk_handshake')) {
                     try {
-                        await clerk.handleRedirectCallback({
-                            fallbackRedirectUrl: _baseUrl,
-                        });
-                    } catch (cbErr) {
-                        console.error('OAuth callback error:', cbErr);
-                        const errDiv = document.getElementById('auth-error');
-                        if (errDiv) {
-                            const details = (cbErr.errors && cbErr.errors.length)
-                                ? cbErr.errors.map(e => '[' + e.code + '] ' + (e.long_message || e.message)).join(' ')
-                                : (cbErr.message || String(cbErr));
-                            errDiv.textContent = 'Sign-in failed: ' + details;
-                            errDiv.style.display = 'block';
-                        }
+                        await clerk.handleRedirectCallback({ fallbackRedirectUrl: _baseUrl });
+                    } catch (err) {
+                        console.error('OAuth callback error:', err);
+                        showAuthError('Sign-in callback failed: ' + formatClerkError(err));
                     }
+                    window.history.replaceState({}, '', _baseUrl);
                 }
 
-                const authBtn = document.getElementById('auth-btn');
-                if (clerk.user) {
-                    authBtn.textContent = 'Sign Out';
-                    authBtn.onclick = () => clerk.signOut().then(() => { window.location.href = _baseUrl; });
-                    authBtn.style.display = 'inline-flex';
-                } else {
-                    authBtn.textContent = 'Sign In';
-                    authBtn.onclick = () => {
-                        document.querySelector('.cta-section').scrollIntoView({ behavior: 'smooth' });
-                    };
-                    authBtn.style.display = 'inline-flex';
-                }
+                /* Listen for live auth-state changes (modal sign-in, sign-out, etc.) */
+                clerk.addListener(function (payload) { renderAuthState(payload.user); });
+
+                /* Initial render */
+                renderAuthState(clerk.user);
+
             } catch (error) {
                 console.error('Clerk initialization error:', error);
             }
         }
 
-        function handleSocialLogin(provider) {
+        /* ── Open Clerk modal (sign-in / sign-up) ──────────── */
+        function openAuth(mode) {
             if (!clerk) {
-                initializeAuth().then(() => handleSocialLogin(provider));
+                initializeAuth().then(function () { openAuth(mode); });
                 return;
             }
-
-            const oauthMap = {
-                google: 'oauth_google',
-                linkedin: 'oauth_linkedin_oidc',
+            var opts = {
+                appearance: clerkTheme,
+                afterSignInUrl: _baseUrl,
+                afterSignUpUrl: _baseUrl,
             };
 
-            const strategy = oauthMap[provider];
-            if (strategy) {
-                clerk.authenticateWithRedirect({
-                    strategy,
-                    redirectUrl: _baseUrl,
-                    redirectUrlComplete: _baseUrl,
-                }).catch((err) => {
-                    console.error('OAuth redirect failed:', provider, err);
-                    const details = (err.errors && err.errors.length)
-                        ? err.errors.map(e => '[' + e.code + '] ' + e.long_message).join(' | ')
-                        : (err.message || JSON.stringify(err));
-                    const errDiv = document.getElementById('auth-error');
-                    if (errDiv) {
-                        errDiv.textContent = provider.charAt(0).toUpperCase() + provider.slice(1) + ' sign-in failed: ' + details;
-                        errDiv.style.display = 'block';
-                    }
-                });
+            if (mode === 'signUp') {
+                clerk.openSignUp(opts);
             } else {
-                clerk.redirectToSignIn({ redirectUrl: _baseUrl });
+                clerk.openSignIn(opts);
             }
         }
 
+        /* ── Sign out ───────────────────────────────────────── */
+        async function handleSignOut() {
+            if (!clerk) return;
+            try {
+                await clerk.signOut();
+                window.location.href = _baseUrl;
+            } catch (err) {
+                console.error('Sign-out error:', err);
+            }
+        }
+
+        /* ── Render auth state ──────────────────────────────── */
+        function renderAuthState(user) {
+            var authSection = document.getElementById('auth-section');
+            var profileSection = document.getElementById('profile-section');
+            var authBtn = document.getElementById('auth-btn');
+            var headerUser = document.getElementById('header-user');
+            var heroTitle = document.getElementById('hero-title');
+            var heroDesc = document.getElementById('hero-desc');
+
+            if (user) {
+                /* ── Authenticated ─────────────────────────── */
+                authSection.style.display = 'none';
+                profileSection.style.display = 'block';
+
+                /* Header: show avatar + name */
+                document.getElementById('header-avatar').src = user.imageUrl || '';
+                document.getElementById('header-name').textContent = user.firstName || 'Member';
+                headerUser.style.display = 'flex';
+
+                /* Header auth button → sign-out */
+                authBtn.textContent = 'Sign Out';
+                authBtn.className = 'btn btn-secondary';
+                authBtn.onclick = handleSignOut;
+                authBtn.style.display = 'inline-flex';
+
+                /* Hero personalization */
+                heroTitle.textContent = 'Welcome back, ' + (user.firstName || 'Member');
+                heroDesc.textContent = 'Manage your profile, explore community features, and connect with other developers.';
+
+                /* Render profile */
+                renderProfile(user);
+
+            } else {
+                /* ── Not authenticated ─────────────────────── */
+                authSection.style.display = '';
+                profileSection.style.display = 'none';
+                headerUser.style.display = 'none';
+
+                /* Header auth button → sign-in */
+                authBtn.textContent = 'Sign In';
+                authBtn.className = 'btn btn-primary';
+                authBtn.onclick = function () { openAuth('signIn'); };
+                authBtn.style.display = 'inline-flex';
+
+                /* Hero default */
+                heroTitle.innerHTML = 'Community Portal <span class="status-badge">Beta</span>';
+                heroDesc.textContent = 'Connect with developers, share insights, participate in discussions, and collaborate on projects in the Good Flippin Design ecosystem.';
+
+                /* Hide welcome banner */
+                document.getElementById('welcome-banner').style.display = 'none';
+            }
+        }
+
+        /* ── Render profile dashboard ───────────────────────── */
+        function renderProfile(user) {
+            /* Avatar */
+            var avatar = document.getElementById('profile-avatar');
+            avatar.src = user.imageUrl || '';
+            avatar.alt = (user.firstName || 'User') + "'s avatar";
+
+            /* Name */
+            var fullName = [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Community Member';
+            document.getElementById('profile-name').textContent = fullName;
+
+            /* Email */
+            var primaryEmail = user.primaryEmailAddress ? user.primaryEmailAddress.emailAddress : '';
+            document.getElementById('profile-email').textContent = primaryEmail;
+
+            /* Member since */
+            var joined = new Date(user.createdAt);
+            document.getElementById('profile-member-since').innerHTML =
+                '&#128197; Joined ' + joined.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            /* Auth provider */
+            var accounts = user.externalAccounts || [];
+            var providerLabel = 'Email';
+            if (accounts.length > 0) {
+                var provider = accounts[0].provider || '';
+                if (provider.indexOf('google') !== -1) providerLabel = 'Google';
+                else if (provider.indexOf('linkedin') !== -1) providerLabel = 'LinkedIn';
+            }
+            document.getElementById('profile-provider').innerHTML =
+                '<span class="profile-provider-badge">' + providerLabel + ' account</span>';
+
+            /* Meta from unsafeMetadata */
+            var meta = user.unsafeMetadata || {};
+
+            /* Populate form fields */
+            setVal('profile-title', meta.title || '');
+            setVal('profile-location', meta.location || '');
+            setVal('profile-website', meta.website || '');
+            setVal('profile-bio', meta.bio || '');
+
+            /* Badges */
+            renderBadges(meta);
+
+            /* First-time user — onboard + set join metadata */
+            if (!meta.joinedCommunityAt) {
+                onboardNewMember(user, meta);
+            }
+        }
+
+        /* ── New member onboarding ──────────────────────────── */
+        async function onboardNewMember(user, existingMeta) {
+            /* Show welcome banner */
+            var banner = document.getElementById('welcome-banner');
+            var name = user.firstName || 'friend';
+            banner.innerHTML =
+                '<h3>Welcome to the community, ' + escapeHtml(name) + '!</h3>' +
+                '<p>You\'re one of our founding members. Complete your profile below to introduce yourself.</p>' +
+                '<span class="welcome-badge">&#11088; Founding Member Badge Earned</span>';
+            banner.style.display = 'block';
+
+            /* Persist join metadata + founding badge */
+            try {
+                await clerk.user.update({
+                    unsafeMetadata: {
+                        ...existingMeta,
+                        joinedCommunityAt: new Date().toISOString(),
+                        badges: ['founding-member'],
+                    },
+                });
+            } catch (err) {
+                console.error('Failed to set join metadata:', err);
+            }
+        }
+
+        /* ── Render badges ──────────────────────────────────── */
+        function renderBadges(meta) {
+            var container = document.getElementById('profile-badges');
+            var badges = meta.badges || ['founding-member'];
+            var html = '';
+
+            var badgeConfig = {
+                'founding-member': { label: '&#11088; Founding Member', cls: 'badge-founding' },
+                'verified': { label: '&#10003; Verified', cls: 'badge-verified' },
+            };
+
+            badges.forEach(function (key) {
+                var cfg = badgeConfig[key];
+                if (cfg) {
+                    html += '<span class="badge ' + cfg.cls + '">' + cfg.label + '</span>';
+                }
+            });
+
+            container.innerHTML = html;
+            var statBadges = document.getElementById('stat-badges');
+            if (statBadges) statBadges.textContent = badges.length || 1;
+        }
+
+        /* ── Save profile ───────────────────────────────────── */
+        async function saveProfile() {
+            if (!clerk || !clerk.user) return;
+
+            var bio = getVal('profile-bio');
+            var title = getVal('profile-title');
+            var loc = getVal('profile-location');
+            var website = getVal('profile-website');
+            var statusEl = document.getElementById('profile-status');
+
+            try {
+                await clerk.user.update({
+                    unsafeMetadata: {
+                        ...clerk.user.unsafeMetadata,
+                        bio: bio,
+                        title: title,
+                        location: loc,
+                        website: website,
+                        lastProfileUpdate: new Date().toISOString(),
+                    },
+                });
+
+                statusEl.textContent = 'Profile saved successfully!';
+                statusEl.className = 'profile-status success';
+                setTimeout(function () { statusEl.className = 'profile-status'; }, 3000);
+
+            } catch (err) {
+                console.error('Profile save error:', err);
+                statusEl.textContent = 'Failed to save: ' + formatClerkError(err);
+                statusEl.className = 'profile-status error';
+            }
+        }
+
+        /* ── Open Clerk account management modal ────────────── */
+        function openManageAccount() {
+            if (!clerk) return;
+            clerk.openUserProfile({ appearance: clerkTheme });
+        }
+
+        /* ── Helpers ────────────────────────────────────────── */
+        function formatClerkError(err) {
+            if (err && err.errors && err.errors.length) {
+                return err.errors.map(function (e) {
+                    return '[' + e.code + '] ' + (e.longMessage || e.message);
+                }).join(' | ');
+            }
+            return err && err.message ? err.message : String(err);
+        }
+
+        function showAuthError(msg) {
+            var el = document.getElementById('auth-error');
+            if (el) {
+                el.textContent = msg;
+                el.style.display = 'block';
+            }
+        }
+
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        function getVal(id) {
+            var el = document.getElementById(id);
+            return el ? el.value.trim() : '';
+        }
+
+        function setVal(id, val) {
+            var el = document.getElementById(id);
+            if (el) el.value = val;
+        }
+
+        /* ── Bootstrap ──────────────────────────────────────── */
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initializeAuth);
         } else {
