@@ -1,6 +1,9 @@
 name = "gfd-auth"
-main = "auth-simple.js"
+main = "auth.js"
 compatibility_date = "2024-01-01"
+
+# Previous entry point (blog/comments only):
+# main = "auth-simple.js"
 
 [[d1_databases]]
 binding = "DB"
