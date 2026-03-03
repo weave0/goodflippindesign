@@ -141,6 +141,33 @@ jobs:
           echo "❌ Timed out waiting for Cloudflare deployment to finish."
           exit 1
 
+      - name: Dump Cloudflare deployment logs (on failure)
+        if: failure()
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_FULL_ITHINK }}
+          CF_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
+          CF_PROJECT_NAME: goodflippindesign
+        run: |
+          echo "📄 Fetching Cloudflare deployment logs for id: ${{ steps.cf.outputs.deploy_id }}"
+
+          LOGS=$(curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/deployments/${{ steps.cf.outputs.deploy_id }}/history/logs" \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json")
+
+          if [ "$(echo "$LOGS" | jq -r '.success')" != "true" ]; then
+            echo "❌ Failed to fetch deployment logs"
+            echo "$LOGS" | jq '.errors'
+            exit 0
+          fi
+
+          echo "includes_container_logs: $(echo "$LOGS" | jq -r '.result.includes_container_logs')"
+          echo "total: $(echo "$LOGS" | jq -r '.result.total')"
+          echo ""
+
+          # Best-effort formatting; schema may vary.
+          echo "$LOGS" | jq -r '.result.data[]? | (.message? // .msg? // .log? // tostring)' | tail -n 400
+
       - name: Verify deployment
         run: |
           echo "🧪 Checking deployed site markers..."
