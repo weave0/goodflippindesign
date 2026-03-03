@@ -1,5 +1,10 @@
 name: Lighthouse CI
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 on:
     pull_request:
         branches: [main]
@@ -67,12 +72,16 @@ jobs:
 
                         [View Full Report](${results[0].url})`;
 
-                        github.rest.issues.createComment({
-                          issue_number: context.issue.number,
-                          owner: context.repo.owner,
-                          repo: context.repo.repo,
-                          body
-                        });
+                        try {
+                          await github.rest.issues.createComment({
+                            issue_number: context.issue.number,
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            body
+                          });
+                        } catch (e) {
+                          console.log('Could not comment on PR:', e.message);
+                        }
                       } catch (e) {
                         console.log('Could not read Lighthouse results:', e.message);
                       }

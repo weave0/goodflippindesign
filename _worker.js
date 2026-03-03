@@ -40,7 +40,16 @@ export default {
       });
     }
 
-    // Get response from static assets
+    // Get response from static assets (Pages provides env.ASSETS automatically).
+    // If this worker is built/deployed outside of Pages advanced mode, env.ASSETS
+    // may not exist—fail gracefully instead of throwing.
+    if (!env.ASSETS || typeof env.ASSETS.fetch !== 'function') {
+      return new Response('Static assets unavailable', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      });
+    }
+
     let response = await env.ASSETS.fetch(request);
 
     // Inject environment variables into HTML responses
