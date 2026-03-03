@@ -6,11 +6,18 @@
  * Returns donation details for the success page
  */
 
-const STRIPE_SECRET_KEY = 'mk_1So71wBL2ppdbQKqalkrbvd0';
 const STRIPE_API_VERSION = '2023-10-16';
 
 export async function onRequestGet(context) {
     try {
+        const STRIPE_SECRET_KEY = context.env?.STRIPE_SECRET_KEY;
+        if (!STRIPE_SECRET_KEY) {
+            return new Response(JSON.stringify({ error: 'STRIPE_SECRET_KEY is not configured' }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
         const url = new URL(context.request.url);
         const sessionId = url.searchParams.get('session_id');
 
