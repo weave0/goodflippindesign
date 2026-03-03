@@ -6,40 +6,60 @@
  * - Admin role assignment
  * - Protected API routes (comments, profiles)
  * - CORS for cross-ecosystem auth
- * - Error tracking via Sentry (observability)
+ * - Error tracking via Sentry (observability) — gracefully degrades if unavailable
  */
 
-import * as Sentry from '@sentry/cloudflare';
+// Dynamic Sentry import — gracefully degrades if @sentry/cloudflare isn't available
+let Sentry = null;
+try {
+  // @sentry/cloudflare may fail on some Cloudflare runtime versions (node:async_hooks)
+  Sentry = await import('@sentry/cloudflare');
+} catch {
+  // Sentry unavailable — all tracking will be no-ops
+}
+
+// No-op helpers for when Sentry is unavailable
+const noopSpan = { setStatus() {}, finish() {} };
+const safeSentry = {
+  init: (...a) => Sentry?.init?.(...a),
+  startTransaction: (...a) => Sentry?.startTransaction?.(...a) || noopSpan,
+  startSpan: (...a) => Sentry?.startSpan?.(...a) || noopSpan,
+  captureException: (...a) => Sentry?.captureException?.(...a),
+  captureMessage: (...a) => Sentry?.captureMessage?.(...a),
+};
 
 /**
  * Initialize Sentry error tracking
  * Cost: $0/month for <50K events (current traffic: ~1K/month)
  */
 function initSentry(env) {
-  if (!env.SENTRY_DSN) {
-    console.warn('⚠️ SENTRY_DSN not configured - skipping error tracking');
+  if (!Sentry || !env.SENTRY_DSN) {
+    console.warn('⚠️ Sentry not available or SENTRY_DSN not configured - skipping error tracking');
     return;
   }
 
-  Sentry.init({
-    dsn: env.SENTRY_DSN,
-    environment: env.NODE_ENV || 'production',
-    tracesSampleRate: 0.1, // 10% of requests for performance monitoring
-    beforeSend(event) {
-      // Strip sensitive data (emails, tokens)
-      if (event.request?.headers?.['authorization']) {
-        delete event.request.headers['authorization'];
-      }
-      return event;
-    },
-  });
+  try {
+    safeSentry.init({
+      dsn: env.SENTRY_DSN,
+      environment: env.NODE_ENV || 'production',
+      tracesSampleRate: 0.1,
+      beforeSend(event) {
+        if (event.request?.headers?.['authorization']) {
+          delete event.request.headers['authorization'];
+        }
+        return event;
+      },
+    });
+  } catch (e) {
+    console.warn('⚠️ Sentry init failed:', e.message);
+  }
 }
 
 /**
  * Wrap handlers with error boundary + performance tracking
  */
 async function withErrorBoundary(handler, context) {
-  const transaction = Sentry.startTransaction({
+  const transaction = safeSentry.startTransaction({
     name: context.name,
     op: context.op || 'http.server',
   });
@@ -50,7 +70,7 @@ async function withErrorBoundary(handler, context) {
     return result;
   } catch (error) {
     transaction.setStatus('internal_error');
-    Sentry.captureException(error, {
+    safeSentry.captureException(error, {
       tags: {
         endpoint: context.name,
         method: context.method,
@@ -58,7 +78,10 @@ async function withErrorBoundary(handler, context) {
       extra: context.extra || {},
     });
     console.error(`[${context.name}] Error:`, error);
-    throw error;
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   } finally {
     transaction.finish();
   }
@@ -68,7 +91,7 @@ async function withErrorBoundary(handler, context) {
  * Monitor D1 query performance
  */
 async function executeD1Query(db, query, bindings, context) {
-  const span = Sentry.startSpan({
+  const span = safeSentry.startSpan({
     name: context.name || 'db.query',
     op: 'db.sql.query',
   });
@@ -78,10 +101,9 @@ async function executeD1Query(db, query, bindings, context) {
     const result = await db.prepare(query).bind(...bindings).run();
     const duration = Date.now() - startTime;
 
-    // Log slow queries (>100ms)
     if (duration > 100) {
       console.warn(`Slow query (${duration}ms): ${context.name}`);
-      Sentry.captureMessage(`Slow D1 Query: ${context.name}`, {
+      safeSentry.captureMessage(`Slow D1 Query: ${context.name}`, {
         level: 'warning',
         extra: { duration, query: context.name },
       });
@@ -89,7 +111,7 @@ async function executeD1Query(db, query, bindings, context) {
 
     return result;
   } catch (error) {
-    Sentry.captureException(error, {
+    safeSentry.captureException(error, {
       tags: { query: context.name },
     });
     throw error;
