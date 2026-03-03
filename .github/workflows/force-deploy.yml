@@ -22,6 +22,7 @@ jobs:
           echo "message=$(git log -1 --pretty=%s)" >> $GITHUB_OUTPUT
 
       - name: Trigger Cloudflare Pages Deployment
+        id: cf
         env:
           CF_API_TOKEN: ${{ secrets.CF_FULL_ITHINK }}
           CF_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
@@ -58,13 +59,19 @@ jobs:
               "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/deployments" \
               -H "Authorization: Bearer $CF_API_TOKEN" \
               -H "Content-Type: application/json" \
-              --data '{}')
+              --data '{
+                "branch": "main",
+                "commit_hash": "${{ steps.commit.outputs.sha }}",
+                "commit_message": "${{ steps.commit.outputs.message }}",
+                "commit_dirty": "false"
+              }')
 
             if [ "$(echo $CREATE_RESPONSE | jq -r '.success')" = "true" ]; then
               NEW_DEPLOY_ID=$(echo $CREATE_RESPONSE | jq -r '.result.id')
               echo "✅ Deployment created successfully!"
               echo "🔄 New deployment ID: $NEW_DEPLOY_ID"
               echo "🌐 Monitor at: https://dash.cloudflare.com/$CF_ACCOUNT_ID/pages/view/$CF_PROJECT_NAME"
+              echo "deploy_id=$NEW_DEPLOY_ID" >> "$GITHUB_OUTPUT"
             else
               echo "❌ Create deployment failed:"
               echo "$CREATE_RESPONSE" | jq '.'
@@ -76,41 +83,94 @@ jobs:
             exit 1
           fi
 
-      - name: Wait for deployment
+      - name: Wait for Cloudflare deployment to finish
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_FULL_ITHINK }}
+          CF_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
+          CF_PROJECT_NAME: goodflippindesign
         run: |
-                  echo "⏳ Waiting 30 seconds before verification polling..."
-                  sleep 30
+          echo "⏳ Waiting for Cloudflare deployment status (id: ${{ steps.cf.outputs.deploy_id }})"
+          echo "📍 Expected commit: ${{ steps.commit.outputs.sha }}"
+
+          MAX_ATTEMPTS=60
+          SLEEP_SECONDS=15
+
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            DEPLOY_INFO=$(curl -s -X GET \
+              "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/deployments/${{ steps.cf.outputs.deploy_id }}" \
+              -H "Authorization: Bearer $CF_API_TOKEN" \
+              -H "Content-Type: application/json")
+
+            SUCCESS=$(echo "$DEPLOY_INFO" | jq -r '.success')
+            if [ "$SUCCESS" != "true" ]; then
+              echo "❌ Failed to fetch deployment info"
+              echo "$DEPLOY_INFO" | jq '.errors'
+              exit 1
+            fi
+
+            STATUS=$(echo "$DEPLOY_INFO" | jq -r '.result.latest_stage.status // empty')
+            STAGE=$(echo "$DEPLOY_INFO" | jq -r '.result.latest_stage.name // empty')
+            COMMIT=$(echo "$DEPLOY_INFO" | jq -r '.result.deployment_trigger.metadata.commit_hash // .result.deployment_trigger.metadata.commitHash // .result.commit_hash // empty')
+            ALIASES=$(echo "$DEPLOY_INFO" | jq -r '.result.aliases[]?')
+
+            echo "[$i/$MAX_ATTEMPTS] stage=$STAGE status=$STATUS commit=${COMMIT:-unknown}"
+            if [ -n "$ALIASES" ]; then
+              echo "$ALIASES" | sed 's/^/  - alias: /'
+            fi
+
+            if [ "$STATUS" = "failure" ]; then
+              echo "❌ Cloudflare deployment failed."
+              exit 1
+            fi
+
+            if [ "$STATUS" = "success" ]; then
+              if [ -n "$COMMIT" ] && [ "$COMMIT" != "${{ steps.commit.outputs.sha }}" ]; then
+                echo "❌ Cloudflare deployed a different commit than expected."
+                echo "Expected: ${{ steps.commit.outputs.sha }}"
+                echo "Actual:   $COMMIT"
+                exit 1
+              fi
+              echo "✅ Cloudflare deployment finished successfully."
+              exit 0
+            fi
+
+            echo "⏳ Still building... sleeping ${SLEEP_SECONDS}s"
+            sleep $SLEEP_SECONDS
+          done
+
+          echo "❌ Timed out waiting for Cloudflare deployment to finish."
+          exit 1
 
       - name: Verify deployment
         run: |
           echo "🧪 Checking deployed site markers..."
 
-                  # Poll because Pages deploy + propagation can take a few minutes.
-                  MAX_ATTEMPTS=30
-                  SLEEP_SECONDS=20
+          # Poll because Pages edge propagation can take a few minutes even after build success.
+          MAX_ATTEMPTS=30
+          SLEEP_SECONDS=20
 
-                  for i in $(seq 1 $MAX_ATTEMPTS); do
-                    echo "\n🔁 Attempt $i/$MAX_ATTEMPTS..."
-                    INDEX_HTML=$(curl -s "https://goodflippindesign.pages.dev/?bust=$i")
-                    PORTAL_HTML=$(curl -s "https://goodflippindesign.pages.dev/community-portal.html?bust=$i")
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            echo "\n🔁 Attempt $i/$MAX_ATTEMPTS..."
+            INDEX_HTML=$(curl -s "https://goodflippindesign.pages.dev/?bust=$i")
+            PORTAL_HTML=$(curl -s "https://goodflippindesign.pages.dev/community-portal.html?bust=$i")
 
-                    HAS_COMMUNITY_LINK=0
-                    HAS_HERO_CTA=0
+            HAS_COMMUNITY_LINK=0
+            HAS_HERO_CTA=0
 
-                    echo "$INDEX_HTML" | grep -q 'community-portal.html' && HAS_COMMUNITY_LINK=1 || true
-                    echo "$PORTAL_HTML" | grep -q 'hero-primary-btn' && HAS_HERO_CTA=1 || true
+            echo "$INDEX_HTML" | grep -q 'community-portal.html' && HAS_COMMUNITY_LINK=1 || true
+            echo "$PORTAL_HTML" | grep -q 'hero-primary-btn' && HAS_HERO_CTA=1 || true
 
-                    echo "- index.html: community link: $(if [ $HAS_COMMUNITY_LINK -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
-                    echo "- community-portal.html: hero CTA id: $(if [ $HAS_HERO_CTA -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
+            echo "- index.html: community link: $(if [ $HAS_COMMUNITY_LINK -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
+            echo "- community-portal.html: hero CTA id: $(if [ $HAS_HERO_CTA -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
 
-                    if [ $HAS_COMMUNITY_LINK -eq 1 ] && [ $HAS_HERO_CTA -eq 1 ]; then
-                      echo "\n✅ Deployment verified via content markers."
-                      exit 0
-                    fi
+            if [ $HAS_COMMUNITY_LINK -eq 1 ] && [ $HAS_HERO_CTA -eq 1 ]; then
+              echo "\n✅ Deployment verified via content markers."
+              exit 0
+            fi
 
-                    echo "⏳ Not ready yet. Sleeping ${SLEEP_SECONDS}s..."
-                    sleep $SLEEP_SECONDS
-                  done
+            echo "⏳ Not ready yet. Sleeping ${SLEEP_SECONDS}s..."
+            sleep $SLEEP_SECONDS
+          done
 
-                  echo "\n❌ Deployment markers not found after $((MAX_ATTEMPTS * SLEEP_SECONDS)) seconds."
-                  exit 1
+          echo "\n❌ Deployment markers not found after $((MAX_ATTEMPTS * SLEEP_SECONDS)) seconds."
+          exit 1
