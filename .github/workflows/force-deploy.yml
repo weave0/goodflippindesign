@@ -141,6 +141,41 @@ jobs:
           echo "❌ Timed out waiting for Cloudflare deployment to finish."
           exit 1
 
+      - name: Verify deployment
+        run: |
+          echo "🧪 Checking deployed site markers..."
+
+          # Poll because Pages edge propagation can take a few minutes even after build success.
+          MAX_ATTEMPTS=30
+          SLEEP_SECONDS=20
+
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            echo "\n🔁 Attempt $i/$MAX_ATTEMPTS..."
+            INDEX_HTML=$(curl -sS -L --compressed -H 'Cache-Control: no-store' -H 'Pragma: no-cache' "https://goodflippindesign.pages.dev/?bust=$i")
+            # Pages commonly redirects clean URLs (e.g. /community-portal.html -> /community-portal)
+            PORTAL_HTML=$(curl -sS -L --compressed -H 'Cache-Control: no-store' -H 'Pragma: no-cache' "https://goodflippindesign.pages.dev/community-portal.html?bust=$i")
+
+            HAS_COMMUNITY_LINK=0
+            HAS_HERO_CTA=0
+
+            grep -q 'community-portal.html' <<<"$INDEX_HTML" && HAS_COMMUNITY_LINK=1 || true
+            grep -q 'hero-primary-btn' <<<"$PORTAL_HTML" && HAS_HERO_CTA=1 || true
+
+            echo "- index.html: community link: $(if [ $HAS_COMMUNITY_LINK -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
+            echo "- community-portal.html: hero CTA id: $(if [ $HAS_HERO_CTA -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
+
+            if [ $HAS_COMMUNITY_LINK -eq 1 ] && [ $HAS_HERO_CTA -eq 1 ]; then
+              echo "\n✅ Deployment verified via content markers."
+              exit 0
+            fi
+
+            echo "⏳ Not ready yet. Sleeping ${SLEEP_SECONDS}s..."
+            sleep $SLEEP_SECONDS
+          done
+
+          echo "\n❌ Deployment markers not found after $((MAX_ATTEMPTS * SLEEP_SECONDS)) seconds."
+          exit 1
+
       - name: Dump Cloudflare deployment logs (on failure)
         if: failure()
         env:
@@ -167,37 +202,3 @@ jobs:
 
           # Best-effort formatting; schema may vary.
           echo "$LOGS" | jq -r '.result.data[]? | (.message? // .msg? // .log? // tostring)' | tail -n 400
-
-      - name: Verify deployment
-        run: |
-          echo "🧪 Checking deployed site markers..."
-
-          # Poll because Pages edge propagation can take a few minutes even after build success.
-          MAX_ATTEMPTS=30
-          SLEEP_SECONDS=20
-
-          for i in $(seq 1 $MAX_ATTEMPTS); do
-            echo "\n🔁 Attempt $i/$MAX_ATTEMPTS..."
-            INDEX_HTML=$(curl -s -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "https://goodflippindesign.pages.dev/?bust=$i")
-            PORTAL_HTML=$(curl -s -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "https://goodflippindesign.pages.dev/community-portal.html?bust=$i")
-
-            HAS_COMMUNITY_LINK=0
-            HAS_HERO_CTA=0
-
-            grep -q 'community-portal.html' <<<"$INDEX_HTML" && HAS_COMMUNITY_LINK=1 || true
-            grep -q 'hero-primary-btn' <<<"$PORTAL_HTML" && HAS_HERO_CTA=1 || true
-
-            echo "- index.html: community link: $(if [ $HAS_COMMUNITY_LINK -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
-            echo "- community-portal.html: hero CTA id: $(if [ $HAS_HERO_CTA -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
-
-            if [ $HAS_COMMUNITY_LINK -eq 1 ] && [ $HAS_HERO_CTA -eq 1 ]; then
-              echo "\n✅ Deployment verified via content markers."
-              exit 0
-            fi
-
-            echo "⏳ Not ready yet. Sleeping ${SLEEP_SECONDS}s..."
-            sleep $SLEEP_SECONDS
-          done
-
-          echo "\n❌ Deployment markers not found after $((MAX_ATTEMPTS * SLEEP_SECONDS)) seconds."
-          exit 1
