@@ -178,14 +178,14 @@ jobs:
 
           for i in $(seq 1 $MAX_ATTEMPTS); do
             echo "\n🔁 Attempt $i/$MAX_ATTEMPTS..."
-            INDEX_HTML=$(curl -s "https://goodflippindesign.pages.dev/?bust=$i")
-            PORTAL_HTML=$(curl -s "https://goodflippindesign.pages.dev/community-portal.html?bust=$i")
+            INDEX_HTML=$(curl -s -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "https://goodflippindesign.pages.dev/?bust=$i")
+            PORTAL_HTML=$(curl -s -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "https://goodflippindesign.pages.dev/community-portal.html?bust=$i")
 
             HAS_COMMUNITY_LINK=0
             HAS_HERO_CTA=0
 
-            echo "$INDEX_HTML" | grep -q 'community-portal.html' && HAS_COMMUNITY_LINK=1 || true
-            echo "$PORTAL_HTML" | grep -q 'hero-primary-btn' && HAS_HERO_CTA=1 || true
+            grep -q 'community-portal.html' <<<"$INDEX_HTML" && HAS_COMMUNITY_LINK=1 || true
+            grep -q 'hero-primary-btn' <<<"$PORTAL_HTML" && HAS_HERO_CTA=1 || true
 
             echo "- index.html: community link: $(if [ $HAS_COMMUNITY_LINK -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
             echo "- community-portal.html: hero CTA id: $(if [ $HAS_HERO_CTA -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
