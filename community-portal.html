@@ -287,6 +287,59 @@
             margin: 0 auto 1.5rem;
         }
 
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin: 0 auto;
+        }
+
+        .btn-hero-primary,
+        .btn-hero-secondary {
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-pill);
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            min-height: 44px;
+            transition: transform var(--transition), border-color var(--transition), background var(--transition);
+        }
+
+        .btn-hero-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-hero-primary:hover {
+            transform: scale(1.03);
+        }
+
+        .btn-hero-secondary {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text);
+            border-color: rgba(34, 211, 238, 0.25);
+        }
+
+        .btn-hero-secondary:hover {
+            border-color: rgba(168, 85, 247, 0.4);
+        }
+
+        .hero-hint {
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .empty-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
         /* ── Quick Stats Bar ─────────────────────────────── */
         .stats-bar {
             display: flex;
@@ -2311,6 +2364,11 @@
                     <p class="hero-greeting" id="hero-greeting">Welcome to the good side of the internet</p>
                     <h1 class="hero-title">Where Good Vibes Earn Rewards</h1>
                     <p class="hero-subtitle">Post. React. Show up. Earn XP. Unlock badges. Climb the leaderboard. No cost. No catch. Just community.</p>
+                    <div class="hero-actions" id="hero-actions">
+                        <button class="btn-hero-primary" id="hero-primary-btn" type="button">Join Free</button>
+                        <button class="btn-hero-secondary" id="hero-secondary-btn" type="button">Browse Threads</button>
+                    </div>
+                    <p class="hero-hint" id="hero-hint">Start with a quick intro post, or check in daily for easy XP.</p>
                 </section>
 
                 <!-- Community Stats Bar (public) -->
@@ -2371,7 +2429,7 @@
                 <!-- Sign-in CTA (logged-out only) -->
                 <section class="signin-cta" id="signin-cta" style="display: none;">
                     <h2>Join the Community</h2>
-                    <p>Create a free account to post, earn XP, unlock badges, and climb the leaderboard. It takes 10 seconds.</p>
+                    <p>Create a free account to post, earn XP, unlock badges, and climb the leaderboard. Your first post takes under a minute.</p>
                     <button class="btn-signup" id="cta-signup">Get Started — It's Free</button>
                     <div class="features-preview">
                         <div class="preview-item">
@@ -2409,6 +2467,10 @@
                             <div class="icon">🌊</div>
                             <p>The feed is quiet... for now.</p>
                             <p style="font-size: 0.8rem; margin-top: 0.5rem;">Be the first to make some waves.</p>
+                            <div class="empty-actions">
+                                <button class="btn-hero-primary" id="btn-feed-cta" type="button">Start a Post</button>
+                                <button class="btn-hero-secondary" id="btn-feed-browse" type="button">Browse Threads</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2448,6 +2510,10 @@
                             <div class="feed-empty" id="threads-empty">
                                 <div class="icon">💬</div>
                                 <p>No threads yet — start the conversation!</p>
+                                <div class="empty-actions">
+                                    <button class="btn-hero-primary" id="btn-threads-cta" type="button">Create the First Thread</button>
+                                    <button class="btn-hero-secondary" id="btn-threads-intro" type="button">Post an Intro</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2459,6 +2525,10 @@
                         <div class="feed-empty" id="lb-empty">
                             <div class="icon">🏆</div>
                             <p>The leaderboard is empty... be the first Legend.</p>
+                            <div class="empty-actions">
+                                <button class="btn-hero-primary" id="btn-lb-cta" type="button">Earn Your First XP</button>
+                                <button class="btn-hero-secondary" id="btn-lb-checkin" type="button">Daily Check-in</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2593,10 +2663,10 @@
             <div class="onboarding-step" data-step="2">
                 <h2>What You Can Do 🚀</h2>
                 <div class="onboarding-features">
-                    <div class="onboarding-feature">💬 <strong>Discuss</strong> — Start conversations about design, dev, and vibes</div>
-                    <div class="onboarding-feature">🎨 <strong>Showcase</strong> — Share your projects and get feedback</div>
-                    <div class="onboarding-feature">❓ <strong>Ask</strong> — Get help from fellow community members</div>
-                    <div class="onboarding-feature">🌈 <strong>Vibe</strong> — Share your mood, wins, and good energy</div>
+                    <div class="onboarding-feature">💬 <strong>Start Threads</strong> — Share ideas, questions, wins, and good energy</div>
+                    <div class="onboarding-feature">🎨 <strong>Showcase</strong> — Share what you’re making and get support</div>
+                    <div class="onboarding-feature">⚡ <strong>Daily Check-in</strong> — Show up, build streaks, and stack XP</div>
+                    <div class="onboarding-feature">🏅 <strong>Collect Badges</strong> — Your presence counts. Literally.</div>
                 </div>
             </div>
             <!-- Step 3: Quick Profile -->
@@ -2753,6 +2823,128 @@
                 };
             }
 
+            // ── First-Run / Hero CTAs ─────────────────────
+            function switchToTab(tabName) {
+                const btn = document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
+                if (btn) btn.click();
+                const tabBar = document.querySelector('.tab-bar');
+                if (tabBar) tabBar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            function openNewPostModal(opts) {
+                if (!currentUser) {
+                    showToast('Sign in to post!', 'error');
+                    if (clerk) clerk.openSignUp();
+                    return;
+                }
+
+                const modal = $('#modal-new-post');
+                const typeSelect = $('#post-type');
+                const contentInput = $('#post-content');
+
+                if (opts && opts.postType && typeSelect) {
+                    typeSelect.value = opts.postType;
+                }
+
+                modal.classList.add('visible');
+                if (contentInput) contentInput.focus();
+            }
+
+            function setupHeroActions() {
+                const primary = $('#hero-primary-btn');
+                const secondary = $('#hero-secondary-btn');
+
+                if (primary) {
+                    primary.addEventListener('click', () => {
+                        if (!currentUser) {
+                            clerk.openSignUp();
+                            return;
+                        }
+                        switchToTab('threads');
+                        const hasAny = profileData && ((profileData.totalPosts || 0) + (profileData.totalReplies || 0) > 0);
+                        openNewPostModal({ postType: hasAny ? 'discussion' : 'intro' });
+                    });
+                }
+
+                if (secondary) {
+                    secondary.addEventListener('click', () => {
+                        if (!currentUser) {
+                            switchToTab('threads');
+                            return;
+                        }
+                        const btn = $('#btn-checkin');
+                        if (btn) btn.click();
+                    });
+                }
+
+                // Empty-state CTAs
+                const feedCta = $('#btn-feed-cta');
+                if (feedCta) {
+                    feedCta.addEventListener('click', () => {
+                        switchToTab('threads');
+                        openNewPostModal({ postType: 'discussion' });
+                    });
+                }
+
+                const feedBrowse = $('#btn-feed-browse');
+                if (feedBrowse) {
+                    feedBrowse.addEventListener('click', () => switchToTab('threads'));
+                }
+
+                const threadsCta = $('#btn-threads-cta');
+                if (threadsCta) {
+                    threadsCta.addEventListener('click', () => openNewPostModal({ postType: 'discussion' }));
+                }
+
+                const threadsIntro = $('#btn-threads-intro');
+                if (threadsIntro) {
+                    threadsIntro.addEventListener('click', () => openNewPostModal({ postType: 'intro' }));
+                }
+
+                const lbCta = $('#btn-lb-cta');
+                if (lbCta) {
+                    lbCta.addEventListener('click', () => {
+                        if (!currentUser) {
+                            clerk.openSignUp();
+                            return;
+                        }
+                        switchToTab('threads');
+                        openNewPostModal({ postType: 'intro' });
+                    });
+                }
+
+                const lbCheckin = $('#btn-lb-checkin');
+                if (lbCheckin) {
+                    lbCheckin.addEventListener('click', () => {
+                        if (!currentUser) {
+                            clerk.openSignUp();
+                            return;
+                        }
+                        const btn = $('#btn-checkin');
+                        if (btn) btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+                }
+            }
+
+            function refreshHeroActions() {
+                const primary = $('#hero-primary-btn');
+                const secondary = $('#hero-secondary-btn');
+                const hint = $('#hero-hint');
+                if (!primary || !secondary || !hint) return;
+
+                if (!currentUser) {
+                    primary.textContent = 'Join Free';
+                    secondary.textContent = 'Browse Threads';
+                    hint.textContent = 'No cost. No catch. Join, post, and earn XP just for showing up.';
+                    return;
+                }
+
+                const hasAnyPosts = profileData && ((profileData.totalPosts || 0) + (profileData.totalReplies || 0) > 0);
+                primary.textContent = hasAnyPosts ? 'Start a Post (+25 XP)' : 'Post Your Intro (+25 XP)';
+                secondary.textContent = 'Daily Check-in (+10 XP)';
+                hint.textContent = hasAnyPosts ? 'Quick win: check in daily and react to posts for easy XP.' : 'Fastest start: post a 1–2 sentence intro. Your presence counts.';
+            }
+
             // ── Init ────────────────────────────────────────
             async function init() {
                 // Load public data immediately
@@ -2790,6 +2982,8 @@
                 const firstName = currentUser.firstName || 'friend';
                 $('#hero-greeting').innerHTML = 'Welcome back, <strong>' + firstName + '</strong>';
 
+                refreshHeroActions();
+
                 // Auth section: user pill
                 const authEl = $('#auth-section');
                 const avatar = currentUser.imageUrl || '';
@@ -2816,6 +3010,7 @@
 
                 // Load profile, then check onboarding
                 loadProfile().then(() => {
+                    refreshHeroActions();
                     checkOnboarding();
                 });
             }
@@ -2844,6 +3039,8 @@
                 // Clear notification polling
                 if (notifPollTimer) { clearInterval(notifPollTimer); notifPollTimer = null; }
                 profileData = null;
+
+                refreshHeroActions();
             }
 
             // ── Load Community Stats ────────────────────────
@@ -3687,7 +3884,12 @@
                             await apiPost('/api/community/onboarding', {});
                             overlay.classList.remove('visible');
                             showToast('Welcome aboard! 🎉', 'xp');
-                            loadProfile();
+                            await loadProfile();
+                            refreshHeroActions();
+
+                            // Immediate first action: create an intro post
+                            switchToTab('threads');
+                            openNewPostModal({ postType: 'intro' });
                         } catch (e) {
                             showToast('Something went wrong', 'error');
                         }
@@ -3712,7 +3914,7 @@
                 if (dotEl) dotEl.classList.add('active');
 
                 const nextBtn = $('#btn-onboard-next');
-                nextBtn.textContent = onboardStep === 3 ? 'Get Started! 🚀' : 'Next →';
+                nextBtn.textContent = onboardStep === 3 ? 'Save & Create Your First Post 🚀' : 'Next →';
             }
 
             function checkOnboarding() {
@@ -3831,6 +4033,8 @@
                 setupSearch();
                 setupSettings();
                 setupOnboarding();
+                setupHeroActions();
+                refreshHeroActions();
             });
 
         })();
