@@ -7,9 +7,10 @@ module.exports = {
     // Target files to test
     targets: {
         mainSite: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/temp_review.html',
-        contactForm: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/assets/contact-form.html'
+        contactForm: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/assets/contact-form.html',
+        communityPortal: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/community-portal.html'
     },
-    
+
     // Viewport configurations for responsive testing
     viewports: {
         mobile: { width: 375, height: 667, name: 'Mobile (iPhone SE)' },
@@ -20,7 +21,7 @@ module.exports = {
         desktop: { width: 1920, height: 1080, name: 'Desktop (1080p)' },
         ultrawide: { width: 2560, height: 1440, name: 'Ultrawide (1440p)' }
     },
-    
+
     // Animation/transition timing thresholds (ms)
     timing: {
         transitionMax: 500,     // Max acceptable transition duration
@@ -30,7 +31,7 @@ module.exports = {
         scrollDelay: 50,        // Delay for scroll events
         hoverDelay: 200         // Delay for hover state changes
     },
-    
+
     // Accessibility standards
     accessibility: {
         contrastRatioMin: 4.5,      // WCAG AA for normal text
@@ -40,14 +41,14 @@ module.exports = {
         requiredLandmarks: ['main', 'navigation'],
         maxHeadingSkip: 1           // Max heading level skip allowed
     },
-    
+
     // Test timeouts
     timeouts: {
         test: 30000,
         navigation: 10000,
         element: 5000
     },
-    
+
     // External link domains to verify (should be reachable)
     externalDomains: [
         'globaldeets.com',
@@ -56,7 +57,7 @@ module.exports = {
         'goodflippinvibes.com',
         'formspree.io'
     ],
-    
+
     // CSS properties to validate for transitions
     transitionProperties: [
         'opacity',
@@ -66,7 +67,7 @@ module.exports = {
         'box-shadow',
         'color'
     ],
-    
+
     // Form validation rules
     formValidation: {
         requiredFields: ['name', 'email', 'description'],
