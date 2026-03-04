@@ -54,7 +54,7 @@ function printSuiteHeader(suiteName) {
 
 function printTestResult(test) {
     let icon, color;
-    
+
     switch (test.status) {
         case 'PASS':
             icon = '✓';
@@ -76,13 +76,13 @@ function printTestResult(test) {
             icon = '?';
             color = colors.white;
     }
-    
+
     console.log(`  ${color}${icon}${colors.reset} ${test.name}`);
-    
+
     if (test.status === 'FAIL' && test.error) {
         console.log(`    ${colors.red}└─ Error: ${test.error}${colors.reset}`);
     }
-    
+
     if (test.status === 'WARN' && test.warning) {
         console.log(`    ${colors.yellow}└─ ${test.warning}${colors.reset}`);
     }
@@ -90,15 +90,15 @@ function printTestResult(test) {
 
 function printSuiteSummary(result) {
     const { passed, failed, warnings, skipped, total, duration } = result;
-    
+
     console.log('\n  ' + colors.dim + '─'.repeat(50) + colors.reset);
-    
+
     const parts = [];
     if (passed > 0) parts.push(colors.green + `${passed} passed` + colors.reset);
     if (failed > 0) parts.push(colors.red + `${failed} failed` + colors.reset);
     if (warnings > 0) parts.push(colors.yellow + `${warnings} warnings` + colors.reset);
     if (skipped > 0) parts.push(colors.dim + `${skipped} skipped` + colors.reset);
-    
+
     console.log(`  ${parts.join(', ')} ${colors.dim}(${formatDuration(duration)})${colors.reset}`);
 }
 
@@ -109,26 +109,26 @@ function printFinalReport(allResults) {
     const totalSkipped = allResults.reduce((sum, r) => sum + r.skipped, 0);
     const totalTests = allResults.reduce((sum, r) => sum + r.total, 0);
     const totalDuration = allResults.reduce((sum, r) => sum + r.duration, 0);
-    
+
     console.log('\n\n');
     console.log(colors.cyan + '╔══════════════════════════════════════════════════════════════════╗' + colors.reset);
     console.log(colors.cyan + '║' + colors.reset + colors.bright + '                        FINAL REPORT                              ' + colors.reset + colors.cyan + '║' + colors.reset);
     console.log(colors.cyan + '╚══════════════════════════════════════════════════════════════════╝' + colors.reset);
-    
+
     console.log('\n  ' + colors.bright + 'Test Suites:' + colors.reset);
     console.log('  ─'.repeat(30));
-    
+
     allResults.forEach(result => {
-        const status = result.failed > 0 
+        const status = result.failed > 0
             ? colors.red + 'FAIL' + colors.reset
-            : result.warnings > 0 
+            : result.warnings > 0
                 ? colors.yellow + 'WARN' + colors.reset
                 : colors.green + 'PASS' + colors.reset;
-        
+
         console.log(`  ${status}  ${result.suite}`);
         console.log(`       ${colors.dim}${result.passed}/${result.total} passed, ${result.warnings} warnings${colors.reset}`);
     });
-    
+
     console.log('\n  ' + colors.bright + 'Overall Statistics:' + colors.reset);
     console.log('  ─'.repeat(30));
     console.log(`  Total Tests:    ${totalTests}`);
@@ -137,20 +137,20 @@ function printFinalReport(allResults) {
     console.log(`  ${colors.yellow}Warnings:       ${totalWarnings}${colors.reset}`);
     console.log(`  ${colors.dim}Skipped:        ${totalSkipped}${colors.reset}`);
     console.log(`  Duration:       ${formatDuration(totalDuration)}`);
-    
+
     // Pass rate
     const passRate = ((totalPassed / (totalTests - totalSkipped)) * 100).toFixed(1);
     console.log(`\n  ${colors.bright}Pass Rate: ${passRate >= 90 ? colors.green : passRate >= 70 ? colors.yellow : colors.red}${passRate}%${colors.reset}`);
-    
+
     // Critical issues summary
-    const criticalIssues = allResults.flatMap(r => 
+    const criticalIssues = allResults.flatMap(r =>
         r.tests.filter(t => t.status === 'FAIL').map(t => ({
             suite: r.suite,
             test: t.name,
             error: t.error
         }))
     );
-    
+
     if (criticalIssues.length > 0) {
         console.log('\n  ' + colors.red + colors.bright + '🚨 CRITICAL ISSUES REQUIRING ATTENTION:' + colors.reset);
         console.log('  ─'.repeat(30));
@@ -161,16 +161,16 @@ function printFinalReport(allResults) {
             }
         });
     }
-    
+
     // Warnings summary
-    const allWarnings = allResults.flatMap(r => 
+    const allWarnings = allResults.flatMap(r =>
         r.tests.filter(t => t.status === 'WARN').map(t => ({
             suite: r.suite,
             test: t.name,
             warning: t.warning
         }))
     );
-    
+
     if (allWarnings.length > 0) {
         console.log('\n  ' + colors.yellow + colors.bright + '⚠️  WARNINGS TO CONSIDER:' + colors.reset);
         console.log('  ─'.repeat(30));
@@ -181,7 +181,7 @@ function printFinalReport(allResults) {
             console.log(`  ${colors.dim}... and ${allWarnings.length - 10} more warnings${colors.reset}`);
         }
     }
-    
+
     // Final status banner
     console.log('\n');
     if (totalFailed === 0 && totalWarnings === 0) {
@@ -192,15 +192,15 @@ function printFinalReport(allResults) {
         console.log(colors.bgRed + colors.bright + '  ❌ TESTS FAILED - FIXES REQUIRED BEFORE DEPLOYMENT  ' + colors.reset);
     }
     console.log('\n');
-    
+
     return { totalPassed, totalFailed, totalWarnings, totalSkipped, totalTests };
 }
 
 async function runAllTests(options = {}) {
     const { verbose = true, suites = 'all' } = options;
-    
+
     printHeader();
-    
+
     const testSuites = [
         { name: 'Structure', runner: runStructureTests },
         { name: 'Navigation', runner: runNavigationTests },
@@ -211,26 +211,26 @@ async function runAllTests(options = {}) {
         { name: 'Compatibility', runner: runCompatibilityTests },
         { name: 'Community Portal', runner: runCommunityTests }
     ];
-    
-    const suitesToRun = suites === 'all' 
-        ? testSuites 
+
+    const suitesToRun = suites === 'all'
+        ? testSuites
         : testSuites.filter(s => suites.includes(s.name.toLowerCase()));
-    
+
     const allResults = [];
-    
+
     for (const suite of suitesToRun) {
         printSuiteHeader(suite.name);
-        
+
         try {
             console.log(`  ${colors.dim}Running tests...${colors.reset}`);
             const result = await suite.runner();
             allResults.push(result);
-            
+
             if (verbose) {
                 console.log('');
                 result.tests.forEach(test => printTestResult(test));
             }
-            
+
             printSuiteSummary(result);
         } catch (error) {
             console.log(`  ${colors.red}✗ Suite failed to run: ${error.message}${colors.reset}`);
@@ -246,9 +246,9 @@ async function runAllTests(options = {}) {
             });
         }
     }
-    
+
     const summary = printFinalReport(allResults);
-    
+
     return {
         results: allResults,
         summary
@@ -259,10 +259,10 @@ async function runAllTests(options = {}) {
 if (require.main === module) {
     const args = process.argv.slice(2);
     const verbose = !args.includes('--quiet');
-    const suites = args.includes('--suite') 
-        ? args[args.indexOf('--suite') + 1]?.split(',') 
+    const suites = args.includes('--suite')
+        ? args[args.indexOf('--suite') + 1]?.split(',')
         : 'all';
-    
+
     runAllTests({ verbose, suites })
         .then(({ summary }) => {
             process.exit(summary.totalFailed > 0 ? 1 : 0);
