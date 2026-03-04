@@ -18,7 +18,12 @@
 
     <!-- Clerk Auth SDK -->
     <script>
-        window.CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuZ29vZGZsaXBwaW52aWJlcy5jb20k';
+        // CLERK_PUBLISHABLE_KEY is injected by _worker.js via window.ENV at runtime.
+        // The fallback here is used in local dev (direct file:// or http-server, no worker).
+        window.CLERK_PUBLISHABLE_KEY =
+            (window.ENV && window.ENV.CLERK_PUBLISHABLE_KEY)
+                ? window.ENV.CLERK_PUBLISHABLE_KEY
+                : 'pk_live_Y2xlcmsuZ29vZGZsaXBwaW52aWJlcy5jb20k';
         window.WORKER_API_URL = 'https://gfd-auth.weave0.workers.dev';
     </script>
     <script src="https://cdn.clerk.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js" crossorigin="anonymous"></script>

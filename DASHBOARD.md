@@ -1,10 +1,11 @@
 # 🎯 Good Flippin Design - Developer Dashboard
 
-## 🌐 Your Live Site
+## 🌐 Your Live Sites
 
-- **Production**: https://goodflippindesign.com ✅ LIVE
-- **Cloudflare**: https://goodflippindesign.pages.dev
-- **Latest Deploy**: https://71255fe9.goodflippindesign.pages.dev
+- **Main site**: https://goodflippindesign.com ✅ LIVE
+- **Community portal**: https://goodflippindesign.com/community-portal.html ✅ LIVE
+- **Donate page**: https://goodflippindesign.com/donate.html ✅ LIVE
+- **Cloudflare Pages**: https://goodflippindesign.pages.dev
 
 ## 💰 Monthly Costs: **$0**
 
@@ -99,16 +100,19 @@ Local Edit → Commit → Push → Cloudflare Detects → Builds → Deploys
 
 ## 📁 Key Files
 
-| File                           | Purpose                                      |
-| ------------------------------ | -------------------------------------------- |
-| `index.html`                   | Production website (1044 lines)              |
-| `temp_review.html`             | Test target (auto-synced)                    |
-| `wrangler.toml`                | Cloudflare Pages config                      |
-| `_headers`                     | Security headers (CSP, XSS)                  |
-| `.github/workflows/ci.yml`     | Test automation (PR only)                    |
-| `scripts/sync-review.js`       | File sync automation                         |
-| `scripts/update-cache-bust.js` | Cache busting                                |
-| `functions/api/contact.js`     | Form handler (FREE alternative to Formspree) |
+| File                         | Purpose                                                 |
+| ---------------------------- | ------------------------------------------------------- |
+| `index.html`                 | Production portfolio site (~7,260 lines)                |
+| `community-portal.html`      | Community portal — Clerk auth, dashboard (~4,045 lines) |
+| `donate.html`                | Donations — Stripe + Cloudflare Worker                  |
+| `temp_review.html`           | Test target (auto-synced from index.html)               |
+| `assets/contact-form.html`   | Standalone inquiry form — Formspree                     |
+| `_worker.js`                 | CF Pages worker: routes /api/\*, injects window.ENV     |
+| `workers/auth.js`            | Auth API — Clerk JWT + D1 database                      |
+| `workers/stripe-payments.js` | Stripe payment intents worker                           |
+| `wrangler.toml`              | Cloudflare Pages config                                 |
+| `_headers`                   | Security headers (CSP, HSTS, X-Frame-Options)           |
+| `scripts/csp-config.js`      | CSP source of truth — edit here, run `npm run gen:csp`  |
 
 ---
 
@@ -228,7 +232,7 @@ Already set up at `functions/api/contact.js`
 
 ---
 
-**Last Updated**: January 28, 2026, 5:45 PM
+**Last Updated**: March 3, 2026
 **Status**: ✅ DEPLOYED & LIVE
 **Monthly Cost**: $0
-**Your Focus**: Closing deals, not DevOps
+**Features**: Portfolio + Community Portal (Clerk) + Donations (Stripe)

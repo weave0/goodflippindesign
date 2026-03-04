@@ -1,67 +1,54 @@
 name: Deploy to Cloudflare Pages
 
 on:
-    push:
-        branches: [main]
-    workflow_dispatch:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
-# Cloudflare Pages handles deployment automatically via GitHub integration
-# This workflow is for manual triggers and additional deployment steps
+# Cloudflare Pages handles deployment automatically via GitHub integration.
+# This workflow provides a lightweight sanity gate on every push to main.
+# Full Puppeteer tests already run in ci.yml on every PR — no need to repeat them here.
 
 jobs:
-    pre-deploy:
-        name: Pre-deployment Checks
-        runs-on: ubuntu-latest
+  pre-deploy:
+    name: Pre-deployment Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5 # Cost control
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "npm"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
 
-            - name: Install dependencies
-              run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-            - name: Build and optimize
-              run: npm run build
+      - name: Build and sync
+        run: npm run build # cache-bust + sync index → temp_review
 
-            - name: Run tests
-              run: npm test
+      - name: Verify CSP headers are up to date
+        run: |
+          node scripts/generate-csp.js
+          git diff --exit-code _headers || (
+            echo "❌ _headers is out of sync with scripts/csp-config.js"
+            echo "   Run: npm run gen:csp  then commit _headers"
+            exit 1
+          )
 
-            - name: Verify files in sync
-              run: |
-                  if ! diff -q index.html temp_review.html > /dev/null 2>&1; then
-                    echo "❌ Files out of sync after build!"
-                    exit 1
-                  fi
-                  echo "✅ All files synced"
+      - name: Quick accessibility smoke test
+        run: node tests/accessibility.test.js
 
-            - name: Check cache bust
-              run: |
-                  CACHE_BUST=$(grep -oP '<!-- Cache bust: \K[0-9-:]+' index.html)
-                  echo "Cache bust timestamp: $CACHE_BUST"
-
-    # Cloudflare Pages deploys automatically when connected to GitHub
-    # If you want manual deployment, uncomment and configure:
-    #
-    # deploy:
-    #   name: Deploy to Cloudflare Pages
-    #   needs: pre-deploy
-    #   runs-on: ubuntu-latest
-    #
-    #   steps:
-    #     - name: Checkout
-    #       uses: actions/checkout@v4
-    #
-    #     - name: Deploy to Cloudflare Pages
-    #       uses: cloudflare/pages-action@v1
-    #       with:
-    #         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-    #         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-    #         projectName: good-flippin-design
-    #         directory: .
-    #         gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify cache bust is present
+        run: |
+          node -e "
+            const fs = require('fs');
+            const html = fs.readFileSync('index.html', 'utf8');
+            const match = html.match(/<!-- Cache bust: ([\d\-:]+) -->/);
+            if (!match) { console.error('Cache bust comment missing'); process.exit(1); }
+            console.log('Cache bust:', match[1]);
+          "

@@ -143,29 +143,44 @@ jobs:
 
       - name: Verify deployment
         run: |
-          echo "🧪 Checking deployed site markers..."
+          echo "🧪 Checking deployed site..."
 
           # Poll because Pages edge propagation can take a few minutes even after build success.
           MAX_ATTEMPTS=30
           SLEEP_SECONDS=20
+          COMMIT="${{ steps.commit.outputs.sha }}"
 
           for i in $(seq 1 $MAX_ATTEMPTS); do
-            echo "\n🔁 Attempt $i/$MAX_ATTEMPTS..."
-            INDEX_HTML=$(curl -sS -L --compressed -H 'Cache-Control: no-store' -H 'Pragma: no-cache' "https://goodflippindesign.pages.dev/?bust=$i")
-            # Pages commonly redirects clean URLs (e.g. /community-portal.html -> /community-portal)
-            PORTAL_HTML=$(curl -sS -L --compressed -H 'Cache-Control: no-store' -H 'Pragma: no-cache' "https://goodflippindesign.pages.dev/community-portal.html?bust=$i")
+            echo ""
+            echo "🔁 Attempt $i/$MAX_ATTEMPTS..."
 
+            # Fetch both pages (follow redirects, bypass CDN cache)
+            INDEX_HTML=$(curl -sS -L -w '\n__STATUS__%{http_code}' --compressed \
+              -H 'Cache-Control: no-store' -H 'Pragma: no-cache' \
+              "https://goodflippindesign.pages.dev/?bust=$i")
+            PORTAL_HTML=$(curl -sS -L -w '\n__STATUS__%{http_code}' --compressed \
+              -H 'Cache-Control: no-store' -H 'Pragma: no-cache' \
+              "https://goodflippindesign.pages.dev/community-portal.html?bust=$i")
+
+            # Extract HTTP status codes
+            INDEX_STATUS=$(echo "$INDEX_HTML" | grep '__STATUS__' | sed 's/__STATUS__//')
+            PORTAL_STATUS=$(echo "$PORTAL_HTML" | grep '__STATUS__' | sed 's/__STATUS__//')
+
+            # Check structural markers (stable across content changes)
             HAS_COMMUNITY_LINK=0
             HAS_HERO_CTA=0
+            HAS_INDEX_TITLE=0
+            grep -q 'community-portal.html' <<<"$INDEX_HTML"  && HAS_COMMUNITY_LINK=1 || true
+            grep -q 'hero-primary-btn'      <<<"$PORTAL_HTML" && HAS_HERO_CTA=1       || true
+            grep -q '<title>'               <<<"$INDEX_HTML"  && HAS_INDEX_TITLE=1    || true
 
-            grep -q 'community-portal.html' <<<"$INDEX_HTML" && HAS_COMMUNITY_LINK=1 || true
-            grep -q 'hero-primary-btn' <<<"$PORTAL_HTML" && HAS_HERO_CTA=1 || true
+            echo "- index.html:            HTTP $INDEX_STATUS | title: $([ $HAS_INDEX_TITLE -eq 1 ] && echo '✅' || echo '❌') | community link: $([ $HAS_COMMUNITY_LINK -eq 1 ] && echo '✅' || echo '❌')"
+            echo "- community-portal.html: HTTP $PORTAL_STATUS | hero CTA btn: $([ $HAS_HERO_CTA -eq 1 ] && echo '✅' || echo '❌')"
 
-            echo "- index.html: community link: $(if [ $HAS_COMMUNITY_LINK -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
-            echo "- community-portal.html: hero CTA id: $(if [ $HAS_HERO_CTA -eq 1 ]; then echo '✅ FOUND'; else echo '❌ MISSING'; fi)"
-
-            if [ $HAS_COMMUNITY_LINK -eq 1 ] && [ $HAS_HERO_CTA -eq 1 ]; then
-              echo "\n✅ Deployment verified via content markers."
+            if [ "$INDEX_STATUS" = "200" ] && [ "$PORTAL_STATUS" = "200" ] && \
+               [ $HAS_INDEX_TITLE -eq 1 ] && [ $HAS_COMMUNITY_LINK -eq 1 ] && [ $HAS_HERO_CTA -eq 1 ]; then
+              echo ""
+              echo "✅ Deployment verified — HTTP 200, structural markers confirmed."
               exit 0
             fi
 
@@ -173,7 +188,9 @@ jobs:
             sleep $SLEEP_SECONDS
           done
 
-          echo "\n❌ Deployment markers not found after $((MAX_ATTEMPTS * SLEEP_SECONDS)) seconds."
+          echo ""
+          echo "❌ Deployment verification failed after $((MAX_ATTEMPTS * SLEEP_SECONDS)) seconds."
+          echo "   Expected: index HTTP 200 + community-portal.html nav link + hero-primary-btn"
           exit 1
 
       - name: Dump Cloudflare deployment logs (on failure)
