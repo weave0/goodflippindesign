@@ -80,6 +80,7 @@ const SITES = {
         'https://plausible.io',
         ...SHARED.stripe.script,
         ...SHARED.clerk.script,
+        'https://www.instagram.com',  // Instagram embed.js
       ],
       'connect-src': [
         "'self'",
@@ -94,8 +95,9 @@ const SITES = {
         'https://plausible.io',
         'https://gfd-auth.weave0.workers.dev',
         ...SHARED.clerk.connect,
+        'https://www.instagram.com',   // Instagram embed API
       ],
-      'frame-src': [...SHARED.stripe.frame, ...SHARED.clerk.frame],
+      'frame-src': [...SHARED.stripe.frame, ...SHARED.clerk.frame, 'https://www.instagram.com', 'https://www.facebook.com'],
     },
 
     // Non-CSP security headers
