@@ -11,6 +11,7 @@
     "test:watch": "nodemon --watch index.html --watch temp_review.html --watch tests/ --exec npm test",
     "test:a11y": "node tests/accessibility.test.js",
     "test:responsive": "node tests/responsive.test.js",
+    "test:community": "node tests/community.test.js",
     "cache-bust": "node scripts/update-cache-bust.js",
     "build": "npm run cache-bust && npm run sync",
     "pretest": "npm run sync",
