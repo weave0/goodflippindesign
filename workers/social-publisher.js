@@ -634,6 +634,194 @@ async function postThreads(token, imageUrl, text) {
 }
 
 // ──────────────────────────────────────────────────────────────
+//  TikTok Content Posting API v2
+//  Uses PULL_FROM_URL: TikTok fetches media directly from R2
+// ──────────────────────────────────────────────────────────────
+async function postTikTok(token, mediaUrl, text) {
+  const accessToken = token.access_token;
+  const BASE = 'https://open.tiktokapis.com/v2';
+
+  if (mediaUrl) {
+    // Video post via PULL_FROM_URL (TikTok fetches the file from your URL)
+    const initRes = await fetch(`${BASE}/post/publish/video/init/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: JSON.stringify({
+        post_info: {
+          title: text.substring(0, 150),
+          privacy_level: 'FOLLOWER_OF_CREATOR',
+          disable_duet: false,
+          disable_comment: false,
+          disable_stitch: false,
+          video_cover_timestamp_ms: 1000,
+        },
+        source_info: {
+          source: 'PULL_FROM_URL',
+          video_url: mediaUrl,
+        },
+      }),
+    });
+    const initData = await initRes.json();
+    if (!initRes.ok || initData.error?.code !== 'ok') {
+      throw new Error(`TikTok video init failed: ${initData.error?.message || JSON.stringify(initData)}`);
+    }
+
+    const publishId = initData.data?.publish_id;
+    return {
+      external_id: publishId || 'pending',
+      external_url: `https://www.tiktok.com/`, // final URL available after processing
+    };
+  } else {
+    // Text-only post via direct post API (TikTok allows text posts for some accounts)
+    const postRes = await fetch(`${BASE}/post/publish/content/init/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: JSON.stringify({
+        post_info: {
+          title: text.substring(0, 150),
+          privacy_level: 'FOLLOWER_OF_CREATOR',
+          disable_comment: false,
+        },
+        source_info: { source: 'FILE_UPLOAD', video_size: 0, chunk_size: 0, total_chunk_count: 0 },
+        post_mode: 'DIRECT_POST',
+        media_type: 'VIDEO',
+      }),
+    });
+    const postData = await postRes.json();
+    if (!postRes.ok || postData.error?.code !== 'ok') {
+      throw new Error(`TikTok text post failed: ${postData.error?.message || JSON.stringify(postData)}`);
+    }
+    return {
+      external_id: postData.data?.publish_id || 'pending',
+      external_url: 'https://www.tiktok.com/',
+    };
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+//  YouTube Data API v3 — Community post or video description
+//  Community posts require youtube.force-ssl scope and
+//  are available for channels with 500+ subscribers.
+//  Video upload is initiated here as a resumable upload to R2 URL.
+// ──────────────────────────────────────────────────────────────
+async function postYouTube(token, mediaUrl, text) {
+  const accessToken = token.access_token;
+  const BASE = 'https://www.googleapis.com';
+
+  if (mediaUrl) {
+    // Initiate a resumable upload: fetch video from R2 and upload to YouTube
+    // Step 1: Request upload session
+    const title = text.substring(0, 100);
+    const description = text.substring(0, 5000);
+
+    const initRes = await fetch(
+      `${BASE}/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json; charset=UTF-8',
+          'X-Upload-Content-Type': 'video/*',
+        },
+        body: JSON.stringify({
+          snippet: {
+            title,
+            description,
+            categoryId: '22', // People & Blogs
+          },
+          status: {
+            privacyStatus: 'public',
+            selfDeclaredMadeForKids: false,
+          },
+        }),
+      }
+    );
+
+    if (!initRes.ok) {
+      const errText = await initRes.text();
+      throw new Error(`YouTube upload init failed (${initRes.status}): ${errText}`);
+    }
+
+    // The upload session URL is in the Location header
+    const uploadUrl = initRes.headers.get('Location');
+    if (!uploadUrl) {
+      throw new Error('YouTube did not return an upload session URL');
+    }
+
+    // Step 2: Fetch video from R2 and stream to YouTube
+    const videoRes = await fetch(mediaUrl);
+    if (!videoRes.ok) {
+      throw new Error(`Could not fetch video from R2: ${videoRes.status}`);
+    }
+
+    const contentType = videoRes.headers.get('Content-Type') || 'video/mp4';
+    const contentLength = videoRes.headers.get('Content-Length');
+
+    const uploadHeaders = {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': contentType,
+    };
+    if (contentLength) uploadHeaders['Content-Length'] = contentLength;
+
+    const uploadRes = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: uploadHeaders,
+      body: videoRes.body,
+      duplex: 'half',
+    });
+
+    if (!uploadRes.ok && uploadRes.status !== 308) {
+      const errText = await uploadRes.text();
+      throw new Error(`YouTube upload failed (${uploadRes.status}): ${errText}`);
+    }
+
+    const uploadData = await uploadRes.json().catch(() => ({}));
+    const videoId = uploadData.id;
+    return {
+      external_id: videoId || 'pending',
+      external_url: videoId ? `https://www.youtube.com/watch?v=${videoId}` : 'https://studio.youtube.com',
+    };
+  } else {
+    // Community post (text only) — requires channel with community post feature
+    const communityRes = await fetch(
+      `${BASE}/youtube/v3/communityPosts?part=snippet`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          snippet: {
+            type: 'textOriginalPost',
+            textOriginalPost: { text: text.substring(0, 5000) },
+          },
+        }),
+      }
+    );
+
+    if (!communityRes.ok) {
+      const errText = await communityRes.text();
+      // Community posts may not be available on all channels
+      throw new Error(`YouTube community post failed (${communityRes.status}): ${errText}`);
+    }
+
+    const communityData = await communityRes.json();
+    const postId = communityData.id;
+    return {
+      external_id: postId,
+      external_url: postId ? `https://www.youtube.com/post/${postId}` : 'https://studio.youtube.com',
+    };
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
 //  Content formatter (char limits, hashtag truncation)
 // ──────────────────────────────────────────────────────────────
 
@@ -725,11 +913,11 @@ async function publishVariant(variant, db, env) {
         result = await postThreads(token, mediaUrl, text);
         break;
       case 'tiktok':
-        // TikTok video publishing requires binary upload — not yet implemented
-        throw new Error('TikTok publishing not yet implemented (requires video upload endpoint)');
+        result = await postTikTok(token, mediaUrl, text);
+        break;
       case 'youtube':
-        // YouTube requires multipart video upload — not yet implemented
-        throw new Error('YouTube publishing not yet implemented (requires video upload endpoint)');
+        result = await postYouTube(token, mediaUrl, text);
+        break;
       default:
         throw new Error(`Unsupported platform: ${platform}`);
     }
