@@ -358,6 +358,12 @@ async function handleUpload(request, user, env) {
 
     const brand = formData.get('brand') || 'gfv';
     const category = formData.get('category') || 'uncategorized';
+    const title = formData.get('title') || file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+    const mediaType = formData.get('media_type') || (
+      file.type.startsWith('video') ? 'video' :
+      file.type.startsWith('audio') ? 'audio' :
+      file.type === 'application/pdf' ? 'document' : 'image'
+    );
     const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
     const safeFilename = file.name
       .replace(/[^a-zA-Z0-9._-]/g, '_')
@@ -373,6 +379,16 @@ async function handleUpload(request, user, env) {
         uploadedBy: user.id,
       },
     });
+
+    // Persist metadata to D1 cms_assets
+    if (env.DB) {
+      const assetId = crypto.randomUUID();
+      await env.DB.prepare(
+        `INSERT INTO cms_assets
+           (id, brand, category, title, file_path, media_type, mime_type, file_size, uploaded_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(assetId, brand, category, title, r2Key, mediaType, file.type, file.size, user.id).run();
+    }
 
     await logAudit(env.DB, user.id, 'upload', 'file', r2Key, {
       filename: file.name,

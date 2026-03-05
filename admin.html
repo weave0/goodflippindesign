@@ -922,6 +922,106 @@
             max-height: none;
         }
 
+        /* ── Upload Dropzone ─────────────────────────────────── */
+        .upload-zone {
+            border: 2px dashed rgba(0, 212, 255, 0.35);
+            border-radius: 14px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease;
+            background: rgba(0, 212, 255, 0.03);
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.drag-over {
+            border-color: rgba(0, 212, 255, 0.75);
+            background: rgba(0, 212, 255, 0.07);
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .upload-progress-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .upload-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.82rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 0.35rem 0.6rem;
+        }
+
+        .upload-item-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .upload-bar-wrap {
+            width: 90px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .upload-bar {
+            height: 100%;
+            background: var(--cyan);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .upload-item-status {
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .upload-item-status.ok {
+            color: #3fb950;
+        }
+
+        .upload-item-status.err {
+            color: #ff7b72;
+        }
+
         .overview-conn-row {
             display: flex;
             justify-content: space-between;
@@ -1254,6 +1354,16 @@
                         <div class="section-head">
                             <h2 class="section-title">Asset Library</h2>
                         </div>
+
+                        <!-- Upload Zone -->
+                        <div class="upload-zone" id="upload-zone" role="button" aria-label="Upload media files — drag and drop or click to browse">
+                            <input type="file" id="upload-input" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx" aria-hidden="true" tabindex="-1">
+                            <div class="upload-icon" aria-hidden="true">&#8679;</div>
+                            <div class="upload-title">Drag &amp; drop to upload</div>
+                            <div class="upload-hint">Images, video, audio, documents &mdash; max 50 MB each</div>
+                        </div>
+                        <ul class="upload-progress-list" id="upload-progress-list"></ul>
+
                         <div class="toolbar">
                             <input type="text" id="library-search" placeholder="Search title or tags">
                             <select id="library-type">
@@ -1590,6 +1700,9 @@
                 $('library-search').addEventListener('input', renderLibrary);
                 $('library-type').addEventListener('change', renderLibrary);
 
+                // ── Upload Dropzone Setup ────────────────────────────────────
+                initUploadZone();
+
                 document.querySelectorAll('[data-close-modal]').forEach((btn) => {
                     btn.addEventListener('click', () => closeModal(btn.getAttribute('data-close-modal')));
                 });
@@ -1892,6 +2005,89 @@
                         renderComposerAssets();
                     });
                 });
+            }
+
+            function initUploadZone() {
+                const zone = $('upload-zone');
+                const input = $('upload-input');
+                if (!zone || !input) return;
+
+                zone.addEventListener('click', (ev) => {
+                    if (ev.target !== input) input.click();
+                });
+                zone.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); input.click(); }
+                });
+                input.addEventListener('change', () => handleUploadFiles(Array.from(input.files)));
+
+                zone.addEventListener('dragover', (ev) => { ev.preventDefault(); zone.classList.add('drag-over'); });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', (ev) => {
+                    ev.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const files = Array.from(ev.dataTransfer.files);
+                    if (files.length) handleUploadFiles(files);
+                });
+            }
+
+            async function handleUploadFiles(files) {
+                const list = $('upload-progress-list');
+                if (!list) return;
+
+                for (const file of files) {
+                    const id = 'up-' + Math.random().toString(36).slice(2);
+                    const li = document.createElement('li');
+                    li.className = 'upload-item';
+                    li.id = id;
+                    li.innerHTML = `
+                        <span class="upload-item-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span>
+                        <div class="upload-bar-wrap"><div class="upload-bar" id="${id}-bar" style="width:0%"></div></div>
+                        <span class="upload-item-status" id="${id}-st">Uploading&hellip;</span>
+                    `;
+                    list.appendChild(li);
+
+                    try {
+                        const bar = $(id + '-bar');
+                        const st = $(id + '-st');
+
+                        if (bar) bar.style.width = '30%';
+
+                        const form = new FormData();
+                        form.append('file', file);
+                        form.append('title', file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
+                        form.append('brand', 'gfd');
+                        form.append('category', 'uploads');
+                        form.append('media_type', file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : file.type === 'application/pdf' ? 'document' : 'image');
+
+                        const token = await clerk.session.getToken();
+                        const resp = await fetch('/api/cms/upload', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + token },
+                            body: form
+                        });
+
+                        if (bar) bar.style.width = '100%';
+
+                        if (resp.ok) {
+                            if (st) { st.textContent = '✓'; st.classList.add('ok'); }
+                            await loadAssets();
+                            renderLibrary();
+                        } else {
+                            const err = await resp.json().catch(() => ({ error: resp.statusText }));
+                            if (st) { st.textContent = err.error || 'Failed'; st.classList.add('err'); }
+                        }
+                    } catch (err) {
+                        const st = $(id + '-st');
+                        if (st) { st.textContent = 'Error'; st.classList.add('err'); }
+                    }
+
+                    // auto-clear after 6s
+                    setTimeout(() => { const el = $(id); if (el) el.remove(); }, 6000);
+                }
+
+                // reset file input
+                const input = $('upload-input');
+                if (input) input.value = '';
             }
 
             function renderLibrary() {
