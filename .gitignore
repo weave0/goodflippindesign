@@ -4,6 +4,10 @@ node_modules/
 .env
 .DS_Store
 
+# Backup files
+*.bak
+*.backup
+
 # Office temp files
 ~$*.docx
 ~$*.pptx

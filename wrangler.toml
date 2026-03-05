@@ -12,13 +12,39 @@ binding = "DB"
 database_name = "gfd_community"
 database_id = "a46ec9df-31b8-4285-845b-1fd3a62bd1b5"
 
+# Cloudflare R2 — media asset storage (10 GB free, zero egress)
+# Create bucket: wrangler r2 bucket create gfv-media
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "gfv-media"
+
 # Environment variables (build config in Cloudflare dashboard)
 [vars]
 NODE_ENV = "production"
+# SOCIAL_PUBLISHER_URL — set this in Cloudflare Pages dashboard (Settings → Environment Variables)
+# after deploying the social publisher worker with: npm run deploy:social
+# Value will be: https://gfv-social-publisher.<your-account>.workers.dev
 
-# Secrets (set via: wrangler secret put SENTRY_DSN)
-# SENTRY_DSN - Error tracking (get from sentry.io dashboard)
-# CLERK_SECRET_KEY - Auth (get from dashboard.clerk.com)
+# Secrets (set via: wrangler secret put <NAME>)
+# SENTRY_DSN              — Error tracking (get from sentry.io dashboard)
+# CLERK_SECRET_KEY        — Auth (get from dashboard.clerk.com)
+# TOKEN_ENCRYPTION_KEY    — 32+ char random string for AES-GCM token/state encryption
+#
+# OAuth secrets (required for seamless platform connections in admin panel):
+# META_APP_ID             — 882897501450706 (Meta Developer Console → your app → Settings → Basic)
+# META_APP_SECRET         — from Meta Developer Console (Settings → Basic → Show)
+# X_CLIENT_ID             — from X Developer Portal
+# X_CLIENT_SECRET         — from X Developer Portal
+# LINKEDIN_CLIENT_ID      — from LinkedIn Developer Console
+# LINKEDIN_CLIENT_SECRET  — from LinkedIn Developer Console
+# PINTEREST_APP_ID        — from Pinterest Developer Console
+# PINTEREST_APP_SECRET    — from Pinterest Developer Console
+# TIKTOK_CLIENT_KEY       — from TikTok Developer Console
+# TIKTOK_CLIENT_SECRET    — from TikTok Developer Console
+# GOOGLE_CLIENT_ID        — from Google Cloud Console (YouTube)
+# GOOGLE_CLIENT_SECRET    — from Google Cloud Console (YouTube)
+# THREADS_APP_ID          — from Meta Developer Console (Threads product, App ID: 1248220120837224)
+# THREADS_APP_SECRET      — from Meta Developer Console (Threads product → Settings → Basic → Show)
 
 # Note: Security headers are configured in _headers file
 # Cloudflare Pages automatically applies headers from _headers file

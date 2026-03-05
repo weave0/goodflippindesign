@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WM6Q66W9W0"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        // Cross-domain tracking for ecosystem attribution
+        gtag('config', 'G-WM6Q66W9W0', {
+            'linker': {
+                'domains': ['goodflippindesign.com', 'aiaimate.com', 'culturesherpa.org', 'goodflippinvibes.com', 'globaldeets.com']
+            }
+        });
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Media Gallery | Good Flippin Design</title>
+    <meta name="description" content="Browse curated brand assets, backgrounds, portfolio previews, and video." />
+    <link rel="canonical" href="https://goodflippindesign.com/gallery.html">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Brand System — derived from GFV circuit medallion logo */
+            --bg: #0a0e1a;
+            --bg-elevated: #111827;
+            --bg-card: #1a2035;
+            --bg-card-hover: #1e2844;
+            --bg-input: #0f1629;
+            --bg-surface: #151d30;
+            --text: #f0f0f5;
+            --text-secondary: #9ca3c0;
+            --text-muted: #6b7280;
+            --accent: #22d3ee;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(34, 211, 238, 0.25);
+
+            /* Brand Accents (Logo Triadic: Cyan + Gold + Violet) */
+            --accent-cyan: #22d3ee;
+            --accent-gold: #fbbf24;
+            --accent-violet: #a855f7;
+            --accent-rose: #f472b6;
+            --accent-emerald: #10b981;
+
+            /* Brand Gradients */
+            --gradient-primary: linear-gradient(135deg, #fbbf24 0%, #22d3ee 50%, #a855f7 100%);
+            --gradient-brand: linear-gradient(135deg, #fbbf24 0%, #22d3ee 50%, #a855f7 100%);
+            --gradient-glow: linear-gradient(135deg, #22d3ee 0%, #a855f7 100%);
+            --gradient-warm: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+            --gradient-card: linear-gradient(135deg, rgba(34, 211, 238, 0.06) 0%, rgba(168, 85, 247, 0.04) 100%);
+            --gradient-hero: radial-gradient(ellipse at 50% 0%, rgba(34, 211, 238, 0.12) 0%, rgba(168, 85, 247, 0.06) 40%, transparent 70%);
+            --gradient-accent-1: linear-gradient(135deg, #22d3ee 0%, #a855f7 100%);
+            --gradient-accent-2: linear-gradient(135deg, #fbbf24 0%, #22d3ee 100%);
+
+            /* Glassmorphism */
+            --glass-bg: rgba(17, 24, 39, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+            /* Glow Effects */
+            --glow-cyan: 0 0 20px rgba(34, 211, 238, 0.4);
+            --glow-purple: 0 0 20px rgba(168, 85, 247, 0.4);
+            --glow-violet: 0 0 20px rgba(168, 85, 247, 0.4);
+            --glow-green: 0 0 20px rgba(16, 185, 129, 0.4);
+            --glow-gold: 0 0 20px rgba(251, 191, 36, 0.4);
+
+            /* Neon Effects */
+            --neon-cyan: 0 0 10px rgba(34, 211, 238, 0.6), 0 0 20px rgba(34, 211, 238, 0.3), 0 0 40px rgba(34, 211, 238, 0.15);
+            --neon-purple: 0 0 10px rgba(168, 85, 247, 0.6), 0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.15);
+            --neon-green: 0 0 10px rgba(16, 185, 129, 0.6), 0 0 20px rgba(16, 185, 129, 0.4), 0 0 30px rgba(16, 185, 129, 0.2);
+            --neon-gold: 0 0 10px rgba(251, 191, 36, 0.6), 0 0 20px rgba(251, 191, 36, 0.4), 0 0 30px rgba(251, 191, 36, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Focus states */
+        :focus-visible {
+            outline: 2px solid var(--text-secondary);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Skip link for accessibility */
+        .skip-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: var(--text);
+            color: var(--bg);
+            padding: 0.75rem 1rem;
+            z-index: 200;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 0 0 8px 0;
+            transform: translateY(-100%);
+            transition: transform 0.2s ease;
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+        }
+
+        /* Top bar */
+        .gallery-top {
+            padding: 1.25rem 0;
+            background: rgba(10, 14, 26, 0.85);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .gallery-top-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+        }
+
+        .logo-text {
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.5)) drop-shadow(0 0 12px rgba(168, 85, 247, 0.3));
+            letter-spacing: -0.01em;
+        }
+
+        .top-link {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .top-link:hover {
+            transform: translateY(-1px);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        /* Page header */
+        .gallery-main {
+            padding: 3.75rem 0 5.5rem;
+        }
+
+        .section-header {
+            margin-bottom: 2.5rem;
+            max-width: 720px;
+        }
+
+        .section-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(1.9rem, 3vw, 2.35rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            font-family: 'Orbitron', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--text) 0%, rgba(34, 211, 238, 0.9) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .gallery-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin: 1.25rem 0 0;
+        }
+
+        .gallery-meta-text {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Media cards (shared with homepage style) */
+        .media-card {
+            background: var(--glass-bg);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: transform 0.25s ease, border-color 0.25s ease;
+            will-change: transform;
+        }
+
+        .media-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-hover);
+        }
+
+        .media-card-media {
+            aspect-ratio: 16/10;
+            background: var(--bg-elevated);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .media-card-media img,
+        .media-card-media video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.92;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+            will-change: transform;
+            display: block;
+        }
+
+        .media-card:hover .media-card-media img,
+        .media-card:hover .media-card-media video {
+            opacity: 1;
+            transform: scale(1.02);
+        }
+
+        .media-card-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: var(--bg-elevated);
+        }
+
+        .media-card-body {
+            padding: 0.875rem 1rem;
+        }
+
+        .media-card-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .media-card-meta {
+            margin-top: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .media-card-actions {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .media-action {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .media-action:hover {
+            transform: translateY(-1px);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        /* Gallery layout */
+        .gallery-section {
+            margin-top: 3rem;
+        }
+
+        .gallery-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 1rem;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 1.25rem;
+            }
+
+            .gallery-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="gallery-top">
+        <div class="container gallery-top-inner">
+            <a class="logo" href="index.html" aria-label="Good Flippin Design home">
+                <span class="logo-text">Good Flippin Design</span>
+            </a>
+            <a class="top-link" href="index.html#media">Back to media rows</a>
+        </div>
+    </header>
+
+    <main id="main" class="gallery-main">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Media</div>
+                <h1 class="section-title">Gallery</h1>
+                <p id="gallery-subtitle" class="section-subtitle">Browse all curated assets and videos.</p>
+
+                <div id="gallery-meta" class="gallery-meta" aria-live="polite"></div>
+            </div>
+
+            <div id="gallery-content"></div>
+        </div>
+    </main>
+
+    <script>
+        (function () {
+            const catalogUrl = 'assets/data/media-catalog.json';
+            const categoryOrder = ['featured', 'branding', 'gfv-art', 'backgrounds', 'portfolio', 'video'];
+
+            const subtitleEl = document.getElementById('gallery-subtitle');
+            const metaEl = document.getElementById('gallery-meta');
+            const contentEl = document.getElementById('gallery-content');
+
+            if (!contentEl || !metaEl || !subtitleEl) return;
+
+            const params = new URLSearchParams(window.location.search);
+            const requestedCategory = (params.get('cat') || '').trim();
+
+            function getCategoryTitle(categoryId, categories) {
+                const match = Array.isArray(categories)
+                    ? categories.find((c) => c && c.id === categoryId)
+                    : null;
+                if (match && match.title) return match.title;
+                return String(categoryId || 'Category');
+            }
+
+            function getOrderedCategoryIds(categories) {
+                const ids = Array.isArray(categories)
+                    ? categories.map((c) => (c && c.id ? String(c.id) : '')).filter(Boolean)
+                    : [];
+
+                const ordered = [];
+                categoryOrder.forEach((id) => {
+                    if (ids.includes(id)) ordered.push(id);
+                });
+
+                ids.forEach((id) => {
+                    if (!ordered.includes(id)) ordered.push(id);
+                });
+
+                return ordered;
+            }
+
+            function getItemsForCategory(allItems, categoryId) {
+                return (Array.isArray(allItems) ? allItems : [])
+                    .filter((item) => item && Array.isArray(item.categories) && item.categories.includes(categoryId))
+                    .sort((a, b) => {
+                        const dateSort = String(b.addedAt || '').localeCompare(String(a.addedAt || ''));
+                        if (dateSort !== 0) return dateSort;
+                        return String(a.title || '').localeCompare(String(b.title || ''));
+                    });
+            }
+
+            function setMeta(message, showViewAllLink) {
+                metaEl.innerHTML = '';
+
+                if (message) {
+                    const text = document.createElement('div');
+                    text.className = 'gallery-meta-text';
+                    text.textContent = String(message);
+                    metaEl.appendChild(text);
+                }
+
+                if (showViewAllLink) {
+                    const link = document.createElement('a');
+                    link.className = 'media-action';
+                    link.href = 'gallery.html';
+                    link.textContent = 'View all categories';
+                    metaEl.appendChild(link);
+                }
+            }
+
+            function createGalleryCard(item) {
+                const brand = item.brand ? String(item.brand).toUpperCase() : '—';
+                const type = item.type ? String(item.type) : 'media';
+
+                const isVideo = item.type === 'video';
+                const href = item.href || item.src || '';
+
+                const card = document.createElement(isVideo ? 'div' : 'a');
+                card.className = 'media-card';
+
+                if (!isVideo) {
+                    card.href = href || '#';
+
+                    const isExternal = /^https?:\/\//i.test(card.href);
+                    if (isExternal) {
+                        card.target = '_blank';
+                        card.rel = 'noopener';
+                    }
+                }
+
+                const media = document.createElement('div');
+                media.className = 'media-card-media';
+
+                if (item.type === 'image' && item.src) {
+                    const img = document.createElement('img');
+                    img.src = item.src;
+                    img.alt = item.title ? String(item.title) : 'Media item';
+                    img.loading = 'lazy';
+                    img.decoding = 'async';
+                    media.appendChild(img);
+                } else if (isVideo && href) {
+                    const video = document.createElement('video');
+                    video.controls = true;
+                    video.preload = 'metadata';
+                    video.src = href;
+                    video.setAttribute('playsinline', '');
+                    video.setAttribute('aria-label', item.title ? String(item.title) : 'Video');
+                    media.appendChild(video);
+                } else {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'media-card-placeholder';
+                    placeholder.textContent = isVideo ? 'Video' : 'Media';
+                    media.appendChild(placeholder);
+                }
+
+                const body = document.createElement('div');
+                body.className = 'media-card-body';
+
+                const title = document.createElement('div');
+                title.className = 'media-card-title';
+                title.textContent = item.title ? String(item.title) : 'Untitled';
+
+                const meta = document.createElement('div');
+                meta.className = 'media-card-meta';
+                meta.textContent = `${brand} • ${type}`;
+
+                body.appendChild(title);
+                body.appendChild(meta);
+
+                if (isVideo && href) {
+                    const actions = document.createElement('div');
+                    actions.className = 'media-card-actions';
+
+                    const open = document.createElement('a');
+                    open.className = 'media-action';
+                    open.href = href;
+                    open.textContent = 'Open video';
+
+                    const isExternal = /^https?:\/\//i.test(href);
+                    if (isExternal) {
+                        open.target = '_blank';
+                        open.rel = 'noopener';
+                    }
+
+                    actions.appendChild(open);
+                    body.appendChild(actions);
+                }
+
+                card.appendChild(media);
+                card.appendChild(body);
+
+                return card;
+            }
+
+            function renderCategorySection(categoryId, title, items) {
+                const section = document.createElement('section');
+                section.className = 'gallery-section';
+                section.id = `cat-${categoryId}`;
+
+                const heading = document.createElement('h2');
+                heading.className = 'gallery-section-title';
+                heading.textContent = title;
+
+                const grid = document.createElement('div');
+                grid.className = 'gallery-grid';
+
+                items.forEach((item) => {
+                    grid.appendChild(createGalleryCard(item));
+                });
+
+                section.appendChild(heading);
+                section.appendChild(grid);
+
+                return section;
+            }
+
+            function renderCatalog(catalog) {
+                const categories = Array.isArray(catalog && catalog.categories) ? catalog.categories : [];
+                const items = Array.isArray(catalog && catalog.items) ? catalog.items : [];
+
+                contentEl.innerHTML = '';
+
+                if (items.length === 0) {
+                    subtitleEl.textContent = 'No media items found.';
+                    setMeta('', false);
+                    return;
+                }
+
+                const orderedCategoryIds = getOrderedCategoryIds(categories);
+
+                const hasRequestedCategory = !!requestedCategory;
+                const isRequestedValid = hasRequestedCategory && orderedCategoryIds.includes(requestedCategory);
+
+                if (isRequestedValid) {
+                    const title = getCategoryTitle(requestedCategory, categories);
+                    subtitleEl.textContent = `${title} — view all items.`;
+                    setMeta('', true);
+
+                    const sectionItems = getItemsForCategory(items, requestedCategory);
+                    if (sectionItems.length > 0) {
+                        contentEl.appendChild(renderCategorySection(requestedCategory, title, sectionItems));
+                    } else {
+                        setMeta('No items found in this category.', true);
+                    }
+
+                    return;
+                }
+
+                if (hasRequestedCategory && !isRequestedValid) {
+                    setMeta(`Category not found: ${requestedCategory}. Showing all categories.`, false);
+                } else {
+                    setMeta('', false);
+                }
+
+                subtitleEl.textContent = 'Browse all curated assets and videos.';
+
+                orderedCategoryIds.forEach((categoryId) => {
+                    const sectionItems = getItemsForCategory(items, categoryId);
+                    if (sectionItems.length === 0) return;
+
+                    contentEl.appendChild(
+                        renderCategorySection(categoryId, getCategoryTitle(categoryId, categories), sectionItems)
+                    );
+                });
+
+                if (contentEl.childElementCount === 0) {
+                    setMeta('No items available to display.', false);
+                }
+            }
+
+            async function loadCatalog() {
+                setMeta('Loading…', false);
+
+                try {
+                    const res = await fetch(catalogUrl, { cache: 'no-store' });
+                    if (!res.ok) throw new Error('Bad response');
+                    const json = await res.json();
+                    renderCatalog(json);
+
+                    if (metaEl.textContent.trim() === 'Loading…') {
+                        setMeta('', false);
+                    }
+                } catch (err) {
+                    subtitleEl.textContent = 'Could not load the media catalog.';
+                    setMeta('Check that assets/data/media-catalog.json is accessible.', false);
+                }
+            }
+
+            loadCatalog();
+        })();
+    </script>
+</body>
+
+</html>

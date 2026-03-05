@@ -28,6 +28,93 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // Block accidental public access to internal docs, source code, and policy drafts.
+    // This repo is a monorepo-style workspace; Cloudflare Pages will serve committed
+    // files unless we explicitly deny them.
+    const rawPath = url.pathname || '/';
+    let decodedPath = rawPath;
+    try {
+      decodedPath = decodeURIComponent(rawPath);
+    } catch {
+      // Leave as-is if decoding fails
+    }
+
+    const pathLower = String(decodedPath).toLowerCase();
+    const normalizedPath = pathLower.endsWith('/') ? pathLower : `${pathLower}/`;
+
+    // Allowlist critical public files that may otherwise match broad deny rules.
+    const allowedExact = new Set(['/robots.txt', '/sitemap.xml']);
+
+    const blockedPrefixes = [
+      '/legal/',
+      '/brand assets development/',
+      '/business registration/',
+      '/official documents/',
+      '/organization docs/',
+      '/cashmoney/',
+      '/deploy-to-gfv/',
+      '/docs/',
+      '/functions/',
+      '/gfd dev projects/',
+      '/mediation-site/',
+      '/nft_gfv_drop/',
+      '/portfolio-manager/',
+      '/tests/',
+      '/scripts/',
+      '/workers/',
+      '/.github/',
+      '/.husky/',
+      '/.git/',
+    ];
+
+    const blockedExact = new Set([
+      '/_worker.js',
+      '/package.json',
+      '/package-lock.json',
+      '/wrangler.toml',
+      '/wrangler-social.toml',
+      '/_headers',
+      '/.env',
+      '/.env.example',
+    ]);
+
+    const blockedExtensions = [
+      '.md',
+      '.sql',
+      '.ps1',
+      '.sh',
+      '.py',
+      '.txt',
+      '.toml',
+      '.yml',
+      '.yaml',
+      '.bak',
+      '.log',
+    ];
+
+    const isAllowed = allowedExact.has(pathLower);
+
+    // Treat JSON as internal unless it lives under /assets/ (used by gallery/media catalog).
+    const isBlockedJson = pathLower.endsWith('.json') && !pathLower.startsWith('/assets/');
+
+    const isBlocked =
+      !isAllowed &&
+      (blockedExact.has(pathLower) ||
+        blockedPrefixes.some((prefix) => normalizedPath.startsWith(prefix)) ||
+        blockedExtensions.some((ext) => pathLower.endsWith(ext)) ||
+        isBlockedJson);
+
+    if (isBlocked) {
+      return new Response('Not found', {
+        status: 404,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-store',
+          'X-Robots-Tag': 'noindex, nofollow',
+        },
+      });
+    }
+
     // Route API requests to auth worker (gracefully degrade if unavailable)
     if (url.pathname.startsWith('/api/')) {
       const authWorker = await getAuthWorker();

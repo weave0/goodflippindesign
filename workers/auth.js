@@ -5,9 +5,12 @@
  * - Clerk session verification
  * - Admin role assignment
  * - Protected API routes (comments, profiles)
+ * - CMS endpoints (assets, social, content, R2 upload)
  * - CORS for cross-ecosystem auth
  * - Error tracking via Sentry (observability) — gracefully degrades if unavailable
  */
+
+import { handleCMSRequest } from './cms.js';
 
 // Dynamic Sentry import — gracefully degrades if @sentry/cloudflare isn't available
 let Sentry = null;
@@ -1698,6 +1701,21 @@ export default {
       return new Response(response.body, {
         ...response,
         headers: { ...Object.fromEntries(response.headers), ...corsHeaders },
+      });
+    }
+
+    // ── CMS routes (public + admin — handler does its own auth checks) ──
+    if (url.pathname.startsWith('/api/cms/')) {
+      let cmsUser = null;
+      const cmsAuth = request.headers.get('Authorization');
+      if (cmsAuth?.startsWith('Bearer ')) {
+        cmsUser = await verifyClerkToken(cmsAuth.replace('Bearer ', ''), env);
+        if (cmsUser) cmsUser = await ensureAdminRole(cmsUser, env);
+      }
+      const cmsResponse = await handleCMSRequest(request, env, cmsUser);
+      return new Response(cmsResponse.body, {
+        status: cmsResponse.status,
+        headers: { ...Object.fromEntries(cmsResponse.headers || new Headers()), ...corsHeaders },
       });
     }
 

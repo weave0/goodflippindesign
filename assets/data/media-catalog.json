@@ -1,0 +1,373 @@
+{
+    "version": 1,
+    "generatedAt": "2026-03-05T00:00:00.000Z",
+    "categories": [
+        {
+            "id": "featured",
+            "title": "Featured"
+        },
+        {
+            "id": "branding",
+            "title": "Branding"
+        },
+        {
+            "id": "backgrounds",
+            "title": "Backgrounds"
+        },
+        {
+            "id": "portfolio",
+            "title": "Portfolio"
+        },
+        {
+            "id": "gfv-art",
+            "title": "GFV Art"
+        },
+        {
+            "id": "video",
+            "title": "Video"
+        }
+    ],
+    "items": [
+        {
+            "id": "gfd-logo-master",
+            "type": "image",
+            "title": "GFD Logo — Master",
+            "brand": "gfd",
+            "src": "assets/brand/logo/gfd-logo-master.png",
+            "categories": [
+                "branding",
+                "featured"
+            ],
+            "tags": [
+                "logo",
+                "brand"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "gfd-logo-white",
+            "type": "image",
+            "title": "GFD Logo — White",
+            "brand": "gfd",
+            "src": "assets/brand/logo/gfd-logo-white.png",
+            "categories": [
+                "branding"
+            ],
+            "tags": [
+                "logo",
+                "brand"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "gfd-logo-mark",
+            "type": "image",
+            "title": "GFD Logo Mark",
+            "brand": "gfd",
+            "src": "assets/brand/logo/gfd-logo-mark.png",
+            "categories": [
+                "branding"
+            ],
+            "tags": [
+                "logo",
+                "mark"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "gfd-mark-1024",
+            "type": "image",
+            "title": "GFD Mark (1024)",
+            "brand": "gfd",
+            "src": "assets/brand/logo/gfd-mark-1024.png",
+            "categories": [
+                "branding"
+            ],
+            "tags": [
+                "logo",
+                "mark"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "ca-logo",
+            "type": "image",
+            "title": "CitizenApproved Logo",
+            "brand": "citizenapproved",
+            "src": "assets/logos/citizenapproved/citizenapproved-logo.png",
+            "categories": [
+                "branding",
+                "featured"
+            ],
+            "tags": [
+                "logo",
+                "brand"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "ca-og-image",
+            "type": "image",
+            "title": "CitizenApproved OG Image",
+            "brand": "citizenapproved",
+            "src": "assets/logos/citizenapproved/og-image-1200x630.png",
+            "categories": [
+                "branding"
+            ],
+            "tags": [
+                "og",
+                "social"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "bg-data-nodes",
+            "type": "image",
+            "title": "Data Nodes Background",
+            "brand": "gfd",
+            "src": "assets/backgrounds/GFD-WebArt-data_nodes-20260131_133558.png",
+            "categories": [
+                "backgrounds",
+                "featured"
+            ],
+            "tags": [
+                "background"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "bg-hero-gradient",
+            "type": "image",
+            "title": "Hero Gradient Background",
+            "brand": "gfd",
+            "src": "assets/backgrounds/GFD-WebArt-hero_gradient-20260131_133525.png",
+            "categories": [
+                "backgrounds"
+            ],
+            "tags": [
+                "background",
+                "gradient"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "bg-portfolio-texture",
+            "type": "image",
+            "title": "Portfolio Texture Background",
+            "brand": "gfd",
+            "src": "assets/backgrounds/GFD-WebArt-portfolio_texture-20260131_133658.png",
+            "categories": [
+                "backgrounds"
+            ],
+            "tags": [
+                "background",
+                "texture"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "bg-warm-ambient",
+            "type": "image",
+            "title": "Warm Ambient Background",
+            "brand": "gfd",
+            "src": "assets/backgrounds/GFD-WebArt-warm_ambient-20260131_133628.png",
+            "categories": [
+                "backgrounds"
+            ],
+            "tags": [
+                "background",
+                "ambient"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "portfolio-ai-aimate",
+            "type": "image",
+            "title": "AI Aimate",
+            "brand": "aiaimate",
+            "src": "assets/portfolio/ai-aimate.webp",
+            "categories": [
+                "portfolio",
+                "featured"
+            ],
+            "tags": [
+                "portfolio",
+                "ai"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "portfolio-culturesherpa",
+            "type": "image",
+            "title": "CultureSherpa",
+            "brand": "culturesherpa",
+            "src": "assets/portfolio/culturesherpa.webp",
+            "categories": [
+                "portfolio"
+            ],
+            "tags": [
+                "portfolio",
+                "data-viz"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "portfolio-citizenapproved",
+            "type": "image",
+            "title": "CitizenApproved",
+            "brand": "citizenapproved",
+            "src": "assets/portfolio/citizenapproved.webp",
+            "categories": [
+                "portfolio"
+            ],
+            "tags": [
+                "portfolio"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "portfolio-globaldeets",
+            "type": "image",
+            "title": "GlobalDeets",
+            "brand": "globaldeets",
+            "src": "assets/portfolio/globaldeets.webp",
+            "categories": [
+                "portfolio"
+            ],
+            "tags": [
+                "portfolio",
+                "bi"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "portfolio-good-flippin-vibes",
+            "type": "image",
+            "title": "Good Flippin Vibes",
+            "brand": "gfv",
+            "src": "assets/portfolio/good-flippin-vibes.webp",
+            "categories": [
+                "portfolio"
+            ],
+            "tags": [
+                "portfolio",
+                "wellness"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "gfv-sheriff",
+            "type": "image",
+            "title": "Sheriff",
+            "brand": "gfv",
+            "src": "assets/GFV/sheriff.png",
+            "categories": [
+                "gfv-art",
+                "featured"
+            ],
+            "tags": [
+                "character"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "gfv-sheriff-beach",
+            "type": "image",
+            "title": "Sheriff (Beach)",
+            "brand": "gfv",
+            "src": "assets/GFV/sheriffbeach.png",
+            "categories": [
+                "gfv-art"
+            ],
+            "tags": [
+                "character"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "gfv-sheriff-beach-2",
+            "type": "image",
+            "title": "Sheriff (Beach 2)",
+            "brand": "gfv",
+            "src": "assets/GFV/sheriffbeach2.png",
+            "categories": [
+                "gfv-art"
+            ],
+            "tags": [
+                "character"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "gfv-sheriff-beach-3",
+            "type": "image",
+            "title": "Sheriff (Beach 3)",
+            "brand": "gfv",
+            "src": "assets/GFV/sheriffbeach3.png",
+            "categories": [
+                "gfv-art"
+            ],
+            "tags": [
+                "character"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "gfv-sheriff-boat",
+            "type": "image",
+            "title": "Sheriff (Boat)",
+            "brand": "gfv",
+            "src": "assets/GFV/sheriffboat.png",
+            "categories": [
+                "gfv-art"
+            ],
+            "tags": [
+                "character"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "gfv-radio",
+            "type": "image",
+            "title": "Radio",
+            "brand": "gfv",
+            "src": "assets/GFV/radio.png",
+            "categories": [
+                "gfv-art"
+            ],
+            "tags": [
+                "object"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "gfv-asack",
+            "type": "image",
+            "title": "Asack",
+            "brand": "gfv",
+            "src": "assets/GFV/asack.png",
+            "categories": [
+                "gfv-art"
+            ],
+            "tags": [
+                "character"
+            ],
+            "addedAt": "2026-03-04"
+        },
+        {
+            "id": "video-cat-strutting-and-dancing",
+            "type": "video",
+            "title": "Cat Strutting & Dancing",
+            "brand": "gfv",
+            "href": "assets/videos/cat-strutting-and-dancing.mp4",
+            "categories": [
+                "video",
+                "featured"
+            ],
+            "tags": [
+                "video"
+            ],
+            "addedAt": "2026-03-04"
+        }
+    ]
+}

@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GFD Command Center</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        window.CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuZ29vZGZsaXBwaW52aWJlcy5jb20k';
+    </script>
+    <script src="https://cdn.clerk.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --bg: #070b15;
+            --bg-alt: #0d1324;
+            --panel: rgba(16, 24, 44, 0.72);
+            --panel-strong: #111a30;
+            --panel-soft: #1a2642;
+            --text: #f4f6fb;
+            --text-secondary: #a7b2cc;
+            --text-muted: #7382a6;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(34, 211, 238, 0.45);
+            --accent-cyan: #22d3ee;
+            --accent-gold: #fbbf24;
+            --accent-violet: #a855f7;
+            --accent-emerald: #10b981;
+            --accent-rose: #f43f5e;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --shadow: 0 20px 55px rgba(0, 0, 0, 0.35);
+            --gradient-brand: linear-gradient(135deg, #fbbf24 0%, #22d3ee 50%, #a855f7 100%);
+            --gradient-atmosphere: radial-gradient(circle at 20% 10%, rgba(251, 191, 36, 0.12), transparent 44%),
+                radial-gradient(circle at 85% 12%, rgba(34, 211, 238, 0.13), transparent 50%),
+                radial-gradient(circle at 62% 82%, rgba(168, 85, 247, 0.12), transparent 42%);
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            background-image: var(--gradient-atmosphere);
+            color: var(--text);
+            line-height: 1.45;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        #auth-gate {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .auth-card {
+            width: min(520px, 100%);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--panel);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            box-shadow: var(--shadow);
+            text-align: center;
+            animation: fade-up 0.45s ease both;
+        }
+
+        .auth-card h1 {
+            font-size: 1.35rem;
+            margin-bottom: 0.6rem;
+            font-weight: 650;
+            letter-spacing: 0.01em;
+        }
+
+        .auth-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .auth-card .denied {
+            color: var(--error);
+            margin-top: 0.9rem;
+            font-weight: 600;
+        }
+
+        #admin-app {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .shell {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            border-right: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(11, 18, 35, 0.95), rgba(10, 15, 28, 0.95));
+            padding: 1.4rem 1.1rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .brand-block {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1rem 1.1rem;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 1rem;
+            animation: fade-up 0.42s ease both;
+        }
+
+        .brand-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            margin-top: 0.45rem;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid rgba(34, 211, 238, 0.35);
+            color: var(--accent-cyan);
+            border-radius: 999px;
+            padding: 0.24rem 0.7rem;
+            font-size: 0.72rem;
+            margin-top: 0.8rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .nav-grid {
+            display: grid;
+            gap: 0.4rem;
+        }
+
+        .nav-btn {
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-secondary);
+            width: 100%;
+            text-align: left;
+            padding: 0.72rem 0.88rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+        }
+
+        .nav-btn:hover {
+            color: var(--text);
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.035);
+            transform: translateX(2px);
+        }
+
+        .nav-btn.active {
+            color: var(--text);
+            border-color: var(--border-strong);
+            background: linear-gradient(90deg, rgba(34, 211, 238, 0.12), rgba(34, 211, 238, 0.02));
+        }
+
+        .sidebar-footer {
+            margin-top: 1rem;
+            padding-top: 0.9rem;
+            border-top: 1px dashed var(--border);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        .content {
+            padding: 1.35rem 1.4rem 2rem;
+            animation: fade-up 0.45s ease both;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .heading {
+            font-size: clamp(1.3rem, 2vw, 1.75rem);
+            font-weight: 680;
+            letter-spacing: 0.01em;
+        }
+
+        .subheading {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.24rem;
+        }
+
+        .user-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.55rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 0.58rem 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.18s ease, opacity 0.18s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.95;
+        }
+
+        .btn-primary {
+            background: var(--accent-cyan);
+            color: #071018;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fecaca;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        .panel {
+            border: 1px solid var(--border);
+            background: var(--panel);
+            border-radius: var(--radius-lg);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+        }
+
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .kpi {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.02);
+            animation: fade-up 0.3s ease both;
+        }
+
+        .kpi-label {
+            color: var(--text-muted);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .kpi-value {
+            font-size: 1.55rem;
+            font-weight: 700;
+            margin-top: 0.2rem;
+        }
+
+        .kpi-value.cyan {
+            color: var(--accent-cyan);
+        }
+
+        .kpi-value.gold {
+            color: var(--accent-gold);
+        }
+
+        .kpi-value.violet {
+            color: var(--accent-violet);
+        }
+
+        .kpi-value.emerald {
+            color: var(--accent-emerald);
+        }
+
+        .kpi-value.rose {
+            color: var(--accent-rose);
+        }
+
+        .view {
+            display: none;
+            animation: fade-up 0.35s ease both;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .section-title {
+            font-size: 1.06rem;
+            font-weight: 650;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 0.85rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.86rem;
+        }
+
+        th,
+        td {
+            padding: 0.62rem 0.62rem;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-size: 0.73rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.16rem 0.45rem;
+            border-radius: 999px;
+            font-size: 0.69rem;
+            border: 1px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+        }
+
+        .tag.ok {
+            color: #7dd3fc;
+            border-color: rgba(34, 211, 238, 0.35);
+            background: rgba(34, 211, 238, 0.1);
+        }
+
+        .tag.warn {
+            color: #fde68a;
+            border-color: rgba(251, 191, 36, 0.35);
+            background: rgba(251, 191, 36, 0.12);
+        }
+
+        .tag.fail {
+            color: #fecaca;
+            border-color: rgba(239, 68, 68, 0.35);
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        .grid-two {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem;
+        }
+
+        .connection-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(210px, 1fr));
+            gap: 0.8rem;
+        }
+
+        .connection-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.82rem;
+            background: rgba(255, 255, 255, 0.02);
+            display: grid;
+            gap: 0.55rem;
+        }
+
+        .conn-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .conn-tab {
+            flex: 1;
+            padding: 0.55rem 1rem;
+            font-size: 0.82rem;
+            font-weight: 550;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .conn-tab.active {
+            background: rgba(34, 211, 238, 0.12);
+            color: var(--accent-cyan);
+        }
+
+        .conn-tab-panel {
+            display: none;
+        }
+
+        .conn-tab-panel.active {
+            display: block;
+        }
+
+        .oauth-provider-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.6rem;
+        }
+
+        .oauth-provider-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text);
+            font-size: 0.88rem;
+            font-weight: 550;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+            text-align: left;
+            width: 100%;
+        }
+
+        .oauth-provider-btn:hover {
+            transform: translateY(-1px);
+            border-color: var(--border-strong);
+            background: rgba(34, 211, 238, 0.06);
+        }
+
+        .oauth-provider-btn.connected {
+            border-color: rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.06);
+        }
+
+        .oauth-provider-btn .oauth-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .oauth-provider-btn.configured .oauth-dot {
+            background: var(--accent-cyan);
+        }
+
+        .oauth-provider-btn.connected .oauth-dot {
+            background: var(--accent-emerald);
+        }
+
+        .oauth-provider-btn.not-configured {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .oauth-provider-btn .oauth-label {
+            flex: 1;
+        }
+
+        .oauth-provider-btn .oauth-status {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .oauth-provider-btn.connected .oauth-status {
+            color: var(--accent-emerald);
+        }
+
+        #oauth-status-note {
+            font-size: 0.78rem;
+        }
+
+        .connection-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+            align-items: baseline;
+        }
+
+        .connection-name {
+            font-weight: 650;
+            font-size: 0.92rem;
+        }
+
+        .connection-account {
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            word-break: break-all;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+
+        .day-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            text-align: center;
+            padding-bottom: 0.3rem;
+        }
+
+        .day-cell {
+            min-height: 92px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.38rem;
+            background: rgba(255, 255, 255, 0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .day-cell.empty {
+            opacity: 0.45;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .day-num {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+        }
+
+        .day-item {
+            font-size: 0.67rem;
+            border-radius: 8px;
+            padding: 0.14rem 0.25rem;
+            color: #dff7ff;
+            background: rgba(34, 211, 238, 0.15);
+            border: 1px solid rgba(34, 211, 238, 0.28);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.72rem;
+        }
+
+        .field,
+        select,
+        input[type="text"],
+        input[type="datetime-local"],
+        input[type="date"],
+        textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.56rem 0.66rem;
+            background: rgba(9, 15, 29, 0.72);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.87rem;
+        }
+
+        textarea {
+            min-height: 124px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--border-strong);
+            box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.16);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.65rem;
+        }
+
+        .platform-picker {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(130px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .platform-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.45rem 0.4rem;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+            transition: border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+        }
+
+        .platform-pill.active {
+            color: var(--text);
+            border-color: var(--border-strong);
+            background: rgba(34, 211, 238, 0.12);
+        }
+
+        .platform-pill:hover {
+            transform: translateY(-1px);
+        }
+
+        .counter-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(180px, 1fr));
+            gap: 0.45rem;
+        }
+
+        .counter {
+            font-size: 0.79rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 0.45rem 0.56rem;
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .counter.over {
+            border-color: rgba(239, 68, 68, 0.45);
+            color: #fca5a5;
+        }
+
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(130px, 1fr));
+            gap: 0.55rem;
+            max-height: 300px;
+            overflow: auto;
+            padding-right: 0.3rem;
+        }
+
+        .asset-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.18s ease, transform 0.18s ease;
+        }
+
+        .asset-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(34, 211, 238, 0.3);
+        }
+
+        .asset-card.active {
+            border-color: var(--border-strong);
+            box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.14);
+        }
+
+        .asset-thumb {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            object-fit: cover;
+            background: #0e172b;
+            display: block;
+        }
+
+        .asset-meta {
+            padding: 0.45rem;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+        }
+
+        .inline-actions {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+        }
+
+        .switch {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .switch input {
+            accent-color: var(--accent-cyan);
+        }
+
+        .modal-wrap {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.72);
+            z-index: 120;
+            padding: 1rem;
+        }
+
+        .modal-wrap.active {
+            display: flex;
+        }
+
+        .modal {
+            width: min(760px, 100%);
+            max-height: 88vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--panel-strong);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+        }
+
+        .modal h3 {
+            font-size: 1rem;
+            margin-bottom: 0.7rem;
+            font-weight: 650;
+        }
+
+        .modal .actions {
+            margin-top: 0.8rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.45rem;
+        }
+
+        #toast {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            z-index: 200;
+            min-width: 220px;
+            max-width: 400px;
+            padding: 0.75rem 0.85rem;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            transform: translateY(140%);
+            transition: transform 0.25s ease;
+            font-size: 0.84rem;
+            font-weight: 600;
+        }
+
+        #toast.show {
+            transform: translateY(0);
+        }
+
+        #toast.success {
+            color: #d1fae5;
+            border-color: rgba(16, 185, 129, 0.35);
+            background: rgba(16, 185, 129, 0.14);
+        }
+
+        #toast.error {
+            color: #fecaca;
+            border-color: rgba(239, 68, 68, 0.35);
+            background: rgba(239, 68, 68, 0.14);
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        .link-accent {
+            color: var(--accent-cyan);
+        }
+
+        .mt-08 {
+            margin-top: 0.8rem;
+        }
+
+        .mt-085 {
+            margin-top: 0.85rem;
+        }
+
+        .mt-06 {
+            margin-top: 0.6rem;
+        }
+
+        .mb-08 {
+            margin-bottom: 0.8rem;
+        }
+
+        .mb-07 {
+            margin-bottom: 0.7rem;
+        }
+
+        .mb-065 {
+            margin-bottom: 0.65rem;
+        }
+
+        .mb-06 {
+            margin-bottom: 0.6rem;
+        }
+
+        .overview-connections-grid {
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .playbook-list {
+            padding-left: 1.1rem;
+            color: var(--text-secondary);
+            display: grid;
+            gap: 0.35rem;
+            font-size: 0.88rem;
+        }
+
+        .form-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .align-end-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.8rem;
+        }
+
+        .asset-grid-full {
+            max-height: none;
+        }
+
+        .overview-conn-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.5rem 0.6rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .overview-conn-name {
+            font-size: 0.85rem;
+        }
+
+        .text-strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .text-note {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        .mt-03 {
+            margin-top: 0.3rem;
+        }
+
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1280px) {
+
+            .connection-grid,
+            .platform-picker,
+            .asset-grid {
+                grid-template-columns: repeat(2, minmax(150px, 1fr));
+            }
+
+            .kpis {
+                grid-template-columns: repeat(3, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 960px) {
+            .shell {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .split,
+            .grid-two,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content {
+                padding: 1rem;
+            }
+
+            .kpis {
+                grid-template-columns: repeat(2, minmax(140px, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            .kpis,
+            .connection-grid,
+            .platform-picker,
+            .asset-grid,
+            .counter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="auth-gate">
+        <div class="auth-card">
+            <h1>GFD Command Center</h1>
+            <p id="auth-loading">Verifying executive admin access...</p>
+            <p id="auth-denied" class="denied hide">Admin access required. Use an account with <span class="mono">publicMetadata.role = admin</span>.</p>
+            <p class="mt-08"><a class="link-accent" href="/">Back to goodflippindesign.com</a></p>
+        </div>
+    </div>
+
+    <div id="admin-app">
+        <div class="shell">
+            <aside class="sidebar">
+                <div class="brand-block">
+                    <div class="brand-title">Good Flippin Design</div>
+                    <div class="brand-subtitle">Executive Social and Media Operations</div>
+                    <span class="pill">Brand Scope: GFD</span>
+                </div>
+
+                <nav class="nav-grid" aria-label="Primary admin navigation">
+                    <button class="nav-btn active" data-view="overview"><span>01</span><span>Overview</span></button>
+                    <button class="nav-btn" data-view="connections"><span>02</span><span>Platform Connect</span></button>
+                    <button class="nav-btn" data-view="planner"><span>03</span><span>Campaign Planner</span></button>
+                    <button class="nav-btn" data-view="composer"><span>04</span><span>Post Composer</span></button>
+                    <button class="nav-btn" data-view="library"><span>05</span><span>Asset Library</span></button>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div>Automation cadence: every 15 minutes</div>
+                    <div>Publisher worker: <span class="mono">gfv-social-publisher</span></div>
+                </div>
+            </aside>
+
+            <main class="content">
+                <div class="topbar">
+                    <div>
+                        <h1 class="heading">Marketing Control, Built In-House</h1>
+                        <p class="subheading">Plan yearly campaigns, auto-fit content by platform limits, and schedule from your own media vault.</p>
+                    </div>
+                    <div class="inline-actions">
+                        <span class="user-chip"><span id="user-email">admin</span></span>
+                        <button class="btn btn-secondary" id="refresh-btn">Refresh</button>
+                        <button class="btn btn-secondary" id="manual-run-btn">Run Queue Now</button>
+                        <button class="btn btn-danger" id="sign-out-btn">Sign out</button>
+                    </div>
+                </div>
+
+                <section class="kpis" id="kpi-row">
+                    <article class="kpi">
+                        <div class="kpi-label">Assets</div>
+                        <div class="kpi-value cyan" id="kpi-assets">0</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Scheduled Variants</div>
+                        <div class="kpi-value gold" id="kpi-scheduled">0</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Campaigns</div>
+                        <div class="kpi-value violet" id="kpi-campaigns">0</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Platform Connections</div>
+                        <div class="kpi-value emerald" id="kpi-connections">0</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Published Variants</div>
+                        <div class="kpi-value rose" id="kpi-published">0</div>
+                    </article>
+                </section>
+
+                <section class="view active" id="view-overview">
+                    <div class="split">
+                        <article class="panel">
+                            <div class="section-head">
+                                <h2 class="section-title">Upcoming Queue</h2>
+                            </div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Campaign</th>
+                                            <th>Platform</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="overview-queue"></tbody>
+                                </table>
+                            </div>
+                        </article>
+
+                        <article class="panel">
+                            <div class="section-head">
+                                <h2 class="section-title">Connection Health</h2>
+                            </div>
+                            <div id="overview-connections" class="overview-connections-grid"></div>
+                        </article>
+                    </div>
+
+                    <article class="panel">
+                        <div class="section-head">
+                            <h2 class="section-title">Recent Assets</h2>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Type</th>
+                                        <th>Added</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overview-assets"></tbody>
+                            </table>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="view" id="view-connections">
+                    <div class="section-head">
+                        <h2 class="section-title">Platform Connect Center</h2>
+                        <button class="btn btn-primary" id="open-connection-modal">Connect Account</button>
+                    </div>
+                    <p class="subheading mb-08">Store one active token profile per platform/account, then the scheduler publishes automatically.</p>
+                    <div class="connection-grid" id="connection-grid"></div>
+                </section>
+
+                <section class="view" id="view-planner">
+                    <div class="grid-two">
+                        <article class="panel">
+                            <div class="section-head">
+                                <h2 class="section-title">Campaign Registry</h2>
+                                <button class="btn btn-primary" id="open-campaign-modal">New Campaign</button>
+                            </div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Window</th>
+                                            <th>Status</th>
+                                            <th>Posts</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="campaign-table"></tbody>
+                                </table>
+                            </div>
+                        </article>
+
+                        <article class="panel">
+                            <div class="section-head">
+                                <h2 class="section-title">Campaign Playbook</h2>
+                            </div>
+                            <ul class="playbook-list">
+                                <li>Plan by objective: authority, pipeline, product proof, recruiting.</li>
+                                <li>Use one core narrative and platform-specific variants.</li>
+                                <li>Schedule weekly in batches; let automation handle distribution.</li>
+                                <li>Keep watermark enabled for share-protected visuals.</li>
+                            </ul>
+                        </article>
+                    </div>
+
+                    <article class="panel mt-085">
+                        <div class="calendar-header">
+                            <h2 class="section-title" id="calendar-title">Calendar</h2>
+                            <div class="inline-actions">
+                                <button class="btn btn-secondary" id="calendar-prev">Previous</button>
+                                <button class="btn btn-secondary" id="calendar-next">Next</button>
+                            </div>
+                        </div>
+                        <div class="calendar-grid" id="calendar-grid"></div>
+                    </article>
+                </section>
+
+                <section class="view" id="view-composer">
+                    <article class="panel">
+                        <div class="section-head">
+                            <h2 class="section-title">Compose and Schedule</h2>
+                            <button class="btn btn-primary" id="submit-composer">Schedule Post Set</button>
+                        </div>
+
+                        <div class="form-grid mb-06">
+                            <div>
+                                <label class="form-label">Campaign</label>
+                                <select id="composer-campaign"></select>
+                            </div>
+                            <div>
+                                <label class="form-label">Schedule Time</label>
+                                <input type="datetime-local" id="composer-schedule">
+                            </div>
+                        </div>
+
+                        <div class="mb-07">
+                            <label class="form-label">Platforms</label>
+                            <div class="platform-picker" id="platform-picker"></div>
+                        </div>
+
+                        <div class="mb-065">
+                            <label class="form-label">Caption</label>
+                            <textarea id="composer-content" placeholder="Write a single source caption. We will enforce each platform limit before scheduling."></textarea>
+                        </div>
+
+                        <div class="form-grid mb-065">
+                            <div>
+                                <label class="form-label">Hashtags (comma separated)</label>
+                                <input type="text" id="composer-hashtags" placeholder="design, strategy, ai">
+                            </div>
+                            <div class="align-end-row">
+                                <label class="switch"><input type="checkbox" id="composer-watermark" checked> Apply watermark profile</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-07">
+                            <label class="form-label">Per-platform Limits</label>
+                            <div class="counter-grid" id="composer-counters"></div>
+                        </div>
+
+                        <div>
+                            <label class="form-label">Select Asset</label>
+                            <div class="asset-grid" id="composer-assets"></div>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="view" id="view-library">
+                    <article class="panel">
+                        <div class="section-head">
+                            <h2 class="section-title">Asset Library</h2>
+                        </div>
+                        <div class="toolbar">
+                            <input type="text" id="library-search" placeholder="Search title or tags">
+                            <select id="library-type">
+                                <option value="">All media types</option>
+                                <option value="image">Image</option>
+                                <option value="video">Video</option>
+                                <option value="audio">Audio</option>
+                                <option value="document">Document</option>
+                            </select>
+                        </div>
+                        <div class="asset-grid asset-grid-full" id="library-grid"></div>
+                    </article>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div class="modal-wrap" id="campaign-modal">
+        <div class="modal">
+            <h3>Create Campaign</h3>
+            <div class="form-grid">
+                <div>
+                    <label class="form-label">Name</label>
+                    <input type="text" id="campaign-name" placeholder="Q3 Thought Leadership">
+                </div>
+                <div>
+                    <label class="form-label">Cadence</label>
+                    <select id="campaign-cadence">
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Biweekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="burst">Burst</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-grid mt-06">
+                <div>
+                    <label class="form-label">Start date</label>
+                    <input type="date" id="campaign-start">
+                </div>
+                <div>
+                    <label class="form-label">End date</label>
+                    <input type="date" id="campaign-end">
+                </div>
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Objective</label>
+                <textarea id="campaign-objective" placeholder="What business outcome should this campaign drive?"></textarea>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" data-close-modal="campaign-modal">Cancel</button>
+                <button class="btn btn-primary" id="save-campaign-btn">Save Campaign</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-wrap" id="connection-modal">
+        <div class="modal">
+            <h3>Connect Platform Account</h3>
+            <div class="conn-tabs">
+                <button class="conn-tab active" data-conn-tab="oauth">OAuth (Recommended)</button>
+                <button class="conn-tab" data-conn-tab="manual">Manual Token</button>
+            </div>
+
+            <div id="conn-tab-oauth" class="conn-tab-panel active">
+                <p class="subheading mb-07">Click a platform to authorize via OAuth. Tokens are securely stored and auto-refreshed.</p>
+                <div class="oauth-provider-grid" id="oauth-provider-grid"></div>
+                <div id="oauth-status-note" class="subheading mt-06"></div>
+            </div>
+
+            <div id="conn-tab-manual" class="conn-tab-panel">
+                <p class="subheading mb-07">Paste production tokens from each developer console. Use this if OAuth is not configured for a platform.</p>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">Platform</label>
+                        <select id="conn-platform">
+                            <option value="instagram">Instagram</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="x">X</option>
+                            <option value="linkedin">LinkedIn</option>
+                            <option value="pinterest">Pinterest</option>
+                            <option value="tiktok">TikTok</option>
+                            <option value="youtube">YouTube</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Account label</label>
+                        <input type="text" id="conn-label" placeholder="@goodflippindesign">
+                    </div>
+                </div>
+                <div class="form-grid mt-06">
+                    <div>
+                        <label class="form-label">Account ID</label>
+                        <input type="text" id="conn-account-id" placeholder="platform user/page id">
+                    </div>
+                    <div>
+                        <label class="form-label">Expires at (optional)</label>
+                        <input type="datetime-local" id="conn-expires-at">
+                    </div>
+                </div>
+                <div class="mt-06">
+                    <label class="form-label">Access token</label>
+                    <textarea id="conn-access-token" placeholder="Paste access token"></textarea>
+                </div>
+                <div class="mt-06">
+                    <label class="form-label">Refresh token (optional)</label>
+                    <input type="text" id="conn-refresh-token" placeholder="Refresh token">
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" data-close-modal="connection-modal">Cancel</button>
+                    <button class="btn btn-primary" id="save-connection-btn">Save Connection</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            const BRAND = 'gfd';
+            const API = '/api/cms';
+            const PLATFORM_ORDER = ['instagram', 'facebook', 'x', 'linkedin', 'pinterest', 'tiktok', 'youtube'];
+
+            // Maps each platform to its OAuth provider key
+            const PLATFORM_TO_PROVIDER = {
+                instagram: 'meta', facebook: 'meta', x: 'x',
+                linkedin: 'linkedin', pinterest: 'pinterest',
+                tiktok: 'tiktok', youtube: 'youtube',
+            };
+
+            const PROVIDER_INFO = {
+                meta: { label: 'Meta (Instagram + Facebook)', platforms: ['instagram', 'facebook'] },
+                x: { label: 'X (Twitter)', platforms: ['x'] },
+                linkedin: { label: 'LinkedIn', platforms: ['linkedin'] },
+                pinterest: { label: 'Pinterest', platforms: ['pinterest'] },
+                tiktok: { label: 'TikTok', platforms: ['tiktok'] },
+                youtube: { label: 'YouTube', platforms: ['youtube'] },
+            };
+
+            const state = {
+                clerk: null,
+                token: null,
+                currentView: 'overview',
+                assets: [],
+                campaigns: [],
+                variants: [],
+                connections: [],
+                platformRules: {},
+                oauthStatus: {},
+                selectedPlatforms: new Set(['linkedin', 'x']),
+                selectedAssetId: '',
+                calendarDate: new Date(),
+            };
+
+            function $(id) {
+                return document.getElementById(id);
+            }
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str || '';
+                return div.innerHTML;
+            }
+
+            function toast(msg, type = 'success') {
+                const el = $('toast');
+                el.className = type + ' show';
+                el.textContent = msg;
+                window.clearTimeout(el._timer);
+                el._timer = window.setTimeout(() => {
+                    el.classList.remove('show');
+                }, 3000);
+            }
+
+            function toIsoFromLocal(localValue) {
+                if (!localValue) return null;
+                return new Date(localValue).toISOString();
+            }
+
+            function localFromIso(isoValue) {
+                if (!isoValue) return '';
+                const d = new Date(isoValue);
+                const pad = (n) => String(n).padStart(2, '0');
+                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            }
+
+            function formatDateTime(value) {
+                if (!value) return '-';
+                return new Date(value).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                });
+            }
+
+            function assetUrl(asset) {
+                const path = asset.thumbnail_path || asset.file_path || '';
+                if (!path) return '';
+                if (path.startsWith('http://') || path.startsWith('https://')) return path;
+                return '/api/cms/media/' + path.split('/').map(encodeURIComponent).join('/');
+            }
+
+            async function api(path, opts = {}) {
+                const headers = {
+                    ...(opts.headers || {}),
+                };
+                if (state.token) headers.Authorization = 'Bearer ' + state.token;
+
+                let body = opts.body;
+                if (body && typeof body === 'object' && !(body instanceof FormData)) {
+                    headers['Content-Type'] = 'application/json';
+                    body = JSON.stringify(body);
+                }
+
+                const res = await fetch(API + path, {
+                    ...opts,
+                    headers,
+                    body,
+                });
+
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(data.error || 'Request failed');
+                }
+                return data;
+            }
+
+            async function initAuth() {
+                try {
+                    const key = window.ENV?.CLERK_PUBLISHABLE_KEY || window.CLERK_PUBLISHABLE_KEY;
+                    state.clerk = new window.Clerk(key);
+                    await state.clerk.load();
+
+                    if (!state.clerk.user) {
+                        state.clerk.openSignIn({ redirectUrl: window.location.href });
+                        return;
+                    }
+
+                    const role = state.clerk.user.publicMetadata?.role;
+                    if (role !== 'admin') {
+                        $('auth-loading').classList.add('hide');
+                        $('auth-denied').classList.remove('hide');
+                        return;
+                    }
+
+                    state.token = await state.clerk.session.getToken();
+                    $('user-email').textContent = state.clerk.user.primaryEmailAddress?.emailAddress || 'admin';
+
+                    $('auth-gate').style.display = 'none';
+                    $('admin-app').style.display = 'block';
+
+                    await boot();
+                } catch (err) {
+                    $('auth-loading').textContent = 'Auth failed. Check Clerk configuration.';
+                    console.error('[admin auth]', err);
+                }
+            }
+
+            async function boot() {
+                bindUI();
+                await refreshAll();
+                renderPlatformPicker();
+                updateComposerCounters();
+            }
+
+            function bindUI() {
+                document.querySelectorAll('.nav-btn').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        switchView(btn.dataset.view);
+                    });
+                });
+
+                $('refresh-btn').addEventListener('click', refreshAll);
+                $('manual-run-btn').addEventListener('click', runQueueNow);
+                $('sign-out-btn').addEventListener('click', () => state.clerk.signOut({ redirectUrl: '/' }));
+
+                $('open-campaign-modal').addEventListener('click', () => openModal('campaign-modal'));
+                $('open-connection-modal').addEventListener('click', () => {
+                    renderOAuthProviderGrid();
+                    openModal('connection-modal');
+                });
+                $('save-campaign-btn').addEventListener('click', saveCampaign);
+                $('save-connection-btn').addEventListener('click', saveConnection);
+                $('submit-composer').addEventListener('click', schedulePostSet);
+
+                // Connection modal tab switching
+                document.querySelectorAll('.conn-tab').forEach((tab) => {
+                    tab.addEventListener('click', () => {
+                        document.querySelectorAll('.conn-tab').forEach((t) => t.classList.remove('active'));
+                        document.querySelectorAll('.conn-tab-panel').forEach((p) => p.classList.remove('active'));
+                        tab.classList.add('active');
+                        $('conn-tab-' + tab.dataset.connTab).classList.add('active');
+                    });
+                });
+
+                // Listen for OAuth callback completion (postMessage from popup/redirect)
+                window.addEventListener('message', (ev) => {
+                    if (ev.origin !== window.location.origin) return;
+                    if (ev.data?.type === 'oauth-complete') {
+                        closeModal('connection-modal');
+                        toast(ev.data.success ? 'Platform connected via OAuth' : 'OAuth connection failed', ev.data.success ? 'success' : 'error');
+                        refreshAll();
+                    }
+                });
+
+                // Check for OAuth result in URL (for same-window redirect flows)
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('oauth') === 'success') {
+                    toast('Platform connected via OAuth', 'success');
+                    window.history.replaceState({}, '', window.location.pathname);
+                    refreshAll();
+                } else if (urlParams.get('oauth') === 'error') {
+                    toast('OAuth connection failed', 'error');
+                    window.history.replaceState({}, '', window.location.pathname);
+                }
+
+                $('calendar-prev').addEventListener('click', async () => {
+                    state.calendarDate = new Date(state.calendarDate.getFullYear(), state.calendarDate.getMonth() - 1, 1);
+                    await loadCalendar();
+                });
+
+                $('calendar-next').addEventListener('click', async () => {
+                    state.calendarDate = new Date(state.calendarDate.getFullYear(), state.calendarDate.getMonth() + 1, 1);
+                    await loadCalendar();
+                });
+
+                $('composer-content').addEventListener('input', updateComposerCounters);
+                $('composer-hashtags').addEventListener('input', updateComposerCounters);
+
+                $('library-search').addEventListener('input', renderLibrary);
+                $('library-type').addEventListener('change', renderLibrary);
+
+                document.querySelectorAll('[data-close-modal]').forEach((btn) => {
+                    btn.addEventListener('click', () => closeModal(btn.getAttribute('data-close-modal')));
+                });
+
+                document.querySelectorAll('.modal-wrap').forEach((wrap) => {
+                    wrap.addEventListener('click', (ev) => {
+                        if (ev.target === wrap) wrap.classList.remove('active');
+                    });
+                });
+            }
+
+            async function refreshAll() {
+                await Promise.all([
+                    loadPlatformRules(),
+                    loadOAuthStatus(),
+                    loadStats(),
+                    loadConnections(),
+                    loadAssets(),
+                    loadCampaigns(),
+                    loadVariants(),
+                ]);
+
+                await loadCalendar();
+                renderOverview();
+                renderConnections();
+                renderCampaigns();
+                renderCampaignSelect();
+                renderLibrary();
+                renderComposerAssets();
+                updateComposerCounters();
+            }
+
+            async function loadPlatformRules() {
+                state.platformRules = await api('/platform-rules');
+            }
+
+            async function loadOAuthStatus() {
+                try {
+                    const data = await api('/oauth/status');
+                    state.oauthStatus = data.providers || {};
+                } catch {
+                    state.oauthStatus = {};
+                }
+            }
+
+            function renderOAuthProviderGrid() {
+                const grid = $('oauth-provider-grid');
+                const note = $('oauth-status-note');
+                const providers = Object.keys(PROVIDER_INFO);
+                let unconfiguredCount = 0;
+
+                grid.innerHTML = providers.map((provider) => {
+                    const info = PROVIDER_INFO[provider];
+                    const oauth = state.oauthStatus[provider];
+                    const configured = oauth?.configured || false;
+                    const connectedPlatforms = info.platforms.filter((p) =>
+                        state.connections.some((c) => c.platform === p && Number(c.is_active) === 1)
+                    );
+                    const isConnected = connectedPlatforms.length > 0;
+
+                    if (!configured) unconfiguredCount++;
+
+                    const cls = isConnected ? 'connected' : configured ? 'configured' : 'not-configured';
+                    const statusText = isConnected ? 'Connected' : configured ? 'Click to connect' : 'Not configured';
+
+                    return `
+                        <button class="oauth-provider-btn ${cls}" data-oauth-provider="${provider}" ${!configured ? 'disabled' : ''}>
+                            <span class="oauth-dot"></span>
+                            <span class="oauth-label">${escapeHtml(info.label)}</span>
+                            <span class="oauth-status">${statusText}</span>
+                        </button>
+                    `;
+                }).join('');
+
+                if (unconfiguredCount > 0) {
+                    note.textContent = `${unconfiguredCount} provider(s) need OAuth secrets configured on the server. Use the Manual Token tab for those platforms.`;
+                } else {
+                    note.textContent = '';
+                }
+
+                grid.querySelectorAll('[data-oauth-provider]').forEach((btn) => {
+                    if (btn.disabled) return;
+                    btn.addEventListener('click', () => startOAuthFlow(btn.dataset.oauthProvider));
+                });
+            }
+
+            function startOAuthFlow(provider) {
+                const url = `${API}/oauth/authorize/${encodeURIComponent(provider)}?brand=${encodeURIComponent(BRAND)}`;
+                // Open in same tab — the callback page has a "Back to Command Center" link
+                window.location.href = url;
+            }
+
+            async function loadStats() {
+                const stats = await api('/stats');
+                const assetTotal = (stats.assets || []).reduce((sum, row) => sum + Number(row.total || 0), 0);
+                const socialRows = stats.social || [];
+                const scheduled = socialRows.find((row) => row.status === 'scheduled')?.total || 0;
+                const published = socialRows.find((row) => row.status === 'published')?.total || 0;
+
+                $('kpi-assets').textContent = assetTotal;
+                $('kpi-scheduled').textContent = scheduled;
+                $('kpi-campaigns').textContent = Number(stats.campaigns || 0);
+                $('kpi-connections').textContent = Number(stats.connections || 0);
+                $('kpi-published').textContent = published;
+            }
+
+            async function loadConnections() {
+                state.connections = await api('/connections?brand=' + encodeURIComponent(BRAND));
+            }
+
+            async function loadAssets() {
+                const data = await api('/assets?brand=' + encodeURIComponent(BRAND) + '&limit=120');
+                state.assets = data.assets || [];
+            }
+
+            async function loadCampaigns() {
+                state.campaigns = await api('/campaigns?brand=' + encodeURIComponent(BRAND));
+            }
+
+            async function loadVariants() {
+                state.variants = await api('/social/variants?brand=' + encodeURIComponent(BRAND) + '&limit=250');
+            }
+
+            async function loadCalendar() {
+                const d = state.calendarDate;
+                const start = new Date(d.getFullYear(), d.getMonth(), 1);
+                const end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+                const data = await api('/campaigns/calendar?brand=' + encodeURIComponent(BRAND) + '&start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString()));
+                renderCalendar(data.events || [], start);
+            }
+
+            function renderOverview() {
+                const queueBody = $('overview-queue');
+                const upcoming = [...state.variants]
+                    .filter((row) => row.scheduled_at)
+                    .sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
+                    .slice(0, 12);
+
+                queueBody.innerHTML = upcoming.length
+                    ? upcoming.map((row) => `
+                        <tr>
+                            <td>${escapeHtml(formatDateTime(row.scheduled_at))}</td>
+                            <td>${escapeHtml(row.campaign_name || 'General')}</td>
+                            <td><span class="tag ok">${escapeHtml(row.platform)}</span></td>
+                            <td>${statusTag(row.status)}</td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="4">No queued variants yet.</td></tr>';
+
+                const connectionSummary = $('overview-connections');
+                const byPlatform = {};
+                for (const platform of PLATFORM_ORDER) {
+                    const active = state.connections.filter((c) => c.platform === platform && Number(c.is_active) === 1);
+                    byPlatform[platform] = active.length;
+                }
+
+                connectionSummary.innerHTML = PLATFORM_ORDER.map((platform) => {
+                    const connected = byPlatform[platform] > 0;
+                    return `
+                        <div class="overview-conn-row">
+                            <span class="overview-conn-name">${escapeHtml(platform)}</span>
+                            <span class="tag ${connected ? 'ok' : 'fail'}">${connected ? 'connected' : 'missing'}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                const assetsBody = $('overview-assets');
+                const recentAssets = [...state.assets]
+                    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+                    .slice(0, 10);
+
+                assetsBody.innerHTML = recentAssets.length
+                    ? recentAssets.map((asset) => `
+                        <tr>
+                            <td>${escapeHtml(asset.title)}</td>
+                            <td>${escapeHtml(asset.category || '-')}</td>
+                            <td>${escapeHtml(asset.media_type || '-')}</td>
+                            <td>${escapeHtml(formatDateTime(asset.created_at))}</td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="4">No assets available.</td></tr>';
+            }
+
+            function renderConnections() {
+                const container = $('connection-grid');
+                container.innerHTML = PLATFORM_ORDER.map((platform) => {
+                    const entries = state.connections.filter((row) => row.platform === platform && Number(row.is_active) === 1);
+                    const latest = entries[0];
+                    const connected = Boolean(latest);
+                    const provider = PLATFORM_TO_PROVIDER[platform];
+                    const oauthReady = state.oauthStatus[provider]?.configured || false;
+
+                    return `
+                        <article class="connection-card">
+                            <div class="connection-top">
+                                <div class="connection-name">${escapeHtml(platform)}</div>
+                                <span class="tag ${connected ? 'ok' : 'warn'}">${connected ? 'ready' : 'needs setup'}</span>
+                            </div>
+                            <div class="connection-account">${connected ? escapeHtml(latest.account_label || latest.account_id || 'connected') : 'No active account profile'}</div>
+                            <div class="inline-actions">
+                                ${oauthReady
+                            ? `<button class="btn btn-primary" data-oauth-connect="${provider}" title="Connect via OAuth">Connect with OAuth</button>`
+                            : `<button class="btn btn-secondary" data-connect-platform="${platform}">Manual Connect</button>`
+                        }
+                                ${connected ? `<button class="btn btn-danger" data-disconnect-id="${latest.id}">Deactivate</button>` : ''}
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+
+                container.querySelectorAll('[data-oauth-connect]').forEach((btn) => {
+                    btn.addEventListener('click', () => startOAuthFlow(btn.dataset.oauthConnect));
+                });
+
+                container.querySelectorAll('[data-connect-platform]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        // Switch to manual tab
+                        document.querySelectorAll('.conn-tab').forEach((t) => t.classList.remove('active'));
+                        document.querySelectorAll('.conn-tab-panel').forEach((p) => p.classList.remove('active'));
+                        document.querySelector('[data-conn-tab="manual"]').classList.add('active');
+                        $('conn-tab-manual').classList.add('active');
+                        $('conn-platform').value = btn.getAttribute('data-connect-platform');
+                        openModal('connection-modal');
+                    });
+                });
+
+                container.querySelectorAll('[data-disconnect-id]').forEach((btn) => {
+                    btn.addEventListener('click', () => disconnectConnection(btn.getAttribute('data-disconnect-id')));
+                });
+            }
+
+            function renderCampaigns() {
+                const body = $('campaign-table');
+                body.innerHTML = state.campaigns.length
+                    ? state.campaigns.map((row) => `
+                        <tr>
+                            <td>
+                                <div class="text-strong">${escapeHtml(row.name)}</div>
+                                <div class="text-note">${escapeHtml(row.objective || '')}</div>
+                            </td>
+                            <td>${escapeHtml((row.start_date || '').slice(0, 10) || '-')}${row.end_date ? ' to ' + escapeHtml(row.end_date.slice(0, 10)) : ''}</td>
+                            <td>${statusTag(row.status)}</td>
+                            <td>${Number(row.post_count || 0)}</td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="4">No campaigns created yet.</td></tr>';
+            }
+
+            function renderCampaignSelect() {
+                const select = $('composer-campaign');
+                select.innerHTML = '<option value="">General (no campaign)</option>' +
+                    state.campaigns.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+            }
+
+            function renderPlatformPicker() {
+                const picker = $('platform-picker');
+                picker.innerHTML = PLATFORM_ORDER.map((platform) => `
+                    <button type="button" class="platform-pill ${state.selectedPlatforms.has(platform) ? 'active' : ''}" data-platform="${platform}">
+                        ${escapeHtml(platform)}
+                    </button>
+                `).join('');
+
+                picker.querySelectorAll('[data-platform]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const platform = btn.getAttribute('data-platform');
+                        if (state.selectedPlatforms.has(platform)) {
+                            state.selectedPlatforms.delete(platform);
+                        } else {
+                            state.selectedPlatforms.add(platform);
+                        }
+                        renderPlatformPicker();
+                        updateComposerCounters();
+                    });
+                });
+            }
+
+            function renderComposerAssets() {
+                const container = $('composer-assets');
+                const candidates = state.assets.filter((a) => ['image', 'video'].includes(a.media_type)).slice(0, 80);
+
+                container.innerHTML = candidates.length
+                    ? candidates.map((asset) => {
+                        const isActive = state.selectedAssetId === asset.id;
+                        const image = assetUrl(asset);
+                        return `
+                            <article class="asset-card ${isActive ? 'active' : ''}" data-asset-id="${asset.id}">
+                                <img class="asset-thumb" src="${escapeHtml(image)}" alt="${escapeHtml(asset.title)}" loading="lazy">
+                                <div class="asset-meta">
+                                    <div class="text-strong">${escapeHtml(asset.title)}</div>
+                                    <div>${escapeHtml(asset.media_type || '')}</div>
+                                </div>
+                            </article>
+                        `;
+                    }).join('')
+                    : '<p class="text-muted">Upload image/video assets first, then schedule from this panel.</p>';
+
+                container.querySelectorAll('[data-asset-id]').forEach((card) => {
+                    card.addEventListener('click', () => {
+                        state.selectedAssetId = card.getAttribute('data-asset-id');
+                        renderComposerAssets();
+                    });
+                });
+            }
+
+            function renderLibrary() {
+                const q = $('library-search').value.trim().toLowerCase();
+                const mediaType = $('library-type').value;
+
+                const list = state.assets.filter((asset) => {
+                    if (mediaType && asset.media_type !== mediaType) return false;
+                    if (!q) return true;
+                    const tags = String(asset.tags || '').toLowerCase();
+                    return String(asset.title || '').toLowerCase().includes(q) || tags.includes(q);
+                });
+
+                const grid = $('library-grid');
+                grid.innerHTML = list.length
+                    ? list.map((asset) => `
+                        <article class="asset-card">
+                            <img class="asset-thumb" src="${escapeHtml(assetUrl(asset))}" alt="${escapeHtml(asset.title)}" loading="lazy">
+                            <div class="asset-meta">
+                                <div class="text-strong">${escapeHtml(asset.title)}</div>
+                                <div>${escapeHtml(asset.category || '-')} | ${escapeHtml(asset.media_type || '-')}</div>
+                                <div class="mt-03 text-muted">${escapeHtml(formatDateTime(asset.created_at))}</div>
+                            </div>
+                        </article>
+                    `).join('')
+                    : '<p class="text-muted">No assets matched your filter.</p>';
+            }
+
+            function renderCalendar(events, monthStart) {
+                const title = monthStart.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                $('calendar-title').textContent = 'Calendar - ' + title;
+
+                const firstWeekday = monthStart.getDay();
+                const daysInMonth = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
+
+                const eventMap = {};
+                events.forEach((event) => {
+                    const day = new Date(event.scheduled_at).getDate();
+                    if (!eventMap[day]) eventMap[day] = [];
+                    eventMap[day].push(event);
+                });
+
+                const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const cells = labels.map((l) => `<div class="day-label">${l}</div>`);
+
+                for (let i = 0; i < firstWeekday; i++) {
+                    cells.push('<div class="day-cell empty"></div>');
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const rows = (eventMap[day] || []).slice(0, 3);
+                    const moreCount = (eventMap[day] || []).length - rows.length;
+                    const itemsHtml = rows.map((row) => `<div class="day-item">${escapeHtml(row.platform)} - ${escapeHtml((row.campaign_name || 'General').slice(0, 22))}</div>`).join('');
+                    const moreHtml = moreCount > 0 ? `<div class="day-item">+${moreCount} more</div>` : '';
+                    cells.push(`
+                        <div class="day-cell">
+                            <div class="day-num">${day}</div>
+                            ${itemsHtml}
+                            ${moreHtml}
+                        </div>
+                    `);
+                }
+
+                $('calendar-grid').innerHTML = cells.join('');
+            }
+
+            function updateComposerCounters() {
+                const content = $('composer-content').value || '';
+                const hashtagRaw = $('composer-hashtags').value || '';
+                const hashtags = hashtagRaw
+                    .split(',')
+                    .map((h) => h.trim().replace(/^#/, ''))
+                    .filter(Boolean);
+
+                const fullText = hashtags.length ? `${content}\n\n${hashtags.map((h) => '#' + h).join(' ')}` : content;
+                const counters = [];
+
+                for (const platform of state.selectedPlatforms) {
+                    const rules = state.platformRules[platform] || { maxChars: 500, maxHashtags: 10 };
+                    const count = fullText.length;
+                    const over = count > Number(rules.maxChars || 500) || hashtags.length > Number(rules.maxHashtags || 10);
+                    counters.push(`
+                        <div class="counter ${over ? 'over' : ''}">
+                            <span>${escapeHtml(platform)}</span>
+                            <span>${count}/${rules.maxChars || 500} chars, ${hashtags.length}/${rules.maxHashtags || 10} hashtags</span>
+                        </div>
+                    `);
+                }
+
+                $('composer-counters').innerHTML = counters.length
+                    ? counters.join('')
+                    : '<div class="counter over"><span>Select at least one platform</span><span>-</span></div>';
+            }
+
+            function statusTag(status) {
+                const cls = status === 'published'
+                    ? 'ok'
+                    : status === 'failed'
+                        ? 'fail'
+                        : 'warn';
+                return `<span class="tag ${cls}">${escapeHtml(status || 'unknown')}</span>`;
+            }
+
+            function switchView(view) {
+                state.currentView = view;
+                document.querySelectorAll('.nav-btn').forEach((btn) => {
+                    btn.classList.toggle('active', btn.dataset.view === view);
+                });
+                document.querySelectorAll('.view').forEach((el) => {
+                    el.classList.toggle('active', el.id === 'view-' + view);
+                });
+            }
+
+            function openModal(id) {
+                $(id).classList.add('active');
+            }
+
+            function closeModal(id) {
+                $(id).classList.remove('active');
+            }
+
+            async function saveCampaign() {
+                try {
+                    const payload = {
+                        brand: BRAND,
+                        name: $('campaign-name').value.trim(),
+                        cadence: $('campaign-cadence').value,
+                        start_date: $('campaign-start').value || null,
+                        end_date: $('campaign-end').value || null,
+                        objective: $('campaign-objective').value.trim(),
+                        status: 'planned',
+                        platforms: [...state.selectedPlatforms],
+                    };
+
+                    if (!payload.name) {
+                        throw new Error('Campaign name is required');
+                    }
+
+                    await api('/campaigns', { method: 'POST', body: payload });
+                    closeModal('campaign-modal');
+                    $('campaign-name').value = '';
+                    $('campaign-objective').value = '';
+                    toast('Campaign created', 'success');
+                    await refreshAll();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function saveConnection() {
+                try {
+                    const expiresLocal = $('conn-expires-at').value;
+                    const payload = {
+                        brand: BRAND,
+                        platform: $('conn-platform').value,
+                        account_label: $('conn-label').value.trim(),
+                        account_id: $('conn-account-id').value.trim(),
+                        payload: {
+                            access_token: $('conn-access-token').value.trim(),
+                            refresh_token: $('conn-refresh-token').value.trim(),
+                            expires_at: expiresLocal ? new Date(expiresLocal).toISOString() : '',
+                        },
+                    };
+
+                    if (!payload.account_id || !payload.payload.access_token) {
+                        throw new Error('Account ID and access token are required');
+                    }
+
+                    await api('/connections', { method: 'POST', body: payload });
+                    closeModal('connection-modal');
+                    $('conn-label').value = '';
+                    $('conn-account-id').value = '';
+                    $('conn-access-token').value = '';
+                    $('conn-refresh-token').value = '';
+                    $('conn-expires-at').value = '';
+                    toast('Platform connection saved', 'success');
+                    await refreshAll();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function disconnectConnection(id) {
+                if (!window.confirm('Deactivate this connection profile?')) return;
+                try {
+                    await api('/connections?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                    toast('Connection deactivated', 'success');
+                    await refreshAll();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function schedulePostSet() {
+                try {
+                    const platforms = [...state.selectedPlatforms];
+                    if (!platforms.length) throw new Error('Select at least one platform');
+                    if (!state.selectedAssetId) throw new Error('Select one media asset');
+
+                    const content = $('composer-content').value.trim();
+                    if (!content) throw new Error('Caption is required');
+
+                    const scheduledLocal = $('composer-schedule').value;
+                    if (!scheduledLocal) throw new Error('Schedule time is required');
+
+                    const hashtags = $('composer-hashtags').value
+                        .split(',')
+                        .map((h) => h.trim())
+                        .filter(Boolean);
+
+                    const payload = {
+                        brand: BRAND,
+                        campaign_id: $('composer-campaign').value ? Number($('composer-campaign').value) : null,
+                        content,
+                        platforms,
+                        media_asset_id: state.selectedAssetId,
+                        hashtags,
+                        scheduled_at: toIsoFromLocal(scheduledLocal),
+                        watermark_enabled: $('composer-watermark').checked,
+                        watermark_profile: $('composer-watermark').checked ? 'default' : '',
+                    };
+
+                    await api('/social/campaign', { method: 'POST', body: payload });
+                    toast('Post set scheduled', 'success');
+                    $('composer-content').value = '';
+                    $('composer-hashtags').value = '';
+                    updateComposerCounters();
+                    await refreshAll();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function runQueueNow() {
+                try {
+                    const result = await api('/social/run-now', { method: 'POST' });
+                    const published = result?.result?.published ?? 0;
+                    const failed = result?.result?.failed ?? 0;
+                    toast(`Queue run complete: ${published} published, ${failed} failed`, 'success');
+                    await loadVariants();
+                    renderOverview();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            initAuth();
+        })();
+    </script>
+</body>
+
+</html>
