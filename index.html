@@ -6657,7 +6657,12 @@
 
       // Sign-in button click (footer admin link + comment sections)
       document.addEventListener('click', function (e) {
-        if (e.target.closest('#footer-sign-in-btn') || e.target.classList.contains('comment-login-btn')) {
+        if (e.target.closest('#footer-sign-in-btn')) {
+          // Admin button always navigates to admin.html — that page handles its own Clerk auth
+          window.location.href = '/admin.html';
+          return;
+        }
+        if (e.target.classList.contains('comment-login-btn')) {
           if (clerkInstance) {
             clerkInstance.openSignIn();
           }
