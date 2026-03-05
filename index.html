@@ -92,7 +92,7 @@
     window.CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuZ29vZGZsaXBwaW52aWJlcy5jb20k';
     window.WORKER_API_URL = 'https://gfd-auth.weave0.workers.dev';
   </script>
-  <script src="https://cdn.clerk.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js" crossorigin="anonymous"></script>
+  <!-- Clerk SDK is loaded dynamically by initializeClerk() only when ENABLE_COMMUNITY is true -->
 
   <!-- GFD Ecosystem Navigation -->
   <link rel="stylesheet" href="shared/ecosystem-nav.css">
@@ -6555,6 +6555,18 @@
       let clerkInstance = null;
       let currentUser = null;
 
+      function loadClerkScript() {
+        return new Promise((resolve, reject) => {
+          if (window.Clerk) { resolve(); return; }
+          const s = document.createElement('script');
+          s.src = 'https://cdn.clerk.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js';
+          s.crossOrigin = 'anonymous';
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+
       async function initializeClerk() {
         // Skip if community features disabled via feature flag
         if (!window.GFD_FLAGS?.ENABLE_COMMUNITY) {
@@ -6572,6 +6584,7 @@
         }
 
         try {
+          await loadClerkScript();
           clerkInstance = new window.Clerk(window.CLERK_PUBLISHABLE_KEY);
           await clerkInstance.load();
 
