@@ -321,7 +321,7 @@
       position: fixed;
       bottom: 2rem;
       right: 2rem;
-      z-index: 999;
+      z-index: 150; /* below exit intent modal (300) */
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: white;
       padding: 0.875rem 1.5rem;
@@ -6213,135 +6213,287 @@
   </a>
 
   <!-- EXIT INTENT POPUP (Newsletter Capture) -->
-  <div id="exit-intent-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden" style="z-index: 200; animation: fadeIn 0.3s ease;">
-    <div class="flex items-center justify-center min-h-screen p-6">
-      <div class="bg-gradient-to-br from-gray-900 to-gray-800 border border-white/10 rounded-2xl p-8 max-w-md w-full relative" style="animation: slideUp 0.4s ease;">
-        <button id="exit-intent-close" class="absolute top-4 right-4 text-white/40 hover:text-white transition-colors" aria-label="Close" style="min-width: 44px; min-height: 44px; padding: 8px; display: inline-flex; align-items: center; justify-content: center;">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        <div class="text-center mb-6">
-          <div class="text-4xl mb-4">⚡</div>
-          <h3 class="font-bold text-2xl mb-2 text-white">Before you go...</h3>
-          <p class="text-white/60 text-sm">Get weekly web dev insights, portfolio tips, and project updates</p>
-        </div>
-
-        <form id="exit-intent-form" class="space-y-4">
-          <div>
-            <label for="exit-email" class="sr-only">Email address</label>
-            <input
-              type="email"
-              id="exit-email"
-              name="email"
-              placeholder="your@email.com"
-              required
-              class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 focus:border-blue-400 focus:outline-none text-white placeholder-white/40 transition-colors" />
-          </div>
-          <button type="submit" class="w-full px-6 py-3 rounded-full font-bold bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition-transform">
-            ✨ Send Me Weekly Tips
-          </button>
-          <p class="text-xs text-white/30 text-center">Web development insights and portfolio strategies. Unsubscribe anytime.</p>
-        </form>
-
-        <div id="exit-success" class="hidden text-center">
-          <div class="text-4xl mb-4">🎉</div>
-          <h3 class="font-bold text-xl mb-2 text-blue-400">You're in!</h3>
-          <p class="text-white/60 text-sm">Check your inbox for our welcome message.</p>
-        </div>
+  <div id="exit-intent-overlay" class="hidden">
+    <div class="exit-intent-modal">
+      <button id="exit-intent-close" class="exit-intent-close-btn" aria-label="Close">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:2.5rem;margin-bottom:0.75rem;">⚡</div>
+        <h3 style="font-size:1.375rem;font-weight:700;margin:0 0 0.5rem;color:var(--text);">Before you go...</h3>
+        <p style="font-size:0.875rem;color:var(--text-muted);margin:0;">Get weekly web dev insights, portfolio tips, and project updates</p>
+      </div>
+      <form id="exit-intent-form">
+        <label for="exit-email" class="sr-only">Email address</label>
+        <input type="email" id="exit-email" name="email" placeholder="your@email.com" required class="exit-intent-email" />
+        <button type="submit" class="exit-intent-submit">✨ Send Me Weekly Tips</button>
+        <p style="font-size:0.75rem;color:rgba(245,245,245,0.25);text-align:center;margin:0.75rem 0 0;">Web development insights and portfolio strategies. Unsubscribe anytime.</p>
+      </form>
+      <div id="exit-success" class="hidden" style="text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:0.75rem;">🎉</div>
+        <h3 style="font-size:1.25rem;font-weight:700;margin:0 0 0.5rem;color:#06b6d4;">You're in!</h3>
+        <p style="font-size:0.875rem;color:var(--text-muted);margin:0;">Check your inbox for our welcome message.</p>
       </div>
     </div>
   </div>
 
   <!-- STICKY CTA BAR (Context-Aware Business CTAs) -->
-  <div id="sticky-cta-bar" class="fixed bottom-0 left-0 right-0 transform translate-y-full transition-transform duration-500" style="z-index: 100; will-change: transform;">
-    <div class="bg-gradient-to-r from-gray-900/95 to-gray-800/95 backdrop-blur-md border-t border-white/10">
-      <div class="max-w-7xl mx-auto px-4 py-3">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">⚡</span>
-            <div>
-              <p class="text-white font-semibold text-sm" id="sticky-cta-text">Ready to build something amazing?</p>
-              <p class="text-white/40 text-xs hidden sm:block">Professional web development & consulting</p>
-            </div>
-          </div>
-          <div class="flex gap-2 flex-wrap justify-center">
-            <a href="mailto:brett@goodflippindesign.com" class="px-4 py-2 rounded-full font-bold text-sm bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-105 transition-transform whitespace-nowrap" style="min-height: 44px; display: inline-flex; align-items: center; padding: 12px 16px;">
-              📧 Get in Touch
-            </a>
-            <a href="donate.html" class="px-4 py-2 rounded-full font-semibold text-sm border border-white/20 text-white/70 hover:bg-white/5 transition-colors whitespace-nowrap" style="min-height: 44px; display: inline-flex; align-items: center; padding: 12px 16px;">
-              💖 Support Us
-            </a>
-            <button id="sticky-cta-close" class="px-3 py-2 text-white/40 hover:text-white/60 transition-colors" aria-label="Close" style="min-width: 44px; min-height: 44px; padding: 12px; display: inline-flex; align-items: center; justify-content: center;">
-              ✕
-            </button>
-          </div>
+  <div id="sticky-cta-bar">
+    <div class="sticky-cta-inner">
+      <div class="sticky-cta-message">
+        <span style="font-size:1.5rem;flex-shrink:0;">⚡</span>
+        <div>
+          <p id="sticky-cta-text" style="margin:0;font-size:0.875rem;font-weight:600;color:var(--text);">Ready to build something amazing?</p>
+          <p class="sticky-cta-subtitle">Professional web development &amp; consulting</p>
         </div>
+      </div>
+      <div class="sticky-cta-actions">
+        <a href="mailto:brett@goodflippindesign.com" class="sticky-cta-primary">📧 Get in Touch</a>
+        <a href="donate.html" class="sticky-cta-secondary">💖 Support Us</a>
+        <button id="sticky-cta-close" class="sticky-cta-dismiss" aria-label="Close">✕</button>
       </div>
     </div>
   </div>
 
   <!-- SOCIAL PROOF ACTIVITY FEED -->
-  <div id="social-proof-feed" class="fixed bottom-6 left-6 max-w-sm hidden" style="z-index: 90; animation: slideInLeft 0.5s ease;">
-    <div class="bg-gradient-to-br from-gray-900/95 to-gray-800/95 backdrop-blur-md border border-white/10 rounded-xl p-4">
-      <div class="flex items-start gap-3">
-        <span id="social-proof-icon" class="text-xl">💼</span>
-        <div class="flex-1 min-w-0">
-          <p id="social-proof-text" class="text-white/80 text-sm mb-1">Someone just viewed the portfolio</p>
-          <p id="social-proof-time" class="text-white/40 text-xs">2m ago</p>
-        </div>
-        <button id="social-proof-close" class="text-white/30 hover:text-white/50 transition-colors" aria-label="Hide notifications" style="min-width: 44px; min-height: 44px; padding: 8px; display: inline-flex; align-items: center; justify-content: center;">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+  <div id="social-proof-feed" class="hidden">
+    <div class="social-proof-card">
+      <span id="social-proof-icon" style="font-size:1.25rem;flex-shrink:0;">💼</span>
+      <div style="flex:1;min-width:0;">
+        <p id="social-proof-text" style="margin:0 0 0.2rem;font-size:0.875rem;color:rgba(245,245,245,0.8);">Someone just viewed the portfolio</p>
+        <p id="social-proof-time" style="margin:0;font-size:0.75rem;color:var(--text-muted);">2m ago</p>
       </div>
+      <button id="social-proof-close" class="social-proof-dismiss" aria-label="Hide notifications">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   </div>
 
   <style>
+    /* ── Conversion widgets: no Tailwind loaded, all vanilla CSS ── */
+    .hidden { display: none !important; }
+
+    /* Exit Intent Overlay */
+    #exit-intent-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      animation: fadeIn 0.3s ease;
+    }
+    .exit-intent-modal {
+      background: #0f1424;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 26rem;
+      width: 100%;
+      position: relative;
+      animation: slideUp 0.4s ease;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+    }
+    .exit-intent-close-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: color 0.2s;
+    }
+    .exit-intent-close-btn:hover { color: var(--text); }
+    .exit-intent-email {
+      display: block;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+      border-radius: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text);
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .exit-intent-email:focus { border-color: #06b6d4; }
+    .exit-intent-submit {
+      display: block;
+      width: 100%;
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1rem;
+      font-family: inherit;
+      background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .exit-intent-submit:hover { transform: scale(1.03); box-shadow: 0 4px 20px rgba(124,58,237,0.4); }
+
+    /* Sticky CTA Bar */
+    #sticky-cta-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      transform: translateY(100%);
+      transition: transform 0.5s ease;
+      z-index: 100;
+      will-change: transform;
+    }
+    .sticky-cta-inner {
+      background: rgba(10, 12, 24, 0.97);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .sticky-cta-message {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+      min-width: 0;
+    }
+    .sticky-cta-subtitle {
+      margin: 0.15rem 0 0;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .sticky-cta-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .sticky-cta-primary {
+      padding: 0 1rem;
+      height: 44px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
+      color: white;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      transition: transform 0.2s;
+    }
+    .sticky-cta-primary:hover { transform: scale(1.03); }
+    .sticky-cta-secondary {
+      padding: 0 1rem;
+      height: 44px;
+      border-radius: 50px;
+      font-size: 0.875rem;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: rgba(245, 245, 245, 0.65);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .sticky-cta-secondary:hover { background: rgba(255, 255, 255, 0.06); }
+    .sticky-cta-dismiss {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      min-width: 44px;
+      height: 44px;
+      padding: 0 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: color 0.2s;
+    }
+    .sticky-cta-dismiss:hover { color: rgba(255, 255, 255, 0.65); }
+
+    /* Social Proof Feed */
+    #social-proof-feed {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      max-width: 22rem;
+      z-index: 90;
+      animation: slideInLeft 0.5s ease;
+    }
+    .social-proof-card {
+      background: rgba(10, 12, 24, 0.97);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 0.75rem;
+      padding: 0.875rem 0.75rem 0.875rem 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    .social-proof-dismiss {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: color 0.2s;
+    }
+    .social-proof-dismiss:hover { color: rgba(255, 255, 255, 0.6); }
+
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
-
     @keyframes slideUp {
-      from {
-        transform: translateY(30px);
-        opacity: 0;
-      }
-
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
-
     @keyframes slideInLeft {
-      from {
-        transform: translateX(-100%);
-        opacity: 0;
-      }
-
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
+      from { transform: translateX(-30px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
-
-    @media (max-width: 768px) {
+    @media (max-width: 600px) {
       #social-proof-feed {
-        bottom: 80px;
-        left: 1rem;
-        right: 1rem;
+        bottom: 5rem;
+        left: 0.75rem;
+        right: 0.75rem;
         max-width: none;
       }
+      .sticky-cta-subtitle { display: none; }
     }
   </style>
 
@@ -6443,10 +6595,14 @@
       let stickyBarShown = false;
       let stickyBarDismissed = sessionStorage.getItem('gfd_sticky_dismissed');
 
+      const floatingDonate = document.querySelector('.floating-donate');
+
       function showStickyBar() {
         if (stickyBarShown || stickyBarDismissed || !stickyBar) return;
         stickyBarShown = true;
         stickyBar.style.transform = 'translateY(0)';
+        // Lift floating donate button above the bar
+        if (floatingDonate) floatingDonate.style.bottom = '5rem';
 
         if (typeof gtag === 'function') {
           gtag('event', 'sticky_cta_shown', { category: 'conversion' });
@@ -6492,6 +6648,8 @@
         stickyClose.addEventListener('click', function () {
           stickyBar.style.transform = 'translateY(100%)';
           sessionStorage.setItem('gfd_sticky_dismissed', '1');
+          // Restore floating donate button position
+          if (floatingDonate) floatingDonate.style.bottom = '';
         });
       }
 
