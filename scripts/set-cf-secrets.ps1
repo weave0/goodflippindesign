@@ -1,14 +1,20 @@
+# set-cf-secrets.ps1
+# Reads ALL secrets from .env and pushes them to Cloudflare Pages.
+# Workflow: add a value to .env, run this script. Done.
+#
+# Usage: .\scripts\set-cf-secrets.ps1
+
 param(
   [string]$ProjectName = "goodflippindesign",
-  [string]$AccountId = "3253d907ea85a18eb442283d7308b193"
+  [string]$AccountId   = "3253d907ea85a18eb442283d7308b193"
 )
-# Use the stored wrangler OAuth token (has pages:write scope) rather than the
-# limited API token in .env which only has workers scope.
+
 $wranglerConfig = Get-Content "C:\Users\brett\AppData\Roaming\xdg.config\.wrangler\config\default.toml" -Raw
-$token = [regex]::Match($wranglerConfig, 'oauth_token\s*=\s*"([^"]+)"').Groups[1].Value
-if (-not $token) { Write-Error "No wrangler OAuth token found"; exit 1 }
+$oauthToken = [regex]::Match($wranglerConfig, 'oauth_token\s*=\s*"([^"]+)"').Groups[1].Value
+if (-not $oauthToken) { Write-Error "No wrangler OAuth token found. Run 'wrangler login'."; exit 1 }
+
 $apiBase = "https://api.cloudflare.com/client/v4/accounts/$AccountId/pages/projects/$ProjectName"
-$headers = @{ Authorization = "Bearer $token"; "Content-Type" = "application/json" }
+$headers = @{ Authorization = "Bearer $oauthToken"; "Content-Type" = "application/json" }
 
 function Set-PagesSecret([string]$Name, [string]$Value) {
   $envVars = @{}
@@ -18,37 +24,56 @@ function Set-PagesSecret([string]$Name, [string]$Value) {
     $r = Invoke-WebRequest -Method Patch -Uri $apiBase -Headers $headers -Body $body -UseBasicParsing
     $result = $r.Content | ConvertFrom-Json
     if ($result.success) { Write-Host "[OK] $Name" } else { Write-Host "[FAIL] $Name : $($result.errors | ConvertTo-Json -Compress)" }
-  }
-  catch {
+  } catch {
     Write-Host "[ERR] $Name : $($_.Exception.Message)"
     if ($_.ErrorDetails.Message) { Write-Host $_.ErrorDetails.Message }
   }
 }
 
-Write-Host "Setting Cloudflare Pages secrets for: $ProjectName"
-Set-PagesSecret "META_APP_ID"          "882897501450706"
-Set-PagesSecret "THREADS_APP_ID"       "1248220120837224"
+# Parse .env into a hashtable
+$env_vars = @{}
+Get-Content "z:\GFD\.env" | Where-Object { $_ -match "^[A-Z_]+=.+" } | ForEach-Object {
+  $parts = $_ -split "=", 2
+  $env_vars[$parts[0]] = $parts[1]
+}
 
-# Load TOKEN_ENCRYPTION_KEY and INTERNAL_SECRET from .env
-$envContent = Get-Content "z:\GFD\.env"
-$encKey = ($envContent | Where-Object { $_ -match "^TOKEN_ENCRYPTION_KEY=" }) -replace "^TOKEN_ENCRYPTION_KEY=", ""
-$intSecret = ($envContent | Where-Object { $_ -match "^INTERNAL_SECRET=" }) -replace "^INTERNAL_SECRET=", ""
-if ($encKey) { Set-PagesSecret "TOKEN_ENCRYPTION_KEY" $encKey }    else { Write-Host "[SKIP] TOKEN_ENCRYPTION_KEY not in .env" }
-if ($intSecret) { Set-PagesSecret "INTERNAL_SECRET"      $intSecret } else { Write-Host "[SKIP] INTERNAL_SECRET not in .env" }
+# Map of .env key -> Cloudflare Pages secret name (they are usually identical)
+$secretMap = @{
+  CLERK_SECRET_KEY        = "CLERK_SECRET_KEY"
+  SENTRY_DSN              = "SENTRY_DSN"
+  STRIPE_SECRET_KEY       = "STRIPE_SECRET_KEY"
+  TOKEN_ENCRYPTION_KEY    = "TOKEN_ENCRYPTION_KEY"
+  INTERNAL_SECRET         = "INTERNAL_SECRET"
+  # OAuth secrets - add values to .env when you have them:
+  META_APP_SECRET         = "META_APP_SECRET"
+  THREADS_APP_SECRET      = "THREADS_APP_SECRET"
+  X_CLIENT_ID             = "X_CLIENT_ID"
+  X_CLIENT_SECRET         = "X_CLIENT_SECRET"
+  LINKEDIN_CLIENT_ID      = "LINKEDIN_CLIENT_ID"
+  LINKEDIN_CLIENT_SECRET  = "LINKEDIN_CLIENT_SECRET"
+  PINTEREST_APP_ID        = "PINTEREST_APP_ID"
+  PINTEREST_APP_SECRET    = "PINTEREST_APP_SECRET"
+  TIKTOK_CLIENT_KEY       = "TIKTOK_CLIENT_KEY"
+  TIKTOK_CLIENT_SECRET    = "TIKTOK_CLIENT_SECRET"
+  GOOGLE_CLIENT_ID        = "GOOGLE_CLIENT_ID"
+  GOOGLE_CLIENT_SECRET    = "GOOGLE_CLIENT_SECRET"
+  SOCIAL_PUBLISHER_URL    = "SOCIAL_PUBLISHER_URL"
+}
 
-# Remaining OAuth secrets — uncomment + fill in as you collect them:
-# Set-PagesSecret "META_APP_SECRET"        "PASTE_HERE"
-# Set-PagesSecret "THREADS_APP_SECRET"     "PASTE_HERE"
-# Set-PagesSecret "X_CLIENT_ID"            "PASTE_HERE"
-# Set-PagesSecret "X_CLIENT_SECRET"        "PASTE_HERE"
-# Set-PagesSecret "LINKEDIN_CLIENT_ID"     "PASTE_HERE"
-# Set-PagesSecret "LINKEDIN_CLIENT_SECRET" "PASTE_HERE"
-# Set-PagesSecret "PINTEREST_APP_ID"       "PASTE_HERE"
-# Set-PagesSecret "PINTEREST_APP_SECRET"   "PASTE_HERE"
-# Set-PagesSecret "TIKTOK_CLIENT_KEY"      "PASTE_HERE"
-# Set-PagesSecret "TIKTOK_CLIENT_SECRET"   "PASTE_HERE"
-# Set-PagesSecret "GOOGLE_CLIENT_ID"       "PASTE_HERE"
-# Set-PagesSecret "GOOGLE_CLIENT_SECRET"   "PASTE_HERE"
-# Set-PagesSecret "SOCIAL_PUBLISHER_URL"   "PASTE_HERE"
+Write-Host "`nSetting Cloudflare Pages secrets for: $ProjectName`n"
 
-Write-Host "Done."
+# Hardcoded known app IDs (public-safe, no secret)
+Set-PagesSecret "META_APP_ID"     "882897501450706"
+Set-PagesSecret "THREADS_APP_ID"  "1248220120837224"
+
+# Push everything found in .env
+foreach ($envKey in $secretMap.Keys) {
+  $val = $env_vars[$envKey]
+  if ($val -and $val.Trim() -ne "") {
+    Set-PagesSecret $secretMap[$envKey] $val.Trim()
+  } else {
+    Write-Host "[SKIP] $envKey (not in .env)"
+  }
+}
+
+Write-Host "`nDone. To add more secrets: edit .env, re-run this script.`n"
