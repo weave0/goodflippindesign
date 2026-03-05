@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "npx http-server . -p 3000 -o",
     "sync": "node scripts/sync-review.js",
+    "invite:team": "pwsh -File scripts/invite-team.ps1",
     "library:index": "node scripts/generate-library-index.js",
     "test:quick": "npm run sync && node tests/accessibility.test.js",
     "test": "node tests/run-all-tests.js",
@@ -22,6 +23,13 @@
     "gen:csp:dry": "node scripts/generate-csp.js --dry-run",
     "deploy:stripe": "wrangler deploy --config workers/wrangler-stripe.toml",
     "stripe:secret": "wrangler secret put STRIPE_SECRET_KEY --config workers/wrangler-stripe.toml",
+    "deploy:social": "wrangler deploy --config wrangler-social.toml",
+    "social:secret:encrypt": "wrangler secret put TOKEN_ENCRYPTION_KEY --config wrangler-social.toml",
+    "social:secret:internal": "wrangler secret put INTERNAL_SECRET --config wrangler-social.toml",
+    "watermark": "node scripts/watermark.js",
+    "watermark:help": "node scripts/watermark.js --list-platforms",
+    "cms:schema": "wrangler d1 execute gfd_community --file=d1-schema-cms.sql",
+    "scan:media": "node scripts/scan-media-drop.js",
     "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf"
   },
   "repository": {
@@ -37,6 +45,9 @@
   "author": "Brett Weaver <brett.l.weaver@gmail.com>",
   "license": "UNLICENSED",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@sentry/cloudflare": "^8.0.0"
   },

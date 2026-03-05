@@ -1241,6 +1241,147 @@
             font-size: 0.75rem;
         }
 
+        /* Media (Netflix-style rows) */
+        .media-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 2.25rem;
+            margin-top: 2.5rem;
+        }
+
+        .media-row-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.875rem;
+        }
+
+        .media-row-title {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .media-row-link {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .media-row-link:hover {
+            transform: translateY(-1px);
+            border-color: var(--border-hover);
+            color: var(--text);
+        }
+
+        .media-scroll {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(200px, 1fr);
+            gap: 1rem;
+            overflow-x: auto;
+            padding: 0 0 0.5rem 0;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .media-scroll:focus {
+            outline: 2px solid var(--border-hover);
+            outline-offset: 6px;
+            border-radius: 12px;
+        }
+
+        .media-card {
+            scroll-snap-align: start;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: transform 0.25s ease, border-color 0.25s ease;
+            will-change: transform;
+        }
+
+        .media-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-hover);
+        }
+
+        .media-card-media {
+            aspect-ratio: 16/10;
+            background: var(--bg-elevated);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .media-card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.9;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+            will-change: transform;
+        }
+
+        .media-card:hover .media-card-media img {
+            opacity: 1;
+            transform: scale(1.02);
+        }
+
+        .media-card-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: var(--bg-elevated);
+        }
+
+        .media-card-body {
+            padding: 0.875rem 1rem;
+        }
+
+        .media-card-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .media-card-meta {
+            margin-top: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .media-view-all {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        @media (max-width: 600px) {
+            .media-scroll {
+                grid-auto-columns: minmax(160px, 1fr);
+            }
+        }
+
         /* Process */
         .process-grid {
             display: grid;
@@ -4662,6 +4803,22 @@
             </div>
         </section>
 
+        <section id="media" class="media-section">
+            <div class="container">
+                <div class="section-header">
+                    <p class="section-label">Media</p>
+                    <h2 class="section-title">Browse the ecosystem</h2>
+                    <p class="section-subtitle">Netflix-style rows across brand assets, backgrounds, portfolio previews, and GFV art.</p>
+                </div>
+
+                <div id="media-rows" class="media-rows" aria-live="polite"></div>
+
+                <div class="media-view-all">
+                    <a href="gallery.html" class="btn-secondary">View all categories</a>
+                </div>
+            </div>
+        </section>
+
         <section id="library" class="library-section">
             <div class="container">
                 <div class="section-header">
@@ -5092,6 +5249,7 @@
             // 0. Social hub: on-site updates (blog-style) + share
             const updatesFeed = document.getElementById('gfd-updates-feed');
             const libraryGrid = document.getElementById('gfd-library-grid');
+            const mediaRows = document.getElementById('media-rows');
             const siteBaseUrl = window.location.href.split('#')[0];
 
             const updates = [
@@ -5331,6 +5489,149 @@
             }
 
             loadLibrary();
+
+            // 0c. Media rows: Netflix-style browsing (data-driven)
+            const mediaCatalogUrl = 'assets/data/media-catalog.json';
+            const mediaRowOrder = ['featured', 'branding', 'gfv-art', 'backgrounds', 'portfolio', 'video'];
+
+            function getCategoryTitle(categoryId, categories) {
+                const match = Array.isArray(categories)
+                    ? categories.find((c) => c && c.id === categoryId)
+                    : null;
+                if (match && match.title) return match.title;
+                return String(categoryId || 'Category');
+            }
+
+            function getCategoryItems(catalog, categoryId) {
+                const items = (catalog && Array.isArray(catalog.items)) ? catalog.items : [];
+                return items
+                    .filter((item) => item && Array.isArray(item.categories) && item.categories.includes(categoryId))
+                    .sort((a, b) => {
+                        const dateSort = String(b.addedAt || '').localeCompare(String(a.addedAt || ''));
+                        if (dateSort !== 0) return dateSort;
+                        return String(a.title || '').localeCompare(String(b.title || ''));
+                    })
+                    .slice(0, 12);
+            }
+
+            function createMediaCard(item) {
+                const href = item.href || item.src || '#';
+                const card = document.createElement('a');
+                card.className = 'media-card';
+                card.href = href;
+
+                const isExternal = /^https?:\/\//i.test(href);
+                if (isExternal) {
+                    card.target = '_blank';
+                    card.rel = 'noopener';
+                }
+
+                const media = document.createElement('div');
+                media.className = 'media-card-media';
+
+                if (item.type === 'image' && item.src) {
+                    const img = document.createElement('img');
+                    img.src = item.src;
+                    img.alt = item.title ? String(item.title) : 'Media item';
+                    img.loading = 'lazy';
+                    img.decoding = 'async';
+                    media.appendChild(img);
+                } else {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'media-card-placeholder';
+                    placeholder.textContent = item.type === 'video' ? 'Video' : 'Media';
+                    media.appendChild(placeholder);
+                }
+
+                const body = document.createElement('div');
+                body.className = 'media-card-body';
+
+                const title = document.createElement('div');
+                title.className = 'media-card-title';
+                title.textContent = item.title ? String(item.title) : 'Untitled';
+
+                const meta = document.createElement('div');
+                meta.className = 'media-card-meta';
+                const brand = item.brand ? String(item.brand).toUpperCase() : '—';
+                const type = item.type ? String(item.type) : 'media';
+                meta.textContent = `${brand} • ${type}`;
+
+                body.appendChild(title);
+                body.appendChild(meta);
+
+                card.appendChild(media);
+                card.appendChild(body);
+
+                return card;
+            }
+
+            function renderMediaRows(catalog) {
+                if (!mediaRows) return;
+
+                const categories = Array.isArray(catalog && catalog.categories) ? catalog.categories : [];
+                const hasItems = !!(catalog && Array.isArray(catalog.items) && catalog.items.length > 0);
+
+                mediaRows.innerHTML = '';
+
+                if (!hasItems) {
+                    const empty = document.createElement('div');
+                    empty.className = 'library-card';
+                    empty.innerHTML = '<div class="library-card-title">Media catalog coming online</div><div class="library-card-desc">This section will expand as we standardize the master asset pipeline.</div><div class="library-card-meta">Status: initializing</div>';
+                    mediaRows.appendChild(empty);
+                    return;
+                }
+
+                mediaRowOrder.forEach((categoryId) => {
+                    const rowItems = getCategoryItems(catalog, categoryId);
+                    if (rowItems.length === 0) return;
+
+                    const row = document.createElement('div');
+                    row.className = 'media-row';
+
+                    const header = document.createElement('div');
+                    header.className = 'media-row-header';
+
+                    const title = document.createElement('div');
+                    title.className = 'media-row-title';
+                    title.textContent = getCategoryTitle(categoryId, categories);
+
+                    const link = document.createElement('a');
+                    link.className = 'media-row-link';
+                    link.href = `gallery.html?cat=${encodeURIComponent(categoryId)}`;
+                    link.textContent = 'View all';
+
+                    header.appendChild(title);
+                    header.appendChild(link);
+
+                    const scroller = document.createElement('div');
+                    scroller.className = 'media-scroll';
+                    scroller.setAttribute('tabindex', '0');
+                    scroller.setAttribute('aria-label', `${getCategoryTitle(categoryId, categories)} items`);
+
+                    rowItems.forEach((item) => {
+                        scroller.appendChild(createMediaCard(item));
+                    });
+
+                    row.appendChild(header);
+                    row.appendChild(scroller);
+
+                    mediaRows.appendChild(row);
+                });
+            }
+
+            async function loadMediaCatalog() {
+                if (!mediaRows) return;
+                try {
+                    const res = await fetch(mediaCatalogUrl, { cache: 'no-store' });
+                    if (!res.ok) throw new Error('Bad response');
+                    const json = await res.json();
+                    renderMediaRows(json);
+                } catch (err) {
+                    renderMediaRows({ items: [] });
+                }
+            }
+
+            loadMediaCatalog();
 
             // Initialize portfolio share buttons
             document.querySelectorAll('.portfolio-share-btn').forEach(btn => {

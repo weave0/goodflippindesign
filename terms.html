@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<!-- Cache bust: 2026-03-05 -->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Terms of Service | Good Flippin Design</title>
+    <meta name="description" content="Terms of Service for goodflippindesign.com.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://goodflippindesign.com/terms.html">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #0a0e1a;
+            --bg-elevated: #111827;
+            --bg-card: #1a2035;
+            --bg-input: #0f1629;
+            --text: #f0f0f5;
+            --text-secondary: #9ca3c0;
+            --text-muted: #6b7280;
+            --accent: #22d3ee;
+            --border: rgba(255, 255, 255, 0.06);
+            --glass-bg: rgba(17, 24, 39, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --gradient-hero: radial-gradient(ellipse at 50% 0%, rgba(34, 211, 238, 0.12) 0%, rgba(168, 85, 247, 0.06) 40%, transparent 70%);
+            --gradient-brand: linear-gradient(135deg, #fbbf24 0%, #22d3ee 50%, #a855f7 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            background-image: var(--gradient-hero);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            padding: 0.6rem 0.9rem;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            color: var(--text);
+            transform: translateY(-150%);
+            transition: transform 0.2s ease;
+            z-index: 50;
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+            outline: none;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            background: rgba(10, 14, 26, 0.75);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+        }
+
+        .wrap {
+            width: min(1050px, calc(100% - 2.5rem));
+            margin: 0 auto;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 0;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .brand strong {
+            font-size: 1.05rem;
+            letter-spacing: 0.02em;
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand span {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        nav {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        nav a {
+            padding: 0.45rem 0.75rem;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+
+        nav a:hover {
+            transform: translateY(-1px);
+            border-color: var(--glass-border);
+            background: rgba(255, 255, 255, 0.03);
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        main {
+            padding: 2rem 0 3.2rem;
+        }
+
+        .card {
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            box-shadow: var(--glass-shadow);
+            border-radius: 18px;
+            padding: 1.4rem 1.4rem;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(1.6rem, 2vw, 2.1rem);
+            letter-spacing: 0.01em;
+        }
+
+        .meta {
+            margin-top: 0.4rem;
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+        }
+
+        .note {
+            margin-top: 1rem;
+            padding: 0.9rem;
+            border-radius: 14px;
+            border: 1px solid rgba(34, 211, 238, 0.22);
+            background: rgba(34, 211, 238, 0.08);
+            color: var(--text);
+        }
+
+        .note strong {
+            font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-weight: 600;
+        }
+
+        h2 {
+            margin-top: 1.6rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            letter-spacing: 0.01em;
+        }
+
+        ul {
+            margin: 0.4rem 0 0.9rem 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        p {
+            margin: 0.55rem 0;
+            color: var(--text-secondary);
+        }
+
+        .mono {
+            font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.92em;
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 1.2rem 0 2.2rem;
+            color: var(--text-muted);
+            font-size: 0.86rem;
+        }
+
+        @media (max-width: 700px) {
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            nav {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header>
+        <div class="wrap">
+            <div class="topbar">
+                <div class="brand">
+                    <strong>Good Flippin Design</strong>
+                    <span>Terms of Service</span>
+                </div>
+                <nav aria-label="Legal navigation">
+                    <a href="/">Home</a>
+                    <a href="/privacy.html">Privacy</a>
+                    <a href="/terms.html" aria-current="page">Terms</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main id="main">
+        <div class="wrap">
+            <article class="card">
+                <h1>Terms of Service</h1>
+                <div class="meta">
+                    Effective: March 5, 2026 · Last updated: March 5, 2026
+                </div>
+
+                <div class="note">
+                    <strong>Plain-language note:</strong> This page is meant to set practical rules for using this website and limit business risk. It’s not legal advice, and it should be reviewed by a qualified attorney for your specific situation.
+                </div>
+
+                <h2>1) Who we are</h2>
+                <p>
+                    <span class="mono">goodflippindesign.com</span> (the “Site”) is operated by GFV LLC, doing business as Good Flippin Design (“GFD”, “we”, “us”, “our”).
+                </p>
+
+                <h2>2) Acceptance of these Terms</h2>
+                <p>
+                    By accessing or using the Site, you agree to these Terms. If you do not agree, do not use the Site.
+                </p>
+
+                <h2>3) Services vs. website use</h2>
+                <p>
+                    These Terms govern use of the Site. Any client work (consulting, development, design, retainers, or deliverables) is governed by a separate written agreement (e.g., Statement of Work / Service Agreement). If there is a conflict, the written client agreement controls.
+                </p>
+
+                <h2>4) Site content and intellectual property</h2>
+                <p>
+                    The Site and its content (including text, design, graphics, code, and media) are owned by us or our licensors and are protected by applicable intellectual property laws.
+                </p>
+                <ul>
+                    <li>You may view and use the Site for personal or business evaluation purposes.</li>
+                    <li>You may not copy, reproduce, distribute, scrape, or republish content without our permission.</li>
+                    <li>Client deliverables and ownership/licensing are handled in the applicable client agreement.</li>
+                </ul>
+
+                <h2>5) Prohibited use</h2>
+                <p>You agree not to:</p>
+                <ul>
+                    <li>Break the law, infringe rights, or violate third-party terms.</li>
+                    <li>Attempt to gain unauthorized access to systems or accounts.</li>
+                    <li>Introduce malware or interfere with the Site’s operation.</li>
+                    <li>Use automated means to harvest data or attempt to overload the Site.</li>
+                </ul>
+
+                <h2>6) Third-party services and links</h2>
+                <p>
+                    The Site may reference or link to third-party services (e.g., analytics providers, payment processors, authentication providers, social platforms). We don’t control third-party services and aren’t responsible for their availability, policies, or actions.
+                </p>
+
+                <h2>7) Disclaimers</h2>
+                <p>
+                    THE SITE IS PROVIDED “AS IS” AND “AS AVAILABLE”. TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+                </p>
+                <p>
+                    NOTHING ON THE SITE CONSTITUTES LEGAL, FINANCIAL, TAX, OR OTHER PROFESSIONAL ADVICE.
+                </p>
+                <p>
+                    Do not submit sensitive information through general web forms (e.g., medical information, Social Security numbers, financial account numbers).
+                </p>
+
+                <h2>8) Limitation of liability</h2>
+                <p>
+                    TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL WE BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES.
+                </p>
+                <p>
+                    TO THE MAXIMUM EXTENT PERMITTED BY LAW, OUR TOTAL LIABILITY FOR ANY CLAIM ARISING OUT OF OR RELATING TO THE SITE OR THESE TERMS WILL NOT EXCEED <span class="mono">$100</span>.
+                </p>
+                <p>
+                    If you are a paying client, limits and remedies for paid services (if any) are defined in your separate client agreement.
+                </p>
+
+                <h2>9) Indemnification</h2>
+                <p>
+                    You agree to indemnify and hold us harmless from claims arising out of your misuse of the Site, violation of these Terms, or infringement of any rights.
+                </p>
+
+                <h2>10) Changes to these Terms</h2>
+                <p>
+                    We may update these Terms from time to time. The “Last updated” date controls. Your continued use of the Site after updates means you accept the updated Terms.
+                </p>
+
+                <h2>11) Governing law</h2>
+                <p>
+                    These Terms are governed by the laws of the State of Minnesota, without regard to conflict of law principles.
+                </p>
+
+                <h2>12) Contact</h2>
+                <p>
+                    Questions about these Terms: <a href="mailto:getsome@goodflippinvibes.com">getsome@goodflippinvibes.com</a>
+                </p>
+            </article>
+        </div>
+    </main>
+
+    <footer>
+        <div class="wrap">
+            <div>© <span id="year"></span> GFV LLC DBA Good Flippin Design. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            document.getElementById('year').textContent = String(new Date().getFullYear());
+        })();
+    </script>
+</body>
+
+</html>

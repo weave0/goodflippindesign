@@ -24,6 +24,18 @@ Disallow: /secrets/
 Disallow: /.env
 Disallow: /.venv/
 
+# Block internal monorepo folders (source, drafts, internal docs)
+Disallow: /Legal/
+Disallow: /docs/
+Disallow: /tests/
+Disallow: /scripts/
+Disallow: /workers/
+Disallow: /Brand%20Assets%20Development/
+Disallow: /Business%20Registration/
+Disallow: /Official%20Documents/
+Disallow: /Organization%20Docs/
+Disallow: /CASHMONEY/
+
 # Allow critical assets
 Allow: /assets/
 Allow: /shared/
@@ -36,6 +48,9 @@ Disallow: /main.html
 Disallow: /donate-v2.html
 Disallow: /globaldeets-*.html
 Disallow: /community-portal.html
+
+# Block admin surface from indexing
+Disallow: /admin.html
 
 # Specific bot instructions
 User-agent: Googlebot

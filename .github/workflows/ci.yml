@@ -24,6 +24,9 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Security audit
+        run: npm audit --audit-level=moderate
+
       - name: Sync index.html → temp_review.html
         run: cp index.html temp_review.html
 

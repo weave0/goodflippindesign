@@ -1,0 +1,51 @@
+# wrangler-social.toml — Standalone Worker config for the social publisher
+#
+# This is a SEPARATE Worker from the Pages site.
+# Deploy with:
+#   wrangler deploy --config wrangler-social.toml
+#
+# Set required secrets BEFORE deploying:
+#   wrangler secret put TOKEN_ENCRYPTION_KEY  --config wrangler-social.toml
+#   wrangler secret put INTERNAL_SECRET       --config wrangler-social.toml
+#
+# Optional (for token auto-refresh):
+#   wrangler secret put META_APP_SECRET       --config wrangler-social.toml
+#   wrangler secret put X_API_SECRET          --config wrangler-social.toml
+#   wrangler secret put LINKEDIN_CLIENT_SECRET --config wrangler-social.toml
+
+name = "gfv-social-publisher"
+main = "workers/social-publisher.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cron triggers — runs every 15 minutes
+[triggers]
+crons = ["*/15 * * * *"]
+
+# D1 — same database as the CMS/community portal
+[[d1_databases]]
+binding = "DB"
+database_name = "gfd_community"
+database_id = "a46ec9df-31b8-4285-845b-1fd3a62bd1b5"
+
+# R2 — same bucket as the CMS
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "gfv-media"
+
+[vars]
+# Public base URL for building R2 media URLs in posts
+SITE_BASE_URL = "https://goodflippindesign.com"
+# Allowed origin for CORS on HTTP calls from admin panel
+ALLOWED_ORIGIN = "https://goodflippindesign.com"
+NODE_ENV = "production"
+
+# Secrets (DO NOT set here — use `wrangler secret put`)
+# TOKEN_ENCRYPTION_KEY     — 32+ char random string for AES-GCM token encryption
+# INTERNAL_SECRET          — shared secret between admin panel and this worker
+# META_APP_SECRET          — Meta App ID is 882897501450706 (secret is from Settings → Basic → Show)
+# X_API_SECRET             — from X Developer Portal
+# LINKEDIN_CLIENT_SECRET   — from LinkedIn Developer Console
+# PINTEREST_APP_SECRET     — from Pinterest Developer Console
+# TIKTOK_CLIENT_SECRET     — from TikTok Developer Console
+# GOOGLE_CLIENT_SECRET     — from Google Cloud Console (YouTube)
