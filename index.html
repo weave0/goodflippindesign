@@ -107,7 +107,8 @@
       --bg-surface: #151d30;
       --text: #f0f0f5;
       --text-secondary: #9ca3c0;
-      --text-muted: #6b7280;
+      --text-muted: #8a8fa4;
+      /* WCAG AA — min 4.5:1 on --bg */
       --accent: #22d3ee;
       --border: rgba(255, 255, 255, 0.06);
       --border-hover: rgba(34, 211, 238, 0.25);
@@ -146,6 +147,13 @@
       --neon-purple: 0 0 10px rgba(168, 85, 247, 0.6), 0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.15);
       --neon-green: 0 0 10px rgba(16, 185, 129, 0.6), 0 0 20px rgba(16, 185, 129, 0.4), 0 0 30px rgba(16, 185, 129, 0.2);
       --neon-gold: 0 0 10px rgba(251, 191, 36, 0.6), 0 0 20px rgba(251, 191, 36, 0.4), 0 0 30px rgba(251, 191, 36, 0.2);
+
+      /* Border Radius System */
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 50px;
     }
 
     * {
@@ -158,6 +166,13 @@
       scroll-behavior: smooth;
       scroll-padding-top: 140px;
       /* Account for ecosystem nav (60px) + main nav (80px) */
+    }
+
+    /* Ensure sections land below fixed nav on programmatic scroll */
+    #services,
+    #blog,
+    #contact {
+      scroll-margin-top: 140px;
     }
 
     body {
@@ -287,7 +302,7 @@
       background: var(--text);
       color: var(--bg);
       padding: 0.625rem 1.25rem;
-      border-radius: 6px;
+      border-radius: 8px;
       text-decoration: none;
       font-weight: 550;
       font-size: 0.875rem;
@@ -302,7 +317,7 @@
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: white;
       padding: 0.625rem 1.25rem;
-      border-radius: 6px;
+      border-radius: 8px;
       text-decoration: none;
       font-weight: 600;
       font-size: 0.875rem;
@@ -321,7 +336,8 @@
       position: fixed;
       bottom: 2rem;
       right: 2rem;
-      z-index: 150; /* below exit intent modal (300) */
+      z-index: 150;
+      /* below exit intent modal (300) */
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: white;
       padding: 0.875rem 1.5rem;
@@ -662,7 +678,7 @@
       width: 100%;
       height: 12px;
       background: rgba(255, 255, 255, 0.05);
-      border-radius: 6px;
+      border-radius: 8px;
       overflow: hidden;
       position: relative;
     }
@@ -670,7 +686,7 @@
     .progress-fill {
       height: 100%;
       background: var(--gradient-primary);
-      border-radius: 6px;
+      border-radius: 8px;
       transition: width 2s ease-out;
       position: relative;
       overflow: hidden;
@@ -748,7 +764,7 @@
     .donate-qr img {
       width: 120px;
       height: 120px;
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid var(--border);
       background: #fff;
     }
@@ -778,7 +794,7 @@
       text-decoration: none;
       font-weight: 600;
       font-size: 0.9375rem;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
@@ -1294,7 +1310,7 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    .media-scroll:focus {
+    .media-scroll:focus-visible {
       outline: 2px solid var(--border-hover);
       outline-offset: 6px;
       border-radius: 12px;
@@ -1306,7 +1322,7 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border);
-      border-radius: 14px;
+      border-radius: 16px;
       overflow: hidden;
       text-decoration: none;
       color: inherit;
@@ -1546,7 +1562,7 @@
     .instagram-featured-icon {
       width: 40px;
       height: 40px;
-      border-radius: 10px;
+      border-radius: 8px;
       background: linear-gradient(135deg, #f9ce34, #ee2a7b 40%, #6228d7);
       display: flex;
       align-items: center;
@@ -1758,11 +1774,11 @@
       border: none;
       color: var(--text-secondary);
       padding: 0.5rem 1rem;
-      border-radius: 6px;
+      border-radius: 8px;
       font-weight: 600;
       font-size: 0.875rem;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: color 0.2s ease, background-color 0.2s ease;
     }
 
     .blog-tab:hover {
@@ -1889,7 +1905,7 @@
       border-radius: 8px;
       color: var(--text-secondary);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
     }
 
     .file-input:hover {
@@ -1900,13 +1916,13 @@
     .file-input::-webkit-file-upload-button {
       background: var(--glass-bg);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 0.5rem 1rem;
       color: var(--text);
       font-weight: 600;
       cursor: pointer;
       margin-right: 1rem;
-      transition: all 0.2s ease;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
     }
 
     .file-input::-webkit-file-upload-button:hover {
@@ -1944,7 +1960,7 @@
       margin-top: 0.5rem;
       padding: 0.75rem;
       background: var(--bg);
-      border-radius: 6px;
+      border-radius: 8px;
       flex-wrap: wrap;
     }
 
@@ -1959,7 +1975,7 @@
       color: var(--text-secondary);
       font-size: 0.875rem;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     }
 
     .toolbar-btn:hover {
@@ -2009,7 +2025,7 @@
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: border-color 0.2s ease, color 0.2s ease;
     }
 
     .btn-secondary:hover {
@@ -2049,7 +2065,7 @@
       border-radius: 16px;
       padding: 1.5rem;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
       box-shadow: var(--glass-shadow);
       position: relative;
       will-change: transform;
@@ -2103,7 +2119,7 @@
       font-size: 0.75rem;
       color: var(--text-secondary);
       font-family: 'JetBrains Mono', monospace;
-      transition: all 0.2s ease;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     }
 
     .post-tag:hover {
@@ -2136,7 +2152,7 @@
       font-size: 0.75rem;
       color: var(--text-secondary);
       font-family: 'JetBrains Mono', monospace;
-      transition: all 0.2s ease;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     }
 
     .post-tag:hover {
@@ -2314,7 +2330,7 @@
       color: var(--text);
       font-size: 0.9375rem;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
     }
 
     .share-btn:hover {
@@ -2382,7 +2398,7 @@
     .comment-avatar {
       width: 40px;
       height: 40px;
-      border-radius: 50%;
+      border-radius: 50px;
       object-fit: cover;
       border: 2px solid var(--border);
     }
@@ -2519,7 +2535,7 @@
       min-height: 44px;
       border-radius: 8px;
       /* Standardized */
-      transition: all 0.2s ease;
+      transition: color 0.2s ease, background-color 0.2s ease;
     }
 
     .comment-action-btn:hover {
@@ -2549,7 +2565,7 @@
       padding: 0.75rem;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
       color: var(--text);
       font-family: inherit;
       font-size: 0.9375rem;
@@ -3085,7 +3101,7 @@
     .step-number {
       width: 48px;
       height: 48px;
-      border-radius: 50%;
+      border-radius: 50px;
       background: linear-gradient(135deg, var(--text-muted), var(--text-secondary));
       color: var(--bg);
       display: flex;
@@ -3298,8 +3314,8 @@
       width: 24px;
       height: 2px;
       background: linear-gradient(135deg, #22d3ee, #a855f7);
-      border-radius: 2px;
-      transition: all 0.3s ease;
+      border-radius: 4px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
     }
 
     .mobile-menu-toggle:hover .hamburger-line {
@@ -3421,7 +3437,7 @@
     }
 
     .mobile-nav-link:hover,
-    .mobile-nav-link:focus {
+    .mobile-nav-link:focus-visible {
       background: rgba(17, 24, 39, 0.9);
       border-color: rgba(34, 211, 238, 0.4);
       transform: translateX(8px);
@@ -3697,7 +3713,7 @@
       border-radius: 50px;
       padding: 0.4rem 0.75rem 0.4rem 0.4rem;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease, border-color 0.3s ease;
       color: var(--text);
       font-family: inherit;
       font-size: 0.9rem;
@@ -3711,7 +3727,7 @@
     .user-avatar {
       width: 28px;
       height: 28px;
-      border-radius: 50%;
+      border-radius: 50px;
       object-fit: cover;
       border: 2px solid var(--accent);
     }
@@ -3738,7 +3754,7 @@
       opacity: 0;
       visibility: hidden;
       transform: translateY(-10px);
-      transition: all 0.3s ease;
+      transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
       z-index: 1000;
     }
 
@@ -3811,7 +3827,7 @@
     .comment-user-avatar {
       width: 36px;
       height: 36px;
-      border-radius: 50%;
+      border-radius: 50px;
       object-fit: cover;
       border: 2px solid var(--accent);
     }
@@ -3827,7 +3843,7 @@
       font-family: inherit;
       font-size: 0.9375rem;
       resize: vertical;
-      transition: all 0.3s ease;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
     }
 
     .comment-textarea:focus {
@@ -3860,7 +3876,7 @@
       border: none;
       border-radius: 24px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
       font-family: inherit;
     }
 
@@ -3886,7 +3902,7 @@
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border);
       border-radius: 12px;
-      transition: all 0.3s ease;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
     }
 
     .comment:hover {
@@ -3951,8 +3967,8 @@
       font-size: 0.8125rem;
       cursor: pointer;
       padding: 0.25rem 0.5rem;
-      border-radius: 6px;
-      transition: all 0.2s ease;
+      border-radius: 8px;
+      transition: color 0.2s ease, background-color 0.2s ease;
       font-family: inherit;
     }
 
@@ -3982,7 +3998,7 @@
       border: none;
       border-radius: 24px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
       font-family: inherit;
       font-size: 1rem;
     }
@@ -4511,7 +4527,7 @@
         <div class="portfolio-grid">
           <a href="https://aiaimate.com" target="_blank" rel="noopener" class="portfolio-card" id="work-aiaimate">
             <div class="portfolio-preview">
-              <img src="assets/portfolio/ai-aimate.webp" alt="AI Aimate - AI Education Platform">
+              <img src="assets/portfolio/ai-aimate.webp" alt="AI Aimate - AI Education Platform" loading="lazy" decoding="async">
             </div>
             <div class="portfolio-info">
               <p class="portfolio-category">
@@ -4535,7 +4551,7 @@
           </a>
           <a href="https://culturesherpa.org" target="_blank" rel="noopener" class="portfolio-card" id="work-culturesherpa">
             <div class="portfolio-preview">
-              <img src="assets/portfolio/culturesherpa.webp" alt="CultureSherpa - Interactive Cultural Atlas">
+              <img src="assets/portfolio/culturesherpa.webp" alt="CultureSherpa - Interactive Cultural Atlas" loading="lazy" decoding="async">
             </div>
             <div class="portfolio-info">
               <p class="portfolio-category">
@@ -4559,7 +4575,7 @@
           </a>
           <a href="https://www.goodflippinvibes.com" target="_blank" rel="noopener" class="portfolio-card" id="work-gfv">
             <div class="portfolio-preview">
-              <img src="assets/portfolio/good-flippin-vibes.webp" alt="Good Flippin Vibes - Wellness Platform">
+              <img src="assets/portfolio/good-flippin-vibes.webp" alt="Good Flippin Vibes - Wellness Platform" loading="lazy" decoding="async">
             </div>
             <div class="portfolio-info">
               <p class="portfolio-category">
@@ -4582,7 +4598,7 @@
           </a>
           <a href="https://eliassen.globaldeets.com" target="_blank" rel="noopener" class="portfolio-card" id="work-globaldeets">
             <div class="portfolio-preview">
-              <img src="assets/portfolio/globaldeets.webp" alt="Market Intelligence">
+              <img src="assets/portfolio/globaldeets.webp" alt="Market Intelligence" loading="lazy" decoding="async">
             </div>
             <div class="portfolio-info">
               <p class="portfolio-category">
@@ -4604,7 +4620,7 @@
           </a>
           <a href="https://citizenapproved.org" target="_blank" rel="noopener" class="portfolio-card" id="work-citizenapproved">
             <div class="portfolio-preview">
-              <img src="assets/portfolio/citizenapproved.webp" alt="CitizenApproved - U.S. Citizenship Pathways">
+              <img src="assets/portfolio/citizenapproved.webp" alt="CitizenApproved - U.S. Citizenship Pathways" loading="lazy" decoding="async">
             </div>
             <div class="portfolio-info">
               <p class="portfolio-category">
@@ -4626,7 +4642,7 @@
           </a>
           <a href="https://medical.globaldeets.com" target="_blank" rel="noopener" class="portfolio-card" id="work-medical">
             <div class="portfolio-preview">
-              <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80" alt="Medical Compliance">
+              <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80" alt="Medical Compliance" loading="lazy" decoding="async">
             </div>
             <div class="portfolio-info">
               <p class="portfolio-category">
@@ -4647,7 +4663,7 @@
           </a>
           <div class="portfolio-card no-link" id="work-healthcare">
             <div class="portfolio-preview">
-              <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80" alt="Healthcare Analytics">
+              <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80" alt="Healthcare Analytics" loading="lazy" decoding="async">
             </div>
             <div class="portfolio-info">
               <p class="portfolio-category">
@@ -4787,7 +4803,7 @@
               <blockquote class="instagram-media" data-instgrm-captioned
                 data-instgrm-permalink="https://www.instagram.com/reel/DVcexauDQIz/?utm_source=ig_embed&amp;utm_campaign=loading"
                 data-instgrm-version="14"
-                style="background:#FFF; border:0; border-radius:3px; box-shadow:none; margin:0; max-width:100%; min-width:0; padding:0; width:100%;">
+                style="background:#FFF; border:0; border-radius:4px; box-shadow:none; margin:0; max-width:100%; min-width:0; padding:0; width:100%;">
               </blockquote>
             </div>
             <div class="instagram-follow-cta">
@@ -5038,7 +5054,7 @@
 
         <div class="legal-forms-grid">
           <div class="legal-form-card">
-            <img src="assets/icons/GFD-Icon-NDA-20260131_191422.png" alt="NDA Icon" class="form-icon-img">
+            <img src="assets/icons/GFD-Icon-NDA-20260131_191422.png" alt="NDA Icon" class="form-icon-img" loading="lazy" decoding="async">
             <h3>Non-Disclosure Agreement</h3>
             <p>Protect confidential information for partnerships, client projects, or business discussions.</p>
             <ul class="form-features">
@@ -5050,7 +5066,7 @@
           </div>
 
           <div class="legal-form-card">
-            <img src="assets/icons/GFD-Icon-Service_Agreement-20260131_191445.png" alt="Service Agreement Icon" class="form-icon-img">
+            <img src="assets/icons/GFD-Icon-Service_Agreement-20260131_191445.png" alt="Service Agreement Icon" class="form-icon-img" loading="lazy" decoding="async">
             <h3>Service Agreement</h3>
             <p>Master contract for client engagements with scope, payment terms, and IP ownership.</p>
             <ul class="form-features">
@@ -5062,7 +5078,7 @@
           </div>
 
           <div class="legal-form-card">
-            <img src="assets/icons/GFD-Icon-Statement_of_Work-20260131_191512.png" alt="Statement of Work Icon" class="form-icon-img">
+            <img src="assets/icons/GFD-Icon-Statement_of_Work-20260131_191512.png" alt="Statement of Work Icon" class="form-icon-img" loading="lazy" decoding="async">
             <h3>Statement of Work</h3>
             <p>Detailed project specifications, deliverables, milestones, and acceptance criteria.</p>
             <ul class="form-features">
@@ -5074,7 +5090,7 @@
           </div>
 
           <div class="legal-form-card">
-            <img src="assets/icons/GFD-Icon-Statement_of_Work-20260131_191512.png" alt="Change Order Icon" class="form-icon-img">
+            <img src="assets/icons/GFD-Icon-Statement_of_Work-20260131_191512.png" alt="Change Order Icon" class="form-icon-img" loading="lazy" decoding="async">
             <h3>Change Order</h3>
             <p>Document scope changes, budget adjustments, and timeline modifications for active projects.</p>
             <ul class="form-features">
@@ -6275,7 +6291,9 @@
 
   <style>
     /* ── Conversion widgets: no Tailwind loaded, all vanilla CSS ── */
-    .hidden { display: none !important; }
+    .hidden {
+      display: none !important;
+    }
 
     /* Exit Intent Overlay */
     #exit-intent-overlay {
@@ -6291,6 +6309,7 @@
       padding: 1.5rem;
       animation: fadeIn 0.3s ease;
     }
+
     .exit-intent-modal {
       background: #0f1424;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -6302,6 +6321,7 @@
       animation: slideUp 0.4s ease;
       box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
     }
+
     .exit-intent-close-btn {
       position: absolute;
       top: 0.75rem;
@@ -6316,10 +6336,14 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
+      border-radius: 8px;
       transition: color 0.2s;
     }
-    .exit-intent-close-btn:hover { color: var(--text); }
+
+    .exit-intent-close-btn:hover {
+      color: var(--text);
+    }
+
     .exit-intent-email {
       display: block;
       width: 100%;
@@ -6335,7 +6359,11 @@
       box-sizing: border-box;
       transition: border-color 0.2s;
     }
-    .exit-intent-email:focus { border-color: #06b6d4; }
+
+    .exit-intent-email:focus {
+      border-color: #06b6d4;
+    }
+
     .exit-intent-submit {
       display: block;
       width: 100%;
@@ -6350,7 +6378,11 @@
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
     }
-    .exit-intent-submit:hover { transform: scale(1.03); box-shadow: 0 4px 20px rgba(124,58,237,0.4); }
+
+    .exit-intent-submit:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+    }
 
     /* Sticky CTA Bar */
     #sticky-cta-bar {
@@ -6363,6 +6395,7 @@
       z-index: 100;
       will-change: transform;
     }
+
     .sticky-cta-inner {
       background: rgba(10, 12, 24, 0.97);
       -webkit-backdrop-filter: blur(12px);
@@ -6374,6 +6407,7 @@
       justify-content: space-between;
       gap: 1rem;
     }
+
     .sticky-cta-message {
       display: flex;
       align-items: center;
@@ -6381,17 +6415,20 @@
       flex: 1;
       min-width: 0;
     }
+
     .sticky-cta-subtitle {
       margin: 0.15rem 0 0;
       font-size: 0.75rem;
       color: var(--text-muted);
     }
+
     .sticky-cta-actions {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       flex-shrink: 0;
     }
+
     .sticky-cta-primary {
       padding: 0 1rem;
       height: 44px;
@@ -6406,7 +6443,11 @@
       white-space: nowrap;
       transition: transform 0.2s;
     }
-    .sticky-cta-primary:hover { transform: scale(1.03); }
+
+    .sticky-cta-primary:hover {
+      transform: scale(1.03);
+    }
+
     .sticky-cta-secondary {
       padding: 0 1rem;
       height: 44px;
@@ -6420,7 +6461,11 @@
       white-space: nowrap;
       transition: background 0.2s;
     }
-    .sticky-cta-secondary:hover { background: rgba(255, 255, 255, 0.06); }
+
+    .sticky-cta-secondary:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
     .sticky-cta-dismiss {
       background: none;
       border: none;
@@ -6435,7 +6480,10 @@
       font-size: 1rem;
       transition: color 0.2s;
     }
-    .sticky-cta-dismiss:hover { color: rgba(255, 255, 255, 0.65); }
+
+    .sticky-cta-dismiss:hover {
+      color: rgba(255, 255, 255, 0.65);
+    }
 
     /* Social Proof Feed */
     #social-proof-feed {
@@ -6446,6 +6494,7 @@
       z-index: 90;
       animation: slideInLeft 0.5s ease;
     }
+
     .social-proof-card {
       background: rgba(10, 12, 24, 0.97);
       -webkit-backdrop-filter: blur(12px);
@@ -6458,6 +6507,7 @@
       gap: 0.75rem;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     }
+
     .social-proof-dismiss {
       background: none;
       border: none;
@@ -6472,20 +6522,45 @@
       flex-shrink: 0;
       transition: color 0.2s;
     }
-    .social-proof-dismiss:hover { color: rgba(255, 255, 255, 0.6); }
+
+    .social-proof-dismiss:hover {
+      color: rgba(255, 255, 255, 0.6);
+    }
 
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
+
     @keyframes slideUp {
-      from { transform: translateY(30px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
+
     @keyframes slideInLeft {
-      from { transform: translateX(-30px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      from {
+        transform: translateX(-30px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
+
     @media (max-width: 600px) {
       #social-proof-feed {
         bottom: 5rem;
@@ -6493,7 +6568,10 @@
         right: 0.75rem;
         max-width: none;
       }
-      .sticky-cta-subtitle { display: none; }
+
+      .sticky-cta-subtitle {
+        display: none;
+      }
     }
   </style>
 
