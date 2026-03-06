@@ -1911,6 +1911,10 @@
                         <div class="kpi-label">Published Variants</div>
                         <div class="kpi-value rose" id="kpi-published">0</div>
                     </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Pending Review</div>
+                        <div class="kpi-value rose" id="kpi-pending-review">0</div>
+                    </article>
                 </section>
 
                 <section class="view active" id="view-overview">
@@ -3119,6 +3123,7 @@
                 $('kpi-campaigns').textContent = Number(stats.campaigns || 0);
                 $('kpi-connections').textContent = Number(stats.connections || 0);
                 $('kpi-published').textContent = published;
+                $('kpi-pending-review').textContent = Number(stats.pendingReview || 0);
             }
 
             async function loadConnections() {
