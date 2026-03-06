@@ -132,16 +132,32 @@ const ADMIN_EMAILS = [
 ];
 
 /**
+ * Select appropriate Clerk secret key based on request hostname
+ * @param {string} hostname - Request hostname
+ * @param {object} env - Environment bindings
+ * @returns {string} - Clerk secret key
+ */
+function getClerkSecretKey(hostname, env) {
+  // GFD admin panel uses separate Clerk app
+  if (hostname === 'goodflippindesign.com' || hostname === 'www.goodflippindesign.com') {
+    return env.CLERK_SECRET_KEY_GFD || env.CLERK_SECRET_KEY;
+  }
+  // GFV community portal and all other sites use main Clerk app
+  return env.CLERK_SECRET_KEY;
+}
+
+/**
  * Verify Clerk session token
  * @param {string} token - JWT from Clerk
+ * @param {string} secretKey - Clerk secret key for this app
  * @returns {object} - User object or null
  */
-async function verifyClerkToken(token, env) {
+async function verifyClerkToken(token, secretKey) {
   try {
     const response = await fetch('https://api.clerk.com/v1/sessions/verify', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${env.CLERK_SECRET_KEY}`,
+        'Authorization': `Bearer ${secretKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ token }),
@@ -171,7 +187,7 @@ function isAdminEmail(email) {
 /**
  * Assign admin role if user is in whitelist
  */
-async function ensureAdminRole(user, env) {
+async function ensureAdminRole(user, secretKey) {
   if (!isAdminEmail(user.emailAddress)) return user;
 
   // Check if role already assigned
@@ -182,7 +198,7 @@ async function ensureAdminRole(user, env) {
     await fetch(`https://api.clerk.com/v1/users/${user.id}/metadata`, {
       method: 'PATCH',
       headers: {
-        'Authorization': `Bearer ${env.CLERK_SECRET_KEY}`,
+        'Authorization': `Bearer ${secretKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -1618,6 +1634,7 @@ export default {
     return withErrorBoundary(
       async () => {
         const url = new URL(request.url);
+        const clerkSecretKey = getClerkSecretKey(url.hostname, env);
 
         // CORS headers for cross-ecosystem requests
         const corsHeaders = {
@@ -1709,8 +1726,8 @@ export default {
       let cmsUser = null;
       const cmsAuth = request.headers.get('Authorization');
       if (cmsAuth?.startsWith('Bearer ')) {
-        cmsUser = await verifyClerkToken(cmsAuth.replace('Bearer ', ''), env);
-        if (cmsUser) cmsUser = await ensureAdminRole(cmsUser, env);
+        cmsUser = await verifyClerkToken(cmsAuth.replace('Bearer ', ''), clerkSecretKey);
+        if (cmsUser) cmsUser = await ensureAdminRole(cmsUser, clerkSecretKey);
       }
       const cmsResponse = await handleCMSRequest(request, env, cmsUser);
       return new Response(cmsResponse.body, {
@@ -1728,14 +1745,14 @@ export default {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    let user = await verifyClerkToken(token, env);
+    let user = await verifyClerkToken(token, clerkSecretKey);
 
     if (!user) {
       return new Response('Invalid token', { status: 401, headers: corsHeaders });
     }
 
     // Auto-assign admin role if email is in whitelist
-    user = await ensureAdminRole(user, env);
+    user = await ensureAdminRole(user, clerkSecretKey);
 
     // Protected routes
     switch (url.pathname) {
