@@ -454,6 +454,145 @@
             gap: 0.8rem;
         }
 
+        /* ── Ecosystem Brand × Platform Matrix ─────────────────────── */
+        .eco-matrix-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .eco-matrix {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            min-width: 600px;
+        }
+
+        .eco-matrix thead th {
+            padding: 0.55rem 0.8rem;
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 650;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .eco-matrix thead th:first-child {
+            text-align: left;
+            min-width: 150px;
+        }
+
+        .eco-matrix tbody tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .eco-matrix tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .eco-matrix td {
+            padding: 0.45rem 0.8rem;
+            vertical-align: middle;
+        }
+
+        .eco-matrix td:first-child {
+            font-weight: 600;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .eco-brand-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.45rem;
+            vertical-align: middle;
+        }
+
+        .eco-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.18rem;
+        }
+
+        .eco-cell-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-width: 80px;
+            padding: 0.3rem 0.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            gap: 0.3rem;
+        }
+
+        .eco-cell-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .eco-cell-btn.connected {
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .eco-cell-btn.connected:hover {
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .eco-cell-btn.n-a {
+            opacity: 0.2;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .eco-status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            flex-shrink: 0;
+        }
+
+        .eco-cell-handle {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .workflow-approval-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding-top: 1.4rem;
+        }
+
+        .workflow-approval-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        .workflow-approval-row .form-label {
+            margin: 0;
+        }
+
         .connection-card {
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
@@ -716,6 +855,50 @@
         }
 
         .platform-pill:hover {
+            transform: translateY(-1px);
+        }
+
+        .crosspost-brand-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .crosspost-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+        }
+
+        .crosspost-pill::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--brand-color, #888);
+            opacity: 0.6;
+        }
+
+        .crosspost-pill.active {
+            color: var(--text);
+            border-color: var(--brand-color, #888);
+            background: color-mix(in srgb, var(--brand-color, #888) 15%, transparent);
+        }
+
+        .crosspost-pill.active::before {
+            opacity: 1;
+        }
+
+        .crosspost-pill:hover {
             transform: translateY(-1px);
         }
 
@@ -1261,11 +1444,46 @@
 
                 <section class="view" id="view-connections">
                     <div class="section-head">
-                        <h2 class="section-title">Platform Connect Center</h2>
-                        <button class="btn btn-primary" id="open-connection-modal">Connect Account</button>
+                        <h2 class="section-title">Ecosystem Connect Center</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="open-workflow-modal">Manage Workflows</button>
+                            <button class="btn btn-primary" id="open-connection-modal">Connect Account</button>
+                        </div>
                     </div>
-                    <p class="subheading mb-08">Store one active token profile per platform/account, then the scheduler publishes automatically.</p>
-                    <div class="connection-grid" id="connection-grid"></div>
+                    <p class="subheading mb-08">All 5 brands × all platforms — one view. Click any cell to connect or update a token.</p>
+
+                    <!-- Brand × Platform Matrix -->
+                    <div id="ecosystem-matrix-wrap" class="eco-matrix-wrap">
+                        <table class="eco-matrix" id="ecosystem-matrix">
+                            <thead id="eco-matrix-head"></thead>
+                            <tbody id="eco-matrix-body"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Social Account Registry (handles registry) -->
+                    <article class="panel mt-085">
+                        <div class="section-head">
+                            <h2 class="section-title">Handle Registry</h2>
+                            <button class="btn btn-primary" id="open-handle-modal">Register Handle</button>
+                        </div>
+                        <p class="subheading mb-08">Track public profile handles per brand + platform. Separate from OAuth tokens.</p>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Brand</th>
+                                        <th>Platform</th>
+                                        <th>Handle</th>
+                                        <th>Followers</th>
+                                        <th>Verified</th>
+                                        <th>Synced</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="handles-table"></tbody>
+                            </table>
+                        </div>
+                    </article>
                 </section>
 
                 <section class="view" id="view-planner">
@@ -1336,6 +1554,11 @@
                         <div class="mb-07">
                             <label class="form-label">Platforms</label>
                             <div class="platform-picker" id="platform-picker"></div>
+                        </div>
+
+                        <div class="mb-065">
+                            <label class="form-label">Also share to (other brands)</label>
+                            <div class="crosspost-brand-row" id="crosspost-brand-picker"></div>
                         </div>
 
                         <div class="mb-065">
@@ -1498,13 +1721,130 @@
 
     <div id="toast"></div>
 
+    <!-- Handle Registration Modal -->
+    <div class="modal-wrap" id="handle-modal">
+        <div class="modal">
+            <h3>Register Social Handle</h3>
+            <p class="subheading mb-07">Track public profile handles separately from API tokens. Use this to map brand × platform identities.</p>
+            <div class="form-grid">
+                <div>
+                    <label class="form-label">Brand</label>
+                    <select id="handle-brand">
+                        <option value="gfd">Good Flippin Design</option>
+                        <option value="gfv">Good Flippin Vibes</option>
+                        <option value="aiaimate">AI Aimate</option>
+                        <option value="culturesherpa">CultureSherpa</option>
+                        <option value="globaldeets">Global Deets</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Platform</label>
+                    <select id="handle-platform">
+                        <option value="instagram">Instagram</option>
+                        <option value="x">X (Twitter)</option>
+                        <option value="linkedin">LinkedIn</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="pinterest">Pinterest</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-grid mt-06">
+                <div>
+                    <label class="form-label">Handle / Username</label>
+                    <input type="text" id="handle-username" placeholder="@goodflippindesign">
+                </div>
+                <div>
+                    <label class="form-label">Display name</label>
+                    <input type="text" id="handle-display-name" placeholder="Good Flippin Design">
+                </div>
+            </div>
+            <div class="form-grid mt-06">
+                <div>
+                    <label class="form-label">Profile URL</label>
+                    <input type="url" id="handle-profile-url" placeholder="https://instagram.com/goodflippindesign">
+                </div>
+                <div>
+                    <label class="form-label">Followers count</label>
+                    <input type="number" id="handle-followers" placeholder="0" min="0">
+                </div>
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Bio (optional)</label>
+                <textarea id="handle-bio" placeholder="Short bio..." rows="2"></textarea>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" data-close-modal="handle-modal">Cancel</button>
+                <button class="btn btn-primary" id="save-handle-btn">Save Handle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Config Modal -->
+    <div class="modal-wrap" id="workflow-modal">
+        <div class="modal">
+            <h3>Brand Workflow Config</h3>
+            <p class="subheading mb-07">Configure publishing settings for a brand — enabled platforms, cadence, approval gates.</p>
+            <div class="form-grid">
+                <div>
+                    <label class="form-label">Brand</label>
+                    <select id="workflow-brand">
+                        <option value="gfd">Good Flippin Design</option>
+                        <option value="gfv">Good Flippin Vibes</option>
+                        <option value="aiaimate">AI Aimate</option>
+                        <option value="culturesherpa">CultureSherpa</option>
+                        <option value="globaldeets">Global Deets</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Default cadence</label>
+                    <select id="workflow-cadence">
+                        <option value="daily">Daily</option>
+                        <option value="weekly" selected>Weekly</option>
+                        <option value="biweekly">Bi-weekly</option>
+                        <option value="manual">Manual only</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-grid mt-06">
+                <div>
+                    <label class="form-label">Preferred publish time (UTC)</label>
+                    <input type="time" id="workflow-post-time" value="14:00">
+                </div>
+                <div class="workflow-approval-row">
+                    <input type="checkbox" id="workflow-require-approval">
+                    <label for="workflow-require-approval" class="form-label">Require approval before publish</label>
+                </div>
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Notes</label>
+                <textarea id="workflow-notes" placeholder="Strategy notes, link-in-bio URL, etc." rows="2"></textarea>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" data-close-modal="workflow-modal">Cancel</button>
+                <button class="btn btn-primary" id="save-workflow-btn">Save Workflow</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function () {
             'use strict';
 
             const BRAND = 'gfd';
             const API = '/api/cms';
-            const PLATFORM_ORDER = ['instagram', 'facebook', 'x', 'linkedin', 'pinterest', 'tiktok', 'youtube'];
+            const ALL_PLATFORMS = ['instagram', 'facebook', 'x', 'linkedin', 'pinterest', 'tiktok', 'youtube'];
+            const PLATFORM_ORDER = ALL_PLATFORMS;
+
+            // Brand definitions (mirrors brands-config.js for in-browser use)
+            const BRAND_DEFS = {
+                gfd: { name: 'Good Flippin Design', shortName: 'GFD', color: '#6c63ff', platforms: ['instagram', 'linkedin', 'x'] },
+                gfv: { name: 'Good Flippin Vibes', shortName: 'GFV', color: '#10b981', platforms: ['instagram', 'x', 'facebook', 'tiktok', 'pinterest'] },
+                aiaimate: { name: 'AI Aimate', shortName: 'Aimate', color: '#3b82f6', platforms: ['linkedin', 'x', 'youtube'] },
+                culturesherpa: { name: 'CultureSherpa', shortName: 'CultureSherpa', color: '#f59e0b', platforms: ['instagram', 'x', 'pinterest'] },
+                globaldeets: { name: 'Global Deets', shortName: 'GlobalDeets', color: '#8b5cf6', platforms: ['linkedin', 'x'] },
+            };
 
             // Maps each platform to its OAuth provider key
             const PLATFORM_TO_PROVIDER = {
@@ -1530,11 +1870,14 @@
                 campaigns: [],
                 variants: [],
                 connections: [],
+                socialAccounts: [],
+                brandWorkflows: {},
                 platformRules: {},
                 oauthStatus: {},
                 selectedPlatforms: new Set(['linkedin', 'x']),
                 selectedAssetId: '',
                 calendarDate: new Date(),
+                crossPostBrands: new Set(),
             };
 
             function $(id) {
@@ -1673,8 +2016,12 @@
                     renderOAuthProviderGrid();
                     openModal('connection-modal');
                 });
+                $('open-handle-modal').addEventListener('click', () => openModal('handle-modal'));
+                $('open-workflow-modal').addEventListener('click', () => openModal('workflow-modal'));
                 $('save-campaign-btn').addEventListener('click', saveCampaign);
                 $('save-connection-btn').addEventListener('click', saveConnection);
+                $('save-handle-btn').addEventListener('click', saveHandle);
+                $('save-workflow-btn').addEventListener('click', saveWorkflow);
                 $('submit-composer').addEventListener('click', schedulePostSet);
 
                 // Connection modal tab switching
@@ -1744,6 +2091,8 @@
                     loadOAuthStatus(),
                     loadStats(),
                     loadConnections(),
+                    loadSocialAccounts(),
+                    loadBrandWorkflows(),
                     loadAssets(),
                     loadCampaigns(),
                     loadVariants(),
@@ -1752,11 +2101,14 @@
                 await loadCalendar();
                 renderOverview();
                 renderConnections();
+                renderEcosystemMatrix();
+                renderHandlesTable();
                 renderCampaigns();
                 renderCampaignSelect();
                 renderLibrary();
                 renderComposerAssets();
                 updateComposerCounters();
+                renderCrossPostPicker();
             }
 
             async function loadPlatformRules() {
@@ -1837,6 +2189,27 @@
                 state.connections = await api('/connections?brand=' + encodeURIComponent(BRAND));
             }
 
+            async function loadSocialAccounts() {
+                try {
+                    const data = await api('/social-accounts');
+                    state.socialAccounts = data.accounts || [];
+                } catch {
+                    state.socialAccounts = [];
+                }
+            }
+
+            async function loadBrandWorkflows() {
+                try {
+                    const data = await api('/brand-workflows');
+                    state.brandWorkflows = {};
+                    for (const wf of (data.workflows || [])) {
+                        state.brandWorkflows[wf.brand] = wf;
+                    }
+                } catch {
+                    state.brandWorkflows = {};
+                }
+            }
+
             async function loadAssets() {
                 const data = await api('/assets?brand=' + encodeURIComponent(BRAND) + '&limit=120');
                 state.assets = data.assets || [];
@@ -1911,50 +2284,121 @@
             }
 
             function renderConnections() {
-                const container = $('connection-grid');
-                container.innerHTML = PLATFORM_ORDER.map((platform) => {
-                    const entries = state.connections.filter((row) => row.platform === platform && Number(row.is_active) === 1);
-                    const latest = entries[0];
-                    const connected = Boolean(latest);
-                    const provider = PLATFORM_TO_PROVIDER[platform];
-                    const oauthReady = state.oauthStatus[provider]?.configured || false;
+                // Legacy: kept for overview connection summary bar only
+                const connectionSummary = $('connection-summary');
+                if (!connectionSummary) return;
+                const summary = PLATFORM_ORDER.map((platform) => {
+                    const active = state.connections.filter((c) => c.platform === platform && Number(c.is_active) === 1);
+                    const connected = active.length > 0;
+                    return `<span class="conn-pill ${connected ? 'ok' : 'warn'}">${escapeHtml(platform)}</span>`;
+                }).join('');
+                connectionSummary.innerHTML = summary;
+            }
 
-                    return `
-                        <article class="connection-card">
-                            <div class="connection-top">
-                                <div class="connection-name">${escapeHtml(platform)}</div>
-                                <span class="tag ${connected ? 'ok' : 'warn'}">${connected ? 'ready' : 'needs setup'}</span>
-                            </div>
-                            <div class="connection-account">${connected ? escapeHtml(latest.account_label || latest.account_id || 'connected') : 'No active account profile'}</div>
-                            <div class="inline-actions">
-                                ${oauthReady
-                            ? `<button class="btn btn-primary" data-oauth-connect="${provider}" title="Connect via OAuth">Connect with OAuth</button>`
-                            : `<button class="btn btn-secondary" data-connect-platform="${platform}">Manual Connect</button>`
+            function renderEcosystemMatrix() {
+                const head = $('eco-matrix-head');
+                const body = $('eco-matrix-body');
+                if (!head || !body) return;
+
+                const activePlatforms = ALL_PLATFORMS;
+
+                // Header row: blank corner + platform names
+                head.innerHTML = '<tr><th>Brand</th>' +
+                    activePlatforms.map((p) => `<th>${escapeHtml(p)}</th>`).join('') +
+                    '</tr>';
+
+                const rows = Object.entries(BRAND_DEFS).map(([brandId, brandDef]) => {
+                    const cells = activePlatforms.map((platform) => {
+                        const isEnabled = brandDef.platforms.includes(platform);
+
+                        if (!isEnabled) {
+                            return `<td><div class="eco-cell"><button class="eco-cell-btn n-a" disabled aria-label="N/A">—</button></div></td>`;
                         }
-                                ${connected ? `<button class="btn btn-danger" data-disconnect-id="${latest.id}">Deactivate</button>` : ''}
+
+                        // Check for an active connection (token)
+                        const conn = state.connections.find(
+                            (c) => c.brand === brandId && c.platform === platform && Number(c.is_active) === 1
+                        );
+                        // Check for a registered handle
+                        const handle = state.socialAccounts.find(
+                            (a) => a.brand === brandId && a.platform === platform
+                        );
+
+                        const isConnected = Boolean(conn);
+                        const handleText = handle ? escapeHtml(handle.handle) : '';
+                        const label = conn ? escapeHtml(conn.account_label || conn.account_id || 'connected') : (isConnected ? 'connected' : 'connect');
+
+                        return `<td>
+                            <div class="eco-cell">
+                                <button class="eco-cell-btn ${isConnected ? 'connected' : ''}"
+                                    data-matrix-brand="${escapeHtml(brandId)}"
+                                    data-matrix-platform="${escapeHtml(platform)}"
+                                    title="${isConnected ? 'Edit connection: ' + (conn.account_label || '') : 'Connect ' + platform + ' for ' + brandDef.name}"
+                                    aria-label="${isConnected ? 'Edit' : 'Connect'} ${platform} for ${brandDef.name}">
+                                    <span class="eco-status-dot"></span>
+                                    <span>${isConnected ? label : 'connect'}</span>
+                                </button>
+                                ${handleText ? `<span class="eco-cell-handle">${handleText}</span>` : ''}
                             </div>
-                        </article>
-                    `;
+                        </td>`;
+                    }).join('');
+
+                    return `<tr>
+                        <td>
+                            <span class="eco-brand-dot" style="background:${brandDef.color}"></span>
+                            ${escapeHtml(brandDef.name)}
+                        </td>
+                        ${cells}
+                    </tr>`;
                 }).join('');
 
-                container.querySelectorAll('[data-oauth-connect]').forEach((btn) => {
-                    btn.addEventListener('click', () => startOAuthFlow(btn.dataset.oauthConnect));
-                });
+                body.innerHTML = rows;
 
-                container.querySelectorAll('[data-connect-platform]').forEach((btn) => {
+                // Wire up matrix cell clicks → prefill connection modal
+                body.querySelectorAll('[data-matrix-brand]').forEach((btn) => {
                     btn.addEventListener('click', () => {
-                        // Switch to manual tab
+                        const platform = btn.dataset.matrixPlatform;
+                        // Switch to manual tab and prefill
                         document.querySelectorAll('.conn-tab').forEach((t) => t.classList.remove('active'));
                         document.querySelectorAll('.conn-tab-panel').forEach((p) => p.classList.remove('active'));
                         document.querySelector('[data-conn-tab="manual"]').classList.add('active');
                         $('conn-tab-manual').classList.add('active');
-                        $('conn-platform').value = btn.getAttribute('data-connect-platform');
+                        $('conn-platform').value = platform;
+                        renderOAuthProviderGrid();
                         openModal('connection-modal');
                     });
                 });
+            }
 
-                container.querySelectorAll('[data-disconnect-id]').forEach((btn) => {
-                    btn.addEventListener('click', () => disconnectConnection(btn.getAttribute('data-disconnect-id')));
+            function renderHandlesTable() {
+                const body = $('handles-table');
+                if (!body) return;
+
+                if (state.socialAccounts.length === 0) {
+                    body.innerHTML = '<tr><td colspan="7" class="text-muted">No handles registered yet. Click "Register Handle" to add one.</td></tr>';
+                    return;
+                }
+
+                body.innerHTML = state.socialAccounts.map((acct) => `
+                    <tr>
+                        <td>
+                            <span class="eco-brand-dot" style="background:${escapeHtml(BRAND_DEFS[acct.brand]?.color || '#888')}"></span>
+                            ${escapeHtml(BRAND_DEFS[acct.brand]?.name || acct.brand)}
+                        </td>
+                        <td>${escapeHtml(acct.platform)}</td>
+                        <td><strong>${escapeHtml(acct.handle)}</strong></td>
+                        <td>${Number(acct.followers_count || 0).toLocaleString()}</td>
+                        <td>${acct.verified ? '✓' : '—'}</td>
+                        <td>${acct.last_synced ? escapeHtml(formatDateTime(acct.last_synced)) : '—'}</td>
+                        <td>
+                            <button class="btn btn-danger" style="font-size:0.72rem;padding:0.2rem 0.55rem;" data-delete-handle="${acct.id}"
+                                aria-label="Delete handle ${acct.handle}">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                body.querySelectorAll('[data-delete-handle]').forEach((btn) => {
+                    btn.addEventListener('click', () => deleteHandle(btn.getAttribute('data-delete-handle')));
                 });
             }
 
@@ -1979,6 +2423,33 @@
                 const select = $('composer-campaign');
                 select.innerHTML = '<option value="">General (no campaign)</option>' +
                     state.campaigns.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+            }
+
+            function renderCrossPostPicker() {
+                const picker = $('crosspost-brand-picker');
+                if (!picker) return;
+                const otherBrands = Object.entries(BRAND_DEFS).filter(([id]) => id !== BRAND);
+                if (otherBrands.length === 0) {
+                    picker.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem">No other brands configured.</span>';
+                    return;
+                }
+                picker.innerHTML = otherBrands.map(([id, def]) => `
+                    <button type="button" class="crosspost-pill ${state.crossPostBrands.has(id) ? 'active' : ''}"
+                        data-cp-brand="${escapeHtml(id)}" style="--brand-color:${escapeHtml(def.color)}">
+                        ${escapeHtml(def.shortName || def.name)}
+                    </button>
+                `).join('');
+                picker.querySelectorAll('[data-cp-brand]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const b = btn.dataset.cpBrand;
+                        if (state.crossPostBrands.has(b)) {
+                            state.crossPostBrands.delete(b);
+                        } else {
+                            state.crossPostBrands.add(b);
+                        }
+                        renderCrossPostPicker();
+                    });
+                });
             }
 
             function renderPlatformPicker() {
@@ -2305,6 +2776,72 @@
                 }
             }
 
+            async function saveHandle() {
+                const brand = $('handle-brand').value;
+                const platform = $('handle-platform').value;
+                const handle = $('handle-username').value.trim();
+                if (!brand || !platform || !handle) {
+                    toast('Brand, platform, and handle are required', 'error');
+                    return;
+                }
+                try {
+                    await api('/social-accounts', {
+                        method: 'POST',
+                        body: {
+                            brand,
+                            platform,
+                            handle,
+                            display_name: $('handle-display-name').value.trim(),
+                            profile_url: $('handle-profile-url').value.trim(),
+                            followers_count: parseInt($('handle-followers').value, 10) || 0,
+                            bio: $('handle-bio').value.trim(),
+                        },
+                    });
+                    toast('Handle registered', 'success');
+                    closeModal('handle-modal');
+                    await loadSocialAccounts();
+                    renderEcosystemMatrix();
+                    renderHandlesTable();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function deleteHandle(id) {
+                if (!window.confirm('Delete this handle record?')) return;
+                try {
+                    await api('/social-accounts?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                    toast('Handle removed', 'success');
+                    await loadSocialAccounts();
+                    renderEcosystemMatrix();
+                    renderHandlesTable();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function saveWorkflow() {
+                const brand = $('workflow-brand').value;
+                if (!brand) { toast('Select a brand', 'error'); return; }
+                try {
+                    await api('/brand-workflows', {
+                        method: 'PUT',
+                        body: {
+                            brand,
+                            default_cadence: $('workflow-cadence').value,
+                            require_approval: $('workflow-require-approval').checked ? 1 : 0,
+                            post_time_utc: $('workflow-post-time').value || '14:00',
+                            notes: $('workflow-notes').value.trim(),
+                        },
+                    });
+                    toast('Workflow saved', 'success');
+                    closeModal('workflow-modal');
+                    await loadBrandWorkflows();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
             async function schedulePostSet() {
                 try {
                     const platforms = [...state.selectedPlatforms];
@@ -2334,8 +2871,21 @@
                         watermark_profile: $('composer-watermark').checked ? 'default' : '',
                     };
 
-                    await api('/social/campaign', { method: 'POST', body: payload });
-                    toast('Post set scheduled', 'success');
+                    const result = await api('/social/campaign', { method: 'POST', body: payload });
+                    const postId = result?.post_id || result?.id;
+                    if (postId && state.crossPostBrands.size > 0) {
+                        for (const targetBrand of state.crossPostBrands) {
+                            try {
+                                await api('/cross-posts', { method: 'POST', body: { source_post_id: postId, target_brand: targetBrand } });
+                            } catch (e) {
+                                console.warn('[cross-post] failed for', targetBrand, e);
+                            }
+                        }
+                        toast(`Scheduled + queued for ${state.crossPostBrands.size} brand(s)`, 'success');
+                    } else {
+                        toast('Post set scheduled', 'success');
+                    }
+                    state.crossPostBrands.clear();
                     $('composer-content').value = '';
                     $('composer-hashtags').value = '';
                     updateComposerCounters();
