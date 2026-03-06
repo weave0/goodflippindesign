@@ -1,5 +1,45 @@
 # Clerk Setup for GFD Admin Panel
 
+## 🚀 Setup Status (Updated 2026-03-05)
+
+### ✅ Complete
+
+1. **Production Clerk app created** (separate from GFV):
+   - Publishable Key: `pk_live_Y2xlcmsuZ29vZGZsaXBwaW5kZXNpZ24uY29tJA`
+   - Clerk Domain: `clerk.goodflippindesign.com`
+
+2. **DNS records configured** (all 5/5):
+
+   ```
+   ✅ clerk.goodflippindesign.com → frontend-api.clerk.services
+   ✅ accounts.goodflippindesign.com → accounts.clerk.services
+   ✅ clkmail.goodflippindesign.com → mail.k6r91ngsvz3c.clerk.services
+   ✅ clk._domainkey.goodflippindesign.com → dkim1.k6r91ngsvz3c.clerk.services
+   ✅ clk2._domainkey.goodflippindesign.com → dkim2.k6r91ngsvz3c.clerk.services
+   ```
+
+3. **admin.html updated** with production keys
+
+4. **Auth worker updated** to support multiple Clerk apps (hostname-based routing)
+
+### ⚠️ Remaining Steps
+
+**REQUIRED**: Set Cloudflare Pages secret
+
+1. Go to: <https://dash.cloudflare.com/> → **Pages** → **goodflippindesign** → **Settings** → **Environment variables**
+2. Click **Add variable** (Production environment)
+3. Set:
+   - **Name**: `CLERK_SECRET_KEY_GFD`
+   - **Value**: `sk_live_XNoNOJvA***************Gl` (use full key from Clerk dashboard)
+   - **Type**: Encrypted variable
+4. Click **Save** → **Redeploy site**
+
+**THEN**: Wait 5-10 minutes for DNS propagation, verify in Clerk dashboard that all 5 records show "Verified" ✅
+
+**TEST**: Visit <https://goodflippindesign.com/admin.html> and sign in
+
+---
+
 ## Overview
 
 The GFD admin panel (goodflippindesign.com) uses a **separate Clerk application** from the GFV community portal (goodflippinvibes.com). This ensures isolated user pools and independent authentication.
