@@ -940,6 +940,8 @@
             overflow: hidden;
             cursor: pointer;
             transition: border-color 0.18s ease, transform 0.18s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .asset-card:hover {
@@ -952,6 +954,10 @@
             box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.14);
         }
 
+        .asset-thumb-wrap {
+            position: relative;
+        }
+
         .asset-thumb {
             width: 100%;
             aspect-ratio: 16 / 10;
@@ -960,10 +966,67 @@
             display: block;
         }
 
+        .asset-no-thumb {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            background: #0e172b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .asset-type-badge {
+            position: absolute;
+            top: 0.3rem;
+            right: 0.3rem;
+            background: rgba(0, 0, 0, 0.65);
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            padding: 0.15rem 0.35rem;
+            border-radius: 4px;
+        }
+
         .asset-meta {
             padding: 0.45rem;
             font-size: 0.72rem;
             color: var(--text-secondary);
+            flex: 1;
+        }
+
+        .asset-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .asset-actions {
+            display: flex;
+            gap: 0.3rem;
+            padding: 0.35rem 0.45rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-micro {
+            font-size: 0.68rem;
+            padding: 0.18rem 0.5rem;
+            border-radius: 5px;
+        }
+
+        .btn-danger-soft {
+            background: transparent;
+            border-color: rgba(239, 68, 68, 0.35);
+            color: #f87171;
+        }
+
+        .btn-danger-soft:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
+        .modal-wide {
+            max-width: 560px;
         }
 
         .inline-actions {
@@ -1089,6 +1152,38 @@
 
         .mb-06 {
             margin-bottom: 0.6rem;
+        }
+
+        .form-check-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding-top: 1.4rem;
+        }
+
+        .form-check-row input[type="checkbox"] {
+            width: auto;
+        }
+
+        .form-check-row .form-label {
+            margin: 0;
+        }
+
+        .tag-hint {
+            font-weight: 400;
+        }
+
+        .actions-split {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.45rem;
+            margin-top: 0.8rem;
+        }
+
+        .actions-split .actions-right {
+            display: flex;
+            gap: 0.75rem;
         }
 
         .overview-connections-grid {
@@ -2015,6 +2110,63 @@
         </div>
     </div>
 
+    <!-- Asset Edit Modal -->
+    <div class="modal-wrap" id="asset-edit-modal">
+        <div class="modal modal-wide">
+            <h3>Edit Asset</h3>
+            <input type="hidden" id="asset-edit-id">
+            <div class="form-grid mt-04">
+                <div>
+                    <label class="form-label">Title</label>
+                    <input type="text" id="asset-edit-title" placeholder="Asset title">
+                </div>
+                <div>
+                    <label class="form-label">Category</label>
+                    <select id="asset-edit-category">
+                        <option value="uploads">Uploads</option>
+                        <option value="hero">Hero</option>
+                        <option value="social">Social</option>
+                        <option value="logo">Logo</option>
+                        <option value="headshot">Headshot</option>
+                        <option value="background">Background</option>
+                        <option value="document">Document</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-grid mt-06">
+                <div>
+                    <label class="form-label">Media type</label>
+                    <select id="asset-edit-media-type">
+                        <option value="image">Image</option>
+                        <option value="video">Video</option>
+                        <option value="audio">Audio</option>
+                        <option value="document">Document</option>
+                    </select>
+                </div>
+                <div class="form-check-row">
+                    <input type="checkbox" id="asset-edit-featured">
+                    <label for="asset-edit-featured" class="form-label">Featured</label>
+                </div>
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Tags <span class="text-muted tag-hint">(comma-separated)</span></label>
+                <input type="text" id="asset-edit-tags" placeholder="leadership, b2b, culture">
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Description</label>
+                <textarea id="asset-edit-description" rows="3" placeholder="Optional description or notes"></textarea>
+            </div>
+            <div class="actions-split mt-08">
+                <button class="btn btn-danger" id="asset-edit-delete-btn">Delete Asset</button>
+                <div class="actions-right">
+                    <button class="btn btn-secondary" data-close-modal="asset-edit-modal">Cancel</button>
+                    <button class="btn btn-primary" id="asset-edit-save-btn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-wrap" id="campaign-modal">
         <div class="modal">
             <h3>Create Campaign</h3>
@@ -2488,6 +2640,10 @@
 
                 $('library-search').addEventListener('input', renderLibrary);
                 $('library-type').addEventListener('change', renderLibrary);
+
+                // ── Asset Edit Modal ─────────────────────────────────────────
+                $('asset-edit-save-btn').addEventListener('click', saveAssetEdit);
+                $('asset-edit-delete-btn').addEventListener('click', () => deleteAsset($('asset-edit-id').value));
 
                 // ── Upload Dropzone Setup ────────────────────────────────────
                 initUploadZone();
@@ -3046,18 +3202,61 @@
                 });
 
                 const grid = $('library-grid');
-                grid.innerHTML = list.length
-                    ? list.map((asset) => `
-                        <article class="asset-card">
-                            <img class="asset-thumb" src="${escapeHtml(assetUrl(asset))}" alt="${escapeHtml(asset.title)}" loading="lazy">
+                if (!list.length) {
+                    grid.innerHTML = '<p class="text-muted">No assets matched your filter.</p>';
+                    return;
+                }
+
+                grid.innerHTML = list.map((asset) => {
+                    let tags = [];
+                    try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
+                    const tagHtml = tags.slice(0, 4).map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+                    const thumb = assetUrl(asset);
+                    const isVideo = asset.media_type === 'video';
+                    return `
+                        <article class="asset-card" data-asset-id="${asset.id}">
+                            ${thumb
+                            ? (isVideo
+                                ? `<div class="asset-thumb-wrap"><video class="asset-thumb" src="${escapeHtml(thumb)}" muted preload="none"></video><span class="asset-type-badge">VIDEO</span></div>`
+                                : `<div class="asset-thumb-wrap"><img class="asset-thumb" src="${escapeHtml(thumb)}" alt="${escapeHtml(asset.title)}" loading="lazy"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`)
+                            : `<div class="asset-thumb-wrap asset-no-thumb"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`}
                             <div class="asset-meta">
                                 <div class="text-strong">${escapeHtml(asset.title)}</div>
-                                <div>${escapeHtml(asset.category || '-')} | ${escapeHtml(asset.media_type || '-')}</div>
+                                <div class="text-note">${escapeHtml(asset.category || '-')}${asset.featured ? ' &nbsp;&#9733;' : ''}</div>
+                                ${tagHtml ? `<div class="asset-tags mt-03">${tagHtml}</div>` : ''}
                                 <div class="mt-03 text-muted">${escapeHtml(formatDateTime(asset.created_at))}</div>
                             </div>
+                            <div class="asset-actions">
+                                <button class="btn btn-micro" data-use-asset="${asset.id}" title="Use in Composer">Use</button>
+                                <button class="btn btn-micro" data-edit-asset="${asset.id}" title="Edit metadata">Edit</button>
+                                <button class="btn btn-micro btn-danger-soft" data-delete-asset="${asset.id}" title="Delete">Del</button>
+                            </div>
                         </article>
-                    `).join('')
-                    : '<p class="text-muted">No assets matched your filter.</p>';
+                    `;
+                }).join('');
+
+                grid.querySelectorAll('[data-edit-asset]').forEach((btn) => {
+                    btn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        const asset = state.assets.find((a) => String(a.id) === btn.dataset.editAsset);
+                        if (asset) openAssetEditModal(asset);
+                    });
+                });
+                grid.querySelectorAll('[data-delete-asset]').forEach((btn) => {
+                    btn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        deleteAsset(btn.dataset.deleteAsset);
+                    });
+                });
+                grid.querySelectorAll('[data-use-asset]').forEach((btn) => {
+                    btn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        state.selectedAssetId = btn.dataset.useAsset;
+                        switchView('composer');
+                        renderComposerAssets();
+                        toast('Asset selected — add a caption and schedule it', 'success');
+                    });
+                });
             }
 
             function renderCalendar(events, monthStart) {
@@ -3352,6 +3551,73 @@
                     toast(`Queue run complete: ${published} published, ${failed} failed`, 'success');
                     await loadVariants();
                     renderOverview();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            // ════════════════════════════════════════════════════════════════
+            // ASSET MANAGEMENT
+            // ════════════════════════════════════════════════════════════════
+
+            function openAssetEditModal(asset) {
+                $('asset-edit-id').value = asset.id;
+                $('asset-edit-title').value = asset.title || '';
+                $('asset-edit-category').value = asset.category || 'uploads';
+                $('asset-edit-media-type').value = asset.media_type || 'image';
+                $('asset-edit-featured').checked = Boolean(Number(asset.featured));
+                $('asset-edit-description').value = asset.description || '';
+
+                let tags = [];
+                try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
+                $('asset-edit-tags').value = tags.join(', ');
+
+                openModal('asset-edit-modal');
+            }
+
+            async function saveAssetEdit() {
+                const id = $('asset-edit-id').value;
+                if (!id) return;
+
+                const rawTags = $('asset-edit-tags').value;
+                const tags = rawTags
+                    .split(',')
+                    .map((t) => t.trim())
+                    .filter(Boolean);
+
+                try {
+                    await api('/assets', {
+                        method: 'PUT',
+                        body: {
+                            id,
+                            title: $('asset-edit-title').value.trim(),
+                            category: $('asset-edit-category').value,
+                            media_type: $('asset-edit-media-type').value,
+                            featured: $('asset-edit-featured').checked,
+                            description: $('asset-edit-description').value.trim(),
+                            tags,
+                        },
+                    });
+                    toast('Asset updated', 'success');
+                    closeModal('asset-edit-modal');
+                    await loadAssets();
+                    renderLibrary();
+                    renderComposerAssets();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function deleteAsset(id) {
+                if (!window.confirm('Permanently delete this asset? This cannot be undone.')) return;
+                try {
+                    await api('/assets?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                    toast('Asset deleted', 'success');
+                    if ($('asset-edit-id').value === String(id)) closeModal('asset-edit-modal');
+                    await loadAssets();
+                    renderLibrary();
+                    renderComposerAssets();
+                    if (state.selectedAssetId === String(id)) state.selectedAssetId = '';
                 } catch (err) {
                     toast(err.message, 'error');
                 }
