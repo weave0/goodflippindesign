@@ -698,6 +698,305 @@ async function handleCreateCampaignSocialPost(request, user, env) {
   }, 201);
 }
 
+// ────────────────────────────────────────────────────────────────
+//  Brand Registry
+// ────────────────────────────────────────────────────────────────
+
+const BRAND_DEFINITIONS = {
+  gfd:          { name: 'Good Flippin Design',  domain: 'goodflippindesign.com',  color: '#6c63ff', platforms: ['instagram','linkedin','x'] },
+  gfv:          { name: 'Good Flippin Vibes',   domain: 'goodflippinvibes.com',   color: '#10b981', platforms: ['instagram','x','facebook','tiktok','pinterest'] },
+  aiaimate:     { name: 'AI Aimate',            domain: 'aiaimate.com',           color: '#3b82f6', platforms: ['linkedin','x','youtube'] },
+  culturesherpa:{ name: 'CultureSherpa',        domain: 'culturesherpa.org',      color: '#f59e0b', platforms: ['instagram','x','pinterest'] },
+  globaldeets:  { name: 'Global Deets',         domain: 'globaldeets.com',        color: '#8b5cf6', platforms: ['linkedin','x'] },
+};
+
+/**
+ * GET /api/cms/brands
+ * Returns all brands with workflow config, connection counts, and social account counts.
+ */
+async function handleListBrands(env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  const [connectionsResult, accountsResult, workflowsResult] = await Promise.all([
+    env.DB.prepare(`
+      SELECT brand, COUNT(*) as connection_count
+      FROM cms_platform_tokens WHERE is_active = 1
+      GROUP BY brand
+    `).all(),
+    env.DB.prepare(`
+      SELECT brand, COUNT(*) as account_count
+      FROM social_accounts
+      GROUP BY brand
+    `).all(),
+    env.DB.prepare('SELECT * FROM brand_workflows').all(),
+  ]);
+
+  const connMap = Object.fromEntries((connectionsResult.results || []).map(r => [r.brand, r.connection_count]));
+  const accountMap = Object.fromEntries((accountsResult.results || []).map(r => [r.brand, r.account_count]));
+  const workflowMap = Object.fromEntries((workflowsResult.results || []).map(r => [r.brand, r]));
+
+  const brands = Object.entries(BRAND_DEFINITIONS).map(([id, def]) => {
+    const wf = workflowMap[id] || {};
+    return {
+      id,
+      ...def,
+      connection_count: connMap[id] || 0,
+      account_count: accountMap[id] || 0,
+      workflow: {
+        enabled_platforms: safeJSON(wf.enabled_platforms, def.platforms),
+        default_cadence: wf.default_cadence || 'weekly',
+        require_approval: wf.require_approval || 0,
+        auto_cross_post: safeJSON(wf.auto_cross_post, []),
+        hashtag_sets: safeJSON(wf.hashtag_sets, {}),
+        post_time_utc: wf.post_time_utc || '14:00',
+        post_days: safeJSON(wf.post_days, [1,2,3,4,5]),
+        timezone: wf.timezone || 'America/New_York',
+      },
+    };
+  });
+
+  return jsonResponse({ brands });
+}
+
+function safeJSON(str, fallback) {
+  if (!str) return fallback;
+  try { return JSON.parse(str); } catch { return fallback; }
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Social Accounts (brand × platform handle registry)
+// ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/cms/social-accounts?brand=&platform=
+ */
+async function handleListSocialAccounts(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  const url = new URL(request.url);
+  const brand = url.searchParams.get('brand');
+  const platform = url.searchParams.get('platform');
+
+  let query = 'SELECT * FROM social_accounts WHERE 1=1';
+  const params = [];
+  if (brand) { query += ' AND brand = ?'; params.push(brand); }
+  if (platform) { query += ' AND platform = ?'; params.push(platform); }
+  query += ' ORDER BY brand ASC, platform ASC, is_primary DESC';
+
+  const { results } = await env.DB.prepare(query).bind(...params).all();
+  return jsonResponse({ accounts: results || [] });
+}
+
+/**
+ * POST /api/cms/social-accounts
+ * Body: { brand, platform, handle, display_name?, profile_url?, bio?, followers_count?, verified?, is_primary? }
+ */
+async function handleUpsertSocialAccount(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!user) return errorResponse('Unauthorized', 401);
+
+  const data = await request.json().catch(() => null);
+  if (!data?.brand || !data?.platform || !data?.handle) {
+    return errorResponse('brand, platform, and handle are required', 400);
+  }
+  if (!BRAND_DEFINITIONS[data.brand]) return errorResponse('Unknown brand', 400);
+
+  const now = new Date().toISOString();
+  await env.DB.prepare(`
+    INSERT INTO social_accounts (brand, platform, handle, display_name, profile_url, bio,
+      followers_count, following_count, post_count, verified, is_primary, last_synced, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(brand, platform, handle) DO UPDATE SET
+      display_name = excluded.display_name,
+      profile_url = excluded.profile_url,
+      bio = excluded.bio,
+      followers_count = excluded.followers_count,
+      following_count = excluded.following_count,
+      post_count = excluded.post_count,
+      verified = excluded.verified,
+      is_primary = excluded.is_primary,
+      last_synced = excluded.last_synced,
+      updated_at = excluded.updated_at
+  `).bind(
+    data.brand, data.platform, data.handle,
+    data.display_name || '', data.profile_url || '', data.bio || '',
+    data.followers_count || 0, data.following_count || 0, data.post_count || 0,
+    data.verified ? 1 : 0, data.is_primary !== false ? 1 : 0,
+    now, now, now
+  ).run();
+
+  await logAudit(env.DB, user.id, 'social.account.upsert', 'social_account',
+    `${data.brand}:${data.platform}:${data.handle}`, { brand: data.brand, platform: data.platform });
+
+  return jsonResponse({ ok: true }, 201);
+}
+
+/**
+ * DELETE /api/cms/social-accounts?id=
+ */
+async function handleDeleteSocialAccount(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!user) return errorResponse('Unauthorized', 401);
+
+  const id = new URL(request.url).searchParams.get('id');
+  if (!id) return errorResponse('id required', 400);
+
+  await env.DB.prepare('DELETE FROM social_accounts WHERE id = ?').bind(id).run();
+  await logAudit(env.DB, user.id, 'social.account.delete', 'social_account', id, {});
+  return jsonResponse({ ok: true });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Brand Workflows
+// ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/cms/brand-workflows?brand=
+ */
+async function handleListBrandWorkflows(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  const brand = new URL(request.url).searchParams.get('brand');
+  let query = 'SELECT * FROM brand_workflows';
+  const params = [];
+  if (brand) { query += ' WHERE brand = ?'; params.push(brand); }
+  query += ' ORDER BY brand ASC';
+
+  const { results } = await env.DB.prepare(query).bind(...params).all();
+  return jsonResponse({ workflows: results || [] });
+}
+
+/**
+ * PUT /api/cms/brand-workflows
+ * Body: { brand, enabled_platforms?, default_cadence?, require_approval?,
+ *         auto_cross_post?, hashtag_sets?, post_time_utc?, post_days?, timezone?, notes? }
+ */
+async function handleUpdateBrandWorkflow(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!user) return errorResponse('Unauthorized', 401);
+
+  const data = await request.json().catch(() => null);
+  if (!data?.brand) return errorResponse('brand is required', 400);
+  if (!BRAND_DEFINITIONS[data.brand]) return errorResponse('Unknown brand', 400);
+
+  const fields = [];
+  const params = [];
+
+  const jsonFields = ['enabled_platforms', 'auto_cross_post', 'post_days', 'hashtag_sets'];
+  const scalarFields = ['default_cadence', 'require_approval', 'post_time_utc', 'timezone', 'notes'];
+
+  for (const f of jsonFields) {
+    if (data[f] !== undefined) {
+      fields.push(`${f} = ?`);
+      params.push(typeof data[f] === 'string' ? data[f] : JSON.stringify(data[f]));
+    }
+  }
+  for (const f of scalarFields) {
+    if (data[f] !== undefined) {
+      fields.push(`${f} = ?`);
+      params.push(data[f]);
+    }
+  }
+
+  if (fields.length === 0) return errorResponse('Nothing to update', 400);
+
+  fields.push('updated_by = ?', 'updated_at = ?');
+  params.push(user.id, new Date().toISOString(), data.brand);
+
+  await env.DB.prepare(`UPDATE brand_workflows SET ${fields.join(', ')} WHERE brand = ?`)
+    .bind(...params).run();
+
+  await logAudit(env.DB, user.id, 'brand.workflow.update', 'brand_workflow', data.brand, data);
+  return jsonResponse({ ok: true });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Cross-Brand Syndication
+// ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/cms/cross-posts?source_post_id=&status=
+ */
+async function handleListCrossPosts(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  const url = new URL(request.url);
+  const sourcePostId = url.searchParams.get('source_post_id');
+  const status = url.searchParams.get('status');
+
+  let query = 'SELECT * FROM cross_post_links WHERE 1=1';
+  const params = [];
+  if (sourcePostId) { query += ' AND source_post_id = ?'; params.push(sourcePostId); }
+  if (status) { query += ' AND status = ?'; params.push(status); }
+  query += ' ORDER BY created_at DESC LIMIT 100';
+
+  const { results } = await env.DB.prepare(query).bind(...params).all();
+  return jsonResponse({ cross_posts: results || [] });
+}
+
+/**
+ * POST /api/cms/cross-posts
+ * Body: { source_post_id, target_brand, adapted_content? }
+ * Creates a syndication link — schedules the post for the target brand.
+ */
+async function handleCreateCrossPost(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!user) return errorResponse('Unauthorized', 401);
+
+  const data = await request.json().catch(() => null);
+  if (!data?.source_post_id || !data?.target_brand) {
+    return errorResponse('source_post_id and target_brand are required', 400);
+  }
+  if (!BRAND_DEFINITIONS[data.target_brand]) return errorResponse('Unknown target brand', 400);
+
+  const now = new Date().toISOString();
+  const result = await env.DB.prepare(`
+    INSERT OR IGNORE INTO cross_post_links (source_post_id, target_brand, adapted_content, status, created_at)
+    VALUES (?, ?, ?, 'queued', ?)
+  `).bind(
+    String(data.source_post_id),
+    data.target_brand,
+    data.adapted_content || '',
+    now
+  ).run();
+
+  await logAudit(env.DB, user.id, 'cross_post.create', 'cross_post_link',
+    `${data.source_post_id}→${data.target_brand}`, data);
+
+  return jsonResponse({ ok: true, id: result.meta?.last_row_id }, 201);
+}
+
+/**
+ * GET /api/cms/ecosystem-calendar?from=&to=&brands=
+ * Cross-brand scheduled post calendar view.
+ */
+async function handleEcosystemCalendar(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  const url = new URL(request.url);
+  const from = url.searchParams.get('from') || new Date().toISOString().slice(0, 10);
+  const to = url.searchParams.get('to') || new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  const brands = url.searchParams.get('brands')?.split(',').filter(Boolean) || Object.keys(BRAND_DEFINITIONS);
+
+  const placeholders = brands.map(() => '?').join(',');
+  const { results } = await env.DB.prepare(`
+    SELECT
+      v.id, v.post_id, v.platform, v.status, v.scheduled_at, v.brand,
+      sp.content_body, sp.campaign_id,
+      c.name as campaign_name
+    FROM cms_post_variants v
+    JOIN cms_social_posts sp ON sp.id = v.post_id
+    LEFT JOIN cms_campaigns c ON c.id = sp.campaign_id
+    WHERE v.brand IN (${placeholders})
+      AND v.scheduled_at BETWEEN ? AND ?
+      AND v.status IN ('scheduled', 'pending', 'published')
+    ORDER BY v.scheduled_at ASC
+    LIMIT 500
+  `).bind(...brands, from + 'T00:00:00Z', to + 'T23:59:59Z').all();
+
+  return jsonResponse({ events: results || [], from, to, brands });
+}
+
 async function handleListConnections(request, env) {
   const url = new URL(request.url);
   const brand = url.searchParams.get('brand');
@@ -1214,6 +1513,41 @@ export async function handleCMSRequest(request, env, user) {
       return handleRunSocialPublisherNow(user, env);
     }
 
+    // ── Brand registry ───────────────────────────────────────
+    if (path === '/brands' && method === 'GET') {
+      return handleListBrands(env);
+    }
+
+    // ── Social account handle registry ───────────────────────
+    if (path === '/social-accounts' && method === 'GET') {
+      return handleListSocialAccounts(request, env);
+    }
+    if (path === '/social-accounts' && method === 'POST') {
+      return handleUpsertSocialAccount(request, user, env);
+    }
+    if (path === '/social-accounts' && method === 'DELETE') {
+      return handleDeleteSocialAccount(request, user, env);
+    }
+
+    // ── Brand workflows ──────────────────────────────────────
+    if (path === '/brand-workflows' && method === 'GET') {
+      return handleListBrandWorkflows(request, env);
+    }
+    if (path === '/brand-workflows' && method === 'PUT') {
+      return handleUpdateBrandWorkflow(request, user, env);
+    }
+
+    // ── Cross-brand syndication ──────────────────────────────
+    if (path === '/cross-posts' && method === 'GET') {
+      return handleListCrossPosts(request, env);
+    }
+    if (path === '/cross-posts' && method === 'POST') {
+      return handleCreateCrossPost(request, user, env);
+    }
+    if (path === '/ecosystem-calendar' && method === 'GET') {
+      return handleEcosystemCalendar(request, env);
+    }
+
     // Platform OAuth/token connections
     if (path === '/connections' && method === 'GET') {
       return handleListConnections(request, env);
@@ -1275,6 +1609,55 @@ export async function handleCMSRequest(request, env, user) {
     }
     if (path === '/assets/overrides' && method === 'DELETE') {
       return handleDeleteOverride(request, user, env);
+    }
+
+    // ── Gallery management ─────────────────────────────
+    if (path === '/galleries' && method === 'GET') {
+      return handleListGalleries(request, env);
+    }
+    if (path === '/galleries' && method === 'POST') {
+      return handleCreateGallery(request, user, env);
+    }
+    const galleryMatch = path.match(/^\/galleries\/(\d+)$/);
+    if (galleryMatch && method === 'PUT') {
+      return handleUpdateGallery(request, user, env, parseInt(galleryMatch[1], 10));
+    }
+    if (galleryMatch && method === 'DELETE') {
+      return handleDeleteGallery(user, env, parseInt(galleryMatch[1], 10));
+    }
+    const galleryItemsMatch = path.match(/^\/galleries\/(\d+)\/items$/);
+    if (galleryItemsMatch && method === 'GET') {
+      return handleListGalleryItems(env, parseInt(galleryItemsMatch[1], 10));
+    }
+    if (galleryItemsMatch && method === 'POST') {
+      return handleAddGalleryItem(request, user, env, parseInt(galleryItemsMatch[1], 10));
+    }
+    const galleryReorderMatch = path.match(/^\/galleries\/(\d+)\/items\/reorder$/);
+    if (galleryReorderMatch && method === 'PUT') {
+      return handleReorderGalleryItems(request, user, env, parseInt(galleryReorderMatch[1], 10));
+    }
+    const galleryItemDeleteMatch = path.match(/^\/galleries\/(\d+)\/items\/(\d+)$/);
+    if (galleryItemDeleteMatch && method === 'DELETE') {
+      return handleRemoveGalleryItem(user, env, parseInt(galleryItemDeleteMatch[1], 10), parseInt(galleryItemDeleteMatch[2], 10));
+    }
+
+    // ── Cross-site asset sharing ───────────────────────
+    const shareMatch = path.match(/^\/assets\/([^/]+)\/share$/);
+    if (shareMatch && method === 'POST') {
+      return handleShareAsset(request, user, env, shareMatch[1]);
+    }
+    const replaceMatch = path.match(/^\/assets\/([^/]+)\/replace$/);
+    if (replaceMatch && method === 'POST') {
+      return handleReplaceAsset(request, user, env, replaceMatch[1]);
+    }
+
+    // ── Site registry ──────────────────────────────────
+    if (path === '/sites' && method === 'GET') {
+      return handleListSites(env);
+    }
+    const siteAssetsMatch = path.match(/^\/sites\/([^/]+)\/assets$/);
+    if (siteAssetsMatch && method === 'GET') {
+      return handleListSiteAssets(request, env, siteAssetsMatch[1]);
     }
 
     return errorResponse('CMS endpoint not found', 404);
@@ -1465,4 +1848,427 @@ async function handleDeleteOverride(request, user, env) {
   await env.DB.prepare('DELETE FROM asset_overrides WHERE id = ?').bind(id).run();
   await logAudit(env.DB, user.id, 'delete', 'asset_override', id, {});
   return jsonResponse({ ok: true });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Gallery Management
+// ────────────────────────────────────────────────────────────────
+
+let gallerySchemaReady = false;
+
+async function ensureGallerySchema(db) {
+  if (gallerySchemaReady) return;
+
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS cms_galleries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      site_domain TEXT NOT NULL,
+      gallery_slug TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      cover_asset_id TEXT DEFAULT '',
+      brand TEXT NOT NULL DEFAULT 'gfv',
+      sort_order INTEGER DEFAULT 100,
+      active INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(site_domain, gallery_slug)
+    )
+  `).run();
+
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS cms_gallery_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      gallery_id INTEGER NOT NULL REFERENCES cms_galleries(id) ON DELETE CASCADE,
+      asset_id TEXT NOT NULL,
+      sort_order INTEGER DEFAULT 100,
+      caption TEXT DEFAULT '',
+      alt_text TEXT DEFAULT '',
+      link_url TEXT DEFAULT '',
+      active INTEGER DEFAULT 1,
+      added_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(gallery_id, asset_id)
+    )
+  `).run();
+
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_gallery_site ON cms_galleries(site_domain)').run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_gallery_brand ON cms_galleries(brand)').run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_gitem_gallery ON cms_gallery_items(gallery_id)').run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_gitem_asset ON cms_gallery_items(asset_id)').run();
+
+  gallerySchemaReady = true;
+}
+
+/**
+ * GET /api/cms/galleries?site=&brand=
+ */
+async function handleListGalleries(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureGallerySchema(env.DB);
+
+  const url = new URL(request.url);
+  const site = url.searchParams.get('site');
+  const brand = url.searchParams.get('brand');
+
+  let query = 'SELECT g.*, (SELECT COUNT(*) FROM cms_gallery_items gi WHERE gi.gallery_id = g.id AND gi.active = 1) as item_count FROM cms_galleries g WHERE g.active = 1';
+  const params = [];
+
+  if (site) { query += ' AND g.site_domain = ?'; params.push(site); }
+  if (brand) { query += ' AND g.brand = ?'; params.push(brand); }
+  query += ' ORDER BY g.sort_order ASC, g.title ASC';
+
+  const { results } = await env.DB.prepare(query).bind(...params).all();
+  return jsonResponse({ galleries: results || [] });
+}
+
+/**
+ * POST /api/cms/galleries
+ * Body: { site_domain, gallery_slug, title, description?, brand?, cover_asset_id?, sort_order? }
+ */
+async function handleCreateGallery(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureGallerySchema(env.DB);
+
+  const data = await request.json();
+  if (!data.site_domain || !data.gallery_slug || !data.title) {
+    return errorResponse('site_domain, gallery_slug, and title are required');
+  }
+
+  const now = new Date().toISOString();
+  const result = await env.DB.prepare(`
+    INSERT INTO cms_galleries (site_domain, gallery_slug, title, description, cover_asset_id, brand, sort_order, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    data.site_domain, data.gallery_slug, data.title,
+    data.description || '', data.cover_asset_id || '',
+    data.brand || 'gfv', data.sort_order || 100, now, now
+  ).run();
+
+  await logAudit(env.DB, user.id, 'gallery.create', 'gallery', String(result.meta?.last_row_id || ''), data);
+  return jsonResponse({ id: result.meta?.last_row_id, message: 'Gallery created' }, 201);
+}
+
+/**
+ * PUT /api/cms/galleries/:id
+ * Body: { title?, description?, cover_asset_id?, sort_order?, active? }
+ */
+async function handleUpdateGallery(request, user, env, galleryId) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureGallerySchema(env.DB);
+
+  const data = await request.json();
+  const fields = [];
+  const params = [];
+
+  if (data.title !== undefined) { fields.push('title = ?'); params.push(data.title); }
+  if (data.description !== undefined) { fields.push('description = ?'); params.push(data.description); }
+  if (data.cover_asset_id !== undefined) { fields.push('cover_asset_id = ?'); params.push(data.cover_asset_id); }
+  if (data.sort_order !== undefined) { fields.push('sort_order = ?'); params.push(data.sort_order); }
+  if (data.active !== undefined) { fields.push('active = ?'); params.push(data.active ? 1 : 0); }
+
+  if (fields.length === 0) return errorResponse('Nothing to update', 400);
+  fields.push('updated_at = ?');
+  params.push(new Date().toISOString(), galleryId);
+
+  await env.DB.prepare(`UPDATE cms_galleries SET ${fields.join(', ')} WHERE id = ?`).bind(...params).run();
+  await logAudit(env.DB, user.id, 'gallery.update', 'gallery', String(galleryId), data);
+  return jsonResponse({ message: 'Gallery updated' });
+}
+
+/**
+ * DELETE /api/cms/galleries/:id
+ */
+async function handleDeleteGallery(user, env, galleryId) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureGallerySchema(env.DB);
+
+  await env.DB.prepare('UPDATE cms_galleries SET active = 0, updated_at = ? WHERE id = ?')
+    .bind(new Date().toISOString(), galleryId).run();
+  await logAudit(env.DB, user.id, 'gallery.delete', 'gallery', String(galleryId), {});
+  return jsonResponse({ message: 'Gallery deactivated' });
+}
+
+/**
+ * GET /api/cms/galleries/:id/items
+ * Returns gallery items joined with asset metadata, ordered by sort_order.
+ */
+async function handleListGalleryItems(env, galleryId) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureGallerySchema(env.DB);
+
+  const { results } = await env.DB.prepare(`
+    SELECT gi.id as item_id, gi.sort_order, gi.caption, gi.alt_text, gi.link_url, gi.added_at,
+           a.id as asset_id, a.brand, a.category, a.title, a.file_path, a.media_type,
+           a.mime_type, a.file_size, a.width, a.height, a.thumbnail_path, a.tags, a.featured
+    FROM cms_gallery_items gi
+    JOIN cms_assets a ON gi.asset_id = a.id
+    WHERE gi.gallery_id = ? AND gi.active = 1
+    ORDER BY gi.sort_order ASC, gi.added_at ASC
+  `).bind(galleryId).all();
+
+  return jsonResponse({ items: results || [] });
+}
+
+/**
+ * POST /api/cms/galleries/:id/items
+ * Body: { asset_id, sort_order?, caption?, alt_text?, link_url? }
+ */
+async function handleAddGalleryItem(request, user, env, galleryId) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureGallerySchema(env.DB);
+
+  const data = await request.json();
+  if (!data.asset_id) return errorResponse('asset_id required');
+
+  const result = await env.DB.prepare(`
+    INSERT OR IGNORE INTO cms_gallery_items (gallery_id, asset_id, sort_order, caption, alt_text, link_url)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).bind(galleryId, data.asset_id, data.sort_order || 100, data.caption || '', data.alt_text || '', data.link_url || '').run();
+
+  await logAudit(env.DB, user.id, 'gallery.item.add', 'gallery_item', data.asset_id, { galleryId });
+  return jsonResponse({ id: result.meta?.last_row_id, message: 'Item added to gallery' }, 201);
+}
+
+/**
+ * PUT /api/cms/galleries/:id/items/reorder
+ * Body: { items: [{ item_id: number, sort_order: number }] }
+ */
+async function handleReorderGalleryItems(request, user, env, galleryId) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureGallerySchema(env.DB);
+
+  const data = await request.json();
+  if (!Array.isArray(data.items)) return errorResponse('items array required');
+
+  for (const item of data.items) {
+    if (item.item_id && item.sort_order !== undefined) {
+      await env.DB.prepare(
+        'UPDATE cms_gallery_items SET sort_order = ? WHERE id = ? AND gallery_id = ?'
+      ).bind(item.sort_order, item.item_id, galleryId).run();
+    }
+  }
+
+  await logAudit(env.DB, user.id, 'gallery.reorder', 'gallery', String(galleryId), { count: data.items.length });
+  return jsonResponse({ message: 'Gallery reordered' });
+}
+
+/**
+ * DELETE /api/cms/galleries/:id/items/:itemId
+ */
+async function handleRemoveGalleryItem(user, env, galleryId, itemId) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureGallerySchema(env.DB);
+
+  await env.DB.prepare('UPDATE cms_gallery_items SET active = 0 WHERE id = ? AND gallery_id = ?')
+    .bind(itemId, galleryId).run();
+  await logAudit(env.DB, user.id, 'gallery.item.remove', 'gallery_item', String(itemId), { galleryId });
+  return jsonResponse({ message: 'Item removed from gallery' });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Cross-Site Asset Sharing & Replacement
+// ────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/cms/assets/:id/share
+ * Body: { target_brand, target_gallery_id?, new_category? }
+ * Creates a copy reference of the asset for another brand/gallery.
+ */
+async function handleShareAsset(request, user, env, assetId) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  const data = await request.json();
+  if (!data.target_brand) return errorResponse('target_brand required');
+
+  // Fetch the source asset
+  const source = await env.DB.prepare('SELECT * FROM cms_assets WHERE id = ?').bind(assetId).first();
+  if (!source) return errorResponse('Source asset not found', 404);
+
+  // Create a shared copy with new brand
+  const newId = `shared_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+  const now = new Date().toISOString();
+
+  await env.DB.prepare(`
+    INSERT INTO cms_assets (id, brand, category, title, description, file_path, media_type,
+      mime_type, file_size, width, height, thumbnail_path, tags, emotions,
+      video_embed_url, video_source, featured, sort_order, uploaded_by, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    newId, data.target_brand, data.new_category || source.category,
+    source.title, source.description || '',
+    source.file_path,  // Same R2 file — no duplication
+    source.media_type, source.mime_type || '', source.file_size || 0,
+    source.width || 0, source.height || 0, source.thumbnail_path || '',
+    source.tags || '[]', source.emotions || '[]',
+    source.video_embed_url || '', source.video_source || '',
+    0, 100, user.id, now, now
+  ).run();
+
+  // Optionally add to a target gallery
+  if (data.target_gallery_id) {
+    await ensureGallerySchema(env.DB);
+    await env.DB.prepare(
+      'INSERT OR IGNORE INTO cms_gallery_items (gallery_id, asset_id, sort_order) VALUES (?, ?, ?)'
+    ).bind(data.target_gallery_id, newId, 100).run();
+  }
+
+  await logAudit(env.DB, user.id, 'asset.share', 'asset', assetId, {
+    sharedAs: newId, targetBrand: data.target_brand,
+  });
+
+  return jsonResponse({ id: newId, message: 'Asset shared', source_id: assetId }, 201);
+}
+
+/**
+ * POST /api/cms/assets/:id/replace
+ * Replaces the R2 binary for an existing asset.
+ * Expects multipart form data with field "file".
+ * Keeps the same R2 key so CDN URLs stay valid; purges cache.
+ */
+async function handleReplaceAsset(request, user, env, assetId) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!env.MEDIA_BUCKET) return errorResponse('R2 not configured', 503);
+
+  const asset = await env.DB.prepare('SELECT * FROM cms_assets WHERE id = ?').bind(assetId).first();
+  if (!asset) return errorResponse('Asset not found', 404);
+
+  const contentType = request.headers.get('Content-Type') || '';
+  if (!contentType.includes('multipart/form-data')) {
+    return errorResponse('Content-Type must be multipart/form-data');
+  }
+
+  const formData = await request.formData();
+  const file = formData.get('file');
+  if (!file || typeof file === 'string') return errorResponse('No file provided');
+
+  const r2Key = asset.file_path;
+
+  // Overwrite the R2 object with the new file (same key = instant URL update)
+  await env.MEDIA_BUCKET.put(r2Key, file.stream(), {
+    httpMetadata: { contentType: file.type },
+    customMetadata: {
+      replacedBy: user.id,
+      replacedAt: new Date().toISOString(),
+      originalName: file.name,
+    },
+  });
+
+  // Bump version and update metadata
+  const now = new Date().toISOString();
+  const newVersion = (asset.version || 1) + 1;
+  await env.DB.prepare(`
+    UPDATE cms_assets SET
+      mime_type = ?, file_size = ?, version = ?, updated_at = ?
+    WHERE id = ?
+  `).bind(file.type, file.size, newVersion, now, assetId).run();
+
+  await logAudit(env.DB, user.id, 'asset.replace', 'asset', assetId, {
+    filename: file.name, size: file.size, version: newVersion,
+  });
+
+  return jsonResponse({
+    message: 'Asset replaced',
+    r2Key,
+    version: newVersion,
+    url: `/api/cms/media/${r2Key}`,
+  });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Site Registry (ecosystem asset overview)
+// ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/cms/sites
+ * Returns ecosystem sites with their asset counts from both cms_assets and discovered_assets.
+ */
+async function handleListSites(env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  // Count assets per brand in the asset library
+  const brandCounts = await env.DB.prepare(
+    'SELECT brand, COUNT(*) as count FROM cms_assets WHERE active = 1 GROUP BY brand'
+  ).all();
+
+  // Count discovered assets per site
+  let discoveredCounts = { results: [] };
+  try {
+    discoveredCounts = await env.DB.prepare(
+      "SELECT site_domain, COUNT(*) as count FROM discovered_assets WHERE status != 'ignored' GROUP BY site_domain"
+    ).all();
+  } catch {
+    // discovered_assets table may not exist yet
+  }
+
+  // Count gallery items per site
+  let galleryCounts = { results: [] };
+  try {
+    galleryCounts = await env.DB.prepare(
+      'SELECT g.site_domain, COUNT(gi.id) as count FROM cms_galleries g LEFT JOIN cms_gallery_items gi ON gi.gallery_id = g.id AND gi.active = 1 WHERE g.active = 1 GROUP BY g.site_domain'
+    ).all();
+  } catch {
+    // gallery tables may not exist yet
+  }
+
+  // Merge into a site registry
+  const siteMap = {};
+  for (const row of (brandCounts.results || [])) {
+    const domain = brandToDomain(row.brand);
+    if (!siteMap[domain]) siteMap[domain] = { domain, brand: row.brand, libraryAssets: 0, discoveredAssets: 0, galleryItems: 0 };
+    siteMap[domain].libraryAssets = row.count;
+  }
+  for (const row of (discoveredCounts.results || [])) {
+    if (!siteMap[row.site_domain]) siteMap[row.site_domain] = { domain: row.site_domain, brand: '', libraryAssets: 0, discoveredAssets: 0, galleryItems: 0 };
+    siteMap[row.site_domain].discoveredAssets = row.count;
+  }
+  for (const row of (galleryCounts.results || [])) {
+    if (!siteMap[row.site_domain]) siteMap[row.site_domain] = { domain: row.site_domain, brand: '', libraryAssets: 0, discoveredAssets: 0, galleryItems: 0 };
+    siteMap[row.site_domain].galleryItems = row.count;
+  }
+
+  return jsonResponse({ sites: Object.values(siteMap) });
+}
+
+function brandToDomain(brand) {
+  const map = {
+    gfv: 'goodflippinvibes.com',
+    gfd: 'goodflippindesign.com',
+    aiaimate: 'aiaimate.com',
+    culturesherpa: 'culturesherpa.org',
+    citizenapproved: 'citizenapproved.org',
+  };
+  return map[brand] || brand;
+}
+
+/**
+ * GET /api/cms/sites/:domain/assets?page=&limit=
+ * Returns discovered assets for a specific site.
+ */
+async function handleListSiteAssets(request, env, domain) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  const url = new URL(request.url);
+  const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));
+  const limit = Math.min(100, parseInt(url.searchParams.get('limit') || '50', 10));
+  const offset = (page - 1) * limit;
+
+  let results = { results: [] };
+  try {
+    results = await env.DB.prepare(
+      'SELECT * FROM discovered_assets WHERE site_domain = ? ORDER BY discovered_at DESC LIMIT ? OFFSET ?'
+    ).bind(domain, limit, offset).all();
+  } catch {
+    // Table may not exist
+  }
+
+  let total = { total: 0 };
+  try {
+    total = await env.DB.prepare(
+      'SELECT COUNT(*) as total FROM discovered_assets WHERE site_domain = ?'
+    ).bind(domain).first();
+  } catch {
+    // Table may not exist
+  }
+
+  return jsonResponse({ assets: results.results || [], total: total?.total || 0, page, limit });
 }

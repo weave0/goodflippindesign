@@ -228,3 +228,80 @@ CREATE TABLE IF NOT EXISTS discovered_assets (
 CREATE INDEX IF NOT EXISTS idx_discovered_brand ON discovered_assets(brand);
 CREATE INDEX IF NOT EXISTS idx_discovered_domain ON discovered_assets(site_domain);
 CREATE INDEX IF NOT EXISTS idx_discovered_status ON discovered_assets(status);
+
+-- ── Social Account Registry ──────────────────────────────────────────────
+-- One row per brand × platform handle. Tracks public profile metadata
+-- separately from the OAuth token (cms_platform_tokens). Synced periodically.
+CREATE TABLE IF NOT EXISTS social_accounts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  brand TEXT NOT NULL,                       -- gfd, gfv, aiaimate, culturesherpa, globaldeets
+  platform TEXT NOT NULL,                    -- instagram, x, linkedin, facebook, tiktok, youtube, pinterest
+  handle TEXT NOT NULL,                      -- @handle or page name
+  display_name TEXT DEFAULT '',
+  profile_url TEXT DEFAULT '',
+  avatar_r2_key TEXT DEFAULT '',             -- cached avatar in R2
+  followers_count INTEGER DEFAULT 0,
+  following_count INTEGER DEFAULT 0,
+  post_count INTEGER DEFAULT 0,
+  bio TEXT DEFAULT '',
+  verified INTEGER DEFAULT 0,
+  is_primary INTEGER DEFAULT 1,             -- 1 = primary posting account for this brand+platform
+  last_synced TEXT DEFAULT '',
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(brand, platform, handle)
+);
+
+CREATE INDEX IF NOT EXISTS idx_social_accounts_brand ON social_accounts(brand);
+CREATE INDEX IF NOT EXISTS idx_social_accounts_platform ON social_accounts(platform);
+
+-- ── Brand Workflows ──────────────────────────────────────────────────────
+-- Per-brand publishing config: which platforms are enabled, approval gates,
+-- default post cadence, cross-post preferences, and watermark settings.
+CREATE TABLE IF NOT EXISTS brand_workflows (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  brand TEXT NOT NULL UNIQUE,               -- gfd, gfv, aiaimate, culturesherpa, globaldeets
+  enabled_platforms TEXT DEFAULT '[]',      -- JSON array of active platform slugs
+  default_cadence TEXT DEFAULT 'weekly',    -- hourly, daily, weekly, manual
+  require_approval INTEGER DEFAULT 0,       -- 1 = posts stay in 'pending' until admin approves
+  auto_cross_post TEXT DEFAULT '[]',        -- JSON array of brands to auto-copy posts to
+  watermark_default TEXT DEFAULT '',        -- default watermark profile slug
+  hashtag_sets TEXT DEFAULT '{}',          -- JSON: { instagram: ["tag1","tag2"], ... }
+  post_time_utc TEXT DEFAULT '14:00',       -- preferred UTC publish time (HH:MM)
+  post_days TEXT DEFAULT '[1,2,3,4,5]',    -- JSON array: 0=Sun … 6=Sat
+  timezone TEXT DEFAULT 'America/New_York',
+  notes TEXT DEFAULT '',
+  updated_by TEXT DEFAULT '',
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- Seed default workflow rows for all known brands
+INSERT OR IGNORE INTO brand_workflows (brand, enabled_platforms, default_cadence)
+VALUES
+  ('gfd',          '["instagram","linkedin","x"]',                          'weekly'),
+  ('gfv',          '["instagram","x","facebook","tiktok","pinterest"]',     'daily'),
+  ('aiaimate',     '["linkedin","x","youtube"]',                            'weekly'),
+  ('culturesherpa','["instagram","x","pinterest"]',                         'weekly'),
+  ('globaldeets',  '["linkedin","x"]',                                      'weekly');
+
+CREATE INDEX IF NOT EXISTS idx_brand_workflows_brand ON brand_workflows(brand);
+
+-- ── Ecosystem Cross-Post Links ────────────────────────────────────────────
+-- Records when a post in one brand is syndicated to another brand.
+-- Enables "share to ecosystem" with full attribution and diff tracking.
+CREATE TABLE IF NOT EXISTS cross_post_links (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  source_post_id INTEGER NOT NULL,           -- cms_social_posts.id of originating post
+  target_brand TEXT NOT NULL,
+  target_post_id INTEGER,                    -- set once target post is created
+  adapted_content TEXT DEFAULT '',           -- modified caption for the target brand's voice
+  status TEXT DEFAULT 'pending',             -- pending, adapted, published, skipped
+  created_by TEXT DEFAULT '',
+  created_at TEXT DEFAULT (datetime('now')),
+  published_at TEXT DEFAULT '',
+  UNIQUE(source_post_id, target_brand)
+);
+
+CREATE INDEX IF NOT EXISTS idx_cross_post_source ON cross_post_links(source_post_id);
+CREATE INDEX IF NOT EXISTS idx_cross_post_target ON cross_post_links(target_brand);
