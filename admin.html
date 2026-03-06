@@ -10,9 +10,24 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script>
-        window.CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuZ29vZGZsaXBwaW52aWJlcy5jb20k';
+        window.CLERK_PUBLISHABLE_KEY = (window.ENV && window.ENV.CLERK_PUBLISHABLE_KEY)
+            ? window.ENV.CLERK_PUBLISHABLE_KEY
+            : 'pk_live_Y2xlcmsuZ29vZGZsaXBwaW52aWJlcy5jb20k';
+        // Derive the frontend API host from the publishable key and load Clerk JS from there.
+        // cdn.clerk.dev does not exist — the correct origin is the configured Clerk domain.
+        window.__clerkReady = new Promise(function (resolve, reject) {
+            var key = window.CLERK_PUBLISHABLE_KEY;
+            var b64 = key.replace(/^pk_(live|test)_/, '');
+            var padded = b64 + '====='.slice(0, (4 - b64.length % 4) % 4);
+            var frontendApi = atob(padded).replace(/\$$/, '');
+            var s = document.createElement('script');
+            s.src = 'https://' + frontendApi + '/npm/@clerk/clerk-js@5/dist/clerk.browser.js';
+            s.crossOrigin = 'anonymous';
+            s.onload = resolve;
+            s.onerror = function () { reject(new Error('Failed to load Clerk JS from ' + frontendApi)); };
+            document.head.appendChild(s);
+        });
     </script>
-    <script src="https://cdn.clerk.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js" crossorigin="anonymous"></script>
     <style>
         :root {
             --bg: #070b15;
@@ -2334,7 +2349,12 @@
                 }
             }
 
-            initAuth();
+            window.__clerkReady
+                .then(initAuth)
+                .catch(function (err) {
+                    $('auth-loading').textContent = 'Failed to load Clerk auth library.';
+                    console.error('[admin auth]', err);
+                });
         })();
     </script>
 </body>
