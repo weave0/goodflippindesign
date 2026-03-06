@@ -106,6 +106,7 @@ const SITES = {
         'https://www.instagram.com',   // Instagram embed API
       ],
       'frame-src': [...SHARED.stripe.frame, ...SHARED.clerk.frame, 'https://www.instagram.com', 'https://www.facebook.com'],
+      'worker-src': ["'self'", 'blob:'],
     },
 
     // Non-CSP security headers
