@@ -1255,10 +1255,214 @@ export async function handleCMSRequest(request, env, user) {
       return handleCMSStats(env);
     }
 
+    // ── Asset discovery (scanner reports) ────────────────
+    if (path === '/assets/discover' && method === 'POST') {
+      return handleDiscoverAssets(request, env);
+    }
+    if (path === '/assets/discovered' && method === 'GET') {
+      return handleListDiscovered(request, env);
+    }
+
+    // ── Image overrides (live swap via HTMLRewriter) ──────
+    if (path === '/assets/overrides' && method === 'GET') {
+      return handleListOverrides(request, env);
+    }
+    if (path === '/assets/overrides' && method === 'POST') {
+      return handleSaveOverride(request, user, env);
+    }
+    if (path === '/assets/overrides' && method === 'PUT') {
+      return handleUpdateOverride(request, user, env);
+    }
+    if (path === '/assets/overrides' && method === 'DELETE') {
+      return handleDeleteOverride(request, user, env);
+    }
+
     return errorResponse('CMS endpoint not found', 404);
 
   } catch (err) {
     console.error('[CMS Worker]', err);
     return errorResponse('Internal CMS error', 500);
   }
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Discover Assets
+// ────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/cms/assets/discover
+ * Body: { brand, site_domain, page_url, assets: [{url, type, alt}] }
+ * Inserts new rows into discovered_assets (IGNORE duplicates via UNIQUE url).
+ */
+async function handleDiscoverAssets(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  const body = await request.json().catch(() => null);
+  if (!body?.brand || !body?.site_domain || !body?.page_url || !Array.isArray(body?.assets)) {
+    return errorResponse('Missing required fields: brand, site_domain, page_url, assets[]', 400);
+  }
+
+  const now = new Date().toISOString();
+  let inserted = 0;
+
+  for (const asset of body.assets) {
+    if (!asset.url) continue;
+    try {
+      const result = await env.DB.prepare(
+        `INSERT OR IGNORE INTO discovered_assets
+           (brand, site_domain, page_url, asset_url, asset_type, alt_text, discovered_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        body.brand,
+        body.site_domain,
+        body.page_url,
+        asset.url,
+        asset.type || 'image',
+        asset.alt || '',
+        now
+      ).run();
+      if (result.changes > 0) inserted++;
+    } catch (_) {
+      // Skip duplicate or malformed rows
+    }
+  }
+
+  return jsonResponse({ ok: true, inserted, total: body.assets.length });
+}
+
+/**
+ * GET /api/cms/assets/discovered?brand=&status=&domain=&page=&limit=
+ */
+async function handleListDiscovered(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  const url = new URL(request.url);
+  const brand = url.searchParams.get('brand');
+  const status = url.searchParams.get('status') || 'discovered';
+  const domain = url.searchParams.get('domain');
+  const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));
+  const limit = Math.min(100, parseInt(url.searchParams.get('limit') || '50', 10));
+  const offset = (page - 1) * limit;
+
+  let query = 'SELECT * FROM discovered_assets WHERE status = ?';
+  const params = [status];
+
+  if (brand) { query += ' AND brand = ?'; params.push(brand); }
+  if (domain) { query += ' AND site_domain = ?'; params.push(domain); }
+
+  query += ' ORDER BY discovered_at DESC LIMIT ? OFFSET ?';
+  params.push(limit, offset);
+
+  const results = await env.DB.prepare(query).bind(...params).all();
+  return jsonResponse({ assets: results.results || [], page, limit });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Image Overrides (for HTMLRewriter live swap)
+// ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/cms/assets/overrides?domain=&brand=
+ * Returns active overrides. Called by _worker.js on every page request.
+ * Cached at the edge via Cache-Control.
+ */
+async function handleListOverrides(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  const url = new URL(request.url);
+  const domain = url.searchParams.get('domain');
+  const brand = url.searchParams.get('brand');
+
+  let query = 'SELECT * FROM asset_overrides WHERE active = 1';
+  const params = [];
+
+  if (domain) { query += ' AND site_domain = ?'; params.push(domain); }
+  if (brand) { query += ' AND brand = ?'; params.push(brand); }
+
+  query += ' ORDER BY created_at DESC';
+
+  const results = await env.DB.prepare(query).bind(...params).all();
+
+  return new Response(JSON.stringify({ overrides: results.results || [] }), {
+    headers: {
+      'Content-Type': 'application/json',
+      // Cache active overrides at edge for 60s; purge via CF API on save
+      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+    },
+  });
+}
+
+/**
+ * POST /api/cms/assets/overrides
+ * Body: { brand, site_domain, url_pattern, r2_key, label? }
+ * Creates a new image override (admin only).
+ */
+async function handleSaveOverride(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!user) return errorResponse('Unauthorized', 401);
+
+  const body = await request.json().catch(() => null);
+  if (!body?.brand || !body?.site_domain || !body?.url_pattern || !body?.r2_key) {
+    return errorResponse('Missing required: brand, site_domain, url_pattern, r2_key', 400);
+  }
+
+  const now = new Date().toISOString();
+  await env.DB.prepare(
+    `INSERT INTO asset_overrides (brand, site_domain, url_pattern, r2_key, label, applied_by, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(
+    body.brand, body.site_domain, body.url_pattern, body.r2_key,
+    body.label || '', user.id, now, now
+  ).run();
+
+  await logAudit(env.DB, user.id, 'create', 'asset_override', body.url_pattern, body);
+  return jsonResponse({ ok: true });
+}
+
+/**
+ * PUT /api/cms/assets/overrides
+ * Body: { id, r2_key?, label?, active? }
+ * Updates an existing override (admin only).
+ */
+async function handleUpdateOverride(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!user) return errorResponse('Unauthorized', 401);
+
+  const body = await request.json().catch(() => null);
+  if (!body?.id) return errorResponse('Missing id', 400);
+
+  const fields = [];
+  const params = [];
+
+  if (body.r2_key !== undefined) { fields.push('r2_key = ?'); params.push(body.r2_key); }
+  if (body.label !== undefined) { fields.push('label = ?'); params.push(body.label); }
+  if (body.active !== undefined) { fields.push('active = ?'); params.push(body.active ? 1 : 0); }
+
+  if (fields.length === 0) return errorResponse('Nothing to update', 400);
+
+  fields.push('updated_at = ?');
+  params.push(new Date().toISOString(), body.id);
+
+  await env.DB.prepare(
+    `UPDATE asset_overrides SET ${fields.join(', ')} WHERE id = ?`
+  ).bind(...params).run();
+
+  await logAudit(env.DB, user.id, 'update', 'asset_override', String(body.id), body);
+  return jsonResponse({ ok: true });
+}
+
+/**
+ * DELETE /api/cms/assets/overrides?id=
+ * Hard-deletes an override (admin only).
+ */
+async function handleDeleteOverride(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!user) return errorResponse('Unauthorized', 401);
+
+  const id = new URL(request.url).searchParams.get('id');
+  if (!id) return errorResponse('Missing id', 400);
+
+  await env.DB.prepare('DELETE FROM asset_overrides WHERE id = ?').bind(id).run();
+  await logAudit(env.DB, user.id, 'delete', 'asset_override', id, {});
+  return jsonResponse({ ok: true });
 }

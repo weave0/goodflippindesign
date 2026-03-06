@@ -170,3 +170,61 @@ CREATE INDEX IF NOT EXISTS idx_cms_campaigns_start ON cms_campaigns(start_date);
 -- ALTER TABLE cms_social_posts ADD COLUMN campaign_id INTEGER;
 -- ALTER TABLE cms_social_posts ADD COLUMN objective TEXT DEFAULT '';
 -- ALTER TABLE cms_social_posts ADD COLUMN watermark_profile TEXT DEFAULT '';
+
+-- ── Asset Overrides (live image swap without redeploy) ─────────────────
+-- When _worker.js serves any brand page, it checks this table.
+-- Any <img src> matching url_pattern is rewritten to point to the R2 CDN URL.
+-- This enables drag-and-replace in admin UI with zero code deploys.
+CREATE TABLE IF NOT EXISTS asset_overrides (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  brand TEXT NOT NULL,                     -- gfv, gfd, aiaimate, etc.
+  site_domain TEXT NOT NULL,               -- e.g. goodflippinvibes.com
+  url_pattern TEXT NOT NULL,               -- original asset path/URL pattern being replaced
+  r2_key TEXT NOT NULL,                    -- replacement asset key in R2 (brand/cat/ts_file)
+  label TEXT DEFAULT '',                   -- human-readable description
+  active INTEGER DEFAULT 1,
+  applied_by TEXT DEFAULT '',              -- Clerk user ID
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_overrides_brand ON asset_overrides(brand);
+CREATE INDEX IF NOT EXISTS idx_overrides_domain ON asset_overrides(site_domain);
+CREATE INDEX IF NOT EXISTS idx_overrides_active ON asset_overrides(active);
+
+-- ── Asset Brands (many-to-many cross-brand sharing) ────────────────────
+-- A single asset in R2/D1 can be shared to multiple brands.
+-- The cms_assets.brand column is the "home" brand; this table adds secondaries.
+CREATE TABLE IF NOT EXISTS asset_brand_shares (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  asset_id TEXT NOT NULL REFERENCES cms_assets(id) ON DELETE CASCADE,
+  brand TEXT NOT NULL,                     -- secondary brand this asset is shared into
+  shared_by TEXT DEFAULT '',              -- Clerk user ID
+  created_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(asset_id, brand)
+);
+
+CREATE INDEX IF NOT EXISTS idx_shares_asset ON asset_brand_shares(asset_id);
+CREATE INDEX IF NOT EXISTS idx_shares_brand ON asset_brand_shares(brand);
+
+-- ── Discovered Assets (scraped from deployed sites) ────────────────────
+-- assets found on live sites that aren't yet in R2/cms_assets.
+-- Admin can "claim" them (upload original to R2, link override).
+CREATE TABLE IF NOT EXISTS discovered_assets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  brand TEXT NOT NULL,
+  site_domain TEXT NOT NULL,
+  page_url TEXT NOT NULL,                  -- page the asset was found on
+  asset_url TEXT NOT NULL,                 -- full URL of the discovered asset
+  asset_type TEXT DEFAULT 'image',         -- image, video, audio
+  alt_text TEXT DEFAULT '',
+  dimensions TEXT DEFAULT '',              -- "1200x630" if determinable
+  cms_asset_id TEXT DEFAULT '',           -- set once claimed → links to cms_assets.id
+  status TEXT DEFAULT 'discovered',        -- discovered, claimed, ignored
+  discovered_at TEXT DEFAULT (datetime('now')),
+  UNIQUE(asset_url)
+);
+
+CREATE INDEX IF NOT EXISTS idx_discovered_brand ON discovered_assets(brand);
+CREATE INDEX IF NOT EXISTS idx_discovered_domain ON discovered_assets(site_domain);
+CREATE INDEX IF NOT EXISTS idx_discovered_status ON discovered_assets(status);

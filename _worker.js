@@ -139,9 +139,20 @@ export default {
 
     let response = await env.ASSETS.fetch(request);
 
-    // Inject environment variables into HTML responses
+    // Inject environment variables + apply image overrides for HTML responses
     if (response.headers.get('content-type')?.includes('text/html')) {
-      const html = await response.text();
+      // Load active image overrides for this domain (if D1 is available)
+      let overrides = [];
+      if (env.DB) {
+        try {
+          const result = await env.DB.prepare(
+            'SELECT url_pattern, r2_key FROM asset_overrides WHERE active = 1 AND site_domain = ?'
+          ).bind(url.hostname).all();
+          overrides = result.results || [];
+        } catch {
+          // D1 unavailable — serve page unmodified
+        }
+      }
 
       // Inject ENV object with sensitive keys (never commit to git)
       const envScript = `<script>window.ENV = ${JSON.stringify({
@@ -149,14 +160,43 @@ export default {
         CLERK_PUBLISHABLE_KEY: env.CLERK_PUBLISHABLE_KEY || null
       })}</script>`;
 
-      const injectedHtml = html.replace('</head>', `${envScript}</head>`);
+      if (overrides.length > 0) {
+        // Use HTMLRewriter to swap img src/srcset without buffering full HTML
+        const overrideMap = new Map(overrides.map(o => [o.url_pattern, o.r2_key]));
+        const cmsBase = `https://${url.hostname}/api/cms/media/`;
 
-      // Create new response with injected HTML
-      response = new Response(injectedHtml, {
-        headers: new Headers(response.headers)
-      });
+        response = new HTMLRewriter()
+          .on('img', {
+            element(el) {
+              const src = el.getAttribute('src');
+              if (src && overrideMap.has(src)) {
+                el.setAttribute('src', `${cmsBase}${overrideMap.get(src)}`);
+              }
+              // Also handle srcset
+              const srcset = el.getAttribute('srcset');
+              if (srcset) {
+                const newSrcset = srcset.replace(/([^\s,]+)/g, (part) =>
+                  overrideMap.has(part) ? `${cmsBase}${overrideMap.get(part)}` : part
+                );
+                if (newSrcset !== srcset) el.setAttribute('srcset', newSrcset);
+              }
+            },
+          })
+          .on('head', {
+            element(el) {
+              el.append(envScript, { html: true });
+            },
+          })
+          .transform(response);
+      } else {
+        // No overrides — fast path: buffer once + inject ENV
+        const html = await response.text();
+        const injectedHtml = html.replace('</head>', `${envScript}</head>`);
+        response = new Response(injectedHtml, {
+          headers: new Headers(response.headers),
+        });
+      }
 
-      // Cache HTML at edge for 5 minutes (balance freshness vs speed)
       response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
     }
 
