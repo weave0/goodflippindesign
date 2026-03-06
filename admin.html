@@ -1025,8 +1025,172 @@
             border-color: rgba(239, 68, 68, 0.6);
         }
 
-        .modal-wide {
-            max-width: 560px;
+        /* ── Review Queue ──────────────────────────────── */
+        .review-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.25rem;
+            height: 1.25rem;
+            padding: 0 0.3rem;
+            background: var(--accent-gold);
+            color: #0d0d0d;
+            border-radius: 99px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            margin-left: 0.25rem;
+        }
+
+        .scanner-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .scanner-url-input {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .scanner-quick-links {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 0.65rem;
+            font-size: 0.78rem;
+        }
+
+        .rq-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rq-thumb-wrap {
+            position: relative;
+            aspect-ratio: 16/9;
+            background: var(--border);
+            overflow: hidden;
+        }
+
+        .rq-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .rq-thumb-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+        }
+
+        .rq-domain-badge {
+            position: absolute;
+            bottom: 0.3rem;
+            left: 0.3rem;
+            background: rgba(0, 0, 0, 0.75);
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+        }
+
+        .rq-meta {
+            padding: 0.45rem;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+
+        .rq-url {
+            word-break: break-all;
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            margin-top: 0.2rem;
+        }
+
+        .rq-actions {
+            display: flex;
+            gap: 0.3rem;
+            padding: 0.35rem 0.45rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .rq-pagination {
+            display: flex;
+            gap: 0.4rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .btn-warn {
+            background: transparent;
+            border-color: rgba(234, 179, 8, 0.5);
+            color: var(--accent-gold);
+        }
+
+        .btn-warn:hover {
+            background: rgba(234, 179, 8, 0.1);
+        }
+
+        .tag.warn {
+            background: rgba(234, 179, 8, 0.15);
+            color: var(--accent-gold);
+            border-color: rgba(234, 179, 8, 0.3);
+        }
+
+        .brand-share-hint {
+            font-size: 0.7rem;
+            margin-top: 0.25rem;
+        }
+
+        .claim-preview-wrap {
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .claim-url-text {
+            font-size: 0.7rem;
+            word-break: break-all;
+        }
+
+        /* ── Cross-brand share UI ─────────────────────── */
+        .brand-share-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.35rem;
+        }
+
+        .brand-share-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .brand-share-chip.active {
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent-cyan);
+        }
+
+        max-width: 560px;
         }
 
         .inline-actions {
@@ -1703,6 +1867,7 @@
                     <button class="nav-btn" data-view="composer"><span>04</span><span>Post Composer</span></button>
                     <button class="nav-btn" data-view="library"><span>05</span><span>Asset Library</span></button>
                     <button class="nav-btn" data-view="drip"><span>06</span><span>Drip Builder</span></button>
+                    <button class="nav-btn" data-view="review-queue"><span>07</span><span>Review Queue <span class="review-badge d-none" id="review-badge">0</span></span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -2088,6 +2253,67 @@
                         </div>
                     </article>
                 </section>
+
+                <!-- ─────────────────────────────────────────────────── -->
+                <!-- VIEW: Review Queue (discovered assets + site scanner) -->
+                <!-- ─────────────────────────────────────────────────── -->
+                <section class="view" id="view-review-queue">
+                    <div class="section-head">
+                        <h2 class="section-title">Asset Review Queue <span class="tag warn" id="rq-pending-count">0 pending</span></h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="rq-refresh-btn">Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Assets discovered on your live sites land here first. Claim them into the library with proper metadata — or ignore them. Use the scanner to crawl any page from your ecosystem.</p>
+
+                    <!-- Site Scanner -->
+                    <article class="panel mb-085">
+                        <h3 class="panel-subtitle">Site Scanner</h3>
+                        <p class="subheading mb-06">Enter any page URL from your ecosystem. The scanner fetches it server-side and queues discovered images for review.</p>
+                        <div class="scanner-row">
+                            <select id="rq-scan-brand" aria-label="Brand to scan for">
+                                <option value="gfd">GFD</option>
+                                <option value="gfv">GFV</option>
+                                <option value="aiaimate">AI Aimate</option>
+                                <option value="culturesherpa">CultureSherpa</option>
+                                <option value="globaldeets">GlobalDeets</option>
+                            </select>
+                            <input type="url" id="rq-scan-url" placeholder="https://goodflippinvibes.com" class="scanner-url-input" aria-label="Page URL to scan">
+                            <button class="btn btn-primary" id="rq-scan-btn">Scan Page</button>
+                        </div>
+                        <div class="scanner-quick-links">
+                            <span class="text-muted">Quick scan:</span>
+                            <button class="btn btn-micro rq-quick-scan" data-brand="gfd" data-url="https://goodflippindesign.com">GFD Home</button>
+                            <button class="btn btn-micro rq-quick-scan" data-brand="gfv" data-url="https://goodflippinvibes.com">GFV Home</button>
+                            <button class="btn btn-micro rq-quick-scan" data-brand="aiaimate" data-url="https://aiaimate.com">AI Aimate</button>
+                            <button class="btn btn-micro rq-quick-scan" data-brand="culturesherpa" data-url="https://culturesherpa.com">CultureSherpa</button>
+                            <button class="btn btn-micro rq-quick-scan" data-brand="globaldeets" data-url="https://globaldeets.com">GlobalDeets</button>
+                        </div>
+                    </article>
+
+                    <!-- Filter bar -->
+                    <div class="toolbar mb-06">
+                        <select id="rq-filter-brand" aria-label="Filter by brand">
+                            <option value="">All brands</option>
+                            <option value="gfd">GFD</option>
+                            <option value="gfv">GFV</option>
+                            <option value="aiaimate">AI Aimate</option>
+                            <option value="culturesherpa">CultureSherpa</option>
+                            <option value="globaldeets">GlobalDeets</option>
+                        </select>
+                        <select id="rq-filter-status" aria-label="Filter by review status">
+                            <option value="discovered">Pending Review</option>
+                            <option value="claimed">Claimed</option>
+                            <option value="ignored">Ignored</option>
+                        </select>
+                    </div>
+
+                    <!-- Discovered assets grid -->
+                    <div class="asset-grid asset-grid-full" id="rq-grid">
+                        <p class="text-muted">No discovered assets yet. Use the scanner above or deploy the site to auto-discover assets.</p>
+                    </div>
+                    <div class="rq-pagination" id="rq-pagination"></div>
+                </section>
             </main>
         </div>
     </div>
@@ -2157,6 +2383,17 @@
                 <label class="form-label">Description</label>
                 <textarea id="asset-edit-description" rows="3" placeholder="Optional description or notes"></textarea>
             </div>
+            <div class="mt-06">
+                <label class="form-label">Share to other brands</label>
+                <div class="brand-share-grid" id="asset-edit-brand-share">
+                    <button type="button" class="brand-share-chip" data-share-brand="gfd">GFD</button>
+                    <button type="button" class="brand-share-chip" data-share-brand="gfv">GFV</button>
+                    <button type="button" class="brand-share-chip" data-share-brand="aiaimate">AI Aimate</button>
+                    <button type="button" class="brand-share-chip" data-share-brand="culturesherpa">CultureSherpa</button>
+                    <button type="button" class="brand-share-chip" data-share-brand="globaldeets">GlobalDeets</button>
+                </div>
+                <p class="text-muted brand-share-hint">Highlighted brands already have this asset shared. Click to toggle.</p>
+            </div>
             <div class="actions-split mt-08">
                 <button class="btn btn-danger" id="asset-edit-delete-btn">Delete Asset</button>
                 <div class="actions-right">
@@ -2167,43 +2404,104 @@
         </div>
     </div>
 
-    <div class="modal-wrap" id="campaign-modal">
-        <div class="modal">
-            <h3>Create Campaign</h3>
+    <!-- Claim Discovered Asset Modal -->
+    <div class="modal-wrap" id="claim-asset-modal">
+        <div class="modal modal-wide">
+            <h3>Claim Asset into Library</h3>
+            <input type="hidden" id="claim-asset-id">
+            <div class="mt-04 mb-06">
+                <div id="claim-asset-preview" class="claim-preview-wrap"></div>
+                <p class="text-muted claim-url-text" id="claim-asset-url"></p>
+            </div>
             <div class="form-grid">
                 <div>
-                    <label class="form-label">Name</label>
-                    <input type="text" id="campaign-name" placeholder="Q3 Thought Leadership">
+                    <label class="form-label">Title</label>
+                    <input type="text" id="claim-asset-title" placeholder="Descriptive title">
                 </div>
                 <div>
-                    <label class="form-label">Cadence</label>
-                    <select id="campaign-cadence">
-                        <option value="weekly">Weekly</option>
-                        <option value="biweekly">Biweekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="burst">Burst</option>
+                    <label class="form-label">Category</label>
+                    <select id="claim-asset-category" aria-label="Category">
+                        <option value="uncategorized">Uncategorized</option>
+                        <option value="hero">Hero</option>
+                        <option value="social">Social</option>
+                        <option value="logo">Logo</option>
+                        <option value="headshot">Headshot</option>
+                        <option value="background">Background</option>
+                        <option value="uploads">Uploads</option>
+                        <option value="other">Other</option>
                     </select>
                 </div>
             </div>
             <div class="form-grid mt-06">
                 <div>
-                    <label class="form-label">Start date</label>
-                    <input type="date" id="campaign-start">
+                    <label class="form-label">Brand</label>
+                    <select id="claim-asset-brand" aria-label="Brand">
+                        <option value="gfd">GFD</option>
+                        <option value="gfv">GFV</option>
+                        <option value="aiaimate">AI Aimate</option>
+                        <option value="culturesherpa">CultureSherpa</option>
+                        <option value="globaldeets">GlobalDeets</option>
+                    </select>
                 </div>
                 <div>
-                    <label class="form-label">End date</label>
-                    <input type="date" id="campaign-end">
+                    <label class="form-label">Media type</label>
+                    <select id="claim-asset-media-type" aria-label="Media type">
+                        <option value="image">Image</option>
+                        <option value="video">Video</option>
+                        <option value="audio">Audio</option>
+                        <option value="document">Document</option>
+                    </select>
                 </div>
             </div>
             <div class="mt-06">
-                <label class="form-label">Objective</label>
-                <textarea id="campaign-objective" placeholder="What business outcome should this campaign drive?"></textarea>
+                <label class="form-label">Tags <span class="text-muted">(comma-separated)</span></label>
+                <input type="text" id="claim-asset-tags" placeholder="logo, hero, branding">
             </div>
-            <div class="actions">
-                <button class="btn btn-secondary" data-close-modal="campaign-modal">Cancel</button>
-                <button class="btn btn-primary" id="save-campaign-btn">Save Campaign</button>
+            <div class="actions-split mt-08">
+                <div></div>
+                <div class="actions-right">
+                    <button class="btn btn-secondary" data-close-modal="claim-asset-modal">Cancel</button>
+                    <button class="btn btn-primary" id="claim-asset-confirm-btn">Add to Library</button>
+                </div>
             </div>
         </div>
+    </div>
+    <div class="modal">
+        <h3>Create Campaign</h3>
+        <div class="form-grid">
+            <div>
+                <label class="form-label">Name</label>
+                <input type="text" id="campaign-name" placeholder="Q3 Thought Leadership">
+            </div>
+            <div>
+                <label class="form-label">Cadence</label>
+                <select id="campaign-cadence">
+                    <option value="weekly">Weekly</option>
+                    <option value="biweekly">Biweekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="burst">Burst</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-grid mt-06">
+            <div>
+                <label class="form-label">Start date</label>
+                <input type="date" id="campaign-start">
+            </div>
+            <div>
+                <label class="form-label">End date</label>
+                <input type="date" id="campaign-end">
+            </div>
+        </div>
+        <div class="mt-06">
+            <label class="form-label">Objective</label>
+            <textarea id="campaign-objective" placeholder="What business outcome should this campaign drive?"></textarea>
+        </div>
+        <div class="actions">
+            <button class="btn btn-secondary" data-close-modal="campaign-modal">Cancel</button>
+            <button class="btn btn-primary" id="save-campaign-btn">Save Campaign</button>
+        </div>
+    </div>
     </div>
 
     <div class="modal-wrap" id="connection-modal">
@@ -2428,6 +2726,9 @@
                 dripSelectedPlatforms: new Set(['linkedin', 'x', 'instagram', 'facebook']),
                 dripPostsPerDay: 2,
                 dripTimes: ['14:00', '20:00'],
+                discoveredAssets: [],
+                discoveredPage: 1,
+                discoveredTotal: 0,
             };
 
             function $(id) {
@@ -2645,6 +2946,33 @@
                 $('asset-edit-save-btn').addEventListener('click', saveAssetEdit);
                 $('asset-edit-delete-btn').addEventListener('click', () => deleteAsset($('asset-edit-id').value));
 
+                // ── Review Queue ─────────────────────────────────────────────
+                $('rq-refresh-btn').addEventListener('click', async () => {
+                    state.discoveredPage = 1;
+                    await loadDiscoveredAssets();
+                    renderReviewQueue();
+                    updateReviewBadge();
+                });
+                $('rq-filter-brand').addEventListener('change', async () => {
+                    state.discoveredPage = 1;
+                    await loadDiscoveredAssets();
+                    renderReviewQueue();
+                });
+                $('rq-filter-status').addEventListener('change', async () => {
+                    state.discoveredPage = 1;
+                    await loadDiscoveredAssets();
+                    renderReviewQueue();
+                });
+                $('rq-scan-btn').addEventListener('click', () => {
+                    const url = $('rq-scan-url').value.trim();
+                    const brand = $('rq-scan-brand').value;
+                    if (url) scanPage(brand, url);
+                });
+                document.querySelectorAll('.rq-quick-scan').forEach((btn) => {
+                    btn.addEventListener('click', () => scanPage(btn.dataset.brand, btn.dataset.url));
+                });
+                $('claim-asset-confirm-btn').addEventListener('click', confirmClaimAsset);
+
                 // ── Upload Dropzone Setup ────────────────────────────────────
                 initUploadZone();
 
@@ -2699,6 +3027,7 @@
                     loadAssets(),
                     loadCampaigns(),
                     loadVariants(),
+                    loadDiscoveredAssets(),
                 ]);
 
                 await loadCalendar();
@@ -2714,6 +3043,8 @@
                 renderCrossPostPicker();
                 renderBrandSwitcher();
                 renderDripCampaignSelect();
+                renderReviewQueue();
+                updateReviewBadge();
             }
 
             async function loadPlatformRules() {
@@ -2820,31 +3151,226 @@
                 state.assets = data.assets || [];
             }
 
-            async function loadCampaigns() {
-                state.campaigns = await api('/campaigns?brand=' + encodeURIComponent(currentBrand));
+            async function loadDiscoveredAssets() {
+                const brand = $('rq-filter-brand')?.value || '';
+                const status = $('rq-filter-status')?.value || 'discovered';
+                const page = state.discoveredPage || 1;
+                let url = '/assets/discovered?status=' + encodeURIComponent(status) + '&page=' + page + '&limit=24';
+                if (brand) url += '&brand=' + encodeURIComponent(brand);
+                try {
+                    const data = await api(url);
+                    state.discoveredAssets = data.assets || [];
+                    state.discoveredTotal = data.total || 0;
+                } catch {
+                    state.discoveredAssets = [];
+                }
             }
+
+            function updateReviewBadge() {
+                const pending = state.discoveredAssets.length;
+                const badge = $('review-badge');
+                if (!badge) return;
+                if (pending > 0) {
+                    badge.textContent = pending;
+                    badge.classList.remove('d-none');
+                } else {
+                    badge.classList.add('d-none');
+                }
+            }
+
+            function renderReviewQueue() {
+                const grid = $('rq-grid');
+                if (!grid) return;
+                const pendingCount = $('rq-pending-count');
+                if (pendingCount) pendingCount.textContent = state.discoveredAssets.length + ' pending';
+
+                if (!state.discoveredAssets.length) {
+                    grid.innerHTML = '<p class="text-muted">No assets found for these filters. Try scanning a page below or change the status filter.</p>';
+                    $('rq-pagination').innerHTML = '';
+                    return;
+                }
+
+                grid.innerHTML = state.discoveredAssets.map((asset) => {
+                    const isImage = (asset.asset_type || 'image') === 'image';
+                    const thumbUrl = isImage ? escapeHtml(asset.asset_url) : '';
+                    const domain = escapeHtml(asset.site_domain || '');
+                    const alt = escapeHtml(asset.alt_text || '');
+                    const isClaimed = asset.status === 'claimed';
+                    const isIgnored = asset.status === 'ignored';
+                    return `
+                        <article class="rq-card" data-da-id="${asset.id}">
+                            <div class="rq-thumb-wrap">
+                                ${thumbUrl
+                            ? `<img class="rq-thumb" src="${thumbUrl}" alt="${alt}" loading="lazy">`
+                            : `<div class="rq-thumb-placeholder">${escapeHtml((asset.asset_type || 'file').toUpperCase())}</div>`}
+                                ${domain ? `<span class="rq-domain-badge">${domain}</span>` : ''}
+                            </div>
+                            <div class="rq-meta">
+                                <div class="text-strong">${alt || '(no alt text)'}</div>
+                                <div class="rq-url">${escapeHtml(asset.asset_url)}</div>
+                                <div class="mt-03 text-muted">${escapeHtml(formatDateTime(asset.discovered_at))}</div>
+                                ${isClaimed ? '<span class="tag ok mt-03">Claimed</span>' : ''}
+                                ${isIgnored ? '<span class="tag mt-03">Ignored</span>' : ''}
+                            </div>
+                            <div class="rq-actions">
+                                ${!isClaimed ? `<button class="btn btn-micro btn-primary" data-claim-da="${asset.id}">Claim</button>` : ''}
+                                ${!isIgnored && !isClaimed ? `<button class="btn btn-micro btn-warn" data-ignore-da="${asset.id}">Ignore</button>` : ''}
+                                ${isIgnored ? `<button class="btn btn-micro" data-undiscover-da="${asset.id}">Reset</button>` : ''}
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+
+                grid.querySelectorAll('[data-claim-da]').forEach((btn) => {
+                    btn.addEventListener('click', () => openClaimModal(btn.dataset.claimDa));
+                });
+                grid.querySelectorAll('[data-ignore-da]').forEach((btn) => {
+                    btn.addEventListener('click', () => updateDiscoveredStatus(btn.dataset.ignoreDa, 'ignored'));
+                });
+                grid.querySelectorAll('[data-undiscover-da]').forEach((btn) => {
+                    btn.addEventListener('click', () => updateDiscoveredStatus(btn.dataset.undiscoverDa, 'discovered'));
+                });
+
+                renderRQPagination();
+            }
+
+            function renderRQPagination() {
+                const pag = $('rq-pagination');
+                if (!pag) return;
+                const limit = 24;
+                const total = state.discoveredTotal || state.discoveredAssets.length;
+                const pages = Math.ceil(total / limit);
+                if (pages <= 1) { pag.innerHTML = ''; return; }
+
+                const cur = state.discoveredPage || 1;
+                let html = '';
+                if (cur > 1) html += `<button class="btn btn-secondary btn-micro rq-page-btn" data-page="${cur - 1}">&#8592; Prev</button>`;
+                html += `<span class="text-muted" style="font-size:0.78rem">Page ${cur} / ${pages}</span>`;
+                if (cur < pages) html += `<button class="btn btn-secondary btn-micro rq-page-btn" data-page="${cur + 1}">Next &#8594;</button>`;
+                pag.innerHTML = html;
+                pag.querySelectorAll('.rq-page-btn').forEach((btn) => {
+                    btn.addEventListener('click', async () => {
+                        state.discoveredPage = Number(btn.dataset.page);
+                        await loadDiscoveredAssets();
+                        renderReviewQueue();
+                    });
+                });
+            }
+
+            async function scanPage(brand, pageUrl) {
+                const btn = $('rq-scan-btn');
+                btn.disabled = true;
+                btn.textContent = 'Scanning…';
+                try {
+                    const result = await api('/scan-page', {
+                        method: 'POST',
+                        body: { brand, page_url: pageUrl },
+                    });
+                    const added = result.inserted || 0;
+                    toast(`Scanned ${escapeHtml(pageUrl)} — ${added} new assets queued`, 'success');
+                    state.discoveredPage = 1;
+                    $('rq-filter-status').value = 'discovered';
+                    await loadDiscoveredAssets();
+                    renderReviewQueue();
+                    updateReviewBadge();
+                } catch (err) {
+                    toast('Scan failed: ' + err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Scan Page';
+                }
+            }
+
+            function openClaimModal(discoveredId) {
+                const asset = state.discoveredAssets.find((a) => String(a.id) === String(discoveredId));
+                if (!asset) return;
+
+                $('claim-asset-id').value = asset.id;
+                $('claim-asset-url').textContent = asset.asset_url;
+                $('claim-asset-title').value = asset.alt_text || '';
+                $('claim-asset-brand').value = asset.brand || currentBrand;
+                $('claim-asset-media-type').value = asset.asset_type || 'image';
+                $('claim-asset-tags').value = '';
+                $('claim-asset-category').value = 'uncategorized';
+
+                const preview = $('claim-asset-preview');
+                if (asset.asset_type === 'image' || !asset.asset_type) {
+                    preview.innerHTML = `<img src="${escapeHtml(asset.asset_url)}" alt="preview" style="max-height:120px;max-width:100%;border-radius:6px;object-fit:contain">`;
+                } else {
+                    preview.innerHTML = `<span class="tag">${escapeHtml((asset.asset_type || 'file').toUpperCase())}</span>`;
+                }
+
+                openModal('claim-asset-modal');
+            }
+
+            async function confirmClaimAsset() {
+                const id = $('claim-asset-id').value;
+                if (!id) return;
+
+                const rawTags = $('claim-asset-tags').value;
+                const tags = rawTags.split(',').map((t) => t.trim()).filter(Boolean);
+
+                try {
+                    await api('/assets/discovered/' + encodeURIComponent(id) + '/claim', {
+                        method: 'POST',
+                        body: {
+                            title: $('claim-asset-title').value.trim() || 'Untitled',
+                            brand: $('claim-asset-brand').value,
+                            category: $('claim-asset-category').value,
+                            media_type: $('claim-asset-media-type').value,
+                            tags,
+                        },
+                    });
+                    toast('Asset claimed and added to library', 'success');
+                    closeModal('claim-asset-modal');
+                    state.discoveredPage = 1;
+                    await Promise.all([loadDiscoveredAssets(), loadAssets()]);
+                    renderReviewQueue();
+                    renderLibrary();
+                    updateReviewBadge();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function updateDiscoveredStatus(id, newStatus) {
+                try {
+                    await api('/assets/discovered/' + encodeURIComponent(id), {
+                        method: 'PUT',
+                        body: { status: newStatus },
+                    });
+                    const asset = state.discoveredAssets.find((a) => String(a.id) === String(id));
+                    if (asset) asset.status = newStatus;
+                    renderReviewQueue();
+                    updateReviewBadge();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+            state.campaigns = await api('/campaigns?brand=' + encodeURIComponent(currentBrand));
+        }
 
             async function loadVariants() {
-                state.variants = await api('/social/variants?brand=' + encodeURIComponent(currentBrand) + '&limit=250');
-            }
+            state.variants = await api('/social/variants?brand=' + encodeURIComponent(currentBrand) + '&limit=250');
+        }
 
-            async function loadCalendar() {
-                const d = state.calendarDate;
-                const start = new Date(d.getFullYear(), d.getMonth(), 1);
-                const end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-                const data = await api('/campaigns/calendar?brand=' + encodeURIComponent(currentBrand) + '&start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString()));
-                renderCalendar(data.events || [], start);
-            }
+        async function loadCalendar() {
+            const d = state.calendarDate;
+            const start = new Date(d.getFullYear(), d.getMonth(), 1);
+            const end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+            const data = await api('/campaigns/calendar?brand=' + encodeURIComponent(currentBrand) + '&start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString()));
+            renderCalendar(data.events || [], start);
+        }
 
-            function renderOverview() {
-                const queueBody = $('overview-queue');
-                const upcoming = [...state.variants]
-                    .filter((row) => row.scheduled_at)
-                    .sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
-                    .slice(0, 12);
+        function renderOverview() {
+            const queueBody = $('overview-queue');
+            const upcoming = [...state.variants]
+                .filter((row) => row.scheduled_at)
+                .sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
+                .slice(0, 12);
 
-                queueBody.innerHTML = upcoming.length
-                    ? upcoming.map((row) => `
+            queueBody.innerHTML = upcoming.length
+                ? upcoming.map((row) => `
                         <tr>
                             <td>${escapeHtml(formatDateTime(row.scheduled_at))}</td>
                             <td>${escapeHtml(row.campaign_name || 'General')}</td>
@@ -2852,32 +3378,32 @@
                             <td>${statusTag(row.status)}</td>
                         </tr>
                     `).join('')
-                    : '<tr><td colspan="4">No queued variants yet.</td></tr>';
+                : '<tr><td colspan="4">No queued variants yet.</td></tr>';
 
-                const connectionSummary = $('overview-connections');
-                const byPlatform = {};
-                for (const platform of PLATFORM_ORDER) {
-                    const active = state.connections.filter((c) => c.platform === platform && Number(c.is_active) === 1);
-                    byPlatform[platform] = active.length;
-                }
+            const connectionSummary = $('overview-connections');
+            const byPlatform = {};
+            for (const platform of PLATFORM_ORDER) {
+                const active = state.connections.filter((c) => c.platform === platform && Number(c.is_active) === 1);
+                byPlatform[platform] = active.length;
+            }
 
-                connectionSummary.innerHTML = PLATFORM_ORDER.map((platform) => {
-                    const connected = byPlatform[platform] > 0;
-                    return `
+            connectionSummary.innerHTML = PLATFORM_ORDER.map((platform) => {
+                const connected = byPlatform[platform] > 0;
+                return `
                         <div class="overview-conn-row">
                             <span class="overview-conn-name">${escapeHtml(platform)}</span>
                             <span class="tag ${connected ? 'ok' : 'fail'}">${connected ? 'connected' : 'missing'}</span>
                         </div>
                     `;
-                }).join('');
+            }).join('');
 
-                const assetsBody = $('overview-assets');
-                const recentAssets = [...state.assets]
-                    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
-                    .slice(0, 10);
+            const assetsBody = $('overview-assets');
+            const recentAssets = [...state.assets]
+                .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+                .slice(0, 10);
 
-                assetsBody.innerHTML = recentAssets.length
-                    ? recentAssets.map((asset) => `
+            assetsBody.innerHTML = recentAssets.length
+                ? recentAssets.map((asset) => `
                         <tr>
                             <td>${escapeHtml(asset.title)}</td>
                             <td>${escapeHtml(asset.category || '-')}</td>
@@ -2885,55 +3411,55 @@
                             <td>${escapeHtml(formatDateTime(asset.created_at))}</td>
                         </tr>
                     `).join('')
-                    : '<tr><td colspan="4">No assets available.</td></tr>';
-            }
+                : '<tr><td colspan="4">No assets available.</td></tr>';
+        }
 
-            function renderConnections() {
-                // Legacy: kept for overview connection summary bar only
-                const connectionSummary = $('connection-summary');
-                if (!connectionSummary) return;
-                const summary = PLATFORM_ORDER.map((platform) => {
-                    const active = state.connections.filter((c) => c.platform === platform && Number(c.is_active) === 1);
-                    const connected = active.length > 0;
-                    return `<span class="conn-pill ${connected ? 'ok' : 'warn'}">${escapeHtml(platform)}</span>`;
-                }).join('');
-                connectionSummary.innerHTML = summary;
-            }
+        function renderConnections() {
+            // Legacy: kept for overview connection summary bar only
+            const connectionSummary = $('connection-summary');
+            if (!connectionSummary) return;
+            const summary = PLATFORM_ORDER.map((platform) => {
+                const active = state.connections.filter((c) => c.platform === platform && Number(c.is_active) === 1);
+                const connected = active.length > 0;
+                return `<span class="conn-pill ${connected ? 'ok' : 'warn'}">${escapeHtml(platform)}</span>`;
+            }).join('');
+            connectionSummary.innerHTML = summary;
+        }
 
-            function renderEcosystemMatrix() {
-                const head = $('eco-matrix-head');
-                const body = $('eco-matrix-body');
-                if (!head || !body) return;
+        function renderEcosystemMatrix() {
+            const head = $('eco-matrix-head');
+            const body = $('eco-matrix-body');
+            if (!head || !body) return;
 
-                const activePlatforms = ALL_PLATFORMS;
+            const activePlatforms = ALL_PLATFORMS;
 
-                // Header row: blank corner + platform names
-                head.innerHTML = '<tr><th>Brand</th>' +
-                    activePlatforms.map((p) => `<th>${escapeHtml(p)}</th>`).join('') +
-                    '</tr>';
+            // Header row: blank corner + platform names
+            head.innerHTML = '<tr><th>Brand</th>' +
+                activePlatforms.map((p) => `<th>${escapeHtml(p)}</th>`).join('') +
+                '</tr>';
 
-                const rows = Object.entries(BRAND_DEFS).map(([brandId, brandDef]) => {
-                    const cells = activePlatforms.map((platform) => {
-                        const isEnabled = brandDef.platforms.includes(platform);
+            const rows = Object.entries(BRAND_DEFS).map(([brandId, brandDef]) => {
+                const cells = activePlatforms.map((platform) => {
+                    const isEnabled = brandDef.platforms.includes(platform);
 
-                        if (!isEnabled) {
-                            return `<td><div class="eco-cell"><button class="eco-cell-btn n-a" disabled aria-label="N/A">—</button></div></td>`;
-                        }
+                    if (!isEnabled) {
+                        return `<td><div class="eco-cell"><button class="eco-cell-btn n-a" disabled aria-label="N/A">—</button></div></td>`;
+                    }
 
-                        // Check for an active connection (token)
-                        const conn = state.connections.find(
-                            (c) => c.brand === brandId && c.platform === platform && Number(c.is_active) === 1
-                        );
-                        // Check for a registered handle
-                        const handle = state.socialAccounts.find(
-                            (a) => a.brand === brandId && a.platform === platform
-                        );
+                    // Check for an active connection (token)
+                    const conn = state.connections.find(
+                        (c) => c.brand === brandId && c.platform === platform && Number(c.is_active) === 1
+                    );
+                    // Check for a registered handle
+                    const handle = state.socialAccounts.find(
+                        (a) => a.brand === brandId && a.platform === platform
+                    );
 
-                        const isConnected = Boolean(conn);
-                        const handleText = handle ? escapeHtml(handle.handle) : '';
-                        const label = conn ? escapeHtml(conn.account_label || conn.account_id || 'connected') : (isConnected ? 'connected' : 'connect');
+                    const isConnected = Boolean(conn);
+                    const handleText = handle ? escapeHtml(handle.handle) : '';
+                    const label = conn ? escapeHtml(conn.account_label || conn.account_id || 'connected') : (isConnected ? 'connected' : 'connect');
 
-                        return `<td>
+                    return `<td>
                             <div class="eco-cell">
                                 <button class="eco-cell-btn ${isConnected ? 'connected' : ''}"
                                     data-matrix-brand="${escapeHtml(brandId)}"
@@ -2946,45 +3472,45 @@
                                 ${handleText ? `<span class="eco-cell-handle">${handleText}</span>` : ''}
                             </div>
                         </td>`;
-                    }).join('');
+                }).join('');
 
-                    return `<tr>
+                return `<tr>
                         <td>
                             <span class="eco-brand-dot" style="background:${brandDef.color}"></span>
                             ${escapeHtml(brandDef.name)}
                         </td>
                         ${cells}
                     </tr>`;
-                }).join('');
+            }).join('');
 
-                body.innerHTML = rows;
+            body.innerHTML = rows;
 
-                // Wire up matrix cell clicks → prefill connection modal
-                body.querySelectorAll('[data-matrix-brand]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        const platform = btn.dataset.matrixPlatform;
-                        // Switch to manual tab and prefill
-                        document.querySelectorAll('.conn-tab').forEach((t) => t.classList.remove('active'));
-                        document.querySelectorAll('.conn-tab-panel').forEach((p) => p.classList.remove('active'));
-                        document.querySelector('[data-conn-tab="manual"]').classList.add('active');
-                        $('conn-tab-manual').classList.add('active');
-                        $('conn-platform').value = platform;
-                        renderOAuthProviderGrid();
-                        openModal('connection-modal');
-                    });
+            // Wire up matrix cell clicks → prefill connection modal
+            body.querySelectorAll('[data-matrix-brand]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const platform = btn.dataset.matrixPlatform;
+                    // Switch to manual tab and prefill
+                    document.querySelectorAll('.conn-tab').forEach((t) => t.classList.remove('active'));
+                    document.querySelectorAll('.conn-tab-panel').forEach((p) => p.classList.remove('active'));
+                    document.querySelector('[data-conn-tab="manual"]').classList.add('active');
+                    $('conn-tab-manual').classList.add('active');
+                    $('conn-platform').value = platform;
+                    renderOAuthProviderGrid();
+                    openModal('connection-modal');
                 });
+            });
+        }
+
+        function renderHandlesTable() {
+            const body = $('handles-table');
+            if (!body) return;
+
+            if (state.socialAccounts.length === 0) {
+                body.innerHTML = '<tr><td colspan="7" class="text-muted">No handles registered yet. Click "Register Handle" to add one.</td></tr>';
+                return;
             }
 
-            function renderHandlesTable() {
-                const body = $('handles-table');
-                if (!body) return;
-
-                if (state.socialAccounts.length === 0) {
-                    body.innerHTML = '<tr><td colspan="7" class="text-muted">No handles registered yet. Click "Register Handle" to add one.</td></tr>';
-                    return;
-                }
-
-                body.innerHTML = state.socialAccounts.map((acct) => `
+            body.innerHTML = state.socialAccounts.map((acct) => `
                     <tr>
                         <td>
                             <span class="eco-brand-dot" style="background:${escapeHtml(BRAND_DEFS[acct.brand]?.color || '#888')}"></span>
@@ -3002,15 +3528,15 @@
                     </tr>
                 `).join('');
 
-                body.querySelectorAll('[data-delete-handle]').forEach((btn) => {
-                    btn.addEventListener('click', () => deleteHandle(btn.getAttribute('data-delete-handle')));
-                });
-            }
+            body.querySelectorAll('[data-delete-handle]').forEach((btn) => {
+                btn.addEventListener('click', () => deleteHandle(btn.getAttribute('data-delete-handle')));
+            });
+        }
 
-            function renderCampaigns() {
-                const body = $('campaign-table');
-                body.innerHTML = state.campaigns.length
-                    ? state.campaigns.map((row) => `
+        function renderCampaigns() {
+            const body = $('campaign-table');
+            body.innerHTML = state.campaigns.length
+                ? state.campaigns.map((row) => `
                         <tr>
                             <td>
                                 <div class="text-strong">${escapeHtml(row.name)}</div>
@@ -3021,73 +3547,73 @@
                             <td>${Number(row.post_count || 0)}</td>
                         </tr>
                     `).join('')
-                    : '<tr><td colspan="4">No campaigns created yet.</td></tr>';
-            }
+                : '<tr><td colspan="4">No campaigns created yet.</td></tr>';
+        }
 
-            function renderCampaignSelect() {
-                const select = $('composer-campaign');
-                select.innerHTML = '<option value="">General (no campaign)</option>' +
-                    state.campaigns.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
-            }
+        function renderCampaignSelect() {
+            const select = $('composer-campaign');
+            select.innerHTML = '<option value="">General (no campaign)</option>' +
+                state.campaigns.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+        }
 
-            function renderCrossPostPicker() {
-                const picker = $('crosspost-brand-picker');
-                if (!picker) return;
-                const otherBrands = Object.entries(BRAND_DEFS).filter(([id]) => id !== currentBrand);
-                if (otherBrands.length === 0) {
-                    picker.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem">No other brands configured.</span>';
-                    return;
-                }
-                picker.innerHTML = otherBrands.map(([id, def]) => `
+        function renderCrossPostPicker() {
+            const picker = $('crosspost-brand-picker');
+            if (!picker) return;
+            const otherBrands = Object.entries(BRAND_DEFS).filter(([id]) => id !== currentBrand);
+            if (otherBrands.length === 0) {
+                picker.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem">No other brands configured.</span>';
+                return;
+            }
+            picker.innerHTML = otherBrands.map(([id, def]) => `
                     <button type="button" class="crosspost-pill ${state.crossPostBrands.has(id) ? 'active' : ''}"
                         data-cp-brand="${escapeHtml(id)}" style="--brand-color:${escapeHtml(def.color)}">
                         ${escapeHtml(def.shortName || def.name)}
                     </button>
                 `).join('');
-                picker.querySelectorAll('[data-cp-brand]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        const b = btn.dataset.cpBrand;
-                        if (state.crossPostBrands.has(b)) {
-                            state.crossPostBrands.delete(b);
-                        } else {
-                            state.crossPostBrands.add(b);
-                        }
-                        renderCrossPostPicker();
-                    });
+            picker.querySelectorAll('[data-cp-brand]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const b = btn.dataset.cpBrand;
+                    if (state.crossPostBrands.has(b)) {
+                        state.crossPostBrands.delete(b);
+                    } else {
+                        state.crossPostBrands.add(b);
+                    }
+                    renderCrossPostPicker();
                 });
-            }
+            });
+        }
 
-            function renderPlatformPicker() {
-                const picker = $('platform-picker');
-                picker.innerHTML = PLATFORM_ORDER.map((platform) => `
+        function renderPlatformPicker() {
+            const picker = $('platform-picker');
+            picker.innerHTML = PLATFORM_ORDER.map((platform) => `
                     <button type="button" class="platform-pill ${state.selectedPlatforms.has(platform) ? 'active' : ''}" data-platform="${platform}">
                         ${escapeHtml(platform)}
                     </button>
                 `).join('');
 
-                picker.querySelectorAll('[data-platform]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        const platform = btn.getAttribute('data-platform');
-                        if (state.selectedPlatforms.has(platform)) {
-                            state.selectedPlatforms.delete(platform);
-                        } else {
-                            state.selectedPlatforms.add(platform);
-                        }
-                        renderPlatformPicker();
-                        updateComposerCounters();
-                    });
+            picker.querySelectorAll('[data-platform]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const platform = btn.getAttribute('data-platform');
+                    if (state.selectedPlatforms.has(platform)) {
+                        state.selectedPlatforms.delete(platform);
+                    } else {
+                        state.selectedPlatforms.add(platform);
+                    }
+                    renderPlatformPicker();
+                    updateComposerCounters();
                 });
-            }
+            });
+        }
 
-            function renderComposerAssets() {
-                const container = $('composer-assets');
-                const candidates = state.assets.filter((a) => ['image', 'video'].includes(a.media_type)).slice(0, 80);
+        function renderComposerAssets() {
+            const container = $('composer-assets');
+            const candidates = state.assets.filter((a) => ['image', 'video'].includes(a.media_type)).slice(0, 80);
 
-                container.innerHTML = candidates.length
-                    ? candidates.map((asset) => {
-                        const isActive = state.selectedAssetId === asset.id;
-                        const image = assetUrl(asset);
-                        return `
+            container.innerHTML = candidates.length
+                ? candidates.map((asset) => {
+                    const isActive = state.selectedAssetId === asset.id;
+                    const image = assetUrl(asset);
+                    return `
                             <article class="asset-card ${isActive ? 'active' : ''}" data-asset-id="${asset.id}">
                                 <img class="asset-thumb" src="${escapeHtml(image)}" alt="${escapeHtml(asset.title)}" loading="lazy">
                                 <div class="asset-meta">
@@ -3096,130 +3622,130 @@
                                 </div>
                             </article>
                         `;
-                    }).join('')
-                    : '<p class="text-muted">Upload image/video assets first, then schedule from this panel.</p>';
+                }).join('')
+                : '<p class="text-muted">Upload image/video assets first, then schedule from this panel.</p>';
 
-                container.querySelectorAll('[data-asset-id]').forEach((card) => {
-                    card.addEventListener('click', () => {
-                        state.selectedAssetId = card.getAttribute('data-asset-id');
-                        renderComposerAssets();
-                    });
+            container.querySelectorAll('[data-asset-id]').forEach((card) => {
+                card.addEventListener('click', () => {
+                    state.selectedAssetId = card.getAttribute('data-asset-id');
+                    renderComposerAssets();
                 });
-            }
+            });
+        }
 
-            function initUploadZone() {
-                const zone = $('upload-zone');
-                const input = $('upload-input');
-                if (!zone || !input) return;
+        function initUploadZone() {
+            const zone = $('upload-zone');
+            const input = $('upload-input');
+            if (!zone || !input) return;
 
-                zone.addEventListener('click', (ev) => {
-                    if (ev.target !== input) input.click();
-                });
-                zone.addEventListener('keydown', (ev) => {
-                    if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); input.click(); }
-                });
-                input.addEventListener('change', () => handleUploadFiles(Array.from(input.files)));
+            zone.addEventListener('click', (ev) => {
+                if (ev.target !== input) input.click();
+            });
+            zone.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); input.click(); }
+            });
+            input.addEventListener('change', () => handleUploadFiles(Array.from(input.files)));
 
-                zone.addEventListener('dragover', (ev) => { ev.preventDefault(); zone.classList.add('drag-over'); });
-                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-                zone.addEventListener('drop', (ev) => {
-                    ev.preventDefault();
-                    zone.classList.remove('drag-over');
-                    const files = Array.from(ev.dataTransfer.files);
-                    if (files.length) handleUploadFiles(files);
-                });
-            }
+            zone.addEventListener('dragover', (ev) => { ev.preventDefault(); zone.classList.add('drag-over'); });
+            zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+            zone.addEventListener('drop', (ev) => {
+                ev.preventDefault();
+                zone.classList.remove('drag-over');
+                const files = Array.from(ev.dataTransfer.files);
+                if (files.length) handleUploadFiles(files);
+            });
+        }
 
-            async function handleUploadFiles(files) {
-                const list = $('upload-progress-list');
-                if (!list) return;
+        async function handleUploadFiles(files) {
+            const list = $('upload-progress-list');
+            if (!list) return;
 
-                for (const file of files) {
-                    const id = 'up-' + Math.random().toString(36).slice(2);
-                    const li = document.createElement('li');
-                    li.className = 'upload-item';
-                    li.id = id;
-                    li.innerHTML = `
+            for (const file of files) {
+                const id = 'up-' + Math.random().toString(36).slice(2);
+                const li = document.createElement('li');
+                li.className = 'upload-item';
+                li.id = id;
+                li.innerHTML = `
                         <span class="upload-item-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span>
                         <div class="upload-bar-wrap"><div class="upload-bar" id="${id}-bar" style="width:0%"></div></div>
                         <span class="upload-item-status" id="${id}-st">Uploading&hellip;</span>
                     `;
-                    list.appendChild(li);
+                list.appendChild(li);
 
-                    try {
-                        const bar = $(id + '-bar');
-                        const st = $(id + '-st');
+                try {
+                    const bar = $(id + '-bar');
+                    const st = $(id + '-st');
 
-                        if (bar) bar.style.width = '30%';
+                    if (bar) bar.style.width = '30%';
 
-                        const form = new FormData();
-                        form.append('file', file);
-                        form.append('title', file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
-                        form.append('brand', currentBrand);
-                        form.append('category', 'uploads');
-                        form.append('media_type', file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : file.type === 'application/pdf' ? 'document' : 'image');
+                    const form = new FormData();
+                    form.append('file', file);
+                    form.append('title', file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
+                    form.append('brand', currentBrand);
+                    form.append('category', 'uploads');
+                    form.append('media_type', file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : file.type === 'application/pdf' ? 'document' : 'image');
 
-                        const token = await clerk.session.getToken();
-                        const resp = await fetch('/api/cms/upload', {
-                            method: 'POST',
-                            headers: { 'Authorization': 'Bearer ' + token },
-                            body: form
-                        });
+                    const token = await clerk.session.getToken();
+                    const resp = await fetch('/api/cms/upload', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token },
+                        body: form
+                    });
 
-                        if (bar) bar.style.width = '100%';
+                    if (bar) bar.style.width = '100%';
 
-                        if (resp.ok) {
-                            if (st) { st.textContent = '✓'; st.classList.add('ok'); }
-                            await loadAssets();
-                            renderLibrary();
-                        } else {
-                            const err = await resp.json().catch(() => ({ error: resp.statusText }));
-                            if (st) { st.textContent = err.error || 'Failed'; st.classList.add('err'); }
-                        }
-                    } catch (err) {
-                        const st = $(id + '-st');
-                        if (st) { st.textContent = 'Error'; st.classList.add('err'); }
+                    if (resp.ok) {
+                        if (st) { st.textContent = '✓'; st.classList.add('ok'); }
+                        await loadAssets();
+                        renderLibrary();
+                    } else {
+                        const err = await resp.json().catch(() => ({ error: resp.statusText }));
+                        if (st) { st.textContent = err.error || 'Failed'; st.classList.add('err'); }
                     }
-
-                    // auto-clear after 6s
-                    setTimeout(() => { const el = $(id); if (el) el.remove(); }, 6000);
+                } catch (err) {
+                    const st = $(id + '-st');
+                    if (st) { st.textContent = 'Error'; st.classList.add('err'); }
                 }
 
-                // reset file input
-                const input = $('upload-input');
-                if (input) input.value = '';
+                // auto-clear after 6s
+                setTimeout(() => { const el = $(id); if (el) el.remove(); }, 6000);
             }
 
-            function renderLibrary() {
-                const q = $('library-search').value.trim().toLowerCase();
-                const mediaType = $('library-type').value;
+            // reset file input
+            const input = $('upload-input');
+            if (input) input.value = '';
+        }
 
-                const list = state.assets.filter((asset) => {
-                    if (mediaType && asset.media_type !== mediaType) return false;
-                    if (!q) return true;
-                    const tags = String(asset.tags || '').toLowerCase();
-                    return String(asset.title || '').toLowerCase().includes(q) || tags.includes(q);
-                });
+        function renderLibrary() {
+            const q = $('library-search').value.trim().toLowerCase();
+            const mediaType = $('library-type').value;
 
-                const grid = $('library-grid');
-                if (!list.length) {
-                    grid.innerHTML = '<p class="text-muted">No assets matched your filter.</p>';
-                    return;
-                }
+            const list = state.assets.filter((asset) => {
+                if (mediaType && asset.media_type !== mediaType) return false;
+                if (!q) return true;
+                const tags = String(asset.tags || '').toLowerCase();
+                return String(asset.title || '').toLowerCase().includes(q) || tags.includes(q);
+            });
 
-                grid.innerHTML = list.map((asset) => {
-                    let tags = [];
-                    try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
-                    const tagHtml = tags.slice(0, 4).map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join('');
-                    const thumb = assetUrl(asset);
-                    const isVideo = asset.media_type === 'video';
-                    return `
+            const grid = $('library-grid');
+            if (!list.length) {
+                grid.innerHTML = '<p class="text-muted">No assets matched your filter.</p>';
+                return;
+            }
+
+            grid.innerHTML = list.map((asset) => {
+                let tags = [];
+                try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
+                const tagHtml = tags.slice(0, 4).map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+                const thumb = assetUrl(asset);
+                const isVideo = asset.media_type === 'video';
+                return `
                         <article class="asset-card" data-asset-id="${asset.id}">
                             ${thumb
-                            ? (isVideo
-                                ? `<div class="asset-thumb-wrap"><video class="asset-thumb" src="${escapeHtml(thumb)}" muted preload="none"></video><span class="asset-type-badge">VIDEO</span></div>`
-                                : `<div class="asset-thumb-wrap"><img class="asset-thumb" src="${escapeHtml(thumb)}" alt="${escapeHtml(asset.title)}" loading="lazy"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`)
-                            : `<div class="asset-thumb-wrap asset-no-thumb"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`}
+                        ? (isVideo
+                            ? `<div class="asset-thumb-wrap"><video class="asset-thumb" src="${escapeHtml(thumb)}" muted preload="none"></video><span class="asset-type-badge">VIDEO</span></div>`
+                            : `<div class="asset-thumb-wrap"><img class="asset-thumb" src="${escapeHtml(thumb)}" alt="${escapeHtml(asset.title)}" loading="lazy"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`)
+                        : `<div class="asset-thumb-wrap asset-no-thumb"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`}
                             <div class="asset-meta">
                                 <div class="text-strong">${escapeHtml(asset.title)}</div>
                                 <div class="text-note">${escapeHtml(asset.category || '-')}${asset.featured ? ' &nbsp;&#9733;' : ''}</div>
@@ -3233,530 +3759,563 @@
                             </div>
                         </article>
                     `;
-                }).join('');
+            }).join('');
 
-                grid.querySelectorAll('[data-edit-asset]').forEach((btn) => {
-                    btn.addEventListener('click', (ev) => {
-                        ev.stopPropagation();
-                        const asset = state.assets.find((a) => String(a.id) === btn.dataset.editAsset);
-                        if (asset) openAssetEditModal(asset);
-                    });
+            grid.querySelectorAll('[data-edit-asset]').forEach((btn) => {
+                btn.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    const asset = state.assets.find((a) => String(a.id) === btn.dataset.editAsset);
+                    if (asset) openAssetEditModal(asset);
                 });
-                grid.querySelectorAll('[data-delete-asset]').forEach((btn) => {
-                    btn.addEventListener('click', (ev) => {
-                        ev.stopPropagation();
-                        deleteAsset(btn.dataset.deleteAsset);
-                    });
+            });
+            grid.querySelectorAll('[data-delete-asset]').forEach((btn) => {
+                btn.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    deleteAsset(btn.dataset.deleteAsset);
                 });
-                grid.querySelectorAll('[data-use-asset]').forEach((btn) => {
-                    btn.addEventListener('click', (ev) => {
-                        ev.stopPropagation();
-                        state.selectedAssetId = btn.dataset.useAsset;
-                        switchView('composer');
-                        renderComposerAssets();
-                        toast('Asset selected — add a caption and schedule it', 'success');
-                    });
+            });
+            grid.querySelectorAll('[data-use-asset]').forEach((btn) => {
+                btn.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    state.selectedAssetId = btn.dataset.useAsset;
+                    switchView('composer');
+                    renderComposerAssets();
+                    toast('Asset selected — add a caption and schedule it', 'success');
                 });
+            });
+        }
+
+        function renderCalendar(events, monthStart) {
+            const title = monthStart.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+            $('calendar-title').textContent = 'Calendar - ' + title;
+
+            const firstWeekday = monthStart.getDay();
+            const daysInMonth = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
+
+            const eventMap = {};
+            events.forEach((event) => {
+                const day = new Date(event.scheduled_at).getDate();
+                if (!eventMap[day]) eventMap[day] = [];
+                eventMap[day].push(event);
+            });
+
+            const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const cells = labels.map((l) => `<div class="day-label">${l}</div>`);
+
+            for (let i = 0; i < firstWeekday; i++) {
+                cells.push('<div class="day-cell empty"></div>');
             }
 
-            function renderCalendar(events, monthStart) {
-                const title = monthStart.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-                $('calendar-title').textContent = 'Calendar - ' + title;
-
-                const firstWeekday = monthStart.getDay();
-                const daysInMonth = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
-
-                const eventMap = {};
-                events.forEach((event) => {
-                    const day = new Date(event.scheduled_at).getDate();
-                    if (!eventMap[day]) eventMap[day] = [];
-                    eventMap[day].push(event);
-                });
-
-                const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                const cells = labels.map((l) => `<div class="day-label">${l}</div>`);
-
-                for (let i = 0; i < firstWeekday; i++) {
-                    cells.push('<div class="day-cell empty"></div>');
-                }
-
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const rows = (eventMap[day] || []).slice(0, 3);
-                    const moreCount = (eventMap[day] || []).length - rows.length;
-                    const itemsHtml = rows.map((row) => `<div class="day-item">${escapeHtml(row.platform)} - ${escapeHtml((row.campaign_name || 'General').slice(0, 22))}</div>`).join('');
-                    const moreHtml = moreCount > 0 ? `<div class="day-item">+${moreCount} more</div>` : '';
-                    cells.push(`
+            for (let day = 1; day <= daysInMonth; day++) {
+                const rows = (eventMap[day] || []).slice(0, 3);
+                const moreCount = (eventMap[day] || []).length - rows.length;
+                const itemsHtml = rows.map((row) => `<div class="day-item">${escapeHtml(row.platform)} - ${escapeHtml((row.campaign_name || 'General').slice(0, 22))}</div>`).join('');
+                const moreHtml = moreCount > 0 ? `<div class="day-item">+${moreCount} more</div>` : '';
+                cells.push(`
                         <div class="day-cell">
                             <div class="day-num">${day}</div>
                             ${itemsHtml}
                             ${moreHtml}
                         </div>
                     `);
-                }
-
-                $('calendar-grid').innerHTML = cells.join('');
             }
 
-            function updateComposerCounters() {
-                const content = $('composer-content').value || '';
-                const hashtagRaw = $('composer-hashtags').value || '';
-                const hashtags = hashtagRaw
-                    .split(',')
-                    .map((h) => h.trim().replace(/^#/, ''))
-                    .filter(Boolean);
+            $('calendar-grid').innerHTML = cells.join('');
+        }
 
-                const fullText = hashtags.length ? `${content}\n\n${hashtags.map((h) => '#' + h).join(' ')}` : content;
-                const counters = [];
+        function updateComposerCounters() {
+            const content = $('composer-content').value || '';
+            const hashtagRaw = $('composer-hashtags').value || '';
+            const hashtags = hashtagRaw
+                .split(',')
+                .map((h) => h.trim().replace(/^#/, ''))
+                .filter(Boolean);
 
-                for (const platform of state.selectedPlatforms) {
-                    const rules = state.platformRules[platform] || { maxChars: 500, maxHashtags: 10 };
-                    const count = fullText.length;
-                    const over = count > Number(rules.maxChars || 500) || hashtags.length > Number(rules.maxHashtags || 10);
-                    counters.push(`
+            const fullText = hashtags.length ? `${content}\n\n${hashtags.map((h) => '#' + h).join(' ')}` : content;
+            const counters = [];
+
+            for (const platform of state.selectedPlatforms) {
+                const rules = state.platformRules[platform] || { maxChars: 500, maxHashtags: 10 };
+                const count = fullText.length;
+                const over = count > Number(rules.maxChars || 500) || hashtags.length > Number(rules.maxHashtags || 10);
+                counters.push(`
                         <div class="counter ${over ? 'over' : ''}">
                             <span>${escapeHtml(platform)}</span>
                             <span>${count}/${rules.maxChars || 500} chars, ${hashtags.length}/${rules.maxHashtags || 10} hashtags</span>
                         </div>
                     `);
+            }
+
+            $('composer-counters').innerHTML = counters.length
+                ? counters.join('')
+                : '<div class="counter over"><span>Select at least one platform</span><span>-</span></div>';
+        }
+
+        function statusTag(status) {
+            const cls = status === 'published'
+                ? 'ok'
+                : status === 'failed'
+                    ? 'fail'
+                    : 'warn';
+            return `<span class="tag ${cls}">${escapeHtml(status || 'unknown')}</span>`;
+        }
+
+        function switchView(view) {
+            state.currentView = view;
+            document.querySelectorAll('.nav-btn').forEach((btn) => {
+                btn.classList.toggle('active', btn.dataset.view === view);
+            });
+            document.querySelectorAll('.view').forEach((el) => {
+                el.classList.toggle('active', el.id === 'view-' + view);
+            });
+        }
+
+        function openModal(id) {
+            $(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            $(id).classList.remove('active');
+        }
+
+        async function saveCampaign() {
+            try {
+                const payload = {
+                    brand: currentBrand,
+                    name: $('campaign-name').value.trim(),
+                    cadence: $('campaign-cadence').value,
+                    start_date: $('campaign-start').value || null,
+                    end_date: $('campaign-end').value || null,
+                    objective: $('campaign-objective').value.trim(),
+                    status: 'planned',
+                    platforms: [...state.selectedPlatforms],
+                };
+
+                if (!payload.name) {
+                    throw new Error('Campaign name is required');
                 }
 
-                $('composer-counters').innerHTML = counters.length
-                    ? counters.join('')
-                    : '<div class="counter over"><span>Select at least one platform</span><span>-</span></div>';
+                await api('/campaigns', { method: 'POST', body: payload });
+                closeModal('campaign-modal');
+                $('campaign-name').value = '';
+                $('campaign-objective').value = '';
+                toast('Campaign created', 'success');
+                await refreshAll();
+            } catch (err) {
+                toast(err.message, 'error');
             }
+        }
 
-            function statusTag(status) {
-                const cls = status === 'published'
-                    ? 'ok'
-                    : status === 'failed'
-                        ? 'fail'
-                        : 'warn';
-                return `<span class="tag ${cls}">${escapeHtml(status || 'unknown')}</span>`;
+        async function saveConnection() {
+            try {
+                const expiresLocal = $('conn-expires-at').value;
+                const payload = {
+                    brand: currentBrand,
+                    platform: $('conn-platform').value,
+                    account_label: $('conn-label').value.trim(),
+                    account_id: $('conn-account-id').value.trim(),
+                    payload: {
+                        access_token: $('conn-access-token').value.trim(),
+                        refresh_token: $('conn-refresh-token').value.trim(),
+                        expires_at: expiresLocal ? new Date(expiresLocal).toISOString() : '',
+                    },
+                };
+
+                if (!payload.account_id || !payload.payload.access_token) {
+                    throw new Error('Account ID and access token are required');
+                }
+
+                await api('/connections', { method: 'POST', body: payload });
+                closeModal('connection-modal');
+                $('conn-label').value = '';
+                $('conn-account-id').value = '';
+                $('conn-access-token').value = '';
+                $('conn-refresh-token').value = '';
+                $('conn-expires-at').value = '';
+                toast('Platform connection saved', 'success');
+                await refreshAll();
+            } catch (err) {
+                toast(err.message, 'error');
             }
+        }
 
-            function switchView(view) {
-                state.currentView = view;
-                document.querySelectorAll('.nav-btn').forEach((btn) => {
-                    btn.classList.toggle('active', btn.dataset.view === view);
+        async function disconnectConnection(id) {
+            if (!window.confirm('Deactivate this connection profile?')) return;
+            try {
+                await api('/connections?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                toast('Connection deactivated', 'success');
+                await refreshAll();
+            } catch (err) {
+                toast(err.message, 'error');
+            }
+        }
+
+        async function saveHandle() {
+            const brand = $('handle-brand').value;
+            const platform = $('handle-platform').value;
+            const handle = $('handle-username').value.trim();
+            if (!brand || !platform || !handle) {
+                toast('Brand, platform, and handle are required', 'error');
+                return;
+            }
+            try {
+                await api('/social-accounts', {
+                    method: 'POST',
+                    body: {
+                        brand,
+                        platform,
+                        handle,
+                        display_name: $('handle-display-name').value.trim(),
+                        profile_url: $('handle-profile-url').value.trim(),
+                        followers_count: parseInt($('handle-followers').value, 10) || 0,
+                        bio: $('handle-bio').value.trim(),
+                    },
                 });
-                document.querySelectorAll('.view').forEach((el) => {
-                    el.classList.toggle('active', el.id === 'view-' + view);
+                toast('Handle registered', 'success');
+                closeModal('handle-modal');
+                await loadSocialAccounts();
+                renderEcosystemMatrix();
+                renderHandlesTable();
+            } catch (err) {
+                toast(err.message, 'error');
+            }
+        }
+
+        async function deleteHandle(id) {
+            if (!window.confirm('Delete this handle record?')) return;
+            try {
+                await api('/social-accounts?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                toast('Handle removed', 'success');
+                await loadSocialAccounts();
+                renderEcosystemMatrix();
+                renderHandlesTable();
+            } catch (err) {
+                toast(err.message, 'error');
+            }
+        }
+
+        async function saveWorkflow() {
+            const brand = $('workflow-brand').value;
+            if (!brand) { toast('Select a brand', 'error'); return; }
+            try {
+                await api('/brand-workflows', {
+                    method: 'PUT',
+                    body: {
+                        brand,
+                        default_cadence: $('workflow-cadence').value,
+                        require_approval: $('workflow-require-approval').checked ? 1 : 0,
+                        post_time_utc: $('workflow-post-time').value || '14:00',
+                        notes: $('workflow-notes').value.trim(),
+                    },
                 });
+                toast('Workflow saved', 'success');
+                closeModal('workflow-modal');
+                await loadBrandWorkflows();
+            } catch (err) {
+                toast(err.message, 'error');
             }
+        }
 
-            function openModal(id) {
-                $(id).classList.add('active');
-            }
+        async function schedulePostSet() {
+            try {
+                const platforms = [...state.selectedPlatforms];
+                if (!platforms.length) throw new Error('Select at least one platform');
+                if (!state.selectedAssetId) throw new Error('Select one media asset');
 
-            function closeModal(id) {
-                $(id).classList.remove('active');
-            }
+                const content = $('composer-content').value.trim();
+                if (!content) throw new Error('Caption is required');
 
-            async function saveCampaign() {
-                try {
-                    const payload = {
-                        brand: currentBrand,
-                        name: $('campaign-name').value.trim(),
-                        cadence: $('campaign-cadence').value,
-                        start_date: $('campaign-start').value || null,
-                        end_date: $('campaign-end').value || null,
-                        objective: $('campaign-objective').value.trim(),
-                        status: 'planned',
-                        platforms: [...state.selectedPlatforms],
-                    };
+                const scheduledLocal = $('composer-schedule').value;
+                if (!scheduledLocal) throw new Error('Schedule time is required');
 
-                    if (!payload.name) {
-                        throw new Error('Campaign name is required');
-                    }
-
-                    await api('/campaigns', { method: 'POST', body: payload });
-                    closeModal('campaign-modal');
-                    $('campaign-name').value = '';
-                    $('campaign-objective').value = '';
-                    toast('Campaign created', 'success');
-                    await refreshAll();
-                } catch (err) {
-                    toast(err.message, 'error');
-                }
-            }
-
-            async function saveConnection() {
-                try {
-                    const expiresLocal = $('conn-expires-at').value;
-                    const payload = {
-                        brand: currentBrand,
-                        platform: $('conn-platform').value,
-                        account_label: $('conn-label').value.trim(),
-                        account_id: $('conn-account-id').value.trim(),
-                        payload: {
-                            access_token: $('conn-access-token').value.trim(),
-                            refresh_token: $('conn-refresh-token').value.trim(),
-                            expires_at: expiresLocal ? new Date(expiresLocal).toISOString() : '',
-                        },
-                    };
-
-                    if (!payload.account_id || !payload.payload.access_token) {
-                        throw new Error('Account ID and access token are required');
-                    }
-
-                    await api('/connections', { method: 'POST', body: payload });
-                    closeModal('connection-modal');
-                    $('conn-label').value = '';
-                    $('conn-account-id').value = '';
-                    $('conn-access-token').value = '';
-                    $('conn-refresh-token').value = '';
-                    $('conn-expires-at').value = '';
-                    toast('Platform connection saved', 'success');
-                    await refreshAll();
-                } catch (err) {
-                    toast(err.message, 'error');
-                }
-            }
-
-            async function disconnectConnection(id) {
-                if (!window.confirm('Deactivate this connection profile?')) return;
-                try {
-                    await api('/connections?id=' + encodeURIComponent(id), { method: 'DELETE' });
-                    toast('Connection deactivated', 'success');
-                    await refreshAll();
-                } catch (err) {
-                    toast(err.message, 'error');
-                }
-            }
-
-            async function saveHandle() {
-                const brand = $('handle-brand').value;
-                const platform = $('handle-platform').value;
-                const handle = $('handle-username').value.trim();
-                if (!brand || !platform || !handle) {
-                    toast('Brand, platform, and handle are required', 'error');
-                    return;
-                }
-                try {
-                    await api('/social-accounts', {
-                        method: 'POST',
-                        body: {
-                            brand,
-                            platform,
-                            handle,
-                            display_name: $('handle-display-name').value.trim(),
-                            profile_url: $('handle-profile-url').value.trim(),
-                            followers_count: parseInt($('handle-followers').value, 10) || 0,
-                            bio: $('handle-bio').value.trim(),
-                        },
-                    });
-                    toast('Handle registered', 'success');
-                    closeModal('handle-modal');
-                    await loadSocialAccounts();
-                    renderEcosystemMatrix();
-                    renderHandlesTable();
-                } catch (err) {
-                    toast(err.message, 'error');
-                }
-            }
-
-            async function deleteHandle(id) {
-                if (!window.confirm('Delete this handle record?')) return;
-                try {
-                    await api('/social-accounts?id=' + encodeURIComponent(id), { method: 'DELETE' });
-                    toast('Handle removed', 'success');
-                    await loadSocialAccounts();
-                    renderEcosystemMatrix();
-                    renderHandlesTable();
-                } catch (err) {
-                    toast(err.message, 'error');
-                }
-            }
-
-            async function saveWorkflow() {
-                const brand = $('workflow-brand').value;
-                if (!brand) { toast('Select a brand', 'error'); return; }
-                try {
-                    await api('/brand-workflows', {
-                        method: 'PUT',
-                        body: {
-                            brand,
-                            default_cadence: $('workflow-cadence').value,
-                            require_approval: $('workflow-require-approval').checked ? 1 : 0,
-                            post_time_utc: $('workflow-post-time').value || '14:00',
-                            notes: $('workflow-notes').value.trim(),
-                        },
-                    });
-                    toast('Workflow saved', 'success');
-                    closeModal('workflow-modal');
-                    await loadBrandWorkflows();
-                } catch (err) {
-                    toast(err.message, 'error');
-                }
-            }
-
-            async function schedulePostSet() {
-                try {
-                    const platforms = [...state.selectedPlatforms];
-                    if (!platforms.length) throw new Error('Select at least one platform');
-                    if (!state.selectedAssetId) throw new Error('Select one media asset');
-
-                    const content = $('composer-content').value.trim();
-                    if (!content) throw new Error('Caption is required');
-
-                    const scheduledLocal = $('composer-schedule').value;
-                    if (!scheduledLocal) throw new Error('Schedule time is required');
-
-                    const hashtags = $('composer-hashtags').value
-                        .split(',')
-                        .map((h) => h.trim())
-                        .filter(Boolean);
-
-                    const payload = {
-                        brand: currentBrand,
-                        campaign_id: $('composer-campaign').value ? Number($('composer-campaign').value) : null,
-                        content,
-                        platforms,
-                        media_asset_id: state.selectedAssetId,
-                        hashtags,
-                        scheduled_at: toIsoFromLocal(scheduledLocal),
-                        watermark_enabled: $('composer-watermark').checked,
-                        watermark_profile: $('composer-watermark').checked ? 'default' : '',
-                    };
-
-                    const result = await api('/social/campaign', { method: 'POST', body: payload });
-                    const postId = result?.post_id || result?.id;
-                    if (postId && state.crossPostBrands.size > 0) {
-                        for (const targetBrand of state.crossPostBrands) {
-                            try {
-                                await api('/cross-posts', { method: 'POST', body: { source_post_id: postId, target_brand: targetBrand } });
-                            } catch (e) {
-                                console.warn('[cross-post] failed for', targetBrand, e);
-                            }
-                        }
-                        toast(`Scheduled + queued for ${state.crossPostBrands.size} brand(s)`, 'success');
-                    } else {
-                        toast('Post set scheduled', 'success');
-                    }
-                    state.crossPostBrands.clear();
-                    $('composer-content').value = '';
-                    $('composer-hashtags').value = '';
-                    updateComposerCounters();
-                    await refreshAll();
-                } catch (err) {
-                    toast(err.message, 'error');
-                }
-            }
-
-            async function runQueueNow() {
-                try {
-                    const result = await api('/social/run-now', { method: 'POST' });
-                    const published = result?.result?.published ?? 0;
-                    const failed = result?.result?.failed ?? 0;
-                    toast(`Queue run complete: ${published} published, ${failed} failed`, 'success');
-                    await loadVariants();
-                    renderOverview();
-                } catch (err) {
-                    toast(err.message, 'error');
-                }
-            }
-
-            // ════════════════════════════════════════════════════════════════
-            // ASSET MANAGEMENT
-            // ════════════════════════════════════════════════════════════════
-
-            function openAssetEditModal(asset) {
-                $('asset-edit-id').value = asset.id;
-                $('asset-edit-title').value = asset.title || '';
-                $('asset-edit-category').value = asset.category || 'uploads';
-                $('asset-edit-media-type').value = asset.media_type || 'image';
-                $('asset-edit-featured').checked = Boolean(Number(asset.featured));
-                $('asset-edit-description').value = asset.description || '';
-
-                let tags = [];
-                try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
-                $('asset-edit-tags').value = tags.join(', ');
-
-                openModal('asset-edit-modal');
-            }
-
-            async function saveAssetEdit() {
-                const id = $('asset-edit-id').value;
-                if (!id) return;
-
-                const rawTags = $('asset-edit-tags').value;
-                const tags = rawTags
+                const hashtags = $('composer-hashtags').value
                     .split(',')
-                    .map((t) => t.trim())
+                    .map((h) => h.trim())
                     .filter(Boolean);
 
-                try {
-                    await api('/assets', {
-                        method: 'PUT',
-                        body: {
-                            id,
-                            title: $('asset-edit-title').value.trim(),
-                            category: $('asset-edit-category').value,
-                            media_type: $('asset-edit-media-type').value,
-                            featured: $('asset-edit-featured').checked,
-                            description: $('asset-edit-description').value.trim(),
-                            tags,
-                        },
-                    });
-                    toast('Asset updated', 'success');
-                    closeModal('asset-edit-modal');
-                    await loadAssets();
-                    renderLibrary();
-                    renderComposerAssets();
-                } catch (err) {
-                    toast(err.message, 'error');
+                const payload = {
+                    brand: currentBrand,
+                    campaign_id: $('composer-campaign').value ? Number($('composer-campaign').value) : null,
+                    content,
+                    platforms,
+                    media_asset_id: state.selectedAssetId,
+                    hashtags,
+                    scheduled_at: toIsoFromLocal(scheduledLocal),
+                    watermark_enabled: $('composer-watermark').checked,
+                    watermark_profile: $('composer-watermark').checked ? 'default' : '',
+                };
+
+                const result = await api('/social/campaign', { method: 'POST', body: payload });
+                const postId = result?.post_id || result?.id;
+                if (postId && state.crossPostBrands.size > 0) {
+                    for (const targetBrand of state.crossPostBrands) {
+                        try {
+                            await api('/cross-posts', { method: 'POST', body: { source_post_id: postId, target_brand: targetBrand } });
+                        } catch (e) {
+                            console.warn('[cross-post] failed for', targetBrand, e);
+                        }
+                    }
+                    toast(`Scheduled + queued for ${state.crossPostBrands.size} brand(s)`, 'success');
+                } else {
+                    toast('Post set scheduled', 'success');
                 }
+                state.crossPostBrands.clear();
+                $('composer-content').value = '';
+                $('composer-hashtags').value = '';
+                updateComposerCounters();
+                await refreshAll();
+            } catch (err) {
+                toast(err.message, 'error');
             }
+        }
 
-            async function deleteAsset(id) {
-                if (!window.confirm('Permanently delete this asset? This cannot be undone.')) return;
-                try {
-                    await api('/assets?id=' + encodeURIComponent(id), { method: 'DELETE' });
-                    toast('Asset deleted', 'success');
-                    if ($('asset-edit-id').value === String(id)) closeModal('asset-edit-modal');
-                    await loadAssets();
-                    renderLibrary();
-                    renderComposerAssets();
-                    if (state.selectedAssetId === String(id)) state.selectedAssetId = '';
-                } catch (err) {
-                    toast(err.message, 'error');
+        async function runQueueNow() {
+            try {
+                const result = await api('/social/run-now', { method: 'POST' });
+                const published = result?.result?.published ?? 0;
+                const failed = result?.result?.failed ?? 0;
+                toast(`Queue run complete: ${published} published, ${failed} failed`, 'success');
+                await loadVariants();
+                renderOverview();
+            } catch (err) {
+                toast(err.message, 'error');
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // ASSET MANAGEMENT
+        // ════════════════════════════════════════════════════════════════
+
+        function openAssetEditModal(asset) {
+            $('asset-edit-id').value = asset.id;
+            $('asset-edit-title').value = asset.title || '';
+            $('asset-edit-category').value = asset.category || 'uploads';
+            $('asset-edit-media-type').value = asset.media_type || 'image';
+            $('asset-edit-featured').checked = Boolean(Number(asset.featured));
+            $('asset-edit-description').value = asset.description || '';
+
+            let tags = [];
+            try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
+            $('asset-edit-tags').value = tags.join(', ');
+
+            // Initialize cross-brand share chips — mark current asset's brand as already-home
+            const homeBrand = asset.brand || currentBrand;
+            document.querySelectorAll('#asset-edit-brand-share [data-share-brand]').forEach((chip) => {
+                // Home brand is inert (this is where the asset lives)
+                if (chip.dataset.shareBrand === homeBrand) {
+                    chip.classList.add('active');
+                    chip.title = 'Home brand';
+                    chip.disabled = true;
+                } else {
+                    chip.classList.remove('active');
+                    chip.disabled = false;
+                    chip.title = 'Share to ' + chip.dataset.shareBrand;
+                    chip.onclick = () => {
+                        chip.classList.toggle('active');
+                    };
                 }
+            });
+
+            openModal('asset-edit-modal');
+        }
+
+        async function saveAssetEdit() {
+            const id = $('asset-edit-id').value;
+            if (!id) return;
+
+            const rawTags = $('asset-edit-tags').value;
+            const tags = rawTags
+                .split(',')
+                .map((t) => t.trim())
+                .filter(Boolean);
+
+            try {
+                await api('/assets', {
+                    method: 'PUT',
+                    body: {
+                        id,
+                        title: $('asset-edit-title').value.trim(),
+                        category: $('asset-edit-category').value,
+                        media_type: $('asset-edit-media-type').value,
+                        featured: $('asset-edit-featured').checked,
+                        description: $('asset-edit-description').value.trim(),
+                        tags,
+                    },
+                });
+
+                // Share to any newly-toggled brands (non-disabled active chips)
+                const sharePromises = [];
+                document.querySelectorAll('#asset-edit-brand-share [data-share-brand]:not([disabled])').forEach((chip) => {
+                    if (chip.classList.contains('active')) {
+                        sharePromises.push(
+                            api('/assets/' + encodeURIComponent(id) + '/share', {
+                                method: 'POST',
+                                body: { target_brand: chip.dataset.shareBrand },
+                            }).catch(() => { /* share already exists is fine */ })
+                        );
+                    }
+                });
+                if (sharePromises.length) await Promise.all(sharePromises);
+
+                toast('Asset updated', 'success');
+                closeModal('asset-edit-modal');
+                await loadAssets();
+                renderLibrary();
+                renderComposerAssets();
+            } catch (err) {
+                toast(err.message, 'error');
             }
+        }
+
+        async function deleteAsset(id) {
+            if (!window.confirm('Permanently delete this asset? This cannot be undone.')) return;
+            try {
+                await api('/assets?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                toast('Asset deleted', 'success');
+                if ($('asset-edit-id').value === String(id)) closeModal('asset-edit-modal');
+                await loadAssets();
+                renderLibrary();
+                renderComposerAssets();
+                if (state.selectedAssetId === String(id)) state.selectedAssetId = '';
+            } catch (err) {
+                toast(err.message, 'error');
+            }
+        }
 
 
-            // ════════════════════════════════════════════════════════════════
-            // BRAND SWITCHER
-            // ════════════════════════════════════════════════════════════════
+        // ════════════════════════════════════════════════════════════════
+        // BRAND SWITCHER
+        // ════════════════════════════════════════════════════════════════
 
-            function renderBrandSwitcher() {
-                const sw = $('brand-switcher');
-                if (!sw) return;
-                sw.innerHTML = Object.entries(BRAND_DEFS).map(([id, def]) => `
+        function renderBrandSwitcher() {
+            const sw = $('brand-switcher');
+            if (!sw) return;
+            sw.innerHTML = Object.entries(BRAND_DEFS).map(([id, def]) => `
                     <button type="button" class="brand-pill ${id === currentBrand ? 'active' : ''}"
                         data-brand="${escapeHtml(id)}"
                         style="--pill-color:${escapeHtml(def.color)}">
                         ${escapeHtml(def.shortName)}
                     </button>
                 `).join('');
-                sw.querySelectorAll('[data-brand]').forEach((btn) => {
-                    btn.addEventListener('click', () => switchBrand(btn.dataset.brand));
-                });
+            sw.querySelectorAll('[data-brand]').forEach((btn) => {
+                btn.addEventListener('click', () => switchBrand(btn.dataset.brand));
+            });
+        }
+
+        function switchBrand(id) {
+            if (!BRAND_DEFS[id]) return;
+            currentBrand = id;
+            const def = BRAND_DEFS[id];
+            const pill = $('active-brand-pill');
+            if (pill) pill.textContent = def.shortName;
+            renderBrandSwitcher();
+            state.selectedPlatforms = new Set(def.platforms || ['x']);
+            state.dripSelectedPlatforms = new Set(def.platforms || ['x']);
+            renderPlatformPicker();
+            renderDripPlatformPicker();
+            refreshAll();
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // DRIP BUILDER
+        // ════════════════════════════════════════════════════════════════
+
+        function initDripBuilder() {
+            const startInput = $('drip-start-date');
+            if (startInput && !startInput.value) {
+                startInput.value = new Date().toISOString().slice(0, 10);
             }
+            renderDripPlatformPicker();
+            renderDripTimes();
+            renderDripCampaignSelect();
+            renderDripEntries();
+            updateDripSummary();
+        }
 
-            function switchBrand(id) {
-                if (!BRAND_DEFS[id]) return;
-                currentBrand = id;
-                const def = BRAND_DEFS[id];
-                const pill = $('active-brand-pill');
-                if (pill) pill.textContent = def.shortName;
-                renderBrandSwitcher();
-                state.selectedPlatforms = new Set(def.platforms || ['x']);
-                state.dripSelectedPlatforms = new Set(def.platforms || ['x']);
-                renderPlatformPicker();
-                renderDripPlatformPicker();
-                refreshAll();
+        function renderDripPlatformPicker() {
+            const picker = $('drip-platform-picker');
+            if (!picker) return;
+            const def = BRAND_DEFS[currentBrand] || {};
+            const brandPlatforms = def.platforms || ALL_PLATFORMS;
+            // Sync state with current brand defaults on first render
+            if (state.dripSelectedPlatforms.size === 0) {
+                state.dripSelectedPlatforms = new Set(brandPlatforms);
             }
-
-            // ════════════════════════════════════════════════════════════════
-            // DRIP BUILDER
-            // ════════════════════════════════════════════════════════════════
-
-            function initDripBuilder() {
-                const startInput = $('drip-start-date');
-                if (startInput && !startInput.value) {
-                    startInput.value = new Date().toISOString().slice(0, 10);
-                }
-                renderDripPlatformPicker();
-                renderDripTimes();
-                renderDripCampaignSelect();
-                renderDripEntries();
-                updateDripSummary();
-            }
-
-            function renderDripPlatformPicker() {
-                const picker = $('drip-platform-picker');
-                if (!picker) return;
-                const def = BRAND_DEFS[currentBrand] || {};
-                const brandPlatforms = def.platforms || ALL_PLATFORMS;
-                // Sync state with current brand defaults on first render
-                if (state.dripSelectedPlatforms.size === 0) {
-                    state.dripSelectedPlatforms = new Set(brandPlatforms);
-                }
-                picker.innerHTML = brandPlatforms.map((p) => `
+            picker.innerHTML = brandPlatforms.map((p) => `
                     <button type="button" class="platform-pill ${state.dripSelectedPlatforms.has(p) ? 'active' : ''}"
                         data-drip-platform="${escapeHtml(p)}">
                         ${escapeHtml(p)}
                     </button>
                 `).join('');
-                picker.querySelectorAll('[data-drip-platform]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        const p = btn.dataset.dripPlatform;
-                        if (state.dripSelectedPlatforms.has(p)) {
-                            state.dripSelectedPlatforms.delete(p);
-                        } else {
-                            state.dripSelectedPlatforms.add(p);
-                        }
-                        renderDripPlatformPicker();
-                        updateDripSummary();
-                    });
+            picker.querySelectorAll('[data-drip-platform]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const p = btn.dataset.dripPlatform;
+                    if (state.dripSelectedPlatforms.has(p)) {
+                        state.dripSelectedPlatforms.delete(p);
+                    } else {
+                        state.dripSelectedPlatforms.add(p);
+                    }
+                    renderDripPlatformPicker();
+                    updateDripSummary();
                 });
-            }
+            });
+        }
 
-            function renderDripTimes() {
-                const row = $('drip-times-row');
-                if (!row) return;
-                row.innerHTML = state.dripTimes.map((t, i) => `
+        function renderDripTimes() {
+            const row = $('drip-times-row');
+            if (!row) return;
+            row.innerHTML = state.dripTimes.map((t, i) => `
                     <span class="drip-time-chip">
                         <input type="time" value="${escapeHtml(t)}" data-time-idx="${i}">
                         <button type="button" class="remove-time-btn" data-time-idx="${i}" title="Remove">×</button>
                     </span>
                 `).join('') + '<button type="button" class="btn btn-micro" id="drip-add-time">+ Time</button>';
-                row.querySelectorAll('input[data-time-idx]').forEach((el) => {
-                    el.addEventListener('change', () => {
-                        state.dripTimes[Number(el.dataset.timeIdx)] = el.value;
-                        updateDripSummary();
-                    });
+            row.querySelectorAll('input[data-time-idx]').forEach((el) => {
+                el.addEventListener('change', () => {
+                    state.dripTimes[Number(el.dataset.timeIdx)] = el.value;
+                    updateDripSummary();
                 });
-                row.querySelectorAll('button[data-time-idx]').forEach((el) => {
-                    el.addEventListener('click', () => {
-                        state.dripTimes.splice(Number(el.dataset.timeIdx), 1);
-                        renderDripTimes();
-                        updateDripSummary();
-                    });
+            });
+            row.querySelectorAll('button[data-time-idx]').forEach((el) => {
+                el.addEventListener('click', () => {
+                    state.dripTimes.splice(Number(el.dataset.timeIdx), 1);
+                    renderDripTimes();
+                    updateDripSummary();
                 });
-                const addBtn = $('drip-add-time');
-                if (addBtn) {
-                    addBtn.addEventListener('click', () => {
-                        state.dripTimes.push('12:00');
-                        renderDripTimes();
-                        updateDripSummary();
-                    });
-                }
+            });
+            const addBtn = $('drip-add-time');
+            if (addBtn) {
+                addBtn.addEventListener('click', () => {
+                    state.dripTimes.push('12:00');
+                    renderDripTimes();
+                    updateDripSummary();
+                });
             }
+        }
 
-            function renderDripCampaignSelect() {
-                const sel = $('drip-campaign');
-                if (!sel) return;
-                const campaigns = Array.isArray(state.campaigns) ? state.campaigns
-                    : (state.campaigns?.campaigns || []);
-                const prev = sel.value;
-                sel.innerHTML = '<option value="">No campaign</option>' + campaigns.map((c) =>
-                    `<option value="${Number(c.id)}" ${String(c.id) === prev ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
-                ).join('');
+        function renderDripCampaignSelect() {
+            const sel = $('drip-campaign');
+            if (!sel) return;
+            const campaigns = Array.isArray(state.campaigns) ? state.campaigns
+                : (state.campaigns?.campaigns || []);
+            const prev = sel.value;
+            sel.innerHTML = '<option value="">No campaign</option>' + campaigns.map((c) =>
+                `<option value="${Number(c.id)}" ${String(c.id) === prev ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
+            ).join('');
+        }
+
+        function renderDripEntries() {
+            const list = $('drip-entries-list');
+            if (!list) return;
+            const count = $('drip-entry-count');
+            if (count) count.textContent = state.dripEntries.length;
+            const statEntries = $('drip-stat-entries');
+            if (statEntries) statEntries.textContent = state.dripEntries.length;
+            if (state.dripEntries.length === 0) {
+                list.innerHTML = '<div class="drip-empty">No content entries yet. Click <strong>+ Add Entry</strong> to start, or <strong>Import JSON</strong> to bulk-load a content set.</div>';
+                return;
             }
-
-            function renderDripEntries() {
-                const list = $('drip-entries-list');
-                if (!list) return;
-                const count = $('drip-entry-count');
-                if (count) count.textContent = state.dripEntries.length;
-                const statEntries = $('drip-stat-entries');
-                if (statEntries) statEntries.textContent = state.dripEntries.length;
-                if (state.dripEntries.length === 0) {
-                    list.innerHTML = '<div class="drip-empty">No content entries yet. Click <strong>+ Add Entry</strong> to start, or <strong>Import JSON</strong> to bulk-load a content set.</div>';
-                    return;
-                }
-                list.innerHTML = state.dripEntries.map((entry, i) => `
+            list.innerHTML = state.dripEntries.map((entry, i) => `
                     <div class="drip-entry" data-entry-idx="${i}">
                         <div class="drip-entry-num">${i + 1}</div>
                         <div class="drip-entry-fields">
@@ -3769,108 +4328,108 @@
                         <button type="button" class="btn btn-micro btn-danger" data-remove-entry="${i}" title="Remove">✕</button>
                     </div>
                 `).join('');
-                list.querySelectorAll('[data-entry-content]').forEach((el) => {
-                    el.addEventListener('input', () => {
-                        state.dripEntries[Number(el.dataset.entryContent)].content = el.value;
-                    });
+            list.querySelectorAll('[data-entry-content]').forEach((el) => {
+                el.addEventListener('input', () => {
+                    state.dripEntries[Number(el.dataset.entryContent)].content = el.value;
                 });
-                list.querySelectorAll('[data-entry-hashtags]').forEach((el) => {
-                    el.addEventListener('change', () => {
-                        state.dripEntries[Number(el.dataset.entryHashtags)].hashtags =
-                            el.value.split(',').map((h) => h.trim().replace(/^#/, '')).filter(Boolean);
-                    });
+            });
+            list.querySelectorAll('[data-entry-hashtags]').forEach((el) => {
+                el.addEventListener('change', () => {
+                    state.dripEntries[Number(el.dataset.entryHashtags)].hashtags =
+                        el.value.split(',').map((h) => h.trim().replace(/^#/, '')).filter(Boolean);
                 });
-                list.querySelectorAll('[data-remove-entry]').forEach((btn) => {
-                    btn.addEventListener('click', () => {
-                        state.dripEntries.splice(Number(btn.dataset.removeEntry), 1);
-                        renderDripEntries();
-                        updateDripSummary();
-                    });
+            });
+            list.querySelectorAll('[data-remove-entry]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    state.dripEntries.splice(Number(btn.dataset.removeEntry), 1);
+                    renderDripEntries();
+                    updateDripSummary();
                 });
-            }
+            });
+        }
 
-            function addDripEntry(content = '', hashtags = [], assetId = '') {
-                state.dripEntries.push({ content, hashtags, asset_id: assetId });
-                renderDripEntries();
-                updateDripSummary();
-            }
+        function addDripEntry(content = '', hashtags = [], assetId = '') {
+            state.dripEntries.push({ content, hashtags, asset_id: assetId });
+            renderDripEntries();
+            updateDripSummary();
+        }
 
-            function updateDripSummary() {
-                const ppd = state.dripPostsPerDay || 2;
-                const platformCount = state.dripSelectedPlatforms.size;
-                const entryCount = state.dripEntries.length;
-                const validEntries = state.dripEntries.filter((e) => e.content?.trim()).length;
-                const days = validEntries > 0 ? Math.ceil(validEntries / ppd) : 0;
-                const totalVariants = validEntries * platformCount;
+        function updateDripSummary() {
+            const ppd = state.dripPostsPerDay || 2;
+            const platformCount = state.dripSelectedPlatforms.size;
+            const entryCount = state.dripEntries.length;
+            const validEntries = state.dripEntries.filter((e) => e.content?.trim()).length;
+            const days = validEntries > 0 ? Math.ceil(validEntries / ppd) : 0;
+            const totalVariants = validEntries * platformCount;
 
-                const $days = $('drip-stat-days');
-                const $platforms = $('drip-stat-platforms');
-                const $variants = $('drip-stat-variants');
-                const $window = $('drip-stat-window');
-                const $statEntries = $('drip-stat-entries');
+            const $days = $('drip-stat-days');
+            const $platforms = $('drip-stat-platforms');
+            const $variants = $('drip-stat-variants');
+            const $window = $('drip-stat-window');
+            const $statEntries = $('drip-stat-entries');
 
-                if ($statEntries) $statEntries.textContent = entryCount;
-                if ($days) $days.textContent = days > 0 ? days + ' days' : '—';
-                if ($platforms) $platforms.textContent = platformCount > 0
-                    ? [...state.dripSelectedPlatforms].join(', ') : '—';
-                if ($variants) $variants.textContent = totalVariants > 0
-                    ? totalVariants.toLocaleString() : '—';
+            if ($statEntries) $statEntries.textContent = entryCount;
+            if ($days) $days.textContent = days > 0 ? days + ' days' : '—';
+            if ($platforms) $platforms.textContent = platformCount > 0
+                ? [...state.dripSelectedPlatforms].join(', ') : '—';
+            if ($variants) $variants.textContent = totalVariants > 0
+                ? totalVariants.toLocaleString() : '—';
 
-                if ($window) {
-                    if (validEntries > 0) {
-                        const startDateVal = $('drip-start-date')?.value;
-                        if (startDateVal) {
-                            const start = new Date(startDateVal + 'T00:00:00');
-                            const end = new Date(start.getTime() + (days - 1) * 86400000);
-                            $window.textContent = start.toLocaleDateString() + ' \u2192 ' + end.toLocaleDateString();
-                        } else {
-                            $window.textContent = days + ' days from chosen start';
-                        }
+            if ($window) {
+                if (validEntries > 0) {
+                    const startDateVal = $('drip-start-date')?.value;
+                    if (startDateVal) {
+                        const start = new Date(startDateVal + 'T00:00:00');
+                        const end = new Date(start.getTime() + (days - 1) * 86400000);
+                        $window.textContent = start.toLocaleDateString() + ' \u2192 ' + end.toLocaleDateString();
                     } else {
-                        $window.textContent = '—';
+                        $window.textContent = days + ' days from chosen start';
                     }
+                } else {
+                    $window.textContent = '—';
                 }
-
-                const countBadge = $('drip-entry-count');
-                if (countBadge) countBadge.textContent = entryCount;
             }
 
-            function generateDripPreview() {
-                const ppd = state.dripPostsPerDay || 2;
-                const times = [...state.dripTimes].sort();
-                const platforms = [...state.dripSelectedPlatforms];
-                const startDateVal = $('drip-start-date')?.value;
-                const entries = state.dripEntries.filter((e) => e.content?.trim());
+            const countBadge = $('drip-entry-count');
+            if (countBadge) countBadge.textContent = entryCount;
+        }
 
-                if (entries.length === 0) { toast('Add at least one content entry before previewing.', 'error'); return; }
-                if (platforms.length === 0) { toast('Select at least one platform.', 'error'); return; }
-                if (!startDateVal) { toast('Choose a start date.', 'error'); return; }
-                if (times.length === 0) { toast('Add at least one post time.', 'error'); return; }
+        function generateDripPreview() {
+            const ppd = state.dripPostsPerDay || 2;
+            const times = [...state.dripTimes].sort();
+            const platforms = [...state.dripSelectedPlatforms];
+            const startDateVal = $('drip-start-date')?.value;
+            const entries = state.dripEntries.filter((e) => e.content?.trim());
 
-                const slots = [];
-                const start = new Date(startDateVal + 'T00:00:00');
+            if (entries.length === 0) { toast('Add at least one content entry before previewing.', 'error'); return; }
+            if (platforms.length === 0) { toast('Select at least one platform.', 'error'); return; }
+            if (!startDateVal) { toast('Choose a start date.', 'error'); return; }
+            if (times.length === 0) { toast('Add at least one post time.', 'error'); return; }
 
-                for (let i = 0; i < entries.length; i++) {
-                    const dayOffset = Math.floor(i / ppd);
-                    const timeIdx = i % ppd;
-                    const time = times[timeIdx] || times[times.length - 1];
-                    const [hh, mm] = time.split(':').map(Number);
-                    const slotDate = new Date(start.getTime() + dayOffset * 86400000);
-                    slotDate.setUTCHours(hh, mm, 0, 0);
-                    slots.push({
-                        idx: i + 1,
-                        scheduled_at: slotDate.toISOString(),
-                        platforms: platforms.join(', '),
-                        content: entries[i].content,
-                    });
-                }
+            const slots = [];
+            const start = new Date(startDateVal + 'T00:00:00');
 
-                const panel = $('drip-preview-panel');
-                const table = $('drip-preview-table');
-                const previewCount = $('drip-preview-count');
-                const displaySlots = slots.slice(0, 50);
+            for (let i = 0; i < entries.length; i++) {
+                const dayOffset = Math.floor(i / ppd);
+                const timeIdx = i % ppd;
+                const time = times[timeIdx] || times[times.length - 1];
+                const [hh, mm] = time.split(':').map(Number);
+                const slotDate = new Date(start.getTime() + dayOffset * 86400000);
+                slotDate.setUTCHours(hh, mm, 0, 0);
+                slots.push({
+                    idx: i + 1,
+                    scheduled_at: slotDate.toISOString(),
+                    platforms: platforms.join(', '),
+                    content: entries[i].content,
+                });
+            }
 
-                table.innerHTML = displaySlots.map((s) => `
+            const panel = $('drip-preview-panel');
+            const table = $('drip-preview-table');
+            const previewCount = $('drip-preview-count');
+            const displaySlots = slots.slice(0, 50);
+
+            table.innerHTML = displaySlots.map((s) => `
                     <tr>
                         <td>${escapeHtml(String(s.idx))}</td>
                         <td>${escapeHtml(formatDateTime(s.scheduled_at))}</td>
@@ -3879,105 +4438,105 @@
                     </tr>
                 `).join('');
 
-                if (previewCount) previewCount.textContent = `${slots.length} slots · showing first ${displaySlots.length}`;
-                if (panel) panel.classList.remove('d-none');
+            if (previewCount) previewCount.textContent = `${slots.length} slots · showing first ${displaySlots.length}`;
+            if (panel) panel.classList.remove('d-none');
 
-                const confirmBtn = $('drip-confirm-btn');
-                if (confirmBtn) confirmBtn.classList.remove('d-none');
+            const confirmBtn = $('drip-confirm-btn');
+            if (confirmBtn) confirmBtn.classList.remove('d-none');
 
+            updateDripSummary();
+            toast(`Preview: ${slots.length} posts × ${platforms.length} platforms = ${(slots.length * platforms.length).toLocaleString()} variants`, 'success');
+        }
+
+        async function confirmDripSchedule() {
+            const ppd = state.dripPostsPerDay || 2;
+            const times = [...state.dripTimes].sort();
+            const platforms = [...state.dripSelectedPlatforms];
+            const startDateVal = $('drip-start-date')?.value;
+            const campaignId = $('drip-campaign')?.value ? Number($('drip-campaign').value) : null;
+            const entries = state.dripEntries.filter((e) => e.content?.trim());
+
+            if (entries.length === 0) { toast('No content entries to schedule.', 'error'); return; }
+            if (platforms.length === 0) { toast('Select at least one platform.', 'error'); return; }
+            if (!startDateVal) { toast('Choose a start date.', 'error'); return; }
+
+            const confirmBtn = $('drip-confirm-btn');
+            try {
+                if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Scheduling…'; }
+
+                const payload = {
+                    brand: currentBrand,
+                    campaign_id: campaignId,
+                    platforms,
+                    start_date: startDateVal,
+                    posts_per_day: ppd,
+                    post_times_utc: times,
+                    entries: entries.map((e) => ({
+                        content: e.content,
+                        hashtags: e.hashtags || [],
+                        asset_id: e.asset_id || '',
+                    })),
+                };
+
+                const result = await api('/campaigns/bulk-schedule', { method: 'POST', body: payload });
+                toast(
+                    `Drip scheduled! ${(result.created_variants || 0).toLocaleString()} variants across ${result.days_covered || 0} days.`,
+                    'success'
+                );
+
+                state.dripEntries = [];
+                renderDripEntries();
                 updateDripSummary();
-                toast(`Preview: ${slots.length} posts × ${platforms.length} platforms = ${(slots.length * platforms.length).toLocaleString()} variants`, 'success');
+                if ($('drip-preview-panel')) $('drip-preview-panel').classList.add('d-none');
+                if (confirmBtn) { confirmBtn.classList.add('d-none'); confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm & Schedule All'; }
+                await refreshAll();
+            } catch (err) {
+                toast('Bulk schedule failed: ' + err.message, 'error');
+                if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm & Schedule All'; }
+            }
+        }
+
+        function importDripJSON() {
+            const raw = $('drip-import-textarea')?.value?.trim();
+            if (!raw) { toast('Paste JSON content first.', 'error'); return; }
+
+            let parsed;
+            try {
+                parsed = JSON.parse(raw);
+            } catch {
+                toast('Invalid JSON — please paste a valid JSON array.', 'error');
+                return;
             }
 
-            async function confirmDripSchedule() {
-                const ppd = state.dripPostsPerDay || 2;
-                const times = [...state.dripTimes].sort();
-                const platforms = [...state.dripSelectedPlatforms];
-                const startDateVal = $('drip-start-date')?.value;
-                const campaignId = $('drip-campaign')?.value ? Number($('drip-campaign').value) : null;
-                const entries = state.dripEntries.filter((e) => e.content?.trim());
+            if (!Array.isArray(parsed)) { toast('JSON must be an array.', 'error'); return; }
 
-                if (entries.length === 0) { toast('No content entries to schedule.', 'error'); return; }
-                if (platforms.length === 0) { toast('Select at least one platform.', 'error'); return; }
-                if (!startDateVal) { toast('Choose a start date.', 'error'); return; }
-
-                const confirmBtn = $('drip-confirm-btn');
-                try {
-                    if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Scheduling…'; }
-
-                    const payload = {
-                        brand: currentBrand,
-                        campaign_id: campaignId,
-                        platforms,
-                        start_date: startDateVal,
-                        posts_per_day: ppd,
-                        post_times_utc: times,
-                        entries: entries.map((e) => ({
-                            content: e.content,
-                            hashtags: e.hashtags || [],
-                            asset_id: e.asset_id || '',
-                        })),
-                    };
-
-                    const result = await api('/campaigns/bulk-schedule', { method: 'POST', body: payload });
-                    toast(
-                        `Drip scheduled! ${(result.created_variants || 0).toLocaleString()} variants across ${result.days_covered || 0} days.`,
-                        'success'
-                    );
-
-                    state.dripEntries = [];
-                    renderDripEntries();
-                    updateDripSummary();
-                    if ($('drip-preview-panel')) $('drip-preview-panel').classList.add('d-none');
-                    if (confirmBtn) { confirmBtn.classList.add('d-none'); confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm & Schedule All'; }
-                    await refreshAll();
-                } catch (err) {
-                    toast('Bulk schedule failed: ' + err.message, 'error');
-                    if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm & Schedule All'; }
-                }
-            }
-
-            function importDripJSON() {
-                const raw = $('drip-import-textarea')?.value?.trim();
-                if (!raw) { toast('Paste JSON content first.', 'error'); return; }
-
-                let parsed;
-                try {
-                    parsed = JSON.parse(raw);
-                } catch {
-                    toast('Invalid JSON — please paste a valid JSON array.', 'error');
-                    return;
-                }
-
-                if (!Array.isArray(parsed)) { toast('JSON must be an array.', 'error'); return; }
-
-                let added = 0;
-                for (const item of parsed) {
-                    if (typeof item === 'string') {
-                        if (item.trim()) { addDripEntry(item.trim(), [], ''); added++; }
-                    } else if (item && typeof item === 'object') {
-                        const content = (item.content || item.text || item.caption || '').toString().trim();
-                        if (content) {
-                            const hashtags = Array.isArray(item.hashtags) ? item.hashtags : [];
-                            addDripEntry(content, hashtags, item.asset_id || '');
-                            added++;
-                        }
+            let added = 0;
+            for (const item of parsed) {
+                if (typeof item === 'string') {
+                    if (item.trim()) { addDripEntry(item.trim(), [], ''); added++; }
+                } else if (item && typeof item === 'object') {
+                    const content = (item.content || item.text || item.caption || '').toString().trim();
+                    if (content) {
+                        const hashtags = Array.isArray(item.hashtags) ? item.hashtags : [];
+                        addDripEntry(content, hashtags, item.asset_id || '');
+                        added++;
                     }
                 }
-
-                closeModal('drip-import-modal');
-                if ($('drip-import-textarea')) $('drip-import-textarea').value = '';
-                toast(`Imported ${added} entr${added === 1 ? 'y' : 'ies'}.`, 'success');
-                updateDripSummary();
             }
 
-            window.__clerkReady
-                .then(initAuth)
-                .catch(function (err) {
-                    $('auth-loading').textContent = 'Failed to load Clerk auth library.';
-                    console.error('[admin auth]', err);
-                });
-        })();
+            closeModal('drip-import-modal');
+            if ($('drip-import-textarea')) $('drip-import-textarea').value = '';
+            toast(`Imported ${added} entr${added === 1 ? 'y' : 'ies'}.`, 'success');
+            updateDripSummary();
+        }
+
+        window.__clerkReady
+            .then(initAuth)
+            .catch(function (err) {
+                $('auth-loading').textContent = 'Failed to load Clerk auth library.';
+                console.error('[admin auth]', err);
+            });
+        }) ();
     </script>
 </body>
 
