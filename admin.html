@@ -1550,10 +1550,18 @@
                 grid-template-columns: 1fr;
             }
         }
-        .d-none { display: none !important; }
-        .content-preview-cell { max-width: 320px; white-space: normal; }
+
+        .d-none {
+            display: none !important;
+        }
+
+        .content-preview-cell {
+            max-width: 320px;
+            white-space: normal;
+        }
+
         .drip-import-hint {
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
             border-radius: 6px;
             padding: 0.6rem 0.75rem;
             margin-bottom: 0.75rem;
@@ -1561,8 +1569,14 @@
             font-family: var(--font-mono);
             color: var(--text-muted);
         }
-        .drip-import-hint-narrow { font-size: 0.78rem; }
-        .drip-modal-wide { max-width: 640px; }
+
+        .drip-import-hint-narrow {
+            font-size: 0.78rem;
+        }
+
+        .drip-modal-wide {
+            max-width: 640px;
+        }
     </style>
 </head>
 
@@ -2245,7 +2259,6 @@
 
             const state = {
                 clerk: null,
-                token: null,
                 currentView: 'overview',
                 assets: [],
                 campaigns: [],
@@ -2314,11 +2327,21 @@
                 return '/api/cms/media/' + path.split('/').map(encodeURIComponent).join('/');
             }
 
-            async function api(path, opts = {}) {
+            async function api(path, opts = {}, _retry = false) {
                 const headers = {
                     ...(opts.headers || {}),
                 };
-                if (state.token) headers.Authorization = 'Bearer ' + state.token;
+
+                // Always get a fresh token — Clerk SDK caches internally and auto-refreshes
+                // before expiry so this is cheap (no extra network call when token is still valid)
+                if (state.clerk?.session) {
+                    try {
+                        const freshToken = await state.clerk.session.getToken();
+                        if (freshToken) headers.Authorization = 'Bearer ' + freshToken;
+                    } catch (tokenErr) {
+                        console.warn('[api] Could not get Clerk token:', tokenErr);
+                    }
+                }
 
                 let body = opts.body;
                 if (body && typeof body === 'object' && !(body instanceof FormData)) {
@@ -2332,9 +2355,18 @@
                     body,
                 });
 
+                // On 401, force a session reload and retry once so a recovered session works
+                if (res.status === 401 && !_retry && state.clerk?.session) {
+                    try {
+                        await state.clerk.session.reload();
+                        return api(path, opts, true);
+                    } catch { /* fall through — surface the real error below */ }
+                }
+
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) {
-                    throw new Error(data.error || 'Request failed');
+                    const msg = data.error || data.message || `${res.status} ${res.statusText}`;
+                    throw new Error(msg);
                 }
                 return data;
             }
@@ -2365,7 +2397,6 @@
                         return;
                     }
 
-                    state.token = await state.clerk.session.getToken();
                     $('user-email').textContent = state.clerk.user.primaryEmailAddress?.emailAddress || 'admin';
 
                     $('auth-gate').style.display = 'none';
@@ -2488,7 +2519,7 @@
                 });
 
                 $('drip-start-date').addEventListener('change', updateDripSummary);
-                $('drip-campaign').addEventListener('change', () => {});
+                $('drip-campaign').addEventListener('change', () => { });
 
                 document.querySelectorAll('[data-close-modal]').forEach((btn) => {
                     btn.addEventListener('click', () => closeModal(btn.getAttribute('data-close-modal')));
