@@ -39,12 +39,20 @@ const SHARED = {
     frame: ['https://js.stripe.com', 'https://hooks.stripe.com'],
   },
   clerk: {
-    script: ['https://cdn.clerk.dev', 'https://clerk.goodflippinvibes.com'],
+    script: [
+      'https://cdn.clerk.dev',
+      'https://clerk.goodflippinvibes.com',
+      'https://clerk.goodflippindesign.com',
+    ],
     connect: [
       'https://clerk.goodflippinvibes.com',
+      'https://clerk.goodflippindesign.com',
       'https://api.clerk.com',
     ],
-    frame: ['https://accounts.goodflippinvibes.com'],
+    frame: [
+      'https://accounts.goodflippinvibes.com',
+      'https://accounts.goodflippindesign.com',
+    ],
   },
   cdnLibs: [
     'https://d3js.org',
