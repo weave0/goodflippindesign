@@ -1320,6 +1320,249 @@
                 align-items: flex-start;
             }
         }
+
+        /* ── Brand Switcher ─────────────────────────────────── */
+        .brand-switcher {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            padding: 0.65rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 0.5rem;
+        }
+
+        .brand-pill {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+
+        .brand-pill:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+            color: var(--text);
+        }
+
+        .brand-pill.active {
+            color: #0d0d0d;
+            border-color: transparent;
+        }
+
+        /* ── Drip Builder ───────────────────────────────────── */
+        .drip-config-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .panel-subtitle {
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin: 0 0 1rem;
+        }
+
+        .ppd-pills {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .ppd-pill {
+            padding: 0.3rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .ppd-pill.active {
+            background: var(--accent);
+            color: #0d0d0d;
+            border-color: var(--accent);
+        }
+
+        .drip-times-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+        .drip-time-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.55rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            font-size: 0.8rem;
+        }
+
+        .drip-time-chip button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .drip-time-chip button:hover {
+            color: var(--error);
+        }
+
+        .drip-add-time {
+            font-size: 0.78rem;
+            padding: 0.25rem 0.55rem;
+            border-radius: 6px;
+            border: 1px dashed var(--border);
+            background: none;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .drip-add-time:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .drip-summary-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .drip-stat-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .drip-stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .drip-stat-label {
+            color: var(--text-muted);
+        }
+
+        .drip-stat-value {
+            font-weight: 600;
+        }
+
+        .drip-stat-value.highlight {
+            color: var(--accent);
+        }
+
+        .drip-entry {
+            display: grid;
+            grid-template-columns: 1.8rem 1fr auto;
+            gap: 0.75rem;
+            align-items: flex-start;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .drip-entry:last-child {
+            border-bottom: none;
+        }
+
+        .drip-entry-num {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding-top: 0.55rem;
+            text-align: right;
+        }
+
+        .drip-entry-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .drip-entry-content {
+            resize: vertical;
+            min-height: 3.5rem;
+            font-size: 0.85rem;
+        }
+
+        .drip-entry-meta {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+        .drip-entry-meta input {
+            font-size: 0.78rem;
+            padding: 0.25rem 0.5rem;
+            height: auto;
+        }
+
+        .drip-entry-meta select {
+            font-size: 0.78rem;
+            padding: 0.25rem 0.4rem;
+            height: auto;
+        }
+
+        .drip-entry-remove {
+            padding: 0.3rem 0.55rem;
+            font-size: 0.75rem;
+            align-self: flex-start;
+            margin-top: 0.25rem;
+        }
+
+        .drip-empty {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .drip-import-textarea {
+            width: 100%;
+            box-sizing: border-box;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            min-height: 220px;
+            resize: vertical;
+        }
+
+        @media (max-width: 960px) {
+            .drip-config-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        .d-none { display: none !important; }
+        .content-preview-cell { max-width: 320px; white-space: normal; }
+        .drip-import-hint {
+            background: rgba(255,255,255,0.04);
+            border-radius: 6px;
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.78rem;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+        }
+        .drip-import-hint-narrow { font-size: 0.78rem; }
+        .drip-modal-wide { max-width: 640px; }
     </style>
 </head>
 
@@ -1337,10 +1580,12 @@
         <div class="shell">
             <aside class="sidebar">
                 <div class="brand-block">
-                    <div class="brand-title">Good Flippin Design</div>
-                    <div class="brand-subtitle">Executive Social and Media Operations</div>
-                    <span class="pill">Brand Scope: GFD</span>
+                    <div class="brand-title">GFD Command Center</div>
+                    <div class="brand-subtitle">Multi-brand Social &amp; Media Operations</div>
+                    <span class="pill" id="active-brand-pill">Brand Scope: GFD</span>
                 </div>
+
+                <div class="brand-switcher" id="brand-switcher" role="group" aria-label="Active brand"></div>
 
                 <nav class="nav-grid" aria-label="Primary admin navigation">
                     <button class="nav-btn active" data-view="overview"><span>01</span><span>Overview</span></button>
@@ -1348,6 +1593,7 @@
                     <button class="nav-btn" data-view="planner"><span>03</span><span>Campaign Planner</span></button>
                     <button class="nav-btn" data-view="composer"><span>04</span><span>Post Composer</span></button>
                     <button class="nav-btn" data-view="library"><span>05</span><span>Asset Library</span></button>
+                    <button class="nav-btn" data-view="drip"><span>06</span><span>Drip Builder</span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -1616,7 +1862,142 @@
                         <div class="asset-grid asset-grid-full" id="library-grid"></div>
                     </article>
                 </section>
+
+                <!-- ─────────────────────────────────────────────────── -->
+                <!-- VIEW: Drip Builder (100-day bulk campaign scheduler) -->
+                <!-- ─────────────────────────────────────────────────── -->
+                <section class="view" id="view-drip">
+                    <div class="section-head">
+                        <h2 class="section-title">Drip Campaign Builder</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="drip-import-json-btn">Import JSON</button>
+                            <button class="btn btn-secondary" id="drip-preview-btn">Preview Schedule</button>
+                            <button class="btn btn-primary d-none" id="drip-confirm-btn">Confirm &amp; Schedule All</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Generate a full drip campaign in one step. Configure your cadence, add content entries, preview the full schedule, then confirm to create all post variants at once.</p>
+
+                    <div class="drip-config-row">
+                        <article class="panel">
+                            <h3 class="panel-subtitle">Schedule Settings</h3>
+                            <div class="form-grid">
+                                <div>
+                                    <label class="form-label">Campaign</label>
+                                    <select id="drip-campaign">
+                                        <option value="">No campaign</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label">Start Date</label>
+                                    <input type="date" id="drip-start-date">
+                                </div>
+                            </div>
+                            <div class="form-grid mt-06">
+                                <div>
+                                    <label class="form-label">Posts per day</label>
+                                    <div class="ppd-pills" id="drip-ppd-pills">
+                                        <button type="button" class="ppd-pill" data-ppd="1">1 / day</button>
+                                        <button type="button" class="ppd-pill active" data-ppd="2">2 / day</button>
+                                        <button type="button" class="ppd-pill" data-ppd="3">3 / day</button>
+                                        <button type="button" class="ppd-pill" data-ppd="4">4 / day</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="form-label">Post times (UTC)</label>
+                                    <div class="drip-times-row" id="drip-times-row">
+                                        <!-- rendered by JS -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-06">
+                                <label class="form-label">Platforms</label>
+                                <div class="platform-picker" id="drip-platform-picker"></div>
+                            </div>
+                        </article>
+
+                        <article class="panel" id="drip-summary-panel">
+                            <h3 class="panel-subtitle">Schedule Summary</h3>
+                            <div id="drip-summary-content">
+                                <div class="drip-summary-box">
+                                    <div class="drip-stat-row">
+                                        <span class="drip-stat-label">Entries loaded</span>
+                                        <span class="drip-stat-value highlight" id="drip-stat-entries">0</span>
+                                    </div>
+                                    <div class="drip-stat-row">
+                                        <span class="drip-stat-label">Days covered</span>
+                                        <span class="drip-stat-value" id="drip-stat-days">—</span>
+                                    </div>
+                                    <div class="drip-stat-row">
+                                        <span class="drip-stat-label">Platforms</span>
+                                        <span class="drip-stat-value" id="drip-stat-platforms">—</span>
+                                    </div>
+                                    <div class="drip-stat-row">
+                                        <span class="drip-stat-label">Total variants to create</span>
+                                        <span class="drip-stat-value highlight" id="drip-stat-variants">—</span>
+                                    </div>
+                                    <div class="drip-stat-row">
+                                        <span class="drip-stat-label">Campaign window</span>
+                                        <span class="drip-stat-value" id="drip-stat-window">—</span>
+                                    </div>
+                                </div>
+                                <p class="subheading mt-06 drip-import-hint-narrow">Click <strong>Preview Schedule</strong> to validate slots, then <strong>Confirm &amp; Schedule All</strong> to create.</p>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- Content entries -->
+                    <article class="panel mt-085">
+                        <div class="section-head">
+                            <h2 class="section-title">Content Entries <span class="tag ok" id="drip-entry-count">0</span></h2>
+                            <div class="inline-actions">
+                                <button class="btn btn-secondary" id="drip-clear-entries">Clear All</button>
+                                <button class="btn btn-primary" id="drip-add-entry">+ Add Entry</button>
+                            </div>
+                        </div>
+                        <div id="drip-entries-list">
+                            <div class="drip-empty">No content entries yet. Click <strong>+ Add Entry</strong> to start, or <strong>Import JSON</strong> to bulk-load a content set.</div>
+                        </div>
+                    </article>
+
+                    <!-- Preview table (hidden until preview is clicked) -->
+                    <article class="panel mt-085 d-none" id="drip-preview-panel">
+                        <div class="section-head">
+                            <h2 class="section-title">Schedule Preview <span class="tag ok" id="drip-preview-count"></span></h2>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Scheduled (UTC)</th>
+                                        <th>Platforms</th>
+                                        <th>Content Preview</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="drip-preview-table"></tbody>
+                            </table>
+                        </div>
+                    </article>
+                </section>
             </main>
+        </div>
+    </div>
+
+    <!-- Drip Builder: JSON import modal -->
+    <div class="modal-wrap" id="drip-import-modal">
+        <div class="modal drip-modal-wide">
+            <h3>Import Content via JSON</h3>
+            <p class="subheading mb-07">Paste a JSON array. Each item can be a plain string, or an object with <code>content</code>, <code>hashtags</code>, and optional <code>asset_id</code>.</p>
+            <div class="drip-import-hint">
+                ["Caption one", "Caption two"]<br>
+                — or —<br>
+                [{"content":"Caption","hashtags":["culture","diversity"],"asset_id":"..."}]
+            </div>
+            <textarea class="drip-import-textarea" id="drip-import-textarea" rows="10" placeholder="Paste JSON array here..."></textarea>
+            <div class="actions">
+                <button class="btn btn-secondary" data-close-modal="drip-import-modal">Cancel</button>
+                <button class="btn btn-primary" id="drip-import-confirm">Import Entries</button>
+            </div>
         </div>
     </div>
 
@@ -1832,7 +2213,7 @@
         (function () {
             'use strict';
 
-            const BRAND = 'gfd';
+            let currentBrand = 'gfd';
             const API = '/api/cms';
             const ALL_PLATFORMS = ['instagram', 'facebook', 'x', 'linkedin', 'pinterest', 'tiktok', 'youtube'];
             const PLATFORM_ORDER = ALL_PLATFORMS;
@@ -1842,7 +2223,7 @@
                 gfd: { name: 'Good Flippin Design', shortName: 'GFD', color: '#6c63ff', platforms: ['instagram', 'linkedin', 'x'] },
                 gfv: { name: 'Good Flippin Vibes', shortName: 'GFV', color: '#10b981', platforms: ['instagram', 'x', 'facebook', 'tiktok', 'pinterest'] },
                 aiaimate: { name: 'AI Aimate', shortName: 'Aimate', color: '#3b82f6', platforms: ['linkedin', 'x', 'youtube'] },
-                culturesherpa: { name: 'CultureSherpa', shortName: 'CultureSherpa', color: '#f59e0b', platforms: ['instagram', 'x', 'pinterest'] },
+                culturesherpa: { name: 'CultureSherpa', shortName: 'CultureSherpa', color: '#f59e0b', platforms: ['linkedin', 'x', 'instagram', 'facebook'] },
                 globaldeets: { name: 'Global Deets', shortName: 'GlobalDeets', color: '#8b5cf6', platforms: ['linkedin', 'x'] },
             };
 
@@ -1878,6 +2259,10 @@
                 selectedAssetId: '',
                 calendarDate: new Date(),
                 crossPostBrands: new Set(),
+                dripEntries: [],
+                dripSelectedPlatforms: new Set(['linkedin', 'x', 'instagram', 'facebook']),
+                dripPostsPerDay: 2,
+                dripTimes: ['14:00', '20:00'],
             };
 
             function $(id) {
@@ -1997,6 +2382,8 @@
                 bindUI();
                 await refreshAll();
                 renderPlatformPicker();
+                renderBrandSwitcher();
+                initDripBuilder();
                 updateComposerCounters();
             }
 
@@ -2074,6 +2461,35 @@
                 // ── Upload Dropzone Setup ────────────────────────────────────
                 initUploadZone();
 
+                // ── Drip Builder ─────────────────────────────────────────────
+                $('drip-add-entry').addEventListener('click', () => addDripEntry());
+                $('drip-import-json-btn').addEventListener('click', () => openModal('drip-import-modal'));
+                $('drip-import-confirm').addEventListener('click', importDripJSON);
+                $('drip-clear-entries').addEventListener('click', () => {
+                    if (state.dripEntries.length > 0 && !confirm('Clear all ' + state.dripEntries.length + ' entries?')) return;
+                    state.dripEntries = [];
+                    renderDripEntries();
+                    updateDripSummary();
+                });
+                $('drip-preview-btn').addEventListener('click', generateDripPreview);
+                $('drip-confirm-btn').addEventListener('click', confirmDripSchedule);
+
+                document.querySelectorAll('.ppd-pill').forEach((pill) => {
+                    pill.addEventListener('click', () => {
+                        state.dripPostsPerDay = Number(pill.dataset.ppd);
+                        document.querySelectorAll('.ppd-pill').forEach((p) => p.classList.remove('active'));
+                        pill.classList.add('active');
+                        while (state.dripTimes.length < state.dripPostsPerDay) {
+                            state.dripTimes.push('12:00');
+                        }
+                        renderDripTimes();
+                        updateDripSummary();
+                    });
+                });
+
+                $('drip-start-date').addEventListener('change', updateDripSummary);
+                $('drip-campaign').addEventListener('change', () => {});
+
                 document.querySelectorAll('[data-close-modal]').forEach((btn) => {
                     btn.addEventListener('click', () => closeModal(btn.getAttribute('data-close-modal')));
                 });
@@ -2109,6 +2525,8 @@
                 renderComposerAssets();
                 updateComposerCounters();
                 renderCrossPostPicker();
+                renderBrandSwitcher();
+                renderDripCampaignSelect();
             }
 
             async function loadPlatformRules() {
@@ -2166,7 +2584,7 @@
             }
 
             function startOAuthFlow(provider) {
-                const url = `${API}/oauth/authorize/${encodeURIComponent(provider)}?brand=${encodeURIComponent(BRAND)}`;
+                const url = `${API}/oauth/authorize/${encodeURIComponent(provider)}?brand=${encodeURIComponent(currentBrand)}`;
                 // Open in same tab — the callback page has a "Back to Command Center" link
                 window.location.href = url;
             }
@@ -2186,7 +2604,7 @@
             }
 
             async function loadConnections() {
-                state.connections = await api('/connections?brand=' + encodeURIComponent(BRAND));
+                state.connections = await api('/connections?brand=' + encodeURIComponent(currentBrand));
             }
 
             async function loadSocialAccounts() {
@@ -2211,23 +2629,23 @@
             }
 
             async function loadAssets() {
-                const data = await api('/assets?brand=' + encodeURIComponent(BRAND) + '&limit=120');
+                const data = await api('/assets?brand=' + encodeURIComponent(currentBrand) + '&limit=120');
                 state.assets = data.assets || [];
             }
 
             async function loadCampaigns() {
-                state.campaigns = await api('/campaigns?brand=' + encodeURIComponent(BRAND));
+                state.campaigns = await api('/campaigns?brand=' + encodeURIComponent(currentBrand));
             }
 
             async function loadVariants() {
-                state.variants = await api('/social/variants?brand=' + encodeURIComponent(BRAND) + '&limit=250');
+                state.variants = await api('/social/variants?brand=' + encodeURIComponent(currentBrand) + '&limit=250');
             }
 
             async function loadCalendar() {
                 const d = state.calendarDate;
                 const start = new Date(d.getFullYear(), d.getMonth(), 1);
                 const end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-                const data = await api('/campaigns/calendar?brand=' + encodeURIComponent(BRAND) + '&start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString()));
+                const data = await api('/campaigns/calendar?brand=' + encodeURIComponent(currentBrand) + '&start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString()));
                 renderCalendar(data.events || [], start);
             }
 
@@ -2428,7 +2846,7 @@
             function renderCrossPostPicker() {
                 const picker = $('crosspost-brand-picker');
                 if (!picker) return;
-                const otherBrands = Object.entries(BRAND_DEFS).filter(([id]) => id !== BRAND);
+                const otherBrands = Object.entries(BRAND_DEFS).filter(([id]) => id !== currentBrand);
                 if (otherBrands.length === 0) {
                     picker.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem">No other brands configured.</span>';
                     return;
@@ -2550,7 +2968,7 @@
                         const form = new FormData();
                         form.append('file', file);
                         form.append('title', file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
-                        form.append('brand', 'gfd');
+                        form.append('brand', currentBrand);
                         form.append('category', 'uploads');
                         form.append('media_type', file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : file.type === 'application/pdf' ? 'document' : 'image');
 
@@ -2707,7 +3125,7 @@
             async function saveCampaign() {
                 try {
                     const payload = {
-                        brand: BRAND,
+                        brand: currentBrand,
                         name: $('campaign-name').value.trim(),
                         cadence: $('campaign-cadence').value,
                         start_date: $('campaign-start').value || null,
@@ -2736,7 +3154,7 @@
                 try {
                     const expiresLocal = $('conn-expires-at').value;
                     const payload = {
-                        brand: BRAND,
+                        brand: currentBrand,
                         platform: $('conn-platform').value,
                         account_label: $('conn-label').value.trim(),
                         account_id: $('conn-account-id').value.trim(),
@@ -2860,7 +3278,7 @@
                         .filter(Boolean);
 
                     const payload = {
-                        brand: BRAND,
+                        brand: currentBrand,
                         campaign_id: $('composer-campaign').value ? Number($('composer-campaign').value) : null,
                         content,
                         platforms,
@@ -2906,6 +3324,354 @@
                 } catch (err) {
                     toast(err.message, 'error');
                 }
+            }
+
+
+            // ════════════════════════════════════════════════════════════════
+            // BRAND SWITCHER
+            // ════════════════════════════════════════════════════════════════
+
+            function renderBrandSwitcher() {
+                const sw = $('brand-switcher');
+                if (!sw) return;
+                sw.innerHTML = Object.entries(BRAND_DEFS).map(([id, def]) => `
+                    <button type="button" class="brand-pill ${id === currentBrand ? 'active' : ''}"
+                        data-brand="${escapeHtml(id)}"
+                        style="--pill-color:${escapeHtml(def.color)}">
+                        ${escapeHtml(def.shortName)}
+                    </button>
+                `).join('');
+                sw.querySelectorAll('[data-brand]').forEach((btn) => {
+                    btn.addEventListener('click', () => switchBrand(btn.dataset.brand));
+                });
+            }
+
+            function switchBrand(id) {
+                if (!BRAND_DEFS[id]) return;
+                currentBrand = id;
+                const def = BRAND_DEFS[id];
+                const pill = $('active-brand-pill');
+                if (pill) pill.textContent = def.shortName;
+                renderBrandSwitcher();
+                state.selectedPlatforms = new Set(def.platforms || ['x']);
+                state.dripSelectedPlatforms = new Set(def.platforms || ['x']);
+                renderPlatformPicker();
+                renderDripPlatformPicker();
+                refreshAll();
+            }
+
+            // ════════════════════════════════════════════════════════════════
+            // DRIP BUILDER
+            // ════════════════════════════════════════════════════════════════
+
+            function initDripBuilder() {
+                const startInput = $('drip-start-date');
+                if (startInput && !startInput.value) {
+                    startInput.value = new Date().toISOString().slice(0, 10);
+                }
+                renderDripPlatformPicker();
+                renderDripTimes();
+                renderDripCampaignSelect();
+                renderDripEntries();
+                updateDripSummary();
+            }
+
+            function renderDripPlatformPicker() {
+                const picker = $('drip-platform-picker');
+                if (!picker) return;
+                const def = BRAND_DEFS[currentBrand] || {};
+                const brandPlatforms = def.platforms || ALL_PLATFORMS;
+                // Sync state with current brand defaults on first render
+                if (state.dripSelectedPlatforms.size === 0) {
+                    state.dripSelectedPlatforms = new Set(brandPlatforms);
+                }
+                picker.innerHTML = brandPlatforms.map((p) => `
+                    <button type="button" class="platform-pill ${state.dripSelectedPlatforms.has(p) ? 'active' : ''}"
+                        data-drip-platform="${escapeHtml(p)}">
+                        ${escapeHtml(p)}
+                    </button>
+                `).join('');
+                picker.querySelectorAll('[data-drip-platform]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const p = btn.dataset.dripPlatform;
+                        if (state.dripSelectedPlatforms.has(p)) {
+                            state.dripSelectedPlatforms.delete(p);
+                        } else {
+                            state.dripSelectedPlatforms.add(p);
+                        }
+                        renderDripPlatformPicker();
+                        updateDripSummary();
+                    });
+                });
+            }
+
+            function renderDripTimes() {
+                const row = $('drip-times-row');
+                if (!row) return;
+                row.innerHTML = state.dripTimes.map((t, i) => `
+                    <span class="drip-time-chip">
+                        <input type="time" value="${escapeHtml(t)}" data-time-idx="${i}">
+                        <button type="button" class="remove-time-btn" data-time-idx="${i}" title="Remove">×</button>
+                    </span>
+                `).join('') + '<button type="button" class="btn btn-micro" id="drip-add-time">+ Time</button>';
+                row.querySelectorAll('input[data-time-idx]').forEach((el) => {
+                    el.addEventListener('change', () => {
+                        state.dripTimes[Number(el.dataset.timeIdx)] = el.value;
+                        updateDripSummary();
+                    });
+                });
+                row.querySelectorAll('button[data-time-idx]').forEach((el) => {
+                    el.addEventListener('click', () => {
+                        state.dripTimes.splice(Number(el.dataset.timeIdx), 1);
+                        renderDripTimes();
+                        updateDripSummary();
+                    });
+                });
+                const addBtn = $('drip-add-time');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        state.dripTimes.push('12:00');
+                        renderDripTimes();
+                        updateDripSummary();
+                    });
+                }
+            }
+
+            function renderDripCampaignSelect() {
+                const sel = $('drip-campaign');
+                if (!sel) return;
+                const campaigns = Array.isArray(state.campaigns) ? state.campaigns
+                    : (state.campaigns?.campaigns || []);
+                const prev = sel.value;
+                sel.innerHTML = '<option value="">No campaign</option>' + campaigns.map((c) =>
+                    `<option value="${Number(c.id)}" ${String(c.id) === prev ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
+                ).join('');
+            }
+
+            function renderDripEntries() {
+                const list = $('drip-entries-list');
+                if (!list) return;
+                const count = $('drip-entry-count');
+                if (count) count.textContent = state.dripEntries.length;
+                const statEntries = $('drip-stat-entries');
+                if (statEntries) statEntries.textContent = state.dripEntries.length;
+                if (state.dripEntries.length === 0) {
+                    list.innerHTML = '<div class="drip-empty">No content entries yet. Click <strong>+ Add Entry</strong> to start, or <strong>Import JSON</strong> to bulk-load a content set.</div>';
+                    return;
+                }
+                list.innerHTML = state.dripEntries.map((entry, i) => `
+                    <div class="drip-entry" data-entry-idx="${i}">
+                        <div class="drip-entry-num">${i + 1}</div>
+                        <div class="drip-entry-fields">
+                            <textarea class="drip-entry-content" data-entry-content="${i}" rows="2"
+                                placeholder="Post content...">${escapeHtml(entry.content || '')}</textarea>
+                            <input type="text" class="drip-entry-hashtags" data-entry-hashtags="${i}"
+                                placeholder="#hashtags, comma separated"
+                                value="${escapeHtml((entry.hashtags || []).join(', '))}">
+                        </div>
+                        <button type="button" class="btn btn-micro btn-danger" data-remove-entry="${i}" title="Remove">✕</button>
+                    </div>
+                `).join('');
+                list.querySelectorAll('[data-entry-content]').forEach((el) => {
+                    el.addEventListener('input', () => {
+                        state.dripEntries[Number(el.dataset.entryContent)].content = el.value;
+                    });
+                });
+                list.querySelectorAll('[data-entry-hashtags]').forEach((el) => {
+                    el.addEventListener('change', () => {
+                        state.dripEntries[Number(el.dataset.entryHashtags)].hashtags =
+                            el.value.split(',').map((h) => h.trim().replace(/^#/, '')).filter(Boolean);
+                    });
+                });
+                list.querySelectorAll('[data-remove-entry]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        state.dripEntries.splice(Number(btn.dataset.removeEntry), 1);
+                        renderDripEntries();
+                        updateDripSummary();
+                    });
+                });
+            }
+
+            function addDripEntry(content = '', hashtags = [], assetId = '') {
+                state.dripEntries.push({ content, hashtags, asset_id: assetId });
+                renderDripEntries();
+                updateDripSummary();
+            }
+
+            function updateDripSummary() {
+                const ppd = state.dripPostsPerDay || 2;
+                const platformCount = state.dripSelectedPlatforms.size;
+                const entryCount = state.dripEntries.length;
+                const validEntries = state.dripEntries.filter((e) => e.content?.trim()).length;
+                const days = validEntries > 0 ? Math.ceil(validEntries / ppd) : 0;
+                const totalVariants = validEntries * platformCount;
+
+                const $days = $('drip-stat-days');
+                const $platforms = $('drip-stat-platforms');
+                const $variants = $('drip-stat-variants');
+                const $window = $('drip-stat-window');
+                const $statEntries = $('drip-stat-entries');
+
+                if ($statEntries) $statEntries.textContent = entryCount;
+                if ($days) $days.textContent = days > 0 ? days + ' days' : '—';
+                if ($platforms) $platforms.textContent = platformCount > 0
+                    ? [...state.dripSelectedPlatforms].join(', ') : '—';
+                if ($variants) $variants.textContent = totalVariants > 0
+                    ? totalVariants.toLocaleString() : '—';
+
+                if ($window) {
+                    if (validEntries > 0) {
+                        const startDateVal = $('drip-start-date')?.value;
+                        if (startDateVal) {
+                            const start = new Date(startDateVal + 'T00:00:00');
+                            const end = new Date(start.getTime() + (days - 1) * 86400000);
+                            $window.textContent = start.toLocaleDateString() + ' \u2192 ' + end.toLocaleDateString();
+                        } else {
+                            $window.textContent = days + ' days from chosen start';
+                        }
+                    } else {
+                        $window.textContent = '—';
+                    }
+                }
+
+                const countBadge = $('drip-entry-count');
+                if (countBadge) countBadge.textContent = entryCount;
+            }
+
+            function generateDripPreview() {
+                const ppd = state.dripPostsPerDay || 2;
+                const times = [...state.dripTimes].sort();
+                const platforms = [...state.dripSelectedPlatforms];
+                const startDateVal = $('drip-start-date')?.value;
+                const entries = state.dripEntries.filter((e) => e.content?.trim());
+
+                if (entries.length === 0) { toast('Add at least one content entry before previewing.', 'error'); return; }
+                if (platforms.length === 0) { toast('Select at least one platform.', 'error'); return; }
+                if (!startDateVal) { toast('Choose a start date.', 'error'); return; }
+                if (times.length === 0) { toast('Add at least one post time.', 'error'); return; }
+
+                const slots = [];
+                const start = new Date(startDateVal + 'T00:00:00');
+
+                for (let i = 0; i < entries.length; i++) {
+                    const dayOffset = Math.floor(i / ppd);
+                    const timeIdx = i % ppd;
+                    const time = times[timeIdx] || times[times.length - 1];
+                    const [hh, mm] = time.split(':').map(Number);
+                    const slotDate = new Date(start.getTime() + dayOffset * 86400000);
+                    slotDate.setUTCHours(hh, mm, 0, 0);
+                    slots.push({
+                        idx: i + 1,
+                        scheduled_at: slotDate.toISOString(),
+                        platforms: platforms.join(', '),
+                        content: entries[i].content,
+                    });
+                }
+
+                const panel = $('drip-preview-panel');
+                const table = $('drip-preview-table');
+                const previewCount = $('drip-preview-count');
+                const displaySlots = slots.slice(0, 50);
+
+                table.innerHTML = displaySlots.map((s) => `
+                    <tr>
+                        <td>${escapeHtml(String(s.idx))}</td>
+                        <td>${escapeHtml(formatDateTime(s.scheduled_at))}</td>
+                        <td>${escapeHtml(s.platforms)}</td>
+                        <td class="content-preview-cell">${escapeHtml(s.content.slice(0, 100))}${s.content.length > 100 ? '…' : ''}</td>
+                    </tr>
+                `).join('');
+
+                if (previewCount) previewCount.textContent = `${slots.length} slots · showing first ${displaySlots.length}`;
+                if (panel) panel.classList.remove('d-none');
+
+                const confirmBtn = $('drip-confirm-btn');
+                if (confirmBtn) confirmBtn.classList.remove('d-none');
+
+                updateDripSummary();
+                toast(`Preview: ${slots.length} posts × ${platforms.length} platforms = ${(slots.length * platforms.length).toLocaleString()} variants`, 'success');
+            }
+
+            async function confirmDripSchedule() {
+                const ppd = state.dripPostsPerDay || 2;
+                const times = [...state.dripTimes].sort();
+                const platforms = [...state.dripSelectedPlatforms];
+                const startDateVal = $('drip-start-date')?.value;
+                const campaignId = $('drip-campaign')?.value ? Number($('drip-campaign').value) : null;
+                const entries = state.dripEntries.filter((e) => e.content?.trim());
+
+                if (entries.length === 0) { toast('No content entries to schedule.', 'error'); return; }
+                if (platforms.length === 0) { toast('Select at least one platform.', 'error'); return; }
+                if (!startDateVal) { toast('Choose a start date.', 'error'); return; }
+
+                const confirmBtn = $('drip-confirm-btn');
+                try {
+                    if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Scheduling…'; }
+
+                    const payload = {
+                        brand: currentBrand,
+                        campaign_id: campaignId,
+                        platforms,
+                        start_date: startDateVal,
+                        posts_per_day: ppd,
+                        post_times_utc: times,
+                        entries: entries.map((e) => ({
+                            content: e.content,
+                            hashtags: e.hashtags || [],
+                            asset_id: e.asset_id || '',
+                        })),
+                    };
+
+                    const result = await api('/campaigns/bulk-schedule', { method: 'POST', body: payload });
+                    toast(
+                        `Drip scheduled! ${(result.created_variants || 0).toLocaleString()} variants across ${result.days_covered || 0} days.`,
+                        'success'
+                    );
+
+                    state.dripEntries = [];
+                    renderDripEntries();
+                    updateDripSummary();
+                    if ($('drip-preview-panel')) $('drip-preview-panel').classList.add('d-none');
+                    if (confirmBtn) { confirmBtn.classList.add('d-none'); confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm & Schedule All'; }
+                    await refreshAll();
+                } catch (err) {
+                    toast('Bulk schedule failed: ' + err.message, 'error');
+                    if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm & Schedule All'; }
+                }
+            }
+
+            function importDripJSON() {
+                const raw = $('drip-import-textarea')?.value?.trim();
+                if (!raw) { toast('Paste JSON content first.', 'error'); return; }
+
+                let parsed;
+                try {
+                    parsed = JSON.parse(raw);
+                } catch {
+                    toast('Invalid JSON — please paste a valid JSON array.', 'error');
+                    return;
+                }
+
+                if (!Array.isArray(parsed)) { toast('JSON must be an array.', 'error'); return; }
+
+                let added = 0;
+                for (const item of parsed) {
+                    if (typeof item === 'string') {
+                        if (item.trim()) { addDripEntry(item.trim(), [], ''); added++; }
+                    } else if (item && typeof item === 'object') {
+                        const content = (item.content || item.text || item.caption || '').toString().trim();
+                        if (content) {
+                            const hashtags = Array.isArray(item.hashtags) ? item.hashtags : [];
+                            addDripEntry(content, hashtags, item.asset_id || '');
+                            added++;
+                        }
+                    }
+                }
+
+                closeModal('drip-import-modal');
+                if ($('drip-import-textarea')) $('drip-import-textarea').value = '';
+                toast(`Imported ${added} entr${added === 1 ? 'y' : 'ies'}.`, 'success');
+                updateDripSummary();
             }
 
             window.__clerkReady

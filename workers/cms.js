@@ -706,7 +706,7 @@ const BRAND_DEFINITIONS = {
   gfd:          { name: 'Good Flippin Design',  domain: 'goodflippindesign.com',  color: '#6c63ff', platforms: ['instagram','linkedin','x'] },
   gfv:          { name: 'Good Flippin Vibes',   domain: 'goodflippinvibes.com',   color: '#10b981', platforms: ['instagram','x','facebook','tiktok','pinterest'] },
   aiaimate:     { name: 'AI Aimate',            domain: 'aiaimate.com',           color: '#3b82f6', platforms: ['linkedin','x','youtube'] },
-  culturesherpa:{ name: 'CultureSherpa',        domain: 'culturesherpa.org',      color: '#f59e0b', platforms: ['instagram','x','pinterest'] },
+  culturesherpa:{ name: 'CultureSherpa',        domain: 'culturesherpa.org',      color: '#f59e0b', platforms: ['instagram','x','facebook','linkedin'] },
   globaldeets:  { name: 'Global Deets',         domain: 'globaldeets.com',        color: '#8b5cf6', platforms: ['linkedin','x'] },
 };
 
@@ -1202,6 +1202,189 @@ async function handleDeleteCampaign(request, user, env) {
   return jsonResponse({ message: 'Campaign archived' });
 }
 
+/**
+ * POST /api/cms/campaigns/bulk-schedule
+ * Body: {
+ *   campaign_id: number|null,
+ *   brand: string,
+ *   platforms: string[],
+ *   start_date: 'YYYY-MM-DD',
+ *   posts_per_day: number,          // default 2
+ *   post_times_utc: string[],       // e.g. ['14:00','20:00']
+ *   entries: Array<{
+ *     content: string,
+ *     hashtags?: string[],
+ *     asset_id?: string,
+ *     platform_overrides?: Record<string, { content?: string; format?: string }>
+ *   }>
+ * }
+ * Creates one cms_social_posts row + N variant rows (one per platform) for each entry.
+ * Uses D1 batch() chunked at 100 for atomicity.
+ */
+async function handleBulkSchedule(request, user, env) {
+  await ensureCampaignSchema(env.DB);
+
+  const data = await request.json().catch(() => null);
+  if (!data) return errorResponse('Invalid JSON body', 400);
+
+  const {
+    campaign_id = null,
+    brand,
+    platforms,
+    start_date,
+    posts_per_day = 2,
+    post_times_utc,
+    entries,
+  } = data;
+
+  if (!brand) return errorResponse('brand is required');
+  if (!Array.isArray(platforms) || platforms.length === 0) return errorResponse('platforms[] is required');
+  if (!start_date || !/^\d{4}-\d{2}-\d{2}$/.test(start_date)) return errorResponse('start_date must be YYYY-MM-DD');
+  if (!Array.isArray(entries) || entries.length === 0) return errorResponse('entries[] is required and must not be empty');
+
+  const ppd = Math.max(1, Math.min(10, parseInt(posts_per_day, 10) || 2));
+  const rawTimes = Array.isArray(post_times_utc) && post_times_utc.length
+    ? post_times_utc
+    : ['14:00', '20:00'];
+  // Normalise to HH:MM and slice to ppd slots
+  const times = rawTimes
+    .map(t => String(t || '14:00').trim().slice(0, 5))
+    .slice(0, ppd);
+  // Pad if fewer times than ppd (repeat last time)
+  while (times.length < ppd) times.push(times[times.length - 1]);
+
+  const now = new Date().toISOString();
+  let skippedCount = 0;
+
+  // ── Phase 1: insert parent posts ──────────────────────────────
+  const postStatements = [];
+  const validEntries = []; // track original indices of non-empty entries
+
+  for (let i = 0; i < entries.length; i++) {
+    const entry = typeof entries[i] === 'string'
+      ? { content: entries[i] }
+      : entries[i];
+    const content = (entry.content || '').trim();
+    if (!content) { skippedCount++; continue; }
+
+    const dayOffset = Math.floor(validEntries.length / ppd);
+    const timeIdx = validEntries.length % ppd;
+    const [h, m] = times[timeIdx].split(':').map(Number);
+    const dt = new Date(start_date + 'T00:00:00Z');
+    dt.setUTCDate(dt.getUTCDate() + dayOffset);
+    dt.setUTCHours(h, m || 0, 0, 0);
+    const scheduledAt = dt.toISOString();
+
+    const mediaIds = entry.asset_id ? [entry.asset_id] : [];
+    postStatements.push(
+      env.DB.prepare(`
+        INSERT INTO cms_social_posts (
+          brand, platform, content, media_ids, scheduled_at, status,
+          created_by, created_at, updated_at, campaign_id, objective
+        ) VALUES (?, 'multi', ?, ?, ?, 'scheduled', ?, ?, ?, ?, ?)
+      `).bind(
+        brand, content,
+        JSON.stringify(mediaIds),
+        scheduledAt,
+        user.id, now, now,
+        campaign_id || null,
+        entry.objective || ''
+      )
+    );
+    validEntries.push({ entry, scheduledAt });
+  }
+
+  if (postStatements.length === 0) {
+    return errorResponse('All entries were empty — nothing to schedule');
+  }
+
+  // Batch insert posts (chunk at 100)
+  const CHUNK = 100;
+  const postIds = [];
+  for (let i = 0; i < postStatements.length; i += CHUNK) {
+    const results = await env.DB.batch(postStatements.slice(i, i + CHUNK));
+    for (const r of results) {
+      postIds.push(r.meta?.last_row_id || null);
+    }
+  }
+
+  // ── Phase 2: insert variants ──────────────────────────────────
+  const variantStatements = [];
+  const previewSlots = [];
+
+  for (let idx = 0; idx < validEntries.length; idx++) {
+    const postId = postIds[idx];
+    if (!postId) continue;
+
+    const { entry, scheduledAt } = validEntries[idx];
+    const content = (entry.content || '').trim();
+    const hashtags = Array.isArray(entry.hashtags)
+      ? entry.hashtags.map(h => String(h).trim().replace(/^#/, '')).filter(Boolean)
+      : [];
+    const assetId = entry.asset_id || '';
+
+    if (previewSlots.length < 20) {
+      previewSlots.push({ slot: idx + 1, scheduled_at: scheduledAt, platforms, content: content.slice(0, 100) });
+    }
+
+    for (const platform of platforms) {
+      const rule = platformRule(platform);
+      const overrides = (entry.platform_overrides || {})[platform] || {};
+      const baseContent = (overrides.content || content).trim();
+      const hashtagString = hashtags.length ? hashtags.map(h => `#${h}`).join(' ') : '';
+      const composedContent = hashtagString
+        ? `${baseContent}\n\n${hashtagString}`
+        : baseContent;
+
+      // Respect platform char limits — truncate gracefully rather than fail the batch
+      const finalContent = composedContent.length > rule.maxChars
+        ? composedContent.slice(0, rule.maxChars - 1) + '…'
+        : composedContent;
+
+      variantStatements.push(
+        env.DB.prepare(`
+          INSERT INTO cms_post_variants (
+            post_id, platform, content, media_asset_id, format,
+            char_count, hashtags, scheduled_at, status, created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)
+        `).bind(
+          postId, platform, finalContent, assetId,
+          overrides.format || rule.defaultFormat,
+          finalContent.length,
+          JSON.stringify(hashtags),
+          scheduledAt, now
+        )
+      );
+    }
+  }
+
+  let variantsCreated = 0;
+  for (let i = 0; i < variantStatements.length; i += CHUNK) {
+    const results = await env.DB.batch(variantStatements.slice(i, i + CHUNK));
+    variantsCreated += results.filter(r => Number(r.meta?.changes) > 0).length;
+  }
+
+  await logAudit(env.DB, user.id, 'campaign.bulk.schedule', 'campaign',
+    String(campaign_id || 'general'), {
+      brand, platforms,
+      total_entries: entries.length,
+      scheduled_posts: postIds.length,
+      created_variants: variantsCreated,
+      posts_per_day: ppd,
+      start_date,
+    });
+
+  return jsonResponse({
+    ok: true,
+    scheduled_posts: postIds.length,
+    created_variants: variantsCreated,
+    skipped_empty: skippedCount,
+    days_covered: Math.ceil(postIds.length / ppd),
+    platforms_per_post: platforms.length,
+    preview: previewSlots,
+  }, 201);
+}
+
 async function handleCampaignCalendar(request, env) {
   await ensureCampaignSchema(env.DB);
 
@@ -1403,20 +1586,6 @@ async function handleListCategories(env) {
   return jsonResponse(results || []);
 }
 
-/**
- * GET /api/cms/brands — Distinct brands with counts
- */
-async function handleListBrands(env) {
-  const { results } = await env.DB.prepare(`
-    SELECT brand, COUNT(*) as asset_count
-    FROM cms_assets WHERE active=1
-    GROUP BY brand
-    ORDER BY asset_count DESC
-  `).all();
-
-  return jsonResponse(results || []);
-}
-
 // ────────────────────────────────────────────────────────────────
 //  Router
 // ────────────────────────────────────────────────────────────────
@@ -1574,6 +1743,9 @@ export async function handleCMSRequest(request, env, user) {
     }
     if (path === '/campaigns/calendar' && method === 'GET') {
       return handleCampaignCalendar(request, env);
+    }
+    if (path === '/campaigns/bulk-schedule' && method === 'POST') {
+      return handleBulkSchedule(request, user, env);
     }
 
     // Content (admin)
