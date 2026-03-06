@@ -6780,8 +6780,13 @@
         return new Promise((resolve, reject) => {
           if (window.Clerk) { resolve(); return; }
           const s = document.createElement('script');
-          s.src = 'https://cdn.clerk.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js';
+          const key = window.CLERK_PUBLISHABLE_KEY;
+          const b64 = key.replace(/^pk_(live|test)_/, '');
+          const padded = b64 + '====='.slice(0, (4 - b64.length % 4) % 4);
+          const frontendApi = atob(padded).replace(/\$$/, '');
+          s.src = 'https://' + frontendApi + '/npm/@clerk/clerk-js@5/dist/clerk.browser.js';
           s.crossOrigin = 'anonymous';
+          s.setAttribute('data-clerk-publishable-key', key);
           s.onload = resolve;
           s.onerror = reject;
           document.head.appendChild(s);
@@ -6806,8 +6811,8 @@
 
         try {
           await loadClerkScript();
-          clerkInstance = new window.Clerk(window.CLERK_PUBLISHABLE_KEY);
-          await clerkInstance.load();
+          clerkInstance = window.Clerk;
+          await clerkInstance.load({ publishableKey: window.CLERK_PUBLISHABLE_KEY });
 
           if (clerkInstance.user) {
             currentUser = clerkInstance.user;
