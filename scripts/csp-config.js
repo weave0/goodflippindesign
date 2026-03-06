@@ -39,7 +39,7 @@ const SHARED = {
     frame: ['https://js.stripe.com', 'https://hooks.stripe.com'],
   },
   clerk: {
-    script: ['https://cdn.clerk.dev'],
+    script: ['https://cdn.clerk.dev', 'https://clerk.goodflippinvibes.com'],
     connect: [
       'https://clerk.goodflippinvibes.com',
       'https://api.clerk.com',
