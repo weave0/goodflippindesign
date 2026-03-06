@@ -1613,9 +1613,8 @@
 
             async function initAuth() {
                 try {
-                    const key = window.ENV?.CLERK_PUBLISHABLE_KEY || window.CLERK_PUBLISHABLE_KEY;
                     state.clerk = window.Clerk;
-                    await state.clerk.load({ publishableKey: key });
+                    await state.clerk.load();
 
                     if (!state.clerk.user) {
                         state.clerk.openSignIn({ redirectUrl: window.location.href });

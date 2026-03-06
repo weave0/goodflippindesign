@@ -6812,7 +6812,7 @@
         try {
           await loadClerkScript();
           clerkInstance = window.Clerk;
-          await clerkInstance.load({ publishableKey: window.CLERK_PUBLISHABLE_KEY });
+          await clerkInstance.load();
 
           if (clerkInstance.user) {
             currentUser = clerkInstance.user;

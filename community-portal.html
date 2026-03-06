@@ -2986,7 +2986,7 @@
                 try {
                     await window.__clerkReady;
                     clerk = window.Clerk;
-                    await clerk.load({ publishableKey: window.CLERK_PUBLISHABLE_KEY });
+                    await clerk.load();
 
                     if (clerk.user) {
                         currentUser = clerk.user;
