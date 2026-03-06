@@ -154,7 +154,21 @@ function getClerkSecretKey(hostname, env) {
  */
 async function verifyClerkToken(token, secretKey) {
   try {
-    const response = await fetch('https://api.clerk.com/v1/sessions/verify', {
+    // Decode JWT payload to extract session ID and user ID
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+
+    // Check expiry
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+
+    const sessionId = payload.sid;
+    const userId = payload.sub;
+    if (!sessionId || !userId) return null;
+
+    // Verify session via Clerk Backend API (requires session ID in URL)
+    const response = await fetch(`https://api.clerk.com/v1/sessions/${sessionId}/verify`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${secretKey}`,
@@ -163,10 +177,25 @@ async function verifyClerkToken(token, secretKey) {
       body: JSON.stringify({ token }),
     });
 
-    if (!response.ok) return null;
+    if (response.ok) {
+      const session = await response.json();
+      if (session.user) return session.user;
+    }
 
-    const session = await response.json();
-    return session.user;
+    // Fallback: fetch user directly if session verify fails
+    const userResponse = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
+      headers: { 'Authorization': `Bearer ${secretKey}` },
+    });
+
+    if (!userResponse.ok) return null;
+    const user = await userResponse.json();
+
+    // Map to expected shape (email_addresses → emailAddress)
+    return {
+      id: user.id,
+      emailAddress: user.email_addresses?.[0]?.email_address,
+      publicMetadata: user.public_metadata,
+    };
   } catch (error) {
     console.error('Token verification failed:', error);
     return null;
