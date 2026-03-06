@@ -1621,7 +1621,16 @@
                         return;
                     }
 
-                    const role = state.clerk.user.publicMetadata?.role;
+                    let role = state.clerk.user.publicMetadata?.role;
+                    if (role !== 'admin') {
+                        // First sign-in: trigger server-side admin role assignment for whitelisted emails
+                        try {
+                            const token = await state.clerk.session.getToken();
+                            await fetch(API + '/posts', { headers: { Authorization: 'Bearer ' + token } });
+                            await state.clerk.user.reload();
+                            role = state.clerk.user.publicMetadata?.role;
+                        } catch (e) { /* server role assignment unavailable */ }
+                    }
                     if (role !== 'admin') {
                         $('auth-loading').classList.add('hide');
                         $('auth-denied').classList.remove('hide');
