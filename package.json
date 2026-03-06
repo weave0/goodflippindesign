@@ -30,6 +30,11 @@
     "watermark:help": "node scripts/watermark.js --list-platforms",
     "cms:schema": "wrangler d1 execute gfd_community --file=d1-schema-cms.sql",
     "scan:media": "node scripts/scan-media-drop.js",
+    "sync:art": "node scripts/sync-art-drive.js",
+    "sync:art:watch": "node scripts/sync-art-drive.js --watch",
+    "sync:art:dry": "node scripts/sync-art-drive.js --dry-run",
+    "discover:assets": "node scripts/discover-site-assets.js",
+    "discover:assets:dry": "node scripts/discover-site-assets.js --dry-run",
     "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf"
   },
   "repository": {
