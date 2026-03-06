@@ -24,7 +24,17 @@
 
 ### ⚠️ Remaining Steps
 
-**REQUIRED**: Set Cloudflare Pages secret
+**STEP 1**: Enable OAuth Providers in Clerk Dashboard
+
+1. Go to: <https://dashboard.clerk.com/> → Select **"Good Flippin Design Admin"** app
+2. Navigate to: **User & authentication** → **Social connections** (or **SSO connections**)
+3. Enable these providers:
+   - ✅ **Google** (click "Add connection" → use Clerk development credentials or your own)
+   - ✅ **LinkedIn** (optional, for professional sign-ins)
+   - ✅ **Email** (under "Email & Phone" section)
+4. Click **Save** for each provider
+
+**STEP 2**: Set Cloudflare Pages secret
 
 1. Go to: <https://dash.cloudflare.com/> → **Pages** → **goodflippindesign** → **Settings** → **Environment variables**
 2. Click **Add variable** (Production environment)
@@ -34,9 +44,13 @@
    - **Type**: Encrypted variable
 4. Click **Save** → **Redeploy site**
 
-**THEN**: Wait 5-10 minutes for DNS propagation, verify in Clerk dashboard that all 5 records show "Verified" ✅
+**STEP 3**: Wait for DNS propagation (5-10 minutes)
 
-**TEST**: Visit <https://goodflippindesign.com/admin.html> and sign in
+Verify in Clerk dashboard that all 5 DNS records show "Verified" ✅
+
+**STEP 4**: Test authentication
+
+Visit <https://goodflippindesign.com/admin.html> and sign in with Google or email
 
 ---
 
