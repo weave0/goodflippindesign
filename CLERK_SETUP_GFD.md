@@ -9,9 +9,9 @@ The GFD admin panel (goodflippindesign.com) uses a **separate Clerk application*
 ### GFD Admin Clerk App Keys
 
 ```
-Publishable Key: pk_test_ZHluYW1pYy1sYWJyYWRvci0zNS5jbGVyay5hY2NvdW50cy5kZXYk
-Secret Key:      sk_test_k0CRFPpl8grMJu1B***************56  (redacted)
-Clerk Domain:    dynamic-labrador-35.clerk.accounts.dev
+Publishable Key: pk_live_Y2xlcmsuZ29vZGZsaXBwaW5kZXNpZ24uY29tJA
+Secret Key:      sk_live_XNoNOJvAG6i7MR***************Gl  (redacted)
+Clerk Domain:    clerk.goodflippindesign.com
 ```
 
 ### GFV Community Clerk App Keys
@@ -30,12 +30,13 @@ Go to **Cloudflare Dashboard** → **Pages** → **goodflippindesign** → **Set
 
 Set these variables for the **Production** environment:
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| `CLERK_SECRET_KEY_GFD` | `sk_test_k0CRFPpl8...***...E56` | GFD admin auth verification |
-| `CLERK_PUBLISHABLE_KEY` | *(optional)* `pk_test_ZHluYW1pYy...` | Injected into admin.html via `window.ENV` (fallback hardcoded) |
+| Variable                | Value                                  | Purpose                                                        |
+| ----------------------- | -------------------------------------- | -------------------------------------------------------------- |
+| `CLERK_SECRET_KEY_GFD`  | `sk_live_XNoNOJvAG6i7MR...***...Gl`    | GFD admin auth verification                                    |
+| `CLERK_PUBLISHABLE_KEY` | _(optional)_ `pk_live_Y2xlcmsuZ29v...` | Injected into admin.html via `window.ENV` (fallback hardcoded) |
 
-**Note**: 
+**Note**:
+
 - The code already has `pk_test_...` hardcoded as a fallback in admin.html
 - `CLERK_SECRET_KEY` (without `_GFD` suffix) is used for GFV community portal
 - The auth worker automatically selects the correct key based on hostname
@@ -60,7 +61,10 @@ The auth worker (`workers/auth.js`) now supports **multiple Clerk applications**
 ```javascript
 function getClerkSecretKey(hostname, env) {
   // GFD admin panel uses separate Clerk app
-  if (hostname === 'goodflippindesign.com' || hostname === 'www.goodflippindesign.com') {
+  if (
+    hostname === "goodflippindesign.com" ||
+    hostname === "www.goodflippindesign.com"
+  ) {
     return env.CLERK_SECRET_KEY_GFD || env.CLERK_SECRET_KEY;
   }
   // GFV community portal and all other sites use main Clerk app
@@ -83,14 +87,15 @@ The auth worker auto-assigns the `admin` role to whitelisted emails:
 
 ```javascript
 const ADMIN_EMAILS = [
-  'brett.l.weaver@gmail.com',
-  'getsome@goodflippinvibes.com',
-  'hello@goodflippindesign.com',
+  "brett.l.weaver@gmail.com",
+  "getsome@goodflippinvibes.com",
+  "hello@goodflippindesign.com",
   // ... (see workers/auth.js)
 ];
 ```
 
 To grant admin access:
+
 1. Add email to `ADMIN_EMAILS` array in `workers/auth.js`
 2. User signs in once
 3. Auth worker assigns `role: 'admin'` to their Clerk profile
@@ -122,15 +127,18 @@ $html -match "new window\.Clerk"  # Should return False
 ## Troubleshooting
 
 ### "Missing publishableKey" Error
+
 - **Cause**: `window.ENV.CLERK_PUBLISHABLE_KEY` not set or wrong key type
 - **Fix**: Unset the Cloudflare env var or ensure it matches the test key
 - **Fallback**: admin.html already has `pk_test_...` hardcoded
 
 ### "authorization_invalid" 403 Error
+
 - **Cause**: Token from GFD Clerk app verified against GFV secret key
 - **Fix**: Ensure `CLERK_SECRET_KEY_GFD` is set and deployed
 
 ### Auth Worker Not Selecting GFD Key
+
 - **Cause**: Hostname not matching detection logic
 - **Debug**: Check `url.hostname` in worker logs
 - **Fix**: Add hostname variant to `getClerkSecretKey()` function
@@ -150,5 +158,5 @@ Currently using **test keys** (`pk_test_...` / `sk_test_...`). Before going live
 
 - [admin.html](admin.html#L14) - Clerk browser SDK initialization
 - [workers/auth.js](workers/auth.js#L139) - Multi-app Clerk verification
-- [_worker.js](_worker.js#L119) - API routing to auth worker
+- [\_worker.js](_worker.js#L119) - API routing to auth worker
 - [wrangler.toml](wrangler.toml) - Worker bindings (add secrets here for local dev)
