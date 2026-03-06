@@ -11,5 +11,12 @@ binding = "DB"
 database_name = "gfd_community"
 database_id = "a46ec9df-31b8-4285-845b-1fd3a62bd1b5"
 
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "gfv-media"
+
 [vars]
 NODE_ENV = "production"
+# SOCIAL_PUBLISHER_URL — set via `wrangler secret put SOCIAL_PUBLISHER_URL`
+# TOKEN_ENCRYPTION_KEY  — set via `wrangler secret put TOKEN_ENCRYPTION_KEY`
+# INTERNAL_SECRET       — set via `wrangler secret put INTERNAL_SECRET`

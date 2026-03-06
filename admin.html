@@ -3036,7 +3036,6 @@
 
                 await loadCalendar();
                 renderOverview();
-                renderConnections();
                 renderEcosystemMatrix();
                 renderHandlesTable();
                 renderCampaigns();
@@ -3352,30 +3351,32 @@
                     toast(err.message, 'error');
                 }
             }
-            state.campaigns = await api('/campaigns?brand=' + encodeURIComponent(currentBrand));
-        }
+
+            async function loadCampaigns() {
+                state.campaigns = await api('/campaigns?brand=' + encodeURIComponent(currentBrand));
+            }
 
             async function loadVariants() {
-            state.variants = await api('/social/variants?brand=' + encodeURIComponent(currentBrand) + '&limit=250');
-        }
+                state.variants = await api('/social/variants?brand=' + encodeURIComponent(currentBrand) + '&limit=250');
+            }
 
-        async function loadCalendar() {
-            const d = state.calendarDate;
-            const start = new Date(d.getFullYear(), d.getMonth(), 1);
-            const end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-            const data = await api('/campaigns/calendar?brand=' + encodeURIComponent(currentBrand) + '&start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString()));
-            renderCalendar(data.events || [], start);
-        }
+            async function loadCalendar() {
+                const d = state.calendarDate;
+                const start = new Date(d.getFullYear(), d.getMonth(), 1);
+                const end = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+                const data = await api('/campaigns/calendar?brand=' + encodeURIComponent(currentBrand) + '&start=' + encodeURIComponent(start.toISOString()) + '&end=' + encodeURIComponent(end.toISOString()));
+                renderCalendar(data.events || [], start);
+            }
 
-        function renderOverview() {
-            const queueBody = $('overview-queue');
-            const upcoming = [...state.variants]
-                .filter((row) => row.scheduled_at)
-                .sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
-                .slice(0, 12);
+            function renderOverview() {
+                const queueBody = $('overview-queue');
+                const upcoming = [...state.variants]
+                    .filter((row) => row.scheduled_at)
+                    .sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
+                    .slice(0, 12);
 
-            queueBody.innerHTML = upcoming.length
-                ? upcoming.map((row) => `
+                queueBody.innerHTML = upcoming.length
+                    ? upcoming.map((row) => `
                         <tr>
                             <td>${escapeHtml(formatDateTime(row.scheduled_at))}</td>
                             <td>${escapeHtml(row.campaign_name || 'General')}</td>
@@ -3383,32 +3384,32 @@
                             <td>${statusTag(row.status)}</td>
                         </tr>
                     `).join('')
-                : '<tr><td colspan="4">No queued variants yet.</td></tr>';
+                    : '<tr><td colspan="4">No queued variants yet.</td></tr>';
 
-            const connectionSummary = $('overview-connections');
-            const byPlatform = {};
-            for (const platform of PLATFORM_ORDER) {
-                const active = state.connections.filter((c) => c.platform === platform && Number(c.is_active) === 1);
-                byPlatform[platform] = active.length;
-            }
+                const connectionSummary = $('overview-connections');
+                const byPlatform = {};
+                for (const platform of PLATFORM_ORDER) {
+                    const active = state.connections.filter((c) => c.platform === platform && Number(c.is_active) === 1);
+                    byPlatform[platform] = active.length;
+                }
 
-            connectionSummary.innerHTML = PLATFORM_ORDER.map((platform) => {
-                const connected = byPlatform[platform] > 0;
-                return `
+                connectionSummary.innerHTML = PLATFORM_ORDER.map((platform) => {
+                    const connected = byPlatform[platform] > 0;
+                    return `
                         <div class="overview-conn-row">
                             <span class="overview-conn-name">${escapeHtml(platform)}</span>
                             <span class="tag ${connected ? 'ok' : 'fail'}">${connected ? 'connected' : 'missing'}</span>
                         </div>
                     `;
-            }).join('');
+                }).join('');
 
-            const assetsBody = $('overview-assets');
-            const recentAssets = [...state.assets]
-                .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
-                .slice(0, 10);
+                const assetsBody = $('overview-assets');
+                const recentAssets = [...state.assets]
+                    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+                    .slice(0, 10);
 
-            assetsBody.innerHTML = recentAssets.length
-                ? recentAssets.map((asset) => `
+                assetsBody.innerHTML = recentAssets.length
+                    ? recentAssets.map((asset) => `
                         <tr>
                             <td>${escapeHtml(asset.title)}</td>
                             <td>${escapeHtml(asset.category || '-')}</td>
@@ -3416,55 +3417,45 @@
                             <td>${escapeHtml(formatDateTime(asset.created_at))}</td>
                         </tr>
                     `).join('')
-                : '<tr><td colspan="4">No assets available.</td></tr>';
-        }
+                    : '<tr><td colspan="4">No assets available.</td></tr>';
+            }
 
-        function renderConnections() {
-            // Legacy: kept for overview connection summary bar only
-            const connectionSummary = $('connection-summary');
-            if (!connectionSummary) return;
-            const summary = PLATFORM_ORDER.map((platform) => {
-                const active = state.connections.filter((c) => c.platform === platform && Number(c.is_active) === 1);
-                const connected = active.length > 0;
-                return `<span class="conn-pill ${connected ? 'ok' : 'warn'}">${escapeHtml(platform)}</span>`;
-            }).join('');
-            connectionSummary.innerHTML = summary;
-        }
 
-        function renderEcosystemMatrix() {
-            const head = $('eco-matrix-head');
-            const body = $('eco-matrix-body');
-            if (!head || !body) return;
 
-            const activePlatforms = ALL_PLATFORMS;
+            function renderEcosystemMatrix() {
+                const head = $('eco-matrix-head');
+                const body = $('eco-matrix-body');
+                if (!head || !body) return;
 
-            // Header row: blank corner + platform names
-            head.innerHTML = '<tr><th>Brand</th>' +
-                activePlatforms.map((p) => `<th>${escapeHtml(p)}</th>`).join('') +
-                '</tr>';
+                const activePlatforms = ALL_PLATFORMS;
 
-            const rows = Object.entries(BRAND_DEFS).map(([brandId, brandDef]) => {
-                const cells = activePlatforms.map((platform) => {
-                    const isEnabled = brandDef.platforms.includes(platform);
+                // Header row: blank corner + platform names
+                head.innerHTML = '<tr><th>Brand</th>' +
+                    activePlatforms.map((p) => `<th>${escapeHtml(p)}</th>`).join('') +
+                    '</tr>';
 
-                    if (!isEnabled) {
-                        return `<td><div class="eco-cell"><button class="eco-cell-btn n-a" disabled aria-label="N/A">—</button></div></td>`;
-                    }
+                const rows = Object.entries(BRAND_DEFS).map(([brandId, brandDef]) => {
+                    const cells = activePlatforms.map((platform) => {
+                        const isEnabled = brandDef.platforms.includes(platform);
 
-                    // Check for an active connection (token)
-                    const conn = state.connections.find(
-                        (c) => c.brand === brandId && c.platform === platform && Number(c.is_active) === 1
-                    );
-                    // Check for a registered handle
-                    const handle = state.socialAccounts.find(
-                        (a) => a.brand === brandId && a.platform === platform
-                    );
+                        if (!isEnabled) {
+                            return `<td><div class="eco-cell"><button class="eco-cell-btn n-a" disabled aria-label="N/A">—</button></div></td>`;
+                        }
 
-                    const isConnected = Boolean(conn);
-                    const handleText = handle ? escapeHtml(handle.handle) : '';
-                    const label = conn ? escapeHtml(conn.account_label || conn.account_id || 'connected') : (isConnected ? 'connected' : 'connect');
+                        // Check for an active connection (token)
+                        const conn = state.connections.find(
+                            (c) => c.brand === brandId && c.platform === platform && Number(c.is_active) === 1
+                        );
+                        // Check for a registered handle
+                        const handle = state.socialAccounts.find(
+                            (a) => a.brand === brandId && a.platform === platform
+                        );
 
-                    return `<td>
+                        const isConnected = Boolean(conn);
+                        const handleText = handle ? escapeHtml(handle.handle) : '';
+                        const label = conn ? escapeHtml(conn.account_label || conn.account_id || 'connected') : (isConnected ? 'connected' : 'connect');
+
+                        return `<td>
                             <div class="eco-cell">
                                 <button class="eco-cell-btn ${isConnected ? 'connected' : ''}"
                                     data-matrix-brand="${escapeHtml(brandId)}"
@@ -3477,45 +3468,45 @@
                                 ${handleText ? `<span class="eco-cell-handle">${handleText}</span>` : ''}
                             </div>
                         </td>`;
-                }).join('');
+                    }).join('');
 
-                return `<tr>
+                    return `<tr>
                         <td>
                             <span class="eco-brand-dot" style="background:${brandDef.color}"></span>
                             ${escapeHtml(brandDef.name)}
                         </td>
                         ${cells}
                     </tr>`;
-            }).join('');
+                }).join('');
 
-            body.innerHTML = rows;
+                body.innerHTML = rows;
 
-            // Wire up matrix cell clicks → prefill connection modal
-            body.querySelectorAll('[data-matrix-brand]').forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    const platform = btn.dataset.matrixPlatform;
-                    // Switch to manual tab and prefill
-                    document.querySelectorAll('.conn-tab').forEach((t) => t.classList.remove('active'));
-                    document.querySelectorAll('.conn-tab-panel').forEach((p) => p.classList.remove('active'));
-                    document.querySelector('[data-conn-tab="manual"]').classList.add('active');
-                    $('conn-tab-manual').classList.add('active');
-                    $('conn-platform').value = platform;
-                    renderOAuthProviderGrid();
-                    openModal('connection-modal');
+                // Wire up matrix cell clicks → prefill connection modal
+                body.querySelectorAll('[data-matrix-brand]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const platform = btn.dataset.matrixPlatform;
+                        // Switch to manual tab and prefill
+                        document.querySelectorAll('.conn-tab').forEach((t) => t.classList.remove('active'));
+                        document.querySelectorAll('.conn-tab-panel').forEach((p) => p.classList.remove('active'));
+                        document.querySelector('[data-conn-tab="manual"]').classList.add('active');
+                        $('conn-tab-manual').classList.add('active');
+                        $('conn-platform').value = platform;
+                        renderOAuthProviderGrid();
+                        openModal('connection-modal');
+                    });
                 });
-            });
-        }
-
-        function renderHandlesTable() {
-            const body = $('handles-table');
-            if (!body) return;
-
-            if (state.socialAccounts.length === 0) {
-                body.innerHTML = '<tr><td colspan="7" class="text-muted">No handles registered yet. Click "Register Handle" to add one.</td></tr>';
-                return;
             }
 
-            body.innerHTML = state.socialAccounts.map((acct) => `
+            function renderHandlesTable() {
+                const body = $('handles-table');
+                if (!body) return;
+
+                if (state.socialAccounts.length === 0) {
+                    body.innerHTML = '<tr><td colspan="7" class="text-muted">No handles registered yet. Click "Register Handle" to add one.</td></tr>';
+                    return;
+                }
+
+                body.innerHTML = state.socialAccounts.map((acct) => `
                     <tr>
                         <td>
                             <span class="eco-brand-dot" style="background:${escapeHtml(BRAND_DEFS[acct.brand]?.color || '#888')}"></span>
@@ -3533,15 +3524,15 @@
                     </tr>
                 `).join('');
 
-            body.querySelectorAll('[data-delete-handle]').forEach((btn) => {
-                btn.addEventListener('click', () => deleteHandle(btn.getAttribute('data-delete-handle')));
-            });
-        }
+                body.querySelectorAll('[data-delete-handle]').forEach((btn) => {
+                    btn.addEventListener('click', () => deleteHandle(btn.getAttribute('data-delete-handle')));
+                });
+            }
 
-        function renderCampaigns() {
-            const body = $('campaign-table');
-            body.innerHTML = state.campaigns.length
-                ? state.campaigns.map((row) => `
+            function renderCampaigns() {
+                const body = $('campaign-table');
+                body.innerHTML = state.campaigns.length
+                    ? state.campaigns.map((row) => `
                         <tr>
                             <td>
                                 <div class="text-strong">${escapeHtml(row.name)}</div>
@@ -3552,73 +3543,73 @@
                             <td>${Number(row.post_count || 0)}</td>
                         </tr>
                     `).join('')
-                : '<tr><td colspan="4">No campaigns created yet.</td></tr>';
-        }
-
-        function renderCampaignSelect() {
-            const select = $('composer-campaign');
-            select.innerHTML = '<option value="">General (no campaign)</option>' +
-                state.campaigns.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
-        }
-
-        function renderCrossPostPicker() {
-            const picker = $('crosspost-brand-picker');
-            if (!picker) return;
-            const otherBrands = Object.entries(BRAND_DEFS).filter(([id]) => id !== currentBrand);
-            if (otherBrands.length === 0) {
-                picker.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem">No other brands configured.</span>';
-                return;
+                    : '<tr><td colspan="4">No campaigns created yet.</td></tr>';
             }
-            picker.innerHTML = otherBrands.map(([id, def]) => `
+
+            function renderCampaignSelect() {
+                const select = $('composer-campaign');
+                select.innerHTML = '<option value="">General (no campaign)</option>' +
+                    state.campaigns.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+            }
+
+            function renderCrossPostPicker() {
+                const picker = $('crosspost-brand-picker');
+                if (!picker) return;
+                const otherBrands = Object.entries(BRAND_DEFS).filter(([id]) => id !== currentBrand);
+                if (otherBrands.length === 0) {
+                    picker.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem">No other brands configured.</span>';
+                    return;
+                }
+                picker.innerHTML = otherBrands.map(([id, def]) => `
                     <button type="button" class="crosspost-pill ${state.crossPostBrands.has(id) ? 'active' : ''}"
                         data-cp-brand="${escapeHtml(id)}" style="--brand-color:${escapeHtml(def.color)}">
                         ${escapeHtml(def.shortName || def.name)}
                     </button>
                 `).join('');
-            picker.querySelectorAll('[data-cp-brand]').forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    const b = btn.dataset.cpBrand;
-                    if (state.crossPostBrands.has(b)) {
-                        state.crossPostBrands.delete(b);
-                    } else {
-                        state.crossPostBrands.add(b);
-                    }
-                    renderCrossPostPicker();
+                picker.querySelectorAll('[data-cp-brand]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const b = btn.dataset.cpBrand;
+                        if (state.crossPostBrands.has(b)) {
+                            state.crossPostBrands.delete(b);
+                        } else {
+                            state.crossPostBrands.add(b);
+                        }
+                        renderCrossPostPicker();
+                    });
                 });
-            });
-        }
+            }
 
-        function renderPlatformPicker() {
-            const picker = $('platform-picker');
-            picker.innerHTML = PLATFORM_ORDER.map((platform) => `
+            function renderPlatformPicker() {
+                const picker = $('platform-picker');
+                picker.innerHTML = PLATFORM_ORDER.map((platform) => `
                     <button type="button" class="platform-pill ${state.selectedPlatforms.has(platform) ? 'active' : ''}" data-platform="${platform}">
                         ${escapeHtml(platform)}
                     </button>
                 `).join('');
 
-            picker.querySelectorAll('[data-platform]').forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    const platform = btn.getAttribute('data-platform');
-                    if (state.selectedPlatforms.has(platform)) {
-                        state.selectedPlatforms.delete(platform);
-                    } else {
-                        state.selectedPlatforms.add(platform);
-                    }
-                    renderPlatformPicker();
-                    updateComposerCounters();
+                picker.querySelectorAll('[data-platform]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const platform = btn.getAttribute('data-platform');
+                        if (state.selectedPlatforms.has(platform)) {
+                            state.selectedPlatforms.delete(platform);
+                        } else {
+                            state.selectedPlatforms.add(platform);
+                        }
+                        renderPlatformPicker();
+                        updateComposerCounters();
+                    });
                 });
-            });
-        }
+            }
 
-        function renderComposerAssets() {
-            const container = $('composer-assets');
-            const candidates = state.assets.filter((a) => ['image', 'video'].includes(a.media_type)).slice(0, 80);
+            function renderComposerAssets() {
+                const container = $('composer-assets');
+                const candidates = state.assets.filter((a) => ['image', 'video'].includes(a.media_type)).slice(0, 80);
 
-            container.innerHTML = candidates.length
-                ? candidates.map((asset) => {
-                    const isActive = state.selectedAssetId === asset.id;
-                    const image = assetUrl(asset);
-                    return `
+                container.innerHTML = candidates.length
+                    ? candidates.map((asset) => {
+                        const isActive = state.selectedAssetId === asset.id;
+                        const image = assetUrl(asset);
+                        return `
                             <article class="asset-card ${isActive ? 'active' : ''}" data-asset-id="${asset.id}">
                                 <img class="asset-thumb" src="${escapeHtml(image)}" alt="${escapeHtml(asset.title)}" loading="lazy">
                                 <div class="asset-meta">
@@ -3627,130 +3618,130 @@
                                 </div>
                             </article>
                         `;
-                }).join('')
-                : '<p class="text-muted">Upload image/video assets first, then schedule from this panel.</p>';
+                    }).join('')
+                    : '<p class="text-muted">Upload image/video assets first, then schedule from this panel.</p>';
 
-            container.querySelectorAll('[data-asset-id]').forEach((card) => {
-                card.addEventListener('click', () => {
-                    state.selectedAssetId = card.getAttribute('data-asset-id');
-                    renderComposerAssets();
+                container.querySelectorAll('[data-asset-id]').forEach((card) => {
+                    card.addEventListener('click', () => {
+                        state.selectedAssetId = card.getAttribute('data-asset-id');
+                        renderComposerAssets();
+                    });
                 });
-            });
-        }
+            }
 
-        function initUploadZone() {
-            const zone = $('upload-zone');
-            const input = $('upload-input');
-            if (!zone || !input) return;
+            function initUploadZone() {
+                const zone = $('upload-zone');
+                const input = $('upload-input');
+                if (!zone || !input) return;
 
-            zone.addEventListener('click', (ev) => {
-                if (ev.target !== input) input.click();
-            });
-            zone.addEventListener('keydown', (ev) => {
-                if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); input.click(); }
-            });
-            input.addEventListener('change', () => handleUploadFiles(Array.from(input.files)));
+                zone.addEventListener('click', (ev) => {
+                    if (ev.target !== input) input.click();
+                });
+                zone.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); input.click(); }
+                });
+                input.addEventListener('change', () => handleUploadFiles(Array.from(input.files)));
 
-            zone.addEventListener('dragover', (ev) => { ev.preventDefault(); zone.classList.add('drag-over'); });
-            zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-            zone.addEventListener('drop', (ev) => {
-                ev.preventDefault();
-                zone.classList.remove('drag-over');
-                const files = Array.from(ev.dataTransfer.files);
-                if (files.length) handleUploadFiles(files);
-            });
-        }
+                zone.addEventListener('dragover', (ev) => { ev.preventDefault(); zone.classList.add('drag-over'); });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', (ev) => {
+                    ev.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const files = Array.from(ev.dataTransfer.files);
+                    if (files.length) handleUploadFiles(files);
+                });
+            }
 
-        async function handleUploadFiles(files) {
-            const list = $('upload-progress-list');
-            if (!list) return;
+            async function handleUploadFiles(files) {
+                const list = $('upload-progress-list');
+                if (!list) return;
 
-            for (const file of files) {
-                const id = 'up-' + Math.random().toString(36).slice(2);
-                const li = document.createElement('li');
-                li.className = 'upload-item';
-                li.id = id;
-                li.innerHTML = `
+                for (const file of files) {
+                    const id = 'up-' + Math.random().toString(36).slice(2);
+                    const li = document.createElement('li');
+                    li.className = 'upload-item';
+                    li.id = id;
+                    li.innerHTML = `
                         <span class="upload-item-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span>
                         <div class="upload-bar-wrap"><div class="upload-bar" id="${id}-bar" style="width:0%"></div></div>
                         <span class="upload-item-status" id="${id}-st">Uploading&hellip;</span>
                     `;
-                list.appendChild(li);
+                    list.appendChild(li);
 
-                try {
-                    const bar = $(id + '-bar');
-                    const st = $(id + '-st');
+                    try {
+                        const bar = $(id + '-bar');
+                        const st = $(id + '-st');
 
-                    if (bar) bar.style.width = '30%';
+                        if (bar) bar.style.width = '30%';
 
-                    const form = new FormData();
-                    form.append('file', file);
-                    form.append('title', file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
-                    form.append('brand', currentBrand);
-                    form.append('category', 'uploads');
-                    form.append('media_type', file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : file.type === 'application/pdf' ? 'document' : 'image');
+                        const form = new FormData();
+                        form.append('file', file);
+                        form.append('title', file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
+                        form.append('brand', currentBrand);
+                        form.append('category', 'uploads');
+                        form.append('media_type', file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : file.type === 'application/pdf' ? 'document' : 'image');
 
-                    const token = await clerk.session.getToken();
-                    const resp = await fetch('/api/cms/upload', {
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + token },
-                        body: form
-                    });
+                        const token = await clerk.session.getToken();
+                        const resp = await fetch('/api/cms/upload', {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + token },
+                            body: form
+                        });
 
-                    if (bar) bar.style.width = '100%';
+                        if (bar) bar.style.width = '100%';
 
-                    if (resp.ok) {
-                        if (st) { st.textContent = '✓'; st.classList.add('ok'); }
-                        await loadAssets();
-                        renderLibrary();
-                    } else {
-                        const err = await resp.json().catch(() => ({ error: resp.statusText }));
-                        if (st) { st.textContent = err.error || 'Failed'; st.classList.add('err'); }
+                        if (resp.ok) {
+                            if (st) { st.textContent = '✓'; st.classList.add('ok'); }
+                            await loadAssets();
+                            renderLibrary();
+                        } else {
+                            const err = await resp.json().catch(() => ({ error: resp.statusText }));
+                            if (st) { st.textContent = err.error || 'Failed'; st.classList.add('err'); }
+                        }
+                    } catch (err) {
+                        const st = $(id + '-st');
+                        if (st) { st.textContent = 'Error'; st.classList.add('err'); }
                     }
-                } catch (err) {
-                    const st = $(id + '-st');
-                    if (st) { st.textContent = 'Error'; st.classList.add('err'); }
+
+                    // auto-clear after 6s
+                    setTimeout(() => { const el = $(id); if (el) el.remove(); }, 6000);
                 }
 
-                // auto-clear after 6s
-                setTimeout(() => { const el = $(id); if (el) el.remove(); }, 6000);
+                // reset file input
+                const input = $('upload-input');
+                if (input) input.value = '';
             }
 
-            // reset file input
-            const input = $('upload-input');
-            if (input) input.value = '';
-        }
+            function renderLibrary() {
+                const q = $('library-search').value.trim().toLowerCase();
+                const mediaType = $('library-type').value;
 
-        function renderLibrary() {
-            const q = $('library-search').value.trim().toLowerCase();
-            const mediaType = $('library-type').value;
+                const list = state.assets.filter((asset) => {
+                    if (mediaType && asset.media_type !== mediaType) return false;
+                    if (!q) return true;
+                    const tags = String(asset.tags || '').toLowerCase();
+                    return String(asset.title || '').toLowerCase().includes(q) || tags.includes(q);
+                });
 
-            const list = state.assets.filter((asset) => {
-                if (mediaType && asset.media_type !== mediaType) return false;
-                if (!q) return true;
-                const tags = String(asset.tags || '').toLowerCase();
-                return String(asset.title || '').toLowerCase().includes(q) || tags.includes(q);
-            });
+                const grid = $('library-grid');
+                if (!list.length) {
+                    grid.innerHTML = '<p class="text-muted">No assets matched your filter.</p>';
+                    return;
+                }
 
-            const grid = $('library-grid');
-            if (!list.length) {
-                grid.innerHTML = '<p class="text-muted">No assets matched your filter.</p>';
-                return;
-            }
-
-            grid.innerHTML = list.map((asset) => {
-                let tags = [];
-                try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
-                const tagHtml = tags.slice(0, 4).map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join('');
-                const thumb = assetUrl(asset);
-                const isVideo = asset.media_type === 'video';
-                return `
+                grid.innerHTML = list.map((asset) => {
+                    let tags = [];
+                    try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
+                    const tagHtml = tags.slice(0, 4).map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+                    const thumb = assetUrl(asset);
+                    const isVideo = asset.media_type === 'video';
+                    return `
                         <article class="asset-card" data-asset-id="${asset.id}">
                             ${thumb
-                        ? (isVideo
-                            ? `<div class="asset-thumb-wrap"><video class="asset-thumb" src="${escapeHtml(thumb)}" muted preload="none"></video><span class="asset-type-badge">VIDEO</span></div>`
-                            : `<div class="asset-thumb-wrap"><img class="asset-thumb" src="${escapeHtml(thumb)}" alt="${escapeHtml(asset.title)}" loading="lazy"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`)
-                        : `<div class="asset-thumb-wrap asset-no-thumb"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`}
+                            ? (isVideo
+                                ? `<div class="asset-thumb-wrap"><video class="asset-thumb" src="${escapeHtml(thumb)}" muted preload="none"></video><span class="asset-type-badge">VIDEO</span></div>`
+                                : `<div class="asset-thumb-wrap"><img class="asset-thumb" src="${escapeHtml(thumb)}" alt="${escapeHtml(asset.title)}" loading="lazy"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`)
+                            : `<div class="asset-thumb-wrap asset-no-thumb"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`}
                             <div class="asset-meta">
                                 <div class="text-strong">${escapeHtml(asset.title)}</div>
                                 <div class="text-note">${escapeHtml(asset.category || '-')}${asset.featured ? ' &nbsp;&#9733;' : ''}</div>
@@ -3764,563 +3755,563 @@
                             </div>
                         </article>
                     `;
-            }).join('');
+                }).join('');
 
-            grid.querySelectorAll('[data-edit-asset]').forEach((btn) => {
-                btn.addEventListener('click', (ev) => {
-                    ev.stopPropagation();
-                    const asset = state.assets.find((a) => String(a.id) === btn.dataset.editAsset);
-                    if (asset) openAssetEditModal(asset);
+                grid.querySelectorAll('[data-edit-asset]').forEach((btn) => {
+                    btn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        const asset = state.assets.find((a) => String(a.id) === btn.dataset.editAsset);
+                        if (asset) openAssetEditModal(asset);
+                    });
                 });
-            });
-            grid.querySelectorAll('[data-delete-asset]').forEach((btn) => {
-                btn.addEventListener('click', (ev) => {
-                    ev.stopPropagation();
-                    deleteAsset(btn.dataset.deleteAsset);
+                grid.querySelectorAll('[data-delete-asset]').forEach((btn) => {
+                    btn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        deleteAsset(btn.dataset.deleteAsset);
+                    });
                 });
-            });
-            grid.querySelectorAll('[data-use-asset]').forEach((btn) => {
-                btn.addEventListener('click', (ev) => {
-                    ev.stopPropagation();
-                    state.selectedAssetId = btn.dataset.useAsset;
-                    switchView('composer');
-                    renderComposerAssets();
-                    toast('Asset selected — add a caption and schedule it', 'success');
+                grid.querySelectorAll('[data-use-asset]').forEach((btn) => {
+                    btn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        state.selectedAssetId = btn.dataset.useAsset;
+                        switchView('composer');
+                        renderComposerAssets();
+                        toast('Asset selected — add a caption and schedule it', 'success');
+                    });
                 });
-            });
-        }
-
-        function renderCalendar(events, monthStart) {
-            const title = monthStart.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-            $('calendar-title').textContent = 'Calendar - ' + title;
-
-            const firstWeekday = monthStart.getDay();
-            const daysInMonth = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
-
-            const eventMap = {};
-            events.forEach((event) => {
-                const day = new Date(event.scheduled_at).getDate();
-                if (!eventMap[day]) eventMap[day] = [];
-                eventMap[day].push(event);
-            });
-
-            const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const cells = labels.map((l) => `<div class="day-label">${l}</div>`);
-
-            for (let i = 0; i < firstWeekday; i++) {
-                cells.push('<div class="day-cell empty"></div>');
             }
 
-            for (let day = 1; day <= daysInMonth; day++) {
-                const rows = (eventMap[day] || []).slice(0, 3);
-                const moreCount = (eventMap[day] || []).length - rows.length;
-                const itemsHtml = rows.map((row) => `<div class="day-item">${escapeHtml(row.platform)} - ${escapeHtml((row.campaign_name || 'General').slice(0, 22))}</div>`).join('');
-                const moreHtml = moreCount > 0 ? `<div class="day-item">+${moreCount} more</div>` : '';
-                cells.push(`
+            function renderCalendar(events, monthStart) {
+                const title = monthStart.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                $('calendar-title').textContent = 'Calendar - ' + title;
+
+                const firstWeekday = monthStart.getDay();
+                const daysInMonth = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
+
+                const eventMap = {};
+                events.forEach((event) => {
+                    const day = new Date(event.scheduled_at).getDate();
+                    if (!eventMap[day]) eventMap[day] = [];
+                    eventMap[day].push(event);
+                });
+
+                const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const cells = labels.map((l) => `<div class="day-label">${l}</div>`);
+
+                for (let i = 0; i < firstWeekday; i++) {
+                    cells.push('<div class="day-cell empty"></div>');
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const rows = (eventMap[day] || []).slice(0, 3);
+                    const moreCount = (eventMap[day] || []).length - rows.length;
+                    const itemsHtml = rows.map((row) => `<div class="day-item">${escapeHtml(row.platform)} - ${escapeHtml((row.campaign_name || 'General').slice(0, 22))}</div>`).join('');
+                    const moreHtml = moreCount > 0 ? `<div class="day-item">+${moreCount} more</div>` : '';
+                    cells.push(`
                         <div class="day-cell">
                             <div class="day-num">${day}</div>
                             ${itemsHtml}
                             ${moreHtml}
                         </div>
                     `);
+                }
+
+                $('calendar-grid').innerHTML = cells.join('');
             }
 
-            $('calendar-grid').innerHTML = cells.join('');
-        }
+            function updateComposerCounters() {
+                const content = $('composer-content').value || '';
+                const hashtagRaw = $('composer-hashtags').value || '';
+                const hashtags = hashtagRaw
+                    .split(',')
+                    .map((h) => h.trim().replace(/^#/, ''))
+                    .filter(Boolean);
 
-        function updateComposerCounters() {
-            const content = $('composer-content').value || '';
-            const hashtagRaw = $('composer-hashtags').value || '';
-            const hashtags = hashtagRaw
-                .split(',')
-                .map((h) => h.trim().replace(/^#/, ''))
-                .filter(Boolean);
+                const fullText = hashtags.length ? `${content}\n\n${hashtags.map((h) => '#' + h).join(' ')}` : content;
+                const counters = [];
 
-            const fullText = hashtags.length ? `${content}\n\n${hashtags.map((h) => '#' + h).join(' ')}` : content;
-            const counters = [];
-
-            for (const platform of state.selectedPlatforms) {
-                const rules = state.platformRules[platform] || { maxChars: 500, maxHashtags: 10 };
-                const count = fullText.length;
-                const over = count > Number(rules.maxChars || 500) || hashtags.length > Number(rules.maxHashtags || 10);
-                counters.push(`
+                for (const platform of state.selectedPlatforms) {
+                    const rules = state.platformRules[platform] || { maxChars: 500, maxHashtags: 10 };
+                    const count = fullText.length;
+                    const over = count > Number(rules.maxChars || 500) || hashtags.length > Number(rules.maxHashtags || 10);
+                    counters.push(`
                         <div class="counter ${over ? 'over' : ''}">
                             <span>${escapeHtml(platform)}</span>
                             <span>${count}/${rules.maxChars || 500} chars, ${hashtags.length}/${rules.maxHashtags || 10} hashtags</span>
                         </div>
                     `);
-            }
-
-            $('composer-counters').innerHTML = counters.length
-                ? counters.join('')
-                : '<div class="counter over"><span>Select at least one platform</span><span>-</span></div>';
-        }
-
-        function statusTag(status) {
-            const cls = status === 'published'
-                ? 'ok'
-                : status === 'failed'
-                    ? 'fail'
-                    : 'warn';
-            return `<span class="tag ${cls}">${escapeHtml(status || 'unknown')}</span>`;
-        }
-
-        function switchView(view) {
-            state.currentView = view;
-            document.querySelectorAll('.nav-btn').forEach((btn) => {
-                btn.classList.toggle('active', btn.dataset.view === view);
-            });
-            document.querySelectorAll('.view').forEach((el) => {
-                el.classList.toggle('active', el.id === 'view-' + view);
-            });
-        }
-
-        function openModal(id) {
-            $(id).classList.add('active');
-        }
-
-        function closeModal(id) {
-            $(id).classList.remove('active');
-        }
-
-        async function saveCampaign() {
-            try {
-                const payload = {
-                    brand: currentBrand,
-                    name: $('campaign-name').value.trim(),
-                    cadence: $('campaign-cadence').value,
-                    start_date: $('campaign-start').value || null,
-                    end_date: $('campaign-end').value || null,
-                    objective: $('campaign-objective').value.trim(),
-                    status: 'planned',
-                    platforms: [...state.selectedPlatforms],
-                };
-
-                if (!payload.name) {
-                    throw new Error('Campaign name is required');
                 }
 
-                await api('/campaigns', { method: 'POST', body: payload });
-                closeModal('campaign-modal');
-                $('campaign-name').value = '';
-                $('campaign-objective').value = '';
-                toast('Campaign created', 'success');
-                await refreshAll();
-            } catch (err) {
-                toast(err.message, 'error');
+                $('composer-counters').innerHTML = counters.length
+                    ? counters.join('')
+                    : '<div class="counter over"><span>Select at least one platform</span><span>-</span></div>';
             }
-        }
 
-        async function saveConnection() {
-            try {
-                const expiresLocal = $('conn-expires-at').value;
-                const payload = {
-                    brand: currentBrand,
-                    platform: $('conn-platform').value,
-                    account_label: $('conn-label').value.trim(),
-                    account_id: $('conn-account-id').value.trim(),
-                    payload: {
-                        access_token: $('conn-access-token').value.trim(),
-                        refresh_token: $('conn-refresh-token').value.trim(),
-                        expires_at: expiresLocal ? new Date(expiresLocal).toISOString() : '',
-                    },
-                };
+            function statusTag(status) {
+                const cls = status === 'published'
+                    ? 'ok'
+                    : status === 'failed'
+                        ? 'fail'
+                        : 'warn';
+                return `<span class="tag ${cls}">${escapeHtml(status || 'unknown')}</span>`;
+            }
 
-                if (!payload.account_id || !payload.payload.access_token) {
-                    throw new Error('Account ID and access token are required');
+            function switchView(view) {
+                state.currentView = view;
+                document.querySelectorAll('.nav-btn').forEach((btn) => {
+                    btn.classList.toggle('active', btn.dataset.view === view);
+                });
+                document.querySelectorAll('.view').forEach((el) => {
+                    el.classList.toggle('active', el.id === 'view-' + view);
+                });
+            }
+
+            function openModal(id) {
+                $(id).classList.add('active');
+            }
+
+            function closeModal(id) {
+                $(id).classList.remove('active');
+            }
+
+            async function saveCampaign() {
+                try {
+                    const payload = {
+                        brand: currentBrand,
+                        name: $('campaign-name').value.trim(),
+                        cadence: $('campaign-cadence').value,
+                        start_date: $('campaign-start').value || null,
+                        end_date: $('campaign-end').value || null,
+                        objective: $('campaign-objective').value.trim(),
+                        status: 'planned',
+                        platforms: [...state.selectedPlatforms],
+                    };
+
+                    if (!payload.name) {
+                        throw new Error('Campaign name is required');
+                    }
+
+                    await api('/campaigns', { method: 'POST', body: payload });
+                    closeModal('campaign-modal');
+                    $('campaign-name').value = '';
+                    $('campaign-objective').value = '';
+                    toast('Campaign created', 'success');
+                    await refreshAll();
+                } catch (err) {
+                    toast(err.message, 'error');
                 }
-
-                await api('/connections', { method: 'POST', body: payload });
-                closeModal('connection-modal');
-                $('conn-label').value = '';
-                $('conn-account-id').value = '';
-                $('conn-access-token').value = '';
-                $('conn-refresh-token').value = '';
-                $('conn-expires-at').value = '';
-                toast('Platform connection saved', 'success');
-                await refreshAll();
-            } catch (err) {
-                toast(err.message, 'error');
             }
-        }
 
-        async function disconnectConnection(id) {
-            if (!window.confirm('Deactivate this connection profile?')) return;
-            try {
-                await api('/connections?id=' + encodeURIComponent(id), { method: 'DELETE' });
-                toast('Connection deactivated', 'success');
-                await refreshAll();
-            } catch (err) {
-                toast(err.message, 'error');
-            }
-        }
+            async function saveConnection() {
+                try {
+                    const expiresLocal = $('conn-expires-at').value;
+                    const payload = {
+                        brand: currentBrand,
+                        platform: $('conn-platform').value,
+                        account_label: $('conn-label').value.trim(),
+                        account_id: $('conn-account-id').value.trim(),
+                        payload: {
+                            access_token: $('conn-access-token').value.trim(),
+                            refresh_token: $('conn-refresh-token').value.trim(),
+                            expires_at: expiresLocal ? new Date(expiresLocal).toISOString() : '',
+                        },
+                    };
 
-        async function saveHandle() {
-            const brand = $('handle-brand').value;
-            const platform = $('handle-platform').value;
-            const handle = $('handle-username').value.trim();
-            if (!brand || !platform || !handle) {
-                toast('Brand, platform, and handle are required', 'error');
-                return;
+                    if (!payload.account_id || !payload.payload.access_token) {
+                        throw new Error('Account ID and access token are required');
+                    }
+
+                    await api('/connections', { method: 'POST', body: payload });
+                    closeModal('connection-modal');
+                    $('conn-label').value = '';
+                    $('conn-account-id').value = '';
+                    $('conn-access-token').value = '';
+                    $('conn-refresh-token').value = '';
+                    $('conn-expires-at').value = '';
+                    toast('Platform connection saved', 'success');
+                    await refreshAll();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
             }
-            try {
-                await api('/social-accounts', {
-                    method: 'POST',
-                    body: {
-                        brand,
-                        platform,
-                        handle,
-                        display_name: $('handle-display-name').value.trim(),
-                        profile_url: $('handle-profile-url').value.trim(),
-                        followers_count: parseInt($('handle-followers').value, 10) || 0,
-                        bio: $('handle-bio').value.trim(),
-                    },
+
+            async function disconnectConnection(id) {
+                if (!window.confirm('Deactivate this connection profile?')) return;
+                try {
+                    await api('/connections?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                    toast('Connection deactivated', 'success');
+                    await refreshAll();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function saveHandle() {
+                const brand = $('handle-brand').value;
+                const platform = $('handle-platform').value;
+                const handle = $('handle-username').value.trim();
+                if (!brand || !platform || !handle) {
+                    toast('Brand, platform, and handle are required', 'error');
+                    return;
+                }
+                try {
+                    await api('/social-accounts', {
+                        method: 'POST',
+                        body: {
+                            brand,
+                            platform,
+                            handle,
+                            display_name: $('handle-display-name').value.trim(),
+                            profile_url: $('handle-profile-url').value.trim(),
+                            followers_count: parseInt($('handle-followers').value, 10) || 0,
+                            bio: $('handle-bio').value.trim(),
+                        },
+                    });
+                    toast('Handle registered', 'success');
+                    closeModal('handle-modal');
+                    await loadSocialAccounts();
+                    renderEcosystemMatrix();
+                    renderHandlesTable();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function deleteHandle(id) {
+                if (!window.confirm('Delete this handle record?')) return;
+                try {
+                    await api('/social-accounts?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                    toast('Handle removed', 'success');
+                    await loadSocialAccounts();
+                    renderEcosystemMatrix();
+                    renderHandlesTable();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function saveWorkflow() {
+                const brand = $('workflow-brand').value;
+                if (!brand) { toast('Select a brand', 'error'); return; }
+                try {
+                    await api('/brand-workflows', {
+                        method: 'PUT',
+                        body: {
+                            brand,
+                            default_cadence: $('workflow-cadence').value,
+                            require_approval: $('workflow-require-approval').checked ? 1 : 0,
+                            post_time_utc: $('workflow-post-time').value || '14:00',
+                            notes: $('workflow-notes').value.trim(),
+                        },
+                    });
+                    toast('Workflow saved', 'success');
+                    closeModal('workflow-modal');
+                    await loadBrandWorkflows();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function schedulePostSet() {
+                try {
+                    const platforms = [...state.selectedPlatforms];
+                    if (!platforms.length) throw new Error('Select at least one platform');
+                    if (!state.selectedAssetId) throw new Error('Select one media asset');
+
+                    const content = $('composer-content').value.trim();
+                    if (!content) throw new Error('Caption is required');
+
+                    const scheduledLocal = $('composer-schedule').value;
+                    if (!scheduledLocal) throw new Error('Schedule time is required');
+
+                    const hashtags = $('composer-hashtags').value
+                        .split(',')
+                        .map((h) => h.trim())
+                        .filter(Boolean);
+
+                    const payload = {
+                        brand: currentBrand,
+                        campaign_id: $('composer-campaign').value ? Number($('composer-campaign').value) : null,
+                        content,
+                        platforms,
+                        media_asset_id: state.selectedAssetId,
+                        hashtags,
+                        scheduled_at: toIsoFromLocal(scheduledLocal),
+                        watermark_enabled: $('composer-watermark').checked,
+                        watermark_profile: $('composer-watermark').checked ? 'default' : '',
+                    };
+
+                    const result = await api('/social/campaign', { method: 'POST', body: payload });
+                    const postId = result?.post_id || result?.id;
+                    if (postId && state.crossPostBrands.size > 0) {
+                        for (const targetBrand of state.crossPostBrands) {
+                            try {
+                                await api('/cross-posts', { method: 'POST', body: { source_post_id: postId, target_brand: targetBrand } });
+                            } catch (e) {
+                                console.warn('[cross-post] failed for', targetBrand, e);
+                            }
+                        }
+                        toast(`Scheduled + queued for ${state.crossPostBrands.size} brand(s)`, 'success');
+                    } else {
+                        toast('Post set scheduled', 'success');
+                    }
+                    state.crossPostBrands.clear();
+                    $('composer-content').value = '';
+                    $('composer-hashtags').value = '';
+                    updateComposerCounters();
+                    await refreshAll();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            async function runQueueNow() {
+                try {
+                    const result = await api('/social/run-now', { method: 'POST' });
+                    const published = result?.result?.published ?? 0;
+                    const failed = result?.result?.failed ?? 0;
+                    toast(`Queue run complete: ${published} published, ${failed} failed`, 'success');
+                    await loadVariants();
+                    renderOverview();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            // ════════════════════════════════════════════════════════════════
+            // ASSET MANAGEMENT
+            // ════════════════════════════════════════════════════════════════
+
+            function openAssetEditModal(asset) {
+                $('asset-edit-id').value = asset.id;
+                $('asset-edit-title').value = asset.title || '';
+                $('asset-edit-category').value = asset.category || 'uploads';
+                $('asset-edit-media-type').value = asset.media_type || 'image';
+                $('asset-edit-featured').checked = Boolean(Number(asset.featured));
+                $('asset-edit-description').value = asset.description || '';
+
+                let tags = [];
+                try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
+                $('asset-edit-tags').value = tags.join(', ');
+
+                // Initialize cross-brand share chips — mark current asset's brand as already-home
+                const homeBrand = asset.brand || currentBrand;
+                document.querySelectorAll('#asset-edit-brand-share [data-share-brand]').forEach((chip) => {
+                    // Home brand is inert (this is where the asset lives)
+                    if (chip.dataset.shareBrand === homeBrand) {
+                        chip.classList.add('active');
+                        chip.title = 'Home brand';
+                        chip.disabled = true;
+                    } else {
+                        chip.classList.remove('active');
+                        chip.disabled = false;
+                        chip.title = 'Share to ' + chip.dataset.shareBrand;
+                        chip.onclick = () => {
+                            chip.classList.toggle('active');
+                        };
+                    }
                 });
-                toast('Handle registered', 'success');
-                closeModal('handle-modal');
-                await loadSocialAccounts();
-                renderEcosystemMatrix();
-                renderHandlesTable();
-            } catch (err) {
-                toast(err.message, 'error');
+
+                openModal('asset-edit-modal');
             }
-        }
 
-        async function deleteHandle(id) {
-            if (!window.confirm('Delete this handle record?')) return;
-            try {
-                await api('/social-accounts?id=' + encodeURIComponent(id), { method: 'DELETE' });
-                toast('Handle removed', 'success');
-                await loadSocialAccounts();
-                renderEcosystemMatrix();
-                renderHandlesTable();
-            } catch (err) {
-                toast(err.message, 'error');
-            }
-        }
+            async function saveAssetEdit() {
+                const id = $('asset-edit-id').value;
+                if (!id) return;
 
-        async function saveWorkflow() {
-            const brand = $('workflow-brand').value;
-            if (!brand) { toast('Select a brand', 'error'); return; }
-            try {
-                await api('/brand-workflows', {
-                    method: 'PUT',
-                    body: {
-                        brand,
-                        default_cadence: $('workflow-cadence').value,
-                        require_approval: $('workflow-require-approval').checked ? 1 : 0,
-                        post_time_utc: $('workflow-post-time').value || '14:00',
-                        notes: $('workflow-notes').value.trim(),
-                    },
-                });
-                toast('Workflow saved', 'success');
-                closeModal('workflow-modal');
-                await loadBrandWorkflows();
-            } catch (err) {
-                toast(err.message, 'error');
-            }
-        }
-
-        async function schedulePostSet() {
-            try {
-                const platforms = [...state.selectedPlatforms];
-                if (!platforms.length) throw new Error('Select at least one platform');
-                if (!state.selectedAssetId) throw new Error('Select one media asset');
-
-                const content = $('composer-content').value.trim();
-                if (!content) throw new Error('Caption is required');
-
-                const scheduledLocal = $('composer-schedule').value;
-                if (!scheduledLocal) throw new Error('Schedule time is required');
-
-                const hashtags = $('composer-hashtags').value
+                const rawTags = $('asset-edit-tags').value;
+                const tags = rawTags
                     .split(',')
-                    .map((h) => h.trim())
+                    .map((t) => t.trim())
                     .filter(Boolean);
 
-                const payload = {
-                    brand: currentBrand,
-                    campaign_id: $('composer-campaign').value ? Number($('composer-campaign').value) : null,
-                    content,
-                    platforms,
-                    media_asset_id: state.selectedAssetId,
-                    hashtags,
-                    scheduled_at: toIsoFromLocal(scheduledLocal),
-                    watermark_enabled: $('composer-watermark').checked,
-                    watermark_profile: $('composer-watermark').checked ? 'default' : '',
-                };
+                try {
+                    await api('/assets', {
+                        method: 'PUT',
+                        body: {
+                            id,
+                            title: $('asset-edit-title').value.trim(),
+                            category: $('asset-edit-category').value,
+                            media_type: $('asset-edit-media-type').value,
+                            featured: $('asset-edit-featured').checked,
+                            description: $('asset-edit-description').value.trim(),
+                            tags,
+                        },
+                    });
 
-                const result = await api('/social/campaign', { method: 'POST', body: payload });
-                const postId = result?.post_id || result?.id;
-                if (postId && state.crossPostBrands.size > 0) {
-                    for (const targetBrand of state.crossPostBrands) {
-                        try {
-                            await api('/cross-posts', { method: 'POST', body: { source_post_id: postId, target_brand: targetBrand } });
-                        } catch (e) {
-                            console.warn('[cross-post] failed for', targetBrand, e);
+                    // Share to any newly-toggled brands (non-disabled active chips)
+                    const sharePromises = [];
+                    document.querySelectorAll('#asset-edit-brand-share [data-share-brand]:not([disabled])').forEach((chip) => {
+                        if (chip.classList.contains('active')) {
+                            sharePromises.push(
+                                api('/assets/' + encodeURIComponent(id) + '/share', {
+                                    method: 'POST',
+                                    body: { target_brand: chip.dataset.shareBrand },
+                                }).catch(() => { /* share already exists is fine */ })
+                            );
                         }
-                    }
-                    toast(`Scheduled + queued for ${state.crossPostBrands.size} brand(s)`, 'success');
-                } else {
-                    toast('Post set scheduled', 'success');
+                    });
+                    if (sharePromises.length) await Promise.all(sharePromises);
+
+                    toast('Asset updated', 'success');
+                    closeModal('asset-edit-modal');
+                    await loadAssets();
+                    renderLibrary();
+                    renderComposerAssets();
+                } catch (err) {
+                    toast(err.message, 'error');
                 }
-                state.crossPostBrands.clear();
-                $('composer-content').value = '';
-                $('composer-hashtags').value = '';
-                updateComposerCounters();
-                await refreshAll();
-            } catch (err) {
-                toast(err.message, 'error');
             }
-        }
 
-        async function runQueueNow() {
-            try {
-                const result = await api('/social/run-now', { method: 'POST' });
-                const published = result?.result?.published ?? 0;
-                const failed = result?.result?.failed ?? 0;
-                toast(`Queue run complete: ${published} published, ${failed} failed`, 'success');
-                await loadVariants();
-                renderOverview();
-            } catch (err) {
-                toast(err.message, 'error');
-            }
-        }
-
-        // ════════════════════════════════════════════════════════════════
-        // ASSET MANAGEMENT
-        // ════════════════════════════════════════════════════════════════
-
-        function openAssetEditModal(asset) {
-            $('asset-edit-id').value = asset.id;
-            $('asset-edit-title').value = asset.title || '';
-            $('asset-edit-category').value = asset.category || 'uploads';
-            $('asset-edit-media-type').value = asset.media_type || 'image';
-            $('asset-edit-featured').checked = Boolean(Number(asset.featured));
-            $('asset-edit-description').value = asset.description || '';
-
-            let tags = [];
-            try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
-            $('asset-edit-tags').value = tags.join(', ');
-
-            // Initialize cross-brand share chips — mark current asset's brand as already-home
-            const homeBrand = asset.brand || currentBrand;
-            document.querySelectorAll('#asset-edit-brand-share [data-share-brand]').forEach((chip) => {
-                // Home brand is inert (this is where the asset lives)
-                if (chip.dataset.shareBrand === homeBrand) {
-                    chip.classList.add('active');
-                    chip.title = 'Home brand';
-                    chip.disabled = true;
-                } else {
-                    chip.classList.remove('active');
-                    chip.disabled = false;
-                    chip.title = 'Share to ' + chip.dataset.shareBrand;
-                    chip.onclick = () => {
-                        chip.classList.toggle('active');
-                    };
+            async function deleteAsset(id) {
+                if (!window.confirm('Permanently delete this asset? This cannot be undone.')) return;
+                try {
+                    await api('/assets?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                    toast('Asset deleted', 'success');
+                    if ($('asset-edit-id').value === String(id)) closeModal('asset-edit-modal');
+                    await loadAssets();
+                    renderLibrary();
+                    renderComposerAssets();
+                    if (state.selectedAssetId === String(id)) state.selectedAssetId = '';
+                } catch (err) {
+                    toast(err.message, 'error');
                 }
-            });
-
-            openModal('asset-edit-modal');
-        }
-
-        async function saveAssetEdit() {
-            const id = $('asset-edit-id').value;
-            if (!id) return;
-
-            const rawTags = $('asset-edit-tags').value;
-            const tags = rawTags
-                .split(',')
-                .map((t) => t.trim())
-                .filter(Boolean);
-
-            try {
-                await api('/assets', {
-                    method: 'PUT',
-                    body: {
-                        id,
-                        title: $('asset-edit-title').value.trim(),
-                        category: $('asset-edit-category').value,
-                        media_type: $('asset-edit-media-type').value,
-                        featured: $('asset-edit-featured').checked,
-                        description: $('asset-edit-description').value.trim(),
-                        tags,
-                    },
-                });
-
-                // Share to any newly-toggled brands (non-disabled active chips)
-                const sharePromises = [];
-                document.querySelectorAll('#asset-edit-brand-share [data-share-brand]:not([disabled])').forEach((chip) => {
-                    if (chip.classList.contains('active')) {
-                        sharePromises.push(
-                            api('/assets/' + encodeURIComponent(id) + '/share', {
-                                method: 'POST',
-                                body: { target_brand: chip.dataset.shareBrand },
-                            }).catch(() => { /* share already exists is fine */ })
-                        );
-                    }
-                });
-                if (sharePromises.length) await Promise.all(sharePromises);
-
-                toast('Asset updated', 'success');
-                closeModal('asset-edit-modal');
-                await loadAssets();
-                renderLibrary();
-                renderComposerAssets();
-            } catch (err) {
-                toast(err.message, 'error');
             }
-        }
-
-        async function deleteAsset(id) {
-            if (!window.confirm('Permanently delete this asset? This cannot be undone.')) return;
-            try {
-                await api('/assets?id=' + encodeURIComponent(id), { method: 'DELETE' });
-                toast('Asset deleted', 'success');
-                if ($('asset-edit-id').value === String(id)) closeModal('asset-edit-modal');
-                await loadAssets();
-                renderLibrary();
-                renderComposerAssets();
-                if (state.selectedAssetId === String(id)) state.selectedAssetId = '';
-            } catch (err) {
-                toast(err.message, 'error');
-            }
-        }
 
 
-        // ════════════════════════════════════════════════════════════════
-        // BRAND SWITCHER
-        // ════════════════════════════════════════════════════════════════
+            // ════════════════════════════════════════════════════════════════
+            // BRAND SWITCHER
+            // ════════════════════════════════════════════════════════════════
 
-        function renderBrandSwitcher() {
-            const sw = $('brand-switcher');
-            if (!sw) return;
-            sw.innerHTML = Object.entries(BRAND_DEFS).map(([id, def]) => `
+            function renderBrandSwitcher() {
+                const sw = $('brand-switcher');
+                if (!sw) return;
+                sw.innerHTML = Object.entries(BRAND_DEFS).map(([id, def]) => `
                     <button type="button" class="brand-pill ${id === currentBrand ? 'active' : ''}"
                         data-brand="${escapeHtml(id)}"
                         style="--pill-color:${escapeHtml(def.color)}">
                         ${escapeHtml(def.shortName)}
                     </button>
                 `).join('');
-            sw.querySelectorAll('[data-brand]').forEach((btn) => {
-                btn.addEventListener('click', () => switchBrand(btn.dataset.brand));
-            });
-        }
-
-        function switchBrand(id) {
-            if (!BRAND_DEFS[id]) return;
-            currentBrand = id;
-            const def = BRAND_DEFS[id];
-            const pill = $('active-brand-pill');
-            if (pill) pill.textContent = def.shortName;
-            renderBrandSwitcher();
-            state.selectedPlatforms = new Set(def.platforms || ['x']);
-            state.dripSelectedPlatforms = new Set(def.platforms || ['x']);
-            renderPlatformPicker();
-            renderDripPlatformPicker();
-            refreshAll();
-        }
-
-        // ════════════════════════════════════════════════════════════════
-        // DRIP BUILDER
-        // ════════════════════════════════════════════════════════════════
-
-        function initDripBuilder() {
-            const startInput = $('drip-start-date');
-            if (startInput && !startInput.value) {
-                startInput.value = new Date().toISOString().slice(0, 10);
+                sw.querySelectorAll('[data-brand]').forEach((btn) => {
+                    btn.addEventListener('click', () => switchBrand(btn.dataset.brand));
+                });
             }
-            renderDripPlatformPicker();
-            renderDripTimes();
-            renderDripCampaignSelect();
-            renderDripEntries();
-            updateDripSummary();
-        }
 
-        function renderDripPlatformPicker() {
-            const picker = $('drip-platform-picker');
-            if (!picker) return;
-            const def = BRAND_DEFS[currentBrand] || {};
-            const brandPlatforms = def.platforms || ALL_PLATFORMS;
-            // Sync state with current brand defaults on first render
-            if (state.dripSelectedPlatforms.size === 0) {
-                state.dripSelectedPlatforms = new Set(brandPlatforms);
+            function switchBrand(id) {
+                if (!BRAND_DEFS[id]) return;
+                currentBrand = id;
+                const def = BRAND_DEFS[id];
+                const pill = $('active-brand-pill');
+                if (pill) pill.textContent = def.shortName;
+                renderBrandSwitcher();
+                state.selectedPlatforms = new Set(def.platforms || ['x']);
+                state.dripSelectedPlatforms = new Set(def.platforms || ['x']);
+                renderPlatformPicker();
+                renderDripPlatformPicker();
+                refreshAll();
             }
-            picker.innerHTML = brandPlatforms.map((p) => `
+
+            // ════════════════════════════════════════════════════════════════
+            // DRIP BUILDER
+            // ════════════════════════════════════════════════════════════════
+
+            function initDripBuilder() {
+                const startInput = $('drip-start-date');
+                if (startInput && !startInput.value) {
+                    startInput.value = new Date().toISOString().slice(0, 10);
+                }
+                renderDripPlatformPicker();
+                renderDripTimes();
+                renderDripCampaignSelect();
+                renderDripEntries();
+                updateDripSummary();
+            }
+
+            function renderDripPlatformPicker() {
+                const picker = $('drip-platform-picker');
+                if (!picker) return;
+                const def = BRAND_DEFS[currentBrand] || {};
+                const brandPlatforms = def.platforms || ALL_PLATFORMS;
+                // Sync state with current brand defaults on first render
+                if (state.dripSelectedPlatforms.size === 0) {
+                    state.dripSelectedPlatforms = new Set(brandPlatforms);
+                }
+                picker.innerHTML = brandPlatforms.map((p) => `
                     <button type="button" class="platform-pill ${state.dripSelectedPlatforms.has(p) ? 'active' : ''}"
                         data-drip-platform="${escapeHtml(p)}">
                         ${escapeHtml(p)}
                     </button>
                 `).join('');
-            picker.querySelectorAll('[data-drip-platform]').forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    const p = btn.dataset.dripPlatform;
-                    if (state.dripSelectedPlatforms.has(p)) {
-                        state.dripSelectedPlatforms.delete(p);
-                    } else {
-                        state.dripSelectedPlatforms.add(p);
-                    }
-                    renderDripPlatformPicker();
-                    updateDripSummary();
+                picker.querySelectorAll('[data-drip-platform]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const p = btn.dataset.dripPlatform;
+                        if (state.dripSelectedPlatforms.has(p)) {
+                            state.dripSelectedPlatforms.delete(p);
+                        } else {
+                            state.dripSelectedPlatforms.add(p);
+                        }
+                        renderDripPlatformPicker();
+                        updateDripSummary();
+                    });
                 });
-            });
-        }
+            }
 
-        function renderDripTimes() {
-            const row = $('drip-times-row');
-            if (!row) return;
-            row.innerHTML = state.dripTimes.map((t, i) => `
+            function renderDripTimes() {
+                const row = $('drip-times-row');
+                if (!row) return;
+                row.innerHTML = state.dripTimes.map((t, i) => `
                     <span class="drip-time-chip">
                         <input type="time" value="${escapeHtml(t)}" data-time-idx="${i}">
                         <button type="button" class="remove-time-btn" data-time-idx="${i}" title="Remove">×</button>
                     </span>
                 `).join('') + '<button type="button" class="btn btn-micro" id="drip-add-time">+ Time</button>';
-            row.querySelectorAll('input[data-time-idx]').forEach((el) => {
-                el.addEventListener('change', () => {
-                    state.dripTimes[Number(el.dataset.timeIdx)] = el.value;
-                    updateDripSummary();
+                row.querySelectorAll('input[data-time-idx]').forEach((el) => {
+                    el.addEventListener('change', () => {
+                        state.dripTimes[Number(el.dataset.timeIdx)] = el.value;
+                        updateDripSummary();
+                    });
                 });
-            });
-            row.querySelectorAll('button[data-time-idx]').forEach((el) => {
-                el.addEventListener('click', () => {
-                    state.dripTimes.splice(Number(el.dataset.timeIdx), 1);
-                    renderDripTimes();
-                    updateDripSummary();
+                row.querySelectorAll('button[data-time-idx]').forEach((el) => {
+                    el.addEventListener('click', () => {
+                        state.dripTimes.splice(Number(el.dataset.timeIdx), 1);
+                        renderDripTimes();
+                        updateDripSummary();
+                    });
                 });
-            });
-            const addBtn = $('drip-add-time');
-            if (addBtn) {
-                addBtn.addEventListener('click', () => {
-                    state.dripTimes.push('12:00');
-                    renderDripTimes();
-                    updateDripSummary();
-                });
+                const addBtn = $('drip-add-time');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        state.dripTimes.push('12:00');
+                        renderDripTimes();
+                        updateDripSummary();
+                    });
+                }
             }
-        }
 
-        function renderDripCampaignSelect() {
-            const sel = $('drip-campaign');
-            if (!sel) return;
-            const campaigns = Array.isArray(state.campaigns) ? state.campaigns
-                : (state.campaigns?.campaigns || []);
-            const prev = sel.value;
-            sel.innerHTML = '<option value="">No campaign</option>' + campaigns.map((c) =>
-                `<option value="${Number(c.id)}" ${String(c.id) === prev ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
-            ).join('');
-        }
-
-        function renderDripEntries() {
-            const list = $('drip-entries-list');
-            if (!list) return;
-            const count = $('drip-entry-count');
-            if (count) count.textContent = state.dripEntries.length;
-            const statEntries = $('drip-stat-entries');
-            if (statEntries) statEntries.textContent = state.dripEntries.length;
-            if (state.dripEntries.length === 0) {
-                list.innerHTML = '<div class="drip-empty">No content entries yet. Click <strong>+ Add Entry</strong> to start, or <strong>Import JSON</strong> to bulk-load a content set.</div>';
-                return;
+            function renderDripCampaignSelect() {
+                const sel = $('drip-campaign');
+                if (!sel) return;
+                const campaigns = Array.isArray(state.campaigns) ? state.campaigns
+                    : (state.campaigns?.campaigns || []);
+                const prev = sel.value;
+                sel.innerHTML = '<option value="">No campaign</option>' + campaigns.map((c) =>
+                    `<option value="${Number(c.id)}" ${String(c.id) === prev ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
+                ).join('');
             }
-            list.innerHTML = state.dripEntries.map((entry, i) => `
+
+            function renderDripEntries() {
+                const list = $('drip-entries-list');
+                if (!list) return;
+                const count = $('drip-entry-count');
+                if (count) count.textContent = state.dripEntries.length;
+                const statEntries = $('drip-stat-entries');
+                if (statEntries) statEntries.textContent = state.dripEntries.length;
+                if (state.dripEntries.length === 0) {
+                    list.innerHTML = '<div class="drip-empty">No content entries yet. Click <strong>+ Add Entry</strong> to start, or <strong>Import JSON</strong> to bulk-load a content set.</div>';
+                    return;
+                }
+                list.innerHTML = state.dripEntries.map((entry, i) => `
                     <div class="drip-entry" data-entry-idx="${i}">
                         <div class="drip-entry-num">${i + 1}</div>
                         <div class="drip-entry-fields">
@@ -4333,108 +4324,108 @@
                         <button type="button" class="btn btn-micro btn-danger" data-remove-entry="${i}" title="Remove">✕</button>
                     </div>
                 `).join('');
-            list.querySelectorAll('[data-entry-content]').forEach((el) => {
-                el.addEventListener('input', () => {
-                    state.dripEntries[Number(el.dataset.entryContent)].content = el.value;
+                list.querySelectorAll('[data-entry-content]').forEach((el) => {
+                    el.addEventListener('input', () => {
+                        state.dripEntries[Number(el.dataset.entryContent)].content = el.value;
+                    });
                 });
-            });
-            list.querySelectorAll('[data-entry-hashtags]').forEach((el) => {
-                el.addEventListener('change', () => {
-                    state.dripEntries[Number(el.dataset.entryHashtags)].hashtags =
-                        el.value.split(',').map((h) => h.trim().replace(/^#/, '')).filter(Boolean);
+                list.querySelectorAll('[data-entry-hashtags]').forEach((el) => {
+                    el.addEventListener('change', () => {
+                        state.dripEntries[Number(el.dataset.entryHashtags)].hashtags =
+                            el.value.split(',').map((h) => h.trim().replace(/^#/, '')).filter(Boolean);
+                    });
                 });
-            });
-            list.querySelectorAll('[data-remove-entry]').forEach((btn) => {
-                btn.addEventListener('click', () => {
-                    state.dripEntries.splice(Number(btn.dataset.removeEntry), 1);
-                    renderDripEntries();
-                    updateDripSummary();
+                list.querySelectorAll('[data-remove-entry]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        state.dripEntries.splice(Number(btn.dataset.removeEntry), 1);
+                        renderDripEntries();
+                        updateDripSummary();
+                    });
                 });
-            });
-        }
+            }
 
-        function addDripEntry(content = '', hashtags = [], assetId = '') {
-            state.dripEntries.push({ content, hashtags, asset_id: assetId });
-            renderDripEntries();
-            updateDripSummary();
-        }
+            function addDripEntry(content = '', hashtags = [], assetId = '') {
+                state.dripEntries.push({ content, hashtags, asset_id: assetId });
+                renderDripEntries();
+                updateDripSummary();
+            }
 
-        function updateDripSummary() {
-            const ppd = state.dripPostsPerDay || 2;
-            const platformCount = state.dripSelectedPlatforms.size;
-            const entryCount = state.dripEntries.length;
-            const validEntries = state.dripEntries.filter((e) => e.content?.trim()).length;
-            const days = validEntries > 0 ? Math.ceil(validEntries / ppd) : 0;
-            const totalVariants = validEntries * platformCount;
+            function updateDripSummary() {
+                const ppd = state.dripPostsPerDay || 2;
+                const platformCount = state.dripSelectedPlatforms.size;
+                const entryCount = state.dripEntries.length;
+                const validEntries = state.dripEntries.filter((e) => e.content?.trim()).length;
+                const days = validEntries > 0 ? Math.ceil(validEntries / ppd) : 0;
+                const totalVariants = validEntries * platformCount;
 
-            const $days = $('drip-stat-days');
-            const $platforms = $('drip-stat-platforms');
-            const $variants = $('drip-stat-variants');
-            const $window = $('drip-stat-window');
-            const $statEntries = $('drip-stat-entries');
+                const $days = $('drip-stat-days');
+                const $platforms = $('drip-stat-platforms');
+                const $variants = $('drip-stat-variants');
+                const $window = $('drip-stat-window');
+                const $statEntries = $('drip-stat-entries');
 
-            if ($statEntries) $statEntries.textContent = entryCount;
-            if ($days) $days.textContent = days > 0 ? days + ' days' : '—';
-            if ($platforms) $platforms.textContent = platformCount > 0
-                ? [...state.dripSelectedPlatforms].join(', ') : '—';
-            if ($variants) $variants.textContent = totalVariants > 0
-                ? totalVariants.toLocaleString() : '—';
+                if ($statEntries) $statEntries.textContent = entryCount;
+                if ($days) $days.textContent = days > 0 ? days + ' days' : '—';
+                if ($platforms) $platforms.textContent = platformCount > 0
+                    ? [...state.dripSelectedPlatforms].join(', ') : '—';
+                if ($variants) $variants.textContent = totalVariants > 0
+                    ? totalVariants.toLocaleString() : '—';
 
-            if ($window) {
-                if (validEntries > 0) {
-                    const startDateVal = $('drip-start-date')?.value;
-                    if (startDateVal) {
-                        const start = new Date(startDateVal + 'T00:00:00');
-                        const end = new Date(start.getTime() + (days - 1) * 86400000);
-                        $window.textContent = start.toLocaleDateString() + ' \u2192 ' + end.toLocaleDateString();
+                if ($window) {
+                    if (validEntries > 0) {
+                        const startDateVal = $('drip-start-date')?.value;
+                        if (startDateVal) {
+                            const start = new Date(startDateVal + 'T00:00:00');
+                            const end = new Date(start.getTime() + (days - 1) * 86400000);
+                            $window.textContent = start.toLocaleDateString() + ' \u2192 ' + end.toLocaleDateString();
+                        } else {
+                            $window.textContent = days + ' days from chosen start';
+                        }
                     } else {
-                        $window.textContent = days + ' days from chosen start';
+                        $window.textContent = '—';
                     }
-                } else {
-                    $window.textContent = '—';
                 }
+
+                const countBadge = $('drip-entry-count');
+                if (countBadge) countBadge.textContent = entryCount;
             }
 
-            const countBadge = $('drip-entry-count');
-            if (countBadge) countBadge.textContent = entryCount;
-        }
+            function generateDripPreview() {
+                const ppd = state.dripPostsPerDay || 2;
+                const times = [...state.dripTimes].sort();
+                const platforms = [...state.dripSelectedPlatforms];
+                const startDateVal = $('drip-start-date')?.value;
+                const entries = state.dripEntries.filter((e) => e.content?.trim());
 
-        function generateDripPreview() {
-            const ppd = state.dripPostsPerDay || 2;
-            const times = [...state.dripTimes].sort();
-            const platforms = [...state.dripSelectedPlatforms];
-            const startDateVal = $('drip-start-date')?.value;
-            const entries = state.dripEntries.filter((e) => e.content?.trim());
+                if (entries.length === 0) { toast('Add at least one content entry before previewing.', 'error'); return; }
+                if (platforms.length === 0) { toast('Select at least one platform.', 'error'); return; }
+                if (!startDateVal) { toast('Choose a start date.', 'error'); return; }
+                if (times.length === 0) { toast('Add at least one post time.', 'error'); return; }
 
-            if (entries.length === 0) { toast('Add at least one content entry before previewing.', 'error'); return; }
-            if (platforms.length === 0) { toast('Select at least one platform.', 'error'); return; }
-            if (!startDateVal) { toast('Choose a start date.', 'error'); return; }
-            if (times.length === 0) { toast('Add at least one post time.', 'error'); return; }
+                const slots = [];
+                const start = new Date(startDateVal + 'T00:00:00');
 
-            const slots = [];
-            const start = new Date(startDateVal + 'T00:00:00');
+                for (let i = 0; i < entries.length; i++) {
+                    const dayOffset = Math.floor(i / ppd);
+                    const timeIdx = i % ppd;
+                    const time = times[timeIdx] || times[times.length - 1];
+                    const [hh, mm] = time.split(':').map(Number);
+                    const slotDate = new Date(start.getTime() + dayOffset * 86400000);
+                    slotDate.setUTCHours(hh, mm, 0, 0);
+                    slots.push({
+                        idx: i + 1,
+                        scheduled_at: slotDate.toISOString(),
+                        platforms: platforms.join(', '),
+                        content: entries[i].content,
+                    });
+                }
 
-            for (let i = 0; i < entries.length; i++) {
-                const dayOffset = Math.floor(i / ppd);
-                const timeIdx = i % ppd;
-                const time = times[timeIdx] || times[times.length - 1];
-                const [hh, mm] = time.split(':').map(Number);
-                const slotDate = new Date(start.getTime() + dayOffset * 86400000);
-                slotDate.setUTCHours(hh, mm, 0, 0);
-                slots.push({
-                    idx: i + 1,
-                    scheduled_at: slotDate.toISOString(),
-                    platforms: platforms.join(', '),
-                    content: entries[i].content,
-                });
-            }
+                const panel = $('drip-preview-panel');
+                const table = $('drip-preview-table');
+                const previewCount = $('drip-preview-count');
+                const displaySlots = slots.slice(0, 50);
 
-            const panel = $('drip-preview-panel');
-            const table = $('drip-preview-table');
-            const previewCount = $('drip-preview-count');
-            const displaySlots = slots.slice(0, 50);
-
-            table.innerHTML = displaySlots.map((s) => `
+                table.innerHTML = displaySlots.map((s) => `
                     <tr>
                         <td>${escapeHtml(String(s.idx))}</td>
                         <td>${escapeHtml(formatDateTime(s.scheduled_at))}</td>
@@ -4443,105 +4434,105 @@
                     </tr>
                 `).join('');
 
-            if (previewCount) previewCount.textContent = `${slots.length} slots · showing first ${displaySlots.length}`;
-            if (panel) panel.classList.remove('d-none');
+                if (previewCount) previewCount.textContent = `${slots.length} slots · showing first ${displaySlots.length}`;
+                if (panel) panel.classList.remove('d-none');
 
-            const confirmBtn = $('drip-confirm-btn');
-            if (confirmBtn) confirmBtn.classList.remove('d-none');
+                const confirmBtn = $('drip-confirm-btn');
+                if (confirmBtn) confirmBtn.classList.remove('d-none');
 
-            updateDripSummary();
-            toast(`Preview: ${slots.length} posts × ${platforms.length} platforms = ${(slots.length * platforms.length).toLocaleString()} variants`, 'success');
-        }
-
-        async function confirmDripSchedule() {
-            const ppd = state.dripPostsPerDay || 2;
-            const times = [...state.dripTimes].sort();
-            const platforms = [...state.dripSelectedPlatforms];
-            const startDateVal = $('drip-start-date')?.value;
-            const campaignId = $('drip-campaign')?.value ? Number($('drip-campaign').value) : null;
-            const entries = state.dripEntries.filter((e) => e.content?.trim());
-
-            if (entries.length === 0) { toast('No content entries to schedule.', 'error'); return; }
-            if (platforms.length === 0) { toast('Select at least one platform.', 'error'); return; }
-            if (!startDateVal) { toast('Choose a start date.', 'error'); return; }
-
-            const confirmBtn = $('drip-confirm-btn');
-            try {
-                if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Scheduling…'; }
-
-                const payload = {
-                    brand: currentBrand,
-                    campaign_id: campaignId,
-                    platforms,
-                    start_date: startDateVal,
-                    posts_per_day: ppd,
-                    post_times_utc: times,
-                    entries: entries.map((e) => ({
-                        content: e.content,
-                        hashtags: e.hashtags || [],
-                        asset_id: e.asset_id || '',
-                    })),
-                };
-
-                const result = await api('/campaigns/bulk-schedule', { method: 'POST', body: payload });
-                toast(
-                    `Drip scheduled! ${(result.created_variants || 0).toLocaleString()} variants across ${result.days_covered || 0} days.`,
-                    'success'
-                );
-
-                state.dripEntries = [];
-                renderDripEntries();
                 updateDripSummary();
-                if ($('drip-preview-panel')) $('drip-preview-panel').classList.add('d-none');
-                if (confirmBtn) { confirmBtn.classList.add('d-none'); confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm & Schedule All'; }
-                await refreshAll();
-            } catch (err) {
-                toast('Bulk schedule failed: ' + err.message, 'error');
-                if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm & Schedule All'; }
-            }
-        }
-
-        function importDripJSON() {
-            const raw = $('drip-import-textarea')?.value?.trim();
-            if (!raw) { toast('Paste JSON content first.', 'error'); return; }
-
-            let parsed;
-            try {
-                parsed = JSON.parse(raw);
-            } catch {
-                toast('Invalid JSON — please paste a valid JSON array.', 'error');
-                return;
+                toast(`Preview: ${slots.length} posts × ${platforms.length} platforms = ${(slots.length * platforms.length).toLocaleString()} variants`, 'success');
             }
 
-            if (!Array.isArray(parsed)) { toast('JSON must be an array.', 'error'); return; }
+            async function confirmDripSchedule() {
+                const ppd = state.dripPostsPerDay || 2;
+                const times = [...state.dripTimes].sort();
+                const platforms = [...state.dripSelectedPlatforms];
+                const startDateVal = $('drip-start-date')?.value;
+                const campaignId = $('drip-campaign')?.value ? Number($('drip-campaign').value) : null;
+                const entries = state.dripEntries.filter((e) => e.content?.trim());
 
-            let added = 0;
-            for (const item of parsed) {
-                if (typeof item === 'string') {
-                    if (item.trim()) { addDripEntry(item.trim(), [], ''); added++; }
-                } else if (item && typeof item === 'object') {
-                    const content = (item.content || item.text || item.caption || '').toString().trim();
-                    if (content) {
-                        const hashtags = Array.isArray(item.hashtags) ? item.hashtags : [];
-                        addDripEntry(content, hashtags, item.asset_id || '');
-                        added++;
-                    }
+                if (entries.length === 0) { toast('No content entries to schedule.', 'error'); return; }
+                if (platforms.length === 0) { toast('Select at least one platform.', 'error'); return; }
+                if (!startDateVal) { toast('Choose a start date.', 'error'); return; }
+
+                const confirmBtn = $('drip-confirm-btn');
+                try {
+                    if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Scheduling…'; }
+
+                    const payload = {
+                        brand: currentBrand,
+                        campaign_id: campaignId,
+                        platforms,
+                        start_date: startDateVal,
+                        posts_per_day: ppd,
+                        post_times_utc: times,
+                        entries: entries.map((e) => ({
+                            content: e.content,
+                            hashtags: e.hashtags || [],
+                            asset_id: e.asset_id || '',
+                        })),
+                    };
+
+                    const result = await api('/campaigns/bulk-schedule', { method: 'POST', body: payload });
+                    toast(
+                        `Drip scheduled! ${(result.created_variants || 0).toLocaleString()} variants across ${result.days_covered || 0} days.`,
+                        'success'
+                    );
+
+                    state.dripEntries = [];
+                    renderDripEntries();
+                    updateDripSummary();
+                    if ($('drip-preview-panel')) $('drip-preview-panel').classList.add('d-none');
+                    if (confirmBtn) { confirmBtn.classList.add('d-none'); confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm & Schedule All'; }
+                    await refreshAll();
+                } catch (err) {
+                    toast('Bulk schedule failed: ' + err.message, 'error');
+                    if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm & Schedule All'; }
                 }
             }
 
-            closeModal('drip-import-modal');
-            if ($('drip-import-textarea')) $('drip-import-textarea').value = '';
-            toast(`Imported ${added} entr${added === 1 ? 'y' : 'ies'}.`, 'success');
-            updateDripSummary();
-        }
+            function importDripJSON() {
+                const raw = $('drip-import-textarea')?.value?.trim();
+                if (!raw) { toast('Paste JSON content first.', 'error'); return; }
 
-        window.__clerkReady
-            .then(initAuth)
-            .catch(function (err) {
-                $('auth-loading').textContent = 'Failed to load Clerk auth library.';
-                console.error('[admin auth]', err);
-            });
-        }) ();
+                let parsed;
+                try {
+                    parsed = JSON.parse(raw);
+                } catch {
+                    toast('Invalid JSON — please paste a valid JSON array.', 'error');
+                    return;
+                }
+
+                if (!Array.isArray(parsed)) { toast('JSON must be an array.', 'error'); return; }
+
+                let added = 0;
+                for (const item of parsed) {
+                    if (typeof item === 'string') {
+                        if (item.trim()) { addDripEntry(item.trim(), [], ''); added++; }
+                    } else if (item && typeof item === 'object') {
+                        const content = (item.content || item.text || item.caption || '').toString().trim();
+                        if (content) {
+                            const hashtags = Array.isArray(item.hashtags) ? item.hashtags : [];
+                            addDripEntry(content, hashtags, item.asset_id || '');
+                            added++;
+                        }
+                    }
+                }
+
+                closeModal('drip-import-modal');
+                if ($('drip-import-textarea')) $('drip-import-textarea').value = '';
+                toast(`Imported ${added} entr${added === 1 ? 'y' : 'ies'}.`, 'success');
+                updateDripSummary();
+            }
+
+            window.__clerkReady
+                .then(initAuth)
+                .catch(function (err) {
+                    $('auth-loading').textContent = 'Failed to load Clerk auth library.';
+                    console.error('[admin auth]', err);
+                });
+        })();
     </script>
 </body>
 
