@@ -1624,9 +1624,17 @@ export async function handleCMSRequest(request, env, user) {
       return jsonResponse(PLATFORM_RULES);
     }
 
+    // ── Asset discovery (must come before generic /assets/:id catch-all) ────
+    if (path === '/assets/discover' && method === 'POST') {
+      return handleDiscoverAssets(request, env);
+    }
+    if (path === '/assets/discovered' && method === 'GET') {
+      return handleListDiscovered(request, env);
+    }
+
     // Single asset (public)
     const assetMatch = path.match(/^\/assets\/([^/]+)$/);
-    if (assetMatch && method === 'GET') {
+    if (assetMatch && method === 'GET' && assetMatch[1] !== 'discovered') {
       return handleGetAsset(assetMatch[1], env);
     }
 
@@ -1761,12 +1769,19 @@ export async function handleCMSRequest(request, env, user) {
       return handleCMSStats(env);
     }
 
-    // ── Asset discovery (scanner reports) ────────────────
-    if (path === '/assets/discover' && method === 'POST') {
-      return handleDiscoverAssets(request, env);
+    // ── Discovered asset claim / status update ────────────
+    const discoveredClaimMatch = path.match(/^\/assets\/discovered\/(\d+)\/claim$/);
+    if (discoveredClaimMatch && method === 'POST') {
+      return handleClaimDiscoveredAsset(request, user, env, discoveredClaimMatch[1]);
     }
-    if (path === '/assets/discovered' && method === 'GET') {
-      return handleListDiscovered(request, env);
+    const discoveredUpdateMatch = path.match(/^\/assets\/discovered\/(\d+)$/);
+    if (discoveredUpdateMatch && method === 'PUT') {
+      return handleUpdateDiscoveredStatus(request, user, env, discoveredUpdateMatch[1]);
+    }
+
+    // ── Server-side page scanner ──────────────────────────
+    if (path === '/scan-page' && method === 'POST') {
+      return handleScanPage(request, user, env);
     }
 
     // ── Image overrides (live swap via HTMLRewriter) ──────
@@ -1909,12 +1924,179 @@ async function handleListDiscovered(request, env) {
   params.push(limit, offset);
 
   const results = await env.DB.prepare(query).bind(...params).all();
-  return jsonResponse({ assets: results.results || [], page, limit });
+
+  // Count total for pagination
+  let countQuery = 'SELECT COUNT(*) as total FROM discovered_assets WHERE status = ?';
+  const countParams = [status];
+  if (brand) { countQuery += ' AND brand = ?'; countParams.push(brand); }
+  if (domain) { countQuery += ' AND site_domain = ?'; countParams.push(domain); }
+  const countResult = await env.DB.prepare(countQuery).bind(...countParams).first();
+
+  return jsonResponse({ assets: results.results || [], page, limit, total: countResult?.total || 0 });
 }
 
 // ────────────────────────────────────────────────────────────────
-//  Image Overrides (for HTMLRewriter live swap)
+//  Claim Discovered Asset → promote to cms_assets
 // ────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/cms/assets/discovered/:id/claim
+ * Body: { title, brand, category, media_type, tags[] }
+ * Creates a cms_assets record from the discovered asset's URL and marks it claimed.
+ */
+async function handleClaimDiscoveredAsset(request, user, env, discoveredId) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!user) return errorResponse('Unauthorized', 401);
+
+  const discovered = await env.DB.prepare(
+    'SELECT * FROM discovered_assets WHERE id = ?'
+  ).bind(discoveredId).first();
+  if (!discovered) return errorResponse('Discovered asset not found', 404);
+  if (discovered.status === 'claimed') return errorResponse('Already claimed', 409);
+
+  const body = await request.json().catch(() => ({}));
+  const title = body.title || discovered.alt_text || 'Untitled';
+  const brand = body.brand || discovered.brand;
+  const category = body.category || 'uncategorized';
+  const mediaType = body.media_type || discovered.asset_type || 'image';
+
+  const assetId = `asset_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+  const now = new Date().toISOString();
+
+  await env.DB.prepare(`
+    INSERT INTO cms_assets
+      (id, brand, category, title, file_path, media_type, tags, uploaded_by, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    assetId, brand, category, title,
+    discovered.asset_url,   // use the live URL as file_path
+    mediaType,
+    JSON.stringify(body.tags || []),
+    user.id, now, now
+  ).run();
+
+  await env.DB.prepare(
+    'UPDATE discovered_assets SET status = ?, cms_asset_id = ? WHERE id = ?'
+  ).bind('claimed', assetId, discoveredId).run();
+
+  await logAudit(env.DB, user.id, 'asset.claim', 'discovered_asset', String(discoveredId), {
+    assetId, brand, category, title,
+  });
+
+  return jsonResponse({ ok: true, asset_id: assetId, message: 'Asset claimed and added to library' }, 201);
+}
+
+/**
+ * PUT /api/cms/assets/discovered/:id
+ * Body: { status } — update status of a discovered asset (ignore / reset to discovered)
+ */
+async function handleUpdateDiscoveredStatus(request, user, env, discoveredId) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!user) return errorResponse('Unauthorized', 401);
+
+  const body = await request.json().catch(() => ({}));
+  const validStatuses = ['discovered', 'claimed', 'ignored'];
+  if (!validStatuses.includes(body.status)) {
+    return errorResponse(`status must be one of: ${validStatuses.join(', ')}`);
+  }
+
+  await env.DB.prepare(
+    'UPDATE discovered_assets SET status = ? WHERE id = ?'
+  ).bind(body.status, discoveredId).run();
+
+  return jsonResponse({ ok: true });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Server-side page scanner
+// ────────────────────────────────────────────────────────────────
+
+/**
+ * POST /api/cms/scan-page
+ * Body: { brand, page_url }
+ * Worker fetches the page, extracts <img> src URLs, inserts into discovered_assets.
+ */
+async function handleScanPage(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!user) return errorResponse('Unauthorized', 401);
+
+  const body = await request.json().catch(() => null);
+  if (!body?.brand || !body?.page_url) {
+    return errorResponse('brand and page_url are required');
+  }
+
+  let pageUrl;
+  try {
+    pageUrl = new URL(body.page_url);
+  } catch {
+    return errorResponse('Invalid page_url');
+  }
+
+  // Fetch the page HTML (with a reasonable timeout)
+  let html;
+  try {
+    const resp = await fetch(pageUrl.toString(), {
+      headers: { 'User-Agent': 'GFD-AssetScanner/1.0' },
+      cf: { cacheTtl: 0 },
+    });
+    if (!resp.ok) return errorResponse(`Page returned HTTP ${resp.status}`, 502);
+    html = await resp.text();
+  } catch (err) {
+    return errorResponse('Failed to fetch page: ' + err.message, 502);
+  }
+
+  // Extract all img src attributes
+  const imgSrcRegex = /<img[^>]+src=["']([^"']+)["'][^>]*(?:alt=["']([^"']*)["'])?[^>]*>/gi;
+  const bgUrlRegex = /url\(["']?([^"')]+)["']?\)/gi;
+  const foundUrls = new Map(); // url → { alt }
+
+  let match;
+  while ((match = imgSrcRegex.exec(html)) !== null) {
+    const src = match[1];
+    const alt = match[2] || '';
+    if (src && !src.startsWith('data:')) {
+      let absUrl;
+      try {
+        absUrl = new URL(src, pageUrl).toString();
+      } catch { continue; }
+      foundUrls.set(absUrl, { alt, type: 'image' });
+    }
+  }
+  while ((match = bgUrlRegex.exec(html)) !== null) {
+    const src = match[1];
+    if (src && !src.startsWith('data:') && src.match(/\.(png|jpg|jpeg|gif|webp|svg|avif)(\?|$)/i)) {
+      let absUrl;
+      try {
+        absUrl = new URL(src, pageUrl).toString();
+      } catch { continue; }
+      if (!foundUrls.has(absUrl)) foundUrls.set(absUrl, { alt: '', type: 'image' });
+    }
+  }
+
+  if (foundUrls.size === 0) {
+    return jsonResponse({ ok: true, inserted: 0, total: 0, message: 'No images found on page' });
+  }
+
+  const now = new Date().toISOString();
+  let inserted = 0;
+
+  for (const [assetUrl, meta] of foundUrls) {
+    try {
+      const result = await env.DB.prepare(
+        `INSERT OR IGNORE INTO discovered_assets
+           (brand, site_domain, page_url, asset_url, asset_type, alt_text, discovered_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
+      ).bind(body.brand, pageUrl.hostname, pageUrl.toString(), assetUrl, meta.type, meta.alt, now).run();
+      if (result.changes > 0) inserted++;
+    } catch { /* skip duplicates */ }
+  }
+
+  await logAudit(env.DB, user.id, 'asset.scan', 'page', pageUrl.toString(), {
+    brand: body.brand, found: foundUrls.size, inserted,
+  });
+
+  return jsonResponse({ ok: true, inserted, total: foundUrls.size });
+}
 
 /**
  * GET /api/cms/assets/overrides?domain=&brand=
