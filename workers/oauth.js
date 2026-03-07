@@ -361,6 +361,17 @@ async function handleCallback(provider, request, env) {
   if (!config) return errorResponse(`Unknown OAuth provider: ${provider}`, 404);
 
   const url = new URL(request.url);
+
+  // ── Webhook verification (Meta sends GET with hub.mode=subscribe) ──────────
+  if (url.searchParams.get('hub.mode') === 'subscribe') {
+    const verifyToken = env.WEBHOOK_VERIFY_TOKEN || 'gfd-ig-webhook-2026';
+    if (url.searchParams.get('hub.verify_token') === verifyToken) {
+      const challenge = url.searchParams.get('hub.challenge') || '';
+      return new Response(challenge, { status: 200, headers: { 'Content-Type': 'text/plain' } });
+    }
+    return new Response('Forbidden', { status: 403 });
+  }
+
   const code = url.searchParams.get('code');
   const stateParam = url.searchParams.get('state');
   const errorParam = url.searchParams.get('error');
