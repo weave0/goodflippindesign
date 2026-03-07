@@ -1408,6 +1408,112 @@
             height: 100%;
         }
 
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+        }
+
+        .upload-folder-btn {
+            margin-top: 0.6rem;
+            position: relative;
+            z-index: 2;
+            font-size: 0.78rem;
+            padding: 0.3rem 0.9rem;
+        }
+
+        /* Getting Started panel */
+        .gs-panel {
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .gs-panel .section-head {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .gs-steps {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .gs-step {
+            display: flex;
+            gap: 0.85rem;
+            align-items: flex-start;
+            padding: 0.65rem 0.8rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            transition: opacity 0.3s ease;
+        }
+
+        .gs-step.gs-done {
+            opacity: 0.45;
+        }
+
+        .gs-step.gs-done .gs-num {
+            background: #3fb950;
+        }
+
+        .gs-num {
+            width: 1.6rem;
+            height: 1.6rem;
+            border-radius: 50%;
+            background: var(--cyan, #38bdf8);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 0.05rem;
+        }
+
+        .gs-step strong {
+            font-size: 0.88rem;
+            color: var(--text);
+        }
+
+        .gs-step p {
+            margin: 0.2rem 0 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            padding: 0;
+            color: var(--cyan, #38bdf8);
+            cursor: pointer;
+            font-size: inherit;
+            text-decoration: underline;
+            font-family: inherit;
+        }
+
+        .btn-link:hover {
+            opacity: 0.8;
+        }
+
+        .subheading {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .mb-08 {
+            margin-bottom: 0.8rem;
+        }
+
         .upload-icon {
             font-size: 2rem;
             margin-bottom: 0.5rem;
@@ -1918,6 +2024,45 @@
                 </section>
 
                 <section class="view active" id="view-overview">
+                    <!-- Getting Started: shown only when DB is empty -->
+                    <article class="panel gs-panel d-none" id="getting-started">
+                        <div class="section-head">
+                            <h2 class="section-title">&#127919; Getting Started</h2>
+                            <button class="btn btn-micro" id="gs-dismiss">Dismiss</button>
+                        </div>
+                        <p class="subheading mb-08">This platform is live and ready. Here's the fastest path to your first scheduled CultureSherpa campaign:</p>
+                        <ol class="gs-steps">
+                            <li class="gs-step" id="gs-step-1">
+                                <span class="gs-num">1</span>
+                                <div>
+                                    <strong>Upload or import your assets</strong>
+                                    <p>Go to <button class="btn-link" data-view-shortcut="library">Asset Library</button> &rarr; drag files in, click &ldquo;Import Folder&rdquo; for a whole directory, or click <button class="btn-link" data-view-shortcut="review-queue">Review Queue</button> to scan your live sites and claim images already deployed.</p>
+                                </div>
+                            </li>
+                            <li class="gs-step" id="gs-step-2">
+                                <span class="gs-num">2</span>
+                                <div>
+                                    <strong>Create a campaign</strong>
+                                    <p>Go to <button class="btn-link" data-view-shortcut="planner">Planner</button> &rarr; click <em>New Campaign</em> &rarr; name it &ldquo;Culture Profile Drip&rdquo; for CultureSherpa.</p>
+                                </div>
+                            </li>
+                            <li class="gs-step" id="gs-step-3">
+                                <span class="gs-num">3</span>
+                                <div>
+                                    <strong>Connect your social platforms</strong>
+                                    <p>Go to <button class="btn-link" data-view-shortcut="connections">Connections</button> &rarr; click <em>Connect Account</em> &rarr; use <em>Manual Token</em> (fastest) or complete OAuth setup for LinkedIn, Instagram, Facebook, and X.</p>
+                                </div>
+                            </li>
+                            <li class="gs-step" id="gs-step-4">
+                                <span class="gs-num">4</span>
+                                <div>
+                                    <strong>Build your 100-day drip</strong>
+                                    <p>Go to <button class="btn-link" data-view-shortcut="drip">Drip Builder</button> &rarr; select your campaign, set start date, pick 2 posts/day, all 4 platforms &rarr; import 200 content entries as JSON &rarr; Preview &rarr; Confirm. Your entire year-quarter is scheduled in one click.</p>
+                                </div>
+                            </li>
+                        </ol>
+                    </article>
+
                     <div class="split">
                         <article class="panel">
                             <div class="section-head">
@@ -2121,9 +2266,11 @@
                         <!-- Upload Zone -->
                         <div class="upload-zone" id="upload-zone" role="button" aria-label="Upload media files — drag and drop or click to browse">
                             <input type="file" id="upload-input" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx" aria-hidden="true" tabindex="-1">
+                            <input type="file" id="folder-input" webkitdirectory multiple accept="image/*,video/*" aria-hidden="true" tabindex="-1" class="sr-only">
                             <div class="upload-icon" aria-hidden="true">&#8679;</div>
                             <div class="upload-title">Drag &amp; drop to upload</div>
                             <div class="upload-hint">Images, video, audio, documents &mdash; max 50 MB each</div>
+                            <button class="btn btn-secondary upload-folder-btn" id="import-folder-btn" type="button">&#128193; Import Folder</button>
                         </div>
                         <ul class="upload-progress-list" id="upload-progress-list"></ul>
 
@@ -2980,6 +3127,18 @@
                 // ── Upload Dropzone Setup ────────────────────────────────────
                 initUploadZone();
 
+                // ── Getting Started Panel ────────────────────────────────────
+                const gsPanel = $('getting-started');
+                if (gsPanel) {
+                    $('gs-dismiss')?.addEventListener('click', () => {
+                        sessionStorage.setItem('gs-dismissed', '1');
+                        gsPanel.classList.add('d-none');
+                    });
+                    document.querySelectorAll('[data-view-shortcut]').forEach((btn) => {
+                        btn.addEventListener('click', () => switchView(btn.dataset.viewShortcut));
+                    });
+                }
+
                 // ── Drip Builder ─────────────────────────────────────────────
                 $('drip-add-entry').addEventListener('click', () => addDripEntry());
                 $('drip-import-json-btn').addEventListener('click', () => openModal('drip-import-modal'));
@@ -3123,6 +3282,7 @@
                 $('kpi-connections').textContent = Number(stats.connections || 0);
                 $('kpi-published').textContent = published;
                 $('kpi-pending-review').textContent = Number(stats.pendingReview || 0);
+                updateGettingStarted();
             }
 
             async function loadConnections() {
@@ -3420,6 +3580,27 @@
                     : '<tr><td colspan="4">No assets available.</td></tr>';
             }
 
+            function updateGettingStarted() {
+                const panel = $('getting-started');
+                if (!panel) return;
+                // Dismissed for this session?
+                if (sessionStorage.getItem('gs-dismissed') === '1') return;
+
+                const assets = Number($('kpi-assets').textContent || 0);
+                const scheduled = Number($('kpi-scheduled').textContent || 0);
+                const campaigns = Number($('kpi-campaigns').textContent || 0);
+                const conns = Number($('kpi-connections').textContent || 0);
+
+                const allZero = assets === 0 && scheduled === 0 && campaigns === 0 && conns === 0;
+                panel.classList.toggle('d-none', !allZero);
+
+                // Mark completed steps
+                if (assets > 0) $('gs-step-1')?.classList.add('gs-done');
+                if (campaigns > 0) $('gs-step-2')?.classList.add('gs-done');
+                if (conns > 0) $('gs-step-3')?.classList.add('gs-done');
+                if (scheduled > 0) $('gs-step-4')?.classList.add('gs-done');
+            }
+
 
 
             function renderEcosystemMatrix() {
@@ -3632,15 +3813,23 @@
             function initUploadZone() {
                 const zone = $('upload-zone');
                 const input = $('upload-input');
+                const folderInput = $('folder-input');
+                const folderBtn = $('import-folder-btn');
                 if (!zone || !input) return;
 
                 zone.addEventListener('click', (ev) => {
+                    if (ev.target === folderBtn || ev.target === folderInput) return;
                     if (ev.target !== input) input.click();
                 });
                 zone.addEventListener('keydown', (ev) => {
                     if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); input.click(); }
                 });
                 input.addEventListener('change', () => handleUploadFiles(Array.from(input.files)));
+
+                if (folderBtn && folderInput) {
+                    folderBtn.addEventListener('click', (ev) => { ev.stopPropagation(); folderInput.click(); });
+                    folderInput.addEventListener('change', () => { handleUploadFiles(Array.from(folderInput.files)); folderInput.value = ''; });
+                }
 
                 zone.addEventListener('dragover', (ev) => { ev.preventDefault(); zone.classList.add('drag-over'); });
                 zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
@@ -3681,7 +3870,7 @@
                         form.append('category', 'uploads');
                         form.append('media_type', file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : file.type === 'application/pdf' ? 'document' : 'image');
 
-                        const token = await clerk.session.getToken();
+                        const token = await state.clerk.session.getToken();
                         const resp = await fetch('/api/cms/upload', {
                             method: 'POST',
                             headers: { 'Authorization': 'Bearer ' + token },
