@@ -314,6 +314,7 @@ async function handleAuthorize(provider, request, env) {
     authUrl.searchParams.set('scope', config.scopes);
     authUrl.searchParams.set('code_challenge', codeChallenge);
     authUrl.searchParams.set('code_challenge_method', 'S256');
+    authUrl.searchParams.set('force_login', 'true'); // always show account picker
   } else if (provider === 'pinterest') {
     authUrl.searchParams.set('response_type', 'code');
     authUrl.searchParams.set('scope', config.scopes);
