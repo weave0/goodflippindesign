@@ -19,7 +19,8 @@ const OAUTH_CONFIGS = {
     authorizeUrl: 'https://www.facebook.com/v21.0/dialog/oauth',
     tokenUrl: 'https://graph.facebook.com/v21.0/oauth/access_token',
     longLivedUrl: 'https://graph.facebook.com/v21.0/oauth/access_token',
-    scopes: 'instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement,pages_manage_posts,public_profile',
+    // instagram_basic + instagram_content_publish deprecated 2024 → instagram_business_* equivalents
+    scopes: 'instagram_business_basic,instagram_business_content_publish,pages_show_list,pages_read_engagement,pages_manage_posts,public_profile',
     platforms: ['instagram', 'facebook'],
     label: 'Meta (Instagram + Facebook)',
     envClientId: 'META_APP_ID',
