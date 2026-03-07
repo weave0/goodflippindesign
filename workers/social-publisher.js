@@ -168,8 +168,11 @@ async function decryptToken(encrypted, keyMaterial) {
 }
 
 async function refreshToken(db, brand, platform, payload, encryptionKey) {
-  if (platform === 'facebook' || platform === 'instagram') {
-    return await refreshMetaToken(db, brand, platform, payload, encryptionKey);
+  if (platform === 'instagram') {
+    return await refreshInstagramToken(db, brand, platform, payload, encryptionKey);
+  }
+  if (platform === 'facebook') {
+    return await refreshFacebookToken(db, brand, platform, payload, encryptionKey);
   }
   if (platform === 'x') {
     return await refreshXToken(db, brand, platform, payload, encryptionKey);
@@ -185,18 +188,37 @@ async function refreshToken(db, brand, platform, payload, encryptionKey) {
 //  Meta (Instagram + Facebook) — Graph API v25
 // ──────────────────────────────────────────────────────────────
 
-async function refreshMetaToken(db, brand, platform, payload, encryptionKey) {
-  const res = await fetch(
-    `https://graph.facebook.com/v25.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${payload.app_id}&client_secret=${payload.app_secret}&fb_exchange_token=${payload.access_token}`
-  );
-  if (!res.ok) throw new Error('Meta token refresh failed');
+async function refreshInstagramToken(db, brand, platform, payload, encryptionKey) {
+  // New Instagram API uses ig_exchange_token at graph.instagram.com
+  const url = new URL('https://graph.instagram.com/access_token');
+  url.searchParams.set('grant_type', 'ig_refresh_token');
+  url.searchParams.set('access_token', payload.access_token);
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error('Instagram token refresh failed');
   const data = await res.json();
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
   const refreshed = {
     ...payload,
     access_token: data.access_token,
     expires_at: new Date(Date.now() + (data.expires_in || 5184000) * 1000).toISOString(),
   };
-  await saveToken(db, brand, platform, payload.account_id, payload.account_label, refreshed, encryptionKey);
+  await saveToken(db, brand, platform, payload.ig_user_id, payload.ig_username || payload.ig_user_id, refreshed, encryptionKey);
+  return refreshed;
+}
+
+async function refreshFacebookToken(db, brand, platform, payload, encryptionKey) {
+  const res = await fetch(
+    `https://graph.facebook.com/v25.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${payload.app_id}&client_secret=${payload.app_secret}&fb_exchange_token=${payload.access_token}`
+  );
+  if (!res.ok) throw new Error('Facebook token refresh failed');
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+  const refreshed = {
+    ...payload,
+    access_token: data.access_token,
+    expires_at: new Date(Date.now() + (data.expires_in || 5184000) * 1000).toISOString(),
+  };
+  await saveToken(db, brand, platform, payload.page_id, payload.page_name || payload.page_id, refreshed, encryptionKey);
   return refreshed;
 }
 

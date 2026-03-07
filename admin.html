@@ -3254,13 +3254,14 @@
 
             // Maps each platform to its OAuth provider key
             const PLATFORM_TO_PROVIDER = {
-                instagram: 'meta', facebook: 'meta', x: 'x',
+                instagram: 'instagram', facebook: 'facebook', x: 'x',
                 linkedin: 'linkedin', pinterest: 'pinterest',
                 tiktok: 'tiktok', youtube: 'youtube', threads: 'threads',
             };
 
             const PROVIDER_INFO = {
-                meta: { label: 'Meta (Instagram + Facebook)', platforms: ['instagram', 'facebook'] },
+                instagram: { label: 'Instagram', platforms: ['instagram'] },
+                facebook: { label: 'Facebook', platforms: ['facebook'] },
                 x: { label: 'X (Twitter)', platforms: ['x'] },
                 linkedin: { label: 'LinkedIn', platforms: ['linkedin'] },
                 pinterest: { label: 'Pinterest', platforms: ['pinterest'] },
