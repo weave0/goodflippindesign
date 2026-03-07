@@ -336,6 +336,7 @@ async function handleDeleteAsset(request, user, env) {
  * Returns R2 key for use in asset metadata
  */
 async function handleUpload(request, user, env) {
+  if (!user) return errorResponse('Unauthorized', 401);
   if (!env.MEDIA_BUCKET) {
     return errorResponse('R2 bucket not configured. Run: wrangler r2 bucket create gfv-media', 503);
   }
