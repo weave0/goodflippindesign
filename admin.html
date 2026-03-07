@@ -967,13 +967,19 @@
             z-index: 2;
             cursor: pointer;
         }
+
         .asset-check-wrap .asset-check {
             width: 1.1rem;
             height: 1.1rem;
             cursor: pointer;
             accent-color: var(--accent, #6366f1);
         }
-        .asset-card { position: relative; } /* ensure absolute positioning anchor */
+
+        .asset-card {
+            position: relative;
+        }
+
+        /* ensure absolute positioning anchor */
 
         .select-all-label {
             display: flex;
@@ -3365,6 +3371,11 @@
                                 const base = img.getAttribute('data-r2');
                                 if (base) img.src = base + '?t=' + enc;
                             });
+                            // Also repatch proxy thumbnails in the Review Queue
+                            document.querySelectorAll('img[data-proxy-url]').forEach((img) => {
+                                const extUrl = img.getAttribute('data-proxy-url');
+                                if (extUrl) img.src = `/api/cms/proxy-img?url=${encodeURIComponent(extUrl)}&t=${enc}`;
+                            });
                         }
                     }
                 } catch { /* silently keep existing token */ }
@@ -3870,7 +3881,9 @@
 
                 grid.innerHTML = state.discoveredAssets.map((asset) => {
                     const isImage = (asset.asset_type || 'image') === 'image';
-                    const thumbUrl = isImage ? escapeHtml(asset.asset_url) : '';
+                    const proxyThumb = isImage && state.mediaToken
+                        ? `/api/cms/proxy-img?url=${encodeURIComponent(asset.asset_url)}&t=${encodeURIComponent(state.mediaToken)}`
+                        : '';
                     const domain = escapeHtml(asset.site_domain || '');
                     const alt = escapeHtml(asset.alt_text || '');
                     const isClaimed = asset.status === 'claimed';
@@ -3878,9 +3891,10 @@
                     return `
                         <article class="rq-card" data-da-id="${asset.id}">
                             <div class="rq-thumb-wrap">
-                                ${thumbUrl
-                            ? `<img class="rq-thumb" src="${thumbUrl}" alt="${alt}" loading="lazy">`
-                            : `<div class="rq-thumb-placeholder">${escapeHtml((asset.asset_type || 'file').toUpperCase())}</div>`}
+                                ${proxyThumb
+                            ? `<img class="rq-thumb" src="${proxyThumb}" data-proxy-url="${escapeHtml(asset.asset_url)}" alt="${alt}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                            : ''}
+                                <div class="rq-thumb-placeholder"${proxyThumb ? ' style="display:none"' : ''}>${escapeHtml((asset.asset_type || 'IMG').toUpperCase())}</div>
                                 ${domain ? `<span class="rq-domain-badge">${domain}</span>` : ''}
                             </div>
                             <div class="rq-meta">
