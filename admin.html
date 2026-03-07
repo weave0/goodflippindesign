@@ -3779,8 +3779,10 @@
                 });
             }
 
-            function startOAuthFlow(provider) {
-                const url = `${API}/oauth/authorize/${encodeURIComponent(provider)}?brand=${encodeURIComponent(currentBrand)}`;
+            async function startOAuthFlow(provider) {
+                const token = await state.clerk?.session?.getToken();
+                const tokenParam = token ? `&t=${encodeURIComponent(token)}` : '';
+                const url = `${API}/oauth/authorize/${encodeURIComponent(provider)}?brand=${encodeURIComponent(currentBrand)}${tokenParam}`;
                 // Open in same tab — the callback page has a "Back to Command Center" link
                 window.location.href = url;
             }
