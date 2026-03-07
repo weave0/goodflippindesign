@@ -933,6 +933,69 @@
             padding-right: 0.3rem;
         }
 
+        .asset-status-badge {
+            display: inline-block;
+            padding: 0.18rem 0.45rem;
+            border-radius: 4px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+        }
+
+        .asset-status-badge.draft {
+            background: rgba(234, 179, 8, 0.15);
+            color: #ca8a04;
+        }
+
+        .asset-status-badge.approved {
+            background: rgba(34, 197, 94, 0.15);
+            color: #16a34a;
+        }
+
+        .asset-status-badge.rejected {
+            background: rgba(239, 68, 68, 0.15);
+            color: #dc2626;
+        }
+
+        /* Selection checkbox overlaid top-left on asset cards */
+        .asset-check-wrap {
+            position: absolute;
+            top: 0.4rem;
+            left: 0.4rem;
+            z-index: 2;
+            cursor: pointer;
+        }
+        .asset-check-wrap .asset-check {
+            width: 1.1rem;
+            height: 1.1rem;
+            cursor: pointer;
+            accent-color: var(--accent, #6366f1);
+        }
+        .asset-card { position: relative; } /* ensure absolute positioning anchor */
+
+        .select-all-label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-success-soft {
+            background: transparent;
+            border-color: rgba(34, 197, 94, 0.4);
+            color: #4ade80;
+        }
+
+        .btn-success-soft:hover {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.7);
+        }
+
         .asset-card {
             border: 1px solid var(--border);
             border-radius: 10px;
@@ -1051,6 +1114,10 @@
         .scanner-url-input {
             flex: 1;
             min-width: 220px;
+        }
+
+        #override-filter-domain {
+            width: 200px;
         }
 
         .scanner-quick-links {
@@ -1235,6 +1302,20 @@
             background: var(--panel-strong);
             box-shadow: var(--shadow);
             padding: 1rem;
+        }
+
+        .modal-sm {
+            width: min(440px, 100%);
+        }
+
+        #confirm-msg {
+            margin: 0 0 1.2rem;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        #kpi-storage {
+            font-size: 0.85rem;
         }
 
         .modal h3 {
@@ -1571,6 +1652,65 @@
             background: var(--cyan);
             border-radius: 4px;
             transition: width 0.3s ease;
+        }
+
+        /* ── Bulk Ingest Staging Panel ──────────────────────── */
+        .bulk-stage {
+            margin-bottom: 1.2rem;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .bulk-stage-header {
+            display: flex;
+            align-items: baseline;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .bulk-stage-meta {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            margin-bottom: 0.8rem;
+        }
+
+        .bulk-file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+
+        .bulk-file-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            padding: 0.2rem 0.4rem;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .bulk-file-item .bulk-remove {
+            margin-left: auto;
+            cursor: pointer;
+            opacity: 0.5;
+            font-size: 0.9rem;
+            background: none;
+            border: none;
+            color: var(--text);
+            line-height: 1;
+            padding: 0 0.2rem;
+        }
+
+        .bulk-file-item .bulk-remove:hover {
+            opacity: 1;
         }
 
         .upload-item-status {
@@ -1974,6 +2114,8 @@
                     <button class="nav-btn" data-view="library"><span>05</span><span>Asset Library</span></button>
                     <button class="nav-btn" data-view="drip"><span>06</span><span>Drip Builder</span></button>
                     <button class="nav-btn" data-view="review-queue"><span>07</span><span>Review Queue <span class="review-badge d-none" id="review-badge">0</span></span></button>
+                    <button class="nav-btn" data-view="overrides"><span>08</span><span>Site Overrides</span></button>
+                    <button class="nav-btn" data-view="galleries"><span>09</span><span>Gallery Manager</span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -2020,6 +2162,10 @@
                     <article class="kpi">
                         <div class="kpi-label">Pending Review</div>
                         <div class="kpi-value rose" id="kpi-pending-review">0</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Storage Used</div>
+                        <div class="kpi-value" id="kpi-storage">—</div>
                     </article>
                 </section>
 
@@ -2170,6 +2316,7 @@
                                             <th>Window</th>
                                             <th>Status</th>
                                             <th>Posts</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody id="campaign-table"></tbody>
@@ -2274,6 +2421,33 @@
                         </div>
                         <ul class="upload-progress-list" id="upload-progress-list"></ul>
 
+                        <!-- Bulk Ingest Staging Panel (shown when files are queued) -->
+                        <div class="panel bulk-stage d-none" id="bulk-stage">
+                            <div class="bulk-stage-header">
+                                <strong id="bulk-stage-count">0 files staged</strong>
+                                <span class="text-muted">Set shared metadata before uploading &mdash; all files land as <em>draft</em></span>
+                            </div>
+                            <div class="form-grid bulk-stage-meta">
+                                <div>
+                                    <label class="form-label" for="bulk-brand">Brand</label>
+                                    <select id="bulk-brand"></select>
+                                </div>
+                                <div>
+                                    <label class="form-label" for="bulk-category">Category</label>
+                                    <input type="text" id="bulk-category" placeholder="e.g. headshots, logos, events">
+                                </div>
+                                <div>
+                                    <label class="form-label" for="bulk-tags">Tags <span class="text-muted">(comma-separated)</span></label>
+                                    <input type="text" id="bulk-tags" placeholder="brand, launch, q1">
+                                </div>
+                            </div>
+                            <ul class="bulk-file-list" id="bulk-file-list"></ul>
+                            <div class="actions-split">
+                                <button class="btn btn-ghost" id="bulk-cancel-btn" type="button">Cancel</button>
+                                <button class="btn btn-primary" id="bulk-upload-btn" type="button">Upload 0 Files</button>
+                            </div>
+                        </div>
+
                         <div class="toolbar">
                             <input type="text" id="library-search" placeholder="Search title or tags">
                             <select id="library-type">
@@ -2283,6 +2457,17 @@
                                 <option value="audio">Audio</option>
                                 <option value="document">Document</option>
                             </select>
+                            <select id="library-status" aria-label="Filter by review status">
+                                <option value="">All statuses</option>
+                                <option value="draft">Draft</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <label class="select-all-label">
+                                <input type="checkbox" id="library-select-all" aria-label="Select all visible assets">
+                                Select All
+                            </label>
+                            <button id="batch-approve-btn" class="btn btn-success-soft" type="button" hidden>Approve Selected (0)</button>
                         </div>
                         <div class="asset-grid asset-grid-full" id="library-grid"></div>
                     </article>
@@ -2428,6 +2613,7 @@
                                 <option value="aiaimate">AI Aimate</option>
                                 <option value="culturesherpa">CultureSherpa</option>
                                 <option value="globaldeets">GlobalDeets</option>
+                                <option value="citizenapproved">CitizenApproved</option>
                             </select>
                             <input type="url" id="rq-scan-url" placeholder="https://goodflippinvibes.com" class="scanner-url-input" aria-label="Page URL to scan">
                             <button class="btn btn-primary" id="rq-scan-btn">Scan Page</button>
@@ -2451,6 +2637,7 @@
                             <option value="aiaimate">AI Aimate</option>
                             <option value="culturesherpa">CultureSherpa</option>
                             <option value="globaldeets">GlobalDeets</option>
+                            <option value="citizenapproved">CitizenApproved</option>
                         </select>
                         <select id="rq-filter-status" aria-label="Filter by review status">
                             <option value="discovered">Pending Review</option>
@@ -2465,7 +2652,206 @@
                     </div>
                     <div class="rq-pagination" id="rq-pagination"></div>
                 </section>
+
+                <section class="view" id="view-overrides">
+                    <div class="section-head">
+                        <h2 class="section-title">Live Site Image Overrides</h2>
+                        <button class="btn btn-primary" id="open-override-modal">New Override</button>
+                    </div>
+                    <p class="subheading mb-08">Replace images on your live sites at the edge — no re-deploy needed. When a visitor requests an image URL matching a pattern, the Cloudflare worker serves your R2 asset instead.</p>
+                    <div class="toolbar mb-06">
+                        <select id="override-filter-brand" aria-label="Filter by brand">
+                            <option value="">All brands</option>
+                            <option value="gfd">GFD</option>
+                            <option value="gfv">GFV</option>
+                            <option value="aiaimate">AI Aimate</option>
+                            <option value="culturesherpa">CultureSherpa</option>
+                            <option value="globaldeets">GlobalDeets</option>
+                            <option value="citizenapproved">CitizenApproved</option>
+                        </select>
+                        <input type="text" id="override-filter-domain" placeholder="Filter by domain…" aria-label="Filter by domain">
+                        <button class="btn btn-secondary" id="overrides-refresh-btn">Refresh</button>
+                    </div>
+                    <article class="panel">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Brand</th>
+                                        <th>Domain</th>
+                                        <th>URL Pattern</th>
+                                        <th>R2 Asset</th>
+                                        <th>Label</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overrides-table"></tbody>
+                            </table>
+                        </div>
+                        <p class="text-muted mt-06 d-none" id="overrides-empty">No overrides configured yet. Click &ldquo;New Override&rdquo; to swap your first image at the edge.</p>
+                    </article>
+                </section>
+
+                <section class="view" id="view-galleries">
+                    <div class="section-head">
+                        <h2 class="section-title">Gallery Manager</h2>
+                        <button class="btn btn-primary" id="open-gallery-modal">New Gallery</button>
+                    </div>
+                    <p class="subheading mb-08">Curate ordered image galleries per site. Each gallery is served via <code>/api/cms/gallery/:slug</code> and embedded by <code>gallery.html</code>.</p>
+                    <div class="toolbar mb-06">
+                        <select id="gallery-filter-brand" aria-label="Filter galleries by brand">
+                            <option value="">All brands</option>
+                            <option value="gfd">GFD</option>
+                            <option value="gfv">GFV</option>
+                            <option value="aiaimate">AI Aimate</option>
+                            <option value="culturesherpa">CultureSherpa</option>
+                            <option value="globaldeets">GlobalDeets</option>
+                            <option value="citizenapproved">CitizenApproved</option>
+                        </select>
+                    </div>
+                    <div class="grid-two">
+                        <article class="panel">
+                            <h3 class="panel-subtitle">Galleries</h3>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Site</th>
+                                            <th>Items</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="galleries-table"></tbody>
+                                </table>
+                            </div>
+                            <p class="text-muted mt-06 d-none" id="galleries-empty">No galleries yet. Click &ldquo;New Gallery&rdquo; to create one.</p>
+                        </article>
+
+                        <article class="panel" id="gallery-items-panel">
+                            <div class="section-head">
+                                <h3 class="panel-subtitle" id="gallery-items-title">Select a gallery to manage its items</h3>
+                                <div class="inline-actions d-none" id="gallery-items-actions">
+                                    <select id="gallery-add-asset" title="Add asset to gallery" aria-label="Add asset to gallery">
+                                        <option value="">— add asset —</option>
+                                    </select>
+                                    <button class="btn btn-secondary" id="gallery-add-btn">Add</button>
+                                </div>
+                            </div>
+                            <div id="gallery-items-list">
+                                <p class="text-muted">Select a gallery on the left to view and manage its items.</p>
+                            </div>
+                        </article>
+                    </div>
+                </section>
             </main>
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div class="modal-wrap" id="gallery-modal">
+        <div class="modal modal-wide">
+            <h3 id="gallery-modal-title">New Gallery</h3>
+            <input type="hidden" id="gallery-id">
+            <div class="form-grid mt-04">
+                <div>
+                    <label class="form-label">Brand</label>
+                    <select id="gallery-brand" title="Gallery brand">
+                        <option value="gfd">GFD</option>
+                        <option value="gfv">GFV</option>
+                        <option value="aiaimate">AI Aimate</option>
+                        <option value="culturesherpa">CultureSherpa</option>
+                        <option value="globaldeets">GlobalDeets</option>
+                        <option value="citizenapproved">CitizenApproved</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Site Domain</label>
+                    <input type="text" id="gallery-domain" placeholder="goodflippinvibes.com">
+                </div>
+            </div>
+            <div class="form-grid mt-06">
+                <div>
+                    <label class="form-label">Slug <span class="text-muted">(URL-safe, e.g. <code>portfolio-2025</code>)</span></label>
+                    <input type="text" id="gallery-slug" placeholder="portfolio-2025">
+                </div>
+                <div>
+                    <label class="form-label">Sort Order</label>
+                    <input type="number" id="gallery-sort" value="100" min="0" title="Sort order (lower = first)">
+                </div>
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Title</label>
+                <input type="text" id="gallery-title" placeholder="2025 Portfolio Highlights">
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Description <span class="text-muted">(optional)</span></label>
+                <textarea id="gallery-description" rows="2" placeholder="Short description shown above the gallery"></textarea>
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Cover Asset <span class="text-muted">(optional)</span></label>
+                <select id="gallery-cover" title="Cover asset">
+                    <option value="">— none —</option>
+                </select>
+            </div>
+            <div class="actions-split mt-08">
+                <div></div>
+                <div class="actions-right">
+                    <button class="btn btn-secondary" data-close-modal="gallery-modal">Cancel</button>
+                    <button class="btn btn-primary" id="save-gallery-btn">Save Gallery</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Override Modal -->
+    <div class="modal-wrap" id="override-modal">
+        <div class="modal modal-wide">
+            <h3 id="override-modal-title">New Image Override</h3>
+            <input type="hidden" id="override-id">
+            <div class="form-grid mt-04">
+                <div>
+                    <label class="form-label">Brand</label>
+                    <select id="override-brand" title="Brand">
+                        <option value="gfd">GFD</option>
+                        <option value="gfv">GFV</option>
+                        <option value="aiaimate">AI Aimate</option>
+                        <option value="culturesherpa">CultureSherpa</option>
+                        <option value="globaldeets">GlobalDeets</option>
+                        <option value="citizenapproved">CitizenApproved</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Site Domain</label>
+                    <input type="text" id="override-domain" placeholder="goodflippinvibes.com">
+                </div>
+            </div>
+            <div class="mt-06">
+                <label class="form-label">URL Pattern <span class="text-muted">(the original image URL fragment to match)</span></label>
+                <input type="text" id="override-url-pattern" placeholder="hero-background.jpg or /images/banner">
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Replacement Asset <span class="text-muted">(select from your library)</span></label>
+                <select id="override-asset-select" title="Replacement asset from library">
+                    <option value="">— pick from library —</option>
+                </select>
+            </div>
+            <div class="mt-04">
+                <label class="form-label">Or enter R2 key directly <span class="text-muted">(overrides picker above)</span></label>
+                <input type="text" id="override-r2-key" placeholder="assets/gfd/hero-v2.webp">
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Label <span class="text-muted">(optional note)</span></label>
+                <input type="text" id="override-label" placeholder="Q1 hero refresh">
+            </div>
+            <div class="actions-split mt-08">
+                <div></div>
+                <div class="actions-right">
+                    <button class="btn btn-secondary" data-close-modal="override-modal">Cancel</button>
+                    <button class="btn btn-primary" id="save-override-btn">Save Override</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2542,10 +2928,12 @@
                     <button type="button" class="brand-share-chip" data-share-brand="aiaimate">AI Aimate</button>
                     <button type="button" class="brand-share-chip" data-share-brand="culturesherpa">CultureSherpa</button>
                     <button type="button" class="brand-share-chip" data-share-brand="globaldeets">GlobalDeets</button>
+                    <button type="button" class="brand-share-chip" data-share-brand="citizenapproved">CitizenApproved</button>
                 </div>
                 <p class="text-muted brand-share-hint">Highlighted brands already have this asset shared. Click to toggle.</p>
             </div>
             <div class="actions-split mt-08">
+                <div class="actions-left" id="asset-edit-review-actions"></div>
                 <button class="btn btn-danger" id="asset-edit-delete-btn">Delete Asset</button>
                 <div class="actions-right">
                     <button class="btn btn-secondary" data-close-modal="asset-edit-modal">Cancel</button>
@@ -2592,6 +2980,7 @@
                         <option value="aiaimate">AI Aimate</option>
                         <option value="culturesherpa">CultureSherpa</option>
                         <option value="globaldeets">GlobalDeets</option>
+                        <option value="citizenapproved">CitizenApproved</option>
                     </select>
                 </div>
                 <div>
@@ -2617,42 +3006,54 @@
             </div>
         </div>
     </div>
-    <div class="modal">
-        <h3>Create Campaign</h3>
-        <div class="form-grid">
-            <div>
-                <label class="form-label">Name</label>
-                <input type="text" id="campaign-name" placeholder="Q3 Thought Leadership">
+    <div class="modal-wrap" id="campaign-modal">
+        <div class="modal">
+            <h3 id="campaign-modal-title">New Campaign</h3>
+            <input type="hidden" id="campaign-id">
+            <div class="form-grid">
+                <div>
+                    <label class="form-label">Name</label>
+                    <input type="text" id="campaign-name" placeholder="Q3 Thought Leadership">
+                </div>
+                <div>
+                    <label class="form-label">Cadence</label>
+                    <select id="campaign-cadence">
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Biweekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="burst">Burst</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <label class="form-label">Cadence</label>
-                <select id="campaign-cadence">
-                    <option value="weekly">Weekly</option>
-                    <option value="biweekly">Biweekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="burst">Burst</option>
-                </select>
+            <div class="form-grid mt-06">
+                <div>
+                    <label class="form-label">Start date</label>
+                    <input type="date" id="campaign-start">
+                </div>
+                <div>
+                    <label class="form-label">End date</label>
+                    <input type="date" id="campaign-end">
+                </div>
             </div>
-        </div>
-        <div class="form-grid mt-06">
-            <div>
-                <label class="form-label">Start date</label>
-                <input type="date" id="campaign-start">
+            <div class="mt-06">
+                <label class="form-label">Objective</label>
+                <textarea id="campaign-objective" placeholder="What business outcome should this campaign drive?"></textarea>
             </div>
-            <div>
-                <label class="form-label">End date</label>
-                <input type="date" id="campaign-end">
+            <div class="actions">
+                <button class="btn btn-secondary" data-close-modal="campaign-modal">Cancel</button>
+                <button class="btn btn-primary" id="save-campaign-btn">Save Campaign</button>
             </div>
-        </div>
-        <div class="mt-06">
-            <label class="form-label">Objective</label>
-            <textarea id="campaign-objective" placeholder="What business outcome should this campaign drive?"></textarea>
-        </div>
-        <div class="actions">
-            <button class="btn btn-secondary" data-close-modal="campaign-modal">Cancel</button>
-            <button class="btn btn-primary" id="save-campaign-btn">Save Campaign</button>
         </div>
     </div>
+
+    <div class="modal-wrap" id="confirm-modal">
+        <div class="modal modal-sm">
+            <p id="confirm-msg"></p>
+            <div class="actions">
+                <button class="btn btn-secondary" data-close-modal="confirm-modal">Cancel</button>
+                <button class="btn btn-danger" id="confirm-ok-btn">Confirm</button>
+            </div>
+        </div>
     </div>
 
     <div class="modal-wrap" id="connection-modal">
@@ -2731,6 +3132,7 @@
                         <option value="aiaimate">AI Aimate</option>
                         <option value="culturesherpa">CultureSherpa</option>
                         <option value="globaldeets">Global Deets</option>
+                        <option value="citizenapproved">CitizenApproved</option>
                     </select>
                 </div>
                 <div>
@@ -2791,6 +3193,7 @@
                         <option value="aiaimate">AI Aimate</option>
                         <option value="culturesherpa">CultureSherpa</option>
                         <option value="globaldeets">Global Deets</option>
+                        <option value="citizenapproved">CitizenApproved</option>
                     </select>
                 </div>
                 <div>
@@ -2840,6 +3243,7 @@
                 aiaimate: { name: 'AI Aimate', shortName: 'Aimate', color: '#3b82f6', platforms: ['linkedin', 'x', 'youtube'] },
                 culturesherpa: { name: 'CultureSherpa', shortName: 'CultureSherpa', color: '#f59e0b', platforms: ['linkedin', 'x', 'instagram', 'facebook'] },
                 globaldeets: { name: 'Global Deets', shortName: 'GlobalDeets', color: '#8b5cf6', platforms: ['linkedin', 'x'] },
+                citizenapproved: { name: 'CitizenApproved', shortName: 'CitApproved', color: '#ef4444', platforms: ['instagram', 'x', 'linkedin'] },
             };
 
             // Maps each platform to its OAuth provider key
@@ -2860,6 +3264,9 @@
 
             const state = {
                 clerk: null,
+                mediaToken: '',
+                uploadQueue: [],
+                selectedLibraryIds: new Set(),
                 currentView: 'overview',
                 assets: [],
                 campaigns: [],
@@ -2880,6 +3287,10 @@
                 discoveredAssets: [],
                 discoveredPage: 1,
                 discoveredTotal: 0,
+                overrides: [],
+                galleries: [],
+                selectedGalleryId: null,
+                galleryItems: [],
             };
 
             function $(id) {
@@ -2924,11 +3335,39 @@
                 });
             }
 
-            function assetUrl(asset) {
+            // Returns the base /api/cms/media/... path (no token). Used for data-r2 attr
+            // so the token-refresh sweep can patch img src without a full re-render.
+            function assetBase(asset) {
                 const path = asset.thumbnail_path || asset.file_path || '';
                 if (!path) return '';
                 if (path.startsWith('http://') || path.startsWith('https://')) return path;
                 return '/api/cms/media/' + path.split('/').map(encodeURIComponent).join('/');
+            }
+
+            // Returns the full src URL with the current session token appended as ?t=
+            function assetUrl(asset) {
+                const base = assetBase(asset);
+                if (!base) return '';
+                if (base.startsWith('http')) return base; // external URL — no token needed
+                return state.mediaToken ? base + '?t=' + encodeURIComponent(state.mediaToken) : base;
+            }
+
+            async function refreshMediaToken() {
+                try {
+                    if (state.clerk?.session) {
+                        const newToken = await state.clerk.session.getToken() || '';
+                        if (newToken && newToken !== state.mediaToken) {
+                            state.mediaToken = newToken;
+                            // Patch any already-rendered media img srcs so stale tokens
+                            // don't cause 401s on lazy-loaded images after the JWT expires.
+                            const enc = encodeURIComponent(newToken);
+                            document.querySelectorAll('img[data-r2]').forEach((img) => {
+                                const base = img.getAttribute('data-r2');
+                                if (base) img.src = base + '?t=' + enc;
+                            });
+                        }
+                    }
+                } catch { /* silently keep existing token */ }
             }
 
             async function api(path, opts = {}, _retry = false) {
@@ -3015,6 +3454,8 @@
 
             async function boot() {
                 bindUI();
+                await refreshMediaToken();
+                setInterval(refreshMediaToken, 55 * 1000); // Clerk short-lived JWTs; refresh before expiry
                 await refreshAll();
                 renderPlatformPicker();
                 renderBrandSwitcher();
@@ -3033,7 +3474,16 @@
                 $('manual-run-btn').addEventListener('click', runQueueNow);
                 $('sign-out-btn').addEventListener('click', () => state.clerk.signOut({ redirectUrl: '/' }));
 
-                $('open-campaign-modal').addEventListener('click', () => openModal('campaign-modal'));
+                $('open-campaign-modal').addEventListener('click', () => {
+                    $('campaign-id').value = '';
+                    $('campaign-modal-title').textContent = 'New Campaign';
+                    $('campaign-name').value = '';
+                    $('campaign-cadence').value = 'weekly';
+                    $('campaign-start').value = '';
+                    $('campaign-end').value = '';
+                    $('campaign-objective').value = '';
+                    openModal('campaign-modal');
+                });
                 $('open-connection-modal').addEventListener('click', () => {
                     renderOAuthProviderGrid();
                     openModal('connection-modal');
@@ -3092,10 +3542,58 @@
 
                 $('library-search').addEventListener('input', renderLibrary);
                 $('library-type').addEventListener('change', renderLibrary);
+                $('library-status').addEventListener('change', renderLibrary);
+                $('library-select-all').addEventListener('change', (ev) => {
+                    const checked = ev.target.checked;
+                    document.querySelectorAll('.asset-check').forEach((cb) => {
+                        cb.checked = checked;
+                        const id = cb.dataset.checkId;
+                        if (checked) state.selectedLibraryIds.add(id);
+                        else state.selectedLibraryIds.delete(id);
+                    });
+                    const bab = $('batch-approve-btn');
+                    if (bab) {
+                        const n = state.selectedLibraryIds.size;
+                        bab.hidden = n === 0;
+                        bab.textContent = `Approve Selected (${n})`;
+                    }
+                });
+                $('batch-approve-btn').addEventListener('click', batchApproveSelected);
+
+                // ── Bulk Ingest ──────────────────────────────────────────────
+                // Populate bulk-brand select from BRAND_DEFS
+                const bulkBrand = $('bulk-brand');
+                Object.entries(BRAND_DEFS).forEach(([id, def]) => {
+                    const opt = document.createElement('option');
+                    opt.value = id;
+                    opt.textContent = def.shortName;
+                    if (id === currentBrand) opt.selected = true;
+                    bulkBrand.appendChild(opt);
+                });
+
+                $('bulk-cancel-btn').addEventListener('click', clearBulkQueue);
+                $('bulk-upload-btn').addEventListener('click', commitBulkUpload);
+                initBulkBrandListener();
 
                 // ── Asset Edit Modal ─────────────────────────────────────────
                 $('asset-edit-save-btn').addEventListener('click', saveAssetEdit);
                 $('asset-edit-delete-btn').addEventListener('click', () => deleteAsset($('asset-edit-id').value));
+
+                // ── Site Overrides ───────────────────────────────────────────
+                $('open-override-modal').addEventListener('click', () => openOverrideModal());
+                $('save-override-btn').addEventListener('click', saveOverride);
+                $('overrides-refresh-btn').addEventListener('click', async () => {
+                    await loadOverrides();
+                    renderOverrides();
+                });
+                $('override-filter-brand').addEventListener('change', async () => {
+                    await loadOverrides();
+                    renderOverrides();
+                });
+                $('override-filter-domain').addEventListener('input', async () => {
+                    await loadOverrides();
+                    renderOverrides();
+                });
 
                 // ── Review Queue ─────────────────────────────────────────────
                 $('rq-refresh-btn').addEventListener('click', async () => {
@@ -3144,10 +3642,12 @@
                 $('drip-import-json-btn').addEventListener('click', () => openModal('drip-import-modal'));
                 $('drip-import-confirm').addEventListener('click', importDripJSON);
                 $('drip-clear-entries').addEventListener('click', () => {
-                    if (state.dripEntries.length > 0 && !confirm('Clear all ' + state.dripEntries.length + ' entries?')) return;
-                    state.dripEntries = [];
-                    renderDripEntries();
-                    updateDripSummary();
+                    if (state.dripEntries.length === 0) return;
+                    showConfirm('Clear all ' + state.dripEntries.length + ' drip entries?', () => {
+                        state.dripEntries = [];
+                        renderDripEntries();
+                        updateDripSummary();
+                    });
                 });
                 $('drip-preview-btn').addEventListener('click', generateDripPreview);
                 $('drip-confirm-btn').addEventListener('click', confirmDripSchedule);
@@ -3191,6 +3691,8 @@
                     loadCampaigns(),
                     loadVariants(),
                     loadDiscoveredAssets(),
+                    loadOverrides(),
+                    loadGalleries(),
                 ]);
 
                 await loadCalendar();
@@ -3207,6 +3709,8 @@
                 renderDripCampaignSelect();
                 renderReviewQueue();
                 updateReviewBadge();
+                renderOverrides();
+                renderGalleriesList();
             }
 
             async function loadPlatformRules() {
@@ -3282,6 +3786,16 @@
                 $('kpi-connections').textContent = Number(stats.connections || 0);
                 $('kpi-published').textContent = published;
                 $('kpi-pending-review').textContent = Number(stats.pendingReview || 0);
+                if (stats.storage) {
+                    const bytes = Number(stats.storage.totalBytes || 0);
+                    const gb = bytes / (1024 ** 3);
+                    const mb = bytes / (1024 ** 2);
+                    $('kpi-storage').textContent = gb >= 1
+                        ? gb.toFixed(2) + ' GB'
+                        : mb >= 1
+                            ? mb.toFixed(1) + ' MB'
+                            : Math.round(bytes / 1024) + ' KB';
+                }
                 updateGettingStarted();
             }
 
@@ -3722,9 +4236,21 @@
                             <td>${escapeHtml((row.start_date || '').slice(0, 10) || '-')}${row.end_date ? ' to ' + escapeHtml(row.end_date.slice(0, 10)) : ''}</td>
                             <td>${statusTag(row.status)}</td>
                             <td>${Number(row.post_count || 0)}</td>
+                            <td class="row-actions">
+                                <button class="btn btn-micro" data-edit-campaign="${row.id}" aria-label="Edit campaign">Edit</button>
+                                <button class="btn btn-danger btn-micro" data-delete-campaign="${row.id}" aria-label="Delete campaign">Delete</button>
+                            </td>
                         </tr>
                     `).join('')
-                    : '<tr><td colspan="4">No campaigns created yet.</td></tr>';
+                    : '<tr><td colspan="5">No campaigns created yet.</td></tr>';
+
+                body.querySelectorAll('[data-edit-campaign]').forEach((btn) => {
+                    const campaign = state.campaigns.find((c) => String(c.id) === btn.dataset.editCampaign);
+                    if (campaign) btn.addEventListener('click', () => editCampaign(campaign));
+                });
+                body.querySelectorAll('[data-delete-campaign]').forEach((btn) => {
+                    btn.addEventListener('click', () => deleteCampaign(btn.dataset.deleteCampaign));
+                });
             }
 
             function renderCampaignSelect() {
@@ -3790,9 +4316,10 @@
                     ? candidates.map((asset) => {
                         const isActive = state.selectedAssetId === asset.id;
                         const image = assetUrl(asset);
+                        const imageBase = assetBase(asset);
                         return `
                             <article class="asset-card ${isActive ? 'active' : ''}" data-asset-id="${asset.id}">
-                                <img class="asset-thumb" src="${escapeHtml(image)}" alt="${escapeHtml(asset.title)}" loading="lazy">
+                                <img class="asset-thumb" src="${escapeHtml(image)}" data-r2="${escapeHtml(imageBase)}" alt="${escapeHtml(asset.title)}" loading="lazy">
                                 <div class="asset-meta">
                                     <div class="text-strong">${escapeHtml(asset.title)}</div>
                                     <div>${escapeHtml(asset.media_type || '')}</div>
@@ -3841,9 +4368,85 @@
                 });
             }
 
-            async function handleUploadFiles(files) {
+            // Stage files in the bulk panel instead of uploading immediately.
+            // Users can set shared brand/category/tags before confirming.
+            function handleUploadFiles(files) {
+                if (!files.length) return;
+
+                // Add new files (skip exact-name duplicates already staged)
+                const existingNames = new Set(state.uploadQueue.map((f) => f.name));
+                files.forEach((f) => { if (!existingNames.has(f.name)) state.uploadQueue.push(f); });
+
+                renderBulkStage();
+
+                // reset file input
+                const input = $('upload-input');
+                if (input) input.value = '';
+            }
+
+            function renderBulkStage() {
+                const panel = $('bulk-stage');
+                const fileList = $('bulk-file-list');
+                const countEl = $('bulk-stage-count');
+                const uploadBtn = $('bulk-upload-btn');
+
+                if (!state.uploadQueue.length) {
+                    panel.classList.add('d-none');
+                    return;
+                }
+
+                panel.classList.remove('d-none');
+                const n = state.uploadQueue.length;
+                countEl.textContent = n + ' file' + (n !== 1 ? 's' : '') + ' staged';
+                uploadBtn.textContent = 'Upload ' + n + ' File' + (n !== 1 ? 's' : '');
+
+                // Sync bulk-brand to currentBrand if no user selection yet
+                const bulkBrand = $('bulk-brand');
+                if (!bulkBrand.dataset.userChanged) bulkBrand.value = currentBrand;
+
+                fileList.innerHTML = state.uploadQueue.map((f, i) => {
+                    const typeIcon = f.type.startsWith('video') ? '🎬' : f.type.startsWith('audio') ? '🔊' : f.type === 'application/pdf' ? '📄' : '🖼';
+                    return `<li class="bulk-file-item">
+                        <span>${typeIcon}</span>
+                        <span title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
+                        <button class="bulk-remove" data-qi="${i}" title="Remove from batch" aria-label="Remove ${escapeHtml(f.name)}">&times;</button>
+                    </li>`;
+                }).join('');
+
+                fileList.querySelectorAll('.bulk-remove').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        state.uploadQueue.splice(Number(btn.dataset.qi), 1);
+                        renderBulkStage();
+                    });
+                });
+            }
+
+            // Mark bulk-brand as user-changed so we don't auto-reset it
+            function initBulkBrandListener() {
+                const el = $('bulk-brand');
+                if (el) el.addEventListener('change', () => { el.dataset.userChanged = '1'; });
+            }
+
+            function clearBulkQueue() {
+                state.uploadQueue = [];
+                renderBulkStage();
+                const el = $('bulk-brand');
+                if (el) delete el.dataset.userChanged;
+            }
+
+            async function commitBulkUpload() {
+                const files = [...state.uploadQueue];
+                if (!files.length) return;
+
+                const brand = $('bulk-brand').value || currentBrand;
+                const category = ($('bulk-category').value.trim() || 'uploads');
+                const tagsRaw = $('bulk-tags').value.trim();
+                const tags = tagsRaw ? JSON.stringify(tagsRaw.split(',').map((t) => t.trim()).filter(Boolean)) : '[]';
+
+                // Clear queue immediately to avoid double-submit
+                clearBulkQueue();
+
                 const list = $('upload-progress-list');
-                if (!list) return;
 
                 for (const file of files) {
                     const id = 'up-' + Math.random().toString(36).slice(2);
@@ -3860,22 +4463,21 @@
                     try {
                         const bar = $(id + '-bar');
                         const st = $(id + '-st');
-
                         if (bar) bar.style.width = '30%';
 
                         const form = new FormData();
                         form.append('file', file);
                         form.append('title', file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '));
-                        form.append('brand', currentBrand);
-                        form.append('category', 'uploads');
+                        form.append('brand', brand);
+                        form.append('category', category);
+                        form.append('tags', tags);
+                        form.append('review_status', 'draft');
                         form.append('media_type', file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : file.type === 'application/pdf' ? 'document' : 'image');
 
                         await api('/upload', { method: 'POST', body: form });
 
                         if (bar) bar.style.width = '100%';
                         if (st) { st.textContent = '✓'; st.classList.add('ok'); }
-                        await loadAssets();
-                        renderLibrary();
                     } catch (err) {
                         const bar = $(id + '-bar');
                         const st = $(id + '-st');
@@ -3883,65 +4485,111 @@
                         if (st) { st.textContent = err.message || 'Upload failed'; st.classList.add('err'); }
                     }
 
-                    // auto-clear after 6s
                     setTimeout(() => { const el = $(id); if (el) el.remove(); }, 6000);
                 }
 
-                // reset file input
-                const input = $('upload-input');
-                if (input) input.value = '';
+                await loadAssets();
+                renderLibrary();
             }
 
             function renderLibrary() {
                 const q = $('library-search').value.trim().toLowerCase();
                 const mediaType = $('library-type').value;
+                const reviewFilter = $('library-status').value;
 
                 const list = state.assets.filter((asset) => {
                     if (mediaType && asset.media_type !== mediaType) return false;
+                    if (reviewFilter && (asset.review_status || 'draft') !== reviewFilter) return false;
                     if (!q) return true;
                     const tags = String(asset.tags || '').toLowerCase();
                     return String(asset.title || '').toLowerCase().includes(q) || tags.includes(q);
                 });
 
+                // Reset selection on each re-render (stale IDs no longer in view)
+                state.selectedLibraryIds.clear();
+
                 const grid = $('library-grid');
                 if (!list.length) {
                     grid.innerHTML = '<p class="text-muted">No assets matched your filter.</p>';
+                    const bab = $('batch-approve-btn');
+                    if (bab) bab.hidden = true;
                     return;
                 }
 
                 grid.innerHTML = list.map((asset) => {
+                    const reviewStatus = asset.review_status || 'draft';
+                    const reviewBadge = `<span class="asset-status-badge ${reviewStatus}">${reviewStatus}</span>`;
                     let tags = [];
                     try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
                     const tagHtml = tags.slice(0, 4).map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join('');
                     const thumb = assetUrl(asset);
+                    const thumbBase = assetBase(asset);
                     const isVideo = asset.media_type === 'video';
                     return `
                         <article class="asset-card" data-asset-id="${asset.id}">
+                            <label class="asset-check-wrap" title="Select for batch action">
+                                <input type="checkbox" class="asset-check" data-check-id="${escapeHtml(String(asset.id))}" aria-label="Select ${escapeHtml(asset.title)}">
+                            </label>
                             ${thumb
                             ? (isVideo
                                 ? `<div class="asset-thumb-wrap"><video class="asset-thumb" src="${escapeHtml(thumb)}" muted preload="none"></video><span class="asset-type-badge">VIDEO</span></div>`
-                                : `<div class="asset-thumb-wrap"><img class="asset-thumb" src="${escapeHtml(thumb)}" alt="${escapeHtml(asset.title)}" loading="lazy"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`)
+                                : `<div class="asset-thumb-wrap"><img class="asset-thumb" src="${escapeHtml(thumb)}" data-r2="${escapeHtml(thumbBase)}" alt="${escapeHtml(asset.title)}" loading="lazy"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`)
                             : `<div class="asset-thumb-wrap asset-no-thumb"><span class="asset-type-badge">${escapeHtml((asset.media_type || 'file').toUpperCase())}</span></div>`}
                             <div class="asset-meta">
                                 <div class="text-strong">${escapeHtml(asset.title)}</div>
                                 <div class="text-note">${escapeHtml(asset.category || '-')}${asset.featured ? ' &nbsp;&#9733;' : ''}</div>
                                 ${tagHtml ? `<div class="asset-tags mt-03">${tagHtml}</div>` : ''}
-                                <div class="mt-03 text-muted">${escapeHtml(formatDateTime(asset.created_at))}</div>
+                                <div class="mt-03">${reviewBadge}</div>
                             </div>
                             <div class="asset-actions">
                                 <button class="btn btn-micro" data-use-asset="${asset.id}" title="Use in Composer">Use</button>
                                 <button class="btn btn-micro" data-edit-asset="${asset.id}" title="Edit metadata">Edit</button>
+                                ${reviewStatus !== 'approved'
+                            ? `<button class="btn btn-micro btn-success-soft" data-approve-asset="${asset.id}" title="Approve for public use">&#10003;</button>`
+                            : `<button class="btn btn-micro" data-reject-asset="${asset.id}" title="Revoke approval">&times;</button>`}
                                 <button class="btn btn-micro btn-danger-soft" data-delete-asset="${asset.id}" title="Delete">Del</button>
                             </div>
                         </article>
                     `;
                 }).join('');
 
+                // Wire per-card checkboxes
+                const updateBatchBtn = () => {
+                    const bab = $('batch-approve-btn');
+                    const sal = $('library-select-all');
+                    if (!bab) return;
+                    const n = state.selectedLibraryIds.size;
+                    bab.hidden = n === 0;
+                    bab.textContent = `Approve Selected (${n})`;
+                    if (sal) sal.indeterminate = n > 0 && n < list.length;
+                    if (sal) sal.checked = n === list.length && list.length > 0;
+                };
+                grid.querySelectorAll('.asset-check').forEach((cb) => {
+                    cb.addEventListener('change', () => {
+                        const id = cb.dataset.checkId;
+                        if (cb.checked) state.selectedLibraryIds.add(id);
+                        else state.selectedLibraryIds.delete(id);
+                        updateBatchBtn();
+                    });
+                });
+
                 grid.querySelectorAll('[data-edit-asset]').forEach((btn) => {
                     btn.addEventListener('click', (ev) => {
                         ev.stopPropagation();
                         const asset = state.assets.find((a) => String(a.id) === btn.dataset.editAsset);
                         if (asset) openAssetEditModal(asset);
+                    });
+                });
+                grid.querySelectorAll('[data-approve-asset]').forEach((btn) => {
+                    btn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        reviewAsset(btn.dataset.approveAsset, 'approve');
+                    });
+                });
+                grid.querySelectorAll('[data-reject-asset]').forEach((btn) => {
+                    btn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        reviewAsset(btn.dataset.rejectAsset, 'reject');
                     });
                 });
                 grid.querySelectorAll('[data-delete-asset]').forEach((btn) => {
@@ -4054,8 +4702,40 @@
                 $(id).classList.remove('active');
             }
 
+            function showConfirm(msg, onConfirm) {
+                $('confirm-msg').textContent = msg;
+                $('confirm-ok-btn').onclick = () => { closeModal('confirm-modal'); onConfirm(); };
+                openModal('confirm-modal');
+            }
+
+            function editCampaign(campaign) {
+                $('campaign-modal-title').textContent = 'Edit Campaign';
+                $('campaign-id').value = campaign.id;
+                $('campaign-name').value = campaign.name || '';
+                $('campaign-cadence').value = campaign.cadence || 'weekly';
+                $('campaign-start').value = (campaign.start_date || '').slice(0, 10);
+                $('campaign-end').value = (campaign.end_date || '').slice(0, 10);
+                $('campaign-objective').value = campaign.objective || '';
+                openModal('campaign-modal');
+            }
+
+            async function deleteCampaign(id) {
+                showConfirm('Archive this campaign? Posts remain but the campaign will be hidden.', async () => {
+                    try {
+                        await api('/campaigns?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                        toast('Campaign archived', 'success');
+                        await loadCampaigns();
+                        renderCampaigns();
+                        renderCampaignSelect();
+                    } catch (err) {
+                        toast(err.message, 'error');
+                    }
+                });
+            }
+
             async function saveCampaign() {
                 try {
+                    const existingId = $('campaign-id').value;
                     const payload = {
                         brand: currentBrand,
                         name: $('campaign-name').value.trim(),
@@ -4071,11 +4751,17 @@
                         throw new Error('Campaign name is required');
                     }
 
-                    await api('/campaigns', { method: 'POST', body: payload });
+                    if (existingId) {
+                        await api('/campaigns', { method: 'PUT', body: { ...payload, id: Number(existingId) } });
+                    } else {
+                        await api('/campaigns', { method: 'POST', body: payload });
+                    }
                     closeModal('campaign-modal');
+                    $('campaign-id').value = '';
+                    $('campaign-modal-title').textContent = 'New Campaign';
                     $('campaign-name').value = '';
                     $('campaign-objective').value = '';
-                    toast('Campaign created', 'success');
+                    toast(existingId ? 'Campaign updated' : 'Campaign created', 'success');
                     await refreshAll();
                 } catch (err) {
                     toast(err.message, 'error');
@@ -4116,14 +4802,15 @@
             }
 
             async function disconnectConnection(id) {
-                if (!window.confirm('Deactivate this connection profile?')) return;
-                try {
-                    await api('/connections?id=' + encodeURIComponent(id), { method: 'DELETE' });
-                    toast('Connection deactivated', 'success');
-                    await refreshAll();
-                } catch (err) {
-                    toast(err.message, 'error');
-                }
+                showConfirm('Deactivate this connection profile?', async () => {
+                    try {
+                        await api('/connections?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                        toast('Connection deactivated', 'success');
+                        await refreshAll();
+                    } catch (err) {
+                        toast(err.message, 'error');
+                    }
+                });
             }
 
             async function saveHandle() {
@@ -4158,16 +4845,17 @@
             }
 
             async function deleteHandle(id) {
-                if (!window.confirm('Delete this handle record?')) return;
-                try {
-                    await api('/social-accounts?id=' + encodeURIComponent(id), { method: 'DELETE' });
-                    toast('Handle removed', 'success');
-                    await loadSocialAccounts();
-                    renderEcosystemMatrix();
-                    renderHandlesTable();
-                } catch (err) {
-                    toast(err.message, 'error');
-                }
+                showConfirm('Delete this handle record?', async () => {
+                    try {
+                        await api('/social-accounts?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                        toast('Handle removed', 'success');
+                        await loadSocialAccounts();
+                        renderEcosystemMatrix();
+                        renderHandlesTable();
+                    } catch (err) {
+                        toast(err.message, 'error');
+                    }
+                });
             }
 
             async function saveWorkflow() {
@@ -4262,7 +4950,7 @@
             // ASSET MANAGEMENT
             // ════════════════════════════════════════════════════════════════
 
-            function openAssetEditModal(asset) {
+            async function openAssetEditModal(asset) {
                 $('asset-edit-id').value = asset.id;
                 $('asset-edit-title').value = asset.title || '';
                 $('asset-edit-category').value = asset.category || 'uploads';
@@ -4274,23 +4962,43 @@
                 try { tags = JSON.parse(asset.tags || '[]'); } catch { tags = []; }
                 $('asset-edit-tags').value = tags.join(', ');
 
-                // Initialize cross-brand share chips — mark current asset's brand as already-home
+                // Fetch brands that already have a copy of this asset
+                let sharedBrands = new Set();
+                try {
+                    const sharesData = await api('/assets/' + encodeURIComponent(asset.id) + '/shares');
+                    if (sharesData?.brands) sharesData.brands.forEach(b => sharedBrands.add(b));
+                } catch { /* graceful degradation if endpoint unavailable */ }
+
+                // Initialize cross-brand share chips
                 const homeBrand = asset.brand || currentBrand;
                 document.querySelectorAll('#asset-edit-brand-share [data-share-brand]').forEach((chip) => {
-                    // Home brand is inert (this is where the asset lives)
-                    if (chip.dataset.shareBrand === homeBrand) {
+                    const chipBrand = chip.dataset.shareBrand;
+                    if (chipBrand === homeBrand) {
                         chip.classList.add('active');
                         chip.title = 'Home brand';
+                        chip.disabled = true;
+                    } else if (sharedBrands.has(chipBrand)) {
+                        chip.classList.add('active');
+                        chip.title = 'Already shared to ' + chipBrand;
                         chip.disabled = true;
                     } else {
                         chip.classList.remove('active');
                         chip.disabled = false;
-                        chip.title = 'Share to ' + chip.dataset.shareBrand;
-                        chip.onclick = () => {
-                            chip.classList.toggle('active');
-                        };
+                        chip.title = 'Share to ' + chipBrand;
+                        chip.onclick = () => { chip.classList.toggle('active'); };
                     }
                 });
+
+                // Show approve/reject button in modal footer
+                const reviewPanel = $('asset-edit-review-actions');
+                const rs = asset.review_status || 'draft';
+                if (rs !== 'approved') {
+                    reviewPanel.innerHTML = `<button class="btn btn-success-soft" id="asset-edit-approve-btn">&#10003; Approve for public use</button>`;
+                    $('asset-edit-approve-btn').onclick = () => { reviewAsset(asset.id, 'approve'); closeModal('asset-edit-modal'); };
+                } else {
+                    reviewPanel.innerHTML = `<button class="btn btn-secondary" id="asset-edit-reject-btn">&times; Revoke approval</button>`;
+                    $('asset-edit-reject-btn').onclick = () => { reviewAsset(asset.id, 'reject'); closeModal('asset-edit-modal'); };
+                }
 
                 openModal('asset-edit-modal');
             }
@@ -4343,19 +5051,62 @@
                 }
             }
 
-            async function deleteAsset(id) {
-                if (!window.confirm('Permanently delete this asset? This cannot be undone.')) return;
+            async function batchApproveSelected() {
+                const ids = [...state.selectedLibraryIds];
+                if (!ids.length) return;
+                showConfirm(`Approve ${ids.length} selected asset${ids.length === 1 ? '' : 's'} for public use?`, async () => {
+                    try {
+                        // Run approvals in parallel — max 6 in-flight at once to avoid rate limits
+                        const batch = 6;
+                        for (let i = 0; i < ids.length; i += batch) {
+                            await Promise.all(
+                                ids.slice(i, i + batch).map((id) =>
+                                    api('/assets/' + encodeURIComponent(id) + '/approve', { method: 'POST' })
+                                        .then(() => {
+                                            const asset = state.assets.find((a) => String(a.id) === String(id));
+                                            if (asset) asset.review_status = 'approved';
+                                        })
+                                        .catch(() => { /* individual failures don't abort the batch */ })
+                                )
+                            );
+                        }
+                        state.selectedLibraryIds.clear();
+                        renderLibrary();
+                        toast(`${ids.length} asset${ids.length === 1 ? '' : 's'} approved`, 'success');
+                    } catch (err) {
+                        toast(err.message || 'Batch approve failed', 'error');
+                    }
+                });
+            }
+
+            async function reviewAsset(id, action) {
                 try {
-                    await api('/assets?id=' + encodeURIComponent(id), { method: 'DELETE' });
-                    toast('Asset deleted', 'success');
-                    if ($('asset-edit-id').value === String(id)) closeModal('asset-edit-modal');
-                    await loadAssets();
+                    const result = await api('/assets/' + encodeURIComponent(id) + '/' + action, { method: 'POST' });
+                    const label = action === 'approve' ? 'approved for public use' : 'approval revoked';
+                    // Update local state so UI refreshes without a full reload
+                    const asset = state.assets.find((a) => String(a.id) === String(id));
+                    if (asset) asset.review_status = result.review_status || (action === 'approve' ? 'approved' : 'rejected');
                     renderLibrary();
-                    renderComposerAssets();
-                    if (state.selectedAssetId === String(id)) state.selectedAssetId = '';
+                    toast('Asset ' + label, 'success');
                 } catch (err) {
                     toast(err.message, 'error');
                 }
+            }
+
+            async function deleteAsset(id) {
+                showConfirm('Permanently delete this asset? This cannot be undone.', async () => {
+                    try {
+                        await api('/assets?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                        toast('Asset deleted', 'success');
+                        if ($('asset-edit-id').value === String(id)) closeModal('asset-edit-modal');
+                        await loadAssets();
+                        renderLibrary();
+                        renderComposerAssets();
+                        if (state.selectedAssetId === String(id)) state.selectedAssetId = '';
+                    } catch (err) {
+                        toast(err.message, 'error');
+                    }
+                });
             }
 
 
@@ -4496,20 +5247,23 @@
                         <div class="drip-entry-num">${i + 1}</div>
                         <div class="drip-entry-fields">
                             <textarea class="drip-entry-content" data-entry-content="${i}" rows="2"
-                                placeholder="Post content...">${escapeHtml(entry.content || '')}</textarea>
+                                placeholder="Post content..."></textarea>
                             <input type="text" class="drip-entry-hashtags" data-entry-hashtags="${i}"
                                 placeholder="#hashtags, comma separated"
-                                value="${escapeHtml((entry.hashtags || []).join(', '))}">
+                                value="">
                         </div>
                         <button type="button" class="btn btn-micro btn-danger" data-remove-entry="${i}" title="Remove">✕</button>
                     </div>
                 `).join('');
+                // Set values directly after render to avoid HTML entity double-encoding
                 list.querySelectorAll('[data-entry-content]').forEach((el) => {
+                    el.value = state.dripEntries[Number(el.dataset.entryContent)].content || '';
                     el.addEventListener('input', () => {
                         state.dripEntries[Number(el.dataset.entryContent)].content = el.value;
                     });
                 });
                 list.querySelectorAll('[data-entry-hashtags]').forEach((el) => {
+                    el.value = (state.dripEntries[Number(el.dataset.entryHashtags)].hashtags || []).join(', ');
                     el.addEventListener('change', () => {
                         state.dripEntries[Number(el.dataset.entryHashtags)].hashtags =
                             el.value.split(',').map((h) => h.trim().replace(/^#/, '')).filter(Boolean);
@@ -4704,6 +5458,353 @@
                 if ($('drip-import-textarea')) $('drip-import-textarea').value = '';
                 toast(`Imported ${added} entr${added === 1 ? 'y' : 'ies'}.`, 'success');
                 updateDripSummary();
+            }
+
+            // ── Gallery Manager ──────────────────────────────────────────────
+
+            async function loadGalleries() {
+                try {
+                    const brand = $('gallery-filter-brand')?.value || '';
+                    const qs = brand ? '?brand=' + encodeURIComponent(brand) : '';
+                    const data = await api('/galleries' + qs);
+                    state.galleries = data.galleries || [];
+                } catch {
+                    state.galleries = [];
+                }
+            }
+
+            function renderGalleriesList() {
+                const tbody = $('galleries-table');
+                const empty = $('galleries-empty');
+                if (!tbody) return;
+                if (!state.galleries.length) {
+                    tbody.innerHTML = '';
+                    empty?.classList.remove('d-none');
+                    return;
+                }
+                empty?.classList.add('d-none');
+                tbody.innerHTML = state.galleries.map((g) => `
+                    <tr class="${state.selectedGalleryId === g.id ? 'row-selected' : ''}" style="cursor:pointer" data-gallery-row="${g.id}">
+                        <td>${escapeHtml(g.title)}</td>
+                        <td class="mono text-muted">${escapeHtml(g.site_domain)}</td>
+                        <td>${g.item_count || 0}</td>
+                        <td class="inline-actions">
+                            <button class="btn btn-micro btn-secondary" data-gallery-edit="${g.id}">Edit</button>
+                            <button class="btn btn-micro btn-danger" data-gallery-delete="${g.id}">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                tbody.querySelectorAll('[data-gallery-row]').forEach((row) => {
+                    row.addEventListener('click', (ev) => {
+                        if (ev.target.closest('button')) return;
+                        selectGallery(Number(row.dataset.galleryRow));
+                    });
+                });
+                tbody.querySelectorAll('[data-gallery-edit]').forEach((btn) => {
+                    btn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        const g = state.galleries.find((x) => String(x.id) === btn.dataset.galleryEdit);
+                        if (g) openGalleryModal(g);
+                    });
+                });
+                tbody.querySelectorAll('[data-gallery-delete]').forEach((btn) => {
+                    btn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        deleteGallery(btn.dataset.galleryDelete);
+                    });
+                });
+            }
+
+            async function selectGallery(id) {
+                state.selectedGalleryId = id;
+                renderGalleriesList();
+                const g = state.galleries.find((x) => x.id === id);
+                $('gallery-items-title').textContent = g ? g.title + ' — Items' : 'Gallery Items';
+                $('gallery-items-actions').classList.remove('d-none');
+
+                // Populate asset picker
+                const sel = $('gallery-add-asset');
+                sel.innerHTML = '<option value="">\u2014 add asset \u2014</option>' +
+                    state.assets.map((a) =>
+                        `<option value="${escapeHtml(a.id)}">${escapeHtml(a.title || a.id)}</option>`
+                    ).join('');
+
+                // Load items
+                try {
+                    const data = await api('/galleries/' + id + '/items');
+                    state.galleryItems = data.items || [];
+                } catch {
+                    state.galleryItems = [];
+                }
+                renderGalleryItems();
+            }
+
+            function renderGalleryItems() {
+                const list = $('gallery-items-list');
+                if (!list) return;
+                if (!state.galleryItems.length) {
+                    list.innerHTML = '<p class="text-muted">No items in this gallery yet. Use the asset picker above to add some.</p>';
+                    return;
+                }
+                list.innerHTML = `
+                    <div class="asset-grid asset-grid-full">
+                        ${state.galleryItems.map((item) => `
+                            <div class="asset-card">
+                                ${item.thumbnail_path
+                        ? `<img src="${assetUrl(item)}" data-r2="${escapeHtml(assetBase(item))}" alt="${escapeHtml(item.alt_text || item.title || '')}" loading="lazy" class="asset-thumb">`
+                        : `<div class="asset-thumb-placeholder">${escapeHtml(item.media_type || 'file')}</div>`
+                    }
+                                <div class="asset-info">
+                                    <span class="asset-name">${escapeHtml(item.title || item.asset_id)}</span>
+                                    ${item.caption ? `<span class="text-muted">${escapeHtml(item.caption)}</span>` : ''}
+                                </div>
+                                <div class="asset-actions">
+                                    <button class="btn btn-micro btn-danger" data-gallery-item-delete="${item.item_id}">Remove</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                list.querySelectorAll('[data-gallery-item-delete]').forEach((btn) => {
+                    btn.addEventListener('click', () =>
+                        removeGalleryItem(state.selectedGalleryId, btn.dataset.galleryItemDelete)
+                    );
+                });
+            }
+
+            function openGalleryModal(gallery = null) {
+                $('gallery-modal-title').textContent = gallery ? 'Edit Gallery' : 'New Gallery';
+                $('gallery-id').value = gallery?.id || '';
+                $('gallery-brand').value = gallery?.brand || currentBrand;
+                $('gallery-domain').value = gallery?.site_domain || '';
+                $('gallery-slug').value = gallery?.gallery_slug || '';
+                $('gallery-title').value = gallery?.title || '';
+                $('gallery-description').value = gallery?.description || '';
+                $('gallery-sort').value = gallery?.sort_order ?? 100;
+
+                const sel = $('gallery-cover');
+                sel.innerHTML = '<option value="">\u2014 none \u2014</option>' +
+                    state.assets.map((a) => {
+                        const sel2 = gallery?.cover_asset_id === a.id ? ' selected' : '';
+                        return `<option value="${escapeHtml(a.id)}"${sel2}>${escapeHtml(a.title || a.id)}</option>`;
+                    }).join('');
+
+                openModal('gallery-modal');
+            }
+
+            async function saveGallery() {
+                const id = $('gallery-id').value;
+                const payload = {
+                    brand: $('gallery-brand').value,
+                    site_domain: $('gallery-domain').value.trim(),
+                    gallery_slug: $('gallery-slug').value.trim(),
+                    title: $('gallery-title').value.trim(),
+                    description: $('gallery-description').value.trim(),
+                    cover_asset_id: $('gallery-cover').value,
+                    sort_order: Number($('gallery-sort').value) || 100,
+                };
+                if (!payload.site_domain || !payload.gallery_slug || !payload.title) {
+                    toast('Domain, slug, and title are required.', 'error');
+                    return;
+                }
+                try {
+                    if (id) {
+                        await api('/galleries/' + id, { method: 'PUT', body: payload });
+                    } else {
+                        await api('/galleries', { method: 'POST', body: payload });
+                    }
+                    closeModal('gallery-modal');
+                    await loadGalleries();
+                    renderGalleriesList();
+                    toast('Gallery saved.', 'success');
+                } catch (err) {
+                    toast('Failed to save: ' + err.message, 'error');
+                }
+            }
+
+            async function deleteGallery(id) {
+                showConfirm('Delete this gallery? Items will be unlinked but assets remain in the library.', async () => {
+                    try {
+                        await api('/galleries/' + id, { method: 'DELETE' });
+                        if (state.selectedGalleryId === Number(id)) {
+                            state.selectedGalleryId = null;
+                            state.galleryItems = [];
+                            renderGalleryItems();
+                            $('gallery-items-title').textContent = 'Select a gallery to manage its items';
+                            $('gallery-items-actions').classList.add('d-none');
+                        }
+                        await loadGalleries();
+                        renderGalleriesList();
+                        toast('Gallery deleted.', 'success');
+                    } catch (err) {
+                        toast('Failed to delete: ' + err.message, 'error');
+                    }
+                });
+            }
+
+            async function addGalleryItem(galleryId, assetId) {
+                try {
+                    await api('/galleries/' + galleryId + '/items', { method: 'POST', body: { asset_id: assetId } });
+                    $('gallery-add-asset').value = '';
+                    await selectGallery(galleryId);
+                    toast('Asset added to gallery.', 'success');
+                } catch (err) {
+                    toast('Failed to add: ' + err.message, 'error');
+                }
+            }
+
+            async function removeGalleryItem(galleryId, itemId) {
+                showConfirm('Remove this item from the gallery?', async () => {
+                    try {
+                        await api('/galleries/' + galleryId + '/items/' + itemId, { method: 'DELETE' });
+                        await selectGallery(galleryId);
+                        toast('Item removed.', 'success');
+                    } catch (err) {
+                        toast('Failed to remove: ' + err.message, 'error');
+                    }
+                });
+            }
+
+            // ── Image Overrides ──────────────────────────────────────────────
+
+            async function loadOverrides() {
+                try {
+                    const brand = $('override-filter-brand')?.value || '';
+                    const domain = $('override-filter-domain')?.value.trim() || '';
+                    const qs = new URLSearchParams();
+                    if (brand) qs.set('brand', brand);
+                    if (domain) qs.set('domain', domain);
+                    const suffix = qs.toString() ? '?' + qs.toString() : '';
+                    const data = await api('/assets/overrides' + suffix);
+                    state.overrides = data.overrides || [];
+                } catch {
+                    state.overrides = [];
+                }
+            }
+
+            function renderOverrides() {
+                const tbody = $('overrides-table');
+                const empty = $('overrides-empty');
+                if (!tbody) return;
+                if (!state.overrides.length) {
+                    tbody.innerHTML = '';
+                    empty?.classList.remove('d-none');
+                    return;
+                }
+                empty?.classList.add('d-none');
+                tbody.innerHTML = state.overrides.map((ov) => {
+                    const isActive = Number(ov.active) !== 0;
+                    return `
+                        <tr>
+                            <td><span class="tag">${escapeHtml(ov.brand)}</span></td>
+                            <td class="mono">${escapeHtml(ov.site_domain)}</td>
+                            <td class="mono">${escapeHtml(ov.url_pattern)}</td>
+                            <td class="mono text-muted" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(ov.r2_key)}">${escapeHtml(ov.r2_key)}</td>
+                            <td>${escapeHtml(ov.label || '\u2014')}</td>
+                            <td>
+                                <button class="btn btn-micro ${isActive ? 'btn-success' : 'btn-secondary'}"
+                                    data-override-toggle="${ov.id}"
+                                    data-override-active="${ov.active}">
+                                    ${isActive ? 'Active' : 'Off'}
+                                </button>
+                            </td>
+                            <td class="inline-actions">
+                                <button class="btn btn-micro btn-secondary" data-override-edit="${ov.id}">Edit</button>
+                                <button class="btn btn-micro btn-danger" data-override-delete="${ov.id}">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                tbody.querySelectorAll('[data-override-toggle]').forEach((btn) => {
+                    btn.addEventListener('click', () =>
+                        toggleOverrideActive(Number(btn.dataset.overrideToggle), Number(btn.dataset.overrideActive) !== 0)
+                    );
+                });
+                tbody.querySelectorAll('[data-override-edit]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const ov = state.overrides.find((o) => String(o.id) === btn.dataset.overrideEdit);
+                        if (ov) openOverrideModal(ov);
+                    });
+                });
+                tbody.querySelectorAll('[data-override-delete]').forEach((btn) => {
+                    btn.addEventListener('click', () => deleteOverride(btn.dataset.overrideDelete));
+                });
+            }
+
+            function openOverrideModal(override = null) {
+                $('override-modal-title').textContent = override ? 'Edit Image Override' : 'New Image Override';
+                $('override-id').value = override?.id || '';
+                $('override-brand').value = override?.brand || currentBrand;
+                $('override-domain').value = override?.site_domain || '';
+                $('override-url-pattern').value = override?.url_pattern || '';
+                $('override-r2-key').value = override?.r2_key || '';
+                $('override-label').value = override?.label || '';
+
+                const sel = $('override-asset-select');
+                sel.innerHTML = '<option value="">\u2014 pick from library \u2014</option>' +
+                    state.assets.map((a) => {
+                        const key = a.file_path || a.r2_key || '';
+                        const selected = override?.r2_key === key ? ' selected' : '';
+                        return `<option value="${escapeHtml(key)}"${selected}>${escapeHtml(a.title || key || a.id)}</option>`;
+                    }).join('');
+
+                openModal('override-modal');
+            }
+
+            async function saveOverride() {
+                const id = $('override-id').value;
+                const pickerVal = $('override-asset-select').value;
+                const r2_key = $('override-r2-key').value.trim() || pickerVal;
+                const payload = {
+                    brand: $('override-brand').value,
+                    site_domain: $('override-domain').value.trim(),
+                    url_pattern: $('override-url-pattern').value.trim(),
+                    r2_key,
+                    label: $('override-label').value.trim(),
+                };
+                if (!payload.site_domain || !payload.url_pattern || !payload.r2_key) {
+                    toast('Domain, URL pattern, and an asset / R2 key are required.', 'error');
+                    return;
+                }
+                try {
+                    if (id) {
+                        await api('/assets/overrides', { method: 'PUT', body: { id: Number(id), ...payload } });
+                    } else {
+                        await api('/assets/overrides', { method: 'POST', body: payload });
+                    }
+                    closeModal('override-modal');
+                    await loadOverrides();
+                    renderOverrides();
+                    toast('Override saved.', 'success');
+                } catch (err) {
+                    toast('Failed to save: ' + err.message, 'error');
+                }
+            }
+
+            async function deleteOverride(id) {
+                showConfirm('Delete this image override? The live-site swap will stop immediately.', async () => {
+                    try {
+                        await api('/assets/overrides?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                        state.overrides = state.overrides.filter((o) => String(o.id) !== String(id));
+                        renderOverrides();
+                        toast('Override deleted.', 'success');
+                    } catch (err) {
+                        toast('Failed to delete: ' + err.message, 'error');
+                    }
+                });
+            }
+
+            async function toggleOverrideActive(id, currentlyActive) {
+                try {
+                    await api('/assets/overrides', { method: 'PUT', body: { id, active: currentlyActive ? 0 : 1 } });
+                    await loadOverrides();
+                    renderOverrides();
+                    toast(`Override ${currentlyActive ? 'deactivated' : 'activated'}.`, 'success');
+                } catch (err) {
+                    toast('Failed to update: ' + err.message, 'error');
+                }
             }
 
             window.__clerkReady

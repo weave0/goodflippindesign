@@ -360,12 +360,26 @@ async function handleUpload(request, user, env) {
     const brand = formData.get('brand') || 'gfv';
     const category = formData.get('category') || 'uncategorized';
     const title = formData.get('title') || file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+    const altText = (formData.get('alt_text') || '').slice(0, 500);
+    // Always land as draft regardless of what the client sends — approval is explicit
+    const reviewStatus = 'draft';
+    // Tags: accept a JSON array string or a comma-separated plain string
+    let tagsJson = '[]';
+    const rawTags = formData.get('tags') || '';
+    if (rawTags) {
+      try {
+        const parsed = JSON.parse(rawTags);
+        tagsJson = JSON.stringify(Array.isArray(parsed) ? parsed : []);
+      } catch {
+        // Comma-separated fallback
+        tagsJson = JSON.stringify(rawTags.split(',').map((t) => t.trim()).filter(Boolean));
+      }
+    }
     const mediaType = formData.get('media_type') || (
       file.type.startsWith('video') ? 'video' :
       file.type.startsWith('audio') ? 'audio' :
       file.type === 'application/pdf' ? 'document' : 'image'
     );
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
     const safeFilename = file.name
       .replace(/[^a-zA-Z0-9._-]/g, '_')
       .toLowerCase();
@@ -386,9 +400,13 @@ async function handleUpload(request, user, env) {
       const assetId = crypto.randomUUID();
       await env.DB.prepare(
         `INSERT INTO cms_assets
-           (id, brand, category, title, file_path, media_type, mime_type, file_size, uploaded_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).bind(assetId, brand, category, title, r2Key, mediaType, file.type, file.size, user.id).run();
+           (id, brand, category, title, alt_text, file_path, media_type, mime_type,
+            file_size, tags, review_status, uploaded_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        assetId, brand, category, title, altText, r2Key, mediaType,
+        file.type, file.size, tagsJson, reviewStatus, user.id
+      ).run();
     }
 
     await logAudit(env.DB, user.id, 'upload', 'file', r2Key, {
@@ -410,7 +428,7 @@ async function handleUpload(request, user, env) {
 }
 
 /**
- * GET /api/cms/media/* — Serve file from R2 (public, cached)
+ * GET /api/cms/media/* — Serve file from R2 (authenticated admin/preview only)
  */
 async function handleServeMedia(r2Key, env) {
   if (!env.MEDIA_BUCKET) {
@@ -422,10 +440,98 @@ async function handleServeMedia(r2Key, env) {
 
   const headers = new Headers();
   object.writeHttpMetadata(headers);
-  headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+  // Private — instruct browsers and CDN not to cache publicly
+  headers.set('Cache-Control', 'private, no-store');
   headers.set('ETag', object.httpEtag);
 
   return new Response(object.body, { headers });
+}
+
+/**
+ * GET /api/cms/pub/:r2Key — Serve APPROVED assets publicly (safe for embedding on public pages)
+ * Returns 404 for any asset whose review_status != 'approved', so unapproved
+ * media can never be served to visitors even if the key leaks.
+ *
+ * Uses the Cloudflare Cache API so approved assets are served from edge cache
+ * on subsequent requests (no D1 or R2 hit).  Cache is purged automatically
+ * when/if an asset is rejected via handleReviewAsset.
+ */
+async function handleServePublicMedia(request, r2Key, env) {
+  if (!env.MEDIA_BUCKET) {
+    return errorResponse('R2 not configured', 503);
+  }
+
+  // ── Cloudflare Cache API lookup ──────────────────────────────
+  // Use a normalized cache key URL (strip any QS to avoid cache fragmentation)
+  const cacheKey = new Request(new URL('/api/cms/pub/' + r2Key, request.url).toString(), {
+    method: 'GET',
+  });
+  const cache = caches.default;
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
+  // ── Gatecheck — only approved assets may be publicly served ──
+  if (env.DB) {
+    const asset = await env.DB.prepare(
+      'SELECT review_status FROM cms_assets WHERE file_path = ? LIMIT 1'
+    ).bind(r2Key).first();
+    if (!asset || asset.review_status !== 'approved') {
+      return errorResponse('Not found', 404);
+    }
+  } else {
+    // D1 unavailable — fail-safe: refuse rather than expose
+    return errorResponse('Media catalog unavailable', 503);
+  }
+
+  const object = await env.MEDIA_BUCKET.get(r2Key);
+  if (!object) return errorResponse('File not found', 404);
+
+  const headers = new Headers();
+  object.writeHttpMetadata(headers);
+  // Long cache — new version = new R2 key, so this key never stales while approved
+  headers.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=3600');
+  headers.set('ETag', object.httpEtag);
+
+  const response = new Response(object.body, { headers });
+  // Store in Cloudflare edge cache (non-blocking)
+  await cache.put(cacheKey, response.clone());
+  return response;
+}
+
+/**
+ * POST /api/cms/assets/:id/approve — Mark an asset as approved for public use
+ * POST /api/cms/assets/:id/reject  — Mark an asset as rejected
+ */
+async function handleReviewAsset(request, assetId, action, user, env) {
+  if (!env.DB) return errorResponse('DB not configured', 503);
+
+  const status = action === 'approve' ? 'approved' : 'rejected';
+  const result = await env.DB.prepare(
+    `UPDATE cms_assets
+       SET review_status = ?, approved_by = ?, approved_at = datetime('now'), updated_at = datetime('now')
+     WHERE id = ?`
+  ).bind(status, user.id, assetId).run();
+
+  if (!result.meta?.changes) return errorResponse('Asset not found', 404);
+
+  // When rejecting, purge the asset from Cloudflare edge cache so it
+  // stops being served publicly without waiting for TTL expiry.
+  if (action === 'reject' && env.DB) {
+    try {
+      const row = await env.DB.prepare('SELECT file_path FROM cms_assets WHERE id = ? LIMIT 1')
+        .bind(assetId).first();
+      if (row?.file_path) {
+        const cacheKey = new Request(
+          new URL('/api/cms/pub/' + row.file_path, request.url).toString(),
+          { method: 'GET' }
+        );
+        await caches.default.delete(cacheKey);
+      }
+    } catch { /* non-fatal — cache TTL will expire it anyway */ }
+  }
+
+  await logAudit(env.DB, user.id, action, 'asset', assetId, { review_status: status });
+  return jsonResponse({ success: true, review_status: status });
 }
 
 // ────────────────────────────────────────────────────────────────
@@ -704,11 +810,12 @@ async function handleCreateCampaignSocialPost(request, user, env) {
 // ────────────────────────────────────────────────────────────────
 
 const BRAND_DEFINITIONS = {
-  gfd:          { name: 'Good Flippin Design',  domain: 'goodflippindesign.com',  color: '#6c63ff', platforms: ['instagram','linkedin','x'] },
-  gfv:          { name: 'Good Flippin Vibes',   domain: 'goodflippinvibes.com',   color: '#10b981', platforms: ['instagram','x','facebook','tiktok','pinterest'] },
-  aiaimate:     { name: 'AI Aimate',            domain: 'aiaimate.com',           color: '#3b82f6', platforms: ['linkedin','x','youtube'] },
-  culturesherpa:{ name: 'CultureSherpa',        domain: 'culturesherpa.org',      color: '#f59e0b', platforms: ['instagram','x','facebook','linkedin'] },
-  globaldeets:  { name: 'Global Deets',         domain: 'globaldeets.com',        color: '#8b5cf6', platforms: ['linkedin','x'] },
+  gfd:             { name: 'Good Flippin Design',  domain: 'goodflippindesign.com',  color: '#6c63ff', platforms: ['instagram','linkedin','x'] },
+  gfv:             { name: 'Good Flippin Vibes',   domain: 'goodflippinvibes.com',   color: '#10b981', platforms: ['instagram','x','facebook','tiktok','pinterest'] },
+  aiaimate:        { name: 'AI Aimate',            domain: 'aiaimate.com',           color: '#3b82f6', platforms: ['linkedin','x','youtube'] },
+  culturesherpa:   { name: 'CultureSherpa',        domain: 'culturesherpa.org',      color: '#f59e0b', platforms: ['instagram','x','facebook','linkedin'] },
+  globaldeets:     { name: 'Global Deets',         domain: 'globaldeets.com',        color: '#8b5cf6', platforms: ['linkedin','x'] },
+  citizenapproved: { name: 'CitizenApproved',      domain: 'citizenapproved.com',    color: '#ef4444', platforms: ['instagram','facebook','linkedin','x'] },
 };
 
 /**
@@ -1605,18 +1712,9 @@ export async function handleCMSRequest(request, env, user) {
   const method = request.method;
 
   try {
-    // ── Public routes (no auth needed) ───────────────────
-    if (path === '/assets' && method === 'GET') {
-      return handleListAssets(request, env);
-    }
+    // ── Fully public routes (no auth, no R2 keys exposed) ───────────────────
 
-    // Serve media from R2 (public, cached)
-    if (path.startsWith('/media/') && method === 'GET') {
-      const r2Key = path.replace('/media/', '');
-      return handleServeMedia(r2Key, env);
-    }
-
-    // Public categories/brands
+    // Public categories/brands — safe metadata only
     if (path === '/categories' && method === 'GET') {
       return handleListCategories(env);
     }
@@ -1627,18 +1725,11 @@ export async function handleCMSRequest(request, env, user) {
       return jsonResponse(PLATFORM_RULES);
     }
 
-    // ── Asset discovery (must come before generic /assets/:id catch-all) ────
-    if (path === '/assets/discover' && method === 'POST') {
-      return handleDiscoverAssets(request, env);
-    }
-    if (path === '/assets/discovered' && method === 'GET') {
-      return handleListDiscovered(request, env);
-    }
-
-    // Single asset (public)
-    const assetMatch = path.match(/^\/assets\/([^/]+)$/);
-    if (assetMatch && method === 'GET' && assetMatch[1] !== 'discovered') {
-      return handleGetAsset(assetMatch[1], env);
+    // Serve approved assets to public pages (image overrides, gallery embeds)
+    // ONLY serves assets where review_status = 'approved' in D1 — all others 404
+    if (path.startsWith('/pub/') && method === 'GET') {
+      const r2Key = decodeURIComponent(path.replace('/pub/', ''));
+      return handleServePublicMedia(request, r2Key, env);
     }
 
     // OAuth flows (authorize needs auth, callback is public)
@@ -1655,6 +1746,36 @@ export async function handleCMSRequest(request, env, user) {
     }
 
     // Asset CRUD (admin)
+    if (path === '/assets' && method === 'GET') {
+      return handleListAssets(request, env);
+    }
+
+    // Asset discovery (must come before generic /assets/:id catch-all)
+    if (path === '/assets/discover' && method === 'POST') {
+      return handleDiscoverAssets(request, env);
+    }
+    if (path === '/assets/discovered' && method === 'GET') {
+      return handleListDiscovered(request, env);
+    }
+
+    // Single asset (admin)
+    const assetMatch = path.match(/^\/assets\/([^/]+)$/);
+    if (assetMatch && method === 'GET' && !['discovered', 'overrides'].includes(assetMatch[1])) {
+      return handleGetAsset(assetMatch[1], env);
+    }
+
+    // Asset review — approve or reject
+    const reviewMatch = path.match(/^\/assets\/([^/]+)\/(approve|reject)$/);
+    if (reviewMatch && method === 'POST') {
+      return handleReviewAsset(request, reviewMatch[1], reviewMatch[2], user, env);
+    }
+
+    // Authenticated media preview (full-resolution, private cache)
+    if (path.startsWith('/media/') && method === 'GET') {
+      const r2Key = decodeURIComponent(path.replace('/media/', ''));
+      return handleServeMedia(r2Key, env);
+    }
+
     if (path === '/assets' && method === 'POST') {
       return handleCreateAsset(request, user, env);
     }
@@ -1832,6 +1953,10 @@ export async function handleCMSRequest(request, env, user) {
     }
 
     // ── Cross-site asset sharing ───────────────────────
+    const sharesMatch = path.match(/^\/assets\/([^/]+)\/shares$/);
+    if (sharesMatch && method === 'GET') {
+      return handleGetAssetShares(env, sharesMatch[1]);
+    }
     const shareMatch = path.match(/^\/assets\/([^/]+)\/share$/);
     if (shareMatch && method === 'POST') {
       return handleShareAsset(request, user, env, shareMatch[1]);
@@ -2480,6 +2605,22 @@ async function handleShareAsset(request, user, env, assetId) {
   });
 
   return jsonResponse({ id: newId, message: 'Asset shared', source_id: assetId }, 201);
+}
+
+/**
+ * GET /api/cms/assets/:id/shares
+ * Returns list of brands that already have a copy of this asset (same file_path).
+ */
+async function handleGetAssetShares(env, assetId) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  const source = await env.DB.prepare(
+    'SELECT file_path, brand FROM cms_assets WHERE id = ?'
+  ).bind(assetId).first();
+  if (!source) return errorResponse('Asset not found', 404);
+  const { results } = await env.DB.prepare(
+    'SELECT DISTINCT brand FROM cms_assets WHERE file_path = ? AND brand != ? AND active = 1'
+  ).bind(source.file_path, source.brand).all();
+  return jsonResponse({ brands: (results || []).map(r => r.brand) });
 }
 
 /**
