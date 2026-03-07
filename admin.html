@@ -2150,6 +2150,11 @@
             font-size: 0.8rem;
         }
 
+        .cs-sync-list {
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
         .text-error {
             color: #ef4444;
         }
@@ -2845,6 +2850,7 @@
                             <option value="promo">Promo</option>
                         </select>
                         <button class="btn btn-ghost" id="cs-refresh-btn">Refresh</button>
+                        <button class="btn btn-secondary" id="cs-sync-btn">&#x21BB; Sync Local</button>
                     </div>
                     <div class="grid-two">
                         <article class="panel">
@@ -3290,6 +3296,23 @@
             <div class="actions mt-08">
                 <button class="btn btn-secondary" data-close-modal="cs-schedule-modal">Cancel</button>
                 <button class="btn btn-primary" id="cs-schedule-submit-btn">Schedule ▶</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Studio: Sync from Local Prompt Studio -->
+    <div class="modal-wrap" id="cs-sync-modal">
+        <div class="modal">
+            <h3>Sync from Local Prompt Studio</h3>
+            <p class="text-muted mt-02">Auto-discovered registries from your local SummitView project (<code>localhost:5050</code>). Select which to sync into the admin portal.</p>
+            <div id="cs-sync-status" class="mt-04"></div>
+            <div id="cs-sync-list" class="cs-sync-list mt-04"></div>
+            <div class="actions-split mt-08">
+                <button class="btn btn-ghost btn-sm" id="cs-sync-select-all">Select all</button>
+                <div class="actions-right">
+                    <button class="btn btn-secondary" data-close-modal="cs-sync-modal">Cancel</button>
+                    <button class="btn btn-primary" id="cs-sync-import-btn">Import Selected &#x2192;</button>
+                </div>
             </div>
         </div>
     </div>
@@ -3939,6 +3962,8 @@
                     openModal('cs-registry-modal');
                 });
                 $('cs-import-btn')?.addEventListener('click', () => openModal('cs-import-modal'));
+                $('cs-sync-btn')?.addEventListener('click', openCSSyncModal);
+                $('cs-sync-import-btn')?.addEventListener('click', importFromPromptStudio);
                 $('cs-prev-scene')?.addEventListener('click', () => {
                     if (state.csCurrentScene > 0) { state.csCurrentScene--; renderCSScene(); }
                 });
@@ -6028,6 +6053,7 @@
                 const videoPrompt = scene.videoPrompt || scene.video_prompt || '';
                 const voiceOver = scene.voiceOver || scene.vo || scene.voice_over || '';
                 const soundCues = scene.soundCues || scene.sound || scene.sound_cues || '';
+                const paddyLine = scene.paddyLine || scene.paddy_line || '';
                 const notes = scene.notes || scene.description || '';
 
                 const promptsHtml = imagePrompts.map((p, i) => {
@@ -6069,6 +6095,11 @@
                     <div class="cs-prompt-section">
                         <h5 class="cs-section-label">Voice Over</h5>
                         <p class="cs-prompt-text">${escapeHtml(voiceOver)}</p>
+                    </div>` : ''}
+                    ${paddyLine ? `
+                    <div class="cs-prompt-section">
+                        <h5 class="cs-section-label">&#x1F9C6; Character Line</h5>
+                        <p class="cs-prompt-text">${escapeHtml(paddyLine)}</p>
                     </div>` : ''}
                     ${soundCues ? `
                     <div class="cs-prompt-section">
@@ -6235,6 +6266,113 @@
                 $('cs-import-json').value = '';
                 openModal('cs-registry-modal');
                 $('cs-registry-modal-title').textContent = 'Review & Save Registry';
+            }
+
+            // ── Prompt Studio sync ───────────────────────────────────────────
+
+            async function openCSSyncModal() {
+                openModal('cs-sync-modal');
+                const statusEl = $('cs-sync-status');
+                const listEl = $('cs-sync-list');
+                statusEl.innerHTML = '<p class="text-muted">Connecting to Prompt Studio at localhost:5050&#x2026;</p>';
+                listEl.innerHTML = '';
+                try {
+                    const res = await fetch('http://localhost:5050/api/registries', {
+                        signal: AbortSignal.timeout(5000),
+                    });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const remoteRegs = await res.json();
+                    const existingIds = new Set(state.csRegistries.map((r) => r.id));
+                    if (!remoteRegs.length) {
+                        statusEl.innerHTML = '<p class="text-muted">No registries found. Run <code>make prompt-studio</code> in SummitView first.</p>';
+                        return;
+                    }
+                    const newCount = remoteRegs.filter((r) => !existingIds.has(r.registryId)).length;
+                    statusEl.innerHTML = `<p class="text-muted">${remoteRegs.length} registries found &#xB7; ${newCount} new</p>`;
+                    listEl.innerHTML = remoteRegs.map((r) => `
+                        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-subtle);cursor:pointer">
+                            <input type="checkbox" value="${escapeHtml(r.registryId)}" ${!existingIds.has(r.registryId) ? 'checked' : ''} style="margin-top:2px;flex-shrink:0">
+                            <div>
+                                <strong>${escapeHtml(r.title)}</strong>
+                                <span class="badge">${r.sceneCount}s</span>
+                                ${existingIds.has(r.registryId) ? '<span class="badge" style="background:#1a2a1a;color:#6bcf8a">already synced</span>' : ''}
+                                <br><small class="text-muted">${escapeHtml(r.brandId)} &#xB7; ${escapeHtml(r.seriesId)}</small>
+                            </div>
+                        </label>
+                    `).join('');
+                    $('cs-sync-select-all')?.addEventListener('click', () => {
+                        listEl.querySelectorAll('input[type=checkbox]').forEach((c) => { c.checked = true; });
+                    });
+                } catch (err) {
+                    statusEl.innerHTML = `<p class="text-error">Cannot reach Prompt Studio: ${escapeHtml(err.message)}<br><small class="text-muted">Start it with <code>make prompt-studio</code> in SummitView.</small></p>`;
+                    listEl.innerHTML = '';
+                }
+            }
+
+            async function importFromPromptStudio() {
+                const checked = Array.from(
+                    document.querySelectorAll('#cs-sync-list input[type=checkbox]:checked')
+                ).map((c) => c.value);
+                if (!checked.length) { toast('Select at least one registry', 'error'); return; }
+                const btn = $('cs-sync-import-btn');
+                if (btn) { btn.disabled = true; btn.textContent = `Importing ${checked.length}\u2026`; }
+                let imported = 0;
+                let failed = 0;
+                for (const registryId of checked) {
+                    try {
+                        const res = await fetch(`http://localhost:5050/api/registries/${encodeURIComponent(registryId)}`);
+                        const reg = await res.json();
+                        await api('/content-studio/registries', {
+                            method: 'POST',
+                            body: {
+                                id: reg.registryId,
+                                brand: _normalizeBrandId(reg.brandId),
+                                type: reg.type || 'special',
+                                series_id: reg.seriesId || '',
+                                title: reg.title || reg.registryId,
+                                description: reg._source || '',
+                                scenes_json: JSON.stringify(_normalizePromptStudioScenes(reg.scenes || [])),
+                            },
+                        });
+                        imported++;
+                    } catch (err) {
+                        console.warn('Failed to import registry', registryId, err);
+                        failed++;
+                    }
+                }
+                if (btn) { btn.disabled = false; btn.textContent = 'Import Selected \u2192'; }
+                toast(
+                    `Imported ${imported} registr${imported !== 1 ? 'ies' : 'y'}` +
+                    (failed ? ` \u00B7 ${failed} failed` : ''),
+                    imported ? 'success' : 'error'
+                );
+                closeModal('cs-sync-modal');
+                await loadContentStudioRegistries();
+            }
+
+            function _normalizePromptStudioScenes(scenes) {
+                return scenes.map((s) => ({
+                    title: s.label || s.beat_id || `Scene ${s.scene_number}`,
+                    notes: s.title_card_text || '',
+                    imagePrompts: (s.image_prompts || [])
+                        .map((p) => (typeof p === 'string' ? p : (p.prompt || '')))
+                        .filter(Boolean),
+                    videoPrompt: s.video_gen_prompt || '',
+                    voiceOver: s.narrator_line || '',
+                    paddyLine: s.paddy_line || '',
+                    soundCues: s.sound_cue || '',
+                }));
+            }
+
+            function _normalizeBrandId(brandId) {
+                const map = {
+                    goodflippinvibes: 'gfv',
+                    goodflippindesign: 'gfd',
+                    aiaimate: 'aiaimate',
+                    culturesherpa: 'culturesherpa',
+                    globaldeets: 'globaldeets',
+                };
+                return map[brandId] || brandId || 'gfv';
             }
 
             // ── Image Overrides ──────────────────────────────────────────────
