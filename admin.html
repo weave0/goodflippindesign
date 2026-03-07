@@ -3870,26 +3870,17 @@
                         form.append('category', 'uploads');
                         form.append('media_type', file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : file.type === 'application/pdf' ? 'document' : 'image');
 
-                        const token = await state.clerk.session.getToken();
-                        const resp = await fetch('/api/cms/upload', {
-                            method: 'POST',
-                            headers: { 'Authorization': 'Bearer ' + token },
-                            body: form
-                        });
+                        await api('/upload', { method: 'POST', body: form });
 
                         if (bar) bar.style.width = '100%';
-
-                        if (resp.ok) {
-                            if (st) { st.textContent = '✓'; st.classList.add('ok'); }
-                            await loadAssets();
-                            renderLibrary();
-                        } else {
-                            const err = await resp.json().catch(() => ({ error: resp.statusText }));
-                            if (st) { st.textContent = err.error || 'Failed'; st.classList.add('err'); }
-                        }
+                        if (st) { st.textContent = '✓'; st.classList.add('ok'); }
+                        await loadAssets();
+                        renderLibrary();
                     } catch (err) {
+                        const bar = $(id + '-bar');
                         const st = $(id + '-st');
-                        if (st) { st.textContent = 'Error'; st.classList.add('err'); }
+                        if (bar) bar.style.width = '100%';
+                        if (st) { st.textContent = err.message || 'Upload failed'; st.classList.add('err'); }
                     }
 
                     // auto-clear after 6s
