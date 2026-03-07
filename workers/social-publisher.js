@@ -182,12 +182,12 @@ async function refreshToken(db, brand, platform, payload, encryptionKey) {
 }
 
 // ──────────────────────────────────────────────────────────────
-//  Meta (Instagram + Facebook) — Graph API v21
+//  Meta (Instagram + Facebook) — Graph API v25
 // ──────────────────────────────────────────────────────────────
 
 async function refreshMetaToken(db, brand, platform, payload, encryptionKey) {
   const res = await fetch(
-    `https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${payload.app_id}&client_secret=${payload.app_secret}&fb_exchange_token=${payload.access_token}`
+    `https://graph.facebook.com/v25.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${payload.app_id}&client_secret=${payload.app_secret}&fb_exchange_token=${payload.access_token}`
   );
   if (!res.ok) throw new Error('Meta token refresh failed');
   const data = await res.json();
@@ -214,7 +214,7 @@ async function postInstagram(token, imageUrl, caption, mediaType = 'IMAGE') {
 
   // Step 1: Create media container
   const containerRes = await fetch(
-    `https://graph.facebook.com/v21.0/${igUserId}/media`,
+    `https://graph.facebook.com/v25.0/${igUserId}/media`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -235,7 +235,7 @@ async function postInstagram(token, imageUrl, caption, mediaType = 'IMAGE') {
   let ready = false;
   for (let i = 0; i < 10; i++) {
     const statusRes = await fetch(
-      `https://graph.facebook.com/v21.0/${container.id}?fields=status_code&access_token=${accessToken}`
+      `https://graph.facebook.com/v25.0/${container.id}?fields=status_code&access_token=${accessToken}`
     );
     const status = await statusRes.json();
     if (status.status_code === 'FINISHED') { ready = true; break; }
@@ -246,7 +246,7 @@ async function postInstagram(token, imageUrl, caption, mediaType = 'IMAGE') {
 
   // Step 3: Publish
   const publishRes = await fetch(
-    `https://graph.facebook.com/v21.0/${igUserId}/media_publish`,
+    `https://graph.facebook.com/v25.0/${igUserId}/media_publish`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -272,7 +272,7 @@ async function postInstagram(token, imageUrl, caption, mediaType = 'IMAGE') {
  */
 async function postFacebook(token, imageUrl, message) {
   const res = await fetch(
-    `https://graph.facebook.com/v21.0/${token.page_id}/photos`,
+    `https://graph.facebook.com/v25.0/${token.page_id}/photos`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
