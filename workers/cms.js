@@ -1849,6 +1849,12 @@ export async function handleCMSRequest(request, env, user) {
       return handleListSiteAssets(request, env, siteAssetsMatch[1]);
     }
 
+    // ── Public gallery feed (used by gallery.html) ────────
+    const galleryFeedMatch = path.match(/^\/gallery\/([^/]+)$/);
+    if (galleryFeedMatch && method === 'GET') {
+      return handleGalleryFeed(galleryFeedMatch[1], env);
+    }
+
     return errorResponse('CMS endpoint not found', 404);
 
   } catch (err) {
@@ -2627,4 +2633,42 @@ async function handleListSiteAssets(request, env, domain) {
   }
 
   return jsonResponse({ assets: results.results || [], total: total?.total || 0, page, limit });
+}
+
+// ── Public Gallery Feed ───────────────────────────────────────────────
+// GET /api/cms/gallery/:brand
+// Returns assets in a format compatible with gallery.html's catalog loader.
+// No auth required — safe to call from public pages.
+async function handleGalleryFeed(brand, env) {
+  const rows = await env.DB.prepare(
+    `SELECT id, title, file_path, media_type, mime_type, category, brand, tags, created_at
+     FROM cms_assets
+     WHERE brand = ? AND active = 1
+     ORDER BY created_at DESC
+     LIMIT 300`
+  ).bind(brand).all();
+
+  const items = (rows.results || []).map((r) => ({
+    id: String(r.id),
+    title: r.title || '',
+    src: r.file_path ? `/api/cms/media/${encodeURIComponent(r.file_path)}` : null,
+    href: r.file_path ? `/api/cms/media/${encodeURIComponent(r.file_path)}` : null,
+    type: r.media_type || 'image',
+    brand: r.brand || brand,
+    category: r.category || 'uncategorized',
+    tags: r.tags ? r.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+    addedAt: r.created_at || null,
+  }));
+
+  // Derive unique category list from items
+  const categorySet = new Set(items.map((i) => i.category));
+  const categories = Array.from(categorySet).sort();
+
+  const headers = new Headers({
+    'Content-Type': 'application/json',
+    'Cache-Control': 'public, max-age=60',
+    'Access-Control-Allow-Origin': '*',
+  });
+
+  return new Response(JSON.stringify({ brand, categories, items }), { status: 200, headers });
 }

@@ -634,20 +634,52 @@
             }
 
             async function loadCatalog() {
-                setMeta('Loading…', false);
+                setMeta('Loading\u2026', false);
+
+                // Try live CMS API first; fall back to static JSON if empty or unavailable
+                const cmsBrand = 'gfd';
+                const cmsUrl = '/api/cms/gallery/' + cmsBrand;
+                let loaded = false;
 
                 try {
-                    const res = await fetch(catalogUrl, { cache: 'no-store' });
-                    if (!res.ok) throw new Error('Bad response');
-                    const json = await res.json();
-                    renderCatalog(json);
-
-                    if (metaEl.textContent.trim() === 'Loading…') {
-                        setMeta('', false);
+                    const res = await fetch(cmsUrl, { cache: 'no-store' });
+                    if (res.ok) {
+                        const json = await res.json();
+                        const cmsItems = Array.isArray(json.items) ? json.items : [];
+                        if (cmsItems.length > 0) {
+                            // Normalize CMS items to the format renderCatalog expects
+                            const normalized = {
+                                categories: (json.categories || []).map((cat) =>
+                                    typeof cat === 'string' ? { id: cat, title: cat.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) } : cat
+                                ),
+                                items: cmsItems.map((item) => ({
+                                    ...item,
+                                    // renderCatalog uses item.categories (array) not item.category (string)
+                                    categories: item.categories || (item.category ? [item.category] : ['uncategorized']),
+                                })),
+                            };
+                            renderCatalog(normalized);
+                            loaded = true;
+                        }
                     }
-                } catch (err) {
-                    subtitleEl.textContent = 'Could not load the media catalog.';
-                    setMeta('Check that assets/data/media-catalog.json is accessible.', false);
+                } catch (_) { /* fall through */ }
+
+                if (!loaded) {
+                    // Fall back to static catalog
+                    try {
+                        const res = await fetch(catalogUrl, { cache: 'no-store' });
+                        if (!res.ok) throw new Error('Bad response');
+                        const json = await res.json();
+                        renderCatalog(json);
+                    } catch (err) {
+                        subtitleEl.textContent = 'Could not load the media catalog.';
+                        setMeta('Check that assets/data/media-catalog.json is accessible.', false);
+                        return;
+                    }
+                }
+
+                if (metaEl.textContent.trim() === 'Loading\u2026') {
+                    setMeta('', false);
                 }
             }
 
