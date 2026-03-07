@@ -16,9 +16,9 @@
 
 const OAUTH_CONFIGS = {
   meta: {
-    authorizeUrl: 'https://www.facebook.com/v21.0/dialog/oauth',
-    tokenUrl: 'https://graph.facebook.com/v21.0/oauth/access_token',
-    longLivedUrl: 'https://graph.facebook.com/v21.0/oauth/access_token',
+    authorizeUrl: 'https://www.facebook.com/v25.0/dialog/oauth',
+    tokenUrl: 'https://graph.facebook.com/v25.0/oauth/access_token',
+    longLivedUrl: 'https://graph.facebook.com/v25.0/oauth/access_token',
     // instagram_basic + instagram_content_publish deprecated 2024 → instagram_business_* equivalents
     scopes: 'instagram_business_basic,instagram_business_content_publish,pages_show_list,pages_read_engagement,pages_manage_posts,public_profile',
     platforms: ['instagram', 'facebook'],
@@ -466,7 +466,7 @@ async function exchangeMeta(code, redirectUri, creds, env) {
 
   // Step 3: Get the user's Pages + Instagram business accounts
   const accountsRes = await fetch(
-    `https://graph.facebook.com/v21.0/me/accounts?fields=id,name,access_token,instagram_business_account{id,username}&access_token=${userToken}`
+    `https://graph.facebook.com/v25.0/me/accounts?fields=id,name,access_token,instagram_business_account{id,username}&access_token=${userToken}`
   );
   const accountsData = await accountsRes.json();
   if (accountsData.error) throw new Error(accountsData.error.message);
