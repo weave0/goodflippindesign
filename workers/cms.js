@@ -1908,6 +1908,11 @@ export async function handleCMSRequest(request, env, user) {
       return handleScanPage(request, user, env);
     }
 
+    // ── External image proxy (for discovered asset thumbnails) ────────────
+    if (path === '/proxy-img' && method === 'GET') {
+      return handleProxyImg(request, env);
+    }
+
     // ── Image overrides (live swap via HTMLRewriter) ──────
     if (path === '/assets/overrides' && method === 'GET') {
       return handleListOverrides(request, env);
@@ -2142,6 +2147,75 @@ async function handleUpdateDiscoveredStatus(request, user, env, discoveredId) {
 }
 
 // ────────────────────────────────────────────────────────────────
+//  External image proxy (for discovered asset thumbnails)
+// ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/cms/proxy-img?url=<encoded_url>
+ * Admin-only. Fetches an external image server-side and returns it, bypassing
+ * browser-level hotlink protection on target sites. Responses cached at the CDN edge.
+ * SSRF protection: only http/https, private/loopback IPs blocked.
+ */
+async function handleProxyImg(request, env) {
+  const url = new URL(request.url);
+  const externalUrl = url.searchParams.get('url');
+  if (!externalUrl) return errorResponse('url parameter required', 400);
+
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(externalUrl);
+  } catch {
+    return errorResponse('Invalid URL', 400);
+  }
+
+  // SSRF guard — only allow public HTTP/HTTPS
+  if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+    return errorResponse('Only HTTP/HTTPS URLs are supported', 400);
+  }
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const privatePattern = /^(localhost|127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|::1$|fc00:|fe80:)/;
+  if (privatePattern.test(hostname)) {
+    return errorResponse('Private/loopback URLs are not allowed', 400);
+  }
+
+  // Cloudflare Cache API check (keyed on the sanitised external URL)
+  const cacheKey = new Request(`https://proxy-cache.gfd.internal/img?u=${encodeURIComponent(externalUrl)}`);
+  const cache = caches.default;
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
+  let resp;
+  try {
+    resp = await fetch(externalUrl, {
+      headers: { 'User-Agent': 'GFD-AssetScanner/1.0' },
+      cf: { cacheTtl: 0 },
+    });
+  } catch (err) {
+    return errorResponse('Proxy fetch failed: ' + err.message, 502);
+  }
+
+  if (!resp.ok) return errorResponse(`Upstream returned ${resp.status}`, 502);
+
+  const contentType = resp.headers.get('Content-Type') || '';
+  if (!contentType.startsWith('image/')) {
+    return errorResponse('URL does not point to an image', 400);
+  }
+
+  const imageData = await resp.arrayBuffer();
+  const proxyResponse = new Response(imageData, {
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+      'X-Proxy-Source': externalUrl,
+    },
+  });
+
+  // Cache asynchronously — best-effort, don't block the response
+  cache.put(cacheKey, proxyResponse.clone()).catch(() => {});
+  return proxyResponse;
+}
+
+// ────────────────────────────────────────────────────────────────
 //  Server-side page scanner
 // ────────────────────────────────────────────────────────────────
 
@@ -2179,15 +2253,21 @@ async function handleScanPage(request, user, env) {
     return errorResponse('Failed to fetch page: ' + err.message, 502);
   }
 
-  // Extract all img src attributes
-  const imgSrcRegex = /<img[^>]+src=["']([^"']+)["'][^>]*(?:alt=["']([^"']*)["'])?[^>]*>/gi;
+  // Extract all img src attributes (two-pass: capture full tag first, then attrs independently)
+  const imgTagRegex = /<img([^>]+)>/gi;
+  const srcAttrRegex = /\bsrc=["']([^"']+)["']/i;
+  const altAttrRegex = /\balt=["']([^"']*)["']/i;
   const bgUrlRegex = /url\(["']?([^"')]+)["']?\)/gi;
   const foundUrls = new Map(); // url → { alt }
 
   let match;
-  while ((match = imgSrcRegex.exec(html)) !== null) {
-    const src = match[1];
-    const alt = match[2] || '';
+  while ((match = imgTagRegex.exec(html)) !== null) {
+    const attrs = match[1];
+    const srcMatch = srcAttrRegex.exec(attrs);
+    if (!srcMatch) continue;
+    const src = srcMatch[1];
+    const altMatch = altAttrRegex.exec(attrs);
+    const alt = altMatch ? altMatch[1] : '';
     if (src && !src.startsWith('data:')) {
       let absUrl;
       try {
