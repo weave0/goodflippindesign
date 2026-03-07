@@ -163,7 +163,8 @@ export default {
       if (overrides.length > 0) {
         // Use HTMLRewriter to swap img src/srcset without buffering full HTML
         const overrideMap = new Map(overrides.map(o => [o.url_pattern, o.r2_key]));
-        const cmsBase = `https://${url.hostname}/api/cms/media/`;
+        // /pub/ only serves assets with review_status = 'approved' in D1
+        const cmsBase = `https://${url.hostname}/api/cms/pub/`;
 
         response = new HTMLRewriter()
           .on('img', {

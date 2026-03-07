@@ -27,11 +27,21 @@ CREATE TABLE IF NOT EXISTS cms_assets (
   active INTEGER DEFAULT 1,
   sort_order INTEGER DEFAULT 100,
   uploaded_by TEXT DEFAULT '',             -- Clerk user ID
+  review_status TEXT DEFAULT 'draft',      -- draft | approved | rejected
+  approved_by TEXT DEFAULT '',             -- Clerk user ID who approved
+  approved_at TEXT DEFAULT '',             -- ISO timestamp of approval
   created_at TEXT DEFAULT (datetime('now')),
   updated_at TEXT DEFAULT (datetime('now'))
 );
 
+-- Migration for existing DBs (safe to run multiple times — SQLite ignores duplicate columns)
+-- Run once in Cloudflare D1 console:
+--   ALTER TABLE cms_assets ADD COLUMN review_status TEXT DEFAULT 'draft';
+--   ALTER TABLE cms_assets ADD COLUMN approved_by TEXT DEFAULT '';
+--   ALTER TABLE cms_assets ADD COLUMN approved_at TEXT DEFAULT '';
+
 CREATE INDEX IF NOT EXISTS idx_cms_assets_brand ON cms_assets(brand);
+CREATE INDEX IF NOT EXISTS idx_cms_assets_review ON cms_assets(review_status);
 CREATE INDEX IF NOT EXISTS idx_cms_assets_category ON cms_assets(category);
 CREATE INDEX IF NOT EXISTS idx_cms_assets_type ON cms_assets(media_type);
 CREATE INDEX IF NOT EXISTS idx_cms_assets_featured ON cms_assets(featured);

@@ -1753,7 +1753,10 @@ export default {
     // ── CMS routes (public + admin — handler does its own auth checks) ──
     if (url.pathname.startsWith('/api/cms/')) {
       let cmsUser = null;
-      const cmsAuth = request.headers.get('Authorization');
+      // Accept token from Authorization header OR ?t= query param (used by <img src> which
+      // cannot send custom headers — token is short-lived Clerk JWT, admin-only)
+      const cmsAuth = request.headers.get('Authorization')
+        || (url.searchParams.get('t') ? 'Bearer ' + url.searchParams.get('t') : null);
       if (cmsAuth?.startsWith('Bearer ')) {
         cmsUser = await verifyClerkToken(cmsAuth.replace('Bearer ', ''), clerkSecretKey);
         if (cmsUser) cmsUser = await ensureAdminRole(cmsUser, clerkSecretKey);
