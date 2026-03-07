@@ -1,0 +1,127 @@
+{
+    "sources": [
+        {
+            "id": "mediadrop",
+            "path": "Z:\\MediaDrop",
+            "recursive": true,
+            "brandInference": "auto",
+            "enabled": true
+        },
+        {
+            "id": "art-gfv",
+            "path": "E:\\Art\\GFV Galleries",
+            "recursive": true,
+            "brand": "gfv",
+            "category": "gallery",
+            "enabled": false,
+            "note": "Enable after confirming E: Art Drive directory structure"
+        },
+        {
+            "id": "art-portfolio",
+            "path": "E:\\Art\\Portfolio",
+            "recursive": true,
+            "brand": "gfd",
+            "category": "portfolio",
+            "enabled": false
+        },
+        {
+            "id": "art-brands",
+            "path": "E:\\Art\\Brands",
+            "recursive": true,
+            "brandInference": "auto",
+            "enabled": false
+        }
+    ],
+    "exclude": [
+        "*.psd",
+        "*.ai",
+        "*.fig",
+        "*.sketch",
+        "*.xd",
+        "*.indd",
+        "Thumbs.db",
+        ".DS_Store",
+        "desktop.ini",
+        "*.tmp",
+        "*.bak"
+    ],
+    "maxFileSizeMB": 50,
+    "manifestPath": "Z:\\MediaDrop\\.sync-manifest.json",
+    "cmsApiBase": "https://goodflippindesign.com/api/cms",
+    "r2BucketName": "gfv-media",
+    "ecosystemSites": [
+        {
+            "domain": "goodflippinvibes.com",
+            "brand": "gfv",
+            "pages": [
+                "/",
+                "/gallery",
+                "/about",
+                "/community"
+            ],
+            "galleryPages": [
+                "/gallery"
+            ],
+            "assetPrefixes": [
+                "/assets/",
+                "/images/",
+                "/media/"
+            ],
+            "canReplace": true
+        },
+        {
+            "domain": "goodflippindesign.com",
+            "brand": "gfd",
+            "pages": [
+                "/",
+                "/gallery.html",
+                "/donate.html"
+            ],
+            "galleryPages": [
+                "/gallery.html"
+            ],
+            "assetPrefixes": [
+                "/assets/"
+            ],
+            "canReplace": true
+        },
+        {
+            "domain": "aiaimate.com",
+            "brand": "aiaimate",
+            "pages": [
+                "/"
+            ],
+            "galleryPages": [],
+            "assetPrefixes": [
+                "/images/",
+                "/assets/"
+            ],
+            "canReplace": false
+        },
+        {
+            "domain": "culturesherpa.org",
+            "brand": "culturesherpa",
+            "pages": [
+                "/"
+            ],
+            "galleryPages": [],
+            "assetPrefixes": [
+                "/assets/"
+            ],
+            "canReplace": false
+        },
+        {
+            "domain": "citizenapproved.org",
+            "brand": "citizenapproved",
+            "pages": [
+                "/"
+            ],
+            "galleryPages": [],
+            "assetPrefixes": [
+                "/assets/",
+                "/images/"
+            ],
+            "canReplace": false
+        }
+    ]
+}
