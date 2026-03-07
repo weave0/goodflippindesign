@@ -2088,6 +2088,71 @@
         .drip-modal-wide {
             max-width: 640px;
         }
+
+        /* ── Content Studio ─────────────────────────────── */
+        .cs-scene-header h4 {
+            margin: 0 0 0.25rem;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .cs-section-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin: 0 0 0.5rem;
+        }
+
+        .cs-prompt-section {
+            margin-top: 1.25rem;
+        }
+
+        .cs-prompt-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 0.875rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .cs-prompt-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .cs-gen-result img {
+            border-radius: 8px;
+            max-width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .cs-schedule-platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+        }
+
+        .cs-schedule-platform-grid label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .cs-mono-textarea {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        .text-error {
+            color: #ef4444;
+        }
     </style>
 </head>
 
@@ -2122,6 +2187,7 @@
                     <button class="nav-btn" data-view="review-queue"><span>07</span><span>Review Queue <span class="review-badge d-none" id="review-badge">0</span></span></button>
                     <button class="nav-btn" data-view="overrides"><span>08</span><span>Site Overrides</span></button>
                     <button class="nav-btn" data-view="galleries"><span>09</span><span>Gallery Manager</span></button>
+                    <button class="nav-btn" data-view="content-studio"><span>10</span><span>Content Studio</span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -2751,6 +2817,70 @@
                         </article>
                     </div>
                 </section>
+
+                <!-- ── 10. CONTENT STUDIO ──────────────────────────────────── -->
+                <section class="view" id="view-content-studio">
+                    <div class="section-head">
+                        <h2 class="section-title">Content Studio</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="cs-import-btn">Import JSON</button>
+                            <button class="btn btn-primary" id="cs-new-registry-btn">New Registry</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Browse scene-by-scene AI prompt registries for video content. Generate images via DALL&#x2011;E&nbsp;3 and schedule directly to social platforms.</p>
+                    <div class="toolbar mb-06">
+                        <select id="cs-brand-filter" aria-label="Filter registries by brand">
+                            <option value="">All brands</option>
+                            <option value="gfd">GFD</option>
+                            <option value="gfv">GFV</option>
+                            <option value="aiaimate">AI Aimate</option>
+                            <option value="culturesherpa">CultureSherpa</option>
+                            <option value="globaldeets">GlobalDeets</option>
+                        </select>
+                        <select id="cs-type-filter" aria-label="Filter registries by type">
+                            <option value="">All types</option>
+                            <option value="episode">Episode</option>
+                            <option value="special">Special</option>
+                            <option value="campaign">Campaign</option>
+                            <option value="promo">Promo</option>
+                        </select>
+                        <button class="btn btn-ghost" id="cs-refresh-btn">Refresh</button>
+                    </div>
+                    <div class="grid-two">
+                        <article class="panel">
+                            <h3 class="panel-subtitle">Registries</h3>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Brand</th>
+                                            <th>Type</th>
+                                            <th>Scenes</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cs-registries-table"></tbody>
+                                </table>
+                            </div>
+                            <p class="text-muted mt-06 d-none" id="cs-registries-empty">No registries yet. Import a <code>story.json</code> or create one manually.</p>
+                        </article>
+
+                        <article class="panel" id="cs-scene-panel">
+                            <div class="section-head">
+                                <h3 class="panel-subtitle" id="cs-scene-panel-title">Select a registry to view scenes</h3>
+                                <div class="inline-actions d-none" id="cs-scene-nav">
+                                    <span class="text-muted" id="cs-scene-counter"></span>
+                                    <button class="btn btn-ghost btn-sm" id="cs-prev-scene" disabled>&#8592;</button>
+                                    <button class="btn btn-ghost btn-sm" id="cs-next-scene" disabled>&#8594;</button>
+                                </div>
+                            </div>
+                            <div id="cs-scene-detail">
+                                <p class="text-muted">Select a registry on the left to browse its scenes.</p>
+                            </div>
+                        </article>
+                    </div>
+                </section>
             </main>
         </div>
     </div>
@@ -3062,6 +3192,108 @@
         </div>
     </div>
 
+    <!-- Content Studio: Registry create/edit modal -->
+    <div class="modal-wrap" id="cs-registry-modal">
+        <div class="modal modal-wide">
+            <h3 id="cs-registry-modal-title">New Prompt Registry</h3>
+            <input type="hidden" id="cs-registry-id">
+            <div class="form-grid mt-04">
+                <div>
+                    <label class="form-label">Brand</label>
+                    <select id="cs-reg-brand" title="Registry brand">
+                        <option value="gfd">GFD</option>
+                        <option value="gfv" selected>GFV</option>
+                        <option value="aiaimate">AI Aimate</option>
+                        <option value="culturesherpa">CultureSherpa</option>
+                        <option value="globaldeets">GlobalDeets</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Type</label>
+                    <select id="cs-reg-type" title="Registry type">
+                        <option value="episode">Episode</option>
+                        <option value="special" selected>Special</option>
+                        <option value="campaign">Campaign</option>
+                        <option value="promo">Promo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-grid mt-06">
+                <div>
+                    <label class="form-label">ID <span class="text-muted">(URL-safe, unique)</span></label>
+                    <input type="text" id="cs-reg-id-field" placeholder="gfv__irish_pickle__70s-reel">
+                </div>
+                <div>
+                    <label class="form-label">Series ID <span class="text-muted">(optional)</span></label>
+                    <input type="text" id="cs-reg-series" placeholder="irish_pickle">
+                </div>
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Title</label>
+                <input type="text" id="cs-reg-title" placeholder="The 70s Reel — Special Feature">
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Description <span class="text-muted">(optional)</span></label>
+                <textarea id="cs-reg-description" rows="2" placeholder="Brief description of this content piece"></textarea>
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Scenes JSON <span class="text-muted">(paste from story.json scenes array)</span></label>
+                <textarea id="cs-reg-scenes" rows="8" class="cs-mono-textarea" placeholder="[{&quot;title&quot;:&quot;Scene 1&quot;,&quot;imagePrompts&quot;:[&quot;...&quot;],&quot;videoPrompt&quot;:&quot;...&quot;}]"></textarea>
+            </div>
+            <div class="actions mt-08">
+                <button class="btn btn-secondary" data-close-modal="cs-registry-modal">Cancel</button>
+                <button class="btn btn-primary" id="cs-save-registry-btn">Save Registry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Studio: JSON import modal -->
+    <div class="modal-wrap" id="cs-import-modal">
+        <div class="modal modal-wide">
+            <h3>Import story.json</h3>
+            <p class="text-muted">Paste the contents of a <code>story.json</code> file with top-level <code>meta</code> and <code>scenes</code> fields, or a raw scenes array.</p>
+            <div class="mt-06">
+                <label class="form-label">JSON</label>
+                <textarea id="cs-import-json" rows="12" class="cs-mono-textarea" placeholder="{ &quot;meta&quot;: { &quot;brand&quot;: &quot;gfv&quot;, &quot;series_id&quot;: &quot;...&quot;, &quot;type&quot;: &quot;special&quot;, &quot;title&quot;: &quot;...&quot;, &quot;id&quot;: &quot;...&quot; }, &quot;scenes&quot;: [...] }"></textarea>
+            </div>
+            <div class="actions mt-08">
+                <button class="btn btn-secondary" data-close-modal="cs-import-modal">Cancel</button>
+                <button class="btn btn-primary" id="cs-do-import-btn">Import</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Studio: Schedule generated image to social -->
+    <div class="modal-wrap" id="cs-schedule-modal">
+        <div class="modal">
+            <h3>Schedule to Social</h3>
+            <input type="hidden" id="cs-schedule-asset-id">
+            <div class="mt-06">
+                <label class="form-label">Caption <span class="text-muted">(optional)</span></label>
+                <textarea id="cs-schedule-caption" rows="3" placeholder="Add a caption for this post…"></textarea>
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Platforms</label>
+                <div class="cs-schedule-platform-grid" id="cs-schedule-platforms">
+                    <label><input type="checkbox" value="instagram"> Instagram</label>
+                    <label><input type="checkbox" value="facebook"> Facebook</label>
+                    <label><input type="checkbox" value="x"> X / Twitter</label>
+                    <label><input type="checkbox" value="linkedin"> LinkedIn</label>
+                    <label><input type="checkbox" value="pinterest"> Pinterest</label>
+                    <label><input type="checkbox" value="tiktok"> TikTok</label>
+                </div>
+            </div>
+            <div class="mt-06">
+                <label class="form-label">Scheduled date &amp; time</label>
+                <input type="datetime-local" id="cs-schedule-date" title="Schedule date and time">
+            </div>
+            <div class="actions mt-08">
+                <button class="btn btn-secondary" data-close-modal="cs-schedule-modal">Cancel</button>
+                <button class="btn btn-primary" id="cs-schedule-submit-btn">Schedule ▶</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-wrap" id="connection-modal">
         <div class="modal">
             <h3>Connect Platform Account</h3>
@@ -3299,6 +3531,9 @@
                 galleries: [],
                 selectedGalleryId: null,
                 galleryItems: [],
+                csRegistries: [],
+                csCurrentRegistry: null,
+                csCurrentScene: 0,
             };
 
             function $(id) {
@@ -3690,6 +3925,33 @@
                         if (ev.target === wrap) wrap.classList.remove('active');
                     });
                 });
+
+                // ── Content Studio button wiring ─────────────────────────────
+                $('cs-refresh-btn')?.addEventListener('click', loadContentStudioRegistries);
+                $('cs-new-registry-btn')?.addEventListener('click', () => {
+                    $('cs-registry-id').value = '';
+                    $('cs-registry-modal-title').textContent = 'New Prompt Registry';
+                    ['cs-reg-id-field', 'cs-reg-series', 'cs-reg-title', 'cs-reg-description', 'cs-reg-scenes'].forEach((id) => {
+                        $(`${id}`).value = '';
+                    });
+                    $('cs-reg-brand').value = currentBrand;
+                    $('cs-reg-type').value = 'episode';
+                    openModal('cs-registry-modal');
+                });
+                $('cs-import-btn')?.addEventListener('click', () => openModal('cs-import-modal'));
+                $('cs-prev-scene')?.addEventListener('click', () => {
+                    if (state.csCurrentScene > 0) { state.csCurrentScene--; renderCSScene(); }
+                });
+                $('cs-next-scene')?.addEventListener('click', () => {
+                    let scenes = [];
+                    try { scenes = JSON.parse(state.csCurrentRegistry?.scenes_json || '[]'); } catch { scenes = []; }
+                    if (state.csCurrentScene < scenes.length - 1) { state.csCurrentScene++; renderCSScene(); }
+                });
+                $('cs-save-registry-btn')?.addEventListener('click', saveCSRegistry);
+                $('cs-do-import-btn')?.addEventListener('click', importCSJSON);
+                $('cs-schedule-submit-btn')?.addEventListener('click', submitCSSchedule);
+                $('cs-brand-filter')?.addEventListener('change', loadContentStudioRegistries);
+                $('cs-type-filter')?.addEventListener('change', loadContentStudioRegistries);
             }
 
             async function refreshAll() {
@@ -3706,6 +3968,7 @@
                     loadDiscoveredAssets(),
                     loadOverrides(),
                     loadGalleries(),
+                    loadContentStudioRegistries(),
                 ]);
 
                 await loadCalendar();
@@ -3724,6 +3987,7 @@
                 updateReviewBadge();
                 renderOverrides();
                 renderGalleriesList();
+                renderCSRegistriesTable();
             }
 
             async function loadPlatformRules() {
@@ -5682,6 +5946,295 @@
                         toast('Failed to remove: ' + err.message, 'error');
                     }
                 });
+            }
+
+            // ── Content Studio ───────────────────────────────────────────────
+
+            async function loadContentStudioRegistries() {
+                const brand = $('cs-brand-filter')?.value || '';
+                const type = $('cs-type-filter')?.value || '';
+                const qs = new URLSearchParams();
+                if (brand) qs.set('brand', brand);
+                if (type) qs.set('type', type);
+                const suffix = qs.toString() ? '?' + qs.toString() : '';
+                try {
+                    const data = await api('/content-studio/registries' + suffix);
+                    state.csRegistries = data.registries || [];
+                } catch {
+                    state.csRegistries = [];
+                }
+                renderCSRegistriesTable();
+            }
+
+            function renderCSRegistriesTable() {
+                const tbody = $('cs-registries-table');
+                const empty = $('cs-registries-empty');
+                if (!tbody) return;
+                if (!state.csRegistries.length) {
+                    tbody.innerHTML = '';
+                    empty?.classList.remove('d-none');
+                    return;
+                }
+                empty?.classList.add('d-none');
+                tbody.innerHTML = state.csRegistries.map((r) => `
+                    <tr>
+                        <td><strong>${escapeHtml(r.title)}</strong><br><small class="text-muted">${escapeHtml(r.id)}</small></td>
+                        <td><span class="badge">${escapeHtml(r.brand)}</span></td>
+                        <td>${escapeHtml(r.type)}</td>
+                        <td>${Number(r.scene_count) || 0}</td>
+                        <td><button class="btn btn-ghost btn-sm" data-cs-open-registry="${escapeHtml(r.id)}">Open</button></td>
+                    </tr>
+                `).join('');
+                tbody.querySelectorAll('[data-cs-open-registry]').forEach((btn) => {
+                    btn.addEventListener('click', () => openCSRegistry(btn.dataset.csOpenRegistry));
+                });
+            }
+
+            async function openCSRegistry(id) {
+                try {
+                    const data = await api('/content-studio/registries/' + encodeURIComponent(id));
+                    state.csCurrentRegistry = data;
+                    state.csCurrentScene = 0;
+                    $('cs-scene-panel-title').textContent = data.title || id;
+                    $('cs-scene-nav').classList.remove('d-none');
+                    renderCSScene();
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+            }
+
+            function renderCSScene() {
+                const reg = state.csCurrentRegistry;
+                if (!reg) return;
+                let scenes = [];
+                try { scenes = JSON.parse(reg.scenes_json || '[]'); } catch { scenes = []; }
+                const idx = state.csCurrentScene;
+                const scene = scenes[idx];
+                const total = scenes.length;
+
+                const counter = $('cs-scene-counter');
+                if (counter) counter.textContent = `Scene ${idx + 1} / ${total}`;
+                const prev = $('cs-prev-scene');
+                const next = $('cs-next-scene');
+                if (prev) prev.disabled = idx === 0;
+                if (next) next.disabled = idx >= total - 1;
+
+                if (!scene) {
+                    $('cs-scene-detail').innerHTML = '<p class="text-muted">No scenes in this registry.</p>';
+                    return;
+                }
+
+                const imagePrompts = Array.isArray(scene.imagePrompts) ? scene.imagePrompts : [];
+                const videoPrompt = scene.videoPrompt || scene.video_prompt || '';
+                const voiceOver = scene.voiceOver || scene.vo || scene.voice_over || '';
+                const soundCues = scene.soundCues || scene.sound || scene.sound_cues || '';
+                const notes = scene.notes || scene.description || '';
+
+                const promptsHtml = imagePrompts.map((p, i) => {
+                    const pText = typeof p === 'string' ? p : (p.prompt || p.text || JSON.stringify(p));
+                    const safeId = 'cs-img-' + idx + '-' + i;
+                    return `
+                    <div class="cs-prompt-card" id="${escapeHtml(safeId)}">
+                        <p class="cs-prompt-text">${escapeHtml(pText)}</p>
+                        <div class="inline-actions mt-04">
+                            <button class="btn btn-ghost btn-sm" data-cs-copy="${escapeHtml(pText)}">Copy</button>
+                            <button class="btn btn-primary btn-sm cs-gen-btn"
+                                data-scene="${idx}" data-pi="${i}"
+                                data-prompt="${escapeHtml(pText)}"
+                                data-registry="${escapeHtml(reg.id)}">Generate ✦</button>
+                        </div>
+                        <div class="cs-gen-result d-none" id="${escapeHtml(safeId)}-result"></div>
+                    </div>`;
+                }).join('');
+
+                $('cs-scene-detail').innerHTML = `
+                    <div class="cs-scene-header">
+                        <h4>Scene ${idx + 1}${scene.title ? ': ' + escapeHtml(scene.title) : ''}</h4>
+                        ${notes ? `<p class="text-muted">${escapeHtml(notes)}</p>` : ''}
+                    </div>
+                    ${imagePrompts.length ? `
+                    <div class="cs-prompt-section">
+                        <h5 class="cs-section-label">Image Prompts (${imagePrompts.length})</h5>
+                        ${promptsHtml}
+                    </div>` : ''}
+                    ${videoPrompt ? `
+                    <div class="cs-prompt-section">
+                        <h5 class="cs-section-label">Video Prompt</h5>
+                        <div class="cs-prompt-card">
+                            <p class="cs-prompt-text">${escapeHtml(videoPrompt)}</p>
+                            <button class="btn btn-ghost btn-sm mt-04" data-cs-copy="${escapeHtml(videoPrompt)}">Copy</button>
+                        </div>
+                    </div>` : ''}
+                    ${voiceOver ? `
+                    <div class="cs-prompt-section">
+                        <h5 class="cs-section-label">Voice Over</h5>
+                        <p class="cs-prompt-text">${escapeHtml(voiceOver)}</p>
+                    </div>` : ''}
+                    ${soundCues ? `
+                    <div class="cs-prompt-section">
+                        <h5 class="cs-section-label">Sound Cues</h5>
+                        <p class="cs-prompt-text">${escapeHtml(soundCues)}</p>
+                    </div>` : ''}
+                `;
+
+                // Copy buttons
+                $('cs-scene-detail').querySelectorAll('[data-cs-copy]').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(btn.dataset.csCopy).then(() => toast('Copied!'));
+                    });
+                });
+
+                // Generate buttons
+                $('cs-scene-detail').querySelectorAll('.cs-gen-btn').forEach((btn) => {
+                    btn.addEventListener('click', handleCSGenerate);
+                });
+            }
+
+            async function handleCSGenerate(e) {
+                const btn = e.currentTarget;
+                const sceneNum = parseInt(btn.dataset.scene, 10);
+                const pi = parseInt(btn.dataset.pi, 10);
+                const promptText = btn.dataset.prompt;
+                const registryId = btn.dataset.registry;
+                const resultEl = document.getElementById('cs-img-' + sceneNum + '-' + pi + '-result');
+
+                btn.disabled = true;
+                btn.textContent = 'Generating…';
+                if (resultEl) { resultEl.classList.remove('d-none'); resultEl.innerHTML = '<p class="text-muted">Calling DALL&#x2011;E 3…</p>'; }
+
+                try {
+                    const data = await api('/content-studio/generate', {
+                        method: 'POST',
+                        body: {
+                            registry_id: registryId,
+                            scene_number: sceneNum,
+                            prompt_index: pi,
+                            prompt_text: promptText,
+                            brand: state.csCurrentRegistry?.brand || currentBrand,
+                        },
+                    });
+                    if (resultEl) {
+                        resultEl.innerHTML = `
+                            <img src="${escapeHtml(data.url)}" alt="Generated scene ${sceneNum + 1} prompt ${pi + 1}" style="max-width:100%;border-radius:8px;margin-top:8px">
+                            <div class="inline-actions mt-04">
+                                <a href="${escapeHtml(data.url)}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">View full</a>
+                                <button class="btn btn-secondary btn-sm" data-cs-schedule="${escapeHtml(data.generated_asset_id)}">Schedule to social &#x25B6;</button>
+                            </div>`;
+                        resultEl.querySelector('[data-cs-schedule]')?.addEventListener('click', (ev) => {
+                            openCSScheduleModal(ev.currentTarget.dataset.csSchedule);
+                        });
+                    }
+                    toast('Image generated!', 'success');
+                } catch (err) {
+                    if (resultEl) resultEl.innerHTML = `<p class="text-error">${escapeHtml(err.message)}</p>`;
+                    toast(err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Generate ✦';
+                }
+            }
+
+            function openCSScheduleModal(genAssetId) {
+                $('cs-schedule-asset-id').value = genAssetId;
+                const tomorrow = new Date(Date.now() + 86400000);
+                tomorrow.setHours(14, 0, 0, 0);
+                $('cs-schedule-date').value = tomorrow.toISOString().slice(0, 16);
+                openModal('cs-schedule-modal');
+            }
+
+            async function submitCSSchedule() {
+                const genAssetId = $('cs-schedule-asset-id').value;
+                const platforms = Array.from(
+                    document.querySelectorAll('#cs-schedule-platforms input:checked')
+                ).map((c) => c.value);
+                const caption = $('cs-schedule-caption').value.trim();
+                const scheduledAt = $('cs-schedule-date').value;
+
+                if (!platforms.length) { toast('Select at least one platform', 'error'); return; }
+                if (!scheduledAt) { toast('Select a scheduled date/time', 'error'); return; }
+
+                const submitBtn = $('cs-schedule-submit-btn');
+                try {
+                    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Scheduling…'; }
+                    const data = await api('/content-studio/schedule', {
+                        method: 'POST',
+                        body: {
+                            generated_asset_id: genAssetId,
+                            platforms,
+                            caption,
+                            scheduled_at: new Date(scheduledAt).toISOString(),
+                            brand: state.csCurrentRegistry?.brand || currentBrand,
+                        },
+                    });
+                    toast('Scheduled to ' + (data.variants?.length || 0) + ' platform(s)', 'success');
+                    closeModal('cs-schedule-modal');
+                    $('cs-schedule-caption').value = '';
+                } catch (err) {
+                    toast(err.message, 'error');
+                } finally {
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Schedule ▶'; }
+                }
+            }
+
+            async function saveCSRegistry() {
+                const id = $('cs-registry-id').value.trim();
+                const regId = $('cs-reg-id-field').value.trim();
+                if (!regId) { toast('Registry ID is required', 'error'); return; }
+
+                let scenesJson = '[]';
+                const raw = $('cs-reg-scenes').value.trim();
+                if (raw) {
+                    try { JSON.parse(raw); scenesJson = raw; }
+                    catch { toast('Scenes JSON is not valid JSON', 'error'); return; }
+                }
+
+                const payload = {
+                    id: id || regId,
+                    brand: $('cs-reg-brand').value,
+                    type: $('cs-reg-type').value,
+                    series_id: $('cs-reg-series').value.trim(),
+                    title: $('cs-reg-title').value.trim(),
+                    description: $('cs-reg-description').value.trim(),
+                    scenes_json: scenesJson,
+                };
+                if (!payload.title) { toast('Title is required', 'error'); return; }
+
+                try {
+                    const method = id ? 'PUT' : 'POST';
+                    await api('/content-studio/registries', { method, body: payload });
+                    closeModal('cs-registry-modal');
+                    await loadContentStudioRegistries();
+                    toast('Registry saved.', 'success');
+                } catch (err) {
+                    toast('Failed to save: ' + err.message, 'error');
+                }
+            }
+
+            function importCSJSON() {
+                const raw = $('cs-import-json')?.value?.trim();
+                if (!raw) { toast('Paste JSON first', 'error'); return; }
+
+                let parsed;
+                try { parsed = JSON.parse(raw); }
+                catch { toast('Invalid JSON', 'error'); return; }
+
+                // Accept either { meta, scenes } wrapper or a raw scenes array
+                const meta = parsed.meta || {};
+                const scenes = Array.isArray(parsed) ? parsed : (parsed.scenes || []);
+
+                $('cs-registry-id').value = meta.id || '';
+                $('cs-reg-id-field').value = meta.id || '';
+                $('cs-reg-brand').value = meta.brand || currentBrand;
+                $('cs-reg-type').value = meta.type || 'episode';
+                $('cs-reg-series').value = meta.series_id || '';
+                $('cs-reg-title').value = meta.title || '';
+                $('cs-reg-description').value = meta.description || '';
+                $('cs-reg-scenes').value = JSON.stringify(scenes, null, 2);
+
+                closeModal('cs-import-modal');
+                $('cs-import-json').value = '';
+                openModal('cs-registry-modal');
+                $('cs-registry-modal-title').textContent = 'Review & Save Registry';
             }
 
             // ── Image Overrides ──────────────────────────────────────────────

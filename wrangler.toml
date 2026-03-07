@@ -29,6 +29,7 @@ NODE_ENV = "production"
 # SENTRY_DSN              — Error tracking (get from sentry.io dashboard)
 # CLERK_SECRET_KEY        — Auth (get from dashboard.clerk.com)
 # TOKEN_ENCRYPTION_KEY    — 32+ char random string for AES-GCM token/state encryption
+# OPENAI_API_KEY          — Required for Content Studio DALL-E 3 image generation
 #
 # OAuth secrets (required for seamless platform connections in admin panel):
 # META_APP_ID             — 882897501450706 (Meta Developer Console → your app → Settings → Basic)

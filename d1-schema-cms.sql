@@ -142,6 +142,7 @@ CREATE TABLE IF NOT EXISTS cms_post_variants (
   hashtags TEXT DEFAULT '[]',             -- JSON array
   scheduled_at TEXT,
   status TEXT DEFAULT 'pending',           -- pending, publishing, published, failed
+  retry_count INTEGER DEFAULT 0,           -- incremented on transient failure (max 3)
   external_id TEXT DEFAULT '',
   external_url TEXT DEFAULT '',
   error_message TEXT DEFAULT '',
@@ -180,6 +181,7 @@ CREATE INDEX IF NOT EXISTS idx_cms_campaigns_start ON cms_campaigns(start_date);
 -- ALTER TABLE cms_social_posts ADD COLUMN campaign_id INTEGER;
 -- ALTER TABLE cms_social_posts ADD COLUMN objective TEXT DEFAULT '';
 -- ALTER TABLE cms_social_posts ADD COLUMN watermark_profile TEXT DEFAULT '';
+-- ALTER TABLE cms_post_variants ADD COLUMN retry_count INTEGER DEFAULT 0;
 
 -- ── Asset Overrides (live image swap without redeploy) ─────────────────
 -- When _worker.js serves any brand page, it checks this table.
@@ -285,6 +287,45 @@ CREATE TABLE IF NOT EXISTS brand_workflows (
   created_at TEXT DEFAULT (datetime('now')),
   updated_at TEXT DEFAULT (datetime('now'))
 );
+
+-- ── Content Studio: Prompt Registries ────────────────────────────────────────
+-- Stores scene-by-scene AI prompt registries for video content production.
+-- Each registry represents a piece of content (episode, special, promo)
+-- with brand/series context and a full JSON array of scene prompts.
+CREATE TABLE IF NOT EXISTS cms_prompt_registries (
+  id TEXT PRIMARY KEY,                       -- e.g. "gfv__irish_pickle__70s-reel"
+  brand TEXT NOT NULL,                       -- gfv, gfd, aiaimate, etc.
+  series_id TEXT NOT NULL DEFAULT '',        -- e.g. "irish_pickle"
+  type TEXT NOT NULL DEFAULT 'episode',      -- episode, special, campaign, promo
+  title TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  scene_count INTEGER DEFAULT 0,
+  scenes_json TEXT NOT NULL DEFAULT '[]',    -- full scene prompts as JSON array
+  source_file TEXT DEFAULT '',               -- original .py or story.json path hint
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_registries_brand ON cms_prompt_registries(brand);
+CREATE INDEX IF NOT EXISTS idx_registries_series ON cms_prompt_registries(series_id);
+
+-- ── Content Studio: Generated Assets ─────────────────────────────────────────
+-- Links generated images/frames back to their source prompt and registry scene.
+CREATE TABLE IF NOT EXISTS cms_generated_assets (
+  id TEXT PRIMARY KEY,
+  registry_id TEXT NOT NULL REFERENCES cms_prompt_registries(id),
+  scene_number INTEGER NOT NULL,
+  prompt_index INTEGER NOT NULL DEFAULT 0,
+  prompt_text TEXT NOT NULL,
+  asset_id TEXT DEFAULT '',                  -- FK to cms_assets.id once generated + saved
+  r2_key TEXT DEFAULT '',
+  status TEXT DEFAULT 'pending',             -- pending, generating, done, failed
+  error_message TEXT DEFAULT '',
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_gen_assets_registry ON cms_generated_assets(registry_id);
+CREATE INDEX IF NOT EXISTS idx_gen_assets_status ON cms_generated_assets(status);
 
 -- Seed default workflow rows for all known brands
 INSERT OR IGNORE INTO brand_workflows (brand, enabled_platforms, default_cadence)

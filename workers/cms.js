@@ -1986,6 +1986,24 @@ export async function handleCMSRequest(request, env, user) {
       return handleGalleryFeed(galleryFeedMatch[1], env);
     }
 
+    // ── Content Studio ─────────────────────────────────────
+    if (path === '/content-studio/registries' && method === 'GET') {
+      return handleListRegistries(request, env);
+    }
+    const registryIdMatch = path.match(/^\/content-studio\/registries\/([^/]+)$/);
+    if (registryIdMatch && method === 'GET') {
+      return handleGetRegistry(registryIdMatch[1], env);
+    }
+    if (path === '/content-studio/registries' && (method === 'POST' || method === 'PUT')) {
+      return handleSaveRegistry(request, user, env);
+    }
+    if (path === '/content-studio/generate' && method === 'POST') {
+      return handleCSGenerateImage(request, user, env);
+    }
+    if (path === '/content-studio/schedule' && method === 'POST') {
+      return handleCSSchedulePost(request, user, env);
+    }
+
     return errorResponse('CMS endpoint not found', 404);
 
   } catch (err) {
@@ -2465,6 +2483,160 @@ async function ensureGallerySchema(db) {
   await db.prepare('CREATE INDEX IF NOT EXISTS idx_gitem_asset ON cms_gallery_items(asset_id)').run();
 
   gallerySchemaReady = true;
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Content Studio Handlers
+// ────────────────────────────────────────────────────────────────
+
+async function handleListRegistries(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  const url = new URL(request.url);
+  const brand = url.searchParams.get('brand');
+  const type = url.searchParams.get('type');
+  let query = 'SELECT id, brand, series_id, type, title, description, scene_count, source_file, created_at FROM cms_prompt_registries WHERE 1=1';
+  const params = [];
+  if (brand) { query += ' AND brand = ?'; params.push(brand); }
+  if (type) { query += ' AND type = ?'; params.push(type); }
+  query += ' ORDER BY created_at DESC LIMIT 200';
+  const { results } = await env.DB.prepare(query).bind(...params).all();
+  return jsonResponse({ registries: results || [] });
+}
+
+async function handleGetRegistry(id, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  const row = await env.DB.prepare('SELECT * FROM cms_prompt_registries WHERE id = ?').bind(id).first();
+  if (!row) return errorResponse('Registry not found', 404);
+  return jsonResponse(row);
+}
+
+async function handleSaveRegistry(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  let data;
+  try { data = await request.json(); } catch { return errorResponse('Invalid JSON', 400); }
+  if (!data?.id || !data?.title) return errorResponse('id and title are required', 400);
+  const now = new Date().toISOString();
+  await env.DB.prepare(`
+    INSERT INTO cms_prompt_registries
+      (id, brand, series_id, type, title, description, scene_count, scenes_json, source_file, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      brand = excluded.brand, series_id = excluded.series_id, type = excluded.type,
+      title = excluded.title, description = excluded.description,
+      scene_count = excluded.scene_count, scenes_json = excluded.scenes_json,
+      source_file = excluded.source_file, updated_at = excluded.updated_at
+  `).bind(
+    data.id, data.brand || 'gfv', data.series_id || '', data.type || 'episode',
+    data.title, data.description || '',
+    (() => { try { return JSON.parse(data.scenes_json || '[]').length; } catch { return 0; } })(),
+    data.scenes_json || '[]', data.source_file || '', now, now
+  ).run();
+  await logAudit(env.DB, user.id, 'content_studio.registry.save', 'registry', data.id, { title: data.title });
+  return jsonResponse({ ok: true, id: data.id });
+}
+
+async function handleCSGenerateImage(request, user, env) {
+  if (!env.OPENAI_API_KEY) return errorResponse('OPENAI_API_KEY not configured', 503);
+  if (!env.MEDIA_BUCKET) return errorResponse('R2 MEDIA_BUCKET not configured', 503);
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  let data;
+  try { data = await request.json(); } catch { return errorResponse('Invalid JSON', 400); }
+  if (!data?.prompt_text) return errorResponse('prompt_text is required', 400);
+
+  const { registry_id = '', scene_number = 0, prompt_index = 0, prompt_text, brand = 'gfv' } = data;
+  const now = new Date().toISOString();
+
+  // Call DALL-E 3
+  const oaiRes = await fetch('https://api.openai.com/v1/images/generations', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'dall-e-3', prompt: prompt_text, n: 1, size: '1024x1024', response_format: 'url' }),
+  });
+  if (!oaiRes.ok) {
+    const err = await oaiRes.json().catch(() => ({}));
+    return errorResponse(err?.error?.message || 'DALL-E 3 generation failed', 502);
+  }
+  const oaiData = await oaiRes.json();
+  const imageUrl = oaiData?.data?.[0]?.url;
+  if (!imageUrl) return errorResponse('No image returned from DALL-E 3', 502);
+
+  // Download and store in R2
+  const imgRes = await fetch(imageUrl);
+  if (!imgRes.ok) return errorResponse('Failed to download generated image', 502);
+  const imgBuffer = await imgRes.arrayBuffer();
+  const r2Key = `${brand}/content-studio/${Date.now()}_s${scene_number}_p${prompt_index}.png`;
+  await env.MEDIA_BUCKET.put(r2Key, imgBuffer, { httpMetadata: { contentType: 'image/png' } });
+
+  // Save to cms_assets
+  const assetId = `cs_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+  await env.DB.prepare(`
+    INSERT INTO cms_assets
+      (id, brand, category, title, file_path, media_type, mime_type, review_status, uploaded_by, created_at, updated_at)
+    VALUES (?, ?, 'content-studio', ?, ?, 'image', 'image/png', 'draft', ?, ?, ?)
+  `).bind(
+    assetId, brand,
+    `CS: scene ${scene_number + 1} prompt ${prompt_index + 1}`,
+    r2Key, user.id, now, now
+  ).run();
+
+  // Track in cms_generated_assets
+  const genId = `gen_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+  if (registry_id) {
+    await env.DB.prepare(`
+      INSERT INTO cms_generated_assets
+        (id, registry_id, scene_number, prompt_index, prompt_text, asset_id, r2_key, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'done', ?)
+    `).bind(genId, registry_id, scene_number, prompt_index, prompt_text, assetId, r2Key, now).run();
+  }
+
+  await logAudit(env.DB, user.id, 'content_studio.generate', 'generated_asset', genId, { registry_id, scene_number, prompt_index });
+
+  return jsonResponse({
+    generated_asset_id: genId,
+    asset_id: assetId,
+    r2_key: r2Key,
+    url: `/api/cms/media/${r2Key}`,
+  }, 201);
+}
+
+async function handleCSSchedulePost(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  let data;
+  try { data = await request.json(); } catch { return errorResponse('Invalid JSON', 400); }
+  if (!data?.generated_asset_id) return errorResponse('generated_asset_id is required', 400);
+  if (!Array.isArray(data.platforms) || !data.platforms.length) return errorResponse('platforms[] required', 400);
+  if (!data.scheduled_at) return errorResponse('scheduled_at required', 400);
+
+  const { generated_asset_id, platforms, caption = '', scheduled_at, brand = 'gfv' } = data;
+  const now = new Date().toISOString();
+
+  // Look up asset_id from cms_generated_assets
+  const genRow = await env.DB.prepare('SELECT asset_id FROM cms_generated_assets WHERE id = ?').bind(generated_asset_id).first();
+  const assetId = genRow?.asset_id || '';
+
+  const postResult = await env.DB.prepare(`
+    INSERT INTO cms_social_posts
+      (brand, platform, content, media_ids, scheduled_at, status, created_by, created_at, updated_at)
+    VALUES (?, 'multi', ?, ?, ?, 'scheduled', ?, ?, ?)
+  `).bind(brand, caption, JSON.stringify(assetId ? [assetId] : []), scheduled_at, user.id, now, now).run();
+  const postId = String(postResult.meta?.last_row_id || '');
+
+  const variants = [];
+  for (const platform of platforms) {
+    const rule = platformRule(platform);
+    const composed = caption.length > rule.maxChars ? caption.slice(0, rule.maxChars - 1) + '\u2026' : caption;
+    const varResult = await env.DB.prepare(`
+      INSERT INTO cms_post_variants
+        (post_id, platform, content, media_asset_id, format, char_count, hashtags, scheduled_at, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, '[]', ?, 'pending', ?)
+    `).bind(postId, platform, composed, assetId, rule.defaultFormat, composed.length, scheduled_at, now).run();
+    variants.push({ id: varResult.meta?.last_row_id, platform, status: 'pending' });
+  }
+
+  await logAudit(env.DB, user.id, 'content_studio.schedule', 'social_post', postId, { platforms, scheduled_at });
+  return jsonResponse({ post_id: postId, variants }, 201);
 }
 
 /**
