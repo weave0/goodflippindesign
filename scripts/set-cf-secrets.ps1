@@ -1,33 +1,28 @@
 # set-cf-secrets.ps1
-# Reads ALL secrets from .env and pushes them to Cloudflare Pages.
+# Reads ALL secrets from .env and pushes them to Cloudflare Pages via wrangler CLI.
 # Workflow: add a value to .env, run this script. Done.
 #
 # Usage: .\scripts\set-cf-secrets.ps1
 
 param(
-  [string]$ProjectName = "goodflippindesign",
-  [string]$AccountId   = "3253d907ea85a18eb442283d7308b193"
+  [string]$ProjectName = "goodflippindesign"
 )
 
-$wranglerConfig = Get-Content "C:\Users\brett\AppData\Roaming\xdg.config\.wrangler\config\default.toml" -Raw
-$oauthToken = [regex]::Match($wranglerConfig, 'oauth_token\s*=\s*"([^"]+)"').Groups[1].Value
-if (-not $oauthToken) { Write-Error "No wrangler OAuth token found. Run 'wrangler login'."; exit 1 }
-
-$apiBase = "https://api.cloudflare.com/client/v4/accounts/$AccountId/pages/projects/$ProjectName"
-$headers = @{ Authorization = "Bearer $oauthToken"; "Content-Type" = "application/json" }
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Continue'
 
 function Set-PagesSecret([string]$Name, [string]$Value) {
-  $envVars = @{}
-  $envVars[$Name] = @{ value = $Value; type = "secret_text" }
-  $body = @{ deployment_configs = @{ production = @{ env_vars = $envVars } } } | ConvertTo-Json -Depth 10 -Compress
-  try {
-    $r = Invoke-WebRequest -Method Patch -Uri $apiBase -Headers $headers -Body $body -UseBasicParsing
-    $result = $r.Content | ConvertFrom-Json
-    if ($result.success) { Write-Host "[OK] $Name" } else { Write-Host "[FAIL] $Name : $($result.errors | ConvertTo-Json -Compress)" }
-  } catch {
-    Write-Host "[ERR] $Name : $($_.Exception.Message)"
-    if ($_.ErrorDetails.Message) { Write-Host $_.ErrorDetails.Message }
+  Write-Host -NoNewline "  $Name ... "
+  $result = ($Value | wrangler pages secret put $Name --project-name $ProjectName 2>&1) | Out-String
+  if ($LASTEXITCODE -eq 0) {
+    Write-Host "[OK]" -ForegroundColor Green
   }
+  else {
+    Write-Host "[FAIL]" -ForegroundColor Red
+    Write-Host $result.Trim()
+  }
+  # Brief pause to stay under CF rate limits
+  Start-Sleep -Milliseconds 400
 }
 
 # Parse .env into a hashtable
@@ -39,25 +34,26 @@ Get-Content "z:\GFD\.env" | Where-Object { $_ -match "^[A-Z_]+=.+" } | ForEach-O
 
 # Map of .env key -> Cloudflare Pages secret name (they are usually identical)
 $secretMap = @{
-  CLERK_SECRET_KEY        = "CLERK_SECRET_KEY"
-  SENTRY_DSN              = "SENTRY_DSN"
-  STRIPE_SECRET_KEY       = "STRIPE_SECRET_KEY"
-  TOKEN_ENCRYPTION_KEY    = "TOKEN_ENCRYPTION_KEY"
-  INTERNAL_SECRET         = "INTERNAL_SECRET"
+  CLERK_SECRET_KEY       = "CLERK_SECRET_KEY"
+  SENTRY_DSN             = "SENTRY_DSN"
+  # STRIPE_SECRET_KEY is for the stripe-payments Worker (separate deploy), NOT Pages.
+  # Set it with: wrangler secret put STRIPE_SECRET_KEY --config workers/wrangler-stripe.toml
+  TOKEN_ENCRYPTION_KEY   = "TOKEN_ENCRYPTION_KEY"
+  INTERNAL_SECRET        = "INTERNAL_SECRET"
   # OAuth secrets - add values to .env when you have them:
-  META_APP_SECRET         = "META_APP_SECRET"
-  THREADS_APP_SECRET      = "THREADS_APP_SECRET"
-  X_CLIENT_ID             = "X_CLIENT_ID"
-  X_CLIENT_SECRET         = "X_CLIENT_SECRET"
-  LINKEDIN_CLIENT_ID      = "LINKEDIN_CLIENT_ID"
-  LINKEDIN_CLIENT_SECRET  = "LINKEDIN_CLIENT_SECRET"
-  PINTEREST_APP_ID        = "PINTEREST_APP_ID"
-  PINTEREST_APP_SECRET    = "PINTEREST_APP_SECRET"
-  TIKTOK_CLIENT_KEY       = "TIKTOK_CLIENT_KEY"
-  TIKTOK_CLIENT_SECRET    = "TIKTOK_CLIENT_SECRET"
-  GOOGLE_CLIENT_ID        = "GOOGLE_CLIENT_ID"
-  GOOGLE_CLIENT_SECRET    = "GOOGLE_CLIENT_SECRET"
-  SOCIAL_PUBLISHER_URL    = "SOCIAL_PUBLISHER_URL"
+  META_APP_SECRET        = "META_APP_SECRET"
+  THREADS_APP_SECRET     = "THREADS_APP_SECRET"
+  X_CLIENT_ID            = "X_CLIENT_ID"
+  X_CLIENT_SECRET        = "X_CLIENT_SECRET"
+  LINKEDIN_CLIENT_ID     = "LINKEDIN_CLIENT_ID"
+  LINKEDIN_CLIENT_SECRET = "LINKEDIN_CLIENT_SECRET"
+  PINTEREST_APP_ID       = "PINTEREST_APP_ID"
+  PINTEREST_APP_SECRET   = "PINTEREST_APP_SECRET"
+  TIKTOK_CLIENT_KEY      = "TIKTOK_CLIENT_KEY"
+  TIKTOK_CLIENT_SECRET   = "TIKTOK_CLIENT_SECRET"
+  GOOGLE_CLIENT_ID       = "GOOGLE_CLIENT_ID"
+  GOOGLE_CLIENT_SECRET   = "GOOGLE_CLIENT_SECRET"
+  SOCIAL_PUBLISHER_URL   = "SOCIAL_PUBLISHER_URL"
 }
 
 Write-Host "`nSetting Cloudflare Pages secrets for: $ProjectName`n"
@@ -71,7 +67,8 @@ foreach ($envKey in $secretMap.Keys) {
   $val = $env_vars[$envKey]
   if ($val -and $val.Trim() -ne "") {
     Set-PagesSecret $secretMap[$envKey] $val.Trim()
-  } else {
+  }
+  else {
     Write-Host "[SKIP] $envKey (not in .env)"
   }
 }

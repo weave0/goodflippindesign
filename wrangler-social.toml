@@ -41,11 +41,10 @@ ALLOWED_ORIGIN = "https://goodflippindesign.com"
 NODE_ENV = "production"
 
 # Secrets (DO NOT set here — use `wrangler secret put`)
-# TOKEN_ENCRYPTION_KEY     — 32+ char random string for AES-GCM token encryption
-# INTERNAL_SECRET          — shared secret between admin panel and this worker
-# META_APP_SECRET          — Meta App ID is 882897501450706 (secret is from Settings → Basic → Show)
-# X_API_SECRET             — from X Developer Portal
-# LINKEDIN_CLIENT_SECRET   — from LinkedIn Developer Console
-# PINTEREST_APP_SECRET     — from Pinterest Developer Console
-# TIKTOK_CLIENT_SECRET     — from TikTok Developer Console
-# GOOGLE_CLIENT_SECRET     — from Google Cloud Console (YouTube)
+# REQUIRED:
+#   TOKEN_ENCRYPTION_KEY  — AES-GCM key for decrypting OAuth tokens from D1
+#   INTERNAL_SECRET       — shared secret between Pages admin and this worker
+#
+# NOT needed here: all platform credentials (Meta, X, LinkedIn, etc.) are stored
+# encrypted inside the D1 platform_tokens table alongside each token. The refresh
+# functions read them from the decrypted payload, not from env vars.
