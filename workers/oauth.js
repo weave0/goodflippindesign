@@ -15,14 +15,26 @@
 // ──────────────────────────────────────────────────────────────
 
 const OAUTH_CONFIGS = {
-  meta: {
+  // New Instagram API (2024+) — separate flow from Facebook Login
+  instagram: {
+    authorizeUrl: 'https://www.instagram.com/oauth/authorize',
+    tokenUrl: 'https://api.instagram.com/oauth/access_token',
+    longLivedUrl: 'https://graph.instagram.com/access_token',
+    scopes: 'instagram_business_basic,instagram_business_content_publish',
+    configId: '893673363564244', // Instagram API Configuration ID from Meta developer portal
+    platforms: ['instagram'],
+    label: 'Instagram',
+    envClientId: 'META_APP_ID',
+    envClientSecret: 'META_APP_SECRET',
+  },
+  // Facebook Graph API — Pages posting
+  facebook: {
     authorizeUrl: 'https://www.facebook.com/v25.0/dialog/oauth',
     tokenUrl: 'https://graph.facebook.com/v25.0/oauth/access_token',
     longLivedUrl: 'https://graph.facebook.com/v25.0/oauth/access_token',
-    // instagram_basic + instagram_content_publish deprecated 2024 → instagram_business_* equivalents
-    scopes: 'instagram_business_basic,instagram_business_content_publish,pages_show_list,pages_read_engagement,pages_manage_posts,public_profile',
-    platforms: ['instagram', 'facebook'],
-    label: 'Meta (Instagram + Facebook)',
+    scopes: 'pages_show_list,pages_read_engagement,pages_manage_posts,public_profile',
+    platforms: ['facebook'],
+    label: 'Facebook',
     envClientId: 'META_APP_ID',
     envClientSecret: 'META_APP_SECRET',
   },
@@ -306,7 +318,14 @@ async function handleAuthorize(provider, request, env) {
   authUrl.searchParams.set('redirect_uri', redirectUri);
   authUrl.searchParams.set('state', state);
 
-  if (provider === 'tiktok') {
+  if (provider === 'instagram') {
+    // New Instagram API uses config_id (pre-defines permissions in Meta portal)
+    authUrl.searchParams.set('client_id', creds.clientId);
+    authUrl.searchParams.set('response_type', 'code');
+    if (config.configId) authUrl.searchParams.set('config_id', config.configId);
+    // scope is optional when config_id is set, but include as fallback
+    authUrl.searchParams.set('scope', config.scopes);
+  } else if (provider === 'tiktok') {
     authUrl.searchParams.set('response_type', 'code');
     authUrl.searchParams.set('scope', config.scopes);
   } else if (provider === 'x') {
@@ -374,8 +393,11 @@ async function handleCallback(provider, request, env) {
   try {
     let tokenData;
     switch (provider) {
-      case 'meta':
-        tokenData = await exchangeMeta(code, redirectUri, creds, env);
+      case 'instagram':
+        tokenData = await exchangeInstagram(code, redirectUri, creds);
+        break;
+      case 'facebook':
+        tokenData = await exchangeFacebook(code, redirectUri, creds);
         break;
       case 'x':
         tokenData = await exchangeX(code, redirectUri, creds, stateData.cv);
@@ -438,12 +460,69 @@ async function handleCallback(provider, request, env) {
 // ──────────────────────────────────────────────────────────────
 
 /**
- * Meta — exchange code for short-lived token, then long-lived token,
- * then enumerate connected IG accounts and Pages.
+ * Instagram — New Instagram API (2024+). Exchange code for short-lived token,
+ * then exchange for long-lived token (60-day). Get user profile.
  */
-async function exchangeMeta(code, redirectUri, creds, env) {
+async function exchangeInstagram(code, redirectUri, creds) {
   // Step 1: Exchange code for short-lived token
-  const tokenUrl = new URL(OAUTH_CONFIGS.meta.tokenUrl);
+  const params = new URLSearchParams({
+    client_id: creds.clientId,
+    client_secret: creds.clientSecret,
+    grant_type: 'authorization_code',
+    redirect_uri: redirectUri,
+    code,
+  });
+  const tokenRes = await fetch(OAUTH_CONFIGS.instagram.tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+  const tokenData = await tokenRes.json();
+  if (tokenData.error_type || tokenData.error) {
+    throw new Error(tokenData.error_message || tokenData.error_type || JSON.stringify(tokenData));
+  }
+
+  // Step 2: Exchange for long-lived token (60-day)
+  const llUrl = new URL(OAUTH_CONFIGS.instagram.longLivedUrl);
+  llUrl.searchParams.set('grant_type', 'ig_exchange_token');
+  llUrl.searchParams.set('client_secret', creds.clientSecret);
+  llUrl.searchParams.set('access_token', tokenData.access_token);
+  const llRes = await fetch(llUrl.toString());
+  const llData = await llRes.json();
+  if (llData.error) throw new Error(llData.error.message || JSON.stringify(llData.error));
+
+  const expiresAt = new Date(Date.now() + (llData.expires_in || 5184000) * 1000).toISOString();
+
+  // Step 3: Get user profile
+  const profileRes = await fetch(
+    `https://graph.instagram.com/v25.0/me?fields=id,username,name&access_token=${llData.access_token}`
+  );
+  const profile = await profileRes.json();
+
+  return {
+    connections: [{
+      platform: 'instagram',
+      accountId: String(profile.id || tokenData.user_id),
+      label: profile.username ? `@${profile.username}` : `IG ${profile.id || tokenData.user_id}`,
+      payload: {
+        access_token: llData.access_token,
+        ig_user_id: String(profile.id || tokenData.user_id),
+        ig_username: profile.username || '',
+        app_id: creds.clientId,
+        app_secret: creds.clientSecret,
+        expires_at: expiresAt,
+      },
+    }],
+  };
+}
+
+/**
+ * Facebook — Graph API. Exchange code for short-lived token, then long-lived,
+ * then enumerate connected Pages.
+ */
+async function exchangeFacebook(code, redirectUri, creds) {
+  // Step 1: Exchange code for short-lived token
+  const tokenUrl = new URL(OAUTH_CONFIGS.facebook.tokenUrl);
   tokenUrl.searchParams.set('client_id', creds.clientId);
   tokenUrl.searchParams.set('client_secret', creds.clientSecret);
   tokenUrl.searchParams.set('redirect_uri', redirectUri);
@@ -453,7 +532,7 @@ async function exchangeMeta(code, redirectUri, creds, env) {
   if (tokenData.error) throw new Error(tokenData.error.message || tokenData.error);
 
   // Step 2: Exchange for long-lived token (60-day expiry)
-  const llUrl = new URL(OAUTH_CONFIGS.meta.longLivedUrl);
+  const llUrl = new URL(OAUTH_CONFIGS.facebook.longLivedUrl);
   llUrl.searchParams.set('grant_type', 'fb_exchange_token');
   llUrl.searchParams.set('client_id', creds.clientId);
   llUrl.searchParams.set('client_secret', creds.clientSecret);
@@ -465,18 +544,15 @@ async function exchangeMeta(code, redirectUri, creds, env) {
   const userToken = llData.access_token;
   const expiresAt = new Date(Date.now() + (llData.expires_in || 5184000) * 1000).toISOString();
 
-  // Step 3: Get the user's Pages + Instagram business accounts
+  // Step 3: Get the user's Pages
   const accountsRes = await fetch(
-    `https://graph.facebook.com/v25.0/me/accounts?fields=id,name,access_token,instagram_business_account{id,username}&access_token=${userToken}`
+    `https://graph.facebook.com/v25.0/me/accounts?fields=id,name,access_token&access_token=${userToken}`
   );
   const accountsData = await accountsRes.json();
   if (accountsData.error) throw new Error(accountsData.error.message);
 
   const connections = [];
-  const pages = accountsData.data || [];
-
-  for (const page of pages) {
-    // Facebook Page connection
+  for (const page of (accountsData.data || [])) {
     connections.push({
       platform: 'facebook',
       accountId: page.id,
@@ -486,35 +562,15 @@ async function exchangeMeta(code, redirectUri, creds, env) {
         page_id: page.id,
         page_name: page.name,
         user_token: userToken,
-        client_id: creds.clientId,
-        client_secret: creds.clientSecret,
+        app_id: creds.clientId,
+        app_secret: creds.clientSecret,
         expires_at: expiresAt,
       },
     });
-
-    // Instagram Business Account (if linked to this page)
-    const igAccount = page.instagram_business_account;
-    if (igAccount) {
-      connections.push({
-        platform: 'instagram',
-        accountId: igAccount.id,
-        label: igAccount.username ? `@${igAccount.username}` : `IG ${igAccount.id}`,
-        payload: {
-          access_token: page.access_token,
-          ig_user_id: igAccount.id,
-          ig_username: igAccount.username || '',
-          page_id: page.id,
-          page_name: page.name,
-          client_id: creds.clientId,
-          client_secret: creds.clientSecret,
-          expires_at: expiresAt,
-        },
-      });
-    }
   }
 
   if (connections.length === 0) {
-    throw new Error('No Facebook Pages found. Ensure your Meta app has the required permissions and your account manages at least one Page.');
+    throw new Error('No Facebook Pages found. Make sure your account manages at least one Page and pages_manage_posts is approved.');
   }
 
   return { connections };
