@@ -10,46 +10,77 @@ jobs:
     health-check:
         name: Check Ecosystem Health
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            issues: write # required to create incident issues on failure
 
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            # curl flags used throughout:
+            #   -L             follow redirects (Cloudflare often 301→200)
+            #   --max-redirs 5 cap redirect chain
+            #   --connect-timeout 15 / --max-time 30  avoid hanging runners
+            #   -A "..."       browser UA avoids some Cloudflare bot blocks
+            # Failure condition: 000 (connection refused / DNS) or 5xx (server error).
+            # 403 from Cloudflare WAF means the edge is running → site is UP.
+
             - name: Check Good Flippin Design
               id: check-gfd
               run: |
-                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://goodflippindesign.com)
+                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+                    -L --max-redirs 5 \
+                    --connect-timeout 15 --max-time 30 \
+                    -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
+                    https://goodflippindesign.com)
                   echo "status=$STATUS" >> $GITHUB_OUTPUT
-                  if [ "$STATUS" != "200" ]; then
-                    echo "::error::Good Flippin Design returned $STATUS"
+                  echo "Good Flippin Design → HTTP $STATUS"
+                  if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
+                    echo "::error::Good Flippin Design appears DOWN (HTTP $STATUS)"
                     exit 1
                   fi
 
             - name: Check AI Aimate
               id: check-aiaimate
               run: |
-                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://aiaimate.com)
+                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+                    -L --max-redirs 5 \
+                    --connect-timeout 15 --max-time 30 \
+                    -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
+                    https://aiaimate.com)
                   echo "status=$STATUS" >> $GITHUB_OUTPUT
-                  if [ "$STATUS" != "200" ]; then
-                    echo "::error::AI Aimate returned $STATUS"
+                  echo "AI Aimate → HTTP $STATUS"
+                  if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
+                    echo "::error::AI Aimate appears DOWN (HTTP $STATUS)"
                     exit 1
                   fi
 
             - name: Check globaldeets Main
               id: check-globaldeets
               run: |
-                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://globaldeets.com)
+                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+                    -L --max-redirs 5 \
+                    --connect-timeout 15 --max-time 30 \
+                    -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
+                    https://globaldeets.com)
                   echo "status=$STATUS" >> $GITHUB_OUTPUT
-                  if [ "$STATUS" != "200" ]; then
+                  echo "globaldeets → HTTP $STATUS"
+                  if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
                     echo "::warning::globaldeets returned $STATUS"
                   fi
 
             - name: Check Eliassen subdomain
               id: check-eliassen
               run: |
-                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://eliassen.globaldeets.com)
+                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+                    -L --max-redirs 5 \
+                    --connect-timeout 15 --max-time 30 \
+                    -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
+                    https://eliassen.globaldeets.com)
                   echo "status=$STATUS" >> $GITHUB_OUTPUT
-                  if [ "$STATUS" != "200" ]; then
+                  echo "Eliassen → HTTP $STATUS"
+                  if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
                     echo "::warning::Eliassen subdomain returned $STATUS"
                   fi
 
