@@ -2158,6 +2158,113 @@
         .text-error {
             color: #ef4444;
         }
+
+        /* ─── Ecosystem Health panel (11) ─── */
+        .eco-sites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 0.55rem;
+            margin-top: 0.65rem;
+        }
+
+        .eco-site-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.65rem 0.85rem;
+            background: rgba(255, 255, 255, 0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .eco-site-name {
+            font-size: 0.83rem;
+            font-weight: 600;
+        }
+
+        .eco-site-url {
+            font-size: 0.71rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .eco-repos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 0.85rem;
+            margin-top: 0.7rem;
+        }
+
+        .eco-repo-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.85rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .eco-repo-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.55rem;
+        }
+
+        .eco-repo-name {
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+
+        .eco-repo-link {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .eco-repo-link:hover { color: var(--accent-cyan); }
+
+        .eco-workflow-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.28rem 0;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            gap: 0.4rem;
+        }
+
+        .eco-workflow-name {
+            color: var(--text-secondary);
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .eco-workflow-meta {
+            color: var(--text-muted);
+            font-size: 0.71rem;
+            white-space: nowrap;
+        }
+
+        .eco-pat-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.65rem 0;
+        }
+
+        .eco-pat-row input {
+            flex: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+        }
+
+        .eco-no-workflows {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            padding-top: 0.4rem;
+        }
     </style>
 </head>
 
@@ -2193,6 +2300,7 @@
                     <button class="nav-btn" data-view="overrides"><span>08</span><span>Site Overrides</span></button>
                     <button class="nav-btn" data-view="galleries"><span>09</span><span>Gallery Manager</span></button>
                     <button class="nav-btn" data-view="content-studio"><span>10</span><span>Content Studio</span></button>
+                    <button class="nav-btn" data-view="ecosystem"><span>11</span><span>Ecosystem Health</span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -2243,6 +2351,14 @@
                     <article class="kpi">
                         <div class="kpi-label">Storage Used</div>
                         <div class="kpi-value" id="kpi-storage">—</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">CI Failures</div>
+                        <div class="kpi-value rose" id="kpi-ci-failures">—</div>
+                    </article>
+                    <article class="kpi">
+                        <div class="kpi-label">Sites Online</div>
+                        <div class="kpi-value emerald" id="kpi-sites-online">—</div>
                     </article>
                 </section>
 
@@ -2886,6 +3002,37 @@
                             </div>
                         </article>
                     </div>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────── -->
+                <!-- VIEW: Ecosystem Health (panel 11)                    -->
+                <!-- ─────────────────────────────────────────────────── -->
+                <section class="view" id="view-ecosystem">
+                    <article class="panel">
+                        <div class="section-head">
+                            <h2 class="section-title">Site Health</h2>
+                            <button class="btn btn-micro" id="eco-refresh-btn">Refresh</button>
+                        </div>
+                        <p class="subheading mb-08">Reachability check for each production domain. Red = DNS/connection failure. Any HTTP response (including Cloudflare 403) counts as <em>online</em>.</p>
+                        <div class="eco-sites-grid" id="eco-sites-grid">
+                            <div class="eco-site-card"><div class="eco-site-name">Loading…</div></div>
+                        </div>
+                    </article>
+
+                    <article class="panel mt-085">
+                        <div class="section-head">
+                            <h2 class="section-title">Repository CI Status</h2>
+                        </div>
+                        <p class="subheading mb-08">Last workflow run per repository. Uses GitHub REST API &mdash; a PAT is required for private repos.</p>
+                        <div class="eco-pat-row">
+                            <label class="form-label" for="eco-github-pat" style="white-space:nowrap;margin:0">GitHub PAT</label>
+                            <input type="password" id="eco-github-pat" placeholder="ghp_… (needed for private repos)" autocomplete="off">
+                            <button class="btn btn-micro" id="eco-save-pat-btn">Save</button>
+                        </div>
+                        <div class="eco-repos-grid" id="eco-repos-grid">
+                            <div class="eco-repo-card"><div class="eco-repo-name">Loading…</div></div>
+                        </div>
+                    </article>
                 </section>
             </main>
         </div>
@@ -3725,6 +3872,9 @@
 
             async function boot() {
                 bindUI();
+                // Restore saved GitHub PAT into the input field
+                const storedPat = localStorage.getItem(ECO_PAT_KEY);
+                if (storedPat && $('eco-github-pat')) $('eco-github-pat').value = storedPat;
                 await refreshMediaToken();
                 setInterval(refreshMediaToken, 55 * 1000); // Clerk short-lived JWTs; refresh before expiry
                 await refreshAll();
@@ -3738,8 +3888,20 @@
                 document.querySelectorAll('.nav-btn').forEach((btn) => {
                     btn.addEventListener('click', () => {
                         switchView(btn.dataset.view);
+                        if (btn.dataset.view === 'ecosystem') refreshEcosystem();
                     });
                 });
+
+                const savePat = $('eco-save-pat-btn');
+                if (savePat) savePat.addEventListener('click', () => {
+                    const val = $('eco-github-pat').value.trim();
+                    if (val) { localStorage.setItem(ECO_PAT_KEY, val); toast('GitHub PAT saved.', 'success'); }
+                    else { localStorage.removeItem(ECO_PAT_KEY); toast('GitHub PAT cleared.', 'success'); }
+                    refreshEcosystem();
+                });
+
+                const ecoRefresh = $('eco-refresh-btn');
+                if (ecoRefresh) ecoRefresh.addEventListener('click', refreshEcosystem);
 
                 $('refresh-btn').addEventListener('click', refreshAll);
                 $('manual-run-btn').addEventListener('click', runQueueNow);
@@ -6515,6 +6677,153 @@
                     toast('Failed to update: ' + err.message, 'error');
                 }
             }
+
+            // ─── Ecosystem Health (panel 11) ────────────────────────────
+            const ECO_SITES = [
+                { name: 'Good Flippin Design', url: 'https://goodflippindesign.com', brand: 'gfd' },
+                { name: 'AI Aimate',            url: 'https://aiaimate.com',          brand: 'aiaimate' },
+                { name: 'GlobalDeets',          url: 'https://globaldeets.com',       brand: 'globaldeets' },
+                { name: 'Eliassen / GD',        url: 'https://eliassen.globaldeets.com', brand: 'globaldeets' },
+            ];
+
+            const ECO_REPOS = [
+                { owner: 'weave0', repo: 'goodflippindesign',  label: 'Good Flippin Design' },
+                { owner: 'weave0', repo: 'SummitView',         label: 'SummitView' },
+                { owner: 'weave0', repo: 'jamie-mediation',    label: 'Jamie Mediation' },
+            ];
+
+            const ECO_PAT_KEY = 'gfd_admin_github_pat';
+
+            function ecoGetPat() {
+                return $('eco-github-pat').value.trim() || localStorage.getItem(ECO_PAT_KEY) || '';
+            }
+
+            async function ecoPingSite(url) {
+                try {
+                    await fetch(url, { mode: 'no-cors', signal: AbortSignal.timeout(8000) });
+                    return 'online';
+                } catch {
+                    return 'offline';
+                }
+            }
+
+            async function ecoFetchCIRuns(owner, repo, pat) {
+                const headers = { 'Accept': 'application/vnd.github+json' };
+                if (pat) headers['Authorization'] = 'Bearer ' + pat;
+                try {
+                    const res = await fetch(
+                        `https://api.github.com/repos/${owner}/${repo}/actions/runs?per_page=6`,
+                        { headers }
+                    );
+                    if (!res.ok) return { error: res.status === 404 ? 'not found / private' : `HTTP ${res.status}` };
+                    const data = await res.json();
+                    return { runs: data.workflow_runs || [] };
+                } catch (e) {
+                    return { error: e.message };
+                }
+            }
+
+            function ecoRelTime(iso) {
+                if (!iso) return '';
+                const diff = Date.now() - new Date(iso).getTime();
+                const h = Math.floor(diff / 3600000);
+                const d = Math.floor(h / 24);
+                if (d > 1) return `${d}d ago`;
+                if (h > 1) return `${h}h ago`;
+                return 'recently';
+            }
+
+            async function refreshEcosystem() {
+                const siteGrid = $('eco-sites-grid');
+                const repoGrid = $('eco-repos-grid');
+                if (!siteGrid || !repoGrid) return;
+
+                // Site health
+                siteGrid.innerHTML = ECO_SITES.map(s =>
+                    `<div class="eco-site-card">
+                        <div class="eco-site-name">${escapeHtml(s.name)}</div>
+                        <div class="eco-site-url">${escapeHtml(s.url)}</div>
+                        <span class="tag warn">checking…</span>
+                    </div>`
+                ).join('');
+
+                const sitePings = await Promise.allSettled(ECO_SITES.map(s => ecoPingSite(s.url)));
+                let onlineCount = 0;
+                siteGrid.innerHTML = ECO_SITES.map((s, i) => {
+                    const status = sitePings[i].status === 'fulfilled' ? sitePings[i].value : 'offline';
+                    if (status === 'online') onlineCount++;
+                    const cls = status === 'online' ? 'ok' : 'fail';
+                    return `<div class="eco-site-card">
+                        <div class="eco-site-name">${escapeHtml(s.name)}</div>
+                        <div class="eco-site-url">${escapeHtml(s.url)}</div>
+                        <span class="tag ${cls}">${status}</span>
+                    </div>`;
+                }).join('');
+
+                const kpiSites = $('kpi-sites-online');
+                if (kpiSites) kpiSites.textContent = `${onlineCount}/${ECO_SITES.length}`;
+
+                // CI status
+                const pat = ecoGetPat();
+                repoGrid.innerHTML = ECO_REPOS.map(r =>
+                    `<div class="eco-repo-card"><div class="eco-repo-name">${escapeHtml(r.label)}</div><div class="eco-no-workflows">loading…</div></div>`
+                ).join('');
+
+                const ciResults = await Promise.allSettled(
+                    ECO_REPOS.map(r => ecoFetchCIRuns(r.owner, r.repo, pat))
+                );
+
+                let totalFailures = 0;
+                repoGrid.innerHTML = ECO_REPOS.map((r, i) => {
+                    const result = ciResults[i].status === 'fulfilled' ? ciResults[i].value : { error: 'fetch failed' };
+                    if (result.error) {
+                        return `<div class="eco-repo-card">
+                            <div class="eco-repo-header">
+                                <span class="eco-repo-name">${escapeHtml(r.label)}</span>
+                                <a class="eco-repo-link" href="https://github.com/${r.owner}/${r.repo}/actions" target="_blank" rel="noopener">↗ GitHub</a>
+                            </div>
+                            <div class="eco-no-workflows">${escapeHtml(result.error)}</div>
+                        </div>`;
+                    }
+                    // Dedupe by workflow name, keep most recent run per workflow
+                    const byWorkflow = {};
+                    (result.runs || []).forEach(run => {
+                        if (!byWorkflow[run.name]) byWorkflow[run.name] = run;
+                    });
+                    const entries = Object.values(byWorkflow);
+                    if (entries.length === 0) {
+                        return `<div class="eco-repo-card">
+                            <div class="eco-repo-header">
+                                <span class="eco-repo-name">${escapeHtml(r.label)}</span>
+                                <a class="eco-repo-link" href="https://github.com/${r.owner}/${r.repo}/actions" target="_blank" rel="noopener">↗ GitHub</a>
+                            </div>
+                            <div class="eco-no-workflows">No recent runs</div>
+                        </div>`;
+                    }
+                    const rows = entries.map(run => {
+                        const concl = run.conclusion || run.status || 'unknown';
+                        const cls = concl === 'success' ? 'ok' : concl === 'failure' ? 'fail' : 'warn';
+                        if (concl === 'failure') totalFailures++;
+                        const age = ecoRelTime(run.updated_at);
+                        return `<div class="eco-workflow-row">
+                            <span class="eco-workflow-name">${escapeHtml(run.name)}</span>
+                            <span class="eco-workflow-meta">${age}</span>
+                            <a class="tag ${cls}" href="${escapeHtml(run.html_url)}" target="_blank" rel="noopener" style="text-decoration:none">${escapeHtml(concl)}</a>
+                        </div>`;
+                    }).join('');
+                    return `<div class="eco-repo-card">
+                        <div class="eco-repo-header">
+                            <span class="eco-repo-name">${escapeHtml(r.label)}</span>
+                            <a class="eco-repo-link" href="https://github.com/${r.owner}/${r.repo}/actions" target="_blank" rel="noopener">↗ GitHub</a>
+                        </div>
+                        ${rows}
+                    </div>`;
+                }).join('');
+
+                const kpiCI = $('kpi-ci-failures');
+                if (kpiCI) kpiCI.textContent = totalFailures > 0 ? String(totalFailures) : '0';
+            }
+            // ─────────────────────────────────────────────────────────────
 
             window.__clerkReady
                 .then(initAuth)
