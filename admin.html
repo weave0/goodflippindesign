@@ -2155,6 +2155,37 @@
             overflow-y: auto;
         }
 
+        .cs-generated-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 0.65rem;
+        }
+
+        .cs-generated-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.6rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .cs-generated-thumb {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .cs-generated-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.45rem;
+            font-size: 0.75rem;
+        }
+
         .text-error {
             color: #ef4444;
         }
@@ -2220,7 +2251,9 @@
             text-decoration: none;
         }
 
-        .eco-repo-link:hover { color: var(--accent-cyan); }
+        .eco-repo-link:hover {
+            color: var(--accent-cyan);
+        }
 
         .eco-workflow-row {
             display: flex;
@@ -3015,7 +3048,9 @@
                         </div>
                         <p class="subheading mb-08">Reachability check for each production domain. Red = DNS/connection failure. Any HTTP response (including Cloudflare 403) counts as <em>online</em>.</p>
                         <div class="eco-sites-grid" id="eco-sites-grid">
-                            <div class="eco-site-card"><div class="eco-site-name">Loading…</div></div>
+                            <div class="eco-site-card">
+                                <div class="eco-site-name">Loading…</div>
+                            </div>
                         </div>
                     </article>
 
@@ -3030,7 +3065,9 @@
                             <button class="btn btn-micro" id="eco-save-pat-btn">Save</button>
                         </div>
                         <div class="eco-repos-grid" id="eco-repos-grid">
-                            <div class="eco-repo-card"><div class="eco-repo-name">Loading…</div></div>
+                            <div class="eco-repo-card">
+                                <div class="eco-repo-name">Loading…</div>
+                            </div>
                         </div>
                     </article>
                 </section>
@@ -3451,7 +3488,7 @@
     <div class="modal-wrap" id="cs-sync-modal">
         <div class="modal">
             <h3>Sync from Local Prompt Studio</h3>
-            <p class="text-muted mt-02">Auto-discovered registries from your local SummitView project (<code>localhost:5050</code>). Select which to sync into the admin portal.</p>
+            <p class="text-muted mt-02">Auto-discovered registries from your local SummitView project (<code>localhost:5000</code> or <code>localhost:5050</code>). Select which to sync into the admin portal.</p>
             <div id="cs-sync-status" class="mt-04"></div>
             <div id="cs-sync-list" class="cs-sync-list mt-04"></div>
             <div class="actions-split mt-08">
@@ -3704,6 +3741,7 @@
                 csRegistries: [],
                 csCurrentRegistry: null,
                 csCurrentScene: 0,
+                csPromptStudioBaseUrl: '',
             };
 
             function $(id) {
@@ -3715,6 +3753,11 @@
                 div.textContent = str || '';
                 return div.innerHTML;
             }
+
+            const PROMPT_STUDIO_BASES = [
+                'http://localhost:5000',
+                'http://localhost:5050',
+            ];
 
             function toast(msg, type = 'success') {
                 const el = $('toast');
@@ -4301,37 +4344,31 @@
                 const page = state.discoveredPage || 1;
                 let url = '/assets/discovered?status=' + encodeURIComponent(status) + '&page=' + page + '&limit=24';
                 if (brand) url += '&brand=' + encodeURIComponent(brand);
-                try {
-                    const data = await api(url);
-                    state.discoveredAssets = data.assets || [];
-                    state.discoveredTotal = data.total || 0;
-                } catch {
-                    state.discoveredAssets = [];
-                }
-            }
-
-            function updateReviewBadge() {
-                const pending = state.discoveredAssets.length;
-                const badge = $('review-badge');
-                if (!badge) return;
-                if (pending > 0) {
-                    badge.textContent = pending;
-                    badge.classList.remove('d-none');
-                } else {
-                    badge.classList.add('d-none');
-                }
-            }
-
+                    const data = await api('/content-studio/generate', {
+                        method: 'POST',
+                        body: {
+                            registry_id: registryId,
+                            scene_number: sceneNum,
+                            prompt_index: pi,
+                            prompt_text: promptText,
+                            brand: state.csCurrentRegistry?.brand || currentBrand,
+                        },
+                    });
+                    const previewAsset = data.r2_key ? { file_path: data.r2_key } : null;
+                    const previewUrl = previewAsset ? assetUrl(previewAsset) : (data.url || '');
+                    const previewBase = previewAsset ? assetBase(previewAsset) : '';
             function renderReviewQueue() {
                 const grid = $('rq-grid');
-                if (!grid) return;
+                            <img src="${escapeHtml(previewUrl)}" ${previewBase ? `data-r2="${escapeHtml(previewBase)}"` : ''} alt="Generated scene ${sceneNum + 1} prompt ${pi + 1}" style="max-width:100%;border-radius:8px;margin-top:8px">
                 const pendingCount = $('rq-pending-count');
                 if (pendingCount) pendingCount.textContent = state.discoveredAssets.length + ' pending';
 
                 if (!state.discoveredAssets.length) {
+                    await loadCSGeneratedAssets(registryId, sceneNum);
                     grid.innerHTML = '<p class="text-muted">No assets found for these filters. Try scanning a page below or change the status filter.</p>';
                     $('rq-pagination').innerHTML = '';
                     return;
+                    await loadCSGeneratedAssets(registryId, sceneNum);
                 }
 
                 grid.innerHTML = state.discoveredAssets.map((asset) => {
@@ -6240,6 +6277,10 @@
                         <h4>Scene ${idx + 1}${scene.title ? ': ' + escapeHtml(scene.title) : ''}</h4>
                         ${notes ? `<p class="text-muted">${escapeHtml(notes)}</p>` : ''}
                     </div>
+                    <div class="cs-prompt-section">
+                        <h5 class="cs-section-label">Existing Outputs</h5>
+                        <div id="cs-generated-assets-body"><p class="text-muted">Loading existing outputs…</p></div>
+                    </div>
                     ${imagePrompts.length ? `
                     <div class="cs-prompt-section">
                         <h5 class="cs-section-label">Image Prompts (${imagePrompts.length})</h5>
@@ -6281,6 +6322,51 @@
                 $('cs-scene-detail').querySelectorAll('.cs-gen-btn').forEach((btn) => {
                     btn.addEventListener('click', handleCSGenerate);
                 });
+
+                loadCSGeneratedAssets(reg.id, idx);
+            }
+
+            async function loadCSGeneratedAssets(registryId, sceneNum) {
+                const container = $('cs-generated-assets-body');
+                if (!container) return;
+
+                container.innerHTML = '<p class="text-muted">Loading existing outputs…</p>';
+                try {
+                    const data = await api(`/content-studio/generated?registry_id=${encodeURIComponent(registryId)}&scene_number=${encodeURIComponent(sceneNum)}`);
+                    const assets = data.assets || [];
+                    if (!assets.length) {
+                        container.innerHTML = '<p class="text-muted">No generated outputs saved for this scene yet.</p>';
+                        return;
+                    }
+
+                    container.innerHTML = `<div class="cs-generated-grid">${assets.map((asset) => {
+                        const media = asset.r2_key ? { file_path: asset.r2_key } : null;
+                        const viewUrl = media ? assetUrl(media) : (asset.url || '');
+                        const baseUrl = media ? assetBase(media) : '';
+                        const createdAt = asset.created_at ? new Date(asset.created_at).toLocaleString() : '';
+                        return `
+                            <article class="cs-generated-card">
+                                ${viewUrl ? `<img class="cs-generated-thumb" src="${escapeHtml(viewUrl)}" ${baseUrl ? `data-r2="${escapeHtml(baseUrl)}"` : ''} alt="Generated output for prompt ${Number(asset.prompt_index) + 1}">` : ''}
+                                <div class="cs-generated-meta">
+                                    <span class="mono">Prompt ${Number(asset.prompt_index) + 1}</span>
+                                    <span class="text-muted">${escapeHtml(asset.status || 'done')}</span>
+                                </div>
+                                ${createdAt ? `<div class="text-muted mt-02">${escapeHtml(createdAt)}</div>` : ''}
+                                <div class="inline-actions mt-04">
+                                    ${viewUrl ? `<a href="${escapeHtml(viewUrl)}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">View full</a>` : ''}
+                                    <button class="btn btn-secondary btn-sm" data-cs-schedule="${escapeHtml(asset.id)}">Schedule to social &#x25B6;</button>
+                                </div>
+                            </article>`;
+                    }).join('')}</div>`;
+
+                    container.querySelectorAll('[data-cs-schedule]').forEach((btn) => {
+                        btn.addEventListener('click', (ev) => {
+                            openCSScheduleModal(ev.currentTarget.dataset.csSchedule);
+                        });
+                    });
+                } catch (err) {
+                    container.innerHTML = `<p class="text-error">${escapeHtml(err.message)}</p>`;
+                }
             }
 
             async function handleCSGenerate(e) {
@@ -6306,17 +6392,21 @@
                             brand: state.csCurrentRegistry?.brand || currentBrand,
                         },
                     });
+                    const previewAsset = data.r2_key ? { file_path: data.r2_key } : null;
+                    const previewUrl = previewAsset ? assetUrl(previewAsset) : (data.url || '');
+                    const previewBase = previewAsset ? assetBase(previewAsset) : '';
                     if (resultEl) {
                         resultEl.innerHTML = `
-                            <img src="${escapeHtml(data.url)}" alt="Generated scene ${sceneNum + 1} prompt ${pi + 1}" style="max-width:100%;border-radius:8px;margin-top:8px">
+                            <img src="${escapeHtml(previewUrl)}" ${previewBase ? `data-r2="${escapeHtml(previewBase)}"` : ''} alt="Generated scene ${sceneNum + 1} prompt ${pi + 1}" style="max-width:100%;border-radius:8px;margin-top:8px">
                             <div class="inline-actions mt-04">
-                                <a href="${escapeHtml(data.url)}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">View full</a>
+                                <a href="${escapeHtml(previewUrl)}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">View full</a>
                                 <button class="btn btn-secondary btn-sm" data-cs-schedule="${escapeHtml(data.generated_asset_id)}">Schedule to social &#x25B6;</button>
                             </div>`;
                         resultEl.querySelector('[data-cs-schedule]')?.addEventListener('click', (ev) => {
                             openCSScheduleModal(ev.currentTarget.dataset.csSchedule);
                         });
                     }
+                    await loadCSGeneratedAssets(registryId, sceneNum);
                     toast('Image generated!', 'success');
                 } catch (err) {
                     if (resultEl) resultEl.innerHTML = `<p class="text-error">${escapeHtml(err.message)}</p>`;
@@ -6436,21 +6526,17 @@
                 openModal('cs-sync-modal');
                 const statusEl = $('cs-sync-status');
                 const listEl = $('cs-sync-list');
-                statusEl.innerHTML = '<p class="text-muted">Connecting to Prompt Studio at localhost:5050&#x2026;</p>';
+                statusEl.innerHTML = '<p class="text-muted">Connecting to Prompt Studio on localhost&#x2026;</p>';
                 listEl.innerHTML = '';
                 try {
-                    const res = await fetch('http://localhost:5050/api/registries', {
-                        signal: AbortSignal.timeout(5000),
-                    });
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    const remoteRegs = await res.json();
+                    const { baseUrl, registries: remoteRegs } = await detectPromptStudio();
                     const existingIds = new Set(state.csRegistries.map((r) => r.id));
                     if (!remoteRegs.length) {
                         statusEl.innerHTML = '<p class="text-muted">No registries found. Run <code>make prompt-studio</code> in SummitView first.</p>';
                         return;
                     }
                     const newCount = remoteRegs.filter((r) => !existingIds.has(r.registryId)).length;
-                    statusEl.innerHTML = `<p class="text-muted">${remoteRegs.length} registries found &#xB7; ${newCount} new</p>`;
+                    statusEl.innerHTML = `<p class="text-muted">Connected to <code>${escapeHtml(baseUrl)}</code> &#xB7; ${remoteRegs.length} registries found &#xB7; ${newCount} new</p>`;
                     listEl.innerHTML = remoteRegs.map((r) => `
                         <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-subtle);cursor:pointer">
                             <input type="checkbox" value="${escapeHtml(r.registryId)}" ${!existingIds.has(r.registryId) ? 'checked' : ''} style="margin-top:2px;flex-shrink:0">
@@ -6482,7 +6568,9 @@
                 let failed = 0;
                 for (const registryId of checked) {
                     try {
-                        const res = await fetch(`http://localhost:5050/api/registries/${encodeURIComponent(registryId)}`);
+                        const baseUrl = state.csPromptStudioBaseUrl || (await detectPromptStudio()).baseUrl;
+                        const res = await fetch(`${baseUrl}/api/registries/${encodeURIComponent(registryId)}`);
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
                         const reg = await res.json();
                         await api('/content-studio/registries', {
                             method: 'POST',
@@ -6535,6 +6623,26 @@
                     globaldeets: 'globaldeets',
                 };
                 return map[brandId] || brandId || 'gfv';
+            }
+
+            async function detectPromptStudio() {
+                for (const baseUrl of PROMPT_STUDIO_BASES) {
+                    try {
+                        const res = await fetch(`${baseUrl}/api/registries`, {
+                            signal: AbortSignal.timeout(5000),
+                        });
+                        if (!res.ok) continue;
+                        const registries = await res.json();
+                        if (!Array.isArray(registries)) continue;
+                        state.csPromptStudioBaseUrl = baseUrl;
+                        return { baseUrl, registries };
+                    } catch {
+                        // Try the next candidate.
+                    }
+                }
+
+                state.csPromptStudioBaseUrl = '';
+                throw new Error('Prompt Studio is not reachable on localhost:5000 or localhost:5050');
             }
 
             // ── Image Overrides ──────────────────────────────────────────────
@@ -6681,15 +6789,15 @@
             // ─── Ecosystem Health (panel 11) ────────────────────────────
             const ECO_SITES = [
                 { name: 'Good Flippin Design', url: 'https://goodflippindesign.com', brand: 'gfd' },
-                { name: 'AI Aimate',            url: 'https://aiaimate.com',          brand: 'aiaimate' },
-                { name: 'GlobalDeets',          url: 'https://globaldeets.com',       brand: 'globaldeets' },
-                { name: 'Eliassen / GD',        url: 'https://eliassen.globaldeets.com', brand: 'globaldeets' },
+                { name: 'AI Aimate', url: 'https://aiaimate.com', brand: 'aiaimate' },
+                { name: 'GlobalDeets', url: 'https://globaldeets.com', brand: 'globaldeets' },
+                { name: 'Eliassen / GD', url: 'https://eliassen.globaldeets.com', brand: 'globaldeets' },
             ];
 
             const ECO_REPOS = [
-                { owner: 'weave0', repo: 'goodflippindesign',  label: 'Good Flippin Design' },
-                { owner: 'weave0', repo: 'SummitView',         label: 'SummitView' },
-                { owner: 'weave0', repo: 'jamie-mediation',    label: 'Jamie Mediation' },
+                { owner: 'weave0', repo: 'goodflippindesign', label: 'Good Flippin Design' },
+                { owner: 'weave0', repo: 'SummitView', label: 'SummitView' },
+                { owner: 'weave0', repo: 'jamie-mediation', label: 'Jamie Mediation' },
             ];
 
             const ECO_PAT_KEY = 'gfd_admin_github_pat';

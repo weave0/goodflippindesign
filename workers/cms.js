@@ -1990,6 +1990,9 @@ export async function handleCMSRequest(request, env, user) {
     if (path === '/content-studio/registries' && method === 'GET') {
       return handleListRegistries(request, env);
     }
+    if (path === '/content-studio/generated' && method === 'GET') {
+      return handleListGeneratedAssets(request, env);
+    }
     const registryIdMatch = path.match(/^\/content-studio\/registries\/([^/]+)$/);
     if (registryIdMatch && method === 'GET') {
       return handleGetRegistry(registryIdMatch[1], env);
@@ -2508,6 +2511,56 @@ async function handleGetRegistry(id, env) {
   const row = await env.DB.prepare('SELECT * FROM cms_prompt_registries WHERE id = ?').bind(id).first();
   if (!row) return errorResponse('Registry not found', 404);
   return jsonResponse(row);
+}
+
+async function handleListGeneratedAssets(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+
+  const url = new URL(request.url);
+  const registryId = url.searchParams.get('registry_id') || '';
+  const sceneNumberRaw = url.searchParams.get('scene_number');
+
+  let query = `
+    SELECT
+      ga.id,
+      ga.registry_id,
+      ga.scene_number,
+      ga.prompt_index,
+      ga.prompt_text,
+      ga.asset_id,
+      ga.r2_key,
+      ga.status,
+      ga.created_at,
+      a.title AS asset_title,
+      a.review_status
+    FROM cms_generated_assets ga
+    LEFT JOIN cms_assets a ON a.id = ga.asset_id
+    WHERE 1 = 1
+  `;
+  const params = [];
+
+  if (registryId) {
+    query += ' AND ga.registry_id = ?';
+    params.push(registryId);
+  }
+
+  if (sceneNumberRaw !== null && sceneNumberRaw !== '') {
+    const sceneNumber = Number.parseInt(sceneNumberRaw, 10);
+    if (!Number.isNaN(sceneNumber)) {
+      query += ' AND ga.scene_number = ?';
+      params.push(sceneNumber);
+    }
+  }
+
+  query += ' ORDER BY ga.prompt_index ASC, ga.created_at DESC LIMIT 100';
+
+  const { results } = await env.DB.prepare(query).bind(...params).all();
+  const assets = (results || []).map((row) => ({
+    ...row,
+    url: row.r2_key ? `/api/cms/media/${row.r2_key}` : '',
+  }));
+
+  return jsonResponse({ assets });
 }
 
 async function handleSaveRegistry(request, user, env) {
