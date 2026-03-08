@@ -104,6 +104,7 @@ const SITES = {
         'https://gfd-auth.weave0.workers.dev',
         ...SHARED.clerk.connect,
         'https://www.instagram.com',   // Instagram embed API
+        'https://api.github.com',      // Admin: Ecosystem Health panel → GitHub CI status
       ],
       'frame-src': [...SHARED.stripe.frame, ...SHARED.clerk.frame, 'https://www.instagram.com', 'https://www.facebook.com'],
       'worker-src': ["'self'", 'blob:'],
