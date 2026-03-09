@@ -1646,10 +1646,12 @@ async function handleCMSStats(env) {
     env.DB.prepare("SELECT COUNT(*) as total, status FROM cms_content GROUP BY status").all(),
   ]);
 
-  const [campaignCount, connectionCount, pendingReviewCount] = await Promise.all([
+  const [campaignCount, connectionCount, pendingReviewCount, blogPostCount, communityMemberCount] = await Promise.all([
     env.DB.prepare('SELECT COUNT(*) as total FROM cms_campaigns WHERE active=1').first(),
     env.DB.prepare('SELECT COUNT(*) as total FROM cms_platform_tokens WHERE is_active=1').first(),
     env.DB.prepare("SELECT COUNT(*) as total FROM discovered_assets WHERE status='discovered'").first(),
+    env.DB.prepare('SELECT COUNT(*) as total FROM blog_posts').first().catch(() => ({ total: 0 })),
+    env.DB.prepare('SELECT COUNT(*) as total FROM community_profiles').first().catch(() => ({ total: 0 })),
   ]);
 
   // R2 usage (if available)
@@ -1674,6 +1676,8 @@ async function handleCMSStats(env) {
     campaigns: campaignCount?.total || 0,
     connections: connectionCount?.total || 0,
     pendingReview: pendingReviewCount?.total || 0,
+    blogPosts: blogPostCount?.total || 0,
+    communityMembers: communityMemberCount?.total || 0,
     storage: storageInfo,
   });
 }
