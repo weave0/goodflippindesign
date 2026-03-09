@@ -4543,9 +4543,13 @@
             gap: 1rem;
             margin-bottom: 1.25rem;
         }
+
         @media (max-width: 700px) {
-            .dcc-today-grid { grid-template-columns: 1fr; }
+            .dcc-today-grid {
+                grid-template-columns: 1fr;
+            }
         }
+
         .dcc-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -4553,7 +4557,11 @@
             overflow: hidden;
             transition: border-color 0.25s ease;
         }
-        .dcc-card:hover { border-color: rgba(255,255,255,0.15); }
+
+        .dcc-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
         .dcc-card-slot {
             display: flex;
             align-items: center;
@@ -4564,42 +4572,60 @@
             letter-spacing: 0.06em;
             color: var(--text-muted);
         }
+
         .dcc-card-slot .dot {
-            width: 8px; height: 8px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             display: inline-block;
         }
-        .dcc-card-slot .dot.am { background: var(--accent-amber); }
-        .dcc-card-slot .dot.pm { background: var(--accent-sky); }
+
+        .dcc-card-slot .dot.am {
+            background: var(--accent-amber);
+        }
+
+        .dcc-card-slot .dot.pm {
+            background: var(--accent-sky);
+        }
+
         .dcc-card-body {
             padding: 0.75rem 1rem 1rem;
         }
+
         .dcc-card-body h3 {
             font-size: 1.15rem;
             margin: 0 0 0.25rem;
         }
+
         .dcc-card-body .dcc-region {
             font-size: 0.8rem;
             color: var(--text-muted);
             margin-bottom: 0.5rem;
         }
+
         .dcc-card-body .dcc-reason {
             font-size: 0.82rem;
             color: var(--accent-amber);
             margin-bottom: 0.35rem;
         }
+
         .dcc-card-body .dcc-fact {
             font-size: 0.82rem;
             color: var(--text-muted);
             line-height: 1.45;
         }
+
         .dcc-card-actions {
             display: flex;
             gap: 0.5rem;
             padding: 0.5rem 1rem 0.75rem;
             border-top: 1px solid var(--border);
         }
-        .dcc-card-actions .btn { font-size: 0.75rem; padding: 0.3rem 0.65rem; }
+
+        .dcc-card-actions .btn {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.65rem;
+        }
 
         .dcc-week-strip {
             display: grid;
@@ -4610,6 +4636,7 @@
             overflow: hidden;
             margin-bottom: 1.25rem;
         }
+
         .dcc-day {
             background: var(--card-bg);
             padding: 0.6rem 0.4rem;
@@ -4618,37 +4645,56 @@
             transition: background 0.2s ease;
             min-height: 90px;
         }
-        .dcc-day:hover { background: rgba(255,255,255,0.04); }
-        .dcc-day.today { background: rgba(34,211,238,0.08); }
+
+        .dcc-day:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .dcc-day.today {
+            background: rgba(34, 211, 238, 0.08);
+        }
+
         .dcc-day .dcc-day-label {
             font-size: 0.68rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
+
         .dcc-day .dcc-day-num {
             font-size: 1.1rem;
             font-weight: 700;
             margin: 0.2rem 0;
         }
-        .dcc-day.today .dcc-day-num { color: var(--accent-sky); }
+
+        .dcc-day.today .dcc-day-num {
+            color: var(--accent-sky);
+        }
+
         .dcc-day .dcc-day-cultures {
             display: flex;
             flex-direction: column;
             gap: 2px;
             margin-top: 0.25rem;
         }
+
         .dcc-day .dcc-slug {
             font-size: 0.62rem;
             padding: 0.1rem 0.3rem;
             border-radius: 4px;
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .dcc-day .dcc-slug.am { border-left: 2px solid var(--accent-amber); }
-        .dcc-day .dcc-slug.pm { border-left: 2px solid var(--accent-sky); }
+
+        .dcc-day .dcc-slug.am {
+            border-left: 2px solid var(--accent-amber);
+        }
+
+        .dcc-day .dcc-slug.pm {
+            border-left: 2px solid var(--accent-sky);
+        }
 
         .dcc-month-grid {
             display: grid;
@@ -4658,8 +4704,9 @@
             border-radius: 10px;
             overflow: hidden;
         }
+
         .dcc-month-header {
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.03);
             padding: 0.45rem 0;
             text-align: center;
             font-size: 0.68rem;
@@ -4668,20 +4715,31 @@
             text-transform: uppercase;
             letter-spacing: 0.06em;
         }
+
         .dcc-month-cell {
             background: var(--card-bg);
             padding: 0.35rem;
             min-height: 60px;
             font-size: 0.7rem;
         }
-        .dcc-month-cell.empty { background: rgba(0,0,0,0.2); }
-        .dcc-month-cell.today { background: rgba(34,211,238,0.08); }
+
+        .dcc-month-cell.empty {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .dcc-month-cell.today {
+            background: rgba(34, 211, 238, 0.08);
+        }
+
         .dcc-month-cell .dcc-cell-num {
             font-weight: 600;
             font-size: 0.72rem;
             margin-bottom: 0.2rem;
         }
-        .dcc-month-cell.today .dcc-cell-num { color: var(--accent-sky); }
+
+        .dcc-month-cell.today .dcc-cell-num {
+            color: var(--accent-sky);
+        }
 
         .dcc-view-toggle {
             display: inline-flex;
@@ -4689,6 +4747,7 @@
             border-radius: 8px;
             overflow: hidden;
         }
+
         .dcc-view-btn {
             background: transparent;
             border: none;
@@ -4698,9 +4757,13 @@
             cursor: pointer;
             transition: background 0.2s ease, color 0.2s ease;
         }
-        .dcc-view-btn:hover { color: var(--text); }
+
+        .dcc-view-btn:hover {
+            color: var(--text);
+        }
+
         .dcc-view-btn.active {
-            background: rgba(34,211,238,0.12);
+            background: rgba(34, 211, 238, 0.12);
             color: var(--accent-sky);
         }
 
@@ -4711,10 +4774,12 @@
             padding: 1rem;
             margin-top: 1rem;
         }
+
         .dcc-schedule-editor h3 {
             font-size: 0.92rem;
             margin: 0 0 0.75rem;
         }
+
         .dcc-schedule-row {
             display: grid;
             grid-template-columns: 110px 1fr 1fr auto;
@@ -4724,19 +4789,25 @@
             border-bottom: 1px solid var(--border);
             font-size: 0.82rem;
         }
-        .dcc-schedule-row:last-child { border-bottom: none; }
+
+        .dcc-schedule-row:last-child {
+            border-bottom: none;
+        }
+
         .dcc-schedule-row .dcc-sched-date {
             font-weight: 600;
             font-size: 0.78rem;
             color: var(--text-muted);
         }
+
         .dcc-schedule-row .dcc-sched-slug {
             display: flex;
             align-items: center;
             gap: 0.4rem;
         }
+
         .dcc-swap-btn {
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             border: 1px solid var(--border);
             border-radius: 6px;
             color: var(--text-muted);
@@ -4745,6 +4816,7 @@
             cursor: pointer;
             transition: border-color 0.2s ease, color 0.2s ease;
         }
+
         .dcc-swap-btn:hover {
             border-color: var(--accent-sky);
             color: var(--accent-sky);
@@ -4877,7 +4949,7 @@
                                 <path d="M11 2v2" />
                                 <circle cx="6" cy="10" r="1" fill="currentColor" stroke="none" />
                                 <circle cx="10" cy="10" r="1" fill="currentColor" stroke="none" />
-                            </svg></span><span class="nav-label">Daily Cultures</span></button>
+                            </svg></span><span class="nav-label">Daily Calendar</span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -4989,6 +5061,7 @@
                         <div class="section-head">
                             <h2 class="section-title">CultureSherpa Culture Post Portal</h2>
                             <div class="inline-actions">
+                                <button class="btn btn-secondary" data-open-daily-cultures="culturesherpa">Open Daily Calendar</button>
                                 <button class="btn btn-secondary" data-open-brand-gallery="culturesherpa">Open Social Feed</button>
                                 <button class="btn btn-primary" data-open-brand-studio="culturesherpa">Open Portal</button>
                             </div>
@@ -4997,6 +5070,7 @@
                             <p class="subheading">Direct route into the workflow for managing CultureSherpa culture-post registries, story scenes, prompt assets, and scheduled post variants. This focuses the workspace on CultureSherpa and opens the right surface immediately.</p>
                             <div class="portal-callout-meta">
                                 <span class="tag ok">CultureSherpa</span>
+                                <span class="tag">2 Cultures / Day</span>
                                 <span class="tag">Story Registries</span>
                                 <span class="tag">Scene Prompts</span>
                                 <span class="tag">Social Variants</span>
@@ -5546,6 +5620,7 @@
                     <div class="section-head">
                         <h2 class="section-title">Story &amp; Culture Post Studio</h2>
                         <div class="inline-actions">
+                            <button class="btn btn-secondary" data-open-daily-cultures="culturesherpa">Daily Calendar</button>
                             <button class="btn btn-secondary" id="cs-focus-culturesherpa-btn" data-open-brand-studio="culturesherpa">CultureSherpa Portal</button>
                             <button class="btn btn-secondary" id="cs-import-btn">Import JSON</button>
                             <button class="btn btn-primary" id="cs-new-registry-btn">New Registry</button>
@@ -7263,11 +7338,7 @@
                         el.addEventListener('click', () => {
                             const v = el.dataset.view;
                             closeCmd();
-                            switchView(v);
-                            if (v === 'ecosystem') refreshEcosystem();
-                            if (window.__adminPanels?.[v === 'analytics' ? 'analytics' : v === 'community' ? 'community' : v === 'notifications' ? 'notifications' : null]) {
-                                window.__adminPanels[v]?.();
-                            }
+                            navigateToView(v);
                         });
                     });
                 }
@@ -7307,7 +7378,7 @@
                     else if (e.key === 'ArrowUp') { e.preventDefault(); updateSelection(selected - 1); }
                     else if (e.key === 'Enter') {
                         const v = list.querySelectorAll('.cmd-item')[selected]?.dataset?.view;
-                        if (v) { closeCmd(); switchView(v); }
+                        if (v) { closeCmd(); navigateToView(v); }
                     } else if (e.key === 'Escape') { closeCmd(); }
                 });
 
@@ -7328,7 +7399,7 @@
                     'overview', 'connections', 'planner', 'composer', 'social-feed',
                     'library', 'drip', 'review-queue', 'overrides', 'galleries',
                     'content-studio', 'ecosystem', 'blog-manager', 'storage',
-                    'donations', 'analytics', 'community', 'notifications', 'characters',
+                    'donations', 'analytics', 'community', 'notifications', 'characters', 'daily-cultures',
                 ];
 
                 document.addEventListener('keydown', (e) => {
@@ -7343,14 +7414,14 @@
                         return;
                     }
 
-                    // Alt+1..9 → views 1-9; Alt+Shift+1..9 → views 10-18
+                    // Alt+1..9 → panels 1-9; Alt+Shift+1..9 → panels 10-18
                     if (e.altKey && !e.ctrlKey && !e.metaKey) {
                         const n = parseInt(e.key, 10);
                         if (!isNaN(n) && n >= 1 && n <= 9) {
                             e.preventDefault();
-                            const idx = e.shiftKey ? n + 9 : n;
+                            const idx = e.shiftKey ? n + 8 : n - 1;
                             const view = VIEWS[idx];
-                            if (view) switchView(view);
+                            if (view) navigateToView(view);
                         }
                     }
                 });
@@ -7359,12 +7430,7 @@
             function bindUI() {
                 document.querySelectorAll('.nav-btn').forEach((btn) => {
                     btn.addEventListener('click', () => {
-                        switchView(btn.dataset.view);
-                        if (btn.dataset.view === 'ecosystem') refreshEcosystem();
-                        if (btn.dataset.view === 'social-feed') loadSocialFeed();
-                        if (btn.dataset.view === 'analytics' && window.__adminPanels?.analytics) window.__adminPanels.analytics();
-                        if (btn.dataset.view === 'community' && window.__adminPanels?.community) window.__adminPanels.community();
-                        if (btn.dataset.view === 'notifications' && window.__adminPanels?.notifications) window.__adminPanels.notifications();
+                        navigateToView(btn.dataset.view);
                     });
                 });
 
@@ -7542,9 +7608,13 @@
                         gsPanel.classList.add('d-none');
                     });
                     document.querySelectorAll('[data-view-shortcut]').forEach((btn) => {
-                        btn.addEventListener('click', () => switchView(btn.dataset.viewShortcut));
+                        btn.addEventListener('click', () => navigateToView(btn.dataset.viewShortcut));
                     });
                 }
+
+                document.querySelectorAll('[data-open-daily-cultures]').forEach((btn) => {
+                    btn.addEventListener('click', () => openDailyCultureCalendar());
+                });
 
                 document.querySelectorAll('[data-open-brand-studio]').forEach((btn) => {
                     btn.addEventListener('click', () => openBrandStudio(btn.dataset.openBrandStudio));
@@ -8945,6 +9015,29 @@
                 updatePageContext(view);
             }
 
+            function loadViewData(view) {
+                if (!view) return;
+                if (view === 'ecosystem') {
+                    refreshEcosystem();
+                }
+                if (view === 'social-feed') {
+                    if (typeof switchSfViewMode === 'function') {
+                        if (sfViewMode === 'kits') loadPostKits();
+                        else loadSocialFeed();
+                    } else {
+                        loadSocialFeed();
+                    }
+                }
+                if (window.__adminPanels?.[view]) {
+                    window.__adminPanels[view]();
+                }
+            }
+
+            function navigateToView(view) {
+                switchView(view);
+                loadViewData(view);
+            }
+
             // ── Page context map ────────────────────────────────────────────
             const PAGE_CONTEXTS = {
                 overview: { name: 'Overview', title: 'Overview', sub: 'Global stats, platform connections, and quick-start guide for your content pipeline.' },
@@ -8966,7 +9059,7 @@
                 community: { name: 'Community', title: 'Community Members', sub: 'Browse, search, and review registered community members and their activity.' },
                 notifications: { name: 'Queue Health', title: 'Queue Health', sub: 'Monitor the social publishing queue, retry failed variants, and trigger manual runs.' },
                 characters: { name: 'Characters', title: 'Character Registry', sub: 'Animation character roster, pose inventory, and pipeline status.' },
-                'daily-cultures': { name: 'Daily Cultures', title: 'Daily Culture Calendar', sub: 'Two featured cultures every day — morning & evening rotations for CultureSherpa.' },
+                'daily-cultures': { name: 'Daily Calendar', title: 'Daily Culture Calendar', sub: 'Two featured cultures every day — morning & evening rotations for CultureSherpa.' },
             };
 
             function updatePageContext(view) {
@@ -9460,6 +9553,12 @@
                 // Open directly to Post Kits view — shows artwork + copy-ready captions
                 switchSfViewMode('kits');
                 toast(BRAND_DEFS[id].name + ' post kits ready.', 'info');
+            }
+
+            async function openDailyCultureCalendar() {
+                await switchBrand('culturesherpa');
+                navigateToView('daily-cultures');
+                toast('CultureSherpa daily calendar ready.', 'info');
             }
 
             // ════════════════════════════════════════════════════════════════
@@ -11680,17 +11779,16 @@
                     });
                 }
 
-                // Hook into nav switching
                 var storageLoaded = false;
-                var storageNavBtn = document.querySelector('[data-view="storage"]');
-                if (storageNavBtn) {
-                    storageNavBtn.addEventListener('click', function () {
-                        if (!storageLoaded) {
-                            storageLoaded = true;
-                            loadFromStorage();
-                        }
-                    });
+                function ensureStorageLoaded() {
+                    if (!storageLoaded) {
+                        storageLoaded = true;
+                    }
+                    loadFromStorage();
                 }
+
+                window.__adminPanels = window.__adminPanels || {};
+                window.__adminPanels.storage = ensureStorageLoaded;
             })();
             // ─── End Storage Intelligence ──────────────────────────────────
 
@@ -11966,16 +12064,19 @@
                     toast('Swap editor for ' + date + ' — coming soon. Edit featured-cultures.json directly for now.', 'info');
                 });
 
-                // Lazy-load on nav
-                var dccNavBtn = document.querySelector('[data-view="daily-cultures"]');
-                if (dccNavBtn) {
-                    dccNavBtn.addEventListener('click', function () {
-                        if (!dccLoaded) {
-                            dccLoaded = true;
-                            loadDccData();
-                        }
-                    });
+                function ensureDccLoaded() {
+                    if (!dccLoaded) {
+                        dccLoaded = true;
+                        loadDccData();
+                        return;
+                    }
+                    renderDccToday();
+                    renderDccWeek();
+                    renderDccMonth();
                 }
+
+                window.__adminPanels = window.__adminPanels || {};
+                window.__adminPanels['daily-cultures'] = ensureDccLoaded;
             })();
             // ─── End Daily Culture Calendar ────────────────────────────────
 
