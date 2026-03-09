@@ -4535,6 +4535,220 @@
             padding: 1rem;
             border-top: 1px solid var(--border);
         }
+
+        /* ── Daily Culture Calendar (Panel 20) ────────────────────── */
+        .dcc-today-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        @media (max-width: 700px) {
+            .dcc-today-grid { grid-template-columns: 1fr; }
+        }
+        .dcc-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.25s ease;
+        }
+        .dcc-card:hover { border-color: rgba(255,255,255,0.15); }
+        .dcc-card-slot {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem 0;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
+        .dcc-card-slot .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dcc-card-slot .dot.am { background: var(--accent-amber); }
+        .dcc-card-slot .dot.pm { background: var(--accent-sky); }
+        .dcc-card-body {
+            padding: 0.75rem 1rem 1rem;
+        }
+        .dcc-card-body h3 {
+            font-size: 1.15rem;
+            margin: 0 0 0.25rem;
+        }
+        .dcc-card-body .dcc-region {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        .dcc-card-body .dcc-reason {
+            font-size: 0.82rem;
+            color: var(--accent-amber);
+            margin-bottom: 0.35rem;
+        }
+        .dcc-card-body .dcc-fact {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+        .dcc-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+        .dcc-card-actions .btn { font-size: 0.75rem; padding: 0.3rem 0.65rem; }
+
+        .dcc-week-strip {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+        }
+        .dcc-day {
+            background: var(--card-bg);
+            padding: 0.6rem 0.4rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            min-height: 90px;
+        }
+        .dcc-day:hover { background: rgba(255,255,255,0.04); }
+        .dcc-day.today { background: rgba(34,211,238,0.08); }
+        .dcc-day .dcc-day-label {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .dcc-day .dcc-day-num {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0.2rem 0;
+        }
+        .dcc-day.today .dcc-day-num { color: var(--accent-sky); }
+        .dcc-day .dcc-day-cultures {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 0.25rem;
+        }
+        .dcc-day .dcc-slug {
+            font-size: 0.62rem;
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.06);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dcc-day .dcc-slug.am { border-left: 2px solid var(--accent-amber); }
+        .dcc-day .dcc-slug.pm { border-left: 2px solid var(--accent-sky); }
+
+        .dcc-month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            background: var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .dcc-month-header {
+            background: rgba(255,255,255,0.03);
+            padding: 0.45rem 0;
+            text-align: center;
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .dcc-month-cell {
+            background: var(--card-bg);
+            padding: 0.35rem;
+            min-height: 60px;
+            font-size: 0.7rem;
+        }
+        .dcc-month-cell.empty { background: rgba(0,0,0,0.2); }
+        .dcc-month-cell.today { background: rgba(34,211,238,0.08); }
+        .dcc-month-cell .dcc-cell-num {
+            font-weight: 600;
+            font-size: 0.72rem;
+            margin-bottom: 0.2rem;
+        }
+        .dcc-month-cell.today .dcc-cell-num { color: var(--accent-sky); }
+
+        .dcc-view-toggle {
+            display: inline-flex;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .dcc-view-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.4rem 0.85rem;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .dcc-view-btn:hover { color: var(--text); }
+        .dcc-view-btn.active {
+            background: rgba(34,211,238,0.12);
+            color: var(--accent-sky);
+        }
+
+        .dcc-schedule-editor {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .dcc-schedule-editor h3 {
+            font-size: 0.92rem;
+            margin: 0 0 0.75rem;
+        }
+        .dcc-schedule-row {
+            display: grid;
+            grid-template-columns: 110px 1fr 1fr auto;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.82rem;
+        }
+        .dcc-schedule-row:last-child { border-bottom: none; }
+        .dcc-schedule-row .dcc-sched-date {
+            font-weight: 600;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .dcc-schedule-row .dcc-sched-slug {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .dcc-swap-btn {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            padding: 0.25rem 0.5rem;
+            font-size: 0.72rem;
+            cursor: pointer;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+        .dcc-swap-btn:hover {
+            border-color: var(--accent-sky);
+            color: var(--accent-sky);
+        }
     </style>
 </head>
 
@@ -4654,6 +4868,16 @@
                                 <path d="M1 15c0-3.3 2.7-6 6-6" />
                                 <path d="M12 8.5l.7 1.4H14l-1.2.9.5 1.5-1.3-1-1.3 1 .5-1.5L10 9.9h1.3l.7-1.4Z" />
                             </svg></span><span class="nav-label">Characters</span></button>
+
+                    <div class="nav-group-label">CultureSherpa</div>
+                    <button class="nav-btn" data-view="daily-cultures"><span class="nav-num">20</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="2" y="2" width="12" height="12" rx="2" />
+                                <path d="M2 6h12" />
+                                <path d="M5 2v2" />
+                                <path d="M11 2v2" />
+                                <circle cx="6" cy="10" r="1" fill="currentColor" stroke="none" />
+                                <circle cx="10" cy="10" r="1" fill="currentColor" stroke="none" />
+                            </svg></span><span class="nav-label">Daily Cultures</span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -5861,6 +6085,84 @@
                         <p>Additional characters will appear here as they enter the production pipeline.</p>
                         <p style="font-size:0.8rem;margin-top:0.35rem">See <strong>ANIMATION_PIPELINE.md</strong> for the full project brief and tool-stack recommendations.</p>
                     </article>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Daily Culture Calendar (panel 20)                  -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-daily-cultures">
+                    <div class="section-head">
+                        <h2 class="section-title">Daily Culture Calendar</h2>
+                        <div class="inline-actions">
+                            <div class="dcc-view-toggle">
+                                <button class="dcc-view-btn active" data-dcc-view="today">Today</button>
+                                <button class="dcc-view-btn" data-dcc-view="week">Week</button>
+                                <button class="dcc-view-btn" data-dcc-view="month">Month</button>
+                            </div>
+                            <button class="btn btn-secondary" id="dcc-refresh-btn">Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Two featured cultures every day &mdash; morning &amp; evening rotations. Schedule, swap, and preview social posts for each day&rsquo;s featured cultures.</p>
+
+                    <!-- Today view -->
+                    <div id="dcc-view-today">
+                        <div class="dcc-today-grid" id="dcc-today-cards">
+                            <!-- AM card -->
+                            <div class="dcc-card" id="dcc-am-card">
+                                <div class="dcc-card-slot"><span class="dot am"></span> Morning Culture</div>
+                                <div class="dcc-card-body">
+                                    <h3 id="dcc-am-name">Loading&hellip;</h3>
+                                    <div class="dcc-region" id="dcc-am-region"></div>
+                                    <div class="dcc-reason" id="dcc-am-reason"></div>
+                                    <div class="dcc-fact" id="dcc-am-fact"></div>
+                                </div>
+                                <div class="dcc-card-actions">
+                                    <button class="btn btn-micro" data-dcc-share="am" data-platform="x">Share on X</button>
+                                    <button class="btn btn-micro" data-dcc-share="am" data-platform="linkedin">LinkedIn</button>
+                                    <button class="btn btn-micro" data-dcc-share="am" data-platform="copy">Copy Link</button>
+                                </div>
+                            </div>
+                            <!-- PM card -->
+                            <div class="dcc-card" id="dcc-pm-card">
+                                <div class="dcc-card-slot"><span class="dot pm"></span> Evening Culture</div>
+                                <div class="dcc-card-body">
+                                    <h3 id="dcc-pm-name">Loading&hellip;</h3>
+                                    <div class="dcc-region" id="dcc-pm-region"></div>
+                                    <div class="dcc-reason" id="dcc-pm-reason"></div>
+                                    <div class="dcc-fact" id="dcc-pm-fact"></div>
+                                </div>
+                                <div class="dcc-card-actions">
+                                    <button class="btn btn-micro" data-dcc-share="pm" data-platform="x">Share on X</button>
+                                    <button class="btn btn-micro" data-dcc-share="pm" data-platform="linkedin">LinkedIn</button>
+                                    <button class="btn btn-micro" data-dcc-share="pm" data-platform="copy">Copy Link</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Quick schedule editor for upcoming days -->
+                        <div class="dcc-schedule-editor">
+                            <h3>Upcoming Schedule</h3>
+                            <div id="dcc-upcoming-list">Loading schedule&hellip;</div>
+                        </div>
+                    </div>
+
+                    <!-- Week view -->
+                    <div id="dcc-view-week" style="display:none">
+                        <div class="dcc-week-strip" id="dcc-week-grid"></div>
+                        <div class="dcc-schedule-editor">
+                            <h3>This Week&rsquo;s Rotation</h3>
+                            <div id="dcc-week-schedule"></div>
+                        </div>
+                    </div>
+
+                    <!-- Month view -->
+                    <div id="dcc-view-month" style="display:none">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+                            <button class="btn btn-micro" id="dcc-month-prev">&larr; Prev</button>
+                            <strong id="dcc-month-label" style="font-size:1rem"></strong>
+                            <button class="btn btn-micro" id="dcc-month-next">Next &rarr;</button>
+                        </div>
+                        <div class="dcc-month-grid" id="dcc-month-grid"></div>
+                    </div>
                 </section>
 
                 <!-- ─── Social Gallery view ─────────────────────────────── -->
@@ -8664,6 +8966,7 @@
                 community: { name: 'Community', title: 'Community Members', sub: 'Browse, search, and review registered community members and their activity.' },
                 notifications: { name: 'Queue Health', title: 'Queue Health', sub: 'Monitor the social publishing queue, retry failed variants, and trigger manual runs.' },
                 characters: { name: 'Characters', title: 'Character Registry', sub: 'Animation character roster, pose inventory, and pipeline status.' },
+                'daily-cultures': { name: 'Daily Cultures', title: 'Daily Culture Calendar', sub: 'Two featured cultures every day — morning & evening rotations for CultureSherpa.' },
             };
 
             function updatePageContext(view) {
@@ -11390,6 +11693,291 @@
                 }
             })();
             // ─── End Storage Intelligence ──────────────────────────────────
+
+            // ─── Daily Culture Calendar (Panel 20) ─────────────────────────
+            (function () {
+                var DCC_SCHEDULE_URL = 'https://www.culturesherpa.org/data/featured-cultures.json';
+                var DCC_CULTURES_URL = 'https://www.culturesherpa.org/data/cultures_index.json';
+                var dccSchedule = [];
+                var dccCultures = [];
+                var dccMonthOffset = 0;
+                var dccCurrentView = 'today';
+                var dccLoaded = false;
+
+                // ── Helpers ──
+                function isoDate(d) {
+                    var y = d.getFullYear();
+                    var m = String(d.getMonth() + 1).padStart(2, '0');
+                    var day = String(d.getDate()).padStart(2, '0');
+                    return y + '-' + m + '-' + day;
+                }
+                function dayName(d) {
+                    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
+                }
+                var MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+
+                // Get 2 cultures for a given date — deterministic from schedule
+                function getCulturesForDate(date) {
+                    var iso = isoDate(date);
+                    var dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
+
+                    // Try exact schedule matches first
+                    var exact = dccSchedule.filter(function (e) { return e.date === iso; });
+                    if (exact.length >= 2) return { am: exact[0], pm: exact[1] };
+
+                    // Build deterministic AM / PM from schedule pool
+                    var pool = dccSchedule.length > 0 ? dccSchedule : [];
+                    if (pool.length === 0) return { am: null, pm: null };
+
+                    var amIdx, pmIdx;
+                    if (exact.length === 1) {
+                        // One exact match = AM, deterministic fallback = PM
+                        amIdx = dccSchedule.indexOf(exact[0]);
+                        pmIdx = ((dayOfYear * 7) + 3) % pool.length;
+                        if (pmIdx === amIdx) pmIdx = (pmIdx + 1) % pool.length;
+                        return { am: exact[0], pm: pool[pmIdx] };
+                    }
+
+                    // Both deterministic
+                    amIdx = (dayOfYear * 2) % pool.length;
+                    pmIdx = (dayOfYear * 2 + 1) % pool.length;
+                    return { am: pool[amIdx], pm: pool[pmIdx] };
+                }
+
+                function getCultureMeta(slug) {
+                    if (!slug || dccCultures.length === 0) return null;
+                    for (var i = 0; i < dccCultures.length; i++) {
+                        if (dccCultures[i].slug === slug) return dccCultures[i];
+                    }
+                    return null;
+                }
+
+                function prettifySlug(s) {
+                    if (!s) return '';
+                    return s.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+                }
+
+                // ── Loading ──
+                function loadDccData() {
+                    var scheduleReq = fetch(DCC_SCHEDULE_URL).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; });
+                    var culturesReq = fetch(DCC_CULTURES_URL).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; });
+
+                    Promise.all([scheduleReq, culturesReq]).then(function (results) {
+                        dccSchedule = results[0] || [];
+                        dccCultures = results[1] || [];
+                        renderDccToday();
+                        renderDccWeek();
+                        renderDccMonth();
+                    });
+                }
+
+                // ── Render today ──
+                function renderDccToday() {
+                    var today = new Date();
+                    var pair = getCulturesForDate(today);
+
+                    fillCard('am', pair.am);
+                    fillCard('pm', pair.pm);
+                    renderUpcoming();
+                }
+
+                function fillCard(slot, entry) {
+                    var name = $('dcc-' + slot + '-name');
+                    var region = $('dcc-' + slot + '-region');
+                    var reason = $('dcc-' + slot + '-reason');
+                    var fact = $('dcc-' + slot + '-fact');
+                    if (!name) return;
+
+                    if (!entry) {
+                        name.textContent = 'No culture scheduled';
+                        if (region) region.textContent = '';
+                        if (reason) reason.textContent = '';
+                        if (fact) fact.textContent = '';
+                        return;
+                    }
+
+                    var meta = getCultureMeta(entry.slug);
+                    name.textContent = meta ? meta.culture_name : prettifySlug(entry.slug);
+                    if (region) region.textContent = meta && meta.region ? meta.region : '';
+                    if (reason) reason.textContent = entry.reason || '';
+                    if (fact) fact.textContent = entry.featured_fact || '';
+                }
+
+                function renderUpcoming() {
+                    var container = $('dcc-upcoming-list');
+                    if (!container) return;
+                    var html = '';
+                    for (var i = 1; i <= 7; i++) {
+                        var d = new Date();
+                        d.setDate(d.getDate() + i);
+                        var pair = getCulturesForDate(d);
+                        var amLabel = pair.am ? prettifySlug(pair.am.slug) : '—';
+                        var pmLabel = pair.pm ? prettifySlug(pair.pm.slug) : '—';
+                        html += '<div class="dcc-schedule-row">';
+                        html += '<span class="dcc-sched-date">' + dayName(d) + ' ' + d.getDate() + '</span>';
+                        html += '<span class="dcc-sched-slug"><span class="dot am" style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--accent-amber)"></span> ' + escapeHtml(amLabel) + '</span>';
+                        html += '<span class="dcc-sched-slug"><span class="dot pm" style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--accent-sky)"></span> ' + escapeHtml(pmLabel) + '</span>';
+                        html += '<button class="dcc-swap-btn" data-dcc-swap-date="' + isoDate(d) + '">Swap</button>';
+                        html += '</div>';
+                    }
+                    container.innerHTML = html;
+                }
+
+                // ── Render week ──
+                function renderDccWeek() {
+                    var grid = $('dcc-week-grid');
+                    var sched = $('dcc-week-schedule');
+                    if (!grid) return;
+
+                    var today = new Date();
+                    var dayOfWeek = today.getDay();
+                    var startOfWeek = new Date(today);
+                    startOfWeek.setDate(today.getDate() - dayOfWeek);
+
+                    var gridHtml = '';
+                    var schedHtml = '';
+                    for (var i = 0; i < 7; i++) {
+                        var d = new Date(startOfWeek);
+                        d.setDate(startOfWeek.getDate() + i);
+                        var isToday = isoDate(d) === isoDate(today);
+                        var pair = getCulturesForDate(d);
+
+                        gridHtml += '<div class="dcc-day' + (isToday ? ' today' : '') + '">';
+                        gridHtml += '<div class="dcc-day-label">' + dayName(d) + '</div>';
+                        gridHtml += '<div class="dcc-day-num">' + d.getDate() + '</div>';
+                        gridHtml += '<div class="dcc-day-cultures">';
+                        if (pair.am) gridHtml += '<span class="dcc-slug am">' + escapeHtml(prettifySlug(pair.am.slug)) + '</span>';
+                        if (pair.pm) gridHtml += '<span class="dcc-slug pm">' + escapeHtml(prettifySlug(pair.pm.slug)) + '</span>';
+                        gridHtml += '</div></div>';
+
+                        var amL = pair.am ? prettifySlug(pair.am.slug) : '—';
+                        var pmL = pair.pm ? prettifySlug(pair.pm.slug) : '—';
+                        schedHtml += '<div class="dcc-schedule-row">';
+                        schedHtml += '<span class="dcc-sched-date">' + dayName(d) + ' ' + d.getDate() + '</span>';
+                        schedHtml += '<span class="dcc-sched-slug"><span class="dot am" style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--accent-amber)"></span> ' + escapeHtml(amL) + '</span>';
+                        schedHtml += '<span class="dcc-sched-slug"><span class="dot pm" style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--accent-sky)"></span> ' + escapeHtml(pmL) + '</span>';
+                        schedHtml += '<button class="dcc-swap-btn" data-dcc-swap-date="' + isoDate(d) + '">Swap</button>';
+                        schedHtml += '</div>';
+                    }
+                    grid.innerHTML = gridHtml;
+                    if (sched) sched.innerHTML = schedHtml;
+                }
+
+                // ── Render month ──
+                function renderDccMonth() {
+                    var grid = $('dcc-month-grid');
+                    var label = $('dcc-month-label');
+                    if (!grid) return;
+
+                    var now = new Date();
+                    var viewMonth = new Date(now.getFullYear(), now.getMonth() + dccMonthOffset, 1);
+                    if (label) label.textContent = MONTH_NAMES[viewMonth.getMonth()] + ' ' + viewMonth.getFullYear();
+
+                    var todayISO = isoDate(now);
+                    var firstDay = viewMonth.getDay();
+                    var daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate();
+
+                    var html = '';
+                    var dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                    for (var h = 0; h < 7; h++) {
+                        html += '<div class="dcc-month-header">' + dayHeaders[h] + '</div>';
+                    }
+                    // Empty cells before 1st
+                    for (var e = 0; e < firstDay; e++) {
+                        html += '<div class="dcc-month-cell empty"></div>';
+                    }
+                    for (var d = 1; d <= daysInMonth; d++) {
+                        var dt = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), d);
+                        var iso = isoDate(dt);
+                        var isToday = iso === todayISO;
+                        var pair = getCulturesForDate(dt);
+                        html += '<div class="dcc-month-cell' + (isToday ? ' today' : '') + '">';
+                        html += '<div class="dcc-cell-num">' + d + '</div>';
+                        if (pair.am) html += '<span class="dcc-slug am" style="font-size:0.58rem;display:block;margin-bottom:1px">' + escapeHtml(prettifySlug(pair.am.slug)) + '</span>';
+                        if (pair.pm) html += '<span class="dcc-slug pm" style="font-size:0.58rem;display:block">' + escapeHtml(prettifySlug(pair.pm.slug)) + '</span>';
+                        html += '</div>';
+                    }
+                    grid.innerHTML = html;
+                }
+
+                // ── Social sharing ──
+                function shareCulture(slot, platform) {
+                    var pair = getCulturesForDate(new Date());
+                    var entry = slot === 'am' ? pair.am : pair.pm;
+                    if (!entry) { toast('No culture to share.', 'error'); return; }
+
+                    var meta = getCultureMeta(entry.slug);
+                    var name = meta ? meta.culture_name : prettifySlug(entry.slug);
+                    var url = 'https://www.culturesherpa.org/explore/culture/' + entry.slug;
+                    var text = (slot === 'am' ? 'Morning' : 'Evening') + ' Featured Culture: ' + name + '! ' + (entry.featured_fact || '');
+
+                    if (platform === 'x') {
+                        window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url) + '&hashtags=CultureSherpa', '_blank', 'noopener');
+                    } else if (platform === 'linkedin') {
+                        window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), '_blank', 'noopener');
+                    } else if (platform === 'copy') {
+                        navigator.clipboard.writeText(url).then(function () {
+                            toast('Link copied!', 'success');
+                        }).catch(function () {
+                            toast('Copy failed.', 'error');
+                        });
+                    }
+                }
+
+                // ── View switching ──
+                function switchDccView(view) {
+                    dccCurrentView = view;
+                    ['today', 'week', 'month'].forEach(function (v) {
+                        var el = $('dcc-view-' + v);
+                        if (el) el.style.display = v === view ? '' : 'none';
+                    });
+                    document.querySelectorAll('.dcc-view-btn').forEach(function (btn) {
+                        btn.classList.toggle('active', btn.dataset.dccView === view);
+                    });
+                }
+
+                // ── Events ──
+                document.querySelectorAll('.dcc-view-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        switchDccView(this.dataset.dccView);
+                    });
+                });
+
+                document.querySelectorAll('[data-dcc-share]').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        shareCulture(this.dataset.dccShare, this.dataset.platform);
+                    });
+                });
+
+                var prevBtn = $('dcc-month-prev');
+                var nextBtn = $('dcc-month-next');
+                if (prevBtn) prevBtn.addEventListener('click', function () { dccMonthOffset--; renderDccMonth(); });
+                if (nextBtn) nextBtn.addEventListener('click', function () { dccMonthOffset++; renderDccMonth(); });
+
+                var refreshBtn = $('dcc-refresh-btn');
+                if (refreshBtn) refreshBtn.addEventListener('click', function () { loadDccData(); toast('Refreshed culture calendar.', 'success'); });
+
+                // Swap button handler (delegated)
+                document.addEventListener('click', function (e) {
+                    var swapBtn = e.target.closest('.dcc-swap-btn');
+                    if (!swapBtn) return;
+                    var date = swapBtn.dataset.dccSwapDate;
+                    toast('Swap editor for ' + date + ' — coming soon. Edit featured-cultures.json directly for now.', 'info');
+                });
+
+                // Lazy-load on nav
+                var dccNavBtn = document.querySelector('[data-view="daily-cultures"]');
+                if (dccNavBtn) {
+                    dccNavBtn.addEventListener('click', function () {
+                        if (!dccLoaded) {
+                            dccLoaded = true;
+                            loadDccData();
+                        }
+                    });
+                }
+            })();
+            // ─── End Daily Culture Calendar ────────────────────────────────
 
             window.__clerkReady
                 .then(initAuth)
