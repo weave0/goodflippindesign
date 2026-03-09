@@ -115,6 +115,25 @@ export default {
       });
     }
 
+    // Serve branded media assets directly from R2 (no auth required).
+    // URL shape: /api/cms/media/{assetId}-{format}.jpg
+    // R2 key shape: cms/media/{assetId}-{format}.jpg
+    if (url.pathname.startsWith('/api/cms/media/') && request.method === 'GET') {
+      if (!env.MEDIA_BUCKET) {
+        return new Response('Media storage unavailable', { status: 503 });
+      }
+      const r2Key = url.pathname.replace(/^\/api\//, ''); // strip leading /api/
+      const object = await env.MEDIA_BUCKET.get(r2Key);
+      if (!object) {
+        return new Response('Not found', { status: 404 });
+      }
+      const headers = new Headers();
+      headers.set('Content-Type', object.httpMetadata?.contentType || 'image/jpeg');
+      headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+      headers.set('ETag', object.httpEtag);
+      return new Response(object.body, { headers });
+    }
+
     // Route API requests to auth worker (gracefully degrade if unavailable)
     if (url.pathname.startsWith('/api/')) {
       const authWorker = await getAuthWorker();

@@ -1523,6 +1523,40 @@
             gap: 0.45rem;
         }
 
+        .portal-callout {
+            position: relative;
+            overflow: hidden;
+            background:
+                linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(34, 211, 238, 0.08)),
+                var(--panel);
+        }
+
+        .portal-callout::before {
+            content: '';
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--accent-gold), var(--accent-cyan));
+        }
+
+        .portal-callout-copy {
+            max-width: 72ch;
+        }
+
+        .portal-callout-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-top: 0.7rem;
+        }
+
+        .portal-callout-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 1rem;
+        }
+
         .playbook-list {
             padding-left: 1.1rem;
             color: var(--text-secondary);
@@ -4334,7 +4368,7 @@
                 <div class="brand-block">
                     <img src="/assets/gfd-mark-nav.png" alt="GFD" class="brand-logo-img">
                     <div class="brand-subtitle">Command Center</div>
-                    <span class="pill" id="active-brand-pill">Brand Scope: GFD</span>
+                    <span class="pill" id="active-brand-pill">GFD</span>
                 </div>
 
                 <div class="brand-switcher" id="brand-switcher" role="group" aria-label="Active brand"></div>
@@ -4395,7 +4429,7 @@
                     <button class="nav-btn" data-view="content-studio"><span class="nav-num">11</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
                                 <rect x="1.5" y="4.5" width="13" height="9.5" rx="1" />
                                 <path d="M1.5 7.5h13M4.5 4.5 3 2M7.5 4.5 6 2M10.5 4.5 9 2M13.5 4.5 12 2" />
-                            </svg></span><span class="nav-label">Content Studio</span></button>
+                            </svg></span><span class="nav-label">Story Studio</span></button>
                     <button class="nav-btn" data-view="ecosystem"><span class="nav-num">12</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M1 8h3l2-5 3 10 2-5 2 3h2" />
                             </svg></span><span class="nav-label">Ecosystem Health</span></button>
@@ -4538,6 +4572,25 @@
                                 </div>
                             </li>
                         </ol>
+                    </article>
+
+                    <article class="panel portal-callout mb-085">
+                        <div class="section-head">
+                            <h2 class="section-title">CultureSherpa Culture Post Portal</h2>
+                            <div class="inline-actions">
+                                <button class="btn btn-secondary" data-open-brand-gallery="culturesherpa">Open Social Feed</button>
+                                <button class="btn btn-primary" data-open-brand-studio="culturesherpa">Open Portal</button>
+                            </div>
+                        </div>
+                        <div class="portal-callout-copy">
+                            <p class="subheading">Direct route into the workflow for managing CultureSherpa culture-post registries, story scenes, prompt assets, and scheduled post variants. This focuses the workspace on CultureSherpa and opens the right surface immediately.</p>
+                            <div class="portal-callout-meta">
+                                <span class="tag ok">CultureSherpa</span>
+                                <span class="tag">Story Registries</span>
+                                <span class="tag">Scene Prompts</span>
+                                <span class="tag">Social Variants</span>
+                            </div>
+                        </div>
                     </article>
 
                     <div class="split">
@@ -5080,13 +5133,14 @@
                 <!-- ── 10. CONTENT STUDIO ──────────────────────────────────── -->
                 <section class="view" id="view-content-studio">
                     <div class="section-head">
-                        <h2 class="section-title">Content Studio</h2>
+                        <h2 class="section-title">Story &amp; Culture Post Studio</h2>
                         <div class="inline-actions">
+                            <button class="btn btn-secondary" id="cs-focus-culturesherpa-btn" data-open-brand-studio="culturesherpa">CultureSherpa Portal</button>
                             <button class="btn btn-secondary" id="cs-import-btn">Import JSON</button>
                             <button class="btn btn-primary" id="cs-new-registry-btn">New Registry</button>
                         </div>
                     </div>
-                    <p class="subheading mb-08">Browse scene-by-scene AI prompt registries for video content. Generate images via DALL&#x2011;E&nbsp;3 and schedule directly to social platforms.</p>
+                    <p class="subheading mb-08">Manage CultureSherpa culture-post registries, scene-by-scene story prompts, and AI-generated assets for scheduled social publishing. Generate images via DALL&#x2011;E&nbsp;3 and push approved outputs directly into the social workflow.</p>
                     <div class="toolbar mb-06">
                         <select id="cs-brand-filter" aria-label="Filter registries by brand">
                             <option value="">All brands</option>
@@ -5635,6 +5689,15 @@
                             <button class="sf-tab" data-platform="pinterest" role="tab" aria-selected="false">Pinterest</button>
                             <button class="sf-tab" data-platform="youtube" role="tab" aria-selected="false">YouTube</button>
                             <div class="sf-tabs-actions">
+                                <select class="input-field" id="sf-brand-filter" aria-label="Filter by brand" style="font-size:0.78rem;padding:0.28rem 0.6rem;height:auto">
+                                    <option value="">All brands</option>
+                                    <option value="gfd">GFD</option>
+                                    <option value="gfv">GFV</option>
+                                    <option value="culturesherpa">CultureSherpa</option>
+                                    <option value="aiaimate">AI Aimate</option>
+                                    <option value="globaldeets">GlobalDeets</option>
+                                    <option value="citizenapproved">CitizenApproved</option>
+                                </select>
                                 <select class="input-field" id="sf-status-filter" aria-label="Filter by status" style="font-size:0.78rem;padding:0.28rem 0.6rem;height:auto">
                                     <option value="">All statuses</option>
                                     <option value="draft">Draft</option>
@@ -6977,6 +7040,14 @@
                     });
                 }
 
+                document.querySelectorAll('[data-open-brand-studio]').forEach((btn) => {
+                    btn.addEventListener('click', () => openBrandStudio(btn.dataset.openBrandStudio));
+                });
+
+                document.querySelectorAll('[data-open-brand-gallery]').forEach((btn) => {
+                    btn.addEventListener('click', () => openBrandGallery(btn.dataset.openBrandGallery));
+                });
+
                 // ── Drip Builder ─────────────────────────────────────────────
                 $('drip-add-entry').addEventListener('click', () => addDripEntry());
                 $('drip-import-json-btn').addEventListener('click', () => openModal('drip-import-modal'));
@@ -7216,6 +7287,7 @@
             // ── Social Feed ──────────────────────────────────────────────────
             let sfPlatformFilter = 'all';
             let sfStatusFilter = '';
+            let sfBrandFilter = '';
             const SF_LIMIT = 40;
 
             async function loadSocialFeed(append) {
@@ -7230,7 +7302,7 @@
                     footer?.classList.add('d-none');
                 }
 
-                const params = new URLSearchParams({ brand: currentBrand, limit: String(SF_LIMIT) });
+                const params = new URLSearchParams({ brand: sfBrandFilter || currentBrand, limit: String(SF_LIMIT) });
                 if (sfPlatformFilter !== 'all') params.set('platform', sfPlatformFilter);
                 if (sfStatusFilter) params.set('status', sfStatusFilter);
 
@@ -7324,6 +7396,9 @@
                         loadSocialFeed();
                     });
                 });
+
+                const sfBrandSel = $('sf-brand-filter');
+                if (sfBrandSel) sfBrandSel.addEventListener('change', () => { sfBrandFilter = sfBrandSel.value; loadSocialFeed(); });
 
                 const sfSel = $('sf-status-filter');
                 if (sfSel) sfSel.addEventListener('change', () => { sfStatusFilter = sfSel.value; loadSocialFeed(); });
@@ -8240,7 +8315,7 @@
                 'review-queue': { name: 'Review Queue', title: 'Review Queue', sub: 'Approve, reject, or edit scraped content before it enters the publishing pipeline.' },
                 overrides: { name: 'Site Overrides', title: 'Site Overrides', sub: 'Manage per-domain redirect rules and link override records.' },
                 galleries: { name: 'Gallery Manager', title: 'Gallery Manager', sub: 'Curate and publish image galleries to your ecosystem sites.' },
-                'content-studio': { name: 'Content Studio', title: 'Content Studio', sub: 'AI-assisted content generation, prompt management, and scene scheduling.' },
+                'content-studio': { name: 'Story Studio', title: 'Story & Culture Post Studio', sub: 'Manage CultureSherpa culture-post registries, prompt scenes, and scheduled story assets across brands.' },
                 ecosystem: { name: 'Ecosystem Health', title: 'Ecosystem Health', sub: 'Monitor CI/CD status, uptime, and cross-brand site health across all properties.' },
                 'blog-manager': { name: 'Blog Manager', title: 'Blog Manager', sub: 'Create and publish blog posts with live markdown preview and full CMS control.' },
                 storage: { name: 'Storage Intel', title: 'Storage Intelligence', sub: 'Analyze local disk usage, identify hot spots, and track cleanup actions.' },
@@ -8708,7 +8783,39 @@
                 state.dripSelectedPlatforms = new Set(def.platforms || ['x']);
                 renderPlatformPicker();
                 renderDripPlatformPicker();
-                refreshAll();
+                return refreshAll();
+            }
+
+            async function openBrandStudio(id) {
+                if (!BRAND_DEFS[id]) return;
+                await switchBrand(id);
+                switchView('content-studio');
+                const brandFilter = $('cs-brand-filter');
+                const typeFilter = $('cs-type-filter');
+                if (brandFilter) brandFilter.value = id;
+                if (typeFilter) typeFilter.value = '';
+                await loadContentStudioRegistries();
+                toast(BRAND_DEFS[id].name + ' story studio ready.', 'info');
+            }
+
+            async function openBrandGallery(id) {
+                if (!BRAND_DEFS[id]) return;
+                await switchBrand(id);
+                switchView('social-feed');
+                sfPlatformFilter = 'all';
+                sfStatusFilter = '';
+                sfBrandFilter = id;
+                const brandFilter = $('sf-brand-filter');
+                if (brandFilter) brandFilter.value = id;
+                const statusFilter = $('sf-status-filter');
+                if (statusFilter) statusFilter.value = '';
+                document.querySelectorAll('.sf-tab').forEach((tab) => {
+                    const active = (tab.dataset.platform || '') === 'all';
+                    tab.classList.toggle('active', active);
+                    tab.setAttribute('aria-selected', active ? 'true' : 'false');
+                });
+                await loadSocialFeed();
+                toast(BRAND_DEFS[id].name + ' social gallery ready.', 'info');
             }
 
             // ════════════════════════════════════════════════════════════════
