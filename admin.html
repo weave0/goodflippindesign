@@ -305,6 +305,7 @@
             text-decoration: none;
             font-size: 0.85em;
         }
+
         .link-muted:hover {
             color: var(--text);
         }
@@ -2464,6 +2465,179 @@
         #blog-posts-table td:last-child {
             width: 130px;
         }
+
+        /* ─── Storage Intelligence panel (13) ─── */
+        .storage-drives-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.65rem;
+            margin-top: 0.65rem;
+        }
+
+        .storage-drive-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.85rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .storage-drive-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 0.4rem;
+        }
+
+        .storage-drive-letter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .storage-drive-pct {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .storage-drive-label {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-bottom: 0.55rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .storage-bar-wrap {
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            margin-bottom: 0.45rem;
+        }
+
+        .storage-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .storage-bar-fill.ok {
+            background: #10b981;
+        }
+
+        .storage-bar-fill.warn {
+            background: #f59e0b;
+        }
+
+        .storage-bar-fill.danger {
+            background: #ef4444;
+        }
+
+        .storage-drive-stats {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .storage-action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.55rem;
+            margin-top: 0.65rem;
+        }
+
+        .storage-action-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            padding: 0.65rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.02);
+            font-size: 0.82rem;
+        }
+
+        .storage-action-item.done {
+            opacity: 0.45;
+        }
+
+        .storage-action-badge {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.15em 0.45em;
+            border-radius: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+
+        .badge-done {
+            background: rgba(16, 185, 129, 0.18);
+            color: #34d399;
+        }
+
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.18);
+            color: #fbbf24;
+        }
+
+        .badge-warn {
+            background: rgba(239, 68, 68, 0.18);
+            color: #f87171;
+        }
+
+        .storage-action-label {
+            font-weight: 600;
+        }
+
+        .storage-action-gb {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 0.1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .storage-action-notes {
+            color: var(--text-muted);
+            font-size: 0.74rem;
+            margin-top: 0.15rem;
+        }
+
+        .storage-import-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.85rem;
+        }
+
+        .storage-copy-cmd {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.35rem 0.65rem;
+            color: var(--text-muted);
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .storage-hotspot-table td:first-child {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.74rem;
+            max-width: 340px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .storage-growth-flag {
+            color: #f87171;
+            font-weight: 700;
+        }
     </style>
 </head>
 
@@ -2501,6 +2675,7 @@
                     <button class="nav-btn" data-view="content-studio"><span>10</span><span>Content Studio</span></button>
                     <button class="nav-btn" data-view="ecosystem"><span>11</span><span>Ecosystem Health</span></button>
                     <button class="nav-btn" data-view="blog-manager"><span>12</span><span>Blog Manager <span class="review-badge d-none" id="blog-draft-badge">0</span></span></button>
+                    <button class="nav-btn" data-view="storage"><span>13</span><span>Storage Intel</span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -3297,6 +3472,94 @@
                         </div>
                         <p class="text-muted mt-06 d-none" id="blog-empty-msg">No posts found. Click <strong>+ New Post</strong> to write your first one.</p>
                     </article>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Storage Intelligence (panel 13)                   -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-storage">
+                    <div class="section-head">
+                        <h2 class="section-title">Storage Intelligence</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="storage-load-btn">Load Snapshot JSON</button>
+                            <button class="btn btn-ghost" id="storage-clear-btn">Clear</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Run <code>scripts/storage-snapshot.ps1</code> on WEAVERASUS, then import the resulting <code>storage-snapshot.json</code> here to see drive utilization, growth deltas, and pending action items.</p>
+
+                    <!-- Command CTA -->
+                    <div class="storage-import-row">
+                        <span class="text-muted" style="font-size:0.82rem;white-space:nowrap">Run on WEAVERASUS:</span>
+                        <span class="storage-copy-cmd" id="storage-cmd-text">.\scripts\storage-snapshot.ps1</span>
+                        <button class="btn btn-micro" id="storage-copy-cmd-btn">Copy</button>
+                        <input type="file" id="storage-file-input" accept=".json" style="display:none" aria-label="Load snapshot JSON">
+                    </div>
+
+                    <!-- Snapshot meta -->
+                    <div id="storage-meta-row" class="text-muted mb-06" style="font-size:0.78rem;display:none">
+                        Snapshot from <strong id="storage-meta-machine"></strong> &mdash; <span id="storage-meta-time"></span>
+                    </div>
+
+                    <!-- Drive cards -->
+                    <article class="panel" id="storage-drives-panel" style="display:none">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Drive Overview</h3>
+                            <span class="text-muted" id="storage-growth-summary" style="font-size:0.78rem"></span>
+                        </div>
+                        <div class="storage-drives-grid" id="storage-drives-grid"></div>
+                    </article>
+
+                    <!-- Hot-spots table -->
+                    <article class="panel mt-085" id="storage-hotspots-panel" style="display:none">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Directory Hot-Spots</h3>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="storage-hotspot-table">
+                                <thead>
+                                    <tr>
+                                        <th>Path / Label</th>
+                                        <th style="text-align:right">GB</th>
+                                        <th>Growth</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="storage-hotspots-tbody"></tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <!-- Action items -->
+                    <article class="panel mt-085" id="storage-actions-panel" style="display:none">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Pending Action Items</h3>
+                            <span class="text-muted" id="storage-pending-summary" style="font-size:0.78rem"></span>
+                        </div>
+                        <div class="storage-action-grid" id="storage-actions-grid"></div>
+                    </article>
+
+                    <!-- node_modules -->
+                    <article class="panel mt-085" id="storage-nm-panel" style="display:none">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">node_modules on Z:</h3>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Path</th>
+                                        <th style="text-align:right">GB</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="storage-nm-tbody"></tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <!-- Empty state -->
+                    <div id="storage-empty-state" class="panel" style="text-align:center;padding:3rem 1rem">
+                        <p style="color:var(--text-muted);margin-bottom:0.85rem">No snapshot loaded yet.</p>
+                        <p style="font-size:0.82rem;color:var(--text-muted)">Run the PowerShell script on WEAVERASUS, then click <strong>Load Snapshot JSON</strong>.</p>
+                    </div>
                 </section>
             </main>
         </div>
@@ -7544,6 +7807,211 @@
                 wireBlogEvents();
             })();
             // ─── End Blog Manager ─────────────────────────────────────────
+
+            // ─────────────────────────────────────────────────────────────────
+            // STORAGE INTELLIGENCE (panel 13)
+            // -----------------------------------------------------------------
+            // Reads a JSON snapshot produced by scripts/storage-snapshot.ps1.
+            // Data is stored in localStorage so it persists across sessions.
+            // ─────────────────────────────────────────────────────────────────
+            (function () {
+                var STORAGE_KEY = 'gfd_storage_snapshot';
+
+                function escHtml(s) {
+                    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                }
+
+                function barClass(pct) {
+                    if (pct >= 85) return 'danger';
+                    if (pct >= 65) return 'warn';
+                    return 'ok';
+                }
+
+                function fmtTime(iso) {
+                    try { return new Date(iso).toLocaleString(); }
+                    catch (e) { return iso; }
+                }
+
+                function renderSnapshot(snap) {
+                    var empty = $('storage-empty-state');
+                    if (empty) empty.style.display = 'none';
+
+                    // Meta row
+                    var metaRow = $('storage-meta-row');
+                    if (metaRow && snap.meta) {
+                        $('storage-meta-machine').textContent = snap.meta.machine || '—';
+                        $('storage-meta-time').textContent = fmtTime(snap.meta.timestamp);
+                        metaRow.style.display = 'block';
+                    }
+
+                    // Drive cards
+                    var drivesPanel = $('storage-drives-panel');
+                    var drivesGrid = $('storage-drives-grid');
+                    if (drivesPanel && drivesGrid && snap.drives && snap.drives.length) {
+                        drivesPanel.style.display = 'block';
+
+                        // Growth summary from comparison
+                        var growthEl = $('storage-growth-summary');
+                        if (growthEl && snap.comparison && snap.comparison.driveGrowth) {
+                            var flagged = snap.comparison.driveGrowth.filter(function (g) { return g.flag; });
+                            if (flagged.length) {
+                                growthEl.innerHTML = '<span class="storage-growth-flag">⚠ ' +
+                                    flagged.map(function (g) { return g.drive + ' +' + g.growthGB + ' GB'; }).join(' · ') +
+                                    '</span> vs baseline ' + escHtml(snap.comparison.baselineTimestamp ? fmtTime(snap.comparison.baselineTimestamp) : '');
+                            } else {
+                                growthEl.textContent = 'No significant growth vs baseline.';
+                            }
+                        }
+
+                        drivesGrid.innerHTML = snap.drives.map(function (d) {
+                            var cls = barClass(d.pctUsed);
+                            return '<div class="storage-drive-card">' +
+                                '<div class="storage-drive-header">' +
+                                '<span class="storage-drive-letter">' + escHtml(d.drive) + '</span>' +
+                                '<span class="storage-drive-pct">' + escHtml(d.pctUsed) + '%</span>' +
+                                '</div>' +
+                                '<div class="storage-drive-label">' + escHtml(d.label || '—') + '</div>' +
+                                '<div class="storage-bar-wrap"><div class="storage-bar-fill ' + cls + '" style="width:' + Math.min(d.pctUsed, 100) + '%"></div></div>' +
+                                '<div class="storage-drive-stats">' + escHtml(d.usedGB) + ' GB used &mdash; ' + escHtml(d.freeGB) + ' GB free</div>' +
+                                '</div>';
+                        }).join('');
+                    }
+
+                    // Hot-spots table
+                    var hsPanel = $('storage-hotspots-panel');
+                    var hsTbody = $('storage-hotspots-tbody');
+                    if (hsPanel && hsTbody && snap.hotspots && snap.hotspots.length) {
+                        hsPanel.style.display = 'block';
+                        var sorted = snap.hotspots.slice().sort(function (a, b) { return (b.sizeGB || 0) - (a.sizeGB || 0); });
+
+                        // Build growth lookup if available
+                        var growthLookup = {};
+                        if (snap.comparison && snap.comparison.driveGrowth) {
+                            snap.comparison.driveGrowth.forEach(function (g) { growthLookup[g.drive] = g; });
+                        }
+
+                        hsTbody.innerHTML = sorted.filter(function (h) { return h.sizeGB !== null && h.sizeGB !== undefined; }).map(function (h) {
+                            return '<tr><td>' + escHtml(h.label || h.path) + '</td>' +
+                                '<td style="text-align:right;font-family:\'JetBrains Mono\',monospace">' + escHtml(h.sizeGB) + '</td>' +
+                                '<td></td></tr>';
+                        }).join('');
+                    }
+
+                    // Action items
+                    var actPanel = $('storage-actions-panel');
+                    var actGrid = $('storage-actions-grid');
+                    if (actPanel && actGrid && snap.actionItems && snap.actionItems.length) {
+                        actPanel.style.display = 'block';
+                        var pending = snap.actionItems.filter(function (a) { return a.status !== 'done'; });
+                        var totalGB = pending.reduce(function (sum, a) { return sum + (a.potentialGB || 0); }, 0);
+                        var pendSumEl = $('storage-pending-summary');
+                        if (pendSumEl) pendSumEl.textContent = pending.length + ' items · ~' + totalGB + ' GB recoverable';
+
+                        actGrid.innerHTML = snap.actionItems.map(function (a) {
+                            var isDone = a.status === 'done';
+                            var badgeCls = isDone ? 'badge-done' : (a.potentialGB > 50 ? 'badge-warn' : 'badge-pending');
+                            var badgeLabel = isDone ? '✓ done' : 'pending';
+                            return '<div class="storage-action-item ' + (isDone ? 'done' : '') + '">' +
+                                '<span class="storage-action-badge ' + badgeCls + '">' + badgeLabel + '</span>' +
+                                '<div>' +
+                                '<div class="storage-action-label">' + escHtml(a.label) + '</div>' +
+                                (a.potentialGB ? '<div class="storage-action-gb">~' + escHtml(a.potentialGB) + ' GB</div>' : '') +
+                                (a.notes ? '<div class="storage-action-notes">' + escHtml(a.notes) + '</div>' : '') +
+                                '</div>' +
+                                '</div>';
+                        }).join('');
+                    }
+
+                    // node_modules
+                    var nmPanel = $('storage-nm-panel');
+                    var nmTbody = $('storage-nm-tbody');
+                    if (nmPanel && nmTbody && snap.nodeModules && snap.nodeModules.length) {
+                        nmPanel.style.display = 'block';
+                        nmTbody.innerHTML = snap.nodeModules.map(function (nm) {
+                            return '<tr><td style="font-family:\'JetBrains Mono\',monospace;font-size:0.74rem">' +
+                                escHtml(nm.path) + '</td><td style="text-align:right">' + escHtml(nm.sizeGB) + '</td></tr>';
+                        }).join('');
+                    }
+                }
+
+                function loadFromStorage() {
+                    var raw = localStorage.getItem(STORAGE_KEY);
+                    if (raw) {
+                        try {
+                            renderSnapshot(JSON.parse(raw));
+                        } catch (e) {
+                            console.error('[storage] Failed to parse saved snapshot', e);
+                        }
+                    }
+                }
+
+                // Load button → file picker
+                var loadBtn = $('storage-load-btn');
+                var fileInput = $('storage-file-input');
+                if (loadBtn && fileInput) {
+                    loadBtn.addEventListener('click', function () { fileInput.click(); });
+                    fileInput.addEventListener('change', function (e) {
+                        var file = e.target.files[0];
+                        if (!file) return;
+                        var reader = new FileReader();
+                        reader.onload = function (ev) {
+                            try {
+                                var snap = JSON.parse(ev.target.result);
+                                localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
+                                // Reset panels
+                                ['storage-drives-panel', 'storage-hotspots-panel', 'storage-actions-panel', 'storage-nm-panel'].forEach(function (id) {
+                                    var el = $(id); if (el) el.style.display = 'none';
+                                });
+                                renderSnapshot(snap);
+                                toast('Snapshot loaded — ' + (snap.meta && snap.meta.machine ? snap.meta.machine : 'unknown'), 'success');
+                            } catch (err) {
+                                toast('Invalid JSON snapshot file.', 'error');
+                            }
+                        };
+                        reader.readAsText(file);
+                        e.target.value = '';
+                    });
+                }
+
+                // Clear button
+                var clearBtn = $('storage-clear-btn');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', function () {
+                        localStorage.removeItem(STORAGE_KEY);
+                        ['storage-drives-panel', 'storage-hotspots-panel', 'storage-actions-panel', 'storage-nm-panel', 'storage-meta-row'].forEach(function (id) {
+                            var el = $(id); if (el) el.style.display = 'none';
+                        });
+                        var empty = $('storage-empty-state'); if (empty) empty.style.display = 'block';
+                        toast('Snapshot cleared.', 'success');
+                    });
+                }
+
+                // Copy command button
+                var copyCmdBtn = $('storage-copy-cmd-btn');
+                var cmdText = $('storage-cmd-text');
+                if (copyCmdBtn && cmdText) {
+                    copyCmdBtn.addEventListener('click', function () {
+                        navigator.clipboard.writeText(cmdText.textContent).then(function () {
+                            toast('Command copied to clipboard.', 'success');
+                        }).catch(function () {
+                            toast('Copy failed — select text manually.', 'error');
+                        });
+                    });
+                }
+
+                // Hook into nav switching
+                var storageLoaded = false;
+                var storageNavBtn = document.querySelector('[data-view="storage"]');
+                if (storageNavBtn) {
+                    storageNavBtn.addEventListener('click', function () {
+                        if (!storageLoaded) {
+                            storageLoaded = true;
+                            loadFromStorage();
+                        }
+                    });
+                }
+            })();
+            // ─── End Storage Intelligence ──────────────────────────────────
 
             window.__clerkReady
                 .then(initAuth)
