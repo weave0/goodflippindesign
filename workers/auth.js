@@ -381,19 +381,22 @@ async function handleListBlogPosts(request, env) {
   const url = new URL(request.url);
   const status = url.searchParams.get('status');
 
+  // 'all' is allowed for authenticated admin callers (enforced at routing level)
   try {
     let query = `
-      SELECT id, title, slug, excerpt, tags, author_id, published_at, created_at
+      SELECT id, title, slug, excerpt, tags, status, author_id, published_at, created_at, updated_at
       FROM blog_posts
     `;
 
     if (status === 'draft') {
       query += ` WHERE status = 'draft'`;
+    } else if (status === 'all') {
+      // No WHERE filter — return all statuses
     } else {
       query += ` WHERE status = 'published'`;
     }
 
-    query += ` ORDER BY published_at DESC LIMIT 50`;
+    query += ` ORDER BY created_at DESC LIMIT 200`;
 
     const { results } = await env.DB.prepare(query).all();
 
@@ -1686,11 +1689,14 @@ export default {
         }
 
         if (url.pathname === '/api/blog' && request.method === 'GET') {
-          const response = await handleListBlogPosts(request, env);
-          return new Response(response.body, {
-            ...response,
-            headers: { ...response.headers, ...corsHeaders },
-          });
+          // status=all requires admin auth — fall through to authenticated routes
+          if (url.searchParams.get('status') !== 'all') {
+            const response = await handleListBlogPosts(request, env);
+            return new Response(response.body, {
+              ...response,
+              headers: { ...response.headers, ...corsHeaders },
+            });
+          }
         }
 
     if (url.pathname === '/api/blog/post' && request.method === 'GET') {
@@ -1818,6 +1824,17 @@ export default {
         });
 
       case '/api/blog':
+        if (request.method === 'GET') {
+          // status=all — admin-only full listing
+          if (user.publicMetadata?.role !== 'admin') {
+            return new Response('Forbidden', { status: 403, headers: corsHeaders });
+          }
+          const response = await handleListBlogPosts(request, env);
+          return new Response(response.body, {
+            status: response.status,
+            headers: { ...response.headers, ...corsHeaders },
+          });
+        }
         if (request.method === 'POST') {
           const response = await handleCreateBlogPost(request, user, env);
           return new Response(response.body, {

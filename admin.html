@@ -294,6 +294,21 @@
             border: 1px solid rgba(239, 68, 68, 0.35);
         }
 
+        .btn-sm {
+            padding: 0.25rem 0.6rem;
+            font-size: 0.78rem;
+            min-height: unset;
+        }
+
+        .link-muted {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85em;
+        }
+        .link-muted:hover {
+            color: var(--text);
+        }
+
         .panel {
             border: 1px solid var(--border);
             background: var(--panel);
@@ -1389,6 +1404,10 @@
             margin-top: 0.6rem;
         }
 
+        .mt-04 {
+            margin-top: 0.4rem;
+        }
+
         .mb-08 {
             margin-bottom: 0.8rem;
         }
@@ -2267,6 +2286,184 @@
             color: var(--text-muted);
             padding-top: 0.4rem;
         }
+
+        /* ─── Blog Manager (panel 12) ──────────────────────────────── */
+        .blog-stats-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .blog-stat-chip {
+            background: var(--panel-strong);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.45rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .blog-stat-chip strong {
+            color: var(--text);
+            font-size: 1.05rem;
+            display: inline-block;
+            margin-right: 0.3rem;
+        }
+
+        .blog-stat-chip.stat-published strong {
+            color: var(--accent-emerald);
+        }
+
+        .blog-stat-chip.stat-draft strong {
+            color: var(--accent-gold);
+        }
+
+        .blog-stat-chip.stat-total strong {
+            color: var(--accent-cyan);
+        }
+
+        .blog-filter-bar {
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .blog-filter-bar input[type="text"] {
+            flex: 1;
+            min-width: 160px;
+            max-width: 320px;
+            padding: 0.45rem 0.75rem;
+            background: var(--panel-strong);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text);
+            font-size: 0.85rem;
+        }
+
+        .blog-filter-bar select {
+            padding: 0.45rem 0.75rem;
+            background: var(--panel-strong);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text);
+            font-size: 0.85rem;
+        }
+
+        #blog-posts-table tbody tr {
+            cursor: pointer;
+        }
+
+        #blog-posts-table tbody tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .blog-post-title-cell {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .blog-post-title-cell .post-slug {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 0.15rem;
+        }
+
+        .blog-post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+
+        .blog-post-tag {
+            background: rgba(168, 85, 247, 0.15);
+            color: var(--accent-violet);
+            border-radius: 4px;
+            padding: 0.1rem 0.45rem;
+            font-size: 0.72rem;
+        }
+
+        /* Blog post editor modal */
+        .blog-editor-modal .form-label {
+            margin-bottom: 0.35rem;
+            display: block;
+        }
+
+        .blog-content-textarea {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 260px;
+        }
+
+        .blog-char-hint {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        .blog-slug-preview {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 0.2rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--panel-strong);
+            border-radius: 4px;
+        }
+
+        .blog-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .blog-toolbar-btn {
+            padding: 0.2rem 0.6rem;
+            background: var(--panel-strong);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .blog-toolbar-btn:hover {
+            background: rgba(34, 211, 238, 0.12);
+            color: var(--accent-cyan);
+            border-color: rgba(34, 211, 238, 0.3);
+        }
+
+        .blog-sort-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 0;
+        }
+
+        .blog-sort-btn.active {
+            color: var(--accent-cyan);
+        }
+
+        .blog-empty-state {
+            padding: 3rem 1rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        #blog-posts-table th:last-child,
+        #blog-posts-table td:last-child {
+            width: 130px;
+        }
     </style>
 </head>
 
@@ -2303,6 +2500,7 @@
                     <button class="nav-btn" data-view="galleries"><span>09</span><span>Gallery Manager</span></button>
                     <button class="nav-btn" data-view="content-studio"><span>10</span><span>Content Studio</span></button>
                     <button class="nav-btn" data-view="ecosystem"><span>11</span><span>Ecosystem Health</span></button>
+                    <button class="nav-btn" data-view="blog-manager"><span>12</span><span>Blog Manager <span class="review-badge d-none" id="blog-draft-badge">0</span></span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -3040,7 +3238,133 @@
                         </div>
                     </article>
                 </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Blog Manager (panel 12)                            -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-blog-manager">
+                    <div class="section-head">
+                        <h2 class="section-title">Blog Manager</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="blog-refresh-btn">Refresh</button>
+                            <button class="btn btn-primary" id="blog-new-btn">+ New Post</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Create, edit, sort, and publish blog posts for <strong>goodflippinvibes.com</strong>. Posts are stored in D1 and served live via the auth worker API.</p>
+
+                    <!-- Mini KPI strip -->
+                    <div class="blog-stats-row" id="blog-stats-row">
+                        <div class="blog-stat-chip stat-total"><strong id="blog-stat-total">—</strong> total</div>
+                        <div class="blog-stat-chip stat-published"><strong id="blog-stat-published">—</strong> published</div>
+                        <div class="blog-stat-chip stat-draft"><strong id="blog-stat-draft">—</strong> draft</div>
+                    </div>
+
+                    <!-- Filter + search bar -->
+                    <div class="blog-filter-bar">
+                        <input type="text" id="blog-search" placeholder="Search title or tags…" aria-label="Search posts">
+                        <select id="blog-filter-status" aria-label="Filter by status" title="Filter by status">
+                            <option value="">All statuses</option>
+                            <option value="published">Published</option>
+                            <option value="draft">Draft</option>
+                        </select>
+                        <select id="blog-filter-sort" aria-label="Sort posts" title="Sort posts">
+                            <option value="created_desc">Newest first</option>
+                            <option value="created_asc">Oldest first</option>
+                            <option value="title_asc">Title A–Z</option>
+                            <option value="title_desc">Title Z–A</option>
+                        </select>
+                    </div>
+
+                    <article class="panel">
+                        <div class="table-wrap">
+                            <table id="blog-posts-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title / Slug</th>
+                                        <th>Status</th>
+                                        <th>Tags</th>
+                                        <th>Published</th>
+                                        <th>Created</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="blog-posts-tbody">
+                                    <tr>
+                                        <td colspan="6" class="blog-empty-state">Loading…</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-muted mt-06 d-none" id="blog-empty-msg">No posts found. Click <strong>+ New Post</strong> to write your first one.</p>
+                    </article>
+                </section>
             </main>
+        </div>
+    </div>
+
+    <!-- Blog Post Create / Edit Modal -->
+    <div class="modal-wrap" id="blog-post-modal">
+        <div class="modal modal-wide blog-editor-modal">
+            <h3 id="blog-modal-title">New Blog Post</h3>
+            <input type="hidden" id="blog-post-id">
+
+            <div class="form-grid mt-04">
+                <div>
+                    <label class="form-label" for="blog-post-title">Title <span class="text-muted">(required)</span></label>
+                    <input type="text" id="blog-post-title" placeholder="The Art of Going With the Flow" maxlength="120">
+                    <div class="blog-char-hint"><span id="blog-title-count">0</span>/120 &mdash; slug preview: <span class="blog-slug-preview" id="blog-slug-preview">auto-generated</span></div>
+                </div>
+                <div>
+                    <label class="form-label" for="blog-post-slug">Slug <span class="text-muted">(auto-filled, editable)</span></label>
+                    <input type="text" id="blog-post-slug" placeholder="the-art-of-going-with-the-flow" pattern="[a-z0-9-]+">
+                </div>
+            </div>
+
+            <div class="mt-06">
+                <label class="form-label" for="blog-post-excerpt">Excerpt <span class="text-muted">(shown in post cards)</span></label>
+                <textarea id="blog-post-excerpt" rows="2" placeholder="One or two sentences that hook the reader…" maxlength="280"></textarea>
+                <div class="blog-char-hint"><span id="blog-excerpt-count">0</span>/280</div>
+            </div>
+
+            <div class="mt-06">
+                <label class="form-label" for="blog-post-content">Content <span class="text-muted">(Markdown)</span></label>
+                <div class="blog-toolbar" role="toolbar" aria-label="Markdown formatting">
+                    <button type="button" class="blog-toolbar-btn" data-md="bold" title="Bold"><strong>B</strong></button>
+                    <button type="button" class="blog-toolbar-btn" data-md="italic" title="Italic"><em>I</em></button>
+                    <button type="button" class="blog-toolbar-btn" data-md="h2" title="Heading 2">H2</button>
+                    <button type="button" class="blog-toolbar-btn" data-md="h3" title="Heading 3">H3</button>
+                    <button type="button" class="blog-toolbar-btn" data-md="link" title="Link">&#128279;</button>
+                    <button type="button" class="blog-toolbar-btn" data-md="code" title="Inline code"><code>`code`</code></button>
+                    <button type="button" class="blog-toolbar-btn" data-md="codeblock" title="Code block">```block```</button>
+                    <button type="button" class="blog-toolbar-btn" data-md="ul" title="Bullet list">&bull; list</button>
+                    <button type="button" class="blog-toolbar-btn" data-md="hr" title="Horizontal rule">&mdash;</button>
+                </div>
+                <textarea id="blog-post-content" class="blog-content-textarea" rows="16" placeholder="Write your post in Markdown. Paragraphs, **bold**, *italic*, ## headings, - lists, [links](url), and ```code blocks``` all work."></textarea>
+            </div>
+
+            <div class="form-grid mt-06">
+                <div>
+                    <label class="form-label" for="blog-post-tags">Tags <span class="text-muted">(comma-separated, max 5)</span></label>
+                    <input type="text" id="blog-post-tags" placeholder="vibes, creativity, wellness">
+                </div>
+                <div>
+                    <label class="form-label" for="blog-post-status">Status</label>
+                    <select id="blog-post-status" title="Post status">
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="actions-split mt-08">
+                <div class="actions-left">
+                    <button class="btn btn-danger d-none" id="blog-delete-btn">Delete Post</button>
+                </div>
+                <div class="actions-right">
+                    <button class="btn btn-secondary" data-close-modal="blog-post-modal">Cancel</button>
+                    <button class="btn btn-primary" id="blog-save-btn">Save Post</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -6857,6 +7181,369 @@
                 if (kpiCI) kpiCI.textContent = totalFailures > 0 ? String(totalFailures) : '0';
             }
             // ─────────────────────────────────────────────────────────────
+
+            // ─── Blog Manager (panel 12) ──────────────────────────────────
+            (function initBlogManager() {
+                'use strict';
+
+                var blogPosts = [];
+                var blogEditingId = null;
+                var blogSlugManuallyEdited = false;
+
+                // ── auth-aware fetch for /api/blog (bypasses /api/cms prefix) ──
+                async function blogFetch(path, opts) {
+                    opts = opts || {};
+                    var headers = Object.assign({}, opts.headers || {});
+                    if (state.clerk && state.clerk.session) {
+                        try {
+                            var token = await state.clerk.session.getToken();
+                            if (token) headers['Authorization'] = 'Bearer ' + token;
+                        } catch (e) { /* token unavailable */ }
+                    }
+                    var body = opts.body;
+                    if (body && typeof body === 'object' && !(body instanceof FormData)) {
+                        headers['Content-Type'] = 'application/json';
+                        body = JSON.stringify(body);
+                    }
+                    var res = await fetch(path, Object.assign({}, opts, { headers: headers, body: body }));
+                    var data = await res.json().catch(function () { return {}; });
+                    if (!res.ok) {
+                        throw new Error(data.error || data.message || (res.status + ' ' + res.statusText));
+                    }
+                    return data;
+                }
+
+                // ── helpers ───────────────────────────────────────────────
+                function slugify(str) {
+                    return String(str)
+                        .toLowerCase()
+                        .trim()
+                        .replace(/[^a-z0-9\s-]/g, '')
+                        .replace(/[\s]+/g, '-')
+                        .replace(/-+/g, '-')
+                        .slice(0, 80);
+                }
+
+                function insertMarkdown(textarea, type) {
+                    var start = textarea.selectionStart;
+                    var end = textarea.selectionEnd;
+                    var sel = textarea.value.slice(start, end) || '';
+                    var before = textarea.value.slice(0, start);
+                    var after = textarea.value.slice(end);
+                    var insert = '';
+                    switch (type) {
+                        case 'bold': insert = '**' + (sel || 'bold text') + '**'; break;
+                        case 'italic': insert = '*' + (sel || 'italic text') + '*'; break;
+                        case 'h2': insert = '\n## ' + (sel || 'Heading'); break;
+                        case 'h3': insert = '\n### ' + (sel || 'Heading'); break;
+                        case 'link': insert = '[' + (sel || 'link text') + '](url)'; break;
+                        case 'code': insert = '`' + (sel || 'code') + '`'; break;
+                        case 'codeblock': insert = '\n```\n' + (sel || 'code here') + '\n```\n'; break;
+                        case 'ul': insert = '\n- ' + (sel || 'list item'); break;
+                        case 'hr': insert = '\n\n---\n\n'; break;
+                    }
+                    textarea.value = before + insert + after;
+                    var cursor = before.length + insert.length;
+                    textarea.setSelectionRange(cursor, cursor);
+                    textarea.focus();
+                    textarea.dispatchEvent(new Event('input'));
+                }
+
+                // ── stats chip update ─────────────────────────────────────
+                function updateBlogStats(posts) {
+                    var total = posts.length;
+                    var published = posts.filter(function (p) { return p.status === 'published'; }).length;
+                    var draft = total - published;
+
+                    var elTotal = $('blog-stat-total');
+                    var elPub = $('blog-stat-published');
+                    var elDraft = $('blog-stat-draft');
+                    var elBadge = $('blog-draft-badge');
+
+                    if (elTotal) elTotal.textContent = total;
+                    if (elPub) elPub.textContent = published;
+                    if (elDraft) elDraft.textContent = draft;
+                    if (elBadge) {
+                        elBadge.textContent = draft;
+                        elBadge.classList.toggle('d-none', draft === 0);
+                    }
+                }
+
+                // ── table render ──────────────────────────────────────────
+                function renderBlogTable() {
+                    var tbody = $('blog-posts-tbody');
+                    var emptyMsg = $('blog-empty-msg');
+                    if (!tbody) return;
+
+                    var search = ($('blog-search') ? $('blog-search').value : '').toLowerCase().trim();
+                    var statusFilter = $('blog-filter-status') ? $('blog-filter-status').value : 'all';
+                    var sortVal = $('blog-filter-sort') ? $('blog-filter-sort').value : 'created_desc';
+
+                    var filtered = blogPosts.filter(function (p) {
+                        if (statusFilter !== 'all' && p.status !== statusFilter) return false;
+                        if (search) {
+                            var haystack = (p.title + ' ' + (p.excerpt || '') + ' ' + (p.tags || '')).toLowerCase();
+                            if (haystack.indexOf(search) === -1) return false;
+                        }
+                        return true;
+                    });
+
+                    filtered.sort(function (a, b) {
+                        if (sortVal === 'created_asc') return (a.created_at || '') < (b.created_at || '') ? -1 : 1;
+                        if (sortVal === 'created_desc') return (a.created_at || '') > (b.created_at || '') ? -1 : 1;
+                        if (sortVal === 'title_asc') return (a.title || '').localeCompare(b.title || '');
+                        if (sortVal === 'title_desc') return (b.title || '').localeCompare(a.title || '');
+                        if (sortVal === 'status') return (a.status || '').localeCompare(b.status || '');
+                        return 0;
+                    });
+
+                    if (filtered.length === 0) {
+                        tbody.innerHTML = '';
+                        if (emptyMsg) emptyMsg.classList.remove('d-none');
+                        return;
+                    }
+                    if (emptyMsg) emptyMsg.classList.add('d-none');
+
+                    tbody.innerHTML = filtered.map(function (p) {
+                        var statusBadge = p.status === 'published'
+                            ? '<span class="tag ok">published</span>'
+                            : '<span class="tag warn">draft</span>';
+
+                        var tagHtml = '';
+                        if (p.tags) {
+                            tagHtml = '<div class="blog-post-tags">' +
+                                p.tags.split(',').slice(0, 4).map(function (t) {
+                                    return '<span class="blog-post-tag">' + escapeHtml(t.trim()) + '</span>';
+                                }).join('') +
+                                '</div>';
+                        }
+
+                        var viewLink = p.status === 'published' && p.slug
+                            ? ' <a href="https://goodflippinvibes.com/blog/' + encodeURIComponent(p.slug) + '" target="_blank" rel="noopener" class="link-muted" aria-label="View post on site">\u2197</a>'
+                            : '';
+
+                        var date = p.updated_at || p.created_at || '';
+                        var dateStr = date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '\u2014';
+
+                        return '<tr>' +
+                            '<td class="blog-post-title-cell">' + escapeHtml(p.title || 'Untitled') + viewLink + tagHtml + '</td>' +
+                            '<td>' + statusBadge + '</td>' +
+                            '<td class="text-muted">' + escapeHtml(dateStr) + '</td>' +
+                            '<td><button class="btn btn-sm btn-secondary blog-edit-btn" data-id="' + escapeHtml(p.id) + '">Edit</button>' +
+                            ' <button class="btn btn-sm btn-danger blog-del-btn" data-id="' + escapeHtml(p.id) + '" aria-label="Delete post">&#128465;</button></td>' +
+                            '</tr>';
+                    }).join('');
+
+                    // bind row action buttons
+                    tbody.querySelectorAll('.blog-edit-btn').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            var post = blogPosts.find(function (p) { return p.id === btn.dataset.id; });
+                            if (post) openBlogModal(post);
+                        });
+                    });
+                    tbody.querySelectorAll('.blog-del-btn').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            deleteBlogPost(btn.dataset.id);
+                        });
+                    });
+                }
+
+                // ── fetch all posts ───────────────────────────────────────
+                async function fetchBlogPosts() {
+                    var btn = $('blog-refresh-btn');
+                    if (btn) { btn.disabled = true; btn.textContent = 'Loading\u2026'; }
+                    try {
+                        var data = await blogFetch('/api/blog?status=all');
+                        blogPosts = Array.isArray(data) ? data : (data.posts || []);
+                        updateBlogStats(blogPosts);
+                        renderBlogTable();
+                    } catch (err) {
+                        console.error('[blog] fetch failed', err);
+                        var tbody = $('blog-posts-tbody');
+                        if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-muted">Failed to load posts. Check auth and worker deployment.</td></tr>';
+                    } finally {
+                        if (btn) { btn.disabled = false; btn.textContent = 'Refresh'; }
+                    }
+                }
+
+                // ── modal open / close ────────────────────────────────────
+                function openBlogModal(post) {
+                    blogEditingId = post ? post.id : null;
+                    blogSlugManuallyEdited = !!post;
+
+                    var titleEl = $('blog-modal-title');
+                    if (titleEl) titleEl.textContent = post ? 'Edit Post' : 'New Blog Post';
+
+                    setValue('blog-post-id', post ? post.id : '');
+                    setValue('blog-post-title', post ? post.title : '');
+                    setValue('blog-post-slug', post ? post.slug : '');
+                    setValue('blog-post-excerpt', post ? post.excerpt : '');
+                    setValue('blog-post-content', post ? post.content : '');
+                    setValue('blog-post-tags', post ? (post.tags || '') : '');
+                    setValue('blog-post-status', post ? post.status : 'draft');
+
+                    updateSlugPreview(post ? post.slug : '');
+                    updateCharCount('blog-post-title', 'blog-title-count');
+                    updateCharCount('blog-post-excerpt', 'blog-excerpt-count');
+
+                    var deleteBtn = $('blog-delete-btn');
+                    if (deleteBtn) deleteBtn.classList.toggle('d-none', !post);
+
+                    var saveBtn = $('blog-save-btn');
+                    if (saveBtn) saveBtn.textContent = post ? 'Save Changes' : 'Create Post';
+
+                    openModal('blog-post-modal');
+                }
+
+                function setValue(id, val) {
+                    var el = $(id);
+                    if (el) el.value = val || '';
+                }
+
+                function updateSlugPreview(slug) {
+                    var preview = $('blog-slug-preview');
+                    if (preview) preview.textContent = slug || 'auto-generated';
+                }
+
+                function updateCharCount(inputId, countId) {
+                    var input = $(inputId);
+                    var counter = $(countId);
+                    if (input && counter) counter.textContent = input.value.length;
+                }
+
+                // ── save (create or update) ───────────────────────────────
+                async function saveBlogPost() {
+                    var saveBtn = $('blog-save-btn');
+                    var title = ($('blog-post-title') || {}).value || '';
+                    var slug = ($('blog-post-slug') || {}).value || '';
+                    var excerpt = ($('blog-post-excerpt') || {}).value || '';
+                    var content = ($('blog-post-content') || {}).value || '';
+                    var tags = ($('blog-post-tags') || {}).value || '';
+                    var status = ($('blog-post-status') || {}).value || 'draft';
+
+                    if (!title.trim()) {
+                        alert('Title is required.');
+                        return;
+                    }
+                    if (!slug.trim()) slug = slugify(title);
+
+                    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving\u2026'; }
+
+                    try {
+                        var body = { title: title.trim(), slug: slug.trim(), excerpt: excerpt.trim(), content: content, tags: tags.trim(), status: status };
+                        if (blogEditingId) body.id = blogEditingId;
+
+                        await blogFetch('/api/blog', {
+                            method: blogEditingId ? 'PUT' : 'POST',
+                            body: body
+                        });
+
+                        closeModal('blog-post-modal');
+                        await fetchBlogPosts();
+                    } catch (err) {
+                        console.error('[blog] save failed', err);
+                        alert('Save failed: ' + (err.message || 'Unknown error'));
+                    } finally {
+                        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = blogEditingId ? 'Save Changes' : 'Create Post'; }
+                    }
+                }
+
+                // ── delete ────────────────────────────────────────────────
+                async function deleteBlogPost(id) {
+                    if (!id) return;
+                    var post = blogPosts.find(function (p) { return p.id === id; });
+                    var title = post ? post.title : 'this post';
+                    if (!confirm('Permanently delete "' + title + '"? This cannot be undone.')) return;
+                    try {
+                        await blogFetch('/api/blog?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                        closeModal('blog-post-modal');
+                        await fetchBlogPosts();
+                    } catch (err) {
+                        console.error('[blog] delete failed', err);
+                        alert('Delete failed: ' + (err.message || 'Unknown error'));
+                    }
+                }
+
+                // ── event wiring ──────────────────────────────────────────
+                function wireBlogEvents() {
+                    // nav → new post
+                    var newBtn = $('blog-new-btn');
+                    if (newBtn) newBtn.addEventListener('click', function () { openBlogModal(null); });
+
+                    // refresh
+                    var refreshBtn = $('blog-refresh-btn');
+                    if (refreshBtn) refreshBtn.addEventListener('click', fetchBlogPosts);
+
+                    // save
+                    var saveBtn = $('blog-save-btn');
+                    if (saveBtn) saveBtn.addEventListener('click', saveBlogPost);
+
+                    // delete (from modal)
+                    var deleteBtn = $('blog-delete-btn');
+                    if (deleteBtn) deleteBtn.addEventListener('click', function () { deleteBlogPost(blogEditingId); });
+
+                    // title → auto-slug + char count
+                    var titleInput = $('blog-post-title');
+                    if (titleInput) {
+                        titleInput.addEventListener('input', function () {
+                            updateCharCount('blog-post-title', 'blog-title-count');
+                            if (!blogSlugManuallyEdited) {
+                                var generated = slugify(titleInput.value);
+                                setValue('blog-post-slug', generated);
+                                updateSlugPreview(generated);
+                            }
+                        });
+                    }
+
+                    // slug → manual edit detection
+                    var slugInput = $('blog-post-slug');
+                    if (slugInput) {
+                        slugInput.addEventListener('input', function () {
+                            blogSlugManuallyEdited = true;
+                            updateSlugPreview(slugInput.value);
+                        });
+                    }
+
+                    // excerpt char count
+                    var excerptInput = $('blog-post-excerpt');
+                    if (excerptInput) {
+                        excerptInput.addEventListener('input', function () {
+                            updateCharCount('blog-post-excerpt', 'blog-excerpt-count');
+                        });
+                    }
+
+                    // filter / search → re-render
+                    ['blog-search', 'blog-filter-status', 'blog-filter-sort'].forEach(function (id) {
+                        var el = $(id);
+                        if (el) el.addEventListener('input', renderBlogTable);
+                    });
+
+                    // markdown toolbar
+                    document.querySelectorAll('.blog-toolbar-btn[data-md]').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            var textarea = $('blog-post-content');
+                            if (textarea) insertMarkdown(textarea, btn.dataset.md);
+                        });
+                    });
+                }
+
+                // ── hook into nav switching ───────────────────────────────
+                // Patch the existing nav-click handler to trigger a fetch when
+                // the Blog Manager view becomes active for the first time.
+                var blogLoaded = false;
+                var origNavHandler = document.querySelector('[data-view="blog-manager"]');
+                if (origNavHandler) {
+                    origNavHandler.addEventListener('click', function () {
+                        if (!blogLoaded) {
+                            blogLoaded = true;
+                            fetchBlogPosts();
+                        }
+                    });
+                }
+
+                wireBlogEvents();
+            })();
+            // ─── End Blog Manager ─────────────────────────────────────────
 
             window.__clerkReady
                 .then(initAuth)
