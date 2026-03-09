@@ -2484,11 +2484,22 @@
             gap: 0.75rem;
         }
 
-        .blog-editor-split.mode-write { grid-template-columns: 1fr; }
-        .blog-editor-split.mode-preview { grid-template-columns: 1fr; }
-        .blog-editor-split.mode-split { grid-template-columns: 1fr 1fr; }
+        .blog-editor-split.mode-write {
+            grid-template-columns: 1fr;
+        }
+
+        .blog-editor-split.mode-preview {
+            grid-template-columns: 1fr;
+        }
+
+        .blog-editor-split.mode-split {
+            grid-template-columns: 1fr 1fr;
+        }
+
         .blog-editor-split.mode-preview .blog-content-textarea,
-        .blog-editor-split.mode-write .blog-preview-pane { display: none; }
+        .blog-editor-split.mode-write .blog-preview-pane {
+            display: none;
+        }
 
         .blog-preview-pane {
             border: 1px solid var(--border);
@@ -2502,15 +2513,33 @@
             background: var(--panel);
         }
 
-        .blog-preview-pane h1, .blog-preview-pane h2, .blog-preview-pane h3 {
-            color: var(--text); margin: 0.75rem 0 0.35rem;
+        .blog-preview-pane h1,
+        .blog-preview-pane h2,
+        .blog-preview-pane h3 {
+            color: var(--text);
+            margin: 0.75rem 0 0.35rem;
         }
-        .blog-preview-pane h2 { font-size: 1.15rem; }
-        .blog-preview-pane h3 { font-size: 1rem; }
-        .blog-preview-pane p { margin: 0 0 0.75rem; color: var(--text-secondary); }
-        .blog-preview-pane ul, .blog-preview-pane ol {
-            padding-left: 1.4rem; margin: 0 0 0.75rem; color: var(--text-secondary);
+
+        .blog-preview-pane h2 {
+            font-size: 1.15rem;
         }
+
+        .blog-preview-pane h3 {
+            font-size: 1rem;
+        }
+
+        .blog-preview-pane p {
+            margin: 0 0 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .blog-preview-pane ul,
+        .blog-preview-pane ol {
+            padding-left: 1.4rem;
+            margin: 0 0 0.75rem;
+            color: var(--text-secondary);
+        }
+
         .blog-preview-pane code {
             font-family: 'JetBrains Mono', monospace;
             background: var(--panel-strong);
@@ -2518,6 +2547,7 @@
             border-radius: 3px;
             font-size: 0.82em;
         }
+
         .blog-preview-pane pre {
             background: var(--panel-strong);
             padding: 0.75rem 1rem;
@@ -2525,11 +2555,32 @@
             overflow-x: auto;
             margin: 0 0 0.75rem;
         }
-        .blog-preview-pane pre code { background: none; padding: 0; }
-        .blog-preview-pane hr { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
-        .blog-preview-pane a { color: var(--accent-cyan); }
-        .blog-preview-pane strong { color: var(--text); font-weight: 600; }
-        .blog-preview-pane em { color: var(--text-secondary); font-style: italic; }
+
+        .blog-preview-pane pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .blog-preview-pane hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 1rem 0;
+        }
+
+        .blog-preview-pane a {
+            color: var(--accent-cyan);
+        }
+
+        .blog-preview-pane strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .blog-preview-pane em {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
         .blog-preview-pane blockquote {
             border-left: 3px solid rgba(34, 211, 238, 0.4);
             padding-left: 0.75rem;
@@ -2544,6 +2595,7 @@
             gap: 0.6rem;
             margin-bottom: 1rem;
         }
+
         .panel-kpi {
             padding: 0.6rem 1rem;
             background: var(--panel);
@@ -2551,23 +2603,40 @@
             border-radius: 6px;
             min-width: 130px;
         }
+
         .panel-kpi-label {
             font-size: 0.72rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }
+
         .panel-kpi-value {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--text);
             line-height: 1.2;
         }
-        .panel-kpi-value.cyan { color: var(--accent-cyan); }
-        .panel-kpi-value.gold { color: var(--accent-gold); }
-        .panel-kpi-value.violet { color: var(--accent-violet); }
-        .panel-kpi-value.emerald { color: var(--accent-emerald); }
-        .panel-kpi-value.rose { color: var(--accent-rose); }
+
+        .panel-kpi-value.cyan {
+            color: var(--accent-cyan);
+        }
+
+        .panel-kpi-value.gold {
+            color: var(--accent-gold);
+        }
+
+        .panel-kpi-value.violet {
+            color: var(--accent-violet);
+        }
+
+        .panel-kpi-value.emerald {
+            color: var(--accent-emerald);
+        }
+
+        .panel-kpi-value.rose {
+            color: var(--accent-rose);
+        }
 
         /* ── Character registry ──────────────────────────────────────────── */
         .char-card {
@@ -2581,6 +2650,7 @@
             border-radius: 8px;
             margin-bottom: 1rem;
         }
+
         .char-avatar {
             width: 64px;
             height: 64px;
@@ -2592,7 +2662,14 @@
             font-size: 1.75rem;
             flex-shrink: 0;
         }
-        .char-poses { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+
+        .char-poses {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+        }
+
         .char-pose-tag {
             padding: 0.2rem 0.6rem;
             border-radius: 20px;
@@ -2601,16 +2678,19 @@
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }
+
         .char-pose-tag.done {
             background: rgba(52, 211, 153, 0.15);
             color: var(--accent-emerald);
             border: 1px solid rgba(52, 211, 153, 0.3);
         }
+
         .char-pose-tag.blocked {
             background: rgba(251, 113, 133, 0.12);
             color: var(--accent-rose);
             border: 1px solid rgba(251, 113, 133, 0.3);
         }
+
         .char-pose-tag.planned {
             background: rgba(34, 211, 238, 0.1);
             color: var(--accent-cyan);
@@ -2800,6 +2880,303 @@
             color: #f87171;
             font-weight: 700;
         }
+
+        /* ═══════════════════════════════════════════════════════
+           MODERN UX LAYER  ── scrollbars · nav · topbar · palette
+           ═══════════════════════════════════════════════════════ */
+
+        /* ── Thin custom scrollbars ──────────────────────────── */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 99px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        /* ── Nav group labels ────────────────────────────────── */
+        .nav-group-label {
+            font-size: 0.63rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            padding: 1rem 0.5rem 0.25rem;
+            font-weight: 700;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* ── Nav button inner structure ──────────────────────── */
+        .nav-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            min-width: 1.65rem;
+            opacity: 0.65;
+            flex-shrink: 0;
+        }
+
+        .nav-icon {
+            font-size: 0.85rem;
+            min-width: 1.25rem;
+            text-align: center;
+            flex-shrink: 0;
+            opacity: 0.7;
+            transition: opacity 0.18s ease;
+        }
+
+        .nav-label {
+            flex: 1;
+        }
+
+        .nav-btn:hover .nav-icon,
+        .nav-btn.active .nav-icon {
+            opacity: 1;
+        }
+
+        .nav-btn.active .nav-num {
+            color: var(--accent-cyan);
+            opacity: 1;
+        }
+
+        /* Left-border accent on active nav item */
+        .nav-btn.active {
+            border-left: 2px solid var(--accent-cyan);
+            padding-left: calc(0.88rem - 2px);
+        }
+
+        /* ── Table row hover ─────────────────────────────────── */
+        tbody tr {
+            transition: background 0.1s ease;
+        }
+
+        tbody tr:hover td {
+            background: rgba(255, 255, 255, 0.024);
+        }
+
+        /* ── Sticky blur topbar ──────────────────────────────── */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            margin: -1.35rem -1.4rem 1.25rem;
+            padding: 0.85rem 1.4rem;
+            background: rgba(7, 11, 21, 0.9);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* ── Topbar breadcrumb ──────────────────────────── */
+        .topbar-breadcrumb {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 0.18rem;
+            letter-spacing: 0.01em;
+        }
+
+        .topbar-sep {
+            margin: 0 0.28rem;
+            opacity: 0.35;
+        }
+
+        #topbar-section-name {
+            color: var(--text-secondary);
+        }
+
+        /* ── Cmd-K button ────────────────────────────────────── */
+        .btn-cmd-k {
+            font-size: 0.78rem;
+            padding: 0.4rem 0.72rem;
+            gap: 0.38rem;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .cmd-k-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 3px;
+            padding: 0.08rem 0.28rem;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── Command Palette ─────────────────────────────────── */
+        .cmd-palette-wrap {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 11vh 1rem 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 200;
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+
+        .cmd-palette-wrap.active {
+            display: flex;
+        }
+
+        .cmd-palette {
+            width: min(600px, 100%);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-lg);
+            background: var(--panel-strong);
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.55);
+            overflow: hidden;
+            animation: fade-up 0.16s ease both;
+        }
+
+        .cmd-input-row {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.85rem 1.1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cmd-search-icon {
+            font-size: 1rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .cmd-input {
+            flex: 1;
+            background: transparent;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            color: var(--text);
+            font-size: 1.02rem;
+            font-family: inherit;
+            padding: 0;
+            width: 100%;
+        }
+
+        .cmd-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .cmd-results {
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 0.4rem;
+        }
+
+        .cmd-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.62rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.1s ease;
+            font-size: 0.9rem;
+        }
+
+        .cmd-item:hover,
+        .cmd-item[aria-selected="true"] {
+            background: rgba(34, 211, 238, 0.1);
+        }
+
+        .cmd-item-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            min-width: 1.8rem;
+            text-align: right;
+        }
+
+        .cmd-item-icon {
+            font-size: 0.88rem;
+            min-width: 1.3rem;
+            text-align: center;
+        }
+
+        .cmd-item-label {
+            flex: 1;
+            color: var(--text);
+        }
+
+        .cmd-item-group {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            white-space: nowrap;
+        }
+
+        .cmd-section-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            padding: 0.6rem 0.8rem 0.2rem;
+            opacity: 0.55;
+        }
+
+        .cmd-footer {
+            display: flex;
+            gap: 1.2rem;
+            padding: 0.55rem 1rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            align-items: center;
+        }
+
+        .cmd-footer kbd {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.13);
+            border-radius: 4px;
+            padding: 0.1rem 0.35rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            margin-right: 0.35rem;
+        }
+
+        /* ── Toast info variant ──────────────────────────────── */
+        #toast.info {
+            color: #bae6fd;
+            border-color: rgba(56, 189, 248, 0.35);
+            background: rgba(56, 189, 248, 0.12);
+        }
+
+        /* ── KPI pulse animation while loading ───────────────── */
+        @keyframes kpi-pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.45;
+            }
+        }
+
+        .kpi-value.loading {
+            animation: kpi-pulse 1.4s ease infinite;
+            color: var(--text-muted) !important;
+        }
     </style>
 </head>
 
@@ -2825,24 +3202,34 @@
                 <div class="brand-switcher" id="brand-switcher" role="group" aria-label="Active brand"></div>
 
                 <nav class="nav-grid" aria-label="Primary admin navigation">
-                    <button class="nav-btn active" data-view="overview"><span>01</span><span>Overview</span></button>
-                    <button class="nav-btn" data-view="connections"><span>02</span><span>Platform Connect</span></button>
-                    <button class="nav-btn" data-view="planner"><span>03</span><span>Campaign Planner</span></button>
-                    <button class="nav-btn" data-view="composer"><span>04</span><span>Post Composer</span></button>
-                    <button class="nav-btn" data-view="library"><span>05</span><span>Asset Library</span></button>
-                    <button class="nav-btn" data-view="drip"><span>06</span><span>Drip Builder</span></button>
-                    <button class="nav-btn" data-view="review-queue"><span>07</span><span>Review Queue <span class="review-badge d-none" id="review-badge">0</span></span></button>
-                    <button class="nav-btn" data-view="overrides"><span>08</span><span>Site Overrides</span></button>
-                    <button class="nav-btn" data-view="galleries"><span>09</span><span>Gallery Manager</span></button>
-                    <button class="nav-btn" data-view="content-studio"><span>10</span><span>Content Studio</span></button>
-                    <button class="nav-btn" data-view="ecosystem"><span>11</span><span>Ecosystem Health</span></button>
-                    <button class="nav-btn" data-view="blog-manager"><span>12</span><span>Blog Manager <span class="review-badge d-none" id="blog-draft-badge">0</span></span></button>
-                    <button class="nav-btn" data-view="storage"><span>13</span><span>Storage Intel</span></button>
-                    <button class="nav-btn" data-view="donations"><span>14</span><span>Donations</span></button>
-                    <button class="nav-btn" data-view="analytics"><span>15</span><span>Analytics</span></button>
-                    <button class="nav-btn" data-view="community"><span>16</span><span>Community</span></button>
-                    <button class="nav-btn" data-view="notifications"><span>17</span><span>Queue Health</span></button>
-                    <button class="nav-btn" data-view="characters"><span>18</span><span>Characters</span></button>
+                    <button class="nav-btn active" data-view="overview"><span class="nav-num">01</span><span class="nav-icon">&#127968;</span><span class="nav-label">Overview</span></button>
+
+                    <div class="nav-group-label">Distribution</div>
+                    <button class="nav-btn" data-view="connections"><span class="nav-num">02</span><span class="nav-icon">&#128279;</span><span class="nav-label">Platform Connect</span></button>
+                    <button class="nav-btn" data-view="planner"><span class="nav-num">03</span><span class="nav-icon">&#128197;</span><span class="nav-label">Campaign Planner</span></button>
+
+                    <div class="nav-group-label">Content</div>
+                    <button class="nav-btn" data-view="composer"><span class="nav-num">04</span><span class="nav-icon">&#9998;</span><span class="nav-label">Post Composer</span></button>
+                    <button class="nav-btn" data-view="library"><span class="nav-num">05</span><span class="nav-icon">&#128450;</span><span class="nav-label">Asset Library</span></button>
+                    <button class="nav-btn" data-view="drip"><span class="nav-num">06</span><span class="nav-icon">&#128167;</span><span class="nav-label">Drip Builder</span></button>
+                    <button class="nav-btn" data-view="review-queue"><span class="nav-num">07</span><span class="nav-icon">&#128065;</span><span class="nav-label">Review Queue <span class="review-badge d-none" id="review-badge">0</span></span></button>
+
+                    <div class="nav-group-label">Sites</div>
+                    <button class="nav-btn" data-view="overrides"><span class="nav-num">08</span><span class="nav-icon">&#9881;</span><span class="nav-label">Site Overrides</span></button>
+                    <button class="nav-btn" data-view="galleries"><span class="nav-num">09</span><span class="nav-icon">&#128444;</span><span class="nav-label">Gallery Manager</span></button>
+                    <button class="nav-btn" data-view="content-studio"><span class="nav-num">10</span><span class="nav-icon">&#127909;</span><span class="nav-label">Content Studio</span></button>
+                    <button class="nav-btn" data-view="ecosystem"><span class="nav-num">11</span><span class="nav-icon">&#127760;</span><span class="nav-label">Ecosystem Health</span></button>
+                    <button class="nav-btn" data-view="blog-manager"><span class="nav-num">12</span><span class="nav-icon">&#128221;</span><span class="nav-label">Blog Manager <span class="review-badge d-none" id="blog-draft-badge">0</span></span></button>
+
+                    <div class="nav-group-label">Intelligence</div>
+                    <button class="nav-btn" data-view="storage"><span class="nav-num">13</span><span class="nav-icon">&#128190;</span><span class="nav-label">Storage Intel</span></button>
+                    <button class="nav-btn" data-view="donations"><span class="nav-num">14</span><span class="nav-icon">&#128179;</span><span class="nav-label">Donations</span></button>
+                    <button class="nav-btn" data-view="analytics"><span class="nav-num">15</span><span class="nav-icon">&#128202;</span><span class="nav-label">Analytics</span></button>
+
+                    <div class="nav-group-label">Community</div>
+                    <button class="nav-btn" data-view="community"><span class="nav-num">16</span><span class="nav-icon">&#128101;</span><span class="nav-label">Community</span></button>
+                    <button class="nav-btn" data-view="notifications"><span class="nav-num">17</span><span class="nav-icon">&#9889;</span><span class="nav-label">Queue Health</span></button>
+                    <button class="nav-btn" data-view="characters"><span class="nav-num">18</span><span class="nav-icon">&#129312;</span><span class="nav-label">Characters</span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -2853,14 +3240,16 @@
 
             <main class="content">
                 <div class="topbar">
-                    <div>
-                        <h1 class="heading">Marketing Control, Built In-House</h1>
-                        <p class="subheading">Plan yearly campaigns, auto-fit content by platform limits, and schedule from your own media vault.</p>
+                    <div class="topbar-context">
+                        <div class="topbar-breadcrumb">GFD Command Center <span class="topbar-sep">&#8250;</span> <span id="topbar-section-name">Overview</span></div>
+                        <h1 class="heading" id="topbar-heading">Overview</h1>
+                        <p class="subheading" id="topbar-subheading">Global KPIs, platform connections, and quick-start guide for your content pipeline.</p>
                     </div>
                     <div class="inline-actions">
+                        <button class="btn btn-secondary btn-cmd-k" id="cmd-k-btn" title="Command palette (Ctrl+K)"><span class="cmd-k-badge">Ctrl K</span> Quick Nav</button>
                         <span class="user-chip"><span id="user-email">admin</span></span>
-                        <button class="btn btn-secondary" id="refresh-btn">Refresh</button>
-                        <button class="btn btn-secondary" id="manual-run-btn">Run Queue Now</button>
+                        <button class="btn btn-secondary" id="refresh-btn" title="Refresh all data">&#8635; Refresh</button>
+                        <button class="btn btn-secondary" id="manual-run-btn">&#9654; Run Queue</button>
                         <button class="btn btn-danger" id="sign-out-btn">Sign out</button>
                     </div>
                 </div>
@@ -3842,7 +4231,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="analytics-variants-tbody">
-                                    <tr><td colspan="5" class="text-muted">Loading…</td></tr>
+                                    <tr>
+                                        <td colspan="5" class="text-muted">Loading…</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -3892,7 +4283,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="community-members-tbody">
-                                    <tr><td colspan="7" class="text-muted" style="text-align:center;padding:2rem">No data — click the panel to load.</td></tr>
+                                    <tr>
+                                        <td colspan="7" class="text-muted" style="text-align:center;padding:2rem">No data — click the panel to load.</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -3945,7 +4338,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="qh-failed-tbody">
-                                    <tr><td colspan="6" class="text-muted" style="text-align:center;padding:2rem">No data — click the panel to load.</td></tr>
+                                    <tr>
+                                        <td colspan="6" class="text-muted" style="text-align:center;padding:2rem">No data — click the panel to load.</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -3967,7 +4362,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="qh-all-tbody">
-                                    <tr><td colspan="5" class="text-muted" style="text-align:center;padding:2rem">No data loaded.</td></tr>
+                                    <tr>
+                                        <td colspan="5" class="text-muted" style="text-align:center;padding:2rem">No data loaded.</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -4585,6 +4982,22 @@
 
     <div id="toast"></div>
 
+    <!-- Command Palette (Ctrl+K) -->
+    <div class="cmd-palette-wrap" id="cmd-palette-wrap" role="dialog" aria-label="Command palette" aria-modal="true">
+        <div class="cmd-palette" id="cmd-palette">
+            <div class="cmd-input-row">
+                <span class="cmd-search-icon" aria-hidden="true">&#128270;</span>
+                <input class="cmd-input" id="cmd-input" type="text" placeholder="Go to panel&hellip;" autocomplete="off" spellcheck="false" aria-label="Search panels" aria-autocomplete="list" aria-controls="cmd-results" />
+            </div>
+            <div class="cmd-results" id="cmd-results"></div>
+            <div class="cmd-footer">
+                <span><kbd>&#9166;</kbd> open</span>
+                <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate</span>
+                <span><kbd>Esc</kbd> close</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Handle Registration Modal -->
     <div class="modal-wrap" id="handle-modal">
         <div class="modal">
@@ -4947,6 +5360,133 @@
                 renderBrandSwitcher();
                 initDripBuilder();
                 updateComposerCounters();
+                initCommandPalette();
+                initKeyboardShortcuts();
+            }
+
+            // ── Command Palette ──────────────────────────────────────────────
+            function initCommandPalette() {
+                const NAV_ITEMS = Object.entries(PAGE_CONTEXTS).map(([view, ctx]) => ({
+                    view,
+                    num: document.querySelector(`.nav-btn[data-view="${view}"] .nav-num`)?.textContent || '',
+                    icon: document.querySelector(`.nav-btn[data-view="${view}"] .nav-icon`)?.textContent || '',
+                    label: ctx.name,
+                    group: ctx.title,
+                }));
+
+                const wrap = $('cmd-palette-wrap');
+                const input = $('cmd-input');
+                const list = $('cmd-results');
+                let selected = 0;
+                let filtered = [];
+
+                function render(items) {
+                    filtered = items;
+                    selected = 0;
+                    list.innerHTML = items.length ? items.map((it, i) =>
+                        `<div class="cmd-item" data-view="${escapeHtml(it.view)}" aria-selected="${i === 0 ? 'true' : 'false'}" role="option">` +
+                        `<span class="cmd-item-num">${escapeHtml(it.num)}</span>` +
+                        `<span class="cmd-item-icon">${it.icon}</span>` +
+                        `<span class="cmd-item-label">${escapeHtml(it.label)}</span>` +
+                        `</div>`
+                    ).join('') :
+                        '<div class="cmd-section-label">No matching panels</div>';
+
+                    list.querySelectorAll('.cmd-item').forEach((el) => {
+                        el.addEventListener('click', () => {
+                            const v = el.dataset.view;
+                            closeCmd();
+                            switchView(v);
+                            if (v === 'ecosystem') refreshEcosystem();
+                            if (window.__adminPanels?.[v === 'analytics' ? 'analytics' : v === 'community' ? 'community' : v === 'notifications' ? 'notifications' : null]) {
+                                window.__adminPanels[v]?.();
+                            }
+                        });
+                    });
+                }
+
+                function updateSelection(newIdx) {
+                    const items = list.querySelectorAll('.cmd-item');
+                    if (!items.length) return;
+                    items[selected]?.setAttribute('aria-selected', 'false');
+                    selected = (newIdx + items.length) % items.length;
+                    items[selected]?.setAttribute('aria-selected', 'true');
+                    items[selected]?.scrollIntoView({ block: 'nearest' });
+                }
+
+                function openCmd() {
+                    render(NAV_ITEMS);
+                    input.value = '';
+                    wrap.classList.add('active');
+                    requestAnimationFrame(() => input.focus());
+                }
+
+                function closeCmd() {
+                    wrap.classList.remove('active');
+                    input.value = '';
+                }
+
+                input.addEventListener('input', () => {
+                    const q = input.value.trim().toLowerCase();
+                    render(q ? NAV_ITEMS.filter(it =>
+                        it.label.toLowerCase().includes(q) ||
+                        it.num.includes(q) ||
+                        it.group.toLowerCase().includes(q)
+                    ) : NAV_ITEMS);
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowDown') { e.preventDefault(); updateSelection(selected + 1); }
+                    else if (e.key === 'ArrowUp') { e.preventDefault(); updateSelection(selected - 1); }
+                    else if (e.key === 'Enter') {
+                        const v = list.querySelectorAll('.cmd-item')[selected]?.dataset?.view;
+                        if (v) { closeCmd(); switchView(v); }
+                    } else if (e.key === 'Escape') { closeCmd(); }
+                });
+
+                // Close on backdrop click
+                wrap.addEventListener('click', (e) => { if (e.target === wrap) closeCmd(); });
+
+                // Open button in topbar
+                const cmdKBtn = $('cmd-k-btn');
+                if (cmdKBtn) cmdKBtn.addEventListener('click', openCmd);
+
+                // Expose for keyboard shortcut
+                window.__openCmdPalette = openCmd;
+            }
+
+            // ── Keyboard shortcuts ───────────────────────────────────────────
+            function initKeyboardShortcuts() {
+                const VIEWS = [
+                    'overview', 'connections', 'planner', 'composer', 'composer',
+                    'library', 'drip', 'review-queue', 'overrides', 'galleries',
+                    'content-studio', 'ecosystem', 'blog-manager', 'storage',
+                    'donations', 'analytics', 'community', 'notifications', 'characters',
+                ];
+
+                document.addEventListener('keydown', (e) => {
+                    // Ignore when typing in inputs / textareas / contenteditable
+                    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) ||
+                        e.target.isContentEditable) return;
+
+                    // Ctrl+K or Cmd+K — command palette
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        window.__openCmdPalette?.();
+                        return;
+                    }
+
+                    // Alt+1..9 → views 1-9; Alt+Shift+1..9 → views 10-18
+                    if (e.altKey && !e.ctrlKey && !e.metaKey) {
+                        const n = parseInt(e.key, 10);
+                        if (!isNaN(n) && n >= 1 && n <= 9) {
+                            e.preventDefault();
+                            const idx = e.shiftKey ? n + 9 : n;
+                            const view = VIEWS[idx];
+                            if (view) switchView(view);
+                        }
+                    }
+                });
             }
 
             function bindUI() {
@@ -6229,6 +6769,40 @@
                 document.querySelectorAll('.view').forEach((el) => {
                     el.classList.toggle('active', el.id === 'view-' + view);
                 });
+                updatePageContext(view);
+            }
+
+            // ── Page context map ────────────────────────────────────────────
+            const PAGE_CONTEXTS = {
+                overview: { name: 'Overview', title: 'Overview', sub: 'Global KPIs, platform connections, and quick-start guide for your content pipeline.' },
+                connections: { name: 'Platform Connect', title: 'Platform Connect', sub: 'Manage OAuth tokens, social handles, and per-brand platform authentication.' },
+                planner: { name: 'Campaign Planner', title: 'Campaign Planner', sub: 'Schedule yearly campaigns, set objectives, and view your content calendar.' },
+                composer: { name: 'Post Composer', title: 'Post Composer', sub: 'Draft and schedule posts across all platforms with per-channel character limits.' },
+                library: { name: 'Asset Library', title: 'Asset Library', sub: 'Upload, tag, and manage media assets stored in Cloudflare R2.' },
+                drip: { name: 'Drip Builder', title: 'Drip Builder', sub: 'Build time-delayed drip sequences for automated multi-touch campaigns.' },
+                'review-queue': { name: 'Review Queue', title: 'Review Queue', sub: 'Approve, reject, or edit scraped content before it enters the publishing pipeline.' },
+                overrides: { name: 'Site Overrides', title: 'Site Overrides', sub: 'Manage per-domain redirect rules and link override records.' },
+                galleries: { name: 'Gallery Manager', title: 'Gallery Manager', sub: 'Curate and publish image galleries to your ecosystem sites.' },
+                'content-studio': { name: 'Content Studio', title: 'Content Studio', sub: 'AI-assisted content generation, prompt management, and scene scheduling.' },
+                ecosystem: { name: 'Ecosystem Health', title: 'Ecosystem Health', sub: 'Monitor CI/CD status, uptime, and cross-brand site health across all properties.' },
+                'blog-manager': { name: 'Blog Manager', title: 'Blog Manager', sub: 'Create and publish blog posts with live markdown preview and full CMS control.' },
+                storage: { name: 'Storage Intel', title: 'Storage Intelligence', sub: 'Analyze local disk usage, identify hot spots, and track cleanup actions.' },
+                donations: { name: 'Donations', title: 'Donations', sub: 'View Stripe donation transactions and configure webhook delivery to D1.' },
+                analytics: { name: 'Analytics', title: 'Publishing Analytics', sub: 'Platform performance breakdown, variant delivery stats, and campaign metrics.' },
+                community: { name: 'Community', title: 'Community Members', sub: 'Browse, search, and review registered community members and their activity.' },
+                notifications: { name: 'Queue Health', title: 'Queue Health', sub: 'Monitor the social publishing queue, retry failed variants, and trigger manual runs.' },
+                characters: { name: 'Characters', title: 'Character Registry', sub: 'Animation character roster, pose inventory, and pipeline status.' },
+            };
+
+            function updatePageContext(view) {
+                const ctx = PAGE_CONTEXTS[view];
+                if (!ctx) return;
+                const heading = $('topbar-heading');
+                const subheading = $('topbar-subheading');
+                const section = $('topbar-section-name');
+                if (heading) heading.textContent = ctx.title;
+                if (subheading) subheading.textContent = ctx.sub;
+                if (section) section.textContent = ctx.name;
             }
 
             function openModal(id) {
