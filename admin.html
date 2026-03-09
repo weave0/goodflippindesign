@@ -2455,6 +2455,168 @@
             color: var(--accent-cyan);
         }
 
+        /* ── Blog editor split preview ──────────────────────────────────── */
+        .blog-view-toggle {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .blog-view-btn {
+            padding: 0.2rem 0.7rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--panel-strong);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .blog-view-btn.active {
+            background: rgba(34, 211, 238, 0.15);
+            color: var(--accent-cyan);
+            border-color: rgba(34, 211, 238, 0.4);
+        }
+
+        .blog-editor-split {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .blog-editor-split.mode-write { grid-template-columns: 1fr; }
+        .blog-editor-split.mode-preview { grid-template-columns: 1fr; }
+        .blog-editor-split.mode-split { grid-template-columns: 1fr 1fr; }
+        .blog-editor-split.mode-preview .blog-content-textarea,
+        .blog-editor-split.mode-write .blog-preview-pane { display: none; }
+
+        .blog-preview-pane {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            min-height: 260px;
+            max-height: 520px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            background: var(--panel);
+        }
+
+        .blog-preview-pane h1, .blog-preview-pane h2, .blog-preview-pane h3 {
+            color: var(--text); margin: 0.75rem 0 0.35rem;
+        }
+        .blog-preview-pane h2 { font-size: 1.15rem; }
+        .blog-preview-pane h3 { font-size: 1rem; }
+        .blog-preview-pane p { margin: 0 0 0.75rem; color: var(--text-secondary); }
+        .blog-preview-pane ul, .blog-preview-pane ol {
+            padding-left: 1.4rem; margin: 0 0 0.75rem; color: var(--text-secondary);
+        }
+        .blog-preview-pane code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--panel-strong);
+            padding: 0.1em 0.35em;
+            border-radius: 3px;
+            font-size: 0.82em;
+        }
+        .blog-preview-pane pre {
+            background: var(--panel-strong);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0 0 0.75rem;
+        }
+        .blog-preview-pane pre code { background: none; padding: 0; }
+        .blog-preview-pane hr { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+        .blog-preview-pane a { color: var(--accent-cyan); }
+        .blog-preview-pane strong { color: var(--text); font-weight: 600; }
+        .blog-preview-pane em { color: var(--text-secondary); font-style: italic; }
+        .blog-preview-pane blockquote {
+            border-left: 3px solid rgba(34, 211, 238, 0.4);
+            padding-left: 0.75rem;
+            margin: 0 0 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Shared panel KPI strip ──────────────────────────────────────── */
+        .panel-kpis {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+        .panel-kpi {
+            padding: 0.6rem 1rem;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            min-width: 130px;
+        }
+        .panel-kpi-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .panel-kpi-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+        .panel-kpi-value.cyan { color: var(--accent-cyan); }
+        .panel-kpi-value.gold { color: var(--accent-gold); }
+        .panel-kpi-value.violet { color: var(--accent-violet); }
+        .panel-kpi-value.emerald { color: var(--accent-emerald); }
+        .panel-kpi-value.rose { color: var(--accent-rose); }
+
+        /* ── Character registry ──────────────────────────────────────────── */
+        .char-card {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+            align-items: start;
+            padding: 1rem;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .char-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--panel-strong);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+        .char-poses { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+        .char-pose-tag {
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .char-pose-tag.done {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--accent-emerald);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+        .char-pose-tag.blocked {
+            background: rgba(251, 113, 133, 0.12);
+            color: var(--accent-rose);
+            border: 1px solid rgba(251, 113, 133, 0.3);
+        }
+        .char-pose-tag.planned {
+            background: rgba(34, 211, 238, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(34, 211, 238, 0.25);
+        }
+
         .blog-empty-state {
             padding: 3rem 1rem;
             text-align: center;
@@ -2676,6 +2838,11 @@
                     <button class="nav-btn" data-view="ecosystem"><span>11</span><span>Ecosystem Health</span></button>
                     <button class="nav-btn" data-view="blog-manager"><span>12</span><span>Blog Manager <span class="review-badge d-none" id="blog-draft-badge">0</span></span></button>
                     <button class="nav-btn" data-view="storage"><span>13</span><span>Storage Intel</span></button>
+                    <button class="nav-btn" data-view="donations"><span>14</span><span>Donations</span></button>
+                    <button class="nav-btn" data-view="analytics"><span>15</span><span>Analytics</span></button>
+                    <button class="nav-btn" data-view="community"><span>16</span><span>Community</span></button>
+                    <button class="nav-btn" data-view="notifications"><span>17</span><span>Queue Health</span></button>
+                    <button class="nav-btn" data-view="characters"><span>18</span><span>Characters</span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -3561,6 +3728,296 @@
                         <p style="font-size:0.82rem;color:var(--text-muted)">Run the PowerShell script on WEAVERASUS, then click <strong>Load Snapshot JSON</strong>.</p>
                     </div>
                 </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Donations Dashboard (panel 14)                    -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-donations">
+                    <div class="section-head">
+                        <h2 class="section-title">Donations Dashboard</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="donations-refresh-btn">Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Donation transactions processed via Stripe. Add a webhook listener at <code>/api/donations/webhook</code> to log gifts to D1 for real-time analytics here.</p>
+
+                    <div class="panel-kpis">
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Total Raised</div>
+                            <div class="panel-kpi-value emerald" id="don-total">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">This Month</div>
+                            <div class="panel-kpi-value cyan" id="don-month">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Transactions</div>
+                            <div class="panel-kpi-value" id="don-count">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Avg Gift</div>
+                            <div class="panel-kpi-value gold" id="don-avg">—</div>
+                        </div>
+                    </div>
+
+                    <article class="panel">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Recent Transactions</h3>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Project</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="donations-tbody">
+                                    <tr>
+                                        <td colspan="4" style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted)">
+                                            <p>No donation transactions stored yet.</p>
+                                            <p style="font-size:0.82rem;margin-top:0.4rem">Configure a Stripe webhook at <code>/api/donations/webhook</code> to automatically log donations to D1.</p>
+                                            <a href="https://dashboard.stripe.com/payments" target="_blank" rel="noopener" class="btn btn-secondary" style="margin-top:0.75rem;display:inline-flex">Open Stripe Dashboard ↗</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Post Analytics (panel 15)                         -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-analytics">
+                    <div class="section-head">
+                        <h2 class="section-title">Post Analytics</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="analytics-refresh-btn">Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Published variant performance aggregated from D1. Covers all brands and platforms in a single view.</p>
+
+                    <div class="panel-kpis">
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Total Published</div>
+                            <div class="panel-kpi-value emerald" id="an-published">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Failed</div>
+                            <div class="panel-kpi-value rose" id="an-failed">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Scheduled</div>
+                            <div class="panel-kpi-value cyan" id="an-scheduled">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Campaigns</div>
+                            <div class="panel-kpi-value gold" id="an-campaigns">—</div>
+                        </div>
+                    </div>
+
+                    <article class="panel">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Published by Platform</h3>
+                        </div>
+                        <div id="analytics-by-platform" style="display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.5rem 0"></div>
+                    </article>
+
+                    <article class="panel mt-085">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Recent Published Variants</h3>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Caption</th>
+                                        <th>Platform</th>
+                                        <th>Campaign</th>
+                                        <th>Brand</th>
+                                        <th>Published At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-variants-tbody">
+                                    <tr><td colspan="5" class="text-muted">Loading…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Community Members (panel 16)                      -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-community">
+                    <div class="section-head">
+                        <h2 class="section-title">Community Members</h2>
+                        <div class="inline-actions">
+                            <input type="text" id="community-search" placeholder="Search members…" style="width:180px" aria-label="Search members">
+                            <button class="btn btn-secondary" id="community-refresh-btn">Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">All registered members from the <strong>community-portal.html</strong> platform, sourced from <code>/api/community/members</code>.</p>
+
+                    <div class="panel-kpis">
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Total Members</div>
+                            <div class="panel-kpi-value cyan" id="cm-total">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Active (30d)</div>
+                            <div class="panel-kpi-value emerald" id="cm-active">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Total XP Awarded</div>
+                            <div class="panel-kpi-value gold" id="cm-xp">—</div>
+                        </div>
+                    </div>
+
+                    <article class="panel">
+                        <div class="table-wrap">
+                            <table id="community-members-table">
+                                <thead>
+                                    <tr>
+                                        <th>Member</th>
+                                        <th>Level</th>
+                                        <th>XP</th>
+                                        <th>Posts</th>
+                                        <th>Check-ins</th>
+                                        <th>Joined</th>
+                                        <th>Last Active</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="community-members-tbody">
+                                    <tr><td colspan="7" class="text-muted" style="text-align:center;padding:2rem">No data — click the panel to load.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Queue Health / Notifications (panel 17)           -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-notifications">
+                    <div class="section-head">
+                        <h2 class="section-title">Queue Health</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-primary" id="run-queue-btn-qh">Run Queue Now</button>
+                            <button class="btn btn-secondary" id="qh-refresh-btn">Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Monitor failed publish variants and publisher worker health. Use <strong>Run Queue Now</strong> for an immediate publish cycle.</p>
+
+                    <div class="panel-kpis">
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Failed Variants</div>
+                            <div class="panel-kpi-value rose" id="qh-failed">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Pending</div>
+                            <div class="panel-kpi-value gold" id="qh-pending">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Published (total)</div>
+                            <div class="panel-kpi-value emerald" id="qh-published">—</div>
+                        </div>
+                    </div>
+
+                    <article class="panel">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Failed Variants</h3>
+                            <button class="btn btn-micro btn-danger" id="retry-all-failed-btn">Retry All</button>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Caption</th>
+                                        <th>Platform</th>
+                                        <th>Brand</th>
+                                        <th>Scheduled At</th>
+                                        <th>Retries</th>
+                                        <th>Last Error</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="qh-failed-tbody">
+                                    <tr><td colspan="6" class="text-muted" style="text-align:center;padding:2rem">No data — click the panel to load.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <article class="panel mt-085">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">All Variants by Status</h3>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Caption</th>
+                                        <th>Platform</th>
+                                        <th>Brand</th>
+                                        <th>Status</th>
+                                        <th>Scheduled At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="qh-all-tbody">
+                                    <tr><td colspan="5" class="text-muted" style="text-align:center;padding:2rem">No data loaded.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Character & Animation Registry (panel 18)         -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-characters">
+                    <div class="section-head">
+                        <h2 class="section-title">Character &amp; Animation Registry</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="char-refresh-btn">Refresh Registry</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Track branded characters, pose libraries, and animation pipeline status. Full production brief in <code>ANIMATION_PIPELINE.md</code>.</p>
+
+                    <!-- Sheriff character card -->
+                    <div class="char-card" id="char-sheriff">
+                        <div class="char-avatar">🤠</div>
+                        <div>
+                            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.25rem">
+                                <strong style="font-size:1rem">The Sheriff</strong>
+                                <span class="tag" style="background:rgba(251,191,36,0.15);color:var(--accent-gold);border:1px solid rgba(251,191,36,0.3);font-size:0.72rem">GFV Brand</span>
+                                <span class="tag planned" id="char-sheriff-stage" style="font-size:0.72rem">In Progress</span>
+                            </div>
+                            <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.5rem">Friendly cowboy mascot. Target: 2D vector production asset in <strong>Rive</strong> (web) + <strong>Spine2D</strong> (video). Current blocker: locked &#8220;single raised paw&#8221; pose must be replaced with 7-pose library via Option B (Simplify to 2D).</p>
+                            <div class="char-poses" id="char-sheriff-poses">
+                                <span class="char-pose-tag blocked" title="Current pose locked — needs redesign">⚡ idle (blocked)</span>
+                                <span class="char-pose-tag planned">wave</span>
+                                <span class="char-pose-tag planned">cheer</span>
+                                <span class="char-pose-tag planned">neutral</span>
+                                <span class="char-pose-tag planned">point</span>
+                                <span class="char-pose-tag planned">nod</span>
+                                <span class="char-pose-tag planned">walk</span>
+                            </div>
+                            <div style="margin-top:0.6rem;font-size:0.78rem;color:var(--text-muted)">
+                                Pipeline option: <span class="char-pose-tag planned" style="font-size:0.72rem">Option B — Simplify to 2D</span>
+                                &emsp;Tools: <code style="font-size:0.75rem">Rive</code> (web animations) &middot; <code style="font-size:0.75rem">Spine2D</code> (video export)
+                            </div>
+                        </div>
+                    </div>
+
+                    <article class="panel" style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.88rem">
+                        <p>Additional characters will appear here as they enter the production pipeline.</p>
+                        <p style="font-size:0.8rem;margin-top:0.35rem">See <strong>ANIMATION_PIPELINE.md</strong> for the full project brief and tool-stack recommendations.</p>
+                    </article>
+                </section>
+
             </main>
         </div>
     </div>
@@ -3601,8 +4058,17 @@
                     <button type="button" class="blog-toolbar-btn" data-md="codeblock" title="Code block">```block```</button>
                     <button type="button" class="blog-toolbar-btn" data-md="ul" title="Bullet list">&bull; list</button>
                     <button type="button" class="blog-toolbar-btn" data-md="hr" title="Horizontal rule">&mdash;</button>
+                    <span style="flex:1"></span>
+                    <div class="blog-view-toggle" role="group" aria-label="Editor view mode">
+                        <button type="button" class="blog-view-btn active" data-blog-view="write">Write</button>
+                        <button type="button" class="blog-view-btn" data-blog-view="split">Split</button>
+                        <button type="button" class="blog-view-btn" data-blog-view="preview">Preview</button>
+                    </div>
                 </div>
-                <textarea id="blog-post-content" class="blog-content-textarea" rows="16" placeholder="Write your post in Markdown. Paragraphs, **bold**, *italic*, ## headings, - lists, [links](url), and ```code blocks``` all work."></textarea>
+                <div class="blog-editor-split mode-write" id="blog-editor-split">
+                    <textarea id="blog-post-content" class="blog-content-textarea" rows="16" placeholder="Write your post in Markdown. Paragraphs, **bold**, *italic*, ## headings, - lists, [links](url), and ```code blocks``` all work."></textarea>
+                    <div class="blog-preview-pane" id="blog-preview-pane" aria-label="Markdown preview" aria-live="polite"></div>
+                </div>
             </div>
 
             <div class="form-grid mt-06">
@@ -4488,6 +4954,9 @@
                     btn.addEventListener('click', () => {
                         switchView(btn.dataset.view);
                         if (btn.dataset.view === 'ecosystem') refreshEcosystem();
+                        if (btn.dataset.view === 'analytics' && window.__adminPanels?.analytics) window.__adminPanels.analytics();
+                        if (btn.dataset.view === 'community' && window.__adminPanels?.community) window.__adminPanels.community();
+                        if (btn.dataset.view === 'notifications' && window.__adminPanels?.notifications) window.__adminPanels.notifications();
                     });
                 });
 
@@ -7788,6 +8257,74 @@
                             if (textarea) insertMarkdown(textarea, btn.dataset.md);
                         });
                     });
+
+                    // ── live markdown preview ─────────────────────────────
+                    var editorSplit = $('blog-editor-split');
+                    var previewPane = $('blog-preview-pane');
+                    var contentArea = $('blog-post-content');
+
+                    function renderBlogMD(md) {
+                        if (!md) return '<p style="color:var(--text-muted);font-style:italic">Nothing to preview yet.</p>';
+                        var html = md;
+                        // code blocks first (before inline code)
+                        html = html.replace(/```[\w]*\n?([\s\S]*?)```/g, function (_, code) {
+                            return '<pre><code>' + code.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code></pre>';
+                        });
+                        // inline code
+                        html = html.replace(/`([^`]+)`/g, function (_, c) {
+                            return '<code>' + c.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code>';
+                        });
+                        // headings
+                        html = html.replace(/^######\s+(.+)$/gm, '<h6>$1</h6>');
+                        html = html.replace(/^#####\s+(.+)$/gm, '<h5>$1</h5>');
+                        html = html.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
+                        html = html.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+                        html = html.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
+                        html = html.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+                        // blockquote
+                        html = html.replace(/^>\s+(.+)$/gm, '<blockquote>$1</blockquote>');
+                        // horizontal rule
+                        html = html.replace(/^---+$/gm, '<hr>');
+                        // bold + italic
+                        html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+                        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                        html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+                        // links
+                        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+                        // unordered lists
+                        html = html.replace(/^[-*]\s+(.+)$/gm, '<li>$1</li>');
+                        html = html.replace(/(<li>[\s\S]*?<\/li>)(\n(?!<li>)|$)/g, '<ul>$1</ul>\n');
+                        // paragraphs: double newlines → <p>
+                        html = html.split(/\n{2,}/).map(function (block) {
+                            if (/^<(h[1-6]|pre|ul|ol|hr|blockquote)/.test(block.trim())) return block;
+                            block = block.replace(/\n/g, '<br>');
+                            return '<p>' + block + '</p>';
+                        }).join('\n');
+                        return html;
+                    }
+
+                    function updatePreview() {
+                        if (previewPane && contentArea) {
+                            previewPane.innerHTML = renderBlogMD(contentArea.value);
+                        }
+                    }
+
+                    if (contentArea) {
+                        contentArea.addEventListener('input', updatePreview);
+                    }
+
+                    // view mode toggle buttons
+                    document.querySelectorAll('.blog-view-btn[data-blog-view]').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            document.querySelectorAll('.blog-view-btn').forEach(function (b) { b.classList.remove('active'); });
+                            btn.classList.add('active');
+                            var mode = btn.dataset.blogView;
+                            if (editorSplit) {
+                                editorSplit.className = 'blog-editor-split mode-' + mode;
+                            }
+                            if (mode === 'preview' || mode === 'split') updatePreview();
+                        });
+                    });
                 }
 
                 // ── hook into nav switching ───────────────────────────────
@@ -7807,6 +8344,273 @@
                 wireBlogEvents();
             })();
             // ─── End Blog Manager ─────────────────────────────────────────
+
+            // =================================================================
+            // ANALYTICS PANEL (panel 15)
+            // =================================================================
+            (function initAnalyticsPanel() {
+                'use strict';
+                var loaded = false;
+
+                async function load() {
+                    try {
+                        // Reuse already-loaded state.variants from refreshAll()
+                        var variants = state.variants || [];
+                        var socialStats = {};
+                        // Count by status
+                        var published = variants.filter(function (v) { return v.status === 'published'; }).length;
+                        var failed = variants.filter(function (v) { return v.status === 'failed'; }).length;
+                        var scheduled = variants.filter(function (v) { return v.status === 'scheduled'; }).length;
+                        var campaigns = (state.campaigns || []).length;
+
+                        $('an-published').textContent = published;
+                        $('an-failed').textContent = failed;
+                        $('an-scheduled').textContent = scheduled;
+                        $('an-campaigns').textContent = campaigns;
+
+                        // Published by platform
+                        var byPlatform = {};
+                        variants.filter(function (v) { return v.status === 'published'; }).forEach(function (v) {
+                            var p = v.platform || 'unknown';
+                            byPlatform[p] = (byPlatform[p] || 0) + 1;
+                        });
+                        var platformEl = $('analytics-by-platform');
+                        if (platformEl) {
+                            if (Object.keys(byPlatform).length) {
+                                platformEl.innerHTML = Object.entries(byPlatform).sort(function (a, b) { return b[1] - a[1]; }).map(function (e) {
+                                    return '<span class="tag ok" style="font-size:0.8rem">' + escapeHtml(e[0]) + ' <strong>' + e[1] + '</strong></span>';
+                                }).join('');
+                            } else {
+                                platformEl.innerHTML = '<span class="text-muted" style="font-size:0.85rem">No published variants yet.</span>';
+                            }
+                        }
+
+                        // Recent published variants table
+                        var recent = variants.filter(function (v) { return v.status === 'published'; })
+                            .sort(function (a, b) { return new Date(b.scheduled_at || 0) - new Date(a.scheduled_at || 0); })
+                            .slice(0, 25);
+                        var tbody = $('analytics-variants-tbody');
+                        if (tbody) {
+                            tbody.innerHTML = recent.length
+                                ? recent.map(function (v) {
+                                    var caption = (v.content || v.caption || '').slice(0, 60) + ((v.content || v.caption || '').length > 60 ? '…' : '');
+                                    return '<tr>' +
+                                        '<td>' + escapeHtml(caption || '—') + '</td>' +
+                                        '<td><span class="tag ok">' + escapeHtml(v.platform || '—') + '</span></td>' +
+                                        '<td>' + escapeHtml(v.campaign_name || '—') + '</td>' +
+                                        '<td>' + escapeHtml(v.brand || '—') + '</td>' +
+                                        '<td>' + escapeHtml(formatDateTime(v.scheduled_at)) + '</td>' +
+                                        '</tr>';
+                                }).join('')
+                                : '<tr><td colspan="5" class="text-muted">No published variants found.</td></tr>';
+                        }
+                    } catch (e) {
+                        console.error('[analytics panel]', e);
+                    }
+                }
+
+                var refBtn = $('analytics-refresh-btn');
+                if (refBtn) refBtn.addEventListener('click', load);
+
+                window.__adminPanels = window.__adminPanels || {};
+                window.__adminPanels.analytics = load;
+            })();
+
+            // =================================================================
+            // COMMUNITY MEMBERS PANEL (panel 16)
+            // =================================================================
+            (function initCommunityPanel() {
+                'use strict';
+                var allMembers = [];
+
+                async function load() {
+                    var tbody = $('community-members-tbody');
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Loading…</td></tr>';
+                    try {
+                        var token = await (state.clerk && state.clerk.session ? state.clerk.session.getToken() : Promise.resolve(null));
+                        if (!token) throw new Error('Not signed in');
+                        var resp = await fetch('/api/community/members', { headers: { Authorization: 'Bearer ' + token } });
+                        if (!resp.ok) throw new Error(resp.status + ' ' + resp.statusText);
+                        var data = await resp.json();
+                        allMembers = Array.isArray(data.members) ? data.members : (Array.isArray(data) ? data : []);
+                        renderTable(allMembers);
+                        updateKPIs(allMembers);
+                    } catch (e) {
+                        if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Failed to load: ' + escapeHtml(e.message) + '</td></tr>';
+                    }
+                }
+
+                function updateKPIs(members) {
+                    $('cm-total').textContent = members.length;
+                    var now = Date.now();
+                    var active = members.filter(function (m) {
+                        var t = m.last_active || m.updated_at || m.created_at;
+                        return t && (now - new Date(t).getTime()) < 30 * 86400 * 1000;
+                    }).length;
+                    $('cm-active').textContent = active;
+                    var totalXP = members.reduce(function (s, m) { return s + Number(m.xp || m.total_xp || 0); }, 0);
+                    $('cm-xp').textContent = totalXP.toLocaleString();
+                }
+
+                function renderTable(members) {
+                    var search = ($('community-search') || {}).value || '';
+                    var filtered = members;
+                    if (search) {
+                        var q = search.toLowerCase();
+                        filtered = members.filter(function (m) {
+                            return (m.email || '').toLowerCase().includes(q) ||
+                                (m.username || '').toLowerCase().includes(q) ||
+                                (m.full_name || '').toLowerCase().includes(q);
+                        });
+                    }
+                    var tbody = $('community-members-tbody');
+                    if (!tbody) return;
+                    if (!filtered.length) {
+                        tbody.innerHTML = '<tr><td colspan="7" class="text-muted">No members found.</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = filtered.map(function (m) {
+                        var xp = Number(m.xp || m.total_xp || 0);
+                        var level = m.level || (Math.floor(xp / 100) + 1);
+                        return '<tr>' +
+                            '<td>' + escapeHtml(m.full_name || m.username || m.email || '—') + '</td>' +
+                            '<td>Lv ' + level + '</td>' +
+                            '<td>' + xp.toLocaleString() + '</td>' +
+                            '<td>' + Number(m.post_count || 0) + '</td>' +
+                            '<td>' + Number(m.checkin_count || 0) + '</td>' +
+                            '<td>' + escapeHtml(formatDateTime(m.created_at)) + '</td>' +
+                            '<td>' + escapeHtml(formatDateTime(m.last_active || m.updated_at)) + '</td>' +
+                            '</tr>';
+                    }).join('');
+                }
+
+                var searchTimer;
+                var searchEl = $('community-search');
+                if (searchEl) {
+                    searchEl.addEventListener('input', function () {
+                        clearTimeout(searchTimer);
+                        searchTimer = setTimeout(function () { renderTable(allMembers); }, 200);
+                    });
+                }
+                var refBtn = $('community-refresh-btn');
+                if (refBtn) refBtn.addEventListener('click', load);
+
+                window.__adminPanels = window.__adminPanels || {};
+                window.__adminPanels.community = load;
+            })();
+
+            // =================================================================
+            // QUEUE HEALTH PANEL (panel 17)
+            // =================================================================
+            (function initQueueHealthPanel() {
+                'use strict';
+
+                async function load() {
+                    try {
+                        var variants = state.variants || [];
+                        var failed = variants.filter(function (v) { return v.status === 'failed'; });
+                        var pending = variants.filter(function (v) { return v.status === 'scheduled' || v.status === 'pending'; });
+                        var published = variants.filter(function (v) { return v.status === 'published'; });
+
+                        $('qh-failed').textContent = failed.length;
+                        $('qh-pending').textContent = pending.length;
+                        $('qh-published').textContent = published.length;
+
+                        // Failed variants table
+                        var failedTbody = $('qh-failed-tbody');
+                        if (failedTbody) {
+                            failedTbody.innerHTML = failed.length
+                                ? failed.map(function (v) {
+                                    var caption = (v.content || v.caption || '').slice(0, 55) + ((v.content || v.caption || '').length > 55 ? '…' : '');
+                                    return '<tr>' +
+                                        '<td>' + escapeHtml(caption || '—') + '</td>' +
+                                        '<td><span class="tag fail">' + escapeHtml(v.platform || '—') + '</span></td>' +
+                                        '<td>' + escapeHtml(v.brand || '—') + '</td>' +
+                                        '<td>' + escapeHtml(formatDateTime(v.scheduled_at)) + '</td>' +
+                                        '<td>' + Number(v.retry_count || 0) + '</td>' +
+                                        '<td style="max-width:200px;word-break:break-all;font-size:0.75rem">' + escapeHtml(v.last_error || '—') + '</td>' +
+                                        '</tr>';
+                                }).join('')
+                                : '<tr><td colspan="6" class="text-muted">No failed variants — publisher is healthy.</td></tr>';
+                        }
+
+                        // All variants table (recent 50)
+                        var allTbody = $('qh-all-tbody');
+                        if (allTbody) {
+                            var recent = [...variants].sort(function (a, b) { return new Date(b.scheduled_at || 0) - new Date(a.scheduled_at || 0); }).slice(0, 50);
+                            allTbody.innerHTML = recent.length
+                                ? recent.map(function (v) {
+                                    var caption = (v.content || v.caption || '').slice(0, 55) + ((v.content || v.caption || '').length > 55 ? '…' : '');
+                                    return '<tr>' +
+                                        '<td>' + escapeHtml(caption || '—') + '</td>' +
+                                        '<td>' + escapeHtml(v.platform || '—') + '</td>' +
+                                        '<td>' + escapeHtml(v.brand || '—') + '</td>' +
+                                        '<td>' + statusTag(v.status) + '</td>' +
+                                        '<td>' + escapeHtml(formatDateTime(v.scheduled_at)) + '</td>' +
+                                        '</tr>';
+                                }).join('')
+                                : '<tr><td colspan="5" class="text-muted">No variants loaded yet.</td></tr>';
+                        }
+                    } catch (e) {
+                        console.error('[queue health panel]', e);
+                    }
+                }
+
+                var refBtn = $('qh-refresh-btn');
+                if (refBtn) refBtn.addEventListener('click', load);
+
+                var runBtn = $('run-queue-btn-qh');
+                if (runBtn) runBtn.addEventListener('click', function () { runQueueNow().then(load); });
+
+                // Retry all failed: re-schedule each to now
+                var retryAllBtn = $('retry-all-failed-btn');
+                if (retryAllBtn) {
+                    retryAllBtn.addEventListener('click', async function () {
+                        var failed = (state.variants || []).filter(function (v) { return v.status === 'failed'; });
+                        if (!failed.length) { toast('No failed variants to retry.', 'info'); return; }
+                        try {
+                            var now = new Date().toISOString();
+                            await Promise.all(failed.map(function (v) {
+                                return api('/social/' + v.id, { method: 'PUT', body: { status: 'scheduled', scheduled_at: now, retry_count: 0, last_error: null } });
+                            }));
+                            toast('Retried ' + failed.length + ' variant(s).', 'success');
+                            await refreshAll();
+                            load();
+                        } catch (e) {
+                            toast('Retry failed: ' + e.message, 'error');
+                        }
+                    });
+                }
+
+                window.__adminPanels = window.__adminPanels || {};
+                window.__adminPanels.notifications = load;
+            })();
+
+            // =================================================================
+            // CHARACTERS PANEL (panel 18)  — static registry, no async needed
+            // =================================================================
+            (function initCharactersPanel() {
+                'use strict';
+                var refBtn = $('char-refresh-btn');
+                if (refBtn) {
+                    refBtn.addEventListener('click', function () {
+                        toast('Character registry is source-controlled in ANIMATION_PIPELINE.md — no live data to reload.', 'info');
+                    });
+                }
+            })();
+
+            // =================================================================
+            // DONATIONS PANEL (panel 14) — placeholder until webhook + D1 setup
+            // =================================================================
+            (function initDonationsPanel() {
+                'use strict';
+                var refBtn = $('donations-refresh-btn');
+                if (refBtn) {
+                    refBtn.addEventListener('click', function () {
+                        toast('Stripe webhook not yet configured. Visit the Stripe Dashboard to view transactions.', 'info');
+                    });
+                }
+            })();
 
             // ─────────────────────────────────────────────────────────────────
             // STORAGE INTELLIGENCE (panel 13)
