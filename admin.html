@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GFD Command Center</title>
+    <title>GFD Admin</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -169,6 +169,14 @@
             margin-top: 0.45rem;
         }
 
+        .brand-logo-img {
+            height: 38px;
+            width: auto;
+            display: block;
+            margin-bottom: 0.4rem;
+            filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.25));
+        }
+
         .pill {
             display: inline-flex;
             align-items: center;
@@ -320,21 +328,74 @@
             padding: 1rem;
         }
 
-        .kpis {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(150px, 1fr));
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .kpi {
+        /* ── Status strip (compact KPI bar) ─────────────────────────── */
+        .status-strip {
+            display: flex;
+            flex-wrap: wrap;
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
-            padding: 0.8rem;
+            overflow: hidden;
+            margin-bottom: 1rem;
             background: rgba(255, 255, 255, 0.02);
             animation: fade-up 0.3s ease both;
         }
 
+        .status-chip {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.55rem 0.75rem 0.45rem;
+            border-right: 1px solid var(--border);
+            min-width: 70px;
+        }
+
+        .status-chip:last-child {
+            border-right: none;
+        }
+
+        .chip-value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
+        .chip-value.cyan {
+            color: var(--accent-cyan);
+        }
+
+        .chip-value.gold {
+            color: var(--accent-gold);
+        }
+
+        .chip-value.violet {
+            color: var(--accent-violet);
+        }
+
+        .chip-value.emerald {
+            color: var(--accent-emerald);
+        }
+
+        .chip-value.rose {
+            color: var(--accent-rose);
+        }
+
+        .chip-value.loading {
+            animation: kpi-pulse 1.4s ease infinite;
+            color: var(--text-muted) !important;
+        }
+
+        .chip-label {
+            font-size: 0.59rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            white-space: nowrap;
+            margin-top: 0.18rem;
+        }
+
+        /* legacy .kpi selectors kept for panel-kpis compatibility */
         .kpi-label {
             color: var(--text-muted);
             font-size: 0.74rem;
@@ -1804,9 +1865,6 @@
                 grid-template-columns: repeat(2, minmax(150px, 1fr));
             }
 
-            .kpis {
-                grid-template-columns: repeat(3, minmax(150px, 1fr));
-            }
         }
 
         @media (max-width: 960px) {
@@ -1831,14 +1889,18 @@
                 padding: 1rem;
             }
 
-            .kpis {
-                grid-template-columns: repeat(2, minmax(140px, 1fr));
+            .status-chip {
+                flex: 1 1 calc(33.33% - 1px);
             }
         }
 
         @media (max-width: 600px) {
 
-            .kpis,
+            .status-chip {
+                flex: 1 1 calc(50% - 1px);
+                border-bottom: 1px solid var(--border);
+            }
+
             .connection-grid,
             .platform-picker,
             .asset-grid,
@@ -2933,6 +2995,16 @@
             flex-shrink: 0;
             opacity: 0.7;
             transition: opacity 0.18s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-icon svg {
+            width: 14px;
+            height: 14px;
+            display: block;
+            flex-shrink: 0;
         }
 
         .nav-label {
@@ -4024,9 +4096,223 @@
                 grid-template-columns: 1fr;
             }
 
-            .kpis {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        }
+
+        /* ══════════════════════════════════════════════════════════════════
+           SOCIAL FEED VIEW
+           ══════════════════════════════════════════════════════════════════ */
+        .sf-tabs {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .sf-tab {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 0.32rem 0.75rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            transition: color 0.15s, border-color 0.15s, background 0.15s;
+        }
+
+        .sf-tab:hover {
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .sf-tab.active {
+            color: var(--accent-cyan);
+            border-color: rgba(34, 211, 238, 0.4);
+            background: rgba(34, 211, 238, 0.08);
+        }
+
+        .sf-tabs-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .sf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .sf-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .sf-card:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+        }
+
+        .sf-card-header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            align-items: center;
+            padding: 0.55rem 0.7rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sf-platform-badge {
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 0.18rem 0.5rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .sf-platform-badge.instagram {
+            background: rgba(225, 48, 108, 0.18);
+            color: #e1306c;
+        }
+
+        .sf-platform-badge.x,
+        .sf-platform-badge.twitter {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+        }
+
+        .sf-platform-badge.linkedin {
+            background: rgba(0, 119, 181, 0.18);
+            color: #5fafda;
+        }
+
+        .sf-platform-badge.facebook {
+            background: rgba(24, 119, 242, 0.18);
+            color: #5b9ef5;
+        }
+
+        .sf-platform-badge.tiktok {
+            background: rgba(255, 0, 80, 0.15);
+            color: #ff4070;
+        }
+
+        .sf-platform-badge.pinterest {
+            background: rgba(230, 0, 35, 0.15);
+            color: #e84055;
+        }
+
+        .sf-platform-badge.youtube {
+            background: rgba(255, 0, 0, 0.15);
+            color: #ff4444;
+        }
+
+        .sf-platform-badge.threads,
+        .sf-platform-badge.other {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+        }
+
+        .sf-status-badge {
+            font-size: 0.6rem;
+            padding: 0.16rem 0.48rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-left: auto;
+        }
+
+        .sf-status-badge.scheduled {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--accent-gold);
+        }
+
+        .sf-status-badge.published {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-emerald);
+        }
+
+        .sf-status-badge.draft {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+        }
+
+        .sf-status-badge.failed {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-rose);
+        }
+
+        .sf-date {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+        }
+
+        .sf-brand-badge {
+            font-size: 0.62rem;
+            color: var(--accent-violet);
+            font-weight: 600;
+        }
+
+        .sf-card-media {
+            height: 110px;
+            background: rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: var(--text-muted);
+            opacity: 0.45;
+        }
+
+        .sf-card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 1;
+        }
+
+        .sf-card-body {
+            padding: 0.7rem;
+        }
+
+        .sf-caption {
+            font-size: 0.81rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .sf-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.55rem 0.7rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .sf-empty {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .sf-empty h3 {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .sf-footer {
+            text-align: center;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
         }
     </style>
 </head>
@@ -4034,7 +4320,8 @@
 <body>
     <div id="auth-gate">
         <div class="auth-card">
-            <h1>GFD Command Center</h1>
+            <img src="/assets/gfd-mark-nav.png" alt="GFD" style="height:44px;width:auto;display:block;margin:0 auto 0.75rem;filter:drop-shadow(0 0 12px rgba(34,211,238,0.3))">
+            <h1 style="font-size:1.1rem;margin-bottom:0.4rem">Command Center</h1>
             <p id="auth-loading">Verifying executive admin access...</p>
             <p id="auth-denied" class="denied hide">Admin access required. Use an account with <span class="mono">publicMetadata.role = admin</span>.</p>
             <p class="mt-08"><a class="link-accent" href="/">Back to goodflippindesign.com</a></p>
@@ -4045,42 +4332,107 @@
         <div class="shell">
             <aside class="sidebar">
                 <div class="brand-block">
-                    <div class="brand-title">GFD Command Center</div>
-                    <div class="brand-subtitle">Multi-brand Social &amp; Media Operations</div>
+                    <img src="/assets/gfd-mark-nav.png" alt="GFD" class="brand-logo-img">
+                    <div class="brand-subtitle">Command Center</div>
                     <span class="pill" id="active-brand-pill">Brand Scope: GFD</span>
                 </div>
 
                 <div class="brand-switcher" id="brand-switcher" role="group" aria-label="Active brand"></div>
 
                 <nav class="nav-grid" aria-label="Primary admin navigation">
-                    <button class="nav-btn active" data-view="overview"><span class="nav-num">01</span><span class="nav-icon">&#127968;</span><span class="nav-label">Overview</span></button>
+                    <button class="nav-btn active" data-view="overview"><span class="nav-num">01</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="1" y="1" width="6" height="6" rx="1" />
+                                <rect x="9" y="1" width="6" height="6" rx="1" />
+                                <rect x="1" y="9" width="6" height="6" rx="1" />
+                                <rect x="9" y="9" width="6" height="6" rx="1" />
+                            </svg></span><span class="nav-label">Overview</span></button>
 
                     <div class="nav-group-label">Distribution</div>
-                    <button class="nav-btn" data-view="connections"><span class="nav-num">02</span><span class="nav-icon">&#128279;</span><span class="nav-label">Platform Connect</span></button>
-                    <button class="nav-btn" data-view="planner"><span class="nav-num">03</span><span class="nav-icon">&#128197;</span><span class="nav-label">Campaign Planner</span></button>
+                    <button class="nav-btn" data-view="connections"><span class="nav-num">02</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <path d="M6.5 9.5a3.5 3.5 0 1 0 4.95-4.95L9.5 6.5" />
+                                <path d="M9.5 6.5a3.5 3.5 0 1 0-4.95 4.95L6.5 9.5" />
+                            </svg></span><span class="nav-label">Platform Connect</span></button>
+                    <button class="nav-btn" data-view="planner"><span class="nav-num">03</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <rect x="1.5" y="3" width="13" height="11.5" rx="1.5" />
+                                <path d="M1.5 7h13M5 1v4M11 1v4" />
+                            </svg></span><span class="nav-label">Campaign Planner</span></button>
 
                     <div class="nav-group-label">Content</div>
-                    <button class="nav-btn" data-view="composer"><span class="nav-num">04</span><span class="nav-icon">&#9998;</span><span class="nav-label">Post Composer</span></button>
-                    <button class="nav-btn" data-view="library"><span class="nav-num">05</span><span class="nav-icon">&#128450;</span><span class="nav-label">Asset Library</span></button>
-                    <button class="nav-btn" data-view="drip"><span class="nav-num">06</span><span class="nav-icon">&#128167;</span><span class="nav-label">Drip Builder</span></button>
-                    <button class="nav-btn" data-view="review-queue"><span class="nav-num">07</span><span class="nav-icon">&#128065;</span><span class="nav-label">Review Queue <span class="review-badge d-none" id="review-badge">0</span></span></button>
+                    <button class="nav-btn" data-view="composer"><span class="nav-num">04</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M10 2.5 13.5 6 5.5 14H2v-3.5L10 2.5Z" />
+                                <path d="M8 4.5 11.5 8" />
+                            </svg></span><span class="nav-label">Post Composer</span></button>
+                    <button class="nav-btn" data-view="social-feed"><span class="nav-num">05</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <rect x="1.5" y="4.5" width="13" height="9.5" rx="1.5" />
+                                <path d="M5.5 4.5V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5" />
+                                <circle cx="8" cy="9.5" r="2.5" />
+                            </svg></span><span class="nav-label">Social Gallery</span></button>
+                    <button class="nav-btn" data-view="library"><span class="nav-num">06</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m8 1 7 3.5-7 3.5L1 4.5 8 1Z" />
+                                <path d="M1 8l7 3.5L15 8" />
+                                <path d="M1 11.5l7 3.5 7-3.5" />
+                            </svg></span><span class="nav-label">Asset Library</span></button>
+                    <button class="nav-btn" data-view="drip"><span class="nav-num">07</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M2 3h12l-5 5.5V13.5l-2-1V8.5L2 3Z" />
+                            </svg></span><span class="nav-label">Drip Builder</span></button>
+                    <button class="nav-btn" data-view="review-queue"><span class="nav-num">08</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <path d="M1 8S3.8 2.5 8 2.5 15 8 15 8 12.2 13.5 8 13.5 1 8 1 8Z" />
+                                <circle cx="8" cy="8" r="2" />
+                            </svg></span><span class="nav-label">Review Queue <span class="review-badge d-none" id="review-badge">0</span></span></button>
 
                     <div class="nav-group-label">Sites</div>
-                    <button class="nav-btn" data-view="overrides"><span class="nav-num">08</span><span class="nav-icon">&#9881;</span><span class="nav-label">Site Overrides</span></button>
-                    <button class="nav-btn" data-view="galleries"><span class="nav-num">09</span><span class="nav-icon">&#128444;</span><span class="nav-label">Gallery Manager</span></button>
-                    <button class="nav-btn" data-view="content-studio"><span class="nav-num">10</span><span class="nav-icon">&#127909;</span><span class="nav-label">Content Studio</span></button>
-                    <button class="nav-btn" data-view="ecosystem"><span class="nav-num">11</span><span class="nav-icon">&#127760;</span><span class="nav-label">Ecosystem Health</span></button>
-                    <button class="nav-btn" data-view="blog-manager"><span class="nav-num">12</span><span class="nav-icon">&#128221;</span><span class="nav-label">Blog Manager <span class="review-badge d-none" id="blog-draft-badge">0</span></span></button>
+                    <button class="nav-btn" data-view="overrides"><span class="nav-num">09</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <path d="M2 4h12M2 8h12M2 12h12" />
+                                <circle cx="5" cy="4" r="1.5" />
+                                <circle cx="10" cy="8" r="1.5" />
+                                <circle cx="6" cy="12" r="1.5" />
+                            </svg></span><span class="nav-label">Site Overrides</span></button>
+                    <button class="nav-btn" data-view="galleries"><span class="nav-num">10</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="1" y="2" width="14" height="12" rx="1.5" />
+                                <path d="m1 11 4-4 3 3 2.5-2 4.5 5" />
+                                <circle cx="11" cy="6" r="1.5" />
+                            </svg></span><span class="nav-label">Gallery Manager</span></button>
+                    <button class="nav-btn" data-view="content-studio"><span class="nav-num">11</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <rect x="1.5" y="4.5" width="13" height="9.5" rx="1" />
+                                <path d="M1.5 7.5h13M4.5 4.5 3 2M7.5 4.5 6 2M10.5 4.5 9 2M13.5 4.5 12 2" />
+                            </svg></span><span class="nav-label">Content Studio</span></button>
+                    <button class="nav-btn" data-view="ecosystem"><span class="nav-num">12</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1 8h3l2-5 3 10 2-5 2 3h2" />
+                            </svg></span><span class="nav-label">Ecosystem Health</span></button>
+                    <button class="nav-btn" data-view="blog-manager"><span class="nav-num">13</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <path d="M10 1.5H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5.5L10 1.5Z" />
+                                <path d="M10 1.5V5.5h4M5 8h6M5 10.5h4" />
+                            </svg></span><span class="nav-label">Blog Manager <span class="review-badge d-none" id="blog-draft-badge">0</span></span></button>
 
                     <div class="nav-group-label">Intelligence</div>
-                    <button class="nav-btn" data-view="storage"><span class="nav-num">13</span><span class="nav-icon">&#128190;</span><span class="nav-label">Storage Intel</span></button>
-                    <button class="nav-btn" data-view="donations"><span class="nav-num">14</span><span class="nav-icon">&#128179;</span><span class="nav-label">Donations</span></button>
-                    <button class="nav-btn" data-view="analytics"><span class="nav-num">15</span><span class="nav-icon">&#128202;</span><span class="nav-label">Analytics</span></button>
+                    <button class="nav-btn" data-view="storage"><span class="nav-num">14</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <path d="M2 4c0-1.4 2.7-2.5 6-2.5S14 2.6 14 4v8c0 1.4-2.7 2.5-6 2.5S2 13.4 2 12V4Z" />
+                                <path d="M14 4c0 1.4-2.7 2.5-6 2.5S2 5.4 2 4" />
+                                <path d="M2 8c0 1.4 2.7 2.5 6 2.5S14 9.4 14 8" />
+                            </svg></span><span class="nav-label">Storage Intel</span></button>
+                    <button class="nav-btn" data-view="donations"><span class="nav-num">15</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M8 13.5C8 13.5 1 9.3 1 5a3.5 3.5 0 0 1 7 0 3.5 3.5 0 0 1 7 0c0 4.3-7 8.5-7 8.5Z" />
+                            </svg></span><span class="nav-label">Donations</span></button>
+                    <button class="nav-btn" data-view="analytics"><span class="nav-num">16</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <path d="M1 13.5h14" />
+                                <path d="M3.5 13.5V9h2M7.5 13.5V6h2M11.5 13.5V3.5h2" />
+                            </svg></span><span class="nav-label">Analytics</span></button>
 
                     <div class="nav-group-label">Community</div>
-                    <button class="nav-btn" data-view="community"><span class="nav-num">16</span><span class="nav-icon">&#128101;</span><span class="nav-label">Community</span></button>
-                    <button class="nav-btn" data-view="notifications"><span class="nav-num">17</span><span class="nav-icon">&#9889;</span><span class="nav-label">Queue Health</span></button>
-                    <button class="nav-btn" data-view="characters"><span class="nav-num">18</span><span class="nav-icon">&#129312;</span><span class="nav-label">Characters</span></button>
+                    <button class="nav-btn" data-view="community"><span class="nav-num">17</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <circle cx="6" cy="5.5" r="2.5" />
+                                <path d="M1 14c0-2.8 2.2-5 5-5s5 2.2 5 5" />
+                                <circle cx="12.5" cy="5" r="2" />
+                                <path d="M15 14c-.2-2-1.5-3.5-2.5-3.5" stroke-width="1.3" />
+                            </svg></span><span class="nav-label">Community</span></button>
+                    <button class="nav-btn" data-view="notifications"><span class="nav-num">18</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 1.5 4 9h4.5l-1 5.5 6.5-8H9.5L11 1.5Z" />
+                            </svg></span><span class="nav-label">Queue Health</span></button>
+                    <button class="nav-btn" data-view="characters"><span class="nav-num">19</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                                <circle cx="7" cy="5" r="3" />
+                                <path d="M1 15c0-3.3 2.7-6 6-6" />
+                                <path d="M12 8.5l.7 1.4H14l-1.2.9.5 1.5-1.3-1-1.3 1 .5-1.5L10 9.9h1.3l.7-1.4Z" />
+                            </svg></span><span class="nav-label">Characters</span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -4092,7 +4444,7 @@
             <main class="content">
                 <div class="topbar">
                     <div class="topbar-context">
-                        <div class="topbar-breadcrumb">GFD Command Center <span class="topbar-sep">&#8250;</span> <span id="topbar-section-name">Overview</span></div>
+                        <div class="topbar-breadcrumb">GFD Admin <span class="topbar-sep">&#8250;</span> <span id="topbar-section-name">Overview</span></div>
                         <h1 class="heading" id="topbar-heading">Overview</h1>
                         <p class="subheading" id="topbar-subheading">Global KPIs, platform connections, and quick-start guide for your content pipeline.</p>
                     </div>
@@ -4105,44 +4457,48 @@
                     </div>
                 </div>
 
-                <section class="kpis" id="kpi-row">
-                    <article class="kpi">
-                        <div class="kpi-label">Assets</div>
-                        <div class="kpi-value cyan" id="kpi-assets">0</div>
-                    </article>
-                    <article class="kpi">
-                        <div class="kpi-label">Scheduled Variants</div>
-                        <div class="kpi-value gold" id="kpi-scheduled">0</div>
-                    </article>
-                    <article class="kpi">
-                        <div class="kpi-label">Campaigns</div>
-                        <div class="kpi-value violet" id="kpi-campaigns">0</div>
-                    </article>
-                    <article class="kpi">
-                        <div class="kpi-label">Platform Connections</div>
-                        <div class="kpi-value emerald" id="kpi-connections">0</div>
-                    </article>
-                    <article class="kpi">
-                        <div class="kpi-label">Published Variants</div>
-                        <div class="kpi-value rose" id="kpi-published">0</div>
-                    </article>
-                    <article class="kpi">
-                        <div class="kpi-label">Pending Review</div>
-                        <div class="kpi-value rose" id="kpi-pending-review">0</div>
-                    </article>
-                    <article class="kpi">
-                        <div class="kpi-label">Storage Used</div>
-                        <div class="kpi-value" id="kpi-storage">—</div>
-                    </article>
-                    <article class="kpi">
-                        <div class="kpi-label">CI Failures</div>
-                        <div class="kpi-value rose" id="kpi-ci-failures">—</div>
-                    </article>
-                    <article class="kpi">
-                        <div class="kpi-label">Sites Online</div>
-                        <div class="kpi-value emerald" id="kpi-sites-online">—</div>
-                    </article>
-                </section>
+                <div class="status-strip" id="kpi-row" role="region" aria-label="Platform statistics">
+                    <div class="status-chip">
+                        <div class="chip-value cyan" id="kpi-assets">—</div>
+                        <div class="chip-label">Assets</div>
+                    </div>
+                    <div class="status-chip">
+                        <div class="chip-value gold" id="kpi-scheduled">—</div>
+                        <div class="chip-label">Scheduled</div>
+                    </div>
+                    <div class="status-chip">
+                        <div class="chip-value violet" id="kpi-campaigns">—</div>
+                        <div class="chip-label">Campaigns</div>
+                    </div>
+                    <div class="status-chip">
+                        <div class="chip-value emerald" id="kpi-connections">—</div>
+                        <div class="chip-label">Connected</div>
+                    </div>
+                    <div class="status-chip">
+                        <div class="chip-value rose" id="kpi-published">—</div>
+                        <div class="chip-label">Published</div>
+                    </div>
+                    <div class="status-chip">
+                        <div class="chip-value rose" id="kpi-pending-review">—</div>
+                        <div class="chip-label">In Review</div>
+                    </div>
+                    <div class="status-chip">
+                        <div class="chip-value cyan" id="kpi-blog-posts">—</div>
+                        <div class="chip-label">Blog Posts</div>
+                    </div>
+                    <div class="status-chip">
+                        <div class="chip-value violet" id="kpi-community-members">—</div>
+                        <div class="chip-label">Members</div>
+                    </div>
+                    <div class="status-chip">
+                        <div class="chip-value" id="kpi-storage">—</div>
+                        <div class="chip-label">Storage</div>
+                    </div>
+                    <div class="status-chip">
+                        <div class="chip-value emerald" id="kpi-sites-online">—</div>
+                        <div class="chip-label">Sites Up</div>
+                    </div>
+                </div>
 
                 <section class="view active" id="view-overview">
                     <!-- Getting Started: shown only when DB is empty -->
@@ -5266,6 +5622,44 @@
                     </article>
                 </section>
 
+                <!-- ─── Social Gallery view ─────────────────────────────── -->
+                <section class="view" id="view-social-feed">
+                    <div class="panel" style="padding:0;overflow:hidden">
+                        <div class="sf-tabs" id="sf-tabs" role="tablist" aria-label="Filter by platform">
+                            <button class="sf-tab active" data-platform="all" role="tab" aria-selected="true">All</button>
+                            <button class="sf-tab" data-platform="instagram" role="tab" aria-selected="false">Instagram</button>
+                            <button class="sf-tab" data-platform="x" role="tab" aria-selected="false">X / Twitter</button>
+                            <button class="sf-tab" data-platform="linkedin" role="tab" aria-selected="false">LinkedIn</button>
+                            <button class="sf-tab" data-platform="facebook" role="tab" aria-selected="false">Facebook</button>
+                            <button class="sf-tab" data-platform="tiktok" role="tab" aria-selected="false">TikTok</button>
+                            <button class="sf-tab" data-platform="pinterest" role="tab" aria-selected="false">Pinterest</button>
+                            <button class="sf-tab" data-platform="youtube" role="tab" aria-selected="false">YouTube</button>
+                            <div class="sf-tabs-actions">
+                                <select class="input-field" id="sf-status-filter" aria-label="Filter by status" style="font-size:0.78rem;padding:0.28rem 0.6rem;height:auto">
+                                    <option value="">All statuses</option>
+                                    <option value="draft">Draft</option>
+                                    <option value="scheduled">Scheduled</option>
+                                    <option value="published">Published</option>
+                                    <option value="failed">Failed</option>
+                                </select>
+                                <button class="btn btn-primary btn-sm" data-view-shortcut="composer">+ New Post</button>
+                            </div>
+                        </div>
+                        <div class="sf-grid" id="sf-grid" role="list"></div>
+                        <div class="sf-empty d-none" id="sf-empty">
+                            <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 1rem;display:block;opacity:.35">
+                                <rect x="4" y="6" width="40" height="36" rx="4" />
+                                <path d="M4 20h40M16 6v14M32 6v14" />
+                            </svg>
+                            <h3>No posts yet</h3>
+                            <p style="font-size:0.85rem;margin-top:0.4rem">Draft your first post in the <button class="btn-link" data-view-shortcut="composer">Post Composer</button>.</p>
+                        </div>
+                        <div class="sf-footer d-none" id="sf-footer">
+                            <button class="btn btn-secondary" id="sf-load-more">Load more</button>
+                        </div>
+                    </div>
+                </section>
+
             </main>
         </div>
     </div>
@@ -6265,6 +6659,7 @@
                 updateComposerCounters();
                 initCommandPalette();
                 initKeyboardShortcuts();
+                wireSocialFeed();
             }
 
             // ── Command Palette ──────────────────────────────────────────────
@@ -6272,7 +6667,7 @@
                 const NAV_ITEMS = Object.entries(PAGE_CONTEXTS).map(([view, ctx]) => ({
                     view,
                     num: document.querySelector(`.nav-btn[data-view="${view}"] .nav-num`)?.textContent || '',
-                    icon: document.querySelector(`.nav-btn[data-view="${view}"] .nav-icon`)?.textContent || '',
+                    icon: document.querySelector(`.nav-btn[data-view="${view}"] .nav-icon`)?.innerHTML || '',
                     label: ctx.name,
                     group: ctx.title,
                 }));
@@ -6361,7 +6756,7 @@
             // ── Keyboard shortcuts ───────────────────────────────────────────
             function initKeyboardShortcuts() {
                 const VIEWS = [
-                    'overview', 'connections', 'planner', 'composer', 'composer',
+                    'overview', 'connections', 'planner', 'composer', 'social-feed',
                     'library', 'drip', 'review-queue', 'overrides', 'galleries',
                     'content-studio', 'ecosystem', 'blog-manager', 'storage',
                     'donations', 'analytics', 'community', 'notifications', 'characters',
@@ -6397,6 +6792,7 @@
                     btn.addEventListener('click', () => {
                         switchView(btn.dataset.view);
                         if (btn.dataset.view === 'ecosystem') refreshEcosystem();
+                        if (btn.dataset.view === 'social-feed') loadSocialFeed();
                         if (btn.dataset.view === 'analytics' && window.__adminPanels?.analytics) window.__adminPanels.analytics();
                         if (btn.dataset.view === 'community' && window.__adminPanels?.community) window.__adminPanels.community();
                         if (btn.dataset.view === 'notifications' && window.__adminPanels?.notifications) window.__adminPanels.notifications();
@@ -6773,12 +7169,169 @@
                             ? mb.toFixed(1) + ' MB'
                             : Math.round(bytes / 1024) + ' KB';
                 }
+
+                // Blog posts + community members from augmented stats
+                if (stats.blogPosts !== undefined) {
+                    const el = $('kpi-blog-posts');
+                    if (el) el.textContent = Number(stats.blogPosts);
+                }
+                if (stats.communityMembers !== undefined) {
+                    const el = $('kpi-community-members');
+                    if (el) el.textContent = Number(stats.communityMembers);
+                }
+
                 updateGettingStarted();
+                checkSiteUptime();
+            }
+
+            async function checkSiteUptime() {
+                const sites = [
+                    'https://goodflippinvibes.com',
+                    'https://goodflippindesign.com',
+                    'https://culturesherpa.com',
+                ];
+                const checks = sites.map(url =>
+                    fetch(url, { method: 'HEAD', mode: 'no-cors', signal: AbortSignal.timeout(5000) })
+                        .then(() => true)
+                        .catch(() => false)
+                );
+                const results = await Promise.allSettled(checks);
+                const online = results.filter(r => r.status === 'fulfilled' && r.value === true).length;
+                const el = $('kpi-sites-online');
+                if (el) {
+                    el.textContent = online + '/' + sites.length;
+                    el.className = 'kpi-value ' + (online === sites.length ? 'emerald' : online > 0 ? 'gold' : 'rose');
+                }
+                // CI failures — cleared until GitHub token is configured
+                const ciEl = $('kpi-ci-failures');
+                if (ciEl && ciEl.textContent === '—') {
+                    ciEl.title = 'Connect a GitHub token in Settings to enable CI failure tracking';
+                }
             }
 
             async function loadConnections() {
                 state.connections = await api('/connections?brand=' + encodeURIComponent(currentBrand));
             }
+
+            // ── Social Feed ──────────────────────────────────────────────────
+            let sfPlatformFilter = 'all';
+            let sfStatusFilter = '';
+            const SF_LIMIT = 40;
+
+            async function loadSocialFeed(append) {
+                const grid = $('sf-grid');
+                const empty = $('sf-empty');
+                const footer = $('sf-footer');
+                if (!grid) return;
+
+                if (!append) {
+                    grid.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.85rem">Loading posts\u2026</div>';
+                    empty?.classList.add('d-none');
+                    footer?.classList.add('d-none');
+                }
+
+                const params = new URLSearchParams({ brand: currentBrand, limit: String(SF_LIMIT) });
+                if (sfPlatformFilter !== 'all') params.set('platform', sfPlatformFilter);
+                if (sfStatusFilter) params.set('status', sfStatusFilter);
+
+                try {
+                    const posts = await api('/social?' + params.toString());
+                    if (!append) grid.innerHTML = '';
+
+                    if (!posts || posts.length === 0) {
+                        if (!append) empty?.classList.remove('d-none');
+                        footer?.classList.add('d-none');
+                        return;
+                    }
+
+                    empty?.classList.add('d-none');
+
+                    posts.forEach((post) => {
+                        const card = document.createElement('div');
+                        card.className = 'sf-card';
+                        card.setAttribute('role', 'listitem');
+                        card.dataset.id = String(post.id);
+
+                        const platform = String(post.platform || '').toLowerCase();
+                        const status = String(post.status || 'draft').toLowerCase();
+                        const caption = String(post.content || '');
+                        const short = caption.length > 150 ? caption.slice(0, 150) + '\u2026' : caption;
+
+                        let dateStr = '';
+                        const ts = post.scheduled_at || post.created_at;
+                        if (ts) {
+                            try { dateStr = new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { }
+                        }
+
+                        const mediaHTML = `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 14l5-5 4 4 3-3 5 5"/><circle cx="15" cy="8" r="2"/></svg>`;
+
+                        card.innerHTML =
+                            '<div class="sf-card-header">' +
+                            '<span class="sf-platform-badge ' + escapeHtml(platform) + '">' + escapeHtml(post.platform || 'Unknown') + '</span>' +
+                            '<span class="sf-brand-badge">' + escapeHtml(post.brand || '') + '</span>' +
+                            '<span class="sf-status-badge ' + escapeHtml(status) + '">' + escapeHtml(status) + '</span>' +
+                            '<span class="sf-date">' + escapeHtml(dateStr) + '</span>' +
+                            '</div>' +
+                            '<div class="sf-card-media">' + mediaHTML + '</div>' +
+                            '<div class="sf-card-body"><p class="sf-caption">' + escapeHtml(short || '\u2014') + '</p></div>' +
+                            '<div class="sf-card-actions">' +
+                            '<button class="btn btn-micro" onclick="sfEditPost(' + Number(post.id) + ')">Edit</button>' +
+                            '<button class="btn btn-micro btn-danger" onclick="sfDeletePost(' + Number(post.id) + ')">Delete</button>' +
+                            '</div>';
+
+                        grid.appendChild(card);
+                    });
+
+                    footer?.classList[posts.length >= SF_LIMIT ? 'remove' : 'add']('d-none');
+                } catch (err) {
+                    grid.innerHTML = '<div style="padding:2rem;color:var(--accent-rose)">' + escapeHtml(String(err.message)) + '</div>';
+                }
+            }
+
+            // Exposed to inline onclick (within this IIFE scope via window assignments below)
+            function sfEditPost(id) {
+                switchView('composer');
+                toast('Opening in Post Composer\u2026', 'info');
+            }
+
+            function sfDeletePost(id) {
+                showConfirm('Delete this post? This cannot be undone.', async () => {
+                    try {
+                        await api('/social?id=' + id, { method: 'DELETE' });
+                        const card = document.querySelector('.sf-card[data-id="' + id + '"]');
+                        if (card) card.remove();
+                        toast('Post deleted.', 'success');
+                    } catch (err) {
+                        toast(err.message, 'error');
+                    }
+                });
+            }
+
+            // Make helpers accessible to inline onclick attributes
+            window.sfEditPost = sfEditPost;
+            window.sfDeletePost = sfDeletePost;
+
+            function wireSocialFeed() {
+                document.querySelectorAll('.sf-tab').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.sf-tab').forEach((t) => {
+                            t.classList.remove('active');
+                            t.setAttribute('aria-selected', 'false');
+                        });
+                        btn.classList.add('active');
+                        btn.setAttribute('aria-selected', 'true');
+                        sfPlatformFilter = btn.dataset.platform || 'all';
+                        loadSocialFeed();
+                    });
+                });
+
+                const sfSel = $('sf-status-filter');
+                if (sfSel) sfSel.addEventListener('change', () => { sfStatusFilter = sfSel.value; loadSocialFeed(); });
+
+                const sfMore = $('sf-load-more');
+                if (sfMore) sfMore.addEventListener('click', () => loadSocialFeed(true));
+            }
+            // ── End Social Feed ──────────────────────────────────────────────
 
             async function loadSocialAccounts() {
                 try {
@@ -7677,10 +8230,11 @@
 
             // ── Page context map ────────────────────────────────────────────
             const PAGE_CONTEXTS = {
-                overview: { name: 'Overview', title: 'Overview', sub: 'Global KPIs, platform connections, and quick-start guide for your content pipeline.' },
+                overview: { name: 'Overview', title: 'Overview', sub: 'Global stats, platform connections, and quick-start guide for your content pipeline.' },
                 connections: { name: 'Platform Connect', title: 'Platform Connect', sub: 'Manage OAuth tokens, social handles, and per-brand platform authentication.' },
                 planner: { name: 'Campaign Planner', title: 'Campaign Planner', sub: 'Schedule yearly campaigns, set objectives, and view your content calendar.' },
                 composer: { name: 'Post Composer', title: 'Post Composer', sub: 'Draft and schedule posts across all platforms with per-channel character limits.' },
+                'social-feed': { name: 'Social Gallery', title: 'Social Post Gallery', sub: 'All scheduled, published, and draft posts organized by platform across your brand ecosystem.' },
                 library: { name: 'Asset Library', title: 'Asset Library', sub: 'Upload, tag, and manage media assets stored in Cloudflare R2.' },
                 drip: { name: 'Drip Builder', title: 'Drip Builder', sub: 'Build time-delayed drip sequences for automated multi-touch campaigns.' },
                 'review-queue': { name: 'Review Queue', title: 'Review Queue', sub: 'Approve, reject, or edit scraped content before it enters the publishing pipeline.' },
@@ -9491,10 +10045,10 @@
                     // dropdown sort still works; column-header sort overrides via blogSortCol/Dir
                     var dropdownSort = $('blog-filter-sort') ? $('blog-filter-sort').value : '';
                     if (dropdownSort && dropdownSort !== 'created_desc') {
-                        if (dropdownSort === 'created_asc')  { blogSortCol = 'created_at';   blogSortDir = 'asc'; }
-                        if (dropdownSort === 'title_asc')    { blogSortCol = 'title';         blogSortDir = 'asc'; }
-                        if (dropdownSort === 'title_desc')   { blogSortCol = 'title';         blogSortDir = 'desc'; }
-                        if (dropdownSort === 'status')       { blogSortCol = 'status';        blogSortDir = 'asc'; }
+                        if (dropdownSort === 'created_asc') { blogSortCol = 'created_at'; blogSortDir = 'asc'; }
+                        if (dropdownSort === 'title_asc') { blogSortCol = 'title'; blogSortDir = 'asc'; }
+                        if (dropdownSort === 'title_desc') { blogSortCol = 'title'; blogSortDir = 'desc'; }
+                        if (dropdownSort === 'status') { blogSortCol = 'status'; blogSortDir = 'asc'; }
                     }
 
                     var filtered = blogPosts.filter(function (p) {
@@ -9540,7 +10094,7 @@
                         var tagHtml = p.tags
                             ? p.tags.split(',').filter(Boolean).slice(0, 4).map(function (t) {
                                 return '<span class="blog-post-tag">' + escapeHtml(t.trim()) + '</span>';
-                              }).join('')
+                            }).join('')
                             : '<span class="text-muted">—</span>';
 
                         var viewLink = p.status === 'published' && p.slug
@@ -9554,14 +10108,14 @@
 
                         return '<tr>' +
                             '<td class="blog-post-title-cell">' + escapeHtml(p.title || 'Untitled') + viewLink +
-                                '<div class="text-muted" style="font-size:0.75rem">' + escapeHtml(p.slug || '') + '</div></td>' +
+                            '<div class="text-muted" style="font-size:0.75rem">' + escapeHtml(p.slug || '') + '</div></td>' +
                             '<td>' + statusBadge + '</td>' +
                             '<td class="blog-post-tags-cell">' + tagHtml + '</td>' +
                             '<td class="text-muted">' + fmtDate(p.published_at) + '</td>' +
                             '<td class="text-muted">' + fmtDate(p.created_at) + '</td>' +
                             '<td style="white-space:nowrap">' +
-                                '<button class="btn btn-sm btn-secondary blog-edit-btn" data-id="' + escapeHtml(p.id) + '">Edit</button>' +
-                                ' <button class="btn btn-sm btn-danger blog-del-btn" data-id="' + escapeHtml(p.id) + '" aria-label="Delete post">&#128465;</button>' +
+                            '<button class="btn btn-sm btn-secondary blog-edit-btn" data-id="' + escapeHtml(p.id) + '">Edit</button>' +
+                            ' <button class="btn btn-sm btn-danger blog-del-btn" data-id="' + escapeHtml(p.id) + '" aria-label="Delete post">&#128465;</button>' +
                             '</td>' +
                             '</tr>';
                     }).join('');
