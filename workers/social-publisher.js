@@ -962,11 +962,25 @@ async function publishVariant(variant, db, env) {
     const errorMsg = err.message || String(err);
     console.error(`[social-publisher] Failed ${platform} variant ${id}: ${errorMsg}`);
 
-    await db.prepare(`
-      UPDATE cms_post_variants SET status='failed', error_message=?, updated_at=? WHERE id=?
-    `).bind(errorMsg.substring(0, 500), now, id).run();
+    const MAX_RETRIES = 3;
+    const retryCount = (variant.retry_count || 0) + 1;
+    const willRetry = retryCount <= MAX_RETRIES;
 
-    return { success: false, platform, id, error: errorMsg };
+    if (willRetry) {
+      // Exponential backoff: 15 min × 2^(attempt-1) → 15, 30, 60 min
+      const backoffMs = 15 * 60 * 1000 * Math.pow(2, retryCount - 1);
+      const retryAt = new Date(Date.now() + backoffMs).toISOString();
+      console.warn(`[social-publisher] Scheduling retry ${retryCount}/${MAX_RETRIES} for variant ${id} at ${retryAt}`);
+      await db.prepare(
+        'UPDATE cms_post_variants SET status=\'pending\', retry_count=?, scheduled_at=?, error_message=?, updated_at=? WHERE id=?'
+      ).bind(retryCount, retryAt, errorMsg.substring(0, 500), now, id).run();
+    } else {
+      await db.prepare(
+        'UPDATE cms_post_variants SET status=\'failed\', retry_count=?, error_message=?, updated_at=? WHERE id=?'
+      ).bind(retryCount, errorMsg.substring(0, 500), now, id).run();
+    }
+
+    return { success: false, platform, id, error: errorMsg, willRetry };
   }
 }
 

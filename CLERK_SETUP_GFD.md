@@ -24,15 +24,40 @@
 
 ### ⚠️ Remaining Steps
 
-**STEP 1**: Enable OAuth Providers in Clerk Dashboard
+**STEP 1**: Configure Google OAuth (Custom Credentials Required)
 
-1. Go to: <https://dashboard.clerk.com/> → Select **"Good Flippin Design Admin"** app
-2. Navigate to: **User & authentication** → **Social connections** (or **SSO connections**)
-3. Enable these providers:
-   - ✅ **Google** (click "Add connection" → use Clerk development credentials or your own)
-   - ✅ **LinkedIn** (optional, for professional sign-ins)
-   - ✅ **Email** (under "Email & Phone" section)
-4. Click **Save** for each provider
+**Note**: Production Clerk instances require custom OAuth credentials, not development credentials.
+
+### Create Google OAuth App
+
+1. Go to: <https://console.cloud.google.com/apis/credentials>
+2. Select or create a project (e.g., "GFD Admin")
+3. Click **+ CREATE CREDENTIALS** → **OAuth client ID**
+4. If prompted, configure OAuth consent screen first:
+   - User Type: **External**
+   - App name: "Good Flippin Design Admin"
+   - User support email: <brett.l.weaver@gmail.com>
+   - Developer email: <brett.l.weaver@gmail.com>
+   - Click **Save and Continue** (skip scopes, skip test users)
+5. Create OAuth client ID:
+   - Application type: **Web application**
+   - Name: "GFD Admin Panel"
+   - **Authorized redirect URIs**: `https://clerk.goodflippindesign.com/v1/oauth_callback`
+   - Click **CREATE**
+6. **Copy Client ID and Client Secret** from the popup
+
+### Add Credentials to Clerk
+
+1. Go to: <https://dashboard.clerk.com/> → **"Good Flippin Design Admin"** app
+2. Navigate to: **Configure** → **Google OAuth**
+3. Paste **Client ID** and **Client Secret** from Google Cloud Console
+4. Verify redirect URI matches: `https://clerk.goodflippindesign.com/v1/oauth_callback`
+5. Click **Save**
+
+### Optional: Enable Additional Providers
+
+- **LinkedIn**: Navigate to **Configure** → Add LinkedIn OAuth (also requires custom credentials)
+- **Email**: Under **Configure** → **Email** → Enable email/password authentication
 
 **STEP 2**: Set Cloudflare Pages secret
 
