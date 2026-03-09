@@ -108,6 +108,7 @@ const SITES = {
         'https://goodflippinvibes.com',
         'https://goodflippindesign.com',
         'https://culturesherpa.com',
+        'https://www.culturesherpa.org',   // Admin: Daily Culture Calendar panel → schedule + cultures data
         'https://aiaimate.com',
         'https://globaldeets.com',
         'https://eliassen.globaldeets.com',      ],
