@@ -4348,6 +4348,193 @@
             padding: 1rem;
             border-top: 1px solid var(--border);
         }
+
+        /* ── Post Kit Gallery (variant cards) ──────────────────── */
+        .sf-mode-toggle {
+            display: flex;
+            gap: 0.25rem;
+            margin-right: 0.75rem;
+        }
+
+        .sf-mode-btn {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.28rem 0.75rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-strong);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+
+        .sf-mode-btn.active {
+            background: var(--accent-violet);
+            color: #fff;
+            border-color: var(--accent-violet);
+        }
+
+        .sk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            padding: 0;
+        }
+
+        .sk-card {
+            background: var(--bg-elevated);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background 0.15s;
+        }
+
+        .sk-card:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .sk-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 0.7rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sk-platform-stripe {
+            width: 4px;
+            align-self: stretch;
+            border-radius: 0 0 0 0;
+            flex-shrink: 0;
+        }
+
+        .sk-card .sk-platform-stripe.instagram {
+            background: #e1306c;
+        }
+
+        .sk-card .sk-platform-stripe.linkedin {
+            background: #0a66c2;
+        }
+
+        .sk-card .sk-platform-stripe.x,
+        .sk-card .sk-platform-stripe.twitter {
+            background: #aaa;
+        }
+
+        .sk-card .sk-platform-stripe.facebook {
+            background: #1877f2;
+        }
+
+        .sk-card .sk-platform-stripe.tiktok {
+            background: #ee1d52;
+        }
+
+        .sk-card .sk-platform-stripe.pinterest {
+            background: #e60023;
+        }
+
+        .sk-card .sk-platform-stripe.youtube {
+            background: #ff0000;
+        }
+
+        .sk-artwork {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .sk-artwork-placeholder {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        .sk-card-body {
+            padding: 0.7rem 0.75rem 0;
+            flex: 1;
+        }
+
+        .sk-caption {
+            font-size: 0.82rem;
+            line-height: 1.55;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 6.5rem;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+        }
+
+        .sk-hashtags {
+            margin-top: 0.45rem;
+            font-size: 0.73rem;
+            color: var(--accent-violet);
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .sk-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.55rem 0.75rem;
+            border-top: 1px solid var(--border);
+            margin-top: 0.65rem;
+            gap: 0.5rem;
+        }
+
+        .sk-copy-btn {
+            font-size: 0.72rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-strong);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+        }
+
+        .sk-copy-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+        }
+
+        .sk-copy-btn.copied {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-emerald);
+            border-color: var(--accent-emerald);
+        }
+
+        .sk-status {
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 0.16rem 0.48rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .sk-empty {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .sk-footer {
+            text-align: center;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+        }
     </style>
 </head>
 
@@ -5679,15 +5866,23 @@
                 <!-- ─── Social Gallery view ─────────────────────────────── -->
                 <section class="view" id="view-social-feed">
                     <div class="panel" style="padding:0;overflow:hidden">
-                        <div class="sf-tabs" id="sf-tabs" role="tablist" aria-label="Filter by platform">
-                            <button class="sf-tab active" data-platform="all" role="tab" aria-selected="true">All</button>
-                            <button class="sf-tab" data-platform="instagram" role="tab" aria-selected="false">Instagram</button>
-                            <button class="sf-tab" data-platform="x" role="tab" aria-selected="false">X / Twitter</button>
-                            <button class="sf-tab" data-platform="linkedin" role="tab" aria-selected="false">LinkedIn</button>
-                            <button class="sf-tab" data-platform="facebook" role="tab" aria-selected="false">Facebook</button>
-                            <button class="sf-tab" data-platform="tiktok" role="tab" aria-selected="false">TikTok</button>
-                            <button class="sf-tab" data-platform="pinterest" role="tab" aria-selected="false">Pinterest</button>
-                            <button class="sf-tab" data-platform="youtube" role="tab" aria-selected="false">YouTube</button>
+                        <div class="sf-tabs" id="sf-tabs">
+                            <!-- View mode toggle -->
+                            <div class="sf-mode-toggle" role="group" aria-label="Gallery view mode">
+                                <button class="sf-mode-btn active" data-sf-mode="posts" title="Show social posts">Posts</button>
+                                <button class="sf-mode-btn" data-sf-mode="kits" title="Show post kits with artwork and copy-ready captions">Post Kits</button>
+                            </div>
+                            <!-- Platform tabs -->
+                            <div role="tablist" aria-label="Filter by platform" style="display:contents">
+                                <button class="sf-tab active" data-platform="all" role="tab" aria-selected="true">All</button>
+                                <button class="sf-tab" data-platform="instagram" role="tab" aria-selected="false">Instagram</button>
+                                <button class="sf-tab" data-platform="x" role="tab" aria-selected="false">X / Twitter</button>
+                                <button class="sf-tab" data-platform="linkedin" role="tab" aria-selected="false">LinkedIn</button>
+                                <button class="sf-tab" data-platform="facebook" role="tab" aria-selected="false">Facebook</button>
+                                <button class="sf-tab" data-platform="tiktok" role="tab" aria-selected="false">TikTok</button>
+                                <button class="sf-tab" data-platform="pinterest" role="tab" aria-selected="false">Pinterest</button>
+                                <button class="sf-tab" data-platform="youtube" role="tab" aria-selected="false">YouTube</button>
+                            </div><!-- /tablist -->
                             <div class="sf-tabs-actions">
                                 <select class="input-field" id="sf-brand-filter" aria-label="Filter by brand" style="font-size:0.78rem;padding:0.28rem 0.6rem;height:auto">
                                     <option value="">All brands</option>
@@ -5719,6 +5914,15 @@
                         </div>
                         <div class="sf-footer d-none" id="sf-footer">
                             <button class="btn btn-secondary" id="sf-load-more">Load more</button>
+                        </div>
+                        <!-- Post Kits grid (shown when mode=kits) -->
+                        <div class="sk-grid d-none" id="sk-grid" role="list"></div>
+                        <div class="sk-empty d-none" id="sk-empty">
+                            <h3>No post kits found</h3>
+                            <p>Generate content in the Story Studio and schedule it to see kits here.</p>
+                        </div>
+                        <div class="sk-footer d-none" id="sk-footer">
+                            <button class="btn btn-secondary" id="sk-load-more">Load more</button>
                         </div>
                     </div>
                 </section>
@@ -7288,6 +7492,7 @@
             let sfPlatformFilter = 'all';
             let sfStatusFilter = '';
             let sfBrandFilter = '';
+            let sfViewMode = 'posts';
             const SF_LIMIT = 40;
 
             async function loadSocialFeed(append) {
@@ -7393,18 +7598,153 @@
                         btn.classList.add('active');
                         btn.setAttribute('aria-selected', 'true');
                         sfPlatformFilter = btn.dataset.platform || 'all';
-                        loadSocialFeed();
+                        sfViewMode === 'kits' ? loadPostKits() : loadSocialFeed();
+                    });
+                });
+
+                document.querySelectorAll('.sf-mode-btn').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        switchSfViewMode(btn.dataset.sfMode || 'posts');
                     });
                 });
 
                 const sfBrandSel = $('sf-brand-filter');
-                if (sfBrandSel) sfBrandSel.addEventListener('change', () => { sfBrandFilter = sfBrandSel.value; loadSocialFeed(); });
+                if (sfBrandSel) sfBrandSel.addEventListener('change', () => {
+                    sfBrandFilter = sfBrandSel.value;
+                    sfViewMode === 'kits' ? loadPostKits() : loadSocialFeed();
+                });
 
                 const sfSel = $('sf-status-filter');
-                if (sfSel) sfSel.addEventListener('change', () => { sfStatusFilter = sfSel.value; loadSocialFeed(); });
+                if (sfSel) sfSel.addEventListener('change', () => {
+                    sfStatusFilter = sfSel.value;
+                    sfViewMode === 'kits' ? loadPostKits() : loadSocialFeed();
+                });
 
                 const sfMore = $('sf-load-more');
                 if (sfMore) sfMore.addEventListener('click', () => loadSocialFeed(true));
+
+                const skMore = $('sk-load-more');
+                if (skMore) skMore.addEventListener('click', () => loadPostKits(true));
+
+                // Copy-to-clipboard delegation for post kits (wired once)
+                const skGrid = $('sk-grid');
+                if (skGrid) {
+                    skGrid.addEventListener('click', (e) => {
+                        const btn = e.target.closest('.sk-copy-btn');
+                        if (!btn) return;
+                        const text = btn.dataset.copy || '';
+                        navigator.clipboard.writeText(text).then(() => {
+                            btn.textContent = 'Copied!';
+                            btn.classList.add('copied');
+                            setTimeout(() => { btn.textContent = 'Copy Caption'; btn.classList.remove('copied'); }, 2000);
+                        }).catch(() => toast('Could not copy to clipboard.', 'error'));
+                    });
+                }
+            }
+
+            function switchSfViewMode(mode) {
+                sfViewMode = mode;
+                // Sync toggle buttons
+                document.querySelectorAll('.sf-mode-btn').forEach((b) => {
+                    b.classList.toggle('active', b.dataset.sfMode === mode);
+                });
+                const postsVisible = mode === 'posts';
+                // Reset Posts containers — let loadSocialFeed manage visibility
+                if (postsVisible) {
+                    [$('sk-grid'), $('sk-empty'), $('sk-footer')].forEach((el) => el?.classList.add('d-none'));
+                    loadSocialFeed();
+                } else {
+                    // Hide Posts, show Kits
+                    [$('sf-grid'), $('sf-empty'), $('sf-footer')].forEach((el) => el?.classList.add('d-none'));
+                    [$('sk-grid'), $('sk-empty'), $('sk-footer')].forEach((el) => el?.classList.add('d-none'));
+                    loadPostKits();
+                }
+            }
+
+            const SK_LIMIT = 40;
+            async function loadPostKits(append) {
+                const grid = $('sk-grid');
+                const empty = $('sk-empty');
+                const footer = $('sk-footer');
+                if (!grid) return;
+
+                if (!append) {
+                    grid.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text-muted);font-size:0.85rem">Loading post kits\u2026</div>';
+                    empty?.classList.add('d-none');
+                    footer?.classList.add('d-none');
+                }
+
+                const params = new URLSearchParams({ brand: sfBrandFilter || currentBrand, limit: String(SK_LIMIT) });
+                if (sfPlatformFilter !== 'all') params.set('platform', sfPlatformFilter);
+                if (sfStatusFilter) params.set('status', sfStatusFilter);
+
+                try {
+                    const kits = await api('/social/variants?' + params.toString());
+                    if (!append) grid.innerHTML = '';
+
+                    if (!kits || kits.length === 0) {
+                        if (!append) empty?.classList.remove('d-none');
+                        footer?.classList.add('d-none');
+                        return;
+                    }
+
+                    empty?.classList.add('d-none');
+
+                    kits.forEach((kit) => {
+                        const card = document.createElement('div');
+                        card.className = 'sk-card';
+                        card.setAttribute('role', 'listitem');
+
+                        const platform = String(kit.platform || '').toLowerCase();
+                        const status = String(kit.status || 'draft').toLowerCase();
+                        const caption = String(kit.content || '');
+                        const hashtags = (() => {
+                            try {
+                                const raw = kit.hashtags;
+                                if (!raw) return '';
+                                const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                                return Array.isArray(parsed)
+                                    ? parsed.map(h => '#' + String(h).replace(/^#/, '')).join(' ')
+                                    : String(raw);
+                            } catch { return String(kit.hashtags || ''); }
+                        })();
+
+                        const copyText = [caption, hashtags].filter(Boolean).join('\n\n');
+
+                        const statusClass = status === 'published' ? 'emerald'
+                            : status === 'scheduled' ? 'gold'
+                                : status === 'failed' ? 'rose' : '';
+
+                        const thumbHTML = kit.thumbnail_path
+                            ? `<img class="sk-artwork" src="${escapeHtml(kit.thumbnail_path)}" alt="${escapeHtml(kit.asset_title || 'Post artwork')}" loading="lazy">`
+                            : `<div class="sk-artwork-placeholder"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 14l5-5 4 4 3-3 5 5"/><circle cx="15" cy="8" r="2"/></svg></div>`;
+
+                        card.innerHTML =
+                            `<div class="sk-platform-stripe ${escapeHtml(platform)}" aria-hidden="true"></div>` +
+                            '<div class="sk-card-header">' +
+                            `<span class="sf-platform-badge ${escapeHtml(platform)}">${escapeHtml(kit.platform || 'Unknown')}</span>` +
+                            `<span class="sf-brand-badge">${escapeHtml(kit.brand || '')}</span>` +
+                            (kit.campaign_name ? `<span style="font-size:0.62rem;color:var(--text-muted)">${escapeHtml(kit.campaign_name)}</span>` : '') +
+                            (statusClass ? `<span class="sk-status" style="margin-left:auto;background:rgba(var(--status-bg,255,255,255),0.08);color:var(--text-muted)">${escapeHtml(status)}</span>` : '') +
+                            '</div>' +
+                            thumbHTML +
+                            '<div class="sk-card-body">' +
+                            `<p class="sk-caption">${escapeHtml(caption || '\u2014')}</p>` +
+                            (hashtags ? `<p class="sk-hashtags">${escapeHtml(hashtags)}</p>` : '') +
+                            '</div>' +
+                            '<div class="sk-card-footer">' +
+                            `<span class="sf-status-badge ${escapeHtml(status)}">${escapeHtml(status)}</span>` +
+                            `<button class="sk-copy-btn" data-copy="${escapeHtml(copyText)}" title="Copy caption + hashtags to clipboard">Copy Caption</button>` +
+                            '</div>';
+
+                        grid.appendChild(card);
+                    });
+
+                    // Copy buttons handled via event delegation wired in wireSocialFeed()
+                    footer?.classList[kits.length >= SK_LIMIT ? 'remove' : 'add']('d-none');
+                } catch (err) {
+                    grid.innerHTML = '<div style="padding:2rem;color:var(--accent-rose)">' + escapeHtml(String(err.message)) + '</div>';
+                }
             }
             // ── End Social Feed ──────────────────────────────────────────────
 
@@ -8814,8 +9154,9 @@
                     tab.classList.toggle('active', active);
                     tab.setAttribute('aria-selected', active ? 'true' : 'false');
                 });
-                await loadSocialFeed();
-                toast(BRAND_DEFS[id].name + ' social gallery ready.', 'info');
+                // Open directly to Post Kits view — shows artwork + copy-ready captions
+                switchSfViewMode('kits');
+                toast(BRAND_DEFS[id].name + ' post kits ready.', 'info');
             }
 
             // ════════════════════════════════════════════════════════════════
