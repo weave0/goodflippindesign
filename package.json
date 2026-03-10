@@ -35,6 +35,17 @@
     "sync:art:dry": "node scripts/sync-art-drive.js --dry-run",
     "discover:assets": "node scripts/discover-site-assets.js",
     "discover:assets:dry": "node scripts/discover-site-assets.js --dry-run",
+    "finance:help": "pwsh -File scripts/finance/finance-workspace.ps1 -Action help",
+    "finance:bootstrap": "pwsh -File scripts/finance/finance-workspace.ps1 -Action bootstrap",
+    "finance:init": "pwsh -File scripts/finance/finance-workspace.ps1 -Action init",
+    "finance:status": "pwsh -File scripts/finance/finance-workspace.ps1 -Action status",
+    "finance:list": "pwsh -File scripts/finance/finance-workspace.ps1 -Action list",
+    "finance:inventory": "node scripts/finance/run-finance-tool.js inventory_finance_inputs",
+    "finance:package": "node scripts/finance/run-finance-tool.js package_submission",
+    "finance:ga4:discover": "node scripts/finance/run-finance-tool.js discover_ga4_properties",
+    "finance:ga4:export": "node scripts/finance/run-finance-tool.js export_ga4",
+    "finance:ga4:ingest": "node scripts/finance/run-finance-tool.js ingest_ga4_ui_exports",
+    "finance:stripe:export": "node scripts/finance/run-finance-tool.js export_stripe",
     "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf"
   },
   "repository": {
