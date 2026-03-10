@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "organization": {
+    "name": "Good Flippin Design / GFV LLC",
+    "submissionPrefix": "finance-submission"
+  },
+  "paths": {
+    "inbound": "data/inbound",
+    "working": "data/working",
+    "submissions": "out/submissions",
+    "logs": "logs"
+  },
+  "ga4": {
+    "measurementId": "",
+    "propertyId": "",
+    "credentialsPath": "",
+    "defaultDateRange": {
+      "startDate": "30daysAgo",
+      "endDate": "yesterday"
+    },
+    "defaultReport": {
+      "dimensions": [
+        "date",
+        "sessionDefaultChannelGroup",
+        "country"
+      ],
+      "metrics": [
+        "sessions",
+        "totalUsers",
+        "screenPageViews",
+        "engagedSessions"
+      ]
+    }
+  },
+  "stripe": {
+    "apiKeyEnvVar": "STRIPE_SECRET_KEY",
+    "defaultLookbackDays": 30,
+    "defaultObjects": [
+      "payment_intents",
+      "charges",
+      "balance_transactions"
+    ]
+  },
+  "submission": {
+    "defaultLabel": "finance-submission",
+    "defaultSourceRoots": [
+      "inbound",
+      "working"
+    ],
+    "includeReadme": true,
+    "includeManifest": true
+  }
+}
