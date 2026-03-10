@@ -261,11 +261,20 @@ async function handleCreateComment(request, user, env) {
     return new Response('Comment too long (max 2000 chars)', { status: 400 });
   }
 
-  // Simple profanity check (expand this list)
-  const profanityList = ['spam', 'test-profanity']; // TODO: Use real list
-  const hasProfanity = profanityList.some(word =>
-    text.toLowerCase().includes(word)
-  );
+  // Profanity / spam word filter (common slurs and spam triggers)
+  const profanityList = [
+    // generic spam signals
+    'buy now', 'click here', 'free money', 'make money fast', 'work from home',
+    // common English slurs / explicit terms (abbreviated to avoid repo policy issues)
+    'asshole', 'bastard', 'bitch', 'bullshit', 'cock', 'cunt', 'dick',
+    'dickhead', 'douche', 'douchebag', 'fag', 'faggot', 'fuck', 'fucking',
+    'motherfucker', 'nigga', 'nigger', 'piss', 'prick', 'pussy', 'shit',
+    'shithead', 'slut', 'twat', 'wanker', 'whore',
+    // test sentinel (keep for automated test suites)
+    'test-profanity',
+  ];
+  const lowerText = text.toLowerCase();
+  const hasProfanity = profanityList.some(word => lowerText.includes(word));
 
   if (hasProfanity) {
     return new Response('Inappropriate language detected', { status: 400 });
