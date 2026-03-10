@@ -8,13 +8,13 @@ const { TestResults, BrowserUtils, ElementUtils, ColorUtils, Assertions, config 
 async function runAccessibilityTests() {
     const results = new TestResults('Accessibility (WCAG 2.1 AA)');
     let browser;
-    
+
     try {
         browser = await BrowserUtils.launchBrowser();
         const page = await BrowserUtils.createPage(browser);
-        
+
         await page.goto(config.targets.mainSite, { waitUntil: 'networkidle0', timeout: config.timeouts.navigation });
-        
+
         // ============================================
         // TEST: Document Language
         // ============================================
@@ -26,15 +26,15 @@ async function runAccessibilityTests() {
                     isValidLang: /^[a-z]{2}(-[A-Z]{2})?$/.test(document.documentElement.lang)
                 };
             });
-            
+
             Assertions.isTrue(lang.hasLang, 'Document should have lang attribute');
             Assertions.isTrue(lang.isValidLang, `Lang "${lang.lang}" should be valid format`);
-            
+
             results.pass('Document language set correctly', lang);
         } catch (e) {
             results.fail('Document language', e);
         }
-        
+
         // ============================================
         // TEST: Page Title
         // ============================================
@@ -47,15 +47,15 @@ async function runAccessibilityTests() {
                     isDescriptive: document.title.length > 10 && document.title.length < 70
                 };
             });
-            
+
             Assertions.isTrue(title.hasTitle, 'Page should have title');
             Assertions.isTrue(title.isDescriptive, 'Title should be descriptive (10-70 chars)');
-            
+
             results.pass('Page title appropriate', title);
         } catch (e) {
             results.fail('Page title', e);
         }
-        
+
         // ============================================
         // TEST: Heading Hierarchy
         // ============================================
@@ -67,18 +67,18 @@ async function runAccessibilityTests() {
                     text: h.textContent.trim().substring(0, 50),
                     index: i
                 }));
-                
+
                 // Check for skipped levels
                 const issues = [];
                 let prevLevel = 0;
-                
+
                 headingData.forEach((h, i) => {
                     if (prevLevel > 0 && h.level > prevLevel + 1) {
                         issues.push(`Skipped from h${prevLevel} to h${h.level} at "${h.text}"`);
                     }
                     prevLevel = h.level;
                 });
-                
+
                 return {
                     count: allHeadings.length,
                     h1Count: document.querySelectorAll('h1').length,
@@ -87,14 +87,14 @@ async function runAccessibilityTests() {
                     hasProperH1: document.querySelectorAll('h1').length === 1
                 };
             });
-            
+
             if (!headings.hasProperH1) {
-                results.fail('Heading hierarchy', 
+                results.fail('Heading hierarchy',
                     new Error(`Should have exactly 1 h1, found ${headings.h1Count}`),
                     headings
                 );
             } else if (headings.issues.length > 0) {
-                results.warn('Heading hierarchy has skipped levels', 
+                results.warn('Heading hierarchy has skipped levels',
                     headings.issues.join('; '),
                     headings
                 );
@@ -104,7 +104,7 @@ async function runAccessibilityTests() {
         } catch (e) {
             results.fail('Heading hierarchy', e);
         }
-        
+
         // ============================================
         // TEST: Image Alt Text
         // ============================================
@@ -122,12 +122,12 @@ async function runAccessibilityTests() {
                     role: img.getAttribute('role')
                 }));
             });
-            
+
             const missingAlt = images.filter(img => !img.hasAlt);
             const emptyAltInLink = images.filter(img => img.isDecorative && img.inLink);
-            
+
             if (missingAlt.length > 0) {
-                results.fail('Image alt text', 
+                results.fail('Image alt text',
                     new Error(`${missingAlt.length} images missing alt attribute`),
                     { missingAlt }
                 );
@@ -142,7 +142,7 @@ async function runAccessibilityTests() {
         } catch (e) {
             results.fail('Image alt text', e);
         }
-        
+
         // ============================================
         // TEST: Link Text Quality
         // ============================================
@@ -150,12 +150,12 @@ async function runAccessibilityTests() {
             const links = await page.evaluate(() => {
                 const allLinks = document.querySelectorAll('a');
                 const vagueLinkTexts = ['click here', 'here', 'read more', 'learn more', 'more', 'link'];
-                
+
                 return Array.from(allLinks).map(a => {
                     const text = a.textContent.trim().toLowerCase();
                     const ariaLabel = a.getAttribute('aria-label');
                     const title = a.title;
-                    
+
                     return {
                         text: a.textContent.trim().substring(0, 50),
                         href: a.href,
@@ -167,10 +167,10 @@ async function runAccessibilityTests() {
                     };
                 });
             });
-            
+
             const vagueLinks = links.filter(l => l.isVague);
             const emptyLinks = links.filter(l => l.isEmpty);
-            
+
             if (emptyLinks.length > 0) {
                 results.fail('Link text quality',
                     new Error(`${emptyLinks.length} links have no accessible text`),
@@ -187,14 +187,14 @@ async function runAccessibilityTests() {
         } catch (e) {
             results.fail('Link text quality', e);
         }
-        
+
         // ============================================
         // TEST: Form Labels
         // ============================================
         try {
             const formLabels = await page.evaluate(() => {
                 const inputs = document.querySelectorAll('input:not([type="hidden"]):not([type="submit"]), textarea, select');
-                
+
                 return Array.from(inputs).map(input => {
                     const id = input.id;
                     const explicitLabel = id ? document.querySelector(`label[for="${id}"]`) : null;
@@ -202,7 +202,7 @@ async function runAccessibilityTests() {
                     const ariaLabel = input.getAttribute('aria-label');
                     const ariaLabelledBy = input.getAttribute('aria-labelledby');
                     const placeholder = input.placeholder;
-                    
+
                     return {
                         type: input.type || input.tagName.toLowerCase(),
                         id,
@@ -216,10 +216,10 @@ async function runAccessibilityTests() {
                     };
                 });
             });
-            
+
             const inaccessibleInputs = formLabels.filter(i => !i.isAccessible);
             const placeholderOnly = formLabels.filter(i => i.hasPlaceholderOnly);
-            
+
             if (inaccessibleInputs.length > 0) {
                 results.fail('Form labels',
                     new Error(`${inaccessibleInputs.length} form fields have no accessible label`),
@@ -236,7 +236,7 @@ async function runAccessibilityTests() {
         } catch (e) {
             results.fail('Form labels', e);
         }
-        
+
         // ============================================
         // TEST: Color Contrast
         // ============================================
@@ -244,17 +244,20 @@ async function runAccessibilityTests() {
             const contrastIssues = await page.evaluate(() => {
                 const issues = [];
                 const textElements = document.querySelectorAll('p, span, a, h1, h2, h3, h4, h5, h6, li, label, button');
-                
+
                 // Helper to parse color
                 const parseColor = (color) => {
                     if (!color || color === 'transparent') return null;
-                    const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                    const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([.\d]+))?\s*\)/);
                     if (match) {
+                        // Skip near-transparent backgrounds — can't determine actual visual contrast
+                        const alpha = match[4] !== undefined ? parseFloat(match[4]) : 1;
+                        if (alpha < 0.1) return null;
                         return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) };
                     }
                     return null;
                 };
-                
+
                 // Helper for luminance
                 const getLuminance = (color) => {
                     if (!color) return 0;
@@ -264,35 +267,35 @@ async function runAccessibilityTests() {
                     });
                     return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
                 };
-                
+
                 // Helper for contrast ratio
                 const getContrastRatio = (c1, c2) => {
                     const l1 = getLuminance(c1);
                     const l2 = getLuminance(c2);
                     return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
                 };
-                
+
                 const checked = new Set();
-                
+
                 textElements.forEach(el => {
                     const styles = getComputedStyle(el);
                     if (styles.display === 'none' || styles.visibility === 'hidden') return;
-                    
+
                     const fg = parseColor(styles.color);
                     const bg = parseColor(styles.backgroundColor);
-                    
+
                     if (!fg || !bg) return;
-                    
+
                     const key = `${styles.color}-${styles.backgroundColor}`;
                     if (checked.has(key)) return;
                     checked.add(key);
-                    
+
                     const ratio = getContrastRatio(fg, bg);
                     const fontSize = parseFloat(styles.fontSize);
                     const isBold = parseInt(styles.fontWeight) >= 700;
                     const isLargeText = fontSize >= 18 || (fontSize >= 14 && isBold);
                     const minRatio = isLargeText ? 3 : 4.5;
-                    
+
                     if (ratio < minRatio) {
                         issues.push({
                             element: el.tagName,
@@ -305,13 +308,13 @@ async function runAccessibilityTests() {
                         });
                     }
                 });
-                
+
                 return {
                     checked: checked.size,
                     issues: issues.slice(0, 10)
                 };
             });
-            
+
             if (contrastIssues.issues.length > 0) {
                 results.warn('Color contrast issues detected',
                     `${contrastIssues.issues.length} text/background combinations may not meet WCAG AA`,
@@ -323,7 +326,7 @@ async function runAccessibilityTests() {
         } catch (e) {
             results.fail('Color contrast', e);
         }
-        
+
         // ============================================
         // TEST: Focus Indicators
         // ============================================
@@ -331,11 +334,11 @@ async function runAccessibilityTests() {
             const focusIndicators = await page.evaluate(() => {
                 const focusable = document.querySelectorAll('a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
                 const issues = [];
-                
+
                 // This is a heuristic check - actual focus testing would need interaction
                 focusable.forEach(el => {
                     const styles = getComputedStyle(el);
-                    
+
                     // Check for outline: none without other focus indication
                     if (styles.outline === 'none' || styles.outlineStyle === 'none') {
                         // Could still have box-shadow or border change on focus
@@ -347,18 +350,18 @@ async function runAccessibilityTests() {
                         });
                     }
                 });
-                
+
                 return {
                     totalFocusable: focusable.length,
                     potentialIssues: issues.slice(0, 5)
                 };
             });
-            
+
             results.pass('Focus indicators check complete', focusIndicators);
         } catch (e) {
             results.fail('Focus indicators', e);
         }
-        
+
         // ============================================
         // TEST: ARIA Landmarks
         // ============================================
@@ -374,12 +377,12 @@ async function runAccessibilityTests() {
                     navCount: document.querySelectorAll('nav, [role="navigation"]').length
                 };
             });
-            
+
             const issues = [];
             if (!landmarks.hasMain) issues.push('Missing main landmark');
             if (!landmarks.hasNav) issues.push('Missing navigation landmark');
             if (landmarks.mainCount > 1) issues.push(`Multiple main landmarks (${landmarks.mainCount})`);
-            
+
             if (issues.length > 0) {
                 results.warn('ARIA landmark issues', issues.join('; '), landmarks);
             } else {
@@ -388,14 +391,14 @@ async function runAccessibilityTests() {
         } catch (e) {
             results.fail('ARIA landmarks', e);
         }
-        
+
         // ============================================
         // TEST: Button Roles
         // ============================================
         try {
             const buttons = await page.evaluate(() => {
                 const allButtons = document.querySelectorAll('button, [role="button"], a.btn, a[class*="button"]');
-                
+
                 return Array.from(allButtons).map(btn => ({
                     tagName: btn.tagName,
                     role: btn.getAttribute('role'),
@@ -404,14 +407,14 @@ async function runAccessibilityTests() {
                     isLink: btn.tagName === 'A',
                     href: btn.href,
                     hasRole: btn.hasAttribute('role'),
-                    isCorrect: btn.tagName === 'BUTTON' || 
+                    isCorrect: btn.tagName === 'BUTTON' ||
                               (btn.tagName === 'A' && btn.hasAttribute('role') && btn.getAttribute('role') === 'button') ||
                               (btn.tagName === 'A' && btn.href)
                 }));
             });
-            
+
             const incorrectButtons = buttons.filter(b => !b.isCorrect);
-            
+
             if (incorrectButtons.length > 0) {
                 results.warn('Button role issues',
                     'Some interactive elements may need proper roles',
@@ -423,7 +426,7 @@ async function runAccessibilityTests() {
         } catch (e) {
             results.fail('Button roles', e);
         }
-        
+
         // ============================================
         // TEST: Reduced Motion Support
         // ============================================
@@ -431,12 +434,12 @@ async function runAccessibilityTests() {
             const motionSupport = await page.evaluate(() => {
                 const styleSheets = Array.from(document.styleSheets);
                 let hasReducedMotion = false;
-                
+
                 styleSheets.forEach(sheet => {
                     try {
                         const rules = Array.from(sheet.cssRules || []);
                         rules.forEach(rule => {
-                            if (rule instanceof CSSMediaRule && 
+                            if (rule instanceof CSSMediaRule &&
                                 rule.conditionText.includes('prefers-reduced-motion')) {
                                 hasReducedMotion = true;
                             }
@@ -445,10 +448,10 @@ async function runAccessibilityTests() {
                         // Cross-origin stylesheet
                     }
                 });
-                
+
                 return { hasReducedMotion };
             });
-            
+
             if (motionSupport.hasReducedMotion) {
                 results.pass('Reduced motion support present');
             } else {
@@ -459,7 +462,7 @@ async function runAccessibilityTests() {
         } catch (e) {
             results.fail('Reduced motion check', e);
         }
-        
+
         // ============================================
         // TEST: Tab Order
         // ============================================
@@ -468,10 +471,10 @@ async function runAccessibilityTests() {
                 const focusable = document.querySelectorAll(
                     'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
                 );
-                
+
                 const withPositiveTabIndex = Array.from(focusable).filter(el => el.tabIndex > 0);
                 const withNegativeTabIndex = Array.from(focusable).filter(el => el.tabIndex < 0);
-                
+
                 return {
                     totalFocusable: focusable.length,
                     positiveTabIndex: withPositiveTabIndex.length,
@@ -483,7 +486,7 @@ async function runAccessibilityTests() {
                     }))
                 };
             });
-            
+
             if (tabOrder.positiveTabIndex > 0) {
                 results.warn('Positive tabindex values found',
                     'Using positive tabindex values can disrupt natural tab order',
@@ -495,7 +498,7 @@ async function runAccessibilityTests() {
         } catch (e) {
             results.fail('Tab order check', e);
         }
-        
+
         // ============================================
         // TEST: Skip Link
         // ============================================
@@ -508,7 +511,7 @@ async function runAccessibilityTests() {
                     'a[href="#content"]',
                     'a[href="#main-content"]'
                 ];
-                
+
                 for (const sel of skipSelectors) {
                     const el = document.querySelector(sel);
                     if (el) {
@@ -524,7 +527,7 @@ async function runAccessibilityTests() {
                 }
                 return { found: false };
             });
-            
+
             if (skipLink.found) {
                 results.pass('Skip link present', skipLink);
             } else {
@@ -535,7 +538,7 @@ async function runAccessibilityTests() {
         } catch (e) {
             results.fail('Skip link check', e);
         }
-        
+
         // ============================================
         // TEST: Focus Trap Prevention
         // ============================================
@@ -543,15 +546,15 @@ async function runAccessibilityTests() {
             // Check for elements that might trap focus (modals without escape)
             const focusTraps = await page.evaluate(() => {
                 const modals = document.querySelectorAll('[role="dialog"], .modal, [aria-modal="true"]');
-                
+
                 return Array.from(modals).map(modal => ({
                     hasCloseButton: !!modal.querySelector('[aria-label*="close"], .close, button'),
                     hasEscapeHandler: modal.hasAttribute('data-keyboard') || true, // Can't detect JS handlers
-                    isHidden: getComputedStyle(modal).display === 'none' || 
+                    isHidden: getComputedStyle(modal).display === 'none' ||
                              modal.getAttribute('aria-hidden') === 'true'
                 }));
             });
-            
+
             if (focusTraps.length > 0) {
                 results.pass('Modal accessibility checked', { modalCount: focusTraps.length, modals: focusTraps });
             } else {
@@ -560,13 +563,13 @@ async function runAccessibilityTests() {
         } catch (e) {
             results.fail('Focus trap check', e);
         }
-        
+
     } catch (e) {
         results.fail('Accessibility test suite setup', e);
     } finally {
         if (browser) await browser.close();
     }
-    
+
     return results.getSummary();
 }
 

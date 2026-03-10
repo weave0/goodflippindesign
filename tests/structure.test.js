@@ -81,7 +81,8 @@ async function runStructureTests() {
 
                 // Check for common style issues
                 const issues = [];
-                if (body.fontFamily.includes('Times') || body.fontFamily.includes('serif')) {
+                // 'sans-serif' contains 'serif' as substring — only warn when no sans-serif fallback exists
+                if (body.fontFamily.includes('Times') || (body.fontFamily.includes('serif') && !body.fontFamily.includes('sans-serif'))) {
                     issues.push('Using default serif font - custom fonts may not have loaded');
                 }
 
@@ -463,13 +464,16 @@ async function runStructureTests() {
                     alt: img.alt,
                     hasAlt: img.hasAttribute('alt'),
                     altIsEmpty: img.alt === '',
+                    isAriaHidden: img.getAttribute('aria-hidden') === 'true' ||
+                                  img.closest('[aria-hidden="true"]') !== null,
                     naturalWidth: img.naturalWidth,
                     naturalHeight: img.naturalHeight
                 }));
             });
 
             const missingAlt = imageData.filter(img => !img.hasAlt);
-            const emptyAlt = imageData.filter(img => img.hasAlt && img.altIsEmpty);
+            // Exclude intentionally decorative images (aria-hidden on img or parent)
+            const emptyAlt = imageData.filter(img => img.hasAlt && img.altIsEmpty && !img.isAriaHidden);
 
             if (missingAlt.length > 0) {
                 throw new Error(`${missingAlt.length} images missing alt attribute`);
