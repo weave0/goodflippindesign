@@ -8,6 +8,15 @@
             "enabled": true
         },
         {
+            "id": "cs-branded-previews",
+            "path": "z:\\GFD\\GFD Dev Projects\\SummitView\\analytics\\branded_previews",
+            "recursive": false,
+            "brand": "culturesherpa",
+            "category": "branded",
+            "enabled": true,
+            "note": "425 dual-logo branded JPEGs (GFD badge + CS wordmark) from brand_watermark.py pipeline, March 2026"
+        },
+        {
             "id": "art-gfv",
             "path": "E:\\Art\\GFV Galleries",
             "recursive": true,

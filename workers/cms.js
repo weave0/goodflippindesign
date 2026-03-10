@@ -97,6 +97,65 @@ async function ensureCampaignSchema(db) {
   campaignSchemaReady = true;
 }
 
+// ── NFT schema (lazy-init, same pattern as campaigns) ─────────────────────────
+let nftSchemaReady = false;
+
+async function ensureNFTSchema(db) {
+  if (nftSchemaReady) return;
+
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS cms_nft_collections (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      brand TEXT NOT NULL DEFAULT 'gfv',
+      slug TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      contract_address TEXT DEFAULT '',
+      marketplace_url TEXT DEFAULT '',
+      status TEXT DEFAULT 'draft',
+      created_by TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    )
+  `).run();
+
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_cms_nft_collections_brand ON cms_nft_collections(brand)').run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_cms_nft_collections_status ON cms_nft_collections(status)').run();
+
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS cms_nft_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      collection_id INTEGER NOT NULL REFERENCES cms_nft_collections(id),
+      asset_id TEXT DEFAULT '',
+      edition_number INTEGER,
+      token_id_onchain TEXT DEFAULT '',
+      ipfs_image_cid TEXT DEFAULT '',
+      ipfs_metadata_cid TEXT DEFAULT '',
+      name TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      external_url TEXT DEFAULT '',
+      background_color TEXT DEFAULT '',
+      animation_url TEXT DEFAULT '',
+      attributes_json TEXT DEFAULT '[]',
+      rarity TEXT DEFAULT 'Common',
+      rarity_tier INTEGER DEFAULT 1,
+      status TEXT DEFAULT 'draft',
+      mint_tx_hash TEXT DEFAULT '',
+      minted_at TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    )
+  `).run();
+
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_cms_nft_tokens_collection ON cms_nft_tokens(collection_id)').run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_cms_nft_tokens_status ON cms_nft_tokens(status)').run();
+  try {
+    await db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_cms_nft_tokens_edition ON cms_nft_tokens(collection_id, edition_number)').run();
+  } catch { /* may already exist */ }
+
+  nftSchemaReady = true;
+}
+
 function platformRule(platform) {
   return PLATFORM_RULES[platform] || { label: platform, maxChars: 500, maxHashtags: 10, defaultFormat: 'square' };
 }
@@ -1990,6 +2049,38 @@ export async function handleCMSRequest(request, env, user) {
       return handleGalleryFeed(galleryFeedMatch[1], env);
     }
 
+    // ── NFT Collections ────────────────────────────────────────────────────────
+    if (path === '/nft/collections' && method === 'GET') {
+      return handleListNFTCollections(request, env);
+    }
+    if (path === '/nft/collections' && method === 'POST') {
+      return handleCreateNFTCollection(request, user, env);
+    }
+    if (path === '/nft/collections' && method === 'PUT') {
+      return handleUpdateNFTCollection(request, user, env);
+    }
+    if (path === '/nft/collections' && method === 'DELETE') {
+      return handleDeleteNFTCollection(request, user, env);
+    }
+
+    // ── NFT Tokens ─────────────────────────────────────────────────────────────
+    if (path === '/nft/tokens' && method === 'GET') {
+      return handleListNFTTokens(request, env);
+    }
+    if (path === '/nft/tokens' && method === 'POST') {
+      return handleCreateNFTToken(request, user, env);
+    }
+    if (path === '/nft/tokens' && method === 'PUT') {
+      return handleUpdateNFTToken(request, user, env);
+    }
+    if (path === '/nft/tokens' && method === 'DELETE') {
+      return handleDeleteNFTToken(request, user, env);
+    }
+    const nftMintMatch = path.match(/^\/nft\/tokens\/(\d+)\/mint$/);
+    if (nftMintMatch && method === 'POST') {
+      return handleMintNFTToken(request, user, env);
+    }
+
     // ── Content Studio ─────────────────────────────────────
     if (path === '/content-studio/registries' && method === 'GET') {
       return handleListRegistries(request, env);
@@ -3122,4 +3213,256 @@ async function handleGalleryFeed(brand, env) {
   });
 
   return new Response(JSON.stringify({ brand, categories, items }), { status: 200, headers });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  NFT Collections
+// ────────────────────────────────────────────────────────────────
+
+async function handleListNFTCollections(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureNFTSchema(env.DB);
+
+  const url = new URL(request.url);
+  const brand = url.searchParams.get('brand');
+
+  let query = `
+    SELECT c.*,
+      (SELECT COUNT(*) FROM cms_nft_tokens t WHERE t.collection_id = c.id) as token_count,
+      (SELECT COUNT(*) FROM cms_nft_tokens t WHERE t.collection_id = c.id AND t.status = 'minted') as minted_count
+    FROM cms_nft_collections c
+  `;
+  const params = [];
+  if (brand) { query += ' WHERE c.brand = ?'; params.push(brand); }
+  query += ' ORDER BY c.created_at DESC';
+
+  const { results } = await env.DB.prepare(query).bind(...params).all();
+  return jsonResponse({ collections: results || [] });
+}
+
+async function handleCreateNFTCollection(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureNFTSchema(env.DB);
+
+  let data;
+  try { data = await request.json(); } catch { return errorResponse('Invalid JSON', 400); }
+  if (!data?.name) return errorResponse('name is required', 400);
+  if (!data?.brand) return errorResponse('brand is required', 400);
+
+  const slug = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const now = new Date().toISOString();
+
+  const result = await env.DB.prepare(`
+    INSERT INTO cms_nft_collections
+      (brand, slug, name, description, contract_address, marketplace_url, status, created_by, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    data.brand, slug, data.name,
+    data.description || '', data.contract_address || '', data.marketplace_url || '',
+    data.status || 'draft', user.id, now, now
+  ).run();
+
+  await logAudit(env.DB, user.id, 'nft_collection.create', 'nft_collection', String(result.meta?.last_row_id), { brand: data.brand, name: data.name });
+  return jsonResponse({ id: result.meta?.last_row_id, slug, name: data.name }, 201);
+}
+
+async function handleUpdateNFTCollection(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureNFTSchema(env.DB);
+
+  let data;
+  try { data = await request.json(); } catch { return errorResponse('Invalid JSON', 400); }
+  if (!data?.id) return errorResponse('id is required', 400);
+
+  const now = new Date().toISOString();
+  const fields = ['name', 'description', 'contract_address', 'marketplace_url', 'status'];
+  const updates = fields.filter(f => data[f] !== undefined);
+  if (!updates.length) return errorResponse('No updatable fields provided', 400);
+
+  const setClauses = updates.map(f => `${f} = ?`).join(', ');
+  const values = updates.map(f => data[f]);
+
+  await env.DB.prepare(`UPDATE cms_nft_collections SET ${setClauses}, updated_at = ? WHERE id = ?`)
+    .bind(...values, now, data.id).run();
+
+  await logAudit(env.DB, user.id, 'nft_collection.update', 'nft_collection', String(data.id), { updates });
+  return jsonResponse({ success: true, id: data.id });
+}
+
+async function handleDeleteNFTCollection(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureNFTSchema(env.DB);
+
+  const url = new URL(request.url);
+  const id = url.searchParams.get('id');
+  if (!id) return errorResponse('id is required', 400);
+
+  // Refuse deletion if any token is already minted/listed on-chain
+  const mintedCheck = await env.DB.prepare(
+    `SELECT COUNT(*) as cnt FROM cms_nft_tokens WHERE collection_id = ? AND status IN ('minted', 'listed')`
+  ).bind(id).first();
+  if (mintedCheck?.cnt > 0) return errorResponse('Cannot delete collection with minted tokens', 409);
+
+  await env.DB.prepare('DELETE FROM cms_nft_tokens WHERE collection_id = ?').bind(id).run();
+  await env.DB.prepare('DELETE FROM cms_nft_collections WHERE id = ?').bind(id).run();
+  await logAudit(env.DB, user.id, 'nft_collection.delete', 'nft_collection', String(id), {});
+  return jsonResponse({ success: true, deleted_id: id });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  NFT Tokens
+// ────────────────────────────────────────────────────────────────
+
+async function handleListNFTTokens(request, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureNFTSchema(env.DB);
+
+  const url = new URL(request.url);
+  const collectionId = url.searchParams.get('collection_id');
+  const status = url.searchParams.get('status');
+
+  let query = `
+    SELECT t.*, c.name as collection_name, c.brand
+    FROM cms_nft_tokens t
+    JOIN cms_nft_collections c ON c.id = t.collection_id
+  `;
+  const conditions = [];
+  const params = [];
+  if (collectionId) { conditions.push('t.collection_id = ?'); params.push(collectionId); }
+  if (status) { conditions.push('t.status = ?'); params.push(status); }
+  if (conditions.length) query += ' WHERE ' + conditions.join(' AND ');
+  query += ' ORDER BY t.edition_number ASC, t.id ASC';
+
+  const { results } = await env.DB.prepare(query).bind(...params).all();
+  return jsonResponse({ tokens: results || [] });
+}
+
+async function handleCreateNFTToken(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureNFTSchema(env.DB);
+
+  let data;
+  try { data = await request.json(); } catch { return errorResponse('Invalid JSON', 400); }
+  if (!data?.collection_id) return errorResponse('collection_id is required', 400);
+  if (!data?.name) return errorResponse('name is required', 400);
+
+  const now = new Date().toISOString();
+
+  // Auto-assign next edition number if not explicitly set
+  let edition = data.edition_number ?? null;
+  if (edition === null) {
+    const maxRow = await env.DB.prepare(
+      'SELECT MAX(edition_number) as max_ed FROM cms_nft_tokens WHERE collection_id = ?'
+    ).bind(data.collection_id).first();
+    edition = (maxRow?.max_ed ?? 0) + 1;
+  }
+
+  const result = await env.DB.prepare(`
+    INSERT INTO cms_nft_tokens
+      (collection_id, asset_id, edition_number, name, description, external_url,
+       background_color, animation_url, attributes_json, rarity, rarity_tier, status,
+       ipfs_image_cid, ipfs_metadata_cid, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    data.collection_id,
+    data.asset_id || '',
+    edition,
+    data.name,
+    data.description || '',
+    data.external_url || '',
+    data.background_color || '',
+    data.animation_url || '',
+    typeof data.attributes === 'object' ? JSON.stringify(data.attributes) : (data.attributes_json || '[]'),
+    data.rarity || 'Common',
+    data.rarity_tier ?? 1,
+    data.status || 'draft',
+    data.ipfs_image_cid || '',
+    data.ipfs_metadata_cid || '',
+    now, now
+  ).run();
+
+  await logAudit(env.DB, user.id, 'nft_token.create', 'nft_token', String(result.meta?.last_row_id), { collection_id: data.collection_id, edition });
+  return jsonResponse({ id: result.meta?.last_row_id, edition_number: edition, name: data.name }, 201);
+}
+
+async function handleUpdateNFTToken(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureNFTSchema(env.DB);
+
+  let data;
+  try { data = await request.json(); } catch { return errorResponse('Invalid JSON', 400); }
+  if (!data?.id) return errorResponse('id is required', 400);
+
+  const now = new Date().toISOString();
+  const fields = ['name', 'description', 'external_url', 'background_color', 'animation_url',
+                  'attributes_json', 'rarity', 'rarity_tier', 'status', 'ipfs_image_cid',
+                  'ipfs_metadata_cid', 'token_id_onchain', 'mint_tx_hash', 'minted_at', 'asset_id'];
+  const updates = fields.filter(f => data[f] !== undefined);
+
+  // Normalize attributes array → JSON string
+  if (data.attributes !== undefined && data.attributes_json === undefined) {
+    data.attributes_json = JSON.stringify(data.attributes);
+    if (!updates.includes('attributes_json')) updates.push('attributes_json');
+  }
+
+  if (!updates.length) return errorResponse('No updatable fields provided', 400);
+
+  const setClauses = updates.map(f => `${f} = ?`).join(', ');
+  const values = updates.map(f => data[f]);
+
+  await env.DB.prepare(`UPDATE cms_nft_tokens SET ${setClauses}, updated_at = ? WHERE id = ?`)
+    .bind(...values, now, data.id).run();
+
+  await logAudit(env.DB, user.id, 'nft_token.update', 'nft_token', String(data.id), { updates });
+  return jsonResponse({ success: true, id: data.id });
+}
+
+async function handleDeleteNFTToken(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureNFTSchema(env.DB);
+
+  const url = new URL(request.url);
+  const id = url.searchParams.get('id');
+  if (!id) return errorResponse('id is required', 400);
+
+  const row = await env.DB.prepare('SELECT status FROM cms_nft_tokens WHERE id = ?').bind(id).first();
+  if (!row) return errorResponse('Token not found', 404);
+  if (['minted', 'listed'].includes(row.status)) return errorResponse('Cannot delete minted or listed token', 409);
+
+  await env.DB.prepare('DELETE FROM cms_nft_tokens WHERE id = ?').bind(id).run();
+  await logAudit(env.DB, user.id, 'nft_token.delete', 'nft_token', String(id), {});
+  return jsonResponse({ success: true, deleted_id: id });
+}
+
+async function handleMintNFTToken(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  await ensureNFTSchema(env.DB);
+
+  const tokenIdMatch = new URL(request.url).pathname.match(/\/nft\/tokens\/(\d+)\/mint$/);
+  const id = tokenIdMatch ? tokenIdMatch[1] : null;
+  if (!id) return errorResponse('Token ID required in path', 400);
+
+  let data;
+  try { data = await request.json(); } catch { data = {}; }
+
+  const row = await env.DB.prepare('SELECT status FROM cms_nft_tokens WHERE id = ?').bind(id).first();
+  if (!row) return errorResponse('Token not found', 404);
+  if (row.status === 'minted') return errorResponse('Token is already minted', 409);
+
+  const now = new Date().toISOString();
+  await env.DB.prepare(`
+    UPDATE cms_nft_tokens
+    SET status = 'minted', token_id_onchain = ?, mint_tx_hash = ?, ipfs_image_cid = ?,
+        ipfs_metadata_cid = ?, minted_at = ?, updated_at = ?
+    WHERE id = ?
+  `).bind(
+    data.token_id_onchain || '',
+    data.mint_tx_hash || '',
+    data.ipfs_image_cid || '',
+    data.ipfs_metadata_cid || '',
+    now, now, id
+  ).run();
+
+  await logAudit(env.DB, user.id, 'nft_token.mint', 'nft_token', String(id), { tx_hash: data.mint_tx_hash });
+  return jsonResponse({ success: true, id, minted_at: now });
 }
