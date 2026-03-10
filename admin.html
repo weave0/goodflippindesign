@@ -5065,6 +5065,68 @@
             border-color: var(--accent-sky);
             color: var(--accent-sky);
         }
+
+        /* ── Gap Flags Panel ──────────────────────────────────────── */
+        .gap-flags-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .gap-flag {
+            display: grid;
+            grid-template-rows: auto auto auto;
+            gap: 0.2rem;
+            padding: 0.65rem 0.85rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--border);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .gap-flag-head {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .gap-severity {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        .gap-area, .gap-brand {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .gap-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .gap-detail {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .flag-blocker { border-left-color: var(--accent-rose); }
+        .flag-blocker .gap-severity { background: rgba(244,63,94,0.15); color: var(--accent-rose); }
+
+        .flag-quality { border-left-color: var(--accent-amber); }
+        .flag-quality .gap-severity { background: rgba(251,191,36,0.12); color: var(--accent-amber); }
+
+        .flag-hygiene { border-left-color: var(--accent-sky); }
+        .flag-hygiene .gap-severity { background: rgba(56,189,248,0.1); color: var(--accent-sky); }
+
+        .flag-done { border-left-color: var(--accent-emerald); opacity: 0.55; }
+        .flag-done .gap-severity { background: rgba(16,185,129,0.12); color: var(--accent-emerald); }
     </style>
 </head>
 
@@ -5372,6 +5434,17 @@
                             <div id="overview-connections" class="overview-connections-grid"></div>
                         </article>
                     </div>
+
+                    <!-- Gap Flags ────────────────────────────────────── -->
+                    <article class="panel mb-085" id="gap-flags-panel">
+                        <div class="section-head">
+                            <h2 class="section-title">&#9873; Ecosystem Gaps &amp; Flags</h2>
+                            <div class="inline-actions">
+                                <span class="text-muted" style="font-size:0.8rem" id="gap-flags-updated"></span>
+                            </div>
+                        </div>
+                        <div id="gap-flags-list" class="gap-flags-list"></div>
+                    </article>
 
                     <article class="panel">
                         <div class="section-head">
@@ -7329,12 +7402,42 @@
 
             // Brand definitions (mirrors brands-config.js for in-browser use)
             const BRAND_DEFS = {
-                gfd: { name: 'Good Flippin Design', shortName: 'GFD', color: '#6c63ff', platforms: ['instagram', 'linkedin', 'x'] },
-                gfv: { name: 'Good Flippin Vibes', shortName: 'GFV', color: '#10b981', platforms: ['instagram', 'x', 'facebook', 'tiktok', 'pinterest'] },
-                aiaimate: { name: 'AI Aimate', shortName: 'Aimate', color: '#3b82f6', platforms: ['linkedin', 'x', 'youtube'] },
-                culturesherpa: { name: 'CultureSherpa', shortName: 'CultureSherpa', color: '#f59e0b', platforms: ['linkedin', 'x', 'instagram', 'facebook'] },
-                globaldeets: { name: 'Global Deets', shortName: 'GlobalDeets', color: '#8b5cf6', platforms: ['linkedin', 'x'] },
-                citizenapproved: { name: 'CitizenApproved', shortName: 'CitApproved', color: '#ef4444', platforms: ['instagram', 'x', 'linkedin'] },
+                gfd: {
+                    name: 'Good Flippin Design', shortName: 'GFD', color: '#6c63ff',
+                    platforms: ['instagram', 'linkedin', 'x'],
+                    hashtags: ['design', 'webdesign', 'ux', 'ui', 'branding', 'creative', 'tech', 'digitaldesign', 'goodflippindesign', 'goodvibes', 'art', 'love'],
+                    highVolumeTags: ['art', 'love', 'goodvibes', 'design', 'creative'],
+                },
+                gfv: {
+                    name: 'Good Flippin Vibes', shortName: 'GFV', color: '#10b981',
+                    platforms: ['instagram', 'x', 'facebook', 'tiktok', 'pinterest'],
+                    hashtags: ['art', 'love', 'goodvibes', 'vibes', 'positivity', 'creative', 'inspiration', 'music', 'culture', 'cultura', 'lifestyle', 'joy', 'energy', 'wellness', 'goodflippingvibes'],
+                    highVolumeTags: ['art', 'love', 'goodvibes', 'culture', 'cultura', 'vibes', 'positivity'],
+                },
+                aiaimate: {
+                    name: 'AI Aimate', shortName: 'Aimate', color: '#3b82f6',
+                    platforms: ['linkedin', 'x', 'youtube'],
+                    hashtags: ['ai', 'artificialintelligence', 'machinelearning', 'tech', 'innovation', 'future', 'aiart', 'automation', 'deeplearning', 'generativeai', 'aiaimate', 'art', 'creative'],
+                    highVolumeTags: ['ai', 'art', 'tech', 'innovation', 'future'],
+                },
+                culturesherpa: {
+                    name: 'CultureSherpa', shortName: 'CultureSherpa', color: '#f59e0b',
+                    platforms: ['linkedin', 'x', 'instagram', 'facebook'],
+                    hashtags: ['culture', 'cultura', 'travel', 'diversity', 'globalcitizen', 'worldcultures', 'heritage', 'multicultural', 'history', 'culturesherpa', 'art', 'love', 'goodvibes', 'explore'],
+                    highVolumeTags: ['culture', 'cultura', 'travel', 'art', 'love', 'goodvibes', 'diversity'],
+                },
+                globaldeets: {
+                    name: 'Global Deets', shortName: 'GlobalDeets', color: '#8b5cf6',
+                    platforms: ['linkedin', 'x'],
+                    hashtags: ['data', 'analytics', 'businessintelligence', 'insights', 'strategy', 'enterprise', 'tech', 'bi', 'dashboard', 'globaldeets', 'datavisualization'],
+                    highVolumeTags: ['data', 'tech', 'analytics', 'strategy'],
+                },
+                citizenapproved: {
+                    name: 'CitizenApproved', shortName: 'CitApproved', color: '#ef4444',
+                    platforms: ['instagram', 'x', 'linkedin'],
+                    hashtags: ['civictech', 'democracy', 'community', 'civic', 'government', 'publicservice', 'voters', 'citizenapproved', 'love', 'goodvibes'],
+                    highVolumeTags: ['community', 'love', 'goodvibes', 'civic'],
+                },
             };
 
             // Maps each platform to its OAuth provider key
@@ -8687,6 +8790,98 @@
                         </tr>
                     `).join('')
                     : '<tr><td colspan="4">No assets available.</td></tr>';
+
+                renderGapFlags();
+            }
+
+            // ── Gap Flags ─────────────────────────────────────────────────────
+            // Centralized gap registry — add new items here as gaps are found.
+            // severity: 'blocker' | 'quality' | 'hygiene' | 'done'
+            const GAP_FLAGS = [
+                // ── Social Media ───────────────────────────────────────────────
+                { id: 'social-hashtags', severity: 'done', brand: 'all', area: 'Social Media',
+                  title: 'Brand hashtag sets wired to composer',
+                  detail: 'Each brand auto-populates its hashtag bank (incl. #art, #love, #goodvibes, #culture, #cultura) when selected.' },
+                { id: 'social-artwork-r2', severity: 'blocker', brand: 'gfv,culturesherpa', area: 'Social Media',
+                  title: 'Branded artwork not in R2 asset library',
+                  detail: '2,038 GFV images + 850 CultureSherpa images exist locally but are NOT uploaded to R2. Post Kits cannot link to them until imported. Run: Asset Library → Import Folder.' },
+                { id: 'social-post-kits', severity: 'quality', brand: 'all', area: 'Social Media',
+                  title: 'Post Kits lack artwork links',
+                  detail: 'Post Kit entries have captions but asset_id fields are empty — post is not truly "click-click" until each kit entry references a branded R2 asset.' },
+                { id: 'social-platform-oauth', severity: 'quality', brand: 'all', area: 'Social Media',
+                  title: 'OAuth connections unverified',
+                  detail: 'Instagram, TikTok, Pinterest may need token refresh. Check Connections → Connection Health.' },
+                // ── CultureSherpa ──────────────────────────────────────────────
+                { id: 'cs-src-stubs', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
+                  title: 'CultureSherpa src/ is nearly empty',
+                  detail: 'src/pages/test.astro is 0KB. Only src/config/admin.ts exists. Website lives in website-astro/ but main src/ needs audit for any stub components.' },
+                { id: 'cs-d1-schemas', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
+                  title: 'Multiple D1 schemas — only community is confirmed applied',
+                  detail: 'd1-schema-cms.sql, d1-schema-media-platform.sql, d1-schema-console.sql exist but production apply status is unknown. Verify via D1 console.' },
+                // ── GFV / goodflippinvibes.com ────────────────────────────────
+                { id: 'gfv-stubs', severity: 'quality', brand: 'gfv', area: 'GFV',
+                  title: 'goodflippinvibes.com stubs unaudited',
+                  detail: 'GFV has 2,038 images locally. Website stubs / incomplete components have not been formally catalogued. Needs walkthrough audit.' },
+                // ── AIAimate ──────────────────────────────────────────────────
+                { id: 'aiaimate-stubs', severity: 'quality', brand: 'aiaimate', area: 'AIAimate',
+                  title: 'aiaimate.com stubs unaudited',
+                  detail: 'AIAimate has 41 images. No formal stub inventory. Needs walkthrough.' },
+                // ── Admin Portal ───────────────────────────────────────────────
+                { id: 'admin-auth-gate', severity: 'quality', brand: 'gfd', area: 'Admin',
+                  title: 'admin.html auth not enforced at CF Pages layer',
+                  detail: 'Clerk gates the UI but _worker.js does not block unauthenticated requests to /admin.html at the edge. Confirm origin protection or add CF Access rule.' },
+                { id: 'admin-profanity', severity: 'quality', brand: 'gfd', area: 'Admin',
+                  title: 'Auth.js profanity filter is a stub',
+                  detail: 'workers/auth.js line ~265 only blocks "spam" and "test-profanity". Replace with a real word list before community platform goes public.' },
+                // ── Ops / Monitoring ──────────────────────────────────────────
+                { id: 'sentry-dsn', severity: 'quality', brand: 'gfd', area: 'Ops',
+                  title: 'Sentry DSN secret not set',
+                  detail: 'SENTRY_DSN env var is empty. Run: wrangler secret put SENTRY_DSN. Dep is installed, auth.js degrades gracefully.' },
+                { id: 'branch-protection', severity: 'hygiene', brand: 'gfd', area: 'Ops',
+                  title: 'Branch protection not enforced',
+                  detail: 'Direct pushes to main bypass CI. Go to GitHub → Settings → Branches → require PR + test-suite status check.' },
+                { id: 'contact-form-e2e', severity: 'hygiene', brand: 'gfd', area: 'Ops',
+                  title: 'Contact form not end-to-end verified',
+                  detail: 'Send a real test submission from goodflippindesign.com and confirm it lands in brett.l.weaver@gmail.com via Formspree xgvgzjbw.' },
+                // ── Hygiene / Orphaned Files ──────────────────────────────────
+                { id: 'orphan-html', severity: 'hygiene', brand: 'gfd', area: 'Hygiene',
+                  title: 'Orphaned HTML files in root',
+                  detail: 'ga-test-enhanced.html, test-ga.html, oauth-diagnostic.html, globaldeets-live-snapshot.html, main.html, globaldeets-phase1-live.html are publicly accessible debug/snapshot files. Move to .gitignore or delete.' },
+                { id: 'jamie-mediation-placement', severity: 'hygiene', brand: 'gfd', area: 'Hygiene',
+                  title: 'jamie-rigling-mediation.html in GFD root',
+                  detail: 'Client page is mixed into main site repo. weave0/jamie-mediation repo exists — should this deploy independently?' },
+                { id: 'gallery-page', severity: 'hygiene', brand: 'gfd', area: 'Hygiene',
+                  title: 'gallery.html has no tests or nav link',
+                  detail: 'gallery.html exists (24KB) but is not tested and not linked from main navigation. Confirm if complete and intended to be public.' },
+            ];
+
+            function renderGapFlags() {
+                const list = $('gap-flags-list');
+                const updated = $('gap-flags-updated');
+                if (!list) return;
+
+                const order = { blocker: 0, quality: 1, hygiene: 2, done: 3 };
+                const sorted = [...GAP_FLAGS].sort((a, b) => (order[a.severity] ?? 9) - (order[b.severity] ?? 9));
+
+                const severityLabel = { blocker: '&#10005; Blocker', quality: '&#9651; Quality', hygiene: '&#128197; Hygiene', done: '&#10003; Done' };
+                const severityClass = { blocker: 'flag-blocker', quality: 'flag-quality', hygiene: 'flag-hygiene', done: 'flag-done' };
+
+                const counts = GAP_FLAGS.reduce((acc, f) => { acc[f.severity] = (acc[f.severity] || 0) + 1; return acc; }, {});
+                if (updated) {
+                    updated.textContent = `${counts.blocker || 0} blockers · ${(counts.quality || 0) + (counts.hygiene || 0)} quality/hygiene · ${counts.done || 0} done`;
+                }
+
+                list.innerHTML = sorted.map(f => `
+                    <div class="gap-flag ${severityClass[f.severity] || ''}">
+                        <div class="gap-flag-head">
+                            <span class="gap-severity">${severityLabel[f.severity] || f.severity}</span>
+                            <span class="gap-area">${escapeHtml(f.area)}</span>
+                            ${f.brand !== 'all' ? `<span class="gap-brand">${escapeHtml(f.brand.split(',').join(' · '))}</span>` : ''}
+                        </div>
+                        <div class="gap-title">${escapeHtml(f.title)}</div>
+                        <div class="gap-detail">${escapeHtml(f.detail)}</div>
+                    </div>
+                `).join('');
             }
 
             function updateGettingStarted() {
@@ -9792,6 +9987,12 @@
                 renderBrandSwitcher();
                 state.selectedPlatforms = new Set(def.platforms || ['x']);
                 state.dripSelectedPlatforms = new Set(def.platforms || ['x']);
+                // Auto-populate composer hashtags with brand defaults
+                const hashtagInput = $('composer-hashtags');
+                if (hashtagInput && def.hashtags && def.hashtags.length) {
+                    hashtagInput.value = def.hashtags.join(', ');
+                    hashtagInput.dispatchEvent(new Event('input'));
+                }
                 renderPlatformPicker();
                 renderDripPlatformPicker();
                 return refreshAll();

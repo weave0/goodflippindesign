@@ -14,6 +14,7 @@ const { runAccessibilityTests } = require('./accessibility.test');
 const { runAnimationTests } = require('./animations.test');
 const { runCompatibilityTests } = require('./compatibility.test');
 const { runCommunityTests } = require('./community.test');
+const { runDonateTests } = require('./donate.test');
 
 // ANSI color codes for terminal output
 const colors = {
@@ -209,7 +210,8 @@ async function runAllTests(options = {}) {
         { name: 'Accessibility', runner: runAccessibilityTests },
         { name: 'Animations', runner: runAnimationTests },
         { name: 'Compatibility', runner: runCompatibilityTests },
-        { name: 'Community Portal', runner: runCommunityTests }
+        { name: 'Community Portal', runner: runCommunityTests },
+        { name: 'Donate Page', runner: runDonateTests }
     ];
 
     const suitesToRun = suites === 'all'

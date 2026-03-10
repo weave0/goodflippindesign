@@ -8,7 +8,8 @@ module.exports = {
     targets: {
         mainSite: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/temp_review.html',
         contactForm: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/assets/contact-form.html',
-        communityPortal: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/community-portal.html'
+        communityPortal: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/community-portal.html',
+        donatePage: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/temp_donate_review.html'
     },
 
     // Viewport configurations for responsive testing

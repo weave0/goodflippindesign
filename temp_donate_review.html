@@ -59,6 +59,7 @@
             gap: 0.75rem;
             text-decoration: none;
             color: var(--text);
+            min-height: 44px;
         }
 
         .logo img {
@@ -170,6 +171,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
+            min-height: 44px;
         }
 
         .donation-toggle button.active {
@@ -313,6 +315,9 @@
             color: var(--text-secondary);
             text-decoration: none;
             transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
         }
 
         footer a:hover {
@@ -322,6 +327,10 @@
         @media (max-width: 600px) {
             .donation-amounts {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .custom-amount {
+                grid-column: span 2;
             }
         }
     </style>
