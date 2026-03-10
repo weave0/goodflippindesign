@@ -67,6 +67,12 @@ final-contrast.json
 verified-contrast.json
 *-contrast.json
 
+# Operational CLI output (wrangler D1 results, storage snapshots)
+d1-*.txt
+d1-result*.txt
+storage-baseline.json
+storage-snapshot.json
+
 # One-off / side sites (keep out of GFD)
 mediation-site/
 jamie-rigling-mediation.html
