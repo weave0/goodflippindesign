@@ -4546,6 +4546,41 @@
             padding-top: 0.5rem;
         }
 
+        .dcc-data-status {
+            display: none;
+            font-size: 0.72rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .dcc-data-status.loading {
+            display: block;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .dcc-data-status.ok {
+            display: block;
+            color: #22c55e;
+            background: rgba(34, 197, 94, 0.07);
+            border: 1px solid rgba(34, 197, 94, 0.18);
+        }
+
+        .dcc-data-status.warn {
+            display: block;
+            color: var(--accent-amber);
+            background: rgba(245, 158, 11, 0.07);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .dcc-data-status.error {
+            display: block;
+            color: #f87171;
+            background: rgba(248, 113, 113, 0.07);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
         .nav-btn--cs {
             position: relative;
             border: 1px solid rgba(245, 158, 11, 0.25);
@@ -4580,7 +4615,9 @@
         }
 
         @media (max-width: 700px) {
-            .ov-cultures-grid { grid-template-columns: 1fr; }
+            .ov-cultures-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .ov-culture-card {
@@ -4609,8 +4646,13 @@
             flex-shrink: 0;
         }
 
-        .ov-culture-slot .dot.am { background: var(--accent-amber); }
-        .ov-culture-slot .dot.pm { background: var(--accent-sky); }
+        .ov-culture-slot .dot.am {
+            background: var(--accent-amber);
+        }
+
+        .ov-culture-slot .dot.pm {
+            background: var(--accent-sky);
+        }
 
         .ov-culture-name {
             font-size: 1.05rem;
@@ -4942,7 +4984,7 @@
                             </svg></span><span class="nav-label">Overview</span></button>
 
                     <div class="nav-group-label nav-group-label--cs">CultureSherpa</div>
-                    <button class="nav-btn nav-btn--cs" data-view="daily-cultures"><span class="nav-num">◆</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <button class="nav-btn nav-btn--cs" data-view="daily-cultures"><span class="nav-num">CS</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <rect x="2" y="2" width="12" height="12" rx="2" />
                                 <path d="M2 6h12" />
                                 <path d="M5 2v2" />
@@ -6284,10 +6326,11 @@
                                 <button class="dcc-view-btn" data-dcc-view="week">Week</button>
                                 <button class="dcc-view-btn" data-dcc-view="month">Month</button>
                             </div>
-                            <button class="btn btn-secondary" id="dcc-refresh-btn">Refresh</button>
+                            <button class="btn btn-secondary" id="dcc-refresh-btn">&#8635; Refresh</button>
                         </div>
                     </div>
-                    <p class="subheading mb-08">Two featured cultures every day &mdash; morning &amp; evening rotations. Schedule, swap, and preview social posts for each day&rsquo;s featured cultures.</p>
+                    <p class="subheading mb-08">Two featured cultures every day &mdash; morning &amp; evening rotations for CultureSherpa social posts.</p>
+                    <div id="dcc-data-status" class="dcc-data-status"></div>
 
                     <!-- Today view -->
                     <div id="dcc-view-today">
@@ -11908,8 +11951,8 @@
 
             // ─── Daily Culture Calendar (Panel 20) ─────────────────────────
             (function () {
-                var DCC_SCHEDULE_URL = 'https://www.culturesherpa.org/data/featured-cultures.json';
-                var DCC_CULTURES_URL = 'https://www.culturesherpa.org/data/cultures_index.json';
+                var DCC_SCHEDULE_URL = '/assets/data/featured-cultures.json';
+                var DCC_CULTURES_URL = '/assets/data/cultures_index.json';
                 var dccSchedule = [];
                 var dccCultures = [];
                 var dccMonthOffset = 0;
@@ -11972,12 +12015,39 @@
 
                 // ── Loading ──
                 function loadDccData() {
-                    var scheduleReq = fetch(DCC_SCHEDULE_URL).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; });
-                    var culturesReq = fetch(DCC_CULTURES_URL).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; });
+                    var statusEl = $('dcc-data-status');
+                    if (statusEl) { statusEl.textContent = 'Loading culture data\u2026'; statusEl.className = 'dcc-data-status loading'; }
+
+                    var scheduleReq = fetch(DCC_SCHEDULE_URL)
+                        .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
+                        .catch(function (e) { console.warn('[DCC] Schedule fetch failed:', e.message); return []; });
+                    var culturesReq = fetch(DCC_CULTURES_URL)
+                        .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
+                        .catch(function (e) { console.warn('[DCC] Cultures fetch failed:', e.message); return []; });
 
                     Promise.all([scheduleReq, culturesReq]).then(function (results) {
-                        dccSchedule = results[0] || [];
-                        dccCultures = results[1] || [];
+                        dccSchedule = Array.isArray(results[0]) ? results[0] : [];
+                        dccCultures = Array.isArray(results[1]) ? results[1] : [];
+
+                        if (statusEl) {
+                            if (dccSchedule.length === 0 && dccCultures.length === 0) {
+                                statusEl.textContent = '\u26a0 Could not load culture data \u2014 check /assets/data/ files are deployed.';
+                                statusEl.className = 'dcc-data-status error';
+                            } else {
+                                var lastEntry = dccSchedule.length > 0 ? dccSchedule[dccSchedule.length - 1] : null;
+                                var lastDate = lastEntry ? lastEntry.date : null;
+                                var today = isoDate(new Date());
+                                var isStale = lastDate && lastDate < today;
+                                if (isStale) {
+                                    statusEl.textContent = '\u26a0 Schedule covers through ' + lastDate + ' \u2014 showing rotation fallback for today. Update featured-cultures.json to extend.';
+                                    statusEl.className = 'dcc-data-status warn';
+                                } else {
+                                    statusEl.textContent = '\u2713 ' + dccSchedule.length + ' scheduled dates loaded \u00b7 ' + dccCultures.length + ' cultures in index';
+                                    statusEl.className = 'dcc-data-status ok';
+                                }
+                            }
+                        }
+
                         renderDccToday();
                         renderDccWeek();
                         renderDccMonth();
@@ -11990,7 +12060,7 @@
                     var today = new Date();
                     var pair = getCulturesForDate(today);
 
-                    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                     var dateEl = $('ov-cultures-date');
                     if (dateEl) dateEl.textContent = months[today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
 
@@ -12208,7 +12278,7 @@
                     var swapBtn = e.target.closest('.dcc-swap-btn');
                     if (!swapBtn) return;
                     var date = swapBtn.dataset.dccSwapDate;
-                    toast('Swap editor for ' + date + ' — coming soon. Edit featured-cultures.json directly for now.', 'info');
+                    toast('Schedule swaps are coming soon. To change ' + date + ', update /assets/data/featured-cultures.json and redeploy.', 'info');
                 });
 
                 function ensureDccLoaded() {
