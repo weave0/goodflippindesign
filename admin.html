@@ -4537,6 +4537,93 @@
         }
 
         /* ── Daily Culture Calendar (Panel 20) ────────────────────── */
+
+        /* CultureSherpa nav accent ─────────────────────────────────── */
+        .nav-group-label--cs {
+            color: var(--accent-amber);
+            border-top: 1px solid rgba(245, 158, 11, 0.2);
+            margin-top: 0.25rem;
+            padding-top: 0.5rem;
+        }
+
+        .nav-btn--cs {
+            position: relative;
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            background: rgba(245, 158, 11, 0.06);
+        }
+
+        .nav-btn--cs:hover,
+        .nav-btn--cs.active {
+            border-color: rgba(245, 158, 11, 0.5);
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--accent-amber);
+        }
+
+        .nav-cs-today {
+            display: block;
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            line-height: 1.2;
+            margin-top: 1px;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Overview: Today's Cultures quick-look ─────────────────────── */
+        .ov-cultures-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        @media (max-width: 700px) {
+            .ov-cultures-grid { grid-template-columns: 1fr; }
+        }
+
+        .ov-culture-card {
+            background: rgba(245, 158, 11, 0.05);
+            border: 1px solid rgba(245, 158, 11, 0.18);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+        }
+
+        .ov-culture-slot {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .ov-culture-slot .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .ov-culture-slot .dot.am { background: var(--accent-amber); }
+        .ov-culture-slot .dot.pm { background: var(--accent-sky); }
+
+        .ov-culture-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0 0 0.2rem;
+        }
+
+        .ov-culture-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
         .dcc-today-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -4854,6 +4941,16 @@
                                 <rect x="9" y="9" width="6" height="6" rx="1" />
                             </svg></span><span class="nav-label">Overview</span></button>
 
+                    <div class="nav-group-label nav-group-label--cs">CultureSherpa</div>
+                    <button class="nav-btn nav-btn--cs" data-view="daily-cultures"><span class="nav-num">◆</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="2" y="2" width="12" height="12" rx="2" />
+                                <path d="M2 6h12" />
+                                <path d="M5 2v2" />
+                                <path d="M11 2v2" />
+                                <circle cx="6" cy="10" r="1" fill="currentColor" stroke="none" />
+                                <circle cx="10" cy="10" r="1" fill="currentColor" stroke="none" />
+                            </svg></span><span class="nav-label">Daily Calendar</span><span class="nav-cs-today" id="nav-cs-today"></span></button>
+
                     <div class="nav-group-label">Distribution</div>
                     <button class="nav-btn" data-view="connections"><span class="nav-num">02</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
                                 <path d="M6.5 9.5a3.5 3.5 0 1 0 4.95-4.95L9.5 6.5" />
@@ -4941,15 +5038,6 @@
                                 <path d="M12 8.5l.7 1.4H14l-1.2.9.5 1.5-1.3-1-1.3 1 .5-1.5L10 9.9h1.3l.7-1.4Z" />
                             </svg></span><span class="nav-label">Characters</span></button>
 
-                    <div class="nav-group-label">CultureSherpa</div>
-                    <button class="nav-btn" data-view="daily-cultures"><span class="nav-num">20</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <rect x="2" y="2" width="12" height="12" rx="2" />
-                                <path d="M2 6h12" />
-                                <path d="M5 2v2" />
-                                <path d="M11 2v2" />
-                                <circle cx="6" cy="10" r="1" fill="currentColor" stroke="none" />
-                                <circle cx="10" cy="10" r="1" fill="currentColor" stroke="none" />
-                            </svg></span><span class="nav-label">Daily Calendar</span></button>
                 </nav>
 
                 <div class="sidebar-footer">
@@ -5018,6 +5106,28 @@
                 </div>
 
                 <section class="view active" id="view-overview">
+                    <!-- Today's Cultures quick-look ─────────────────────── -->
+                    <article class="panel mb-085" id="ov-cultures-today">
+                        <div class="section-head">
+                            <h2 class="section-title">Today's Cultures <span id="ov-cultures-date" style="font-weight:400;font-size:0.85rem;color:var(--text-muted);margin-left:0.5rem"></span></h2>
+                            <div class="inline-actions">
+                                <button class="btn btn-secondary" onclick="navigateToView('daily-cultures')">Full Calendar &rarr;</button>
+                            </div>
+                        </div>
+                        <div class="ov-cultures-grid">
+                            <div class="ov-culture-card">
+                                <div class="ov-culture-slot"><span class="dot am"></span> Morning Culture</div>
+                                <p class="ov-culture-name" id="ov-am-name">Loading&hellip;</p>
+                                <div class="ov-culture-meta" id="ov-am-region"></div>
+                            </div>
+                            <div class="ov-culture-card">
+                                <div class="ov-culture-slot"><span class="dot pm"></span> Evening Culture</div>
+                                <p class="ov-culture-name" id="ov-pm-name">Loading&hellip;</p>
+                                <div class="ov-culture-meta" id="ov-pm-region"></div>
+                            </div>
+                        </div>
+                    </article>
+
                     <!-- Getting Started: shown only when DB is empty -->
                     <article class="panel gs-panel d-none" id="getting-started">
                         <div class="section-head">
@@ -7304,6 +7414,10 @@
                 initCommandPalette();
                 initKeyboardShortcuts();
                 wireSocialFeed();
+                // Pre-load DCC data so Overview Today's Cultures hero is populated on login
+                if (window.__adminPanels?.['daily-cultures']) {
+                    window.__adminPanels['daily-cultures']();
+                }
             }
 
             // ── Command Palette ──────────────────────────────────────────────
@@ -11867,7 +11981,40 @@
                         renderDccToday();
                         renderDccWeek();
                         renderDccMonth();
+                        renderOvCultures();
                     });
+                }
+
+                // ── Render Overview hero ──
+                function renderOvCultures() {
+                    var today = new Date();
+                    var pair = getCulturesForDate(today);
+
+                    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    var dateEl = $('ov-cultures-date');
+                    if (dateEl) dateEl.textContent = months[today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
+
+                    function fillOvSlot(slot, entry) {
+                        var nameEl = $('ov-' + slot + '-name');
+                        var regionEl = $('ov-' + slot + '-region');
+                        if (!nameEl) return;
+                        if (!entry) { nameEl.textContent = 'No culture scheduled'; return; }
+                        var meta = getCultureMeta(entry.slug);
+                        nameEl.textContent = meta ? meta.culture_name : prettifySlug(entry.slug);
+                        if (regionEl) regionEl.textContent = (meta && meta.region) ? meta.region : (entry.reason || '');
+                    }
+                    fillOvSlot('am', pair.am);
+                    fillOvSlot('pm', pair.pm);
+
+                    // Update the sidebar nav label under the Daily Calendar button
+                    var navToday = $('nav-cs-today');
+                    if (navToday && pair.am && pair.pm) {
+                        var amMeta = getCultureMeta(pair.am.slug);
+                        var pmMeta = getCultureMeta(pair.pm.slug);
+                        var amName = amMeta ? amMeta.culture_name : prettifySlug(pair.am.slug);
+                        var pmName = pmMeta ? pmMeta.culture_name : prettifySlug(pair.pm.slug);
+                        navToday.textContent = amName + ' · ' + pmName;
+                    }
                 }
 
                 // ── Render today ──
