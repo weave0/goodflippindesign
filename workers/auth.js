@@ -243,7 +243,10 @@ async function ensureAdminRole(user, secretKey) {
     console.error('Failed to assign admin role:', error);
   }
 
-  return user;
+  // Return updated user with role applied in-memory so this request succeeds
+  // without requiring a token refresh (the Clerk PATCH above updates the DB for
+  // all future requests, but the JWT returned by this call still has the old claims).
+  return { ...user, publicMetadata: { ...user.publicMetadata, role: 'admin' } };
 }
 
 /**
