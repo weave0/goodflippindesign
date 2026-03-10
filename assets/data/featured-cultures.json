@@ -1,0 +1,152 @@
+[
+  {
+    "date": "2025-12-14",
+    "slug": "inuit",
+    "reason": "Approaching Winter Solstice - celebrating Arctic resilience and traditional knowledge",
+    "featured_fact": "The Inuit have over 50 words for different types of snow and ice, demonstrating centuries of environmental knowledge."
+  },
+  {
+    "date": "2025-12-15",
+    "slug": "sami",
+    "reason": "Winter season - honoring Arctic indigenous cultures",
+    "featured_fact": "The Sami are Europe's only indigenous people, with a rich tradition of reindeer herding spanning thousands of years."
+  },
+  {
+    "date": "2025-12-16",
+    "slug": "samoan",
+    "reason": "Celebrating indigenous navigation and astronomical knowledge",
+    "featured_fact": "Polynesian navigators used star paths, ocean swells, and bird behavior to voyage across vast Pacific distances without instruments."
+  },
+  {
+    "date": "2025-12-17",
+    "slug": "cherokee",
+    "reason": "Honoring indigenous resilience and artistic traditions",
+    "featured_fact": "Native American Code Talkers created an unbreakable military code using indigenous languages during WWII."
+  },
+  {
+    "date": "2025-12-18",
+    "slug": "tibetans",
+    "reason": "Celebrating high-altitude adaptation and spiritual traditions",
+    "featured_fact": "Tibetans have unique genetic adaptations that allow them to thrive at extreme altitudes where oxygen is scarce."
+  },
+  {
+    "date": "2025-12-19",
+    "slug": "inuit",
+    "reason": "Winter Solstice - Return of the Sun",
+    "featured_fact": "During polar night, Inuit communities experience months of darkness, making the solstice a profound celebration of light's return."
+  },
+  {
+    "date": "2025-12-20",
+    "slug": "japanese",
+    "reason": "Winter Solstice traditions (Tōji) - yuzu baths and pumpkin dishes",
+    "featured_fact": "Japanese people celebrate Tōji with yuzu citrus baths believed to prevent colds and bring good health."
+  },
+  {
+    "date": "2025-12-21",
+    "slug": "chinese",
+    "reason": "Winter Solstice (Dongzhi Festival) - family reunion and ancestral respect",
+    "featured_fact": "Dongzhi Festival is one of the most important Chinese celebrations, marking the peak of yin energy and return of yang."
+  },
+  {
+    "date": "2025-12-22",
+    "slug": "korean",
+    "reason": "Dongji (Winter Solstice) - red bean porridge tradition",
+    "featured_fact": "Koreans eat patjuk (red bean porridge) on Dongji, believed to ward off evil spirits and bring good luck."
+  },
+  {
+    "date": "2025-12-23",
+    "slug": "iranian",
+    "reason": "Yalda Night - celebrating the longest night of the year",
+    "featured_fact": "Shab-e Yalda is an ancient Persian festival where families gather to recite poetry and eat pomegranates and watermelons."
+  },
+  {
+    "date": "2025-12-24",
+    "slug": "ethiopian",
+    "reason": "Rich Orthodox Christian traditions during holiday season",
+    "featured_fact": "Ethiopia uses a unique calendar that is 7-8 years behind the Gregorian calendar and has 13 months."
+  },
+  {
+    "date": "2025-12-25",
+    "slug": "armenia",
+    "reason": "Ancient Christian heritage and cultural preservation",
+    "featured_fact": "Armenia was the first nation to officially adopt Christianity as a state religion in 301 AD."
+  },
+  {
+    "date": "2025-12-26",
+    "slug": "kenyan",
+    "reason": "Celebrating East African diversity and Jamhuri Day",
+    "featured_fact": "Kenya is home to over 40 different ethnic groups, each with unique languages and traditions."
+  },
+  {
+    "date": "2025-12-27",
+    "slug": "maasai",
+    "reason": "Honoring pastoralist cultures and traditional knowledge",
+    "featured_fact": "Maasai warriors can identify individual lions by their roars and have deep knowledge of wildlife behavior."
+  },
+  {
+    "date": "2025-12-28",
+    "slug": "hmong",
+    "reason": "Celebrating textile arts and New Year preparations",
+    "featured_fact": "Hmong story cloths (paj ntaub) are intricate textiles that preserve history and cultural narratives through embroidery."
+  },
+  {
+    "date": "2025-12-29",
+    "slug": "cherokee",
+    "reason": "Honoring indigenous writing systems and cultural revival",
+    "featured_fact": "Cherokee has its own syllabary writing system invented by Sequoyah in 1821, enabling widespread literacy."
+  },
+  {
+    "date": "2025-12-30",
+    "slug": "nigerian",
+    "reason": "Celebrating West African innovation and cultural depth",
+    "featured_fact": "Nigerian cultures have diverse traditions including unique calendar systems and sophisticated governance structures."
+  },
+  {
+    "date": "2025-12-31",
+    "slug": "scottish",
+    "reason": "Hogmanay - New Year's Eve traditions",
+    "featured_fact": "Scotland's Hogmanay celebration includes 'first-footing' where the first visitor after midnight brings symbolic gifts for luck."
+  },
+  {
+    "date": "2026-01-01",
+    "slug": "haitian",
+    "reason": "Independence Day - celebrating freedom and resilience",
+    "featured_fact": "Haiti became the first independent Black republic in 1804, following the only successful slave revolution in history."
+  },
+  {
+    "date": "2026-01-02",
+    "slug": "berbers",
+    "reason": "Celebrating North African indigenous heritage",
+    "featured_fact": "Berbers (Amazigh) have inhabited North Africa for over 10,000 years, predating Arab arrival by millennia."
+  },
+  {
+    "date": "2026-01-03",
+    "slug": "moroccan",
+    "reason": "Honoring Saharan nomadic traditions",
+    "featured_fact": "Moroccan cultures include rich nomadic traditions and sophisticated knowledge of desert survival and navigation."
+  },
+  {
+    "date": "2026-01-04",
+    "slug": "burmese",
+    "reason": "Celebrating Southeast Asian Buddhist culture",
+    "featured_fact": "Myanmar has over 2,500 active Buddhist pagodas, more than any other country in the world."
+  },
+  {
+    "date": "2026-01-05",
+    "slug": "irish",
+    "reason": "Celebrating Celtic heritage and literary traditions",
+    "featured_fact": "Ireland has produced four Nobel Prize winners in Literature, reflecting its deep literary culture."
+  },
+  {
+    "date": "2026-01-06",
+    "slug": "egyptian",
+    "reason": "Coptic Christmas - celebrating ancient Christian traditions",
+    "featured_fact": "Egyptian Coptic Christians use one of the world's oldest continuously used calendars, dating to ancient Egypt."
+  },
+  {
+    "date": "2026-01-07",
+    "slug": "russian",
+    "reason": "Orthodox Christmas celebration",
+    "featured_fact": "Russia spans 11 time zones, making it the world's largest country by land area."
+  }
+]
