@@ -955,8 +955,21 @@ async function handleListSocialAccounts(request, env) {
 }
 
 /**
+ * Compute a stable 16-hex-char fingerprint for a brand+platform+platformUserId triplet.
+ * Used to verify that a social_accounts row is bound to the correct cms_platform_tokens entry.
+ * SHA-256("brand|platform|platformUserId") → first 16 hex chars.
+ */
+async function computeTokenFingerprint(brand, platform, platformUserId) {
+  const input = `${brand}|${platform}|${platformUserId}`;
+  const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+  const hex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return hex.slice(0, 16);
+}
+
+/**
  * POST /api/cms/social-accounts
- * Body: { brand, platform, handle, display_name?, profile_url?, bio?, followers_count?, verified?, is_primary? }
+ * Body: { brand, platform, handle, display_name?, profile_url?, bio?, followers_count?,
+ *         verified?, is_primary?, platform_user_id? }
  */
 async function handleUpsertSocialAccount(request, user, env) {
   if (!env.DB) return errorResponse('D1 not configured', 503);
@@ -969,10 +982,15 @@ async function handleUpsertSocialAccount(request, user, env) {
   if (!BRAND_DEFINITIONS[data.brand]) return errorResponse('Unknown brand', 400);
 
   const now = new Date().toISOString();
+  const platformUserId = data.platform_user_id || '';
+  const fingerprint = platformUserId ? await computeTokenFingerprint(data.brand, data.platform, platformUserId) : '';
+  const linkStatus = platformUserId ? 'linked' : 'unlinked';
+
   await env.DB.prepare(`
     INSERT INTO social_accounts (brand, platform, handle, display_name, profile_url, bio,
-      followers_count, following_count, post_count, verified, is_primary, last_synced, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      followers_count, following_count, post_count, verified, is_primary, last_synced,
+      platform_user_id, token_fingerprint, link_status, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(brand, platform, handle) DO UPDATE SET
       display_name = excluded.display_name,
       profile_url = excluded.profile_url,
@@ -983,19 +1001,93 @@ async function handleUpsertSocialAccount(request, user, env) {
       verified = excluded.verified,
       is_primary = excluded.is_primary,
       last_synced = excluded.last_synced,
+      platform_user_id = CASE WHEN excluded.platform_user_id != '' THEN excluded.platform_user_id ELSE platform_user_id END,
+      token_fingerprint = CASE WHEN excluded.token_fingerprint != '' THEN excluded.token_fingerprint ELSE token_fingerprint END,
+      link_status = CASE WHEN excluded.platform_user_id != '' THEN excluded.link_status ELSE link_status END,
       updated_at = excluded.updated_at
   `).bind(
     data.brand, data.platform, data.handle,
     data.display_name || '', data.profile_url || '', data.bio || '',
     data.followers_count || 0, data.following_count || 0, data.post_count || 0,
     data.verified ? 1 : 0, data.is_primary !== false ? 1 : 0,
-    now, now, now
+    now, platformUserId, fingerprint, linkStatus, now, now
   ).run();
 
   await logAudit(env.DB, user.id, 'social.account.upsert', 'social_account',
     `${data.brand}:${data.platform}:${data.handle}`, { brand: data.brand, platform: data.platform });
 
   return jsonResponse({ ok: true }, 201);
+}
+
+/**
+ * POST /api/cms/social-accounts/populate
+ * Reads all active cms_platform_tokens entries and auto-creates/updates the matching
+ * social_accounts rows with platform_user_id = account_id and a verified token_fingerprint.
+ * Also writes token_fingerprint + social_account_id back to cms_platform_tokens.
+ * Body: { brand? }  — omit brand to populate all brands.
+ */
+async function handlePopulateSocialAccounts(request, user, env) {
+  if (!env.DB) return errorResponse('D1 not configured', 503);
+  if (!user) return errorResponse('Unauthorized', 401);
+
+  const body = await request.json().catch(() => ({}));
+  const filterBrand = body.brand || null;
+
+  let query = 'SELECT id, brand, platform, account_id, account_label FROM cms_platform_tokens WHERE is_active = 1';
+  const params = [];
+  if (filterBrand) { query += ' AND brand = ?'; params.push(filterBrand); }
+  query += ' ORDER BY brand, platform';
+
+  const { results: tokens } = await env.DB.prepare(query).bind(...params).all();
+  if (!tokens?.length) return jsonResponse({ ok: true, populated: 0, accounts: [] });
+
+  const now = new Date().toISOString();
+  const populated = [];
+
+  for (const token of tokens) {
+    const { id: tokenId, brand, platform, account_id: platformUserId, account_label } = token;
+    if (!platformUserId) continue; // skip if no external ID stored
+
+    // Derive a canonical handle: strip leading @ from label, fallback to platformUserId
+    const handle = (account_label || '').replace(/^@/, '') || String(platformUserId);
+    const displayName = account_label || '';
+    const fingerprint = await computeTokenFingerprint(brand, platform, String(platformUserId));
+
+    // Upsert social_accounts by (brand, platform, handle)
+    await env.DB.prepare(`
+      INSERT INTO social_accounts
+        (brand, platform, handle, display_name, platform_user_id, token_fingerprint,
+         link_status, last_synced, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, 'linked', ?, ?, ?)
+      ON CONFLICT(brand, platform, handle) DO UPDATE SET
+        display_name      = excluded.display_name,
+        platform_user_id  = excluded.platform_user_id,
+        token_fingerprint = excluded.token_fingerprint,
+        link_status       = 'linked',
+        last_synced       = excluded.last_synced,
+        updated_at        = excluded.updated_at
+    `).bind(brand, platform, handle, displayName, String(platformUserId), fingerprint, now, now, now).run();
+
+    // Retrieve the social_account id for back-reference
+    const acctRow = await env.DB.prepare(
+      'SELECT id FROM social_accounts WHERE brand = ? AND platform = ? AND handle = ?'
+    ).bind(brand, platform, handle).first();
+    const socialAccountId = acctRow?.id || null;
+
+    // Write fingerprint + social_account_id back to the token row
+    await env.DB.prepare(`
+      UPDATE cms_platform_tokens
+      SET token_fingerprint = ?, social_account_id = ?, updated_at = ?
+      WHERE id = ?
+    `).bind(fingerprint, socialAccountId, now, tokenId).run();
+
+    populated.push({ brand, platform, handle, platform_user_id: String(platformUserId), fingerprint, social_account_id: socialAccountId });
+  }
+
+  await logAudit(env.DB, user.id, 'social.account.populate', 'social_accounts', 'bulk',
+    { count: populated.length, brand: filterBrand || 'all' });
+
+  return jsonResponse({ ok: true, populated: populated.length, accounts: populated });
 }
 
 /**
@@ -1885,6 +1977,9 @@ export async function handleCMSRequest(request, env, user) {
     // ── Social account handle registry ───────────────────────
     if (path === '/social-accounts' && method === 'GET') {
       return handleListSocialAccounts(request, env);
+    }
+    if (path === '/social-accounts/populate' && method === 'POST') {
+      return handlePopulateSocialAccounts(request, user, env);
     }
     if (path === '/social-accounts' && method === 'POST') {
       return handleUpsertSocialAccount(request, user, env);

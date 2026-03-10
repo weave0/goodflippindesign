@@ -5466,8 +5466,14 @@
                                 <path d="M1 15c0-3.3 2.7-6 6-6" />
                                 <path d="M12 8.5l.7 1.4H14l-1.2.9.5 1.5-1.3-1-1.3 1 .5-1.5L10 9.9h1.3l.7-1.4Z" />
                             </svg></span><span class="nav-label">Characters</span></button>
-                    <button class="nav-btn" data-view="nft-studio"><span class="nav-num">20</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="8,1 10.5,6 16,6.5 12,10.5 13.5,16 8,13 2.5,16 4,10.5 0,6.5 5.5,6"/></svg></span><span class="nav-label">NFT Studio</span></button>
-                    <button class="nav-btn" data-view="brands"><span class="nav-num">21</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="4" width="14" height="9" rx="2"/><path d="M5 4V3a3 3 0 0 1 6 0v1"/><circle cx="8" cy="8.5" r="1.5"/></svg></span><span class="nav-label">Brand Registry</span></button>
+                    <button class="nav-btn" data-view="nft-studio"><span class="nav-num">20</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polygon points="8,1 10.5,6 16,6.5 12,10.5 13.5,16 8,13 2.5,16 4,10.5 0,6.5 5.5,6" />
+                            </svg></span><span class="nav-label">NFT Studio</span></button>
+                    <button class="nav-btn" data-view="brands"><span class="nav-num">21</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="1" y="4" width="14" height="9" rx="2" />
+                                <path d="M5 4V3a3 3 0 0 1 6 0v1" />
+                                <circle cx="8" cy="8.5" r="1.5" />
+                            </svg></span><span class="nav-label">Brand Registry</span></button>
 
                 </nav>
 
@@ -6927,7 +6933,9 @@
                                         </tr>
                                     </thead>
                                     <tbody id="nft-tokens-tbody">
-                                        <tr><td colspan="8" class="text-muted" style="text-align:center;padding:2rem">Loading&hellip;</td></tr>
+                                        <tr>
+                                            <td colspan="8" class="text-muted" style="text-align:center;padding:2rem">Loading&hellip;</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -6942,6 +6950,7 @@
                     <div class="section-head">
                         <h2 class="section-title">Brand Registry</h2>
                         <div class="inline-actions">
+                            <button class="btn btn-secondary" id="brands-populate-btn">&#8644; Sync from Tokens</button>
                             <button class="btn btn-secondary" id="brands-refresh-btn">&#8635; Refresh</button>
                         </div>
                     </div>
@@ -6958,6 +6967,10 @@
                         <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
                             <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Accounts</div>
                             <div id="br-kpi-accounts" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Linked</div>
+                            <div id="br-kpi-linked" style="font-size:1.5rem;font-weight:600;color:#10b981">&mdash;</div>
                         </div>
                     </div>
                     <div id="brands-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem">
@@ -7760,7 +7773,9 @@
             <div class="modal-body" style="display:grid;gap:0.75rem">
                 <input type="hidden" id="nft-token-id">
                 <div><label class="form-label">Name *</label><input class="form-input" id="nft-token-name" placeholder="Token name"></div>
-                <div><label class="form-label">Collection *</label><select class="form-input" id="nft-token-collection"><option value="">&mdash; select &mdash;</option></select></div>
+                <div><label class="form-label">Collection *</label><select class="form-input" id="nft-token-collection">
+                        <option value="">&mdash; select &mdash;</option>
+                    </select></div>
                 <div><label class="form-label">Edition #</label><input class="form-input" id="nft-token-edition" type="number" placeholder="e.g. 1"></div>
                 <div><label class="form-label">Rarity</label>
                     <select class="form-input" id="nft-token-rarity">
@@ -13359,7 +13374,7 @@
                         '<td><span class="tag" style="' + rarityStyle + '">' + escapeHtml(t.rarity || 'Common') + '</span></td>' +
                         '<td><span class="tag" style="' + statusStyle + '">' + escapeHtml(t.status) + '</span></td>' +
                         '<td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--accent-teal)">' +
-                            (t.ipfs_image_cid ? t.ipfs_image_cid.slice(0, 10) + '\u2026' : '\u2014') + '</td>' +
+                        (t.ipfs_image_cid ? t.ipfs_image_cid.slice(0, 10) + '\u2026' : '\u2014') + '</td>' +
                         '<td style="font-size:0.78rem;color:var(--text-muted)">' + (t.minted_at ? formatDateTime(t.minted_at) : '\u2014') + '</td>' +
                         '<td><button class="btn btn-secondary btn-sm" onclick="window.__nftEditToken(' + t.id + ')">Edit</button></td>' +
                         '</tr>';
@@ -13504,35 +13519,75 @@
                 }
                 var totalAccounts = Object.values(accountsMap).reduce(function (s, v) { return s + v.length; }, 0);
                 var totalWorkflows = Object.values(workflowMap).reduce(function (s, v) { return s + v; }, 0);
+                var totalLinked = Object.values(accountsMap).reduce(function (s, v) {
+                    return s + v.filter(function (a) { return a.link_status === 'linked'; }).length;
+                }, 0);
                 var kpi = function (id, v) { var e = $(id); if (e) e.textContent = v; };
                 kpi('br-kpi-total', BRAND_DEFS.length);
                 kpi('br-kpi-workflows', totalWorkflows);
                 kpi('br-kpi-accounts', totalAccounts);
+                kpi('br-kpi-linked', totalLinked);
                 grid.innerHTML = BRAND_DEFS.map(function (b) {
                     var accts = accountsMap[b.id] || [];
                     var wfCount = workflowMap[b.id] || 0;
                     var acctTags = accts.slice(0, 6).map(function (a) {
-                        return '<span class="tag" style="font-size:0.72rem;background:rgba(255,255,255,0.06)">' +
-                            escapeHtml(a.platform) + (a.handle ? ' @' + escapeHtml(a.handle) : '') + '</span>';
+                        var isLinked = a.link_status === 'linked';
+                        var dot = '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:' +
+                            (isLinked ? '#10b981' : 'var(--text-muted)') +
+                            ';margin-right:4px;vertical-align:middle" title="' +
+                            (isLinked ? 'Linked \u2022 ref: ' + (a.token_fingerprint || 'n/a') : 'Unlinked') + '"></span>';
+                        return '<span class="tag" style="font-size:0.72rem;background:rgba(255,255,255,0.06);display:inline-flex;align-items:center">' +
+                            dot + escapeHtml(a.platform) + (a.handle ? ' @' + escapeHtml(a.handle) : '') + '</span>';
                     }).join('');
+                    var linkedCount = accts.filter(function (a) { return a.link_status === 'linked'; }).length;
+                    var linkBadge = accts.length
+                        ? '<span class="tag" style="font-size:0.72rem;background:rgba(16,185,129,0.12);color:#10b981">' +
+                          linkedCount + '/' + accts.length + ' linked</span>'
+                        : '';
                     return '<article class="panel" style="border-top:3px solid ' + b.color + '">' +
                         '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.6rem">' +
                         '<span style="font-size:1.5rem;line-height:1">' + b.emoji + '</span>' +
                         '<div><strong style="font-size:1rem;color:var(--text)">' + escapeHtml(b.name) + '</strong>' +
                         '<div style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono)">' + escapeHtml(b.slug) + '</div></div>' +
                         '</div>' +
-                        '<div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">' +
+                        '<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">' +
                         '<span class="tag" style="font-size:0.72rem;background:rgba(255,255,255,0.06)">' + accts.length + ' accounts</span>' +
                         '<span class="tag" style="font-size:0.72rem;background:rgba(255,255,255,0.06)">' + wfCount + ' workflows</span>' +
+                        linkBadge +
                         '</div>' +
-                        (acctTags ? '<div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:0.5rem">' + acctTags + '</div>' : '') +
+                        (acctTags ? '<div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:0.75rem">' + acctTags + '</div>' : '') +
+                        '<div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem">' +
                         '<a href="' + escapeHtml(b.url) + '" target="_blank" rel="noopener" style="font-size:0.78rem;color:var(--text-muted)">' + escapeHtml(b.url) + '</a>' +
+                        '<button class="btn btn-secondary brands-sync-btn" data-brand="' + escapeHtml(b.id) + '" style="font-size:0.72rem;padding:0.25rem 0.6rem;height:auto">&#8644; Sync</button>' +
+                        '</div>' +
                         '</article>';
                 }).join('');
+
+                // Per-brand sync buttons
+                grid.querySelectorAll('.brands-sync-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () { populateForBrand(btn.dataset.brand); });
+                });
+            }
+
+            async function populateForBrand(brand) {
+                try {
+                    var res = await api('/social-accounts/populate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(brand ? { brand: brand } : {}),
+                    });
+                    toast('Synced ' + (res.populated || 0) + ' account(s)' + (brand ? ' for ' + brand : ''), 'success');
+                    load();
+                } catch (err) {
+                    toast('Sync failed: ' + err.message, 'error');
+                }
             }
 
             var brandsRefreshBtn = $('brands-refresh-btn');
             if (brandsRefreshBtn) brandsRefreshBtn.addEventListener('click', load);
+
+            var brandsPopulateBtn = $('brands-populate-btn');
+            if (brandsPopulateBtn) brandsPopulateBtn.addEventListener('click', function () { populateForBrand(null); });
 
             window.__adminPanels = window.__adminPanels || {};
             window.__adminPanels['brands'] = load;
