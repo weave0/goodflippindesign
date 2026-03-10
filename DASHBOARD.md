@@ -49,24 +49,28 @@ npm run cache-bust
 - [x] File sync automated (pretest hook)
 - [x] Custom domain configured
 - [x] SSL certificate (automatic)
+- [x] Finance toolkit: GA4 + Stripe export, submission packager
+- [x] CSP regenerated on every commit
 
-### 🔧 Optional (If Needed)
+### 🔧 Gaps / To-Do
 
-- [ ] Contact form (use Cloudflare Workers - already set up)
-- [ ] Analytics (Cloudflare Web Analytics - free)
-- [ ] Email routing (Cloudflare - free)
+- [ ] Sentry DSN secret — set `SENTRY_DSN` via `wrangler secret put` to enable error tracking
+- [ ] Branch protection on `main` — direct pushes currently allowed
+- [ ] donate.html dedicated test coverage — currently covered by community portal suite only
+- [ ] Contact form end-to-end verification — submit a real test message
 
 ---
 
 ## 📈 Performance Metrics
 
 ```
-✅ Test Pass Rate: 98.6% (141/144 tests)
-✅ Accessibility: 100% WCAG 2.1 AA
+✅ Test Pass Rate: 93.4% (156/167 tests) — last run 2026-03-10
+✅ Community Portal: 19/19 tests passing
 ✅ Responsive: 100% (7 viewports)
 ✅ Security Headers: Configured
 ✅ GPU Animations: Optimized
 ✅ Load Time: <3s
+⚠️  Accessibility: 13/14 (color contrast warning — review advised)
 ```
 
 ---

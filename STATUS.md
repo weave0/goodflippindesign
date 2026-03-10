@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated**: March 3, 2026
+**Last Updated**: March 10, 2026
 **Status**: ✅ Production Live
 **Monthly Cost**: $0 (Cloudflare Pages free tier)
 
@@ -34,26 +34,42 @@
 | CI — PR tests           | ✅            | ci.yml — Puppeteer on PRs                                     |
 | CI — deploy gate        | ✅            | deploy.yml — a11y smoke test on push to main                  |
 | CI — force deploy       | ✅            | force-deploy.yml — CF Pages API                               |
-| D1 community database   | ✅ configured | Schema deployed; API reads/writes through auth worker         |
+| D1 community database   | ✅ configured | 27 tables deployed; API reads/writes through auth worker      |
+| R2 media bucket         | ✅ configured | `gfv-media` binding in workers/wrangler.toml                  |
+| Admin panel             | ✅            | admin.html — 20+ panels, command palette, blog manager        |
+| Daily Culture Calendar  | ✅            | 2 cultures/day, week + month views (panel 20)                 |
+| Social Gallery          | ✅            | Post Kit cards, platform filter, copy-to-clipboard            |
+| Finance toolkit         | ✅            | scripts/finance/ — GA4/Stripe export, submission packager     |
 
 ---
 
 ## Test Coverage
 
-| Target                            | Coverage                | Last Run                   |
-| --------------------------------- | ----------------------- | -------------------------- |
-| index.html (via temp_review.html) | 98.6% — 141/144 passing | 2026-01-28 (re-run needed) |
-| community-portal.html             | ❌ 0%                   | Not yet written            |
-| donate.html                       | ❌ 0%                   | Not yet written            |
+| Target                            | Coverage                          | Last Run       |
+| --------------------------------- | --------------------------------- | -------------- |
+| index.html (via temp_review.html) | 93.4% — 156/167 passing (10 warn) | 2026-03-10     |
+| community-portal.html             | ✅ 19/19 passing                  | 2026-03-10     |
+| donate.html                       | ⚠️ minimal                        | included above |
 
 ```powershell
-npm test            # Full suite — 7 suites, 144 tests (~25s)
+npm test            # Full suite — 7 suites, 167 tests (~60s)
 npm run test:a11y   # Accessibility only (~5s)
 ```
 
 ---
 
-## Recent Work (Feb 19 – Mar 3, 2026)
+## Recent Work (Mar 3 – Mar 10, 2026)
+
+- Added Daily Culture Calendar (DCC) panel — 2 cultures/day with week + month views
+- Surfaced CultureSherpa portal discoverability from admin
+- Social Gallery: Post Kit share modal, platform filter, branded nav SVG icons
+- Admin UX overhaul: sticky topbar, command palette (Ctrl+K), keyboard shortcuts, blog markdown preview
+- Auth worker: fixed admin role assignment probe to use `/api/profile`
+- CSP: added ecosystem health ping domains + api.github.com to connect-src
+- Finance: added root-managed toolkit (GA4 export, Stripe export, submission packager) under `scripts/finance/`
+- CASHMONEY: formalized as local staging area, explicitly gitignored
+
+## Previous Work (Feb 19 – Mar 3, 2026)
 
 - Fixed invisible logos (immutable cache bug)
 - Replaced AWS Lambda with Cloudflare Worker for Stripe payments
@@ -87,16 +103,16 @@ Successfully transformed single-file portfolio site from 90.8% test pass rate to
 ## 📊 Test Results
 
 ```text
-HTML/CSS Structure      13/14  (1 warning - font loading)
-Navigation & Links      12/14  (1 warning - scroll pos)
-Form Interactions       14/14  (100% pass)
+HTML/CSS Structure      12/14  (2 warnings)
+Navigation & Links      12/18  (5 warnings, 1 skipped)
+Form Interactions       13/14  (1 warning)
 Responsive Design       60/60  (100% pass)
-Accessibility (WCAG AA) 14/14  (100% pass)
+Accessibility (WCAG AA) 13/14  (1 warning)
 Animations              12/12  (100% pass)
-Compatibility           16/16  (100% pass)
+Community Portal        15/16  (1 warning)
+Compatibility           19/19  (100% pass)
 ─────────────────────────────────────────
-Total: 144  Passed: 141  Warnings: 2  Skipped: 1
+Total: 167  Passed: 156  Warnings: 10  Skipped: 1
 ```
 
-> **Note:** These results are from the last full test run on 2026-01-28.
-> Run `npm test` to get current results.
+> Last full test run: **2026-03-10**. Run `npm test` to get current results.
