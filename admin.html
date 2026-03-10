@@ -5466,6 +5466,8 @@
                                 <path d="M1 15c0-3.3 2.7-6 6-6" />
                                 <path d="M12 8.5l.7 1.4H14l-1.2.9.5 1.5-1.3-1-1.3 1 .5-1.5L10 9.9h1.3l.7-1.4Z" />
                             </svg></span><span class="nav-label">Characters</span></button>
+                    <button class="nav-btn" data-view="nft-studio"><span class="nav-num">20</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="8,1 10.5,6 16,6.5 12,10.5 13.5,16 8,13 2.5,16 4,10.5 0,6.5 5.5,6"/></svg></span><span class="nav-label">NFT Studio</span></button>
+                    <button class="nav-btn" data-view="brands"><span class="nav-num">21</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="4" width="14" height="9" rx="2"/><path d="M5 4V3a3 3 0 0 1 6 0v1"/><circle cx="8" cy="8.5" r="1.5"/></svg></span><span class="nav-label">Brand Registry</span></button>
 
                 </nav>
 
@@ -6871,6 +6873,98 @@
                     </div>
                 </section>
 
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: NFT Studio (panel 20)                              -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-nft-studio">
+                    <div class="section-head">
+                        <h2 class="section-title">NFT Studio</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="nft-refresh-btn">&#8635; Refresh</button>
+                            <button class="btn btn-primary" id="nft-new-token-btn">+ New Token</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Manage NFT collections, token registry, rarity tiers, IPFS metadata, and on-chain mint records.</p>
+                    <div style="display:flex;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap">
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Total</div>
+                            <div id="nft-kpi-total" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Minted</div>
+                            <div id="nft-kpi-minted" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Ready</div>
+                            <div id="nft-kpi-ready" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Draft</div>
+                            <div id="nft-kpi-draft" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:200px 1fr;gap:1rem;align-items:start">
+                        <aside class="panel" style="padding:0.75rem">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+                                <strong style="font-size:0.85rem">Collections</strong>
+                                <button class="btn btn-primary" id="nft-new-collection-btn" style="font-size:0.72rem;padding:0.2rem 0.5rem">+ New</button>
+                            </div>
+                            <div id="nft-collections-list" style="display:flex;flex-direction:column;gap:0.3rem"></div>
+                        </aside>
+                        <div class="panel" style="padding:0">
+                            <div style="overflow-x:auto">
+                                <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
+                                    <thead>
+                                        <tr style="border-bottom:1px solid var(--border)">
+                                            <th style="padding:0.6rem 1rem;text-align:left;color:var(--text-muted)">#</th>
+                                            <th style="padding:0.6rem 1rem;text-align:left;color:var(--text-muted)">Name</th>
+                                            <th style="padding:0.6rem 1rem;text-align:left;color:var(--text-muted)">Collection</th>
+                                            <th style="padding:0.6rem 1rem;text-align:left;color:var(--text-muted)">Rarity</th>
+                                            <th style="padding:0.6rem 1rem;text-align:left;color:var(--text-muted)">Status</th>
+                                            <th style="padding:0.6rem 1rem;text-align:left;color:var(--text-muted)">IPFS Image</th>
+                                            <th style="padding:0.6rem 1rem;text-align:left;color:var(--text-muted)">Minted</th>
+                                            <th style="padding:0.6rem 1rem"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="nft-tokens-tbody">
+                                        <tr><td colspan="8" class="text-muted" style="text-align:center;padding:2rem">Loading&hellip;</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Brand Registry (panel 21)                          -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-brands">
+                    <div class="section-head">
+                        <h2 class="section-title">Brand Registry</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="brands-refresh-btn">&#8635; Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Overview of all brands in the ecosystem &mdash; social accounts, workflow counts, and external links.</p>
+                    <div style="display:flex;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap">
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Brands</div>
+                            <div id="br-kpi-total" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Workflows</div>
+                            <div id="br-kpi-workflows" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Accounts</div>
+                            <div id="br-kpi-accounts" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
+                    </div>
+                    <div id="brands-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem">
+                        <div class="text-muted" style="text-align:center;padding:2rem">Loading&hellip;</div>
+                    </div>
+                </section>
+
             </main>
         </div>
     </div>
@@ -7611,6 +7705,80 @@
             <div class="actions">
                 <button class="btn btn-secondary" data-close-modal="workflow-modal">Cancel</button>
                 <button class="btn btn-primary" id="save-workflow-btn">Save Workflow</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NFT Collection Modal -->
+    <div class="modal-wrap" id="nft-collection-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="nft-coll-modal-title">New Collection</h3>
+                <button class="modal-close" data-close-modal="nft-collection-modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body" style="display:grid;gap:0.75rem">
+                <input type="hidden" id="nft-coll-id">
+                <div><label class="form-label">Name *</label><input class="form-input" id="nft-coll-name" placeholder="Collection name"></div>
+                <div><label class="form-label">Slug</label><input class="form-input" id="nft-coll-slug" placeholder="auto-generated"></div>
+                <div><label class="form-label">Brand</label>
+                    <select class="form-input" id="nft-coll-brand">
+                        <option value="">&mdash; none &mdash;</option>
+                        <option value="gfd">Good Flippin Design</option>
+                        <option value="gfv">Good Flippin Vibes</option>
+                        <option value="culturesherpa">CultureSherpa</option>
+                        <option value="aiaimate">AI Aimate</option>
+                        <option value="globaldeets">GlobalDeets</option>
+                        <option value="citizenapproved">CitizenApproved</option>
+                    </select>
+                </div>
+                <div><label class="form-label">Description</label><textarea class="form-input" id="nft-coll-description" rows="2" placeholder="Optional description"></textarea></div>
+                <div><label class="form-label">Contract Address</label><input class="form-input" id="nft-coll-contract" placeholder="0x&hellip;"></div>
+                <div><label class="form-label">Marketplace URL</label><input class="form-input" id="nft-coll-marketplace" placeholder="https://opensea.io/&hellip;"></div>
+                <div><label class="form-label">Status</label>
+                    <select class="form-input" id="nft-coll-status">
+                        <option value="draft">Draft</option>
+                        <option value="active">Active</option>
+                        <option value="paused">Paused</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" data-close-modal="nft-collection-modal">Cancel</button>
+                <button class="btn btn-primary" id="nft-coll-save-btn">Save Collection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NFT Token Modal -->
+    <div class="modal-wrap" id="nft-token-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="nft-token-modal-title">New Token</h3>
+                <button class="modal-close" data-close-modal="nft-token-modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body" style="display:grid;gap:0.75rem">
+                <input type="hidden" id="nft-token-id">
+                <div><label class="form-label">Name *</label><input class="form-input" id="nft-token-name" placeholder="Token name"></div>
+                <div><label class="form-label">Collection *</label><select class="form-input" id="nft-token-collection"><option value="">&mdash; select &mdash;</option></select></div>
+                <div><label class="form-label">Edition #</label><input class="form-input" id="nft-token-edition" type="number" placeholder="e.g. 1"></div>
+                <div><label class="form-label">Rarity</label>
+                    <select class="form-input" id="nft-token-rarity">
+                        <option value="Common">Common</option>
+                        <option value="Uncommon">Uncommon</option>
+                        <option value="Rare">Rare</option>
+                        <option value="Epic">Epic</option>
+                        <option value="Legendary">Legendary</option>
+                    </select>
+                </div>
+                <div><label class="form-label">Description</label><textarea class="form-input" id="nft-token-description" rows="2"></textarea></div>
+                <div><label class="form-label">IPFS Image CID</label><input class="form-input" id="nft-token-ipfs-img" placeholder="Qm&hellip; or bafy&hellip;"></div>
+                <div><label class="form-label">IPFS Metadata CID</label><input class="form-input" id="nft-token-ipfs-meta" placeholder="Qm&hellip; or bafy&hellip;"></div>
+                <div><label class="form-label">External URL</label><input class="form-input" id="nft-token-external-url" placeholder="https://&hellip;"></div>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" data-close-modal="nft-token-modal">Cancel</button>
+                <button class="btn btn-primary" id="nft-token-save-btn">Save Token</button>
             </div>
         </div>
     </div>
@@ -9922,6 +10090,8 @@
             notifications: { name: 'Queue Health', title: 'Queue Health', sub: 'Monitor the social publishing queue, retry failed variants, and trigger manual runs.' },
             characters: { name: 'Characters', title: 'Character Registry', sub: 'Animation character roster, pose inventory, and pipeline status.' },
             'daily-cultures': { name: 'Daily Calendar', title: 'Daily Culture Calendar', sub: 'Two featured cultures every day — morning & evening rotations for CultureSherpa.' },
+            'nft-studio': { name: 'NFT Studio', title: 'NFT Studio', sub: 'Manage NFT collections, token registry, rarity tiers, IPFS metadata, and on-chain mint records.' },
+            'brands': { name: 'Brands', title: 'Brand Registry', sub: 'Overview of all brands in the ecosystem \u2014 social accounts, workflow counts, and external links.' },
         };
 
         function updatePageContext(view) {
@@ -13095,6 +13265,277 @@
 
             window.__adminPanels = window.__adminPanels || {};
             window.__adminPanels['daily-cultures'] = ensureDccLoaded;
+        })();
+
+        // --- NFT Studio Panel (20) --------------------------------------------------------
+        (function initNftStudioPanel() {
+            'use strict';
+
+            var nftCollections = [];
+            var nftTokens = [];
+            var activeCollId = null;
+
+            var RARITY_COLORS = {
+                Common: 'background:rgba(107,114,128,0.2);color:#9ca3af',
+                Uncommon: 'background:rgba(34,197,94,0.2);color:#4ade80',
+                Rare: 'background:rgba(59,130,246,0.2);color:#60a5fa',
+                Epic: 'background:rgba(168,85,247,0.2);color:#c084fc',
+                Legendary: 'background:rgba(234,179,8,0.2);color:#facc15',
+            };
+            var STATUS_COLORS = {
+                draft: 'background:rgba(107,114,128,0.2);color:#9ca3af',
+                watermarked: 'background:rgba(20,184,166,0.2);color:#2dd4bf',
+                ready: 'background:rgba(59,130,246,0.2);color:#60a5fa',
+                minted: 'background:rgba(34,197,94,0.2);color:#4ade80',
+                listed: 'background:rgba(249,115,22,0.2);color:#fb923c',
+            };
+
+            function autoSlug(v) {
+                return v.toLowerCase().replace(/[^\w]+/g, '-').replace(/^-|-$/g, '');
+            }
+
+            async function load() {
+                try {
+                    var [collRes, tokRes] = await Promise.all([
+                        api('/nft/collections'),
+                        api('/nft/tokens?limit=500' + (activeCollId ? '&collection_id=' + activeCollId : '')),
+                    ]);
+                    nftCollections = collRes.collections || collRes || [];
+                    nftTokens = tokRes.tokens || tokRes || [];
+                    renderCollections();
+                    renderTokens();
+                    renderKPIs();
+                } catch (err) {
+                    toast('NFT Studio: ' + err.message, 'error');
+                }
+            }
+
+            function renderKPIs() {
+                var byStatus = {};
+                nftTokens.forEach(function (t) { byStatus[t.status] = (byStatus[t.status] || 0) + 1; });
+                var el = function (id, v) { var e = $(id); if (e) e.textContent = v; };
+                el('nft-kpi-total', nftTokens.length);
+                el('nft-kpi-minted', byStatus.minted || 0);
+                el('nft-kpi-ready', byStatus.ready || 0);
+                el('nft-kpi-draft', byStatus.draft || 0);
+            }
+
+            function renderCollections() {
+                var list = $('nft-collections-list');
+                if (!list) return;
+                var allBtn = '<button class="btn btn-secondary" style="font-size:0.8rem;padding:0.3rem 0.6rem;text-align:left' +
+                    (activeCollId === null ? ';background:var(--accent-bg)' : '') +
+                    '" data-coll-id="">All Collections</button>';
+                var collBtns = nftCollections.map(function (c) {
+                    return '<button class="btn btn-secondary" style="font-size:0.8rem;padding:0.3rem 0.6rem;text-align:left' +
+                        (activeCollId === c.id ? ';background:var(--accent-bg)' : '') +
+                        '" data-coll-id="' + c.id + '">' + escapeHtml(c.name) + '</button>';
+                });
+                list.innerHTML = allBtn + collBtns.join('');
+                list.querySelectorAll('[data-coll-id]').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        activeCollId = this.dataset.collId ? Number(this.dataset.collId) : null;
+                        load();
+                    });
+                });
+            }
+
+            function renderTokens() {
+                var tbody = $('nft-tokens-tbody');
+                if (!tbody) return;
+                var collMap = {};
+                nftCollections.forEach(function (c) { collMap[c.id] = c.name; });
+                if (!nftTokens.length) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-muted" style="text-align:center;padding:2rem">No tokens yet. Create a collection and add tokens to get started.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = nftTokens.map(function (t) {
+                    var rarityStyle = RARITY_COLORS[t.rarity] || RARITY_COLORS.Common;
+                    var statusStyle = STATUS_COLORS[t.status] || STATUS_COLORS.draft;
+                    return '<tr>' +
+                        '<td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">' + (t.edition_number || '\u2014') + '</td>' +
+                        '<td><strong>' + escapeHtml(t.name) + '</strong></td>' +
+                        '<td>' + escapeHtml(collMap[t.collection_id] || '\u2014') + '</td>' +
+                        '<td><span class="tag" style="' + rarityStyle + '">' + escapeHtml(t.rarity || 'Common') + '</span></td>' +
+                        '<td><span class="tag" style="' + statusStyle + '">' + escapeHtml(t.status) + '</span></td>' +
+                        '<td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--accent-teal)">' +
+                            (t.ipfs_image_cid ? t.ipfs_image_cid.slice(0, 10) + '\u2026' : '\u2014') + '</td>' +
+                        '<td style="font-size:0.78rem;color:var(--text-muted)">' + (t.minted_at ? formatDateTime(t.minted_at) : '\u2014') + '</td>' +
+                        '<td><button class="btn btn-secondary btn-sm" onclick="window.__nftEditToken(' + t.id + ')">Edit</button></td>' +
+                        '</tr>';
+                }).join('');
+            }
+
+            function openCollectionModal(coll) {
+                $('nft-coll-modal-title').textContent = coll ? 'Edit Collection' : 'New Collection';
+                $('nft-coll-id').value = coll ? coll.id : '';
+                $('nft-coll-name').value = coll ? coll.name : '';
+                $('nft-coll-slug').value = coll ? (coll.slug || '') : '';
+                $('nft-coll-brand').value = coll ? (coll.brand || '') : '';
+                $('nft-coll-description').value = coll ? (coll.description || '') : '';
+                $('nft-coll-contract').value = coll ? (coll.contract_address || '') : '';
+                $('nft-coll-marketplace').value = coll ? (coll.marketplace_url || '') : '';
+                $('nft-coll-status').value = coll ? (coll.status || 'draft') : 'draft';
+                openModal('nft-collection-modal');
+            }
+
+            var saveCollBtn = $('nft-coll-save-btn');
+            if (saveCollBtn) saveCollBtn.addEventListener('click', async function () {
+                var id = $('nft-coll-id').value;
+                var name = $('nft-coll-name').value.trim();
+                if (!name) { toast('Collection name is required', 'error'); return; }
+                var payload = {
+                    id: id ? Number(id) : undefined,
+                    name: name,
+                    slug: $('nft-coll-slug').value.trim() || autoSlug(name),
+                    brand: $('nft-coll-brand').value || undefined,
+                    description: $('nft-coll-description').value.trim() || undefined,
+                    contract_address: $('nft-coll-contract').value.trim() || undefined,
+                    marketplace_url: $('nft-coll-marketplace').value.trim() || undefined,
+                    status: $('nft-coll-status').value,
+                };
+                try {
+                    await api('/nft/collections', { method: id ? 'PUT' : 'POST', body: payload });
+                    closeModal('nft-collection-modal');
+                    toast('Collection saved', 'success');
+                    load();
+                } catch (err) { toast(err.message, 'error'); }
+            });
+
+            var newCollBtn = $('nft-new-collection-btn');
+            if (newCollBtn) newCollBtn.addEventListener('click', function () { openCollectionModal(null); });
+
+            function openTokenModal(token) {
+                $('nft-token-modal-title').textContent = token ? 'Edit Token' : 'New Token';
+                $('nft-token-id').value = token ? token.id : '';
+                $('nft-token-name').value = token ? token.name : '';
+                $('nft-token-edition').value = token ? (token.edition_number || '') : '';
+                $('nft-token-description').value = token ? (token.description || '') : '';
+                $('nft-token-rarity').value = token ? (token.rarity || 'Common') : 'Common';
+                $('nft-token-ipfs-img').value = token ? (token.ipfs_image_cid || '') : '';
+                $('nft-token-ipfs-meta').value = token ? (token.ipfs_metadata_cid || '') : '';
+                $('nft-token-external-url').value = token ? (token.external_url || '') : '';
+                var sel = $('nft-token-collection');
+                sel.innerHTML = '<option value="">\u2014 select \u2014</option>' +
+                    nftCollections.map(function (c) {
+                        return '<option value="' + c.id + '"' +
+                            (token && token.collection_id === c.id ? ' selected' : '') +
+                            '>' + escapeHtml(c.name) + '</option>';
+                    }).join('');
+                if (!token && activeCollId) sel.value = activeCollId;
+                openModal('nft-token-modal');
+            }
+
+            var saveTokenBtn = $('nft-token-save-btn');
+            if (saveTokenBtn) saveTokenBtn.addEventListener('click', async function () {
+                var id = $('nft-token-id').value;
+                var name = $('nft-token-name').value.trim();
+                var collId = Number($('nft-token-collection').value);
+                if (!name) { toast('Token name is required', 'error'); return; }
+                if (!collId) { toast('Collection is required', 'error'); return; }
+                var payload = {
+                    id: id ? Number(id) : undefined,
+                    name: name,
+                    collection_id: collId,
+                    rarity: $('nft-token-rarity').value,
+                    edition_number: $('nft-token-edition').value ? Number($('nft-token-edition').value) : undefined,
+                    description: $('nft-token-description').value.trim() || undefined,
+                    ipfs_image_cid: $('nft-token-ipfs-img').value.trim() || undefined,
+                    ipfs_metadata_cid: $('nft-token-ipfs-meta').value.trim() || undefined,
+                    external_url: $('nft-token-external-url').value.trim() || undefined,
+                };
+                try {
+                    await api('/nft/tokens', { method: id ? 'PUT' : 'POST', body: payload });
+                    closeModal('nft-token-modal');
+                    toast('Token saved', 'success');
+                    load();
+                } catch (err) { toast(err.message, 'error'); }
+            });
+
+            var newTokenBtn = $('nft-new-token-btn');
+            if (newTokenBtn) newTokenBtn.addEventListener('click', function () { openTokenModal(null); });
+
+            var nftRefreshBtn = $('nft-refresh-btn');
+            if (nftRefreshBtn) nftRefreshBtn.addEventListener('click', load);
+
+            window.__nftEditToken = function (id) {
+                var t = nftTokens.find(function (x) { return x.id === id; });
+                if (t) openTokenModal(t);
+            };
+
+            window.__adminPanels = window.__adminPanels || {};
+            window.__adminPanels['nft-studio'] = load;
+        })();
+
+        // --- Brand Registry Panel (21) ----------------------------------------------------
+        (function initBrandsPanel() {
+            'use strict';
+
+            var BRAND_DEFS = [
+                { id: 'gfd', name: 'Good Flippin Design', slug: 'gfd', color: '#6366f1', emoji: '\ud83c\udfa8', url: 'https://goodflippindesign.com' },
+                { id: 'gfv', name: 'Good Flippin Vibes', slug: 'gfv', color: '#8b5cf6', emoji: '\u2728', url: 'https://goodflippinvibes.com' },
+                { id: 'culturesherpa', name: 'CultureSherpa', slug: 'culturesherpa', color: '#10b981', emoji: '\ud83e\uddad', url: 'https://culturesherpa.org' },
+                { id: 'aiaimate', name: 'AI Aimate', slug: 'aiaimate', color: '#0ea5e9', emoji: '\ud83e\udd16', url: 'https://aiaimate.com' },
+                { id: 'globaldeets', name: 'GlobalDeets', slug: 'globaldeets', color: '#f59e0b', emoji: '\ud83c\udf0d', url: 'https://globaldeets.com' },
+                { id: 'citizenapproved', name: 'CitizenApproved', slug: 'citizenapproved', color: '#ef4444', emoji: '\u2705', url: 'https://citizenapproved.com' },
+            ];
+
+            async function load() {
+                var grid = $('brands-grid');
+                if (!grid) return;
+                var accountsMap = {};
+                var workflowMap = {};
+                try {
+                    var [socRes, wfRes] = await Promise.all([
+                        api('/social-accounts?limit=200'),
+                        api('/workflows?limit=200'),
+                    ]);
+                    var accounts = socRes.accounts || socRes || [];
+                    accounts.forEach(function (a) {
+                        if (!accountsMap[a.brand]) accountsMap[a.brand] = [];
+                        accountsMap[a.brand].push(a);
+                    });
+                    var workflows = wfRes.workflows || wfRes || [];
+                    workflows.forEach(function (w) {
+                        workflowMap[w.brand] = (workflowMap[w.brand] || 0) + 1;
+                    });
+                } catch (err) {
+                    console.warn('[brands panel] Could not load live data:', err.message);
+                }
+                var totalAccounts = Object.values(accountsMap).reduce(function (s, v) { return s + v.length; }, 0);
+                var totalWorkflows = Object.values(workflowMap).reduce(function (s, v) { return s + v; }, 0);
+                var kpi = function (id, v) { var e = $(id); if (e) e.textContent = v; };
+                kpi('br-kpi-total', BRAND_DEFS.length);
+                kpi('br-kpi-workflows', totalWorkflows);
+                kpi('br-kpi-accounts', totalAccounts);
+                grid.innerHTML = BRAND_DEFS.map(function (b) {
+                    var accts = accountsMap[b.id] || [];
+                    var wfCount = workflowMap[b.id] || 0;
+                    var acctTags = accts.slice(0, 6).map(function (a) {
+                        return '<span class="tag" style="font-size:0.72rem;background:rgba(255,255,255,0.06)">' +
+                            escapeHtml(a.platform) + (a.handle ? ' @' + escapeHtml(a.handle) : '') + '</span>';
+                    }).join('');
+                    return '<article class="panel" style="border-top:3px solid ' + b.color + '">' +
+                        '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.6rem">' +
+                        '<span style="font-size:1.5rem;line-height:1">' + b.emoji + '</span>' +
+                        '<div><strong style="font-size:1rem;color:var(--text)">' + escapeHtml(b.name) + '</strong>' +
+                        '<div style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono)">' + escapeHtml(b.slug) + '</div></div>' +
+                        '</div>' +
+                        '<div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">' +
+                        '<span class="tag" style="font-size:0.72rem;background:rgba(255,255,255,0.06)">' + accts.length + ' accounts</span>' +
+                        '<span class="tag" style="font-size:0.72rem;background:rgba(255,255,255,0.06)">' + wfCount + ' workflows</span>' +
+                        '</div>' +
+                        (acctTags ? '<div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:0.5rem">' + acctTags + '</div>' : '') +
+                        '<a href="' + escapeHtml(b.url) + '" target="_blank" rel="noopener" style="font-size:0.78rem;color:var(--text-muted)">' + escapeHtml(b.url) + '</a>' +
+                        '</article>';
+                }).join('');
+            }
+
+            var brandsRefreshBtn = $('brands-refresh-btn');
+            if (brandsRefreshBtn) brandsRefreshBtn.addEventListener('click', load);
+
+            window.__adminPanels = window.__adminPanels || {};
+            window.__adminPanels['brands'] = load;
         })();
         // ─── End Daily Culture Calendar ────────────────────────────────
 

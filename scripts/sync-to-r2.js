@@ -203,7 +203,7 @@ function registerInD1(asset, r2Key, contentHash, databaseName) {
   const sql = `INSERT OR IGNORE INTO cms_assets (id, brand, category, title, file_path, media_type, mime_type, file_size, source_type, source_path, content_hash, uploaded_by, created_at, updated_at, tags) VALUES ('${assetId}', '${asset.brand}', '${asset.category}', '${safeTitle}', '${r2Key}', '${asset.assetType}', '${asset.mimeType}', ${asset.sizeBytes}, 'local_sync', '${asset.fullPath.replace(/\\/g, '\\\\').replace(/'/g, "''")}', '${contentHash}', 'sync-agent', '${now}', '${now}', '${tags}')`;
 
   try {
-    execSync(`npx wrangler d1 execute "${databaseName}" --command="${sql}"`, {
+    execSync(`npx wrangler d1 execute "${databaseName}" --remote --command="${sql}"`, {
       stdio: 'pipe',
       timeout: 30000,
     });
@@ -211,7 +211,7 @@ function registerInD1(asset, r2Key, contentHash, databaseName) {
   } catch (e) {
     // If source_type column doesn't exist yet, retry without it
     const fallbackSql = `INSERT OR IGNORE INTO cms_assets (id, brand, category, title, file_path, media_type, mime_type, file_size, uploaded_by, created_at, updated_at, tags) VALUES ('${assetId}', '${asset.brand}', '${asset.category}', '${safeTitle}', '${r2Key}', '${asset.assetType}', '${asset.mimeType}', ${asset.sizeBytes}, 'sync-agent', '${now}', '${now}', '${tags}')`;
-    execSync(`npx wrangler d1 execute "${databaseName}" --command="${fallbackSql}"`, {
+    execSync(`npx wrangler d1 execute "${databaseName}" --remote --command="${fallbackSql}"`, {
       stdio: 'pipe',
       timeout: 30000,
     });
