@@ -1,232 +1,353 @@
 {
-  "_meta": {
-    "version": "1.0",
-    "lastUpdated": "2026-03-10",
-    "purpose": "Proactive gap tracking for all GFD ecosystem brands and products. Keep this file current — it feeds the admin portal Overview panel.",
-    "severities": {
-      "blocker": "Stops the click-click workflow or exposes a security/data risk. Must resolve before investor demo.",
-      "quality": "Incomplete feature, stub code, or missing test coverage. Looks bad if found externally.",
-      "hygiene": "Orphaned files, unconfirmed config, minor cleanup. Low urgency but should be scheduled.",
-      "done": "Resolved. Keep for audit trail."
-    }
-  },
-  "gaps": [
-    {
-      "id": "social-artwork-r2",
-      "severity": "blocker",
-      "brand": ["gfv", "culturesherpa"],
-      "area": "Social Media",
-      "title": "Branded artwork not in R2 asset library",
-      "detail": "2,038 GFV images + 850 CultureSherpa images exist locally (GFD Dev Projects/GFV, GFD Dev Projects/CultureSherpa/cultural_images) but are NOT uploaded to Cloudflare R2. Post Kits cannot link to them until imported. Fix: Asset Library → Import Folder (or bulk upload via wrangler r2 object put).",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
+    "_meta": {
+        "version": "1.0",
+        "lastUpdated": "2026-03-10",
+        "purpose": "Proactive gap tracking for all GFD ecosystem brands and products. Keep this file current — it feeds the admin portal Overview panel.",
+        "severities": {
+            "blocker": "Stops the click-click workflow or exposes a security/data risk. Must resolve before investor demo.",
+            "quality": "Incomplete feature, stub code, or missing test coverage. Looks bad if found externally.",
+            "hygiene": "Orphaned files, unconfirmed config, minor cleanup. Low urgency but should be scheduled.",
+            "done": "Resolved. Keep for audit trail."
+        }
     },
-    {
-      "id": "social-post-kits-asset-links",
-      "severity": "blocker",
-      "brand": ["all"],
-      "area": "Social Media",
-      "title": "Post Kit entries have empty asset_id fields",
-      "detail": "Post Kit rows have captions + hashtags but asset_id is blank — the post is not truly 'click-click ready' until each kit entry references a branded R2 asset. Workflow: upload artwork to R2 → note asset IDs → edit kit entries in Drip Builder to attach asset_id per row.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "social-hashtags-composer",
-      "severity": "done",
-      "brand": ["all"],
-      "area": "Social Media",
-      "title": "Brand hashtag sets wired to post composer",
-      "detail": "Each brand now auto-populates its full hashtag bank (incl. #art, #love, #goodvibes, #culture, #cultura) when selected in the brand switcher. High-volume tags included per brand.",
-      "status": "done",
-      "createdAt": "2026-03-10",
-      "resolvedAt": "2026-03-10",
-      "owner": "brett"
-    },
-    {
-      "id": "social-platform-oauth",
-      "severity": "quality",
-      "brand": ["all"],
-      "area": "Social Media",
-      "title": "OAuth connections unverified",
-      "detail": "Instagram, TikTok, Pinterest may need token refresh. Check Connections → Connection Health. Especially relevant before any scheduled post run.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "cs-src-stubs",
-      "severity": "quality",
-      "brand": ["culturesherpa"],
-      "area": "CultureSherpa",
-      "title": "CultureSherpa src/ is nearly empty",
-      "detail": "src/pages/test.astro is 0KB. Only src/config/admin.ts (1.6KB) exists in the main src/. The production site is in website-astro/ which has full structure, but main project src/ needs a walkthrough to determine which components are genuinely stubbed.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "cs-d1-schemas-unconfirmed",
-      "severity": "quality",
-      "brand": ["culturesherpa"],
-      "area": "CultureSherpa",
-      "title": "Multiple D1 schemas — only community confirmed applied",
-      "detail": "d1-schema-cms.sql, d1-schema-media-platform.sql, d1-schema-console.sql exist in GFD root but production apply status is unknown. Run: wrangler d1 execute gfd_community --file=<schema.sql> --dry-run to verify each one.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "cs-library-stubs",
-      "severity": "quality",
-      "brand": ["culturesherpa"],
-      "area": "CultureSherpa",
-      "title": "CultureSherpa component library has stubs (exact count unknown)",
-      "detail": "Strategic plans and admin docs reference stub components in culturesherpa. Full walkthrough of website-astro/src needed to create a formal stub inventory. Known: test.astro is empty. Unknown: how many page components are scaffolded vs functional.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "gfv-stubs",
-      "severity": "quality",
-      "brand": ["gfv"],
-      "area": "GFV",
-      "title": "goodflippinvibes.com stubs unaudited",
-      "detail": "GFV has 2,038 images locally. No formal stub inventory of the website. Needs a walkthrough of GFD Dev Projects/GFV/website/src to catalogue any scaffolded/incomplete components. science-enhancer.js has parsing issues detected.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "aiaimate-stubs",
-      "severity": "quality",
-      "brand": ["aiaimate"],
-      "area": "AIAimate",
-      "title": "aiaimate.com stubs unaudited",
-      "detail": "AIAimate has 41 images in GFD Dev Projects/AI. No formal stub inventory. Needs walkthrough to identify scaffolded/incomplete features.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "admin-auth-edge",
-      "severity": "quality",
-      "brand": ["gfd"],
-      "area": "Admin",
-      "title": "admin.html not blocked at Cloudflare Pages edge",
-      "detail": "Clerk gates the admin UI client-side but _worker.js does not block unauthenticated HTTP requests to /admin.html at the edge. Any user can fetch the HTML. Add a Cloudflare Access rule or a 401 redirect in _worker.js for /admin.html requests missing a valid Clerk session cookie.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "auth-profanity-stub",
-      "severity": "quality",
-      "brand": ["gfd"],
-      "area": "Admin",
-      "title": "Auth.js profanity filter stub",
-      "detail": "workers/auth.js line ~265 only blocks 'spam' and 'test-profanity'. Must be replaced with a real word list before community platform public launch.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett",
-      "notes": "Partially addressed — expanded list added 2026-03-10. Needs production word list."
-    },
-    {
-      "id": "sentry-dsn",
-      "severity": "quality",
-      "brand": ["gfd"],
-      "area": "Ops",
-      "title": "Sentry DSN secret not set",
-      "detail": "SENTRY_DSN env var is empty. @sentry/cloudflare is installed and auth.js degrades gracefully. Fix: wrangler secret put SENTRY_DSN",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "branch-protection",
-      "severity": "hygiene",
-      "brand": ["gfd"],
-      "area": "Ops",
-      "title": "Branch protection not enforced on main",
-      "detail": "Direct pushes to main bypass CI. GitHub → Settings → Branches → Add rule: require PR + require test-suite status check to pass.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "contact-form-e2e",
-      "severity": "hygiene",
-      "brand": ["gfd"],
-      "area": "Ops",
-      "title": "Contact form not end-to-end verified",
-      "detail": "Send a real test submission from goodflippindesign.com → confirm it arrives at brett.l.weaver@gmail.com via Formspree endpoint xgvgzjbw.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "orphan-html-root",
-      "severity": "hygiene",
-      "brand": ["gfd"],
-      "area": "Hygiene",
-      "title": "Orphaned debug/snapshot HTML files publicly accessible",
-      "detail": "ga-test-enhanced.html, test-ga.html, oauth-diagnostic.html, globaldeets-live-snapshot.html, main.html, globaldeets-phase1-live.html are in the root of the deployed site. Not linked but publicly reachable. Move to .gitignore or delete before next investor review.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "jamie-mediation-placement",
-      "severity": "hygiene",
-      "brand": ["gfd"],
-      "area": "Hygiene",
-      "title": "Client page (jamie-rigling-mediation.html) mixed into main site repo",
-      "detail": "weave0/jamie-mediation repo already exists. Decide: should this deploy independently from that repo, or stay here? If independent, remove from GFD root and point DNS.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "gallery-page",
-      "severity": "hygiene",
-      "brand": ["gfd"],
-      "area": "Hygiene",
-      "title": "gallery.html has no tests and no nav link",
-      "detail": "gallery.html (24KB) exists in root but is not tested and not linked from navigation. Determine if it is complete and intended to be public. If yes: add a nav link and smoke test. If no: move to _archive.",
-      "status": "open",
-      "createdAt": "2026-03-10",
-      "resolvedAt": null,
-      "owner": "brett"
-    },
-    {
-      "id": "donate-tests",
-      "severity": "done",
-      "brand": ["gfd"],
-      "area": "Testing",
-      "title": "donate.html Puppeteer test suite (24/24 passing)",
-      "detail": "tests/donate.test.js written and integrated into run-all-tests.js. 24 tests: load, metadata, Stripe SDK, donation UI, landmarks, responsive, touch targets, WCAG contrast, security hygiene.",
-      "status": "done",
-      "createdAt": "2026-03-10",
-      "resolvedAt": "2026-03-10",
-      "owner": "brett"
-    }
-  ]
+    "gaps": [
+        {
+            "id": "social-artwork-r2",
+            "severity": "blocker",
+            "brand": [
+                "gfv",
+                "culturesherpa"
+            ],
+            "area": "Social Media",
+            "title": "Branded artwork not in R2 asset library",
+            "detail": "2,038 GFV images + 850 CultureSherpa images exist locally (GFD Dev Projects/GFV, GFD Dev Projects/CultureSherpa/cultural_images) but are NOT uploaded to Cloudflare R2. Post Kits cannot link to them until imported. Fix: Asset Library → Import Folder (or bulk upload via wrangler r2 object put).",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "social-post-kits-asset-links",
+            "severity": "blocker",
+            "brand": [
+                "all"
+            ],
+            "area": "Social Media",
+            "title": "Post Kit entries have empty asset_id fields",
+            "detail": "Post Kit rows have captions + hashtags but asset_id is blank — the post is not truly 'click-click ready' until each kit entry references a branded R2 asset. Workflow: upload artwork to R2 → note asset IDs → edit kit entries in Drip Builder to attach asset_id per row.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "social-hashtags-composer",
+            "severity": "done",
+            "brand": [
+                "all"
+            ],
+            "area": "Social Media",
+            "title": "Brand hashtag sets wired to post composer",
+            "detail": "Each brand now auto-populates its full hashtag bank (incl. #art, #love, #goodvibes, #culture, #cultura) when selected in the brand switcher. High-volume tags included per brand.",
+            "status": "done",
+            "createdAt": "2026-03-10",
+            "resolvedAt": "2026-03-10",
+            "owner": "brett"
+        },
+        {
+            "id": "social-platform-oauth",
+            "severity": "quality",
+            "brand": [
+                "all"
+            ],
+            "area": "Social Media",
+            "title": "OAuth connections unverified",
+            "detail": "Instagram, TikTok, Pinterest may need token refresh. Check Connections → Connection Health. Especially relevant before any scheduled post run.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "cs-src-stubs",
+            "severity": "quality",
+            "brand": [
+                "culturesherpa"
+            ],
+            "area": "CultureSherpa",
+            "title": "CultureSherpa src/ is nearly empty",
+            "detail": "src/pages/test.astro is 0KB. Only src/config/admin.ts (1.6KB) exists in the main src/. The production site is in website-astro/ which has full structure, but main project src/ needs a walkthrough to determine which components are genuinely stubbed.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "cs-d1-schemas-unconfirmed",
+            "severity": "quality",
+            "brand": [
+                "culturesherpa"
+            ],
+            "area": "CultureSherpa",
+            "title": "Multiple D1 schemas — only community confirmed applied",
+            "detail": "d1-schema-cms.sql, d1-schema-media-platform.sql, d1-schema-console.sql exist in GFD root but production apply status is unknown. Run: wrangler d1 execute gfd_community --file=<schema.sql> --dry-run to verify each one.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "cs-library-stubs",
+            "severity": "quality",
+            "brand": [
+                "culturesherpa"
+            ],
+            "area": "CultureSherpa",
+            "title": "CultureSherpa component library has stubs (exact count unknown)",
+            "detail": "Strategic plans and admin docs reference stub components in culturesherpa. Full walkthrough of website-astro/src needed to create a formal stub inventory. Known: test.astro is empty. Unknown: how many page components are scaffolded vs functional.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "gfv-stubs",
+            "severity": "quality",
+            "brand": [
+                "gfv"
+            ],
+            "area": "GFV",
+            "title": "goodflippinvibes.com stubs unaudited",
+            "detail": "GFV has 2,038 images locally. No formal stub inventory of the website. Needs a walkthrough of GFD Dev Projects/GFV/website/src to catalogue any scaffolded/incomplete components. science-enhancer.js has parsing issues detected.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "aiaimate-stubs",
+            "severity": "quality",
+            "brand": [
+                "aiaimate"
+            ],
+            "area": "AIAimate",
+            "title": "aiaimate.com stubs unaudited",
+            "detail": "AIAimate has 41 images in GFD Dev Projects/AI. No formal stub inventory. Needs walkthrough to identify scaffolded/incomplete features.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "admin-auth-edge",
+            "severity": "quality",
+            "brand": [
+                "gfd"
+            ],
+            "area": "Admin",
+            "title": "admin.html not blocked at Cloudflare Pages edge",
+            "detail": "Clerk gates the admin UI client-side but _worker.js does not block unauthenticated HTTP requests to /admin.html at the edge. Any user can fetch the HTML. Add a Cloudflare Access rule or a 401 redirect in _worker.js for /admin.html requests missing a valid Clerk session cookie.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "auth-profanity-stub",
+            "severity": "quality",
+            "brand": [
+                "gfd"
+            ],
+            "area": "Admin",
+            "title": "Auth.js profanity filter stub",
+            "detail": "workers/auth.js line ~265 only blocks 'spam' and 'test-profanity'. Must be replaced with a real word list before community platform public launch.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett",
+            "notes": "Partially addressed — expanded list added 2026-03-10. Needs production word list."
+        },
+        {
+            "id": "sentry-dsn",
+            "severity": "quality",
+            "brand": [
+                "gfd"
+            ],
+            "area": "Ops",
+            "title": "Sentry DSN secret not set",
+            "detail": "SENTRY_DSN env var is empty. @sentry/cloudflare is installed and auth.js degrades gracefully. Fix: wrangler secret put SENTRY_DSN",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "branch-protection",
+            "severity": "hygiene",
+            "brand": [
+                "gfd"
+            ],
+            "area": "Ops",
+            "title": "Branch protection not enforced on main",
+            "detail": "Direct pushes to main bypass CI. GitHub → Settings → Branches → Add rule: require PR + require test-suite status check to pass.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "contact-form-e2e",
+            "severity": "hygiene",
+            "brand": [
+                "gfd"
+            ],
+            "area": "Ops",
+            "title": "Contact form not end-to-end verified",
+            "detail": "Send a real test submission from goodflippindesign.com → confirm it arrives at brett.l.weaver@gmail.com via Formspree endpoint xgvgzjbw.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "orphan-html-root",
+            "severity": "hygiene",
+            "brand": [
+                "gfd"
+            ],
+            "area": "Hygiene",
+            "title": "Orphaned debug/snapshot HTML files publicly accessible",
+            "detail": "ga-test-enhanced.html, test-ga.html, oauth-diagnostic.html, globaldeets-live-snapshot.html, main.html, globaldeets-phase1-live.html are in the root of the deployed site. Not linked but publicly reachable. Move to .gitignore or delete before next investor review.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "jamie-mediation-placement",
+            "severity": "hygiene",
+            "brand": [
+                "gfd"
+            ],
+            "area": "Hygiene",
+            "title": "Client page (jamie-rigling-mediation.html) mixed into main site repo",
+            "detail": "weave0/jamie-mediation repo already exists. Decide: should this deploy independently from that repo, or stay here? If independent, remove from GFD root and point DNS.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "gallery-page",
+            "severity": "hygiene",
+            "brand": [
+                "gfd"
+            ],
+            "area": "Hygiene",
+            "title": "gallery.html has no tests and no nav link",
+            "detail": "gallery.html (24KB) exists in root but is not tested and not linked from navigation. Determine if it is complete and intended to be public. If yes: add a nav link and smoke test. If no: move to _archive.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "donate-tests",
+            "severity": "done",
+            "brand": [
+                "gfd"
+            ],
+            "area": "Testing",
+            "title": "donate.html Puppeteer test suite (24/24 passing)",
+            "detail": "tests/donate.test.js written and integrated into run-all-tests.js. 24 tests: load, metadata, Stripe SDK, donation UI, landmarks, responsive, touch targets, WCAG contrast, security hygiene.",
+            "status": "done",
+            "createdAt": "2026-03-10",
+            "resolvedAt": "2026-03-10",
+            "owner": "brett"
+        },
+        {
+            "id": "cs-api-auth-stubs",
+            "severity": "blocker",
+            "brand": [
+                "culturesherpa"
+            ],
+            "area": "CultureSherpa",
+            "title": "CS API endpoints have no JWT authentication",
+            "detail": "Three Python API files accept requests without verifying Clerk JWTs: GFD Dev Projects/CultureSherpa/api/celebrations.py:32, cultural_images.py:48, s3_upload.py:62. Any unauthenticated caller can modify celebrations, upload images, or interact with cultural image data. Must add Clerk JWT verification middleware before any public launch.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "cs-coming-soon-tabs",
+            "severity": "quality",
+            "brand": [
+                "culturesherpa"
+            ],
+            "area": "CultureSherpa",
+            "title": "CultureSherpa Research/Connect/Comparison tabs show stub content",
+            "detail": "ConnectTab.astro:90 renders 'Content coming soon', ResearchTab.astro:180 renders 'Research content coming soon', index.astro:540 renders 'Comparing cultures (feature coming soon)'. These are visible to end users as blank placeholder tabs.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "cs-celebrations-stubs",
+            "severity": "quality",
+            "brand": [
+                "culturesherpa"
+            ],
+            "area": "CultureSherpa",
+            "title": "Celebrations page has unimplemented S3 upload and Add Family dialog",
+            "detail": "celebrations.astro:1817 has TODO: Upload to S3 via Lambda API (never implemented). celebrations.astro:2208 shows 'Add Family dialog coming soon!'. Both are user-facing gaps that block the celebrations workflow.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "cs-profile-password-stub",
+            "severity": "quality",
+            "brand": [
+                "culturesherpa"
+            ],
+            "area": "CultureSherpa",
+            "title": "Profile page password change calls alert() stub",
+            "detail": "profile.astro:172 calls alert('Password change is not yet implemented') — a browser alert visible to all users. Also CultureRenderer.astro:451 renders 'Profile coming soon'. Replace with Clerk password-change API call or suppress the option entirely.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "cs-worklist-stub",
+            "severity": "hygiene",
+            "brand": [
+                "culturesherpa"
+            ],
+            "area": "CultureSherpa",
+            "title": "Quality page uses hardcoded fake stubWorklist data",
+            "detail": "quality.astro:15-30 defines stubWorklist with hardcoded entries instead of fetching from the API. This means quality tracking data is never real. Wire to the actual API endpoint or remove if the feature is not ready.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        },
+        {
+            "id": "cs-invalidation-stub",
+            "severity": "hygiene",
+            "brand": [
+                "culturesherpa"
+            ],
+            "area": "CultureSherpa",
+            "title": "Cache invalidation endpoint is a no-op stub",
+            "detail": "api/invalidate.json.ts:82 comments 'Automated invalidation not yet implemented' and returns 200 without doing anything. client_health_ping.ts is described as 'Minimal Astro endpoint stub'. Cache invalidation silently failing means stale content can persist after updates.",
+            "status": "open",
+            "createdAt": "2026-03-10",
+            "resolvedAt": null,
+            "owner": "brett"
+        }
+    ]
 }
