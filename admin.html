@@ -4768,13 +4768,14 @@
         .dcc-kit-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.72);
+            background: rgba(0, 0, 0, 0.72);
             z-index: 2000;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 1rem;
         }
+
         .dcc-kit-modal {
             background: var(--card-bg, #1a1a1a);
             border: 1px solid var(--border);
@@ -4785,6 +4786,7 @@
             max-height: 90vh;
             overflow-y: auto;
         }
+
         .dcc-kit-header {
             display: flex;
             align-items: center;
@@ -4792,7 +4794,12 @@
             padding: 0.85rem 1.1rem;
             border-bottom: 1px solid var(--border);
         }
-        .dcc-kit-header h3 { font-size: 0.95rem; margin: 0; }
+
+        .dcc-kit-header h3 {
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
         .dcc-kit-close {
             background: none;
             border: none;
@@ -4808,17 +4815,23 @@
             align-items: center;
             justify-content: center;
         }
-        .dcc-kit-close:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+
+        .dcc-kit-close:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
         .dcc-kit-art {
             width: 100%;
             max-height: 260px;
             object-fit: cover;
             display: block;
         }
+
         .dcc-kit-art-placeholder {
             width: 100%;
             height: 160px;
-            background: rgba(245,158,11,0.06);
+            background: rgba(245, 158, 11, 0.06);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -4827,12 +4840,16 @@
             flex-direction: column;
             gap: 0.5rem;
         }
-        .dcc-kit-body { padding: 1rem 1.1rem; }
+
+        .dcc-kit-body {
+            padding: 1rem 1.1rem;
+        }
+
         .dcc-kit-caption {
             font-size: 0.85rem;
             line-height: 1.55;
             color: var(--text);
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 0.75rem;
@@ -4840,7 +4857,13 @@
             margin-bottom: 0.85rem;
             user-select: all;
         }
-        .dcc-kit-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+        .dcc-kit-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
         .dcc-kit-note {
             font-size: 0.72rem;
             color: var(--text-muted);
@@ -7511,9 +7534,10 @@
                     let role = state.clerk.user.publicMetadata?.role;
                     if (role !== 'admin') {
                         // First sign-in: trigger server-side admin role assignment for whitelisted emails
+                        // Uses /api/profile — a real authenticated endpoint that calls ensureAdminRole()
                         try {
                             const token = await state.clerk.session.getToken();
-                            await fetch(API + '/posts', { headers: { Authorization: 'Bearer ' + token } });
+                            await fetch('/api/profile', { headers: { Authorization: 'Bearer ' + token } });
                             await state.clerk.user.reload();
                             role = state.clerk.user.publicMetadata?.role;
                         } catch (e) { /* server role assignment unavailable */ }
@@ -12351,21 +12375,21 @@
 
                     overlay.innerHTML =
                         '<div class="dcc-kit-modal">' +
-                            '<div class="dcc-kit-header">' +
-                                '<h3>' + escapeHtml(name) + ' &mdash; ' + slotLabel + ' Post Kit</h3>' +
-                                '<button class="dcc-kit-close" aria-label="Close post kit">&times;</button>' +
-                            '</div>' +
-                            artHTML +
-                            '<div class="dcc-kit-body">' +
-                                '<div class="dcc-kit-caption">' + escapeHtml(postText) + '</div>' +
-                                '<div class="dcc-kit-actions">' +
-                                    '<button class="btn btn-primary btn-micro" id="dcc-kit-copy-text">Copy Caption</button>' +
-                                    downloadLink +
-                                    '<a class="btn btn-secondary btn-micro" href="' + escapeHtml(tweetUrl) + '" target="_blank" rel="noopener">Post to X</a>' +
-                                    '<a class="btn btn-secondary btn-micro" href="' + escapeHtml(liUrl) + '" target="_blank" rel="noopener">Post to LinkedIn</a>' +
-                                '</div>' +
-                                '<p class="dcc-kit-note">Tip: Download the art and attach it manually when posting to X &mdash; Twitter&#39;s share URL doesn&#39;t support image uploads.</p>' +
-                            '</div>' +
+                        '<div class="dcc-kit-header">' +
+                        '<h3>' + escapeHtml(name) + ' &mdash; ' + slotLabel + ' Post Kit</h3>' +
+                        '<button class="dcc-kit-close" aria-label="Close post kit">&times;</button>' +
+                        '</div>' +
+                        artHTML +
+                        '<div class="dcc-kit-body">' +
+                        '<div class="dcc-kit-caption">' + escapeHtml(postText) + '</div>' +
+                        '<div class="dcc-kit-actions">' +
+                        '<button class="btn btn-primary btn-micro" id="dcc-kit-copy-text">Copy Caption</button>' +
+                        downloadLink +
+                        '<a class="btn btn-secondary btn-micro" href="' + escapeHtml(tweetUrl) + '" target="_blank" rel="noopener">Post to X</a>' +
+                        '<a class="btn btn-secondary btn-micro" href="' + escapeHtml(liUrl) + '" target="_blank" rel="noopener">Post to LinkedIn</a>' +
+                        '</div>' +
+                        '<p class="dcc-kit-note">Tip: Download the art and attach it manually when posting to X &mdash; Twitter&#39;s share URL doesn&#39;t support image uploads.</p>' +
+                        '</div>' +
                         '</div>';
 
                     document.body.appendChild(overlay);
