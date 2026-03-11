@@ -2294,9 +2294,17 @@
             transition: border-color 0.2s ease, background 0.2s ease;
         }
 
-        .eco-site-card--pass { border-left-color: #22c55e; }
-        .eco-site-card--warn { border-left-color: #f59e0b; }
-        .eco-site-card--fail { border-left-color: #f43f5e; }
+        .eco-site-card--pass {
+            border-left-color: #22c55e;
+        }
+
+        .eco-site-card--warn {
+            border-left-color: #f59e0b;
+        }
+
+        .eco-site-card--fail {
+            border-left-color: #f43f5e;
+        }
 
         .eco-site-card-header {
             display: flex;
@@ -2339,23 +2347,36 @@
             border-radius: 0.25rem;
             letter-spacing: 0.01em;
         }
-        .eco-sec-score.ok   { color: #22c55e; background: rgba(34,197,94,0.13); }
-        .eco-sec-score.warn { color: #f59e0b; background: rgba(245,158,11,0.13); }
-        .eco-sec-score.fail { color: #f43f5e; background: rgba(244,63,94,0.13); }
+
+        .eco-sec-score.ok {
+            color: #22c55e;
+            background: rgba(34, 197, 94, 0.13);
+        }
+
+        .eco-sec-score.warn {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.13);
+        }
+
+        .eco-sec-score.fail {
+            color: #f43f5e;
+            background: rgba(244, 63, 94, 0.13);
+        }
 
         .eco-header-chip {
             font-size: 0.6rem;
             font-weight: 500;
             padding: 0.07rem 0.26rem;
             border-radius: 0.2rem;
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.06);
             color: var(--text-muted);
             font-family: 'JetBrains Mono', monospace;
             letter-spacing: 0.03em;
         }
+
         .eco-header-chip.missing {
-            background: rgba(244,63,94,0.08);
-            color: rgba(244,63,94,0.55);
+            background: rgba(244, 63, 94, 0.08);
+            color: rgba(244, 63, 94, 0.55);
             text-decoration: line-through;
         }
 
@@ -2366,6 +2387,7 @@
             border-collapse: collapse;
             margin-top: 0.5rem;
         }
+
         .eco-history-table th {
             text-align: left;
             color: var(--text-muted);
@@ -2373,12 +2395,16 @@
             padding: 0.3rem 0.5rem;
             border-bottom: 1px solid var(--border);
         }
+
         .eco-history-table td {
             padding: 0.3rem 0.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             color: var(--text-secondary);
         }
-        .eco-history-table tr:last-child td { border-bottom: none; }
+
+        .eco-history-table tr:last-child td {
+            border-bottom: none;
+        }
 
         .eco-repos-grid {
             display: grid;
@@ -6541,7 +6567,14 @@
                         <details class="mt-085" id="eco-history-details" style="display:none">
                             <summary style="font-size:0.78rem;color:var(--text-muted);cursor:pointer;user-select:none">Sweep history (last 7 runs)</summary>
                             <table class="eco-history-table" id="eco-history-table">
-                                <thead><tr><th>Time</th><th>✅ Pass</th><th>⚠ Warn</th><th>❌ Fail</th></tr></thead>
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>✅ Pass</th>
+                                        <th>⚠ Warn</th>
+                                        <th>❌ Fail</th>
+                                    </tr>
+                                </thead>
                                 <tbody id="eco-history-body"></tbody>
                             </table>
                         </details>
@@ -12079,9 +12112,9 @@
                     siteGrid.innerHTML = checks.map(c => {
                         const cls = c.overall_status === 'pass' ? 'pass' : c.overall_status === 'warn' ? 'warn' : 'fail';
                         const tagCls = cls === 'pass' ? 'ok' : cls;
-                        const responseLabel = c.overall_status === 'pass'  ? `${c.response_time_ms}ms` :
-                                              c.overall_status === 'warn'  ? `slow ${c.response_time_ms}ms` :
-                                              c.error ? c.error.substring(0, 30) : `HTTP ${c.status_code}`;
+                        const responseLabel = c.overall_status === 'pass' ? `${c.response_time_ms}ms` :
+                            c.overall_status === 'warn' ? `slow ${c.response_time_ms}ms` :
+                                c.error ? c.error.substring(0, 30) : `HTTP ${c.status_code}`;
                         // Security headers: 4 possible (CSP, HSTS, X-Frame, XCTO)
                         const secScore = (c.has_csp || 0) + (c.has_hsts || 0) + (c.has_x_frame || 0) + (c.has_xcto || 0);
                         const secCls = secScore >= 4 ? 'ok' : secScore >= 2 ? 'warn' : 'fail';
