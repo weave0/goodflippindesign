@@ -12212,7 +12212,7 @@
             }
 
             // ── Sweep trigger button ──
-            on('eco-sweep-btn', 'click', async function () {
+            $('eco-sweep-btn').addEventListener('click', async function () {
                 const btn = $('eco-sweep-btn');
                 const ageEl = $('eco-sweep-age');
                 btn.disabled = true;
