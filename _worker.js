@@ -82,6 +82,10 @@ export default {
       '/temp_donate_review.html',
       '/temp_review.html',
       '/test-ga.html',
+      // Orphan/wrong-domain pages — public access blocked
+      '/globaldeets-live-snapshot.html',
+      '/globaldeets-phase1-live.html',
+      '/main.html',
     ]);
 
     const blockedExtensions = [

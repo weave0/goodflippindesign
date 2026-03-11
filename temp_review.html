@@ -4436,11 +4436,6 @@
             </div>
             <div class="fundraising-stats">
               <div class="stat-item">
-                <div class="stat-value" id="total-supporters">Growing</div>
-                <div class="stat-label">Community Support</div>
-              </div>
-              <div class="stat-divider"></div>
-              <div class="stat-item">
                 <div class="stat-value">Active</div>
                 <div class="stat-label">Fundraising</div>
               </div>
@@ -5136,7 +5131,6 @@
               <div style="display: flex; flex-direction: column; gap: 0.25rem;">
                 <a href="javascript:void(0)" id="email-link">getsome@goodflippinvibes.com</a>
                 <a href="javascript:void(0)" id="email-link-alt" style="opacity: 0.8;">getsome@goodflippindesign.com</a>
-                <span style="font-size: 0.8125rem; font-style: italic; opacity: 0.6;">either or, we'll find them! :)</span>
               </div>
             </div>
             <div class="contact-item">
@@ -6172,7 +6166,6 @@
         },
 
         elements: {
-          totalSupporters: document.getElementById('total-supporters'),
           recentActivity: document.getElementById('recent-activity')
         },
 
@@ -7551,9 +7544,7 @@
               try {
                 await navigator.share(shareData);
               } catch (err) {
-                if (err.name !== 'AbortError') {
-                  console.log('Share failed:', err);
-                }
+                // AbortError = user cancelled; all other errors fail silently
               }
             } else {
               alert('Web Share API not supported. Try copying the link instead.');
@@ -7587,7 +7578,6 @@
                 clipboardShareBtn.innerHTML = originalText;
               }, 2000);
             } catch (err) {
-              console.log('Copy failed:', err);
               alert('Failed to copy link. Please copy manually.');
             }
           });
