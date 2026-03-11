@@ -1,47 +1,54 @@
 #!/usr/bin/env node
 /**
  * sync-review.js - Cross-platform sync script
- * Syncs index.html to temp_review.html
+ * Syncs source HTML files to their test-target mirrors:
+ *   index.html        → temp_review.html
+ *   donate.html       → temp_donate_review.html
  */
 
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const INDEX_PATH = path.join(ROOT, 'index.html');
-const TEMP_PATH = path.join(ROOT, 'temp_review.html');
 
-function syncFiles() {
-    console.log('📋 Syncing index.html → temp_review.html...');
+const SYNC_PAIRS = [
+    { src: 'index.html',  dest: 'temp_review.html' },
+    { src: 'donate.html', dest: 'temp_donate_review.html' },
+];
 
-    if (!fs.existsSync(INDEX_PATH)) {
-        console.error('❌ Error: index.html not found!');
+function syncPair(src, dest) {
+    const srcPath  = path.join(ROOT, src);
+    const destPath = path.join(ROOT, dest);
+
+    console.log(`📋 Syncing ${src} → ${dest}...`);
+
+    if (!fs.existsSync(srcPath)) {
+        console.error(`❌ Error: ${src} not found!`);
         process.exit(1);
     }
 
     try {
-        // Read index.html
-        const content = fs.readFileSync(INDEX_PATH, 'utf8');
-        const lines = content.split('\n').length;
+        const content = fs.readFileSync(srcPath, 'utf8');
+        const lines   = content.split('\n').length;
 
-        // Write to temp_review.html
-        fs.writeFileSync(TEMP_PATH, content, 'utf8');
+        fs.writeFileSync(destPath, content, 'utf8');
 
-        console.log('✅ Sync complete!');
-        console.log(`📊 Synced ${lines} lines`);
-
-        // Verify
-        const tempContent = fs.readFileSync(TEMP_PATH, 'utf8');
-        if (content === tempContent) {
-            console.log('✅ Verification passed: Files are identical');
+        const verify = fs.readFileSync(destPath, 'utf8');
+        if (content === verify) {
+            console.log(`✅ ${dest} synced (${lines} lines)`);
         } else {
-            console.warn('⚠️  WARNING: Files differ after sync!');
+            console.warn(`⚠️  WARNING: ${dest} differs after sync!`);
             process.exit(1);
         }
     } catch (error) {
-        console.error('❌ Error during sync:', error.message);
+        console.error(`❌ Error syncing ${src}:`, error.message);
         process.exit(1);
     }
+}
+
+function syncFiles() {
+    SYNC_PAIRS.forEach(({ src, dest }) => syncPair(src, dest));
+    console.log('✅ All syncs complete!');
 }
 
 if (require.main === module) {

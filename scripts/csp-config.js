@@ -89,6 +89,7 @@ const SITES = {
         ...SHARED.stripe.script,
         ...SHARED.clerk.script,
         'https://www.instagram.com',  // Instagram embed.js
+        'https://browser.sentry-cdn.com',  // Sentry error tracking (conditional)
       ],
       'connect-src': [
         "'self'",
@@ -104,7 +105,8 @@ const SITES = {
         'https://gfd-auth.weave0.workers.dev',
         ...SHARED.clerk.connect,
         'https://www.instagram.com',   // Instagram embed API
-        'https://api.github.com',      // Admin: Ecosystem Health panel → GitHub CI status        // Admin: ecosystem health pings (checkSiteUptime + ecoPingSite)
+        'https://api.github.com',      // Admin: Ecosystem Health panel → GitHub CI status
+        // Admin: ecosystem health pings (checkSiteUptime + ecoPingSite)
         'https://goodflippinvibes.com',
         'https://goodflippindesign.com',
         'https://culturesherpa.com',
@@ -112,7 +114,9 @@ const SITES = {
         'https://www.culturesherpa.org',   // Admin: Daily Culture Calendar panel → schedule + cultures data
         'https://aiaimate.com',
         'https://globaldeets.com',
-        'https://eliassen.globaldeets.com',      ],
+        'https://eliassen.globaldeets.com',
+        ...SHARED.sentry,  // Sentry error ingest
+      ],
       'frame-src': [...SHARED.stripe.frame, ...SHARED.clerk.frame, 'https://www.instagram.com', 'https://www.facebook.com'],
       'worker-src': ["'self'", 'blob:'],
     },

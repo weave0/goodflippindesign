@@ -187,6 +187,10 @@
             color: var(--text-secondary);
             text-decoration: none;
             transition: color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 0.25rem;
         }
 
         .back-link:hover {
@@ -645,6 +649,7 @@
         .payment-tab {
             flex: 1;
             padding: 0.75rem 1rem;
+            min-height: 44px;
             background: transparent;
             border: none;
             border-radius: 6px;
@@ -1102,6 +1107,10 @@
             color: var(--text-secondary);
             text-decoration: none;
             transition: color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 0.25rem;
         }
 
         footer a:hover {
@@ -1290,9 +1299,9 @@
                         Support on GoFundMe
                     </a>
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
-                        <a href="#payment-gateway" style="color: var(--text-muted); font-size: 0.875rem; text-decoration: underline; transition: color 0.3s ease;" onmouseover="this.style.color='var(--text-secondary)';" onmouseout="this.style.color='var(--text-muted)';">Direct Stripe/PayPal Donations</a>
+                        <a href="#payment-gateway" style="color: var(--text-muted); font-size: 0.875rem; text-decoration: underline; transition: color 0.3s ease; min-height: 44px; display: inline-flex; align-items: center;" onmouseover="this.style.color='var(--text-secondary)';" onmouseout="this.style.color='var(--text-muted)';">Direct Stripe/PayPal Donations</a>
                         <span style="color: var(--border);">|</span>
-                        <a href="#impact" style="color: var(--text-muted); font-size: 0.875rem; text-decoration: underline; transition: color 0.3s ease;" onmouseover="this.style.color='var(--text-secondary)';" onmouseout="this.style.color='var(--text-muted)';">See Impact Breakdown</a>
+                        <a href="#impact" style="color: var(--text-muted); font-size: 0.875rem; text-decoration: underline; transition: color 0.3s ease; min-height: 44px; display: inline-flex; align-items: center;" onmouseover="this.style.color='var(--text-secondary)';" onmouseout="this.style.color='var(--text-muted)';">See Impact Breakdown</a>
                     </div>
                 </div>
             </div>
@@ -1388,14 +1397,14 @@
                         </div>
 
                         <div class="donation-amounts">
-                            <button class="donation-amount recommended" data-amount="10">$10</button>
-                            <button class="donation-amount" data-amount="25">$25</button>
-                            <button class="donation-amount" data-amount="50">$50</button>
-                            <button class="donation-amount" data-amount="100">$100</button>
+                            <button type="button" class="donation-amount recommended" data-amount="10">$10</button>
+                            <button type="button" class="donation-amount" data-amount="25">$25</button>
+                            <button type="button" class="donation-amount" data-amount="50">$50</button>
+                            <button type="button" class="donation-amount" data-amount="100">$100</button>
                         </div>
 
                         <div class="custom-amount">
-                            <input type="number" id="customAmount" placeholder="Or enter custom amount..." min="5" step="5">
+                            <input type="number" id="customAmount" aria-label="Custom donation amount" placeholder="Or enter custom amount..." min="5" step="5">
                         </div>
 
                         <!-- Payment Method Selection -->
@@ -1429,7 +1438,8 @@
                             <!-- Stripe Payment -->
                             <div class="payment-option active" id="stripe-payment">
                                 <div id="payment-element" class="payment-element"></div>
-                                <button class="btn-primary" id="donateBtn">
+                                <div class="success-message" id="success-message" style="display:none;" role="status" aria-live="polite"></div>
+                                <button class="btn-primary" id="continue-btn">
                                     <span id="donateBtnText">Continue with Card</span>
                                 </button>
                             </div>
@@ -1861,7 +1871,7 @@
         });
 
         // Donate button (Stripe)
-        document.getElementById('donateBtn').addEventListener('click', async function () {
+        document.getElementById('continue-btn').addEventListener('click', async function () {
             if (selectedAmount < 5) {
                 alert('Minimum donation is $5. Every bit helps!');
 

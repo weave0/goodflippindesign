@@ -176,8 +176,16 @@ export default {
       // Inject ENV object with sensitive keys (never commit to git)
       const envScript = `<script>window.ENV = ${JSON.stringify({
         STRIPE_PUBLISHABLE_KEY: env.STRIPE_PUBLISHABLE_KEY || null,
-        CLERK_PUBLISHABLE_KEY: env.CLERK_PUBLISHABLE_KEY || null
+        CLERK_PUBLISHABLE_KEY: env.CLERK_PUBLISHABLE_KEY || null,
+        SENTRY_DSN: env.SENTRY_DSN || null,
       })}</script>`;
+
+      // Inject Sentry client init when DSN is configured
+      const sentryScript = env.SENTRY_DSN ? `<script src="https://browser.sentry-cdn.com/8/bundle.min.js" crossorigin="anonymous"></script><script>window.Sentry&&Sentry.init({dsn:${JSON.stringify(env.SENTRY_DSN)},release:${JSON.stringify(env.CF_PAGES_COMMIT_SHA||'unknown')},environment:'production',tracesSampleRate:0.05,replaysSessionSampleRate:0,ignoreErrors:['ResizeObserver loop','Non-Error exception','cancelled','NetworkError']})</script>` : '';
+
+      // Compact Web Vitals reporter — PerformanceObserver only, zero CDN deps.
+      // Reports CLS, LCP, FCP, TTFB, INP to GA4 (gtag) when available.
+      const webVitalsScript = `<script>(()=>{const s='object'==typeof performance;if(!s||!window.PerformanceObserver)return;function r(n,v,i){if(window.gtag)gtag('event',n,{value:Math.round('CLS'===n?1e3*v:v),metric_id:i,non_interaction:!0,event_category:'Web Vitals'});}const ob=(t,cb,opts)=>{try{const o=new PerformanceObserver(l=>{for(const e of l.getEntries())cb(e)});o.observe(Object.assign({type:t,buffered:!0},opts||{}));return o}catch(e){}};ob('largest-contentful-paint',e=>r('LCP',e.startTime,e.id||''));ob('first-input',e=>r('FID',e.processingStart-e.startTime,e.id||''));ob('layout-shift',e=>{if(!e.hadRecentInput)r('CLS',e.value,e.id||'');},{durationThreshold:0});ob('event',e=>{if(e.interactionId)r('INP',e.duration,e.interactionId||'');},{durationThreshold:40});const np=performance.getEntriesByType('navigation')[0];if(np)r('TTFB',np.responseStart,np.name||'');})();</script>`;
 
       if (overrides.length > 0) {
         // Use HTMLRewriter to swap img src/srcset without buffering full HTML
@@ -204,14 +212,14 @@ export default {
           })
           .on('head', {
             element(el) {
-              el.append(envScript, { html: true });
+              el.append(envScript + sentryScript + webVitalsScript, { html: true });
             },
           })
           .transform(response);
       } else {
         // No overrides — fast path: buffer once + inject ENV
         const html = await response.text();
-        const injectedHtml = html.replace('</head>', `${envScript}</head>`);
+        const injectedHtml = html.replace('</head>', `${envScript}${sentryScript}${webVitalsScript}</head>`);
         response = new Response(injectedHtml, {
           headers: new Headers(response.headers),
         });
