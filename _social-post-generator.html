@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Post Generator — GFV LLC</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --bg-card: #111827;
+            --bg-input: #0f1629;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f0f0f5;
+            --text-muted: #9ca3c0;
+            --accent: #22d3ee;
+            --accent2: #a855f7;
+            --accent3: #fbbf24;
+            --success: #10b981;
+            --warn: #f59e0b;
+            --error: #ef4444;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fbbf24, #22d3ee, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 2rem;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 1.5rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 700px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* --- Brand Selector --- */
+        .brand-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .panel-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .brand-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            width: 100%;
+            background: none;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 0.6rem 0.75rem;
+            color: var(--text);
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.875rem;
+            transition: background 0.2s, border-color 0.2s;
+            margin-bottom: 0.25rem;
+        }
+
+        .brand-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .brand-btn.active {
+            background: rgba(34, 211, 238, 0.08);
+            border-color: var(--accent);
+        }
+
+        .brand-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .brand-meta {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .separator {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0.75rem 0;
+        }
+
+        /* --- Compose Panel --- */
+        .compose-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+
+        .card-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            padding: 0.875rem;
+            resize: vertical;
+            min-height: 120px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .textarea-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .char-count {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .char-count.warn {
+            color: var(--warn);
+        }
+
+        .char-count.over {
+            color: var(--error);
+        }
+
+        /* --- Platform grid --- */
+        .platforms {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 0.875rem;
+        }
+
+        .platform-card {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .platform-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .platform-name {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .platform-icon {
+            font-size: 1rem;
+        }
+
+        .platform-limit {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .platform-counter {
+            font-size: 0.75rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .platform-actions {
+            display: flex;
+            gap: 0.4rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+        }
+
+        .btn-copy {
+            background: rgba(168, 85, 247, 0.15);
+            color: var(--accent2);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .btn-copy.copied {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .brand-context {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: rgba(34, 211, 238, 0.05);
+            border: 1px solid rgba(34, 211, 238, 0.12);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .brand-context .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .handle-tag {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+        }
+
+        .handle-tag.confirmed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .handle-tag.todo {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warn);
+        }
+
+        .no-intent-note {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .url-input-group input {
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.8rem;
+            padding: 0.4rem 0.6rem;
+            outline: none;
+        }
+
+        .url-input-group input:focus {
+            border-color: var(--accent);
+        }
+
+        .url-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="max-width:1100px;margin:0 auto 1rem">
+        <h1>Social Post Generator</h1>
+        <p class="subtitle">GFV LLC — Admin tool. Pick a brand, write your post, open on the platform.</p>
+    </div>
+
+    <div class="layout">
+        <!-- Brand Selector -->
+        <div class="brand-panel">
+            <div class="panel-label">Brand</div>
+            <div id="brandList"></div>
+        </div>
+
+        <!-- Compose -->
+        <div class="compose-panel">
+            <div class="card">
+                <div id="brandContext" class="brand-context" style="margin-bottom:1rem;display:none"></div>
+                <div class="card-title">Post Content</div>
+                <textarea id="postText" placeholder="Write your post here...&#10;&#10;Tip: keep X under 280 · LinkedIn under 3000 · Bluesky under 300"></textarea>
+                <div class="textarea-footer">
+                    <div class="char-count" id="globalCount">0 characters</div>
+                    <button class="btn btn-secondary" onclick="clearPost()">Clear</button>
+                </div>
+
+                <div style="margin-top:1rem">
+                    <div class="url-label">Share URL (for LinkedIn / Facebook — optional, uses brand domain by default)</div>
+                    <div class="url-input-group">
+                        <input type="url" id="shareUrl" placeholder="https://yourdomain.com/specific-post">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Platforms</div>
+                <div class="platforms" id="platformGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ─── Brand Registry (inline from brands.json) ──────────────────────────────
+        const BRANDS = {
+            gfd: {
+                name: 'Good Flippin Design', color: '#22d3ee', domain: 'goodflippindesign.com',
+                tagline: 'Web dev & AI integration consultancy',
+                social: { x: '@CultureSherps', linkedin: 'brett-weaver', github: 'weave0' }
+            },
+            gfv: {
+                name: 'Good Flippin Vibes', color: '#fbbf24', domain: 'goodflippinvibes.com',
+                tagline: 'Wellness, art, and community',
+                social: { instagram: '@goodflippinvibes' }
+            },
+            aiaimate: {
+                name: 'AI Aimate', color: '#22d3ee', domain: 'aiaimate.com',
+                tagline: 'AI education platform',
+                social: { x: '@CultureSherps' }
+            },
+            culturesherpa: {
+                name: 'CultureSherpa', color: '#10b981', domain: 'culturesherpa.org',
+                tagline: 'Interactive cultural atlas',
+                social: { x: '@CultureSherps' }
+            },
+            citizenapproved: {
+                name: 'CitizenApproved', color: '#3b82f6', domain: 'citizenapproved.org',
+                tagline: 'Civic data platform',
+                social: {}
+            },
+            globaldeets: {
+                name: 'GlobalDeets', color: '#fbbf24', domain: 'globaldeets.com',
+                tagline: 'Portfolio hub',
+                social: {}
+            }
+        };
+
+        // ─── Platform Definitions ─────────────────────────────────────────────────
+        const PLATFORMS = [
+            {
+                id: 'x', name: 'X / Twitter', icon: 'X', limit: 280, color: '#1d9bf0',
+                intentType: 'text',
+                getUrl(text, url) {
+                    const t = url ? `${text}\n${url}` : text;
+                    return `https://x.com/intent/post?text=${encodeURIComponent(t)}`;
+                }
+            },
+            {
+                id: 'bluesky', name: 'Bluesky', icon: '🦋', limit: 300, color: '#0085ff',
+                intentType: 'text',
+                getUrl(text) {
+                    return `https://bsky.app/intent/compose?text=${encodeURIComponent(text)}`;
+                }
+            },
+            {
+                id: 'linkedin', name: 'LinkedIn', icon: 'in', limit: 3000, color: '#0077b5',
+                intentType: 'url',
+                note: 'Opens share dialog — paste your text in the "Add a comment" field',
+                getUrl(text, url) {
+                    const shareUrl = url || '';
+                    return shareUrl
+                        ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`
+                        : 'https://www.linkedin.com/feed/';
+                }
+            },
+            {
+                id: 'facebook', name: 'Facebook', icon: 'f', limit: 63206, color: '#1877f2',
+                intentType: 'url',
+                note: 'Opens share dialog — paste your text into the post',
+                getUrl(text, url) {
+                    const shareUrl = url || '';
+                    return shareUrl
+                        ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`
+                        : 'https://www.facebook.com/';
+                }
+            },
+            {
+                id: 'threads', name: 'Threads', icon: '@', limit: 500, color: '#000000',
+                intentType: 'copy',
+                note: 'No web share URL — copy text and post from the Threads app',
+                getUrl() { return null; }
+            },
+            {
+                id: 'instagram', name: 'Instagram', icon: '📷', limit: 2200, color: '#e1306c',
+                intentType: 'copy',
+                note: 'No web share URL — copy text and caption from the Instagram app',
+                getUrl() { return null; }
+            }
+        ];
+
+        // ─── State ────────────────────────────────────────────────────────────────
+        let activeBrand = 'gfd';
+
+        // ─── Init ─────────────────────────────────────────────────────────────────
+        function init() {
+            renderBrandList();
+            renderPlatformGrid();
+            setActiveBrand('gfd');
+            document.getElementById('postText').addEventListener('input', onTextChange);
+            document.getElementById('shareUrl').addEventListener('input', onTextChange);
+        }
+
+        function renderBrandList() {
+            const el = document.getElementById('brandList');
+            el.innerHTML = Object.entries(BRANDS).map(([id, b]) => `
+      <button class="brand-btn" id="brand-btn-${id}" onclick="setActiveBrand('${id}')">
+        <span class="brand-dot" style="background:${b.color}"></span>
+        <div>
+          <div>${b.name}</div>
+          <div class="brand-meta">${b.domain}</div>
+        </div>
+      </button>
+    `).join('');
+        }
+
+        function setActiveBrand(id) {
+            activeBrand = id;
+            const brand = BRANDS[id];
+
+            // Update active button
+            document.querySelectorAll('.brand-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`brand-btn-${id}`)?.classList.add('active');
+
+            // Update brand context bar
+            const handles = Object.entries(brand.social || {}).map(([plat, handle]) =>
+                `<span class="handle-tag ${handle === 'TODO' ? 'todo' : 'confirmed'}">${plat}: ${handle}</span>`
+            ).join(' ');
+
+            const ctx = document.getElementById('brandContext');
+            ctx.style.display = 'flex';
+            ctx.style.flexWrap = 'wrap';
+            ctx.style.gap = '0.5rem';
+            ctx.innerHTML = `
+      <span class="dot" style="background:${brand.color}"></span>
+      <strong style="font-size:0.875rem">${brand.name}</strong>
+      <span style="color:var(--text-muted);font-size:0.8rem">${brand.tagline}</span>
+      ${handles}
+    `;
+
+            // Auto-fill share URL with brand domain
+            const urlInput = document.getElementById('shareUrl');
+            if (!urlInput.value || Object.values(BRANDS).some(b => `https://${b.domain}` === urlInput.value)) {
+                urlInput.value = `https://${brand.domain}`;
+            }
+
+            onTextChange();
+        }
+
+        function renderPlatformGrid() {
+            const el = document.getElementById('platformGrid');
+            el.innerHTML = PLATFORMS.map(p => `
+      <div class="platform-card" id="platform-${p.id}">
+        <div class="platform-header">
+          <div class="platform-name">
+            <span class="platform-icon" style="color:${p.color}">${p.icon}</span>
+            ${p.name}
+          </div>
+          <span class="platform-limit" id="counter-${p.id}">0 / ${p.limit}</span>
+        </div>
+        ${p.note ? `<div class="no-intent-note">${p.note}</div>` : ''}
+        <div class="platform-actions">
+          ${p.intentType !== 'copy' ? `
+            <button class="btn btn-primary" id="open-${p.id}" onclick="openPlatform('${p.id}')">
+              ↗ Open ${p.name.split(' ')[0]}
+            </button>
+          ` : ''}
+          <button class="btn btn-copy" id="copy-${p.id}" onclick="copyForPlatform('${p.id}')">
+            📋 Copy
+          </button>
+        </div>
+      </div>
+    `).join('');
+        }
+
+        function onTextChange() {
+            const text = document.getElementById('postText').value;
+            const charCount = document.getElementById('globalCount');
+            const n = text.length;
+            charCount.textContent = `${n} character${n === 1 ? '' : 's'}`;
+
+            PLATFORMS.forEach(p => {
+                const counter = document.getElementById(`counter-${p.id}`);
+                if (!counter) return;
+                counter.textContent = `${n} / ${p.limit}`;
+                counter.className = 'platform-limit';
+                if (n > p.limit) counter.style.color = 'var(--error)';
+                else if (n > p.limit * 0.85) counter.style.color = 'var(--warn)';
+                else counter.style.color = 'var(--text-muted)';
+            });
+        }
+
+        function openPlatform(platformId) {
+            const platform = PLATFORMS.find(p => p.id === platformId);
+            if (!platform) return;
+            const text = document.getElementById('postText').value.trim();
+            const url = document.getElementById('shareUrl').value.trim();
+            const shareUrl = platform.getUrl(text, url);
+            if (shareUrl) {
+                window.open(shareUrl, '_blank', 'noopener,noreferrer');
+            }
+        }
+
+        function copyForPlatform(platformId) {
+            const text = document.getElementById('postText').value.trim();
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById(`copy-${platformId}`);
+                if (!btn) return;
+                const orig = btn.innerHTML;
+                btn.classList.add('copied');
+                btn.innerHTML = '✓ Copied!';
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = orig;
+                }, 2000);
+            });
+        }
+
+        function clearPost() {
+            document.getElementById('postText').value = '';
+            onTextChange();
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

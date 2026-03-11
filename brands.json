@@ -1,0 +1,290 @@
+{
+    "_meta": {
+        "description": "Single source of truth for all GFV LLC brands and internal projects. Used by social-post-generator, sync-config, CMS, and brand asset tooling.",
+        "updated": "2026-03-10",
+        "notes": "Handles set to null where not yet registered. Known active: GFD X=@CultureSherps (shared), GFV Instagram=@goodflippinvibes, AI Aimate X=@CultureSherps (shared), CultureSherpa X=@CultureSherps (shared).",
+        "entity": "GFV LLC DBA Good Flippin Vibes"
+    },
+    "public": {
+        "gfd": {
+            "name": "Good Flippin Design",
+            "slug": "gfd",
+            "type": "consultancy",
+            "status": "active",
+            "domain": "goodflippindesign.com",
+            "url": "https://goodflippindesign.com",
+            "tagline": "Web development & AI integration consultancy",
+            "description": "Primary portfolio and consultancy site for Brett Weaver. Showcases BI dashboards, data viz, healthcare analytics, and AI integrations.",
+            "colors": {
+                "bg": "#0a0e1a",
+                "accent": "#22d3ee",
+                "accent2": "#a855f7",
+                "accent3": "#fbbf24",
+                "text": "#f0f0f5"
+            },
+            "assetDirs": {
+                "brand": "Brand Assets Development/Final Assets",
+                "social": "Brand Assets Development/Final Assets/02-Social-Media",
+                "web": "Brand Assets Development/Final Assets/03-Web-Assets",
+                "logos": "assets/brand/logo"
+            },
+            "social": {
+                "x": {
+                    "handle": "@CultureSherps",
+                    "url": "https://x.com/CultureSherps",
+                    "note": "Shared ecosystem account — dedicated @gfd handle TBD"
+                },
+                "linkedin": {
+                    "handle": "brett-weaver",
+                    "url": "https://www.linkedin.com/in/brett-weaver",
+                    "type": "personal"
+                },
+                "github": {
+                    "handle": "weave0",
+                    "url": "https://github.com/weave0"
+                },
+                "instagram": {
+                    "handle": null,
+                    "url": null
+                },
+                "bluesky": {
+                    "handle": null,
+                    "url": null
+                }
+            },
+            "activePlatforms": [
+                "x",
+                "linkedin",
+                "github"
+            ],
+            "email": "getsome@goodflippinvibes.com",
+            "repo": "weave0/goodflippindesign"
+        },
+        "gfv": {
+            "name": "Good Flippin Vibes",
+            "slug": "gfv",
+            "type": "lifestyle",
+            "status": "active",
+            "domain": "goodflippinvibes.com",
+            "url": "https://goodflippinvibes.com",
+            "tagline": "Wellness, art, and community — the origin brand",
+            "description": "Origin brand for the GFV LLC entity. Wellness, gallery, and community platform. Art-forward, community-driven.",
+            "colors": {
+                "bg": "#0d0d0d",
+                "accent": "#fbbf24",
+                "text": "#f5f5f5"
+            },
+            "assetDirs": {
+                "brand": "GFD Dev Projects/GFV/website",
+                "social": null
+            },
+            "social": {
+                "x": {
+                    "handle": null,
+                    "url": null
+                },
+                "instagram": {
+                    "handle": "@goodflippinvibes",
+                    "url": "https://instagram.com/goodflippinvibes"
+                },
+                "facebook": {
+                    "handle": null,
+                    "url": null
+                }
+            },
+            "activePlatforms": [
+                "instagram"
+            ],
+            "repo": null
+        },
+        "aiaimate": {
+            "name": "AI Aimate",
+            "slug": "aiaimate",
+            "type": "product",
+            "status": "active",
+            "domain": "aiaimate.com",
+            "url": "https://aiaimate.com",
+            "tagline": "AI education platform — learn AI by doing",
+            "description": "RAG-powered AI education platform. Semantic search, learning tracks, AI tools for all skill levels.",
+            "colors": {
+                "bg": "#0d0d0d",
+                "accent": "#22d3ee",
+                "text": "#f5f5f5"
+            },
+            "assetDirs": {
+                "brand": "Brand Assets Development/AI Aimate",
+                "social": "Brand Assets Development/AI Aimate/Social Media",
+                "web": "Brand Assets Development/AI Aimate/Web Assets"
+            },
+            "social": {
+                "x": {
+                    "handle": "@CultureSherps",
+                    "url": "https://x.com/CultureSherps",
+                    "note": "Shared ecosystem account — dedicated @aiaimate handle TBD"
+                },
+                "instagram": {
+                    "handle": null,
+                    "url": null
+                },
+                "bluesky": {
+                    "handle": null,
+                    "url": null
+                }
+            },
+            "activePlatforms": [
+                "x"
+            ],
+            "repo": null
+        },
+        "culturesherpa": {
+            "name": "CultureSherpa",
+            "slug": "culturesherpa",
+            "type": "product",
+            "status": "active",
+            "domain": "culturesherpa.org",
+            "url": "https://culturesherpa.org",
+            "tagline": "Interactive cultural atlas — explore the world's cultures",
+            "description": "React 18 + MapboxGL cultural atlas. Geographic data visualization, anthropology, travel insights. PWA.",
+            "colors": {
+                "bg": "#0d0d0d",
+                "accent": "#10b981",
+                "text": "#f5f5f5"
+            },
+            "assetDirs": {
+                "brand": "GFD Dev Projects/CultureSherpa",
+                "social": null
+            },
+            "social": {
+                "x": {
+                    "handle": "@CultureSherps",
+                    "url": "https://x.com/CultureSherps"
+                },
+                "instagram": {
+                    "handle": null,
+                    "url": null
+                },
+                "bluesky": {
+                    "handle": null,
+                    "url": null
+                }
+            },
+            "activePlatforms": [
+                "x"
+            ],
+            "repo": null
+        },
+        "citizenapproved": {
+            "name": "CitizenApproved",
+            "slug": "citizenapproved",
+            "type": "product",
+            "status": "active",
+            "domain": "citizenapproved.org",
+            "url": "https://citizenapproved.org",
+            "tagline": "Civic data platform — government accountability made accessible",
+            "description": "Next.js civic tech product. Government data transparency, ratings, community feedback.",
+            "colors": {
+                "bg": "#0d0d0d",
+                "accent": "#3b82f6",
+                "text": "#f5f5f5"
+            },
+            "assetDirs": {
+                "brand": "Brand Assets Development/Final Assets/CitizenApproved",
+                "social": null
+            },
+            "social": {
+                "x": {
+                    "handle": null,
+                    "url": null
+                },
+                "linkedin": {
+                    "handle": null,
+                    "url": null
+                },
+                "bluesky": {
+                    "handle": null,
+                    "url": null
+                }
+            },
+            "activePlatforms": [],
+            "repo": null
+        },
+        "globaldeets": {
+            "name": "GlobalDeets",
+            "slug": "globaldeets",
+            "type": "portfolio",
+            "status": "active",
+            "domain": "globaldeets.com",
+            "url": "https://globaldeets.com",
+            "tagline": "Project portfolio hub — client work showcase",
+            "description": "Vanilla JS PWA that serves as the portfolio subdomain ecosystem. Individual client projects live on subdomains (e.g. eliassen.globaldeets.com).",
+            "colors": {
+                "bg": "#0d0d0d",
+                "accent": "#fbbf24",
+                "text": "#f5f5f5"
+            },
+            "assetDirs": {
+                "brand": "GFD Dev Projects/Globaldeets"
+            },
+            "social": {
+                "x": {
+                    "handle": null,
+                    "url": null
+                }
+            },
+            "activePlatforms": [],
+            "repo": null
+        }
+    },
+    "internal": {
+        "thyown": {
+            "name": "ThyOwn",
+            "slug": "thyown",
+            "type": "research",
+            "status": "active",
+            "description": "Internal AI/ML research project. Character-based AI agents, training pipelines, generative art tooling. Not a public-facing brand.",
+            "dir": "GFD Dev Projects/ThyOwn"
+        },
+        "summitview": {
+            "name": "SummitView",
+            "slug": "summitview",
+            "type": "analytics",
+            "status": "active",
+            "description": "Analytics platform and branded preview pipeline. Produced 425 dual-logo branded JPEGs via brand_watermark.py. Feeds into CultureSherpa ecosystem data.",
+            "dir": "GFD Dev Projects/SummitView"
+        },
+        "weave": {
+            "name": "Weave",
+            "slug": "weave",
+            "type": "devtools",
+            "status": "active",
+            "description": "Internal developer tooling and shared infrastructure. Hosts InputTraining data for ThyOwn. GitHub org: weave0.",
+            "dir": "GFD Dev Projects/Weave"
+        },
+        "cashmoney": {
+            "name": "CASHMONEY",
+            "slug": "cashmoney",
+            "type": "finance",
+            "status": "active",
+            "description": "Internal Python finance tooling. FI submission packages, income tracking, compliance baselines. Not deployed publicly.",
+            "dir": "CASHMONEY"
+        }
+    },
+    "paused": {
+        "fantasypenpal": {
+            "name": "Fantasy Penpal",
+            "slug": "fantasypenpal",
+            "type": "product",
+            "status": "paused",
+            "description": "Next.js fantasy character pen-pal experience. Age-grouped content, character slugs. On hold.",
+            "dir": "GFD Dev Projects/Paused Projects/fantasy-penpal"
+        },
+        "tonedef": {
+            "name": "ToneDef",
+            "slug": "tonedef",
+            "type": "product",
+            "status": "paused",
+            "description": "Music/audio-related product. Paused.",
+            "dir": "GFD Dev Projects/Paused Projects/ToneDef"
+        }
+    }
+}
