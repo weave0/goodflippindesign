@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated**: March 10, 2026
+**Last Updated**: March 11, 2026
 **Status**: ✅ Production Live
 **Monthly Cost**: $0 (Cloudflare Pages free tier)
 
@@ -45,6 +45,10 @@
 
 ---
 
+Cross-brand hardening is live: AI Aimate, CitizenApproved, and GFV are all now returning CSP, HSTS, X-Frame-Options, and X-Content-Type-Options on production.
+
+---
+
 ## Test Coverage
 
 | Target                            | Coverage                     | Last Run   |
@@ -69,6 +73,10 @@ npm run test:a11y   # Accessibility only (~5s)
 - CI branch protection on `weave0/goodflippindesign` and `weave0/jamie-mediation`
 - Community portal test suite expanded 19→39 tests; donate.html added 24 tests
 - Total test coverage: 205/205 passing (100%)
+- AI Aimate live now serves CSP/HSTS/X-Frame/XCTO after `portal/next.config.mjs` hardening and CI lint repair
+- CitizenApproved live now serves CSP/HSTS/X-Frame/XCTO after `public/_headers` rollout and direct production Pages deploy
+- Good Flippin Vibes live now serves HSTS from `public/_headers`; Vite build fixed by moving CSS `@import` rules ahead of `@font-face`
+- Health sweep re-run confirmed 9/9 endpoints reachable; GlobalDeets password gate is handled by the sweep cookie bypass
 
 - Added Daily Culture Calendar (DCC) panel — 2 cultures/day with week + month views
 - Surfaced CultureSherpa portal discoverability from admin
@@ -78,6 +86,11 @@ npm run test:a11y   # Accessibility only (~5s)
 - CSP: added ecosystem health ping domains + api.github.com to connect-src
 - Finance: added root-managed toolkit (GA4 export, Stripe export, submission packager) under `scripts/finance/`
 - CASHMONEY: formalized as local staging area, explicitly gitignored
+
+## Remaining Gap
+
+- `weave0/CitizenApproved` and `weave0/good-flippin-vibes` GitHub deploy workflows still fail against Cloudflare Pages because the repo secrets do not yet contain a Pages-scoped API token. Production was updated directly with local Wrangler deploys, so the sites are live, but the GitHub Actions deploy jobs remain red until a proper token is stored.
+- `globaldeets.com` is now reachable by the sweep, but it still does not emit CSP or HSTS headers because the password-gated Pages middleware is serving the site without that header layer.
 
 ## Previous Work (Feb 19 – Mar 3, 2026)
 

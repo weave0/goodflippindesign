@@ -57,6 +57,7 @@ npm run cache-bust
 - [ ] Set `SENTRY_DSN` secret via `wrangler secret put SENTRY_DSN` to enable client error tracking (worker code already live)
 - [ ] Branch protection on `main` — CI check bypass warning still shows on push (rule exists but `required_pull_request_reviews` not enforced for owner)
 - [ ] Contact form end-to-end verification — submit a real test message
+- [ ] Store a Pages-scoped Cloudflare API token in `weave0/CitizenApproved` and `weave0/good-flippin-vibes` GitHub repo secrets so their deploy workflows stop failing; sites are live today via direct Wrangler production deploys
 
 ---
 
@@ -72,6 +73,8 @@ npm run cache-bust
 ✅ Load Time: <3s
 ✅ Accessibility: 14/14 — 0 warnings
 ✅ Health Sweep: Live (gfd-health-sweep.weave0.workers.dev, cron 6 AM UTC)
+✅ Ecosystem Sweep: 9/9 endpoints passing on latest run
+✅ External Brand Headers: AI Aimate, CitizenApproved, GFV all returning CSP + HSTS + XFO + XCTO
 ```
 
 ---
