@@ -54,9 +54,8 @@ npm run cache-bust
 
 ### 🔧 Gaps / To-Do
 
-- [ ] Sentry DSN secret — set `SENTRY_DSN` via `wrangler secret put` to enable error tracking
-- [ ] Branch protection on `main` — direct pushes currently allowed
-- [ ] donate.html dedicated test coverage — currently covered by community portal suite only
+- [ ] Set `SENTRY_DSN` secret via `wrangler secret put SENTRY_DSN` to enable client error tracking (worker code already live)
+- [ ] Branch protection on `main` — CI check bypass warning still shows on push (rule exists but `required_pull_request_reviews` not enforced for owner)
 - [ ] Contact form end-to-end verification — submit a real test message
 
 ---
@@ -64,13 +63,15 @@ npm run cache-bust
 ## 📈 Performance Metrics
 
 ```
-✅ Test Pass Rate: 99.4% (161/162 tests) — last run 2026-03-10
-✅ Community Portal: 19/19 tests passing
+✅ Test Pass Rate: 100% (205/205 tests) — last run 2026-03-11
+✅ Community Portal: 39/39 tests passing
+✅ Donate Page: 24/24 tests passing
 ✅ Responsive: 100% (7 viewports)
 ✅ Security Headers: Configured
 ✅ GPU Animations: Optimized
 ✅ Load Time: <3s
 ✅ Accessibility: 14/14 — 0 warnings
+✅ Health Sweep: Live (gfd-health-sweep.weave0.workers.dev, cron 6 AM UTC)
 ```
 
 ---
