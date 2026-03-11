@@ -4753,6 +4753,7 @@
 
         .dcc-card-actions {
             display: flex;
+            flex-wrap: wrap;
             gap: 0.5rem;
             padding: 0.5rem 1rem 0.75rem;
             border-top: 1px solid var(--border);
@@ -4857,11 +4858,80 @@
             user-select: all;
         }
 
+        .dcc-kit-art-wrap {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dcc-kit-art-wrap .dcc-kit-art {
+            cursor: pointer;
+        }
+
+        .dcc-kit-art-dl-hint {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.72));
+            color: #fff;
+            font-size: 0.72rem;
+            text-align: center;
+            padding: 0.6rem 0.5rem 0.4rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .dcc-kit-art-wrap:hover .dcc-kit-art-dl-hint {
+            opacity: 1;
+        }
+
+        .dcc-kit-section-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin: 0.85rem 0 0.4rem;
+        }
+
         .dcc-kit-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
+            margin-bottom: 0.5rem;
         }
+
+        .dcc-kit-platforms {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .dcc-kit-platforms .btn-platform {
+            font-size: 0.78rem;
+            padding: 0.35rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            background: rgba(255,255,255,0.04);
+            color: var(--text);
+            transition: background 0.15s ease, border-color 0.15s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .dcc-kit-platforms .btn-platform:hover {
+            background: rgba(255,255,255,0.10);
+        }
+
+        .dcc-kit-platforms .btn-platform.p-x       { border-color: rgba(255,255,255,0.25); }
+        .dcc-kit-platforms .btn-platform.p-linkedin { border-color: rgba(10,102,194,0.6); }
+        .dcc-kit-platforms .btn-platform.p-facebook { border-color: rgba(24,119,242,0.6); }
+        .dcc-kit-platforms .btn-platform.p-instagram{ border-color: rgba(193,53,132,0.6); }
 
         .dcc-kit-note {
             font-size: 0.72rem;
@@ -4869,6 +4939,8 @@
             margin-top: 0.65rem;
             line-height: 1.4;
         }
+
+        .dcc-kit-note strong { color: var(--text); }
 
         .dcc-week-strip {
             display: grid;
@@ -6793,6 +6865,8 @@
                                     <button class="btn btn-micro" data-dcc-share="am" data-platform="kit">&#128444; Post Kit</button>
                                     <button class="btn btn-micro" data-dcc-share="am" data-platform="x">X</button>
                                     <button class="btn btn-micro" data-dcc-share="am" data-platform="linkedin">LinkedIn</button>
+                                    <button class="btn btn-micro" data-dcc-share="am" data-platform="facebook">Facebook</button>
+                                    <button class="btn btn-micro" data-dcc-share="am" data-platform="instagram">Instagram</button>
                                 </div>
                             </div>
                             <!-- PM card -->
@@ -6809,6 +6883,8 @@
                                     <button class="btn btn-micro" data-dcc-share="pm" data-platform="kit">&#128444; Post Kit</button>
                                     <button class="btn btn-micro" data-dcc-share="pm" data-platform="x">X</button>
                                     <button class="btn btn-micro" data-dcc-share="pm" data-platform="linkedin">LinkedIn</button>
+                                    <button class="btn btn-micro" data-dcc-share="pm" data-platform="facebook">Facebook</button>
+                                    <button class="btn btn-micro" data-dcc-share="pm" data-platform="instagram">Instagram</button>
                                 </div>
                             </div>
                         </div>
@@ -13194,23 +13270,30 @@
                 }
 
                 // ── Post Kit modal ──
-                function showShareKit(slot, entry, meta) {
+                function showShareKit(slot, entry, meta, focusPlatform) {
                     var name = meta ? meta.culture_name : prettifySlug(entry.slug);
-                    var url = 'https://www.culturesherpa.org/explore/culture/' + entry.slug;
+                    var slug = entry.slug;
+                    var url = 'https://www.culturesherpa.org/explore/culture/' + slug;
                     var slotLabel = slot === 'am' ? 'Morning' : 'Evening';
                     var text = slotLabel + ' Featured Culture: ' + name + '! ' + (entry.featured_fact || '');
                     var postText = text + '\n\n' + url + '\n\n#CultureSherpa';
                     var imgPath = meta && meta.image ? 'https://www.culturesherpa.org' + meta.image : null;
 
                     var tweetUrl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url) + '&hashtags=CultureSherpa';
-                    var liUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url);
+                    var liUrl   = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url);
+                    var fbUrl   = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
 
-                    var artHTML = imgPath
-                        ? '<img class="dcc-kit-art" src="' + escapeHtml(imgPath) + '" alt="' + escapeHtml(name) + ' cultural art">'
-                        : '<div class="dcc-kit-art-placeholder"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 14l5-5 4 4 3-3 5 5"/><circle cx="15" cy="8" r="2"/></svg><span>No image available</span></div>';
+                    var artSection = imgPath
+                        ? '<div class="dcc-kit-art-wrap">'
+                          + '<a href="' + escapeHtml(imgPath) + '" download target="_blank" rel="noopener" title="Click to save art">'
+                          + '<img class="dcc-kit-art" src="' + escapeHtml(imgPath) + '" alt="' + escapeHtml(name) + ' cultural art" id="dcc-kit-img">'
+                          + '</a>'
+                          + '<div class="dcc-kit-art-dl-hint">&#8659; Click image to save art</div>'
+                          + '</div>'
+                        : '<div class="dcc-kit-art-placeholder"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 14l5-5 4 4 3-3 5 5"/><circle cx="15" cy="8" r="2"/></svg><span>No art found \u2014 add an <em>image</em> field to this culture in cultures_index.json.</span></div>';
 
-                    var downloadLink = imgPath
-                        ? '<a class="btn btn-secondary btn-micro" href="' + escapeHtml(imgPath) + '" download target="_blank" rel="noopener">&#8659; Download Art</a>'
+                    var copyImgBtn = imgPath
+                        ? '<button class="btn btn-secondary btn-micro" id="dcc-kit-copy-img">&#x1F5BC; Copy Image</button>'
                         : '';
 
                     var overlay = document.createElement('div');
@@ -13220,48 +13303,147 @@
                     overlay.setAttribute('aria-label', 'Post Kit: ' + name);
 
                     overlay.innerHTML =
-                        '<div class="dcc-kit-modal">' +
-                        '<div class="dcc-kit-header">' +
-                        '<h3>' + escapeHtml(name) + ' &mdash; ' + slotLabel + ' Post Kit</h3>' +
-                        '<button class="dcc-kit-close" aria-label="Close post kit">&times;</button>' +
-                        '</div>' +
-                        artHTML +
-                        '<div class="dcc-kit-body">' +
-                        '<div class="dcc-kit-caption">' + escapeHtml(postText) + '</div>' +
-                        '<div class="dcc-kit-actions">' +
-                        '<button class="btn btn-primary btn-micro" id="dcc-kit-copy-text">Copy Caption</button>' +
-                        downloadLink +
-                        '<a class="btn btn-secondary btn-micro" href="' + escapeHtml(tweetUrl) + '" target="_blank" rel="noopener">Post to X</a>' +
-                        '<a class="btn btn-secondary btn-micro" href="' + escapeHtml(liUrl) + '" target="_blank" rel="noopener">Post to LinkedIn</a>' +
-                        '</div>' +
-                        '<p class="dcc-kit-note">Tip: Download the art and attach it manually when posting to X &mdash; Twitter&#39;s share URL doesn&#39;t support image uploads.</p>' +
-                        '</div>' +
-                        '</div>';
+                        '<div class="dcc-kit-modal">'
+                        + '<div class="dcc-kit-header">'
+                        + '<h3>' + escapeHtml(name) + ' &mdash; ' + slotLabel + ' Post Kit</h3>'
+                        + '<button class="dcc-kit-close" aria-label="Close post kit">&times;</button>'
+                        + '</div>'
+                        + artSection
+                        + '<div class="dcc-kit-body">'
+                        + '<div class="dcc-kit-section-label">Caption</div>'
+                        + '<div class="dcc-kit-caption" id="dcc-kit-caption-text">' + escapeHtml(postText) + '</div>'
+                        + '<div class="dcc-kit-actions">'
+                        + '<button class="btn btn-primary btn-micro" id="dcc-kit-copy-text">Copy Caption</button>'
+                        + copyImgBtn
+                        + '</div>'
+                        + '<div class="dcc-kit-section-label">Post to Platform</div>'
+                        + '<div class="dcc-kit-platforms">'
+                        + '<a class="btn-platform p-x" href="' + escapeHtml(tweetUrl) + '" target="_blank" rel="noopener" id="dcc-kit-post-x">&#x1D54F; X / Twitter</a>'
+                        + '<a class="btn-platform p-linkedin" href="' + escapeHtml(liUrl) + '" target="_blank" rel="noopener" id="dcc-kit-post-li">in LinkedIn</a>'
+                        + '<a class="btn-platform p-facebook" href="' + escapeHtml(fbUrl) + '" target="_blank" rel="noopener" id="dcc-kit-post-fb">f Facebook</a>'
+                        + '<button class="btn-platform p-instagram" id="dcc-kit-post-ig">&#x1F4F7; Instagram</button>'
+                        + '</div>'
+                        + '<p class="dcc-kit-note" id="dcc-kit-platform-note">'
+                        + '<strong>LinkedIn:</strong> In the share dialog click the <em>"Brett Weaver"</em> dropdown &rarr; switch to <em>CultureSherpa</em> page to post as the brand.<br>'
+                        + '<strong>Instagram / X:</strong> Use <em>Copy Image</em> above (or click the art to save), then attach / paste when composing.'
+                        + '</p>'
+                        + '</div>'
+                        + '</div>';
 
                     document.body.appendChild(overlay);
 
+                    // ── Close ──
                     overlay.addEventListener('click', function (e) {
                         if (e.target === overlay || e.target.classList.contains('dcc-kit-close')) {
                             overlay.remove();
                         }
                     });
-
-                    var copyBtn = overlay.querySelector('#dcc-kit-copy-text');
-                    if (copyBtn) {
-                        copyBtn.addEventListener('click', function () {
-                            navigator.clipboard.writeText(postText).then(function () {
-                                copyBtn.textContent = 'Copied!';
-                                setTimeout(function () { copyBtn.textContent = 'Copy Caption'; }, 2000);
-                            }).catch(function () {
-                                toast('Copy failed.', 'error');
-                            });
-                        });
-                    }
-
                     var keyHandler = function (e) {
                         if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', keyHandler); }
                     };
                     document.addEventListener('keydown', keyHandler);
+
+                    // ── Copy caption ──
+                    var copyBtn = overlay.querySelector('#dcc-kit-copy-text');
+                    if (copyBtn) {
+                        copyBtn.addEventListener('click', function () {
+                            navigator.clipboard.writeText(postText).then(function () {
+                                copyBtn.textContent = '\u2713 Copied!';
+                                setTimeout(function () { copyBtn.textContent = 'Copy Caption'; }, 2000);
+                            }).catch(function () { toast('Copy failed \u2014 select the text above manually.', 'error'); });
+                        });
+                    }
+
+                    // ── Copy image (try clipboard API; fall back to download) ──
+                    var copyImgBtnEl = overlay.querySelector('#dcc-kit-copy-img');
+                    if (copyImgBtnEl && imgPath) {
+                        copyImgBtnEl.addEventListener('click', function () {
+                            copyImgBtnEl.textContent = 'Copying\u2026';
+                            copyImgBtnEl.disabled = true;
+                            function fallbackDownload() {
+                                var a = document.createElement('a');
+                                a.href = imgPath;
+                                a.download = (slug || 'culture-art') + '.jpg';
+                                a.rel = 'noopener';
+                                a.target = '_blank';
+                                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                                copyImgBtnEl.textContent = '\u2713 Saved!';
+                                copyImgBtnEl.disabled = false;
+                                setTimeout(function () { copyImgBtnEl.textContent = '\u{1F5BC} Copy Image'; }, 2500);
+                                toast('Art saved \u2014 drag or attach it when composing your post!', 'info');
+                            }
+                            if (navigator.clipboard && window.ClipboardItem) {
+                                fetch(imgPath, { mode: 'cors' })
+                                    .then(function (r) { return r.blob(); })
+                                    .then(function (blob) {
+                                        var img2 = new Image();
+                                        var objUrl = URL.createObjectURL(blob);
+                                        img2.onload = function () {
+                                            var cv = document.createElement('canvas');
+                                            cv.width = img2.naturalWidth; cv.height = img2.naturalHeight;
+                                            cv.getContext('2d').drawImage(img2, 0, 0);
+                                            URL.revokeObjectURL(objUrl);
+                                            cv.toBlob(function (pngBlob) {
+                                                navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })])
+                                                    .then(function () {
+                                                        copyImgBtnEl.textContent = '\u2713 Image Copied!';
+                                                        copyImgBtnEl.disabled = false;
+                                                        setTimeout(function () { copyImgBtnEl.textContent = '\u{1F5BC} Copy Image'; }, 2500);
+                                                        toast('Art copied to clipboard \u2014 paste it into your post!', 'success');
+                                                    })
+                                                    .catch(fallbackDownload);
+                                            }, 'image/png');
+                                        };
+                                        img2.onerror = function () { URL.revokeObjectURL(objUrl); fallbackDownload(); };
+                                        img2.src = objUrl;
+                                    })
+                                    .catch(fallbackDownload);
+                            } else {
+                                fallbackDownload();
+                            }
+                        });
+                    }
+
+                    // ── Auto-copy caption when opening any platform link ──
+                    function autoCopyCaption() {
+                        navigator.clipboard && navigator.clipboard.writeText(postText).catch(function () {});
+                    }
+                    var postX  = overlay.querySelector('#dcc-kit-post-x');
+                    var postLi = overlay.querySelector('#dcc-kit-post-li');
+                    var postFb = overlay.querySelector('#dcc-kit-post-fb');
+                    if (postX)  postX.addEventListener('click',  function () { autoCopyCaption(); });
+                    if (postLi) postLi.addEventListener('click', function () {
+                        autoCopyCaption();
+                        toast('Caption copied \u2014 paste it in LinkedIn. Switch posting to CultureSherpa page in the dialog!', 'info');
+                    });
+                    if (postFb) postFb.addEventListener('click', function () { autoCopyCaption(); });
+
+                    // ── Instagram: copy + open instagram.com ──
+                    var postIg = overlay.querySelector('#dcc-kit-post-ig');
+                    if (postIg) {
+                        postIg.addEventListener('click', function () {
+                            autoCopyCaption();
+                            var note = overlay.querySelector('#dcc-kit-platform-note');
+                            if (note) {
+                                note.innerHTML = '<strong>Instagram steps:</strong> '
+                                    + '1. Click <em>Copy Image</em> above (or click the art to save it). '
+                                    + '2. Caption already copied. '
+                                    + '3. Instagram is opening \u2014 create a new post, attach the saved art, then paste the caption.';
+                            }
+                            setTimeout(function () { window.open('https://www.instagram.com/', '_blank', 'noopener'); }, 350);
+                        });
+                    }
+
+                    // Pre-populate Instagram note if opened from quick-share
+                    if (focusPlatform === 'instagram') {
+                        var note = overlay.querySelector('#dcc-kit-platform-note');
+                        if (note) {
+                            note.innerHTML = '<strong>Instagram steps:</strong> '
+                                + '1. Use <em>Copy Image</em> (or click the art to save). '
+                                + '2. Click the Instagram button above \u2014 you\'ll land on instagram.com. '
+                                + '3. Create a new post, attach the saved art, paste the caption.';
+                        }
+                    }
 
                     // Focus close button for accessibility
                     var closeBtn = overlay.querySelector('.dcc-kit-close');
@@ -13282,9 +13464,17 @@
                     if (platform === 'kit') {
                         showShareKit(slot, entry, meta);
                     } else if (platform === 'x') {
+                        navigator.clipboard && navigator.clipboard.writeText(text + '\n\n' + url + '\n\n#CultureSherpa').catch(function(){});
                         window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url) + '&hashtags=CultureSherpa', '_blank', 'noopener');
                     } else if (platform === 'linkedin') {
+                        navigator.clipboard && navigator.clipboard.writeText(text + '\n\n' + url + '\n\n#CultureSherpa').catch(function(){});
+                        toast('Caption copied — paste it in LinkedIn. In the dialog, switch posting as CultureSherpa Page.', 'info');
                         window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), '_blank', 'noopener');
+                    } else if (platform === 'facebook') {
+                        navigator.clipboard && navigator.clipboard.writeText(text + '\n\n' + url + '\n\n#CultureSherpa').catch(function(){});
+                        window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank', 'noopener');
+                    } else if (platform === 'instagram') {
+                        showShareKit(slot, entry, meta, 'instagram');
                     } else if (platform === 'copy') {
                         navigator.clipboard.writeText(url).then(function () {
                             toast('Link copied!', 'success');
