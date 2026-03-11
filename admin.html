@@ -9724,34 +9724,36 @@
                     `;
                 }).join('');
             }
-            const zone = $('upload-zone');
-            const input = $('upload-input');
-            const folderInput = $('folder-input');
-            const folderBtn = $('import-folder-btn');
-            if (!zone || !input) return;
+            function initUploadZone() {
+                const zone = $('upload-zone');
+                const input = $('upload-input');
+                const folderInput = $('folder-input');
+                const folderBtn = $('import-folder-btn');
+                if (!zone || !input) return;
 
-            zone.addEventListener('click', (ev) => {
-                if (ev.target === folderBtn || ev.target === folderInput) return;
-                if (ev.target !== input) input.click();
-            });
-            zone.addEventListener('keydown', (ev) => {
-                if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); input.click(); }
-            });
-            input.addEventListener('change', () => handleUploadFiles(Array.from(input.files)));
+                zone.addEventListener('click', (ev) => {
+                    if (ev.target === folderBtn || ev.target === folderInput) return;
+                    if (ev.target !== input) input.click();
+                });
+                zone.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); input.click(); }
+                });
+                input.addEventListener('change', () => handleUploadFiles(Array.from(input.files)));
 
-            if (folderBtn && folderInput) {
-                folderBtn.addEventListener('click', (ev) => { ev.stopPropagation(); folderInput.click(); });
-                folderInput.addEventListener('change', () => { handleUploadFiles(Array.from(folderInput.files)); folderInput.value = ''; });
+                if (folderBtn && folderInput) {
+                    folderBtn.addEventListener('click', (ev) => { ev.stopPropagation(); folderInput.click(); });
+                    folderInput.addEventListener('change', () => { handleUploadFiles(Array.from(folderInput.files)); folderInput.value = ''; });
+                }
+
+                zone.addEventListener('dragover', (ev) => { ev.preventDefault(); zone.classList.add('drag-over'); });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', (ev) => {
+                    ev.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const files = Array.from(ev.dataTransfer.files);
+                    if (files.length) handleUploadFiles(files);
+                });
             }
-
-            zone.addEventListener('dragover', (ev) => { ev.preventDefault(); zone.classList.add('drag-over'); });
-            zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-            zone.addEventListener('drop', (ev) => {
-                ev.preventDefault();
-                zone.classList.remove('drag-over');
-                const files = Array.from(ev.dataTransfer.files);
-                if (files.length) handleUploadFiles(files);
-            });
 
             // Stage files in the bulk panel instead of uploading immediately.
             // Users can set shared brand/category/tags before confirming.
