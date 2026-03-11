@@ -558,6 +558,38 @@ async function handleServePublicMedia(request, r2Key, env) {
 }
 
 /**
+ * POST /api/cms/assets/bulk-approve — Approve all draft assets matching optional brand/category filters
+ * Body: { brand?, category?, confirm: true }
+ * Returns: { approved: N }
+ */
+async function handleBulkApproveAssets(request, user, env) {
+  if (!env.DB) return errorResponse('DB not configured', 503);
+
+  let body = {};
+  try { body = await request.json(); } catch { /* body is optional */ }
+
+  if (!body.confirm) {
+    return errorResponse('Must pass confirm:true to bulk-approve', 400);
+  }
+
+  const brandFilter = body.brand || null;
+  const categoryFilter = body.category || null;
+  const statusFilter = body.from_status || 'draft';
+
+  let query = `UPDATE cms_assets SET review_status='approved', approved_by=?, approved_at=datetime('now'), updated_at=datetime('now') WHERE review_status=?`;
+  const bindings = [user.id, statusFilter];
+
+  if (brandFilter) { query += ' AND brand=?'; bindings.push(brandFilter); }
+  if (categoryFilter) { query += ' AND category=?'; bindings.push(categoryFilter); }
+
+  const result = await env.DB.prepare(query).bind(...bindings).run();
+  const approved = result.meta?.changes || 0;
+
+  await logAudit(env.DB, user.id, 'bulk_approve', 'asset', null, { brand: brandFilter, category: categoryFilter, approved });
+  return jsonResponse({ success: true, approved });
+}
+
+/**
  * POST /api/cms/assets/:id/approve — Mark an asset as approved for public use
  * POST /api/cms/assets/:id/reject  — Mark an asset as rejected
  */
@@ -1917,6 +1949,11 @@ export async function handleCMSRequest(request, env, user) {
     const assetMatch = path.match(/^\/assets\/([^/]+)$/);
     if (assetMatch && method === 'GET' && !['discovered', 'overrides'].includes(assetMatch[1])) {
       return handleGetAsset(assetMatch[1], env);
+    }
+
+    // Bulk approve assets (must come before single-asset review route)
+    if (path === '/assets/bulk-approve' && method === 'POST') {
+      return handleBulkApproveAssets(request, user, env);
     }
 
     // Asset review — approve or reject

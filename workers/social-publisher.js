@@ -160,7 +160,10 @@ async function decryptToken(encrypted, keyMaterial) {
   }
   const keyBytes = new TextEncoder().encode(keyMaterial.substring(0, 32).padEnd(32, '0'));
   const key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt']);
-  const combined = Uint8Array.from(atob(encrypted), c => c.charCodeAt(0));
+  // Normalize base64url → standard base64: oauth.js stores tokens with URL-safe chars (-, _) and no padding
+  let normalized = encrypted.replace(/-/g, '+').replace(/_/g, '/');
+  while (normalized.length % 4) normalized += '=';
+  const combined = Uint8Array.from(atob(normalized), c => c.charCodeAt(0));
   const iv = combined.slice(0, 12);
   const data = combined.slice(12);
   const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);

@@ -5909,6 +5909,7 @@
                                 Select All
                             </label>
                             <button id="batch-approve-btn" class="btn btn-success-soft" type="button" hidden>Approve Selected (0)</button>
+                            <button id="bulk-approve-all-btn" class="btn btn-success-soft" type="button" title="Approve all draft assets matching the current brand filter">&#9851; Approve All Drafts</button>
                         </div>
                         <div class="asset-grid asset-grid-full" id="library-grid"></div>
                     </article>
@@ -8319,6 +8320,27 @@
                     }
                 });
                 $('batch-approve-btn').addEventListener('click', batchApproveSelected);
+
+                $('bulk-approve-all-btn').addEventListener('click', async () => {
+                    const brand = $('library-status').value !== 'approved' ? currentBrand : null;
+                    const brandLabel = brand ? ` for <strong>${brand}</strong>` : ' across all brands';
+                    const draftFilter = $('library-status').value || 'draft';
+                    if (draftFilter === 'approved') {
+                        return toast('Already filtered to approved assets — switch filter to Draft first.', 'warn');
+                    }
+                    showConfirm(`Bulk-approve ALL draft assets${brandLabel}? This will mark every matching asset as approved.`, async () => {
+                        try {
+                            const body = { confirm: true, from_status: 'draft' };
+                            if (brand) body.brand = brand;
+                            const result = await api('/assets/bulk-approve', { method: 'POST', body: JSON.stringify(body) });
+                            toast(`${result.approved} asset${result.approved === 1 ? '' : 's'} approved`, 'success');
+                            await loadAssets();
+                            renderLibrary();
+                        } catch (err) {
+                            toast(err.message || 'Bulk approve failed', 'error');
+                        }
+                    });
+                });
 
                 // ── Bulk Ingest ──────────────────────────────────────────────
                 // Populate bulk-brand select from BRAND_DEFS
@@ -13542,7 +13564,7 @@
                     var linkedCount = accts.filter(function (a) { return a.link_status === 'linked'; }).length;
                     var linkBadge = accts.length
                         ? '<span class="tag" style="font-size:0.72rem;background:rgba(16,185,129,0.12);color:#10b981">' +
-                          linkedCount + '/' + accts.length + ' linked</span>'
+                        linkedCount + '/' + accts.length + ' linked</span>'
                         : '';
                     return '<article class="panel" style="border-top:3px solid ' + b.color + '">' +
                         '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.6rem">' +
