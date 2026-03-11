@@ -173,11 +173,20 @@ async function checkTarget(target) {
   const timer      = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
+    // globaldeets.com is intentionally password-gated; send the auth cookie so
+    // the sweep measures actual site health rather than the 401 login wall.
+    const extraHeaders = target.url.includes('globaldeets.com')
+      ? { Cookie: 'globaldeets_auth=verified' }
+      : {};
+
     const resp = await fetch(target.url, {
       method: 'GET',
       redirect: 'follow',
       signal: controller.signal,
-      headers: { 'User-Agent': 'GFD-HealthSweep/1.0 (+https://goodflippindesign.com)' },
+      headers: {
+        'User-Agent': 'GFD-HealthSweep/1.0 (+https://goodflippindesign.com)',
+        ...extraHeaders,
+      },
     });
     clearTimeout(timer);
 

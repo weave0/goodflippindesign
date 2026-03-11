@@ -47,12 +47,12 @@
 
 ## Test Coverage
 
-| Target                            | Coverage                          | Last Run       |
-| --------------------------------- | --------------------------------- | -------------- |
-| index.html (via temp_review.html) | 9 suites, 127/127 passing         | 2026-03-11     |
-| community-portal.html             | ✅ 39/39 passing                  | 2026-03-11     |
-| donate.html                       | ✅ 24/24 passing                  | 2026-03-11     |
-| **Total**                         | **205/205 — 100% pass rate**      | 2026-03-11     |
+| Target                            | Coverage                     | Last Run   |
+| --------------------------------- | ---------------------------- | ---------- |
+| index.html (via temp_review.html) | 9 suites, 127/127 passing    | 2026-03-11 |
+| community-portal.html             | ✅ 39/39 passing             | 2026-03-11 |
+| donate.html                       | ✅ 24/24 passing             | 2026-03-11 |
+| **Total**                         | **205/205 — 100% pass rate** | 2026-03-11 |
 
 ```powershell
 npm test            # Full suite — 7 suites, 167 tests (~60s)
