@@ -147,6 +147,7 @@ CREATE TABLE IF NOT EXISTS cms_post_variants (
   external_url TEXT DEFAULT '',
   error_message TEXT DEFAULT '',
   published_at TEXT,
+  updated_at TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -182,6 +183,8 @@ CREATE INDEX IF NOT EXISTS idx_cms_campaigns_start ON cms_campaigns(start_date);
 -- ALTER TABLE cms_social_posts ADD COLUMN objective TEXT DEFAULT '';
 -- ALTER TABLE cms_social_posts ADD COLUMN watermark_profile TEXT DEFAULT '';
 -- ALTER TABLE cms_post_variants ADD COLUMN retry_count INTEGER DEFAULT 0;
+-- ALTER TABLE cms_post_variants ADD COLUMN updated_at TEXT;
+-- (Both applied 2026-03-11 via wrangler d1 execute directly)
 
 -- ── Asset Overrides (live image swap without redeploy) ─────────────────
 -- When _worker.js serves any brand page, it checks this table.
