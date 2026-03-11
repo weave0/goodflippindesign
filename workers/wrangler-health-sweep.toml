@@ -1,0 +1,30 @@
+name = "gfd-health-sweep"
+main = "health-sweep.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 — same database as the rest of the ecosystem
+# Stores health_checks table (see d1-schema-health.sql in repo root)
+[[d1_databases]]
+binding = "DB"
+database_name = "gfd_community"
+database_id = "a46ec9df-31b8-4285-845b-1fd3a62bd1b5"
+
+# Cron: daily at 6:00 AM UTC
+# Add more entries for more frequent checks, e.g. "0 */6 * * *" for every 6h
+[triggers]
+crons = ["0 6 * * *"]
+
+# ── Secrets ────────────────────────────────────────────────────────────────────
+# Set from repo root:
+#
+#   wrangler secret put GITHUB_TOKEN --config workers/wrangler-health-sweep.toml
+#   wrangler secret put SWEEP_SECRET --config workers/wrangler-health-sweep.toml
+#
+# GITHUB_TOKEN — Fine-grained PAT from https://github.com/settings/personal-access-tokens/new
+#   Resource owner:     weave0
+#   Repository access:  Only weave0/goodflippindesign
+#   Repository perms:   Issues → Read and Write
+#
+# SWEEP_SECRET — Random string for manual HTTP trigger auth
+#   Generate: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
