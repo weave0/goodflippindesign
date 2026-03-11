@@ -16,6 +16,7 @@
 | https://goodflippindesign.com/donate.html           | Donations               | ✅ Live |
 | https://gfd-stripe.weave0.workers.dev               | Stripe payments worker  | ✅ Live |
 | https://gfd-auth.weave0.workers.dev                 | Auth/profile API worker | ✅ Live |
+| https://gfd-health-sweep.weave0.workers.dev         | D1 health sweep worker  | ✅ Live |
 
 ---
 
@@ -40,6 +41,7 @@
 | Daily Culture Calendar  | ✅            | 2 cultures/day, week + month views (panel 20)                 |
 | Social Gallery          | ✅            | Post Kit cards, platform filter, copy-to-clipboard            |
 | Finance toolkit         | ✅            | scripts/finance/ — GA4/Stripe export, submission packager     |
+| Sovereign health sweep  | ✅            | workers/health-sweep.js — cron daily 6 AM UTC, D1 + GH Issues |
 
 ---
 
@@ -47,9 +49,10 @@
 
 | Target                            | Coverage                          | Last Run       |
 | --------------------------------- | --------------------------------- | -------------- |
-| index.html (via temp_review.html) | 93.4% — 156/167 passing (10 warn) | 2026-03-10     |
-| community-portal.html             | ✅ 19/19 passing                  | 2026-03-10     |
-| donate.html                       | ⚠️ minimal                        | included above |
+| index.html (via temp_review.html) | 9 suites, 127/127 passing         | 2026-03-11     |
+| community-portal.html             | ✅ 39/39 passing                  | 2026-03-11     |
+| donate.html                       | ✅ 24/24 passing                  | 2026-03-11     |
+| **Total**                         | **205/205 — 100% pass rate**      | 2026-03-11     |
 
 ```powershell
 npm test            # Full suite — 7 suites, 167 tests (~60s)
@@ -58,7 +61,14 @@ npm run test:a11y   # Accessibility only (~5s)
 
 ---
 
-## Recent Work (Mar 3 – Mar 10, 2026)
+## Recent Work (Mar 10 – Mar 11, 2026)
+
+- Built sovereign `gfd-health-sweep` Cloudflare Worker — hourly cron checks all 6 ecosystem domains (HTTP, response time, CSP/HSTS/X-Frame/XCTO), writes to D1 `health_checks`, files GitHub Issues on failures
+- Admin panel 11 (Ecosystem Health) rebuilt: real D1 data, KPI strip (pass/warn/fail/avg-ms), full 4-header security score badges, sweep history table, trigger button with rate-limit handling
+- Sentry graceful-degrade + Web Vitals injected in `_worker.js` (enabled by setting `SENTRY_DSN` secret)
+- CI branch protection on `weave0/goodflippindesign` and `weave0/jamie-mediation`
+- Community portal test suite expanded 19→39 tests; donate.html added 24 tests
+- Total test coverage: 205/205 passing (100%)
 
 - Added Daily Culture Calendar (DCC) panel — 2 cultures/day with week + month views
 - Surfaced CultureSherpa portal discoverability from admin

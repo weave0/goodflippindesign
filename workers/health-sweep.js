@@ -9,12 +9,12 @@
  * sweeps auto-close immediately so they don't clog the queue.
  *
  * Cron: 0 6 * * * (6 AM UTC daily)
- * Manual trigger: GET /trigger   — requires X-Sweep-Secret header
- * Last results:   GET /last      — returns last 20 rows from D1 as JSON
+ * Manual trigger: GET /trigger   — open endpoint, rate-limited to 1 per 5 min via D1
+ * Last results:   GET /last      — returns last 50 rows from D1 as JSON
  *
  * Required secrets (set via wrangler secret put, see wrangler-health-sweep.toml):
  *   GITHUB_TOKEN  — Fine-grained PAT, weave0/goodflippindesign, Issues: Write
- *   SWEEP_SECRET  — Random string for authenticated manual trigger
+ *   (SWEEP_SECRET removed — trigger is open but D1-rate-limited to prevent spam)
  */
 
 // ── Ecosystem targets ─────────────────────────────────────────────────────────

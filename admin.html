@@ -2277,31 +2277,108 @@
         /* ─── Ecosystem Health panel (11) ─── */
         .eco-sites-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-            gap: 0.55rem;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 0.6rem;
             margin-top: 0.65rem;
         }
 
         .eco-site-card {
             border: 1px solid var(--border);
+            border-left: 3px solid var(--border);
             border-radius: var(--radius-md);
-            padding: 0.65rem 0.85rem;
+            padding: 0.7rem 0.9rem;
             background: rgba(255, 255, 255, 0.02);
             display: flex;
             flex-direction: column;
-            gap: 0.2rem;
+            gap: 0.3rem;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .eco-site-card--pass { border-left-color: #22c55e; }
+        .eco-site-card--warn { border-left-color: #f59e0b; }
+        .eco-site-card--fail { border-left-color: #f43f5e; }
+
+        .eco-site-card-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 0.4rem;
         }
 
         .eco-site-name {
             font-size: 0.83rem;
             font-weight: 600;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .eco-site-url {
-            font-size: 0.71rem;
+            font-size: 0.68rem;
             color: var(--text-muted);
             font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+
+        .eco-sec-row {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+            margin-top: 0.15rem;
+        }
+
+        .eco-sec-score {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.1rem 0.38rem;
+            border-radius: 0.25rem;
+            letter-spacing: 0.01em;
+        }
+        .eco-sec-score.ok   { color: #22c55e; background: rgba(34,197,94,0.13); }
+        .eco-sec-score.warn { color: #f59e0b; background: rgba(245,158,11,0.13); }
+        .eco-sec-score.fail { color: #f43f5e; background: rgba(244,63,94,0.13); }
+
+        .eco-header-chip {
+            font-size: 0.6rem;
+            font-weight: 500;
+            padding: 0.07rem 0.26rem;
+            border-radius: 0.2rem;
+            background: rgba(255,255,255,0.06);
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.03em;
+        }
+        .eco-header-chip.missing {
+            background: rgba(244,63,94,0.08);
+            color: rgba(244,63,94,0.55);
+            text-decoration: line-through;
+        }
+
+        /* Sweep history mini-table */
+        .eco-history-table {
+            width: 100%;
+            font-size: 0.76rem;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+        .eco-history-table th {
+            text-align: left;
+            color: var(--text-muted);
+            font-weight: 500;
+            padding: 0.3rem 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .eco-history-table td {
+            padding: 0.3rem 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--text-secondary);
+        }
+        .eco-history-table tr:last-child td { border-bottom: none; }
 
         .eco-repos-grid {
             display: grid;
@@ -6459,6 +6536,15 @@
                                 <div class="eco-site-name">Loading…</div>
                             </div>
                         </div>
+
+                        <!-- Sweep history -->
+                        <details class="mt-085" id="eco-history-details" style="display:none">
+                            <summary style="font-size:0.78rem;color:var(--text-muted);cursor:pointer;user-select:none">Sweep history (last 7 runs)</summary>
+                            <table class="eco-history-table" id="eco-history-table">
+                                <thead><tr><th>Time</th><th>✅ Pass</th><th>⚠ Warn</th><th>❌ Fail</th></tr></thead>
+                                <tbody id="eco-history-body"></tbody>
+                            </table>
+                        </details>
                     </article>
 
                     <!-- ── CI Status ── -->
@@ -11991,26 +12077,60 @@
 
                     // Cards
                     siteGrid.innerHTML = checks.map(c => {
-                        const cls = c.overall_status === 'pass' ? 'ok' : c.overall_status === 'warn' ? 'warn' : 'fail';
-                        const label = c.overall_status === 'pass' ? `${c.response_time_ms}ms` :
-                            c.overall_status === 'warn' ? `slow ${c.response_time_ms}ms` :
-                                c.error ? c.error.substring(0, 28) : `HTTP ${c.status_code}`;
-                        const shields = [
-                            c.has_csp ? '<span title="CSP" style="font-size:0.65rem;color:var(--text-muted)">CSP</span>' : '',
-                            c.has_hsts ? '<span title="HSTS" style="font-size:0.65rem;color:var(--text-muted)">HSTS</span>' : '',
-                        ].filter(Boolean).join(' ');
-                        return `<div class="eco-site-card">
-                            <div class="eco-site-name">${escapeHtml(c.name)}</div>
+                        const cls = c.overall_status === 'pass' ? 'pass' : c.overall_status === 'warn' ? 'warn' : 'fail';
+                        const tagCls = cls === 'pass' ? 'ok' : cls;
+                        const responseLabel = c.overall_status === 'pass'  ? `${c.response_time_ms}ms` :
+                                              c.overall_status === 'warn'  ? `slow ${c.response_time_ms}ms` :
+                                              c.error ? c.error.substring(0, 30) : `HTTP ${c.status_code}`;
+                        // Security headers: 4 possible (CSP, HSTS, X-Frame, XCTO)
+                        const secScore = (c.has_csp || 0) + (c.has_hsts || 0) + (c.has_x_frame || 0) + (c.has_xcto || 0);
+                        const secCls = secScore >= 4 ? 'ok' : secScore >= 2 ? 'warn' : 'fail';
+                        const headerChip = (label, has, abbrev) =>
+                            `<span class="eco-header-chip${has ? '' : ' missing'}" title="${label}">${abbrev}</span>`;
+                        return `<div class="eco-site-card eco-site-card--${cls}">
+                            <div class="eco-site-card-header">
+                                <span class="eco-site-name">${escapeHtml(c.name)}</span>
+                                <span class="tag ${tagCls}">${escapeHtml(responseLabel)}</span>
+                            </div>
                             <div class="eco-site-url">${escapeHtml(c.url)}</div>
-                            <div style="display:flex;align-items:center;gap:0.4rem;margin-top:0.2rem">
-                                <span class="tag ${cls}">${escapeHtml(label)}</span>
-                                ${shields}
+                            <div class="eco-sec-row">
+                                <span class="eco-sec-score ${secCls}" title="Security headers score">🛡️ ${secScore}/4</span>
+                                ${headerChip('Content-Security-Policy', c.has_csp, 'CSP')}
+                                ${headerChip('Strict-Transport-Security', c.has_hsts, 'HSTS')}
+                                ${headerChip('X-Frame-Options', c.has_x_frame, 'X-Frame')}
+                                ${headerChip('X-Content-Type-Options', c.has_xcto, 'XCTO')}
                             </div>
                         </div>`;
                     }).join('');
 
                     const kpiSites = $('kpi-sites-online');
                     if (kpiSites) kpiSites.textContent = `${pass}/${checks.length}`;
+
+                    // Sweep history — group rows by checked_at timestamp
+                    const histDetails = $('eco-history-details');
+                    const histBody = $('eco-history-body');
+                    if (histDetails && histBody) {
+                        const byRun = {};
+                        rows.forEach(r => {
+                            if (!byRun[r.checked_at]) byRun[r.checked_at] = { ts: r.checked_at, pass: 0, warn: 0, fail: 0 };
+                            byRun[r.checked_at][r.overall_status] = (byRun[r.checked_at][r.overall_status] || 0) + 1;
+                        });
+                        const history = Object.values(byRun).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 7);
+                        if (history.length > 1) {
+                            histDetails.style.display = '';
+                            histBody.innerHTML = history.map(h => {
+                                const ts = new Date(h.ts);
+                                const label = ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+                                    ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' UTC';
+                                return `<tr>
+                                    <td>${escapeHtml(label)}</td>
+                                    <td style="color:#22c55e">${h.pass}</td>
+                                    <td style="color:#f59e0b">${h.warn || 0}</td>
+                                    <td style="color:#f43f5e">${h.fail || 0}</td>
+                                </tr>`;
+                            }).join('');
+                        }
+                    }
                 }
 
                 // ── CI status (public repos — no PAT needed) ──
@@ -13113,27 +13233,31 @@
                     var iso = isoDate(date);
                     var dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
 
-                    // Try exact schedule matches first
-                    var exact = dccSchedule.filter(function (e) { return e.date === iso; });
-                    if (exact.length >= 2) return { am: exact[0], pm: exact[1] };
+                    // Find all entries for this date; entries without a slot field are treated as 'am'
+                    var all = dccSchedule.filter(function (e) { return e.date === iso; });
+                    var schedAm = null, schedPm = null;
+                    for (var i = 0; i < all.length; i++) {
+                        if (all[i].slot === 'pm') { if (!schedPm) schedPm = all[i]; }
+                        else { if (!schedAm) schedAm = all[i]; }
+                    }
+                    if (schedAm && schedPm) return { am: schedAm, pm: schedPm };
 
-                    // Build deterministic AM / PM from schedule pool
-                    var pool = dccSchedule.length > 0 ? dccSchedule : [];
+                    // Fallback pool uses only AM entries to avoid duplicates in deterministic mode
+                    var pool = dccSchedule.filter(function (e) { return e.slot !== 'pm'; });
                     if (pool.length === 0) return { am: null, pm: null };
 
-                    var amIdx, pmIdx;
-                    if (exact.length === 1) {
-                        // One exact match = AM, deterministic fallback = PM
-                        amIdx = dccSchedule.indexOf(exact[0]);
-                        pmIdx = ((dayOfYear * 7) + 3) % pool.length;
+                    if (schedAm && !schedPm) {
+                        // AM scheduled, derive PM deterministically
+                        var pmIdx = ((dayOfYear * 7) + 3) % pool.length;
+                        var amIdx = pool.indexOf(schedAm);
                         if (pmIdx === amIdx) pmIdx = (pmIdx + 1) % pool.length;
-                        return { am: exact[0], pm: pool[pmIdx] };
+                        return { am: schedAm, pm: pool[pmIdx] };
                     }
 
-                    // Both deterministic
-                    amIdx = (dayOfYear * 2) % pool.length;
-                    pmIdx = (dayOfYear * 2 + 1) % pool.length;
-                    return { am: pool[amIdx], pm: pool[pmIdx] };
+                    // Both deterministic (no explicit schedule for this date)
+                    var amIdx2 = (dayOfYear * 2) % pool.length;
+                    var pmIdx2 = (dayOfYear * 2 + 1) % pool.length;
+                    return { am: pool[amIdx2], pm: pool[pmIdx2] };
                 }
 
                 function getCultureMeta(slug) {
@@ -13252,7 +13376,20 @@
                     name.textContent = meta ? meta.culture_name : prettifySlug(entry.slug);
                     if (region) region.textContent = meta && meta.region ? meta.region : '';
                     if (reason) reason.textContent = entry.reason || '';
-                    if (fact) fact.textContent = entry.featured_fact || '';
+                    if (fact) {
+                        var factText = entry.featured_fact || '';
+                        // Fall back to index summary when schedule entry is a stub
+                        if (!factText || factText.includes('Initial stub') || factText.includes('requires enrichment')) {
+                            var metaSummary = meta && meta.summary && !meta.summary.includes('Initial stub') ? meta.summary : '';
+                            if (metaSummary) {
+                                var dot = metaSummary.indexOf('. ');
+                                factText = dot >= 0 ? metaSummary.substring(0, dot + 1) : metaSummary;
+                            } else {
+                                factText = 'Explore the rich traditions of the ' + (meta ? meta.culture_name : prettifySlug(entry.slug)) + ' people.';
+                            }
+                        }
+                        fact.textContent = factText;
+                    }
 
                     // Show culture artwork
                     var imgEl = $('dcc-' + slot + '-img');
@@ -13376,6 +13513,10 @@
                         ? (summary.indexOf('. ') > -1 ? summary.substring(0, summary.indexOf('. ') + 1) : summary)
                         : '';
                     var fact = entry.featured_fact || summaryFirst;
+                    // Filter stubs: fall back to index summary or generic text
+                    if (!fact || fact.includes('Initial stub') || fact.includes('requires enrichment')) {
+                        fact = summaryFirst || ('Explore the rich traditions of the ' + name + ' people.');
+                    }
                     var url = 'https://www.culturesherpa.org/explore/culture/' + slug;
                     var slotLabel = slot === 'am' ? 'Morning' : 'Evening';
                     var imgPath = meta && meta.image ? 'https://www.culturesherpa.org' + meta.image : null;
@@ -13648,6 +13789,10 @@
                         ? (summary.indexOf('. ') > -1 ? summary.substring(0, summary.indexOf('. ') + 1) : summary)
                         : '';
                     var fact = entry.featured_fact || summaryFirst;
+                    // Filter stubs: fall back to index summary or generic text
+                    if (!fact || fact.includes('Initial stub') || fact.includes('requires enrichment')) {
+                        fact = summaryFirst || ('Explore the rich traditions of the ' + name + ' people.');
+                    }
                     var url = 'https://www.culturesherpa.org/explore/culture/' + entry.slug;
                     var slotLabel = slot === 'am' ? 'Morning' : 'Evening';
 
