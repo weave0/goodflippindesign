@@ -76,6 +76,12 @@ export default {
       '/_headers',
       '/.env',
       '/.env.example',
+      // Test/staging HTML pages — not for public consumption
+      '/ga-test-enhanced.html',
+      '/oauth-diagnostic.html',
+      '/temp_donate_review.html',
+      '/temp_review.html',
+      '/test-ga.html',
     ]);
 
     const blockedExtensions = [
@@ -97,12 +103,16 @@ export default {
     // Treat JSON as internal unless it lives under /assets/ (used by gallery/media catalog).
     const isBlockedJson = pathLower.endsWith('.json') && !pathLower.startsWith('/assets/');
 
+    // Block root-level .js files (debug/test/utility scripts — all app JS is inline or CDN).
+    const isRootLevelJs = pathLower.endsWith('.js') && !pathLower.slice(1).includes('/');
+
     const isBlocked =
       !isAllowed &&
       (blockedExact.has(pathLower) ||
         blockedPrefixes.some((prefix) => normalizedPath.startsWith(prefix)) ||
         blockedExtensions.some((ext) => pathLower.endsWith(ext)) ||
-        isBlockedJson);
+        isBlockedJson ||
+        isRootLevelJs);
 
     if (isBlocked) {
       return new Response('Not found', {
@@ -181,7 +191,7 @@ export default {
       })}</script>`;
 
       // Inject Sentry client init when DSN is configured
-      const sentryScript = env.SENTRY_DSN ? `<script src="https://browser.sentry-cdn.com/8/bundle.min.js" crossorigin="anonymous"></script><script>window.Sentry&&Sentry.init({dsn:${JSON.stringify(env.SENTRY_DSN)},release:${JSON.stringify(env.CF_PAGES_COMMIT_SHA||'unknown')},environment:'production',tracesSampleRate:0.05,replaysSessionSampleRate:0,ignoreErrors:['ResizeObserver loop','Non-Error exception','cancelled','NetworkError']})</script>` : '';
+      const sentryScript = env.SENTRY_DSN ? `<script src="https://browser.sentry-cdn.com/8.0.0/bundle.min.js" crossorigin="anonymous"></script><script>window.Sentry&&Sentry.init({dsn:${JSON.stringify(env.SENTRY_DSN)},release:${JSON.stringify(env.CF_PAGES_COMMIT_SHA||'unknown')},environment:'production',tracesSampleRate:0.05,replaysSessionSampleRate:0,ignoreErrors:['ResizeObserver loop','Non-Error exception','cancelled','NetworkError']})</script>` : '';
 
       // Compact Web Vitals reporter — PerformanceObserver only, zero CDN deps.
       // Reports CLS, LCP, FCP, TTFB, INP to GA4 (gtag) when available.
