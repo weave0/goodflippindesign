@@ -61,28 +61,52 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // CORS — allow admin panel at goodflippindesign.com to call us directly
+    const origin = request.headers.get('origin') || '';
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': origin.includes('goodflippindesign.com') || origin.includes('localhost') ? origin : 'https://goodflippindesign.com',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'content-type',
+      'Access-Control-Max-Age': '600',
+    };
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: corsHeaders });
+    }
+
     if (url.pathname === '/trigger') {
-      // Auth-gated manual trigger — use for ad-hoc sweeps or CI integration
-      const secret = request.headers.get('x-sweep-secret');
-      if (!env.SWEEP_SECRET || secret !== env.SWEEP_SECRET) {
-        return new Response('Unauthorized', { status: 401 });
+      // No secret required — this just runs a health check and creates a GitHub Issue.
+      // Rate-limited to 1 per 5 minutes via D1 to prevent issue spam.
+      if (env.DB) {
+        const last = await env.DB
+          .prepare(`SELECT checked_at FROM health_checks ORDER BY checked_at DESC LIMIT 1`)
+          .first();
+        if (last) {
+          const elapsedMs = Date.now() - new Date(last.checked_at).getTime();
+          if (elapsedMs < 5 * 60 * 1000) {
+            const waitSec = Math.ceil((5 * 60 * 1000 - elapsedMs) / 1000);
+            return Response.json(
+              { status: 'rate_limited', retry_after_seconds: waitSec, last_sweep: last.checked_at },
+              { status: 429, headers: { ...corsHeaders, 'Retry-After': String(waitSec) } }
+            );
+          }
+        }
       }
       ctx.waitUntil(runSweep(env));
-      return Response.json({ status: 'sweep triggered', ts: new Date().toISOString() });
+      return Response.json({ status: 'sweep triggered', ts: new Date().toISOString() }, { headers: corsHeaders });
     }
 
     if (url.pathname === '/last') {
       // Return recent sweep history from D1
-      if (!env.DB) return Response.json({ error: 'DB not configured' }, { status: 503 });
+      if (!env.DB) return Response.json({ error: 'DB not configured' }, { status: 503, headers: corsHeaders });
       const { results } = await env.DB
         .prepare('SELECT * FROM health_checks ORDER BY checked_at DESC LIMIT 50')
         .all();
-      return Response.json(results || []);
+      return Response.json(results || [], { headers: corsHeaders });
     }
 
     // Basic liveness probe
     return new Response(JSON.stringify({ worker: 'gfd-health-sweep', v: 1, ts: new Date().toISOString() }), {
-      headers: { 'content-type': 'application/json' }
+      headers: { 'content-type': 'application/json', ...corsHeaders }
     });
   }
 };
