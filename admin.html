@@ -4845,16 +4845,12 @@
             padding: 1rem 1.1rem;
         }
 
+        /* Sizing/spacing kept minimal — border/bg lives on .dcc-kit-cap-area */
         .dcc-kit-caption {
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             line-height: 1.55;
             color: var(--text);
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.75rem;
             white-space: pre-wrap;
-            margin-bottom: 0.85rem;
             user-select: all;
         }
 
@@ -4989,26 +4985,31 @@
             color: var(--text);
         }
 
-        .dcc-kit-platab.active.p-instagram { border-top-color: rgba(193, 53, 132, 0.7); color: #e1306c; }
-        .dcc-kit-platab.active.p-linkedin  { border-top-color: rgba(10, 102, 194, 0.7); color: #0a66c2; }
-        .dcc-kit-platab.active.p-x         { border-top-color: rgba(255, 255, 255, 0.4); color: #fff; }
-        .dcc-kit-platab.active.p-facebook  { border-top-color: rgba(24, 119, 242, 0.7); color: #1877f2; }
+        .dcc-kit-platab.active.p-instagram {
+            border-top-color: rgba(193, 53, 132, 0.7);
+            color: #e1306c;
+        }
+
+        .dcc-kit-platab.active.p-linkedin {
+            border-top-color: rgba(10, 102, 194, 0.7);
+            color: #0a66c2;
+        }
+
+        .dcc-kit-platab.active.p-x {
+            border-top-color: rgba(255, 255, 255, 0.4);
+            color: #fff;
+        }
+
+        .dcc-kit-platab.active.p-facebook {
+            border-top-color: rgba(24, 119, 242, 0.7);
+            color: #1877f2;
+        }
 
         .dcc-kit-cap-area {
             border: 1px solid var(--border);
             border-radius: 0 0 6px 6px;
             padding: 0.75rem;
             background: rgba(255, 255, 255, 0.03);
-        }
-
-        .dcc-kit-caption {
-            font-size: 0.82rem;
-            line-height: 1.55;
-            white-space: pre-wrap;
-            user-select: all;
-            margin: 0;
-            color: var(--text);
-            cursor: text;
         }
 
         .dcc-kit-char-counter {
@@ -5018,9 +5019,18 @@
             transition: color 0.2s ease;
         }
 
-        .dcc-kit-char-counter.ok   { color: var(--text-muted); }
-        .dcc-kit-char-counter.warn { color: #f59e0b; }
-        .dcc-kit-char-counter.over { color: #ef4444; font-weight: 700; }
+        .dcc-kit-char-counter.ok {
+            color: var(--text-muted);
+        }
+
+        .dcc-kit-char-counter.warn {
+            color: #f59e0b;
+        }
+
+        .dcc-kit-char-counter.over {
+            color: #ef4444;
+            font-weight: 700;
+        }
 
         .dcc-week-strip {
             display: grid;
@@ -13411,9 +13421,9 @@
 
                     var VARIANTS = [
                         { id: 'instagram', label: '📷 Instagram', cls: 'p-instagram', caption: igCaption(), charLimit: 2200, actionLabel: '📷 Open Instagram', actionUrl: 'https://www.instagram.com/', tip: '<strong>Instagram steps:</strong> 1. Click <em>Copy Image</em> (or click the art to save). 2. Click <em>Open Instagram</em> below — create a new post, attach the saved art, then paste the caption.' },
-                        { id: 'linkedin',  label: 'in LinkedIn',  cls: 'p-linkedin',  caption: liCaption(), charLimit: 3000, actionLabel: 'in Share on LinkedIn', actionUrl: 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), tip: '<strong>LinkedIn tip:</strong> In the share dialog click the <em>"Brett Weaver"</em> dropdown &rarr; switch to <strong>CultureSherpa</strong> page to post as the brand.' },
-                        { id: 'x',         label: '𝕏 X / Twitter', cls: 'p-x',        caption: xCaption(), charLimit: 280,  actionLabel: '𝕏 Post to X', actionUrl: 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(xCaption()), tip: '<strong>X / Twitter:</strong> The intent URL pre-fills this caption. Caption also auto-copied for manual compose.' },
-                        { id: 'facebook',  label: 'f Facebook',   cls: 'p-facebook',  caption: fbCaption(), charLimit: 63206, actionLabel: 'f Share on Facebook', actionUrl: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), tip: '<strong>Facebook tip:</strong> The sharer dialog includes the link preview. Paste the copied caption into the post box for full narrative.' },
+                        { id: 'linkedin', label: 'in LinkedIn', cls: 'p-linkedin', caption: liCaption(), charLimit: 3000, actionLabel: 'in Share on LinkedIn', actionUrl: 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), tip: '<strong>LinkedIn tip:</strong> In the share dialog click the <em>"Brett Weaver"</em> dropdown &rarr; switch to <strong>CultureSherpa</strong> page to post as the brand.' },
+                        { id: 'x', label: '𝕏 X / Twitter', cls: 'p-x', caption: xCaption(), charLimit: 280, actionLabel: '𝕏 Post to X', actionUrl: 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(xCaption()), tip: '<strong>X / Twitter:</strong> The intent URL pre-fills this caption. Caption also auto-copied for manual compose.' },
+                        { id: 'facebook', label: 'f Facebook', cls: 'p-facebook', caption: fbCaption(), charLimit: 63206, actionLabel: 'f Share on Facebook', actionUrl: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), tip: '<strong>Facebook tip:</strong> The sharer dialog includes the link preview. Paste the copied caption into the post box for full narrative.' },
                     ];
 
                     var activePlatformIdx = 0;
