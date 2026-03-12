@@ -444,28 +444,49 @@ async function handleUpload(request, user, env) {
       .toLowerCase();
     const r2Key = `${brand}/${category}/${Date.now()}_${safeFilename}`;
 
-    await env.MEDIA_BUCKET.put(r2Key, file.stream(), {
-      httpMetadata: { contentType: file.type },
-      customMetadata: {
-        brand,
-        category,
-        originalName: file.name,
-        uploadedBy: user.id,
-      },
-    });
+    try {
+      await env.MEDIA_BUCKET.put(r2Key, file.stream(), {
+        httpMetadata: { contentType: file.type },
+        customMetadata: {
+          brand,
+          category,
+          originalName: file.name,
+          uploadedBy: user.id,
+        },
+      });
+    } catch (r2Err) {
+      console.error('[CMS upload] R2 put failed:', r2Err?.message || r2Err);
+      return errorResponse(
+        `R2 upload failed: ${r2Err?.message || 'bucket may not exist — run: wrangler r2 bucket create gfv-media'}`,
+        502
+      );
+    }
 
     // Persist metadata to D1 cms_assets
     if (env.DB) {
       const assetId = crypto.randomUUID();
-      await env.DB.prepare(
-        `INSERT INTO cms_assets
-           (id, brand, category, title, alt_text, file_path, media_type, mime_type,
-            file_size, tags, review_status, uploaded_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).bind(
-        assetId, brand, category, title, altText, r2Key, mediaType,
-        file.type, file.size, tagsJson, reviewStatus, user.id
-      ).run();
+      try {
+        await env.DB.prepare(
+          `INSERT INTO cms_assets
+             (id, brand, category, title, alt_text, file_path, media_type, mime_type,
+              file_size, tags, review_status, uploaded_by)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ).bind(
+          assetId, brand, category, title, altText, r2Key, mediaType,
+          file.type, file.size, tagsJson, reviewStatus, user.id
+        ).run();
+      } catch (dbErr) {
+        console.error('[CMS upload] D1 insert failed:', dbErr?.message || dbErr);
+        // File is already in R2 — return success with a warning rather than 500
+        return jsonResponse({
+          r2Key,
+          filename: file.name,
+          size: file.size,
+          type: file.type,
+          url: `/api/cms/media/${r2Key}`,
+          warning: `File uploaded to R2 but metadata save failed: ${dbErr?.message || 'schema may need migration'}`,
+        }, 201);
+      }
     }
 
     await logAudit(env.DB, user.id, 'upload', 'file', r2Key, {

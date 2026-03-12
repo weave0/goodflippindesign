@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -4867,6 +4867,26 @@
             padding: 0.3rem 0.65rem;
         }
 
+        .dcc-card-actions .dcc-share-x {
+            border-color: rgba(255, 255, 255, 0.28);
+            color: #e7e7e7;
+        }
+
+        .dcc-card-actions .dcc-share-li {
+            border-color: rgba(10, 102, 194, 0.5);
+            color: #0a66c2;
+        }
+
+        .dcc-card-actions .dcc-share-fb {
+            border-color: rgba(24, 119, 242, 0.5);
+            color: #1877f2;
+        }
+
+        .dcc-card-actions .dcc-share-ig {
+            border-color: rgba(193, 53, 132, 0.5);
+            color: #e1306c;
+        }
+
         /* Post Kit modal */
         .dcc-kit-overlay {
             position: fixed;
@@ -4948,13 +4968,25 @@
             padding: 1rem 1.1rem;
         }
 
-        /* Sizing/spacing kept minimal — border/bg lives on .dcc-kit-cap-area */
+        /* Editable caption textarea */
         .dcc-kit-caption {
+            width: 100%;
+            min-height: 130px;
             font-size: 0.82rem;
             line-height: 1.55;
             color: var(--text);
             white-space: pre-wrap;
-            user-select: all;
+            background: transparent;
+            border: none;
+            resize: vertical;
+            outline: none;
+            font-family: inherit;
+            box-sizing: border-box;
+            padding: 0;
+        }
+
+        .dcc-kit-caption:focus {
+            outline: none;
         }
 
         .dcc-kit-art-wrap {
@@ -5008,7 +5040,8 @@
             margin-top: 0.25rem;
         }
 
-        .dcc-kit-platforms .btn-platform {
+        .dcc-kit-platforms .btn-platform,
+        .dcc-kit-actions .btn-platform {
             font-size: 0.78rem;
             padding: 0.35rem 0.8rem;
             border-radius: 6px;
@@ -5016,30 +5049,35 @@
             cursor: pointer;
             background: rgba(255, 255, 255, 0.04);
             color: var(--text);
-            transition: background 0.15s ease, border-color 0.15s ease;
+            transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 0.3rem;
         }
 
-        .dcc-kit-platforms .btn-platform:hover {
+        .dcc-kit-platforms .btn-platform:hover,
+        .dcc-kit-actions .btn-platform:hover {
             background: rgba(255, 255, 255, 0.10);
         }
 
-        .dcc-kit-platforms .btn-platform.p-x {
+        .dcc-kit-platforms .btn-platform.p-x,
+        .dcc-kit-actions .btn-platform.p-x {
             border-color: rgba(255, 255, 255, 0.25);
         }
 
-        .dcc-kit-platforms .btn-platform.p-linkedin {
+        .dcc-kit-platforms .btn-platform.p-linkedin,
+        .dcc-kit-actions .btn-platform.p-linkedin {
             border-color: rgba(10, 102, 194, 0.6);
         }
 
-        .dcc-kit-platforms .btn-platform.p-facebook {
+        .dcc-kit-platforms .btn-platform.p-facebook,
+        .dcc-kit-actions .btn-platform.p-facebook {
             border-color: rgba(24, 119, 242, 0.6);
         }
 
-        .dcc-kit-platforms .btn-platform.p-instagram {
+        .dcc-kit-platforms .btn-platform.p-instagram,
+        .dcc-kit-actions .btn-platform.p-instagram {
             border-color: rgba(193, 53, 132, 0.6);
         }
 
@@ -5106,6 +5144,33 @@
         .dcc-kit-platab.active.p-facebook {
             border-top-color: rgba(24, 119, 242, 0.7);
             color: #1877f2;
+        }
+
+        .dcc-kit-cap-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0.85rem 0 0.4rem;
+        }
+
+        .dcc-kit-reset-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.45rem;
+            border-radius: 4px;
+            transition: color 0.15s ease, background 0.15s ease;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        .dcc-kit-reset-btn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.06);
         }
 
         .dcc-kit-cap-area {
@@ -7072,10 +7137,10 @@
                                 </div>
                                 <div class="dcc-card-actions">
                                     <button class="btn btn-micro" data-dcc-share="am" data-platform="kit">&#128444; Post Kit</button>
-                                    <button class="btn btn-micro" data-dcc-share="am" data-platform="x">X</button>
-                                    <button class="btn btn-micro" data-dcc-share="am" data-platform="linkedin">LinkedIn</button>
-                                    <button class="btn btn-micro" data-dcc-share="am" data-platform="facebook">Facebook</button>
-                                    <button class="btn btn-micro" data-dcc-share="am" data-platform="instagram">Instagram</button>
+                                    <button class="btn btn-micro dcc-share-x" data-dcc-share="am" data-platform="x">𝕏 X</button>
+                                    <button class="btn btn-micro dcc-share-li" data-dcc-share="am" data-platform="linkedin">in LI</button>
+                                    <button class="btn btn-micro dcc-share-fb" data-dcc-share="am" data-platform="facebook">f FB</button>
+                                    <button class="btn btn-micro dcc-share-ig" data-dcc-share="am" data-platform="instagram">📷 IG</button>
                                 </div>
                             </div>
                             <!-- PM card -->
@@ -7090,10 +7155,10 @@
                                 </div>
                                 <div class="dcc-card-actions">
                                     <button class="btn btn-micro" data-dcc-share="pm" data-platform="kit">&#128444; Post Kit</button>
-                                    <button class="btn btn-micro" data-dcc-share="pm" data-platform="x">X</button>
-                                    <button class="btn btn-micro" data-dcc-share="pm" data-platform="linkedin">LinkedIn</button>
-                                    <button class="btn btn-micro" data-dcc-share="pm" data-platform="facebook">Facebook</button>
-                                    <button class="btn btn-micro" data-dcc-share="pm" data-platform="instagram">Instagram</button>
+                                    <button class="btn btn-micro dcc-share-x" data-dcc-share="pm" data-platform="x">𝕏 X</button>
+                                    <button class="btn btn-micro dcc-share-li" data-dcc-share="pm" data-platform="linkedin">in LI</button>
+                                    <button class="btn btn-micro dcc-share-fb" data-dcc-share="pm" data-platform="facebook">f FB</button>
+                                    <button class="btn btn-micro dcc-share-ig" data-dcc-share="pm" data-platform="instagram">📷 IG</button>
                                 </div>
                             </div>
                         </div>
@@ -10408,6 +10473,8 @@
                 switchView(view);
                 loadViewData(view);
             }
+            // Expose to global scope so inline onclick attributes can reach it
+            window.navigateToView = navigateToView;
 
             // ── Page context map ────────────────────────────────────────────
             const PAGE_CONTEXTS = {
@@ -13552,7 +13619,8 @@
                     }
                     var url = 'https://www.culturesherpa.org/explore/culture/' + slug;
                     var slotLabel = slot === 'am' ? 'Morning' : 'Evening';
-                    var imgPath = meta && meta.image ? 'https://www.culturesherpa.org' + meta.image : null;
+                    var imgPath = meta && meta.image ? 'https://www.culturesherpa.org' + meta.image.replace(/(\.[^.\/]+)$/, '_branded$1') : null;
+                    var imgPathPlain = meta && meta.image ? 'https://www.culturesherpa.org' + meta.image : null;
 
                     // ── Per-platform caption generators ──
                     var igTags = '#culture #art #travel #love #history #beautiful #photography #explore #world #people #diversity #heritage #indigenous #traditions #multicultural #globalcitizen #worldcultures #culturesherpa #culturalheritage #anthropology #folklore #humanstories #cultureiseverywhere #culturaleducation #educate #goodvibes #culturaldiversity #exploreculture #ethnicculture #cultureislife';
@@ -13574,13 +13642,23 @@
                         return t;
                     }
 
+                    // Twitter counts every URL as exactly 23 chars regardless of domain length
+                    function twitterLength(text) {
+                        return text.replace(/https?:\/\/[^\s]+/g, 'x'.repeat(23)).length;
+                    }
+
                     function xCaption() {
                         var tags = '#CultureSherpa #WorldCultures #History';
-                        var head = '🌍 ' + name + (region ? ' | ' + region : '');
-                        // Keep tight for 280-char limit
-                        var factShort = fact.length > 150 ? fact.substring(0, 147) + '…' : fact;
-                        var t = head + (factShort ? '\n\n' + factShort : '') + '\n\n↝ ' + url + '\n\n' + tags;
-                        return t;
+                        var head = '\uD83C\uDF0D ' + name + (region ? ' | ' + region : '');
+                        var suffix = '\n\n\u21DD ' + url + '\n\n' + tags;
+                        var full = head + (fact ? '\n\n' + fact : '') + suffix;
+                        if (twitterLength(full) > 280 && fact) {
+                            var over = twitterLength(full) - 280;
+                            var trimLen = Math.max(0, fact.length - over - 1);
+                            var trimmedFact = trimLen > 0 ? fact.substring(0, trimLen) + '\u2026' : '';
+                            full = head + (trimmedFact ? '\n\n' + trimmedFact : '') + suffix;
+                        }
+                        return full;
                     }
 
                     function fbCaption() {
@@ -13594,8 +13672,8 @@
                     }
 
                     var VARIANTS = [
-                        { id: 'instagram', label: '📷 Instagram', cls: 'p-instagram', caption: igCaption(), charLimit: 2200, actionLabel: '📷 Open Instagram', actionUrl: 'https://www.instagram.com/', tip: '<strong>Instagram steps:</strong> 1. Click <em>Copy Image</em> (or click the art to save). 2. Click <em>Open Instagram</em> below — create a new post, attach the saved art, then paste the caption.' },
-                        { id: 'linkedin', label: 'in LinkedIn', cls: 'p-linkedin', caption: liCaption(), charLimit: 3000, actionLabel: 'in Share on LinkedIn', actionUrl: 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), tip: '<strong>LinkedIn tip:</strong> In the share dialog click the <em>"Brett Weaver"</em> dropdown &rarr; switch to <strong>CultureSherpa</strong> page to post as the brand.' },
+                        { id: 'instagram', label: '📷 Instagram', cls: 'p-instagram', caption: igCaption(), charLimit: 2200, actionLabel: '📷 Open Instagram', actionUrl: 'https://www.instagram.com/', tip: '<strong>Instagram steps:</strong> 1. Click <em>Copy Image</em> (saves art). 2. Click <em>Open Instagram</em> and create a new post, then paste the caption.<br><em>Desktop?</em> Try <a href="https://creator.instagram.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">creator.instagram.com</a> to upload directly from a browser.' },
+                        { id: 'linkedin', label: 'in LinkedIn', cls: 'p-linkedin', caption: liCaption(), charLimit: 3000, actionLabel: 'in Share on LinkedIn', actionUrl: 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), tip: '<strong>LinkedIn:</strong> Caption is auto-copied when you click the button. In the share dialog, click the poster dropdown → switch to <strong>CultureSherpa</strong> page, then paste the caption into the post body.' },
                         { id: 'x', label: '𝕏 X / Twitter', cls: 'p-x', caption: xCaption(), charLimit: 280, actionLabel: '𝕏 Post to X', actionUrl: 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(xCaption()), tip: '<strong>X / Twitter:</strong> The intent URL pre-fills this caption. Caption also auto-copied for manual compose.' },
                         { id: 'facebook', label: 'f Facebook', cls: 'p-facebook', caption: fbCaption(), charLimit: 63206, actionLabel: 'f Share on Facebook', actionUrl: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), tip: '<strong>Facebook tip:</strong> The sharer dialog includes the link preview. Paste the copied caption into the post box for full narrative.' },
                     ];
@@ -13608,7 +13686,7 @@
 
                     var artSection = imgPath
                         ? '<div class="dcc-kit-art-wrap">'
-                        + '<a href="' + escapeHtml(imgPath) + '" download target="_blank" rel="noopener" title="Click to save art">'
+                        + '<a href="' + escapeHtml(imgPath) + '" id="dcc-kit-art-link" download target="_blank" rel="noopener" title="Click to save art">'
                         + '<img class="dcc-kit-art" src="' + escapeHtml(imgPath) + '" alt="' + escapeHtml(name) + ' cultural art" id="dcc-kit-img">'
                         + '</a>'
                         + '<div class="dcc-kit-art-dl-hint">&#8659; Click image to save art</div>'
@@ -13631,14 +13709,23 @@
                     var cntPct = capLen / activeVar.charLimit;
                     var cntCls = cntPct > 1 ? 'over' : cntPct > 0.85 ? 'warn' : 'ok';
 
-                    var capAreaHtml = '<div class="dcc-kit-cap-area" id="dcc-kit-cap-area">'
-                        + '<div class="dcc-kit-caption" id="dcc-kit-caption-text">' + escapeHtml(activeVar.caption) + '</div>'
-                        + '<div class="dcc-kit-char-counter ' + cntCls + '" id="dcc-kit-char-counter">' + capLen + ' / ' + activeVar.charLimit + '</div>'
+                    var xInitLen = activeVar.id === 'x' ? twitterLength(activeVar.caption) : capLen;
+                    var xInitCls = (xInitLen / activeVar.charLimit) > 1 ? 'over' : (xInitLen / activeVar.charLimit) > 0.85 ? 'warn' : 'ok';
+                    var displayCntCls = activeVar.id === 'x' ? xInitCls : cntCls;
+                    var displayCapLen = activeVar.id === 'x' ? xInitLen : capLen;
+                    var capAreaHtml = '<div class="dcc-kit-cap-header">'
+                        + '<span class="dcc-kit-section-label" style="margin:0">Caption</span>'
+                        + '<button class="dcc-kit-reset-btn" id="dcc-kit-reset-btn" title="Restore original caption" aria-label="Reset caption">&#x21ba; Reset</button>'
+                        + '</div>'
+                        + '<div class="dcc-kit-cap-area" id="dcc-kit-cap-area">'
+                        + '<textarea class="dcc-kit-caption" id="dcc-kit-caption-text" rows="7" spellcheck="false" aria-label="Caption — edit before copying">' + escapeHtml(activeVar.caption) + '</textarea>'
+                        + '<div class="dcc-kit-char-counter ' + displayCntCls + '" id="dcc-kit-char-counter">' + displayCapLen + ' / ' + activeVar.charLimit + (activeVar.id === 'x' ? ' tw' : '') + '</div>'
                         + '</div>';
 
                     var actionsHtml = '<div class="dcc-kit-actions" id="dcc-kit-actions-row">'
                         + '<button class="btn btn-primary btn-micro" id="dcc-kit-copy-text">Copy Caption</button>'
                         + copyImgBtn
+                        + '<button class="btn btn-secondary btn-micro" id="dcc-kit-save-draft" title="Save as CMS draft">&#128190; Save Draft</button>'
                         + '<a class="btn-platform ' + activeVar.cls + '" href="' + escapeHtml(activeVar.actionUrl) + '" target="_blank" rel="noopener" id="dcc-kit-post-btn">' + activeVar.actionLabel + '</a>'
                         + '</div>';
 
@@ -13669,15 +13756,68 @@
                     document.body.appendChild(overlay);
 
                     // ── Close ──
+                    function closeKit() {
+                        overlay.remove();
+                        document.removeEventListener('keydown', kitKeyHandler);
+                    }
+
                     overlay.addEventListener('click', function (e) {
                         if (e.target === overlay || e.target.classList.contains('dcc-kit-close')) {
-                            overlay.remove();
+                            closeKit();
                         }
                     });
-                    var keyHandler = function (e) {
-                        if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', keyHandler); }
+
+                    var kitKeyHandler = function (e) {
+                        if (e.key === 'Escape') {
+                            closeKit();
+                            return;
+                        }
+                        // ── Focus trap ──
+                        if (e.key === 'Tab') {
+                            var focusable = Array.from(overlay.querySelectorAll(
+                                'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                            )).filter(function (el) { return !el.closest('[hidden]') && el.offsetParent !== null; });
+                            if (!focusable.length) return;
+                            var first = focusable[0];
+                            var last = focusable[focusable.length - 1];
+                            if (e.shiftKey) {
+                                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+                            } else {
+                                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+                            }
+                        }
                     };
-                    document.addEventListener('keydown', keyHandler);
+                    document.addEventListener('keydown', kitKeyHandler);
+
+                    // ── Shared counter update helper ──
+                    function updateKitCounter(rawLen, charLimit) {
+                        var counterEl = overlay.querySelector('#dcc-kit-char-counter');
+                        if (!counterEl) return;
+                        var v = VARIANTS[activePlatformIdx];
+                        var displayLen = rawLen;
+                        if (v.id === 'x') {
+                            var capEl2 = overlay.querySelector('#dcc-kit-caption-text');
+                            if (capEl2) displayLen = twitterLength(capEl2.value);
+                        }
+                        var pct = displayLen / charLimit;
+                        counterEl.className = 'dcc-kit-char-counter ' + (pct > 1 ? 'over' : pct > 0.85 ? 'warn' : 'ok');
+                        counterEl.textContent = displayLen + ' / ' + charLimit + (v.id === 'x' ? ' tw' : '');
+                        // Disable X post button if over 280 Twitter chars
+                        if (v.id === 'x') {
+                            var postBtn2 = overlay.querySelector('#dcc-kit-post-btn');
+                            if (postBtn2) {
+                                if (pct > 1) {
+                                    postBtn2.setAttribute('aria-disabled', 'true');
+                                    postBtn2.style.opacity = '0.4';
+                                    postBtn2.style.pointerEvents = 'none';
+                                } else {
+                                    postBtn2.removeAttribute('aria-disabled');
+                                    postBtn2.style.opacity = '';
+                                    postBtn2.style.pointerEvents = '';
+                                }
+                            }
+                        }
+                    }
 
                     // ── Switch platform tab ──
                     function switchPlatformTab(idx) {
@@ -13686,29 +13826,29 @@
                         overlay.querySelectorAll('.dcc-kit-platab').forEach(function (btn, i) {
                             btn.classList.toggle('active', i === idx);
                         });
-                        // Update caption
+                        // Update caption textarea
                         var capEl = overlay.querySelector('#dcc-kit-caption-text');
-                        if (capEl) capEl.textContent = v.caption;
+                        if (capEl) capEl.value = v.caption;
                         // Update char counter
-                        var counterEl = overlay.querySelector('#dcc-kit-char-counter');
-                        if (counterEl) {
-                            var len = v.caption.length;
-                            var pct = len / v.charLimit;
-                            counterEl.className = 'dcc-kit-char-counter ' + (pct > 1 ? 'over' : pct > 0.85 ? 'warn' : 'ok');
-                            counterEl.textContent = len + ' / ' + v.charLimit;
-                        }
+                        updateKitCounter(v.caption.length, v.charLimit);
                         // Update action button
                         var postBtn = overlay.querySelector('#dcc-kit-post-btn');
                         if (postBtn) {
                             postBtn.textContent = v.actionLabel;
-                            postBtn.href = v.actionUrl;
                             postBtn.className = 'btn-platform ' + v.cls;
+                            postBtn.style.opacity = '';
+                            postBtn.style.pointerEvents = '';
+                            postBtn.removeAttribute('aria-disabled');
                             if (v.id === 'instagram') {
                                 postBtn.removeAttribute('href');
-                                postBtn.tagName === 'A' && postBtn.setAttribute('role', 'button');
+                            } else if (v.id === 'x') {
+                                // Use fresh caption for intent URL
+                                postBtn.setAttribute('href', 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(v.caption));
+                            } else {
+                                postBtn.setAttribute('href', v.actionUrl);
                             }
                         }
-                        // Update copy button label
+                        // Reset copy button label
                         var copyBtn = overlay.querySelector('#dcc-kit-copy-text');
                         if (copyBtn) copyBtn.textContent = 'Copy Caption';
                         // Update tip
@@ -13723,15 +13863,80 @@
                         });
                     });
 
+                    // ── Live char counter on textarea input ──
+                    var capTextarea = overlay.querySelector('#dcc-kit-caption-text');
+                    if (capTextarea) {
+                        capTextarea.addEventListener('input', function () {
+                            updateKitCounter(this.value.length, VARIANTS[activePlatformIdx].charLimit);
+                            // Keep X intent URL in sync with live edits
+                            if (VARIANTS[activePlatformIdx].id === 'x') {
+                                var pBtn = overlay.querySelector('#dcc-kit-post-btn');
+                                if (pBtn) pBtn.setAttribute('href', 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(this.value));
+                            }
+                        });
+                    }
+
+                    // ── Branded image onerror → fall back to plain image ──
+                    if (imgPathPlain && imgPath && imgPath !== imgPathPlain) {
+                        var kitImg = overlay.querySelector('#dcc-kit-img');
+                        if (kitImg) {
+                            kitImg.addEventListener('error', function () {
+                                if (!this._brandedFallback) {
+                                    this._brandedFallback = true;
+                                    this.src = imgPathPlain;
+                                    var artLink = overlay.querySelector('#dcc-kit-art-link');
+                                    if (artLink) artLink.href = imgPathPlain;
+                                }
+                            });
+                        }
+                    }
+
                     // ── Copy caption ──
                     var copyBtn = overlay.querySelector('#dcc-kit-copy-text');
                     if (copyBtn) {
                         copyBtn.addEventListener('click', function () {
-                            var caption = VARIANTS[activePlatformIdx].caption;
+                            var capEl = overlay.querySelector('#dcc-kit-caption-text');
+                            var caption = capEl ? capEl.value : VARIANTS[activePlatformIdx].caption;
                             navigator.clipboard.writeText(caption).then(function () {
                                 copyBtn.textContent = '\u2713 Copied!';
                                 setTimeout(function () { copyBtn.textContent = 'Copy Caption'; }, 2000);
                             }).catch(function () { toast('Copy failed \u2014 select the text above manually.', 'error'); });
+                        });
+                    }
+
+                    // ── Save Draft to CMS ──
+                    var saveDraftBtn = overlay.querySelector('#dcc-kit-save-draft');
+                    if (saveDraftBtn) {
+                        saveDraftBtn.addEventListener('click', function () {
+                            var v = VARIANTS[activePlatformIdx];
+                            var capEl = overlay.querySelector('#dcc-kit-caption-text');
+                            var draftContent = capEl ? capEl.value : v.caption;
+                            var currentSrc = (overlay.querySelector('#dcc-kit-img') || {}).src || imgPath;
+                            saveDraftBtn.textContent = 'Saving\u2026';
+                            saveDraftBtn.disabled = true;
+                            fetch('/api/cms/social', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    brand: 'culturesherpa',
+                                    platform: v.id,
+                                    content: draftContent,
+                                    culture_slug: slug,
+                                    slot: slot,
+                                    media_ids: currentSrc ? [currentSrc] : []
+                                })
+                            })
+                                .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
+                                .then(function () {
+                                    saveDraftBtn.textContent = '\u2713 Draft Saved';
+                                    toast('Post draft saved!', 'success');
+                                    setTimeout(function () { saveDraftBtn.textContent = '\uD83D\uDCBE Save Draft'; saveDraftBtn.disabled = false; }, 2500);
+                                })
+                                .catch(function (err) {
+                                    saveDraftBtn.textContent = '\uD83D\uDCBE Save Draft';
+                                    saveDraftBtn.disabled = false;
+                                    toast('Failed to save draft: ' + err.message, 'error');
+                                });
                         });
                     }
 
@@ -13740,14 +13945,26 @@
                     if (postBtnEl) {
                         postBtnEl.addEventListener('click', function (e) {
                             var v = VARIANTS[activePlatformIdx];
+                            var capEl = overlay.querySelector('#dcc-kit-caption-text');
+                            var caption = capEl ? capEl.value : v.caption;
                             // Auto-copy caption before opening platform
-                            navigator.clipboard && navigator.clipboard.writeText(v.caption).catch(function () { });
+                            navigator.clipboard && navigator.clipboard.writeText(caption).catch(function () { });
                             if (v.id === 'instagram') {
                                 e.preventDefault();
+                                var igUrl = window.innerWidth >= 768
+                                    ? 'https://creator.instagram.com'
+                                    : 'https://www.instagram.com/';
                                 var noteEl = overlay.querySelector('#dcc-kit-platform-note');
-                                if (noteEl) noteEl.innerHTML = '<strong>Instagram steps:</strong> Caption copied! 1. Save the art (click image or <em>Copy Image</em>). 2. Go to Instagram &rarr; tap + &rarr; paste caption &rarr; attach art.';
-                                setTimeout(function () { window.open('https://www.instagram.com/', '_blank', 'noopener'); }, 200);
+                                if (noteEl) noteEl.innerHTML = '<strong>Instagram steps:</strong> Caption copied! 1. Save the art (click image above or <em>Copy Image</em>). 2. Compose a new post, attach the art, then paste the caption.';
+                                setTimeout(function () { window.open(igUrl, '_blank', 'noopener'); }, 200);
+                            } else if (v.id === 'facebook') {
+                                var fbNote = overlay.querySelector('#dcc-kit-platform-note');
+                                if (fbNote) fbNote.innerHTML = '<strong>Facebook:</strong> Caption copied \u2014 paste it into the Facebook post text box after the link preview loads.';
+                                toast('Caption copied \u2014 paste it into the Facebook post.', 'info');
                             } else if (v.id === 'linkedin') {
+                                // Update the share URL to use current caption if user edited it
+                                var liNote = overlay.querySelector('#dcc-kit-platform-note');
+                                if (liNote) liNote.innerHTML = '<strong>LinkedIn:</strong> Caption copied \u2014 paste it in the share dialog. Switch posting as <strong>CultureSherpa</strong> page.';
                                 toast('Caption copied \u2014 paste it in LinkedIn. Switch to CultureSherpa page in the share dialog!', 'info');
                             }
                         });
@@ -13759,20 +13976,23 @@
                         copyImgBtnEl.addEventListener('click', function () {
                             copyImgBtnEl.textContent = 'Copying\u2026';
                             copyImgBtnEl.disabled = true;
+                            var currentImg = overlay.querySelector('#dcc-kit-img');
+                            var effectiveImgPath = (currentImg && currentImg.src) || imgPath || imgPathPlain;
+                            var dlExt = effectiveImgPath ? effectiveImgPath.split('.').pop().split('?')[0] || 'webp' : 'webp';
                             function fallbackDownload() {
                                 var a = document.createElement('a');
-                                a.href = imgPath;
-                                a.download = (slug || 'culture-art') + '.jpg';
+                                a.href = effectiveImgPath;
+                                a.download = (slug || 'culture-art') + '_branded.' + dlExt;
                                 a.rel = 'noopener';
                                 a.target = '_blank';
                                 document.body.appendChild(a); a.click(); document.body.removeChild(a);
                                 copyImgBtnEl.textContent = '\u2713 Saved!';
                                 copyImgBtnEl.disabled = false;
-                                setTimeout(function () { copyImgBtnEl.textContent = '\u{1F5BC} Copy Image'; }, 2500);
+                                setTimeout(function () { copyImgBtnEl.textContent = '\uD83D\uDDBC\uFE0F Copy Image'; }, 2500);
                                 toast('Art saved \u2014 attach it when composing your post!', 'info');
                             }
                             if (navigator.clipboard && window.ClipboardItem) {
-                                fetch(imgPath, { mode: 'cors' })
+                                fetch(effectiveImgPath, { mode: 'cors' })
                                     .then(function (r) { return r.blob(); })
                                     .then(function (blob) {
                                         var img2 = new Image();
@@ -13803,68 +14023,56 @@
                         });
                     }
 
+                    // ── Reset caption ──
+                    var resetBtn = overlay.querySelector('#dcc-kit-reset-btn');
+                    if (resetBtn) {
+                        resetBtn.addEventListener('click', function () {
+                            var v = VARIANTS[activePlatformIdx];
+                            var capEl = overlay.querySelector('#dcc-kit-caption-text');
+                            if (capEl) {
+                                capEl.value = v.caption;
+                                updateKitCounter(v.caption.length, v.charLimit);
+                                if (v.id === 'x') {
+                                    var pBtn = overlay.querySelector('#dcc-kit-post-btn');
+                                    if (pBtn) pBtn.setAttribute('href', 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(v.caption));
+                                }
+                                capEl.focus();
+                                toast('Caption reset.', 'info');
+                            }
+                        });
+                    }
+
                     // Focus close button for accessibility
                     var closeBtn = overlay.querySelector('.dcc-kit-close');
                     if (closeBtn) closeBtn.focus();
                 }
 
                 // ── Social sharing ──
+                // All platforms open the Post Kit modal pre-focused on the right tab.
+                // 'copy' is the only non-kit action (copies the page URL directly).
                 function shareCulture(slot, platform) {
                     var pair = getCulturesForDate(new Date());
                     var entry = slot === 'am' ? pair.am : pair.pm;
                     if (!entry) { toast('No culture to share.', 'error'); return; }
 
-                    var meta = getCultureMeta(entry.slug);
-                    var name = meta ? meta.culture_name : prettifySlug(entry.slug);
-                    var region = (meta && meta.region) ? meta.region : '';
-                    var summary = (meta && meta.summary) ? meta.summary : '';
-                    var summaryFirst = summary
-                        ? (summary.indexOf('. ') > -1 ? summary.substring(0, summary.indexOf('. ') + 1) : summary)
-                        : '';
-                    var fact = entry.featured_fact || summaryFirst;
-                    // Filter stubs: fall back to index summary or generic text
-                    if (!fact || fact.includes('Initial stub') || fact.includes('requires enrichment')) {
-                        fact = summaryFirst || ('Explore the rich traditions of the ' + name + ' people.');
+                    if (platform === 'copy') {
+                        var copyUrl = 'https://www.culturesherpa.org/explore/culture/' + entry.slug;
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(copyUrl).then(function () {
+                                toast('Link copied!', 'success');
+                            }).catch(function () {
+                                toast('Copy failed \u2014 try the Post Kit.', 'error');
+                            });
+                        } else {
+                            toast('Clipboard unavailable \u2014 use the Post Kit to copy.', 'error');
+                        }
+                        return;
                     }
-                    var url = 'https://www.culturesherpa.org/explore/culture/' + entry.slug;
-                    var slotLabel = slot === 'am' ? 'Morning' : 'Evening';
 
-                    if (platform === 'kit') {
-                        showShareKit(slot, entry, meta);
-                    } else if (platform === 'x') {
-                        var factShort = fact.length > 150 ? fact.substring(0, 147) + '\u2026' : fact;
-                        var xText = '\ud83c\udf0d ' + name + (region ? ' | ' + region : '')
-                            + (factShort ? '\n\n' + factShort : '')
-                            + '\n\n\u21dd ' + url + '\n\n#CultureSherpa #WorldCultures #History';
-                        navigator.clipboard && navigator.clipboard.writeText(xText).catch(function () { });
-                        window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(
-                            '\ud83c\udf0d ' + name + (region ? ' | ' + region : '') + (factShort ? '\n\n' + factShort : '')
-                        ) + '&url=' + encodeURIComponent(url) + '&hashtags=CultureSherpa,WorldCultures,History', '_blank', 'noopener');
-                    } else if (platform === 'linkedin') {
-                        var liText = '\ud83c\udf0d ' + slotLabel + ' Culture Spotlight: ' + name
-                            + (region ? ' (' + region + ')' : '') + '\n\n'
-                            + (fact ? fact + '\n\n' : '')
-                            + 'Cultural intelligence starts with curiosity. Explore ' + name + ' and hundreds of world cultures at CultureSherpa \ud83d\udc47\n\n'
-                            + url + '\n\n#CultureSherpa #CulturalIntelligence #DEI #GlobalMindset #CrossCulturalCommunication #Anthropology #WorldCultures';
-                        navigator.clipboard && navigator.clipboard.writeText(liText).catch(function () { });
-                        toast('Caption copied \u2014 paste it in LinkedIn. In the dialog, switch posting as CultureSherpa Page.', 'info');
-                        window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), '_blank', 'noopener');
-                    } else if (platform === 'facebook') {
-                        var fbText = '\ud83c\udf0d ' + slotLabel + ' Culture: ' + name
-                            + (region ? ' (' + region + ')' : '') + '\n\n'
-                            + (fact ? fact + '\n\n' : '')
-                            + 'Learn more: ' + url + '\n\n#CultureSherpa #WorldCultures #Diversity #Heritage #Culture';
-                        navigator.clipboard && navigator.clipboard.writeText(fbText).catch(function () { });
-                        window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank', 'noopener');
-                    } else if (platform === 'instagram') {
-                        showShareKit(slot, entry, meta, 'instagram');
-                    } else if (platform === 'copy') {
-                        navigator.clipboard.writeText(url).then(function () {
-                            toast('Link copied!', 'success');
-                        }).catch(function () {
-                            toast('Copy failed.', 'error');
-                        });
-                    }
+                    var meta = getCultureMeta(entry.slug);
+                    // 'kit' with no focusPlatform defaults to Instagram (first tab)
+                    var focusPlatform = platform === 'kit' ? null : platform;
+                    showShareKit(slot, entry, meta, focusPlatform);
                 }
 
                 // ── View switching ──
