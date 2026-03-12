@@ -53,7 +53,9 @@
     "finance:ga4:export": "node scripts/finance/run-finance-tool.js export_ga4",
     "finance:ga4:ingest": "node scripts/finance/run-finance-tool.js ingest_ga4_ui_exports",
     "finance:stripe:export": "node scripts/finance/run-finance-tool.js export_stripe",
-    "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf"
+    "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf",
+    "r2:import": "node scripts/r2-bulk-import.js",
+    "r2:import:dry": "node scripts/r2-bulk-import.js --dry-run"
   },
   "repository": {
     "type": "git",
