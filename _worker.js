@@ -77,15 +77,8 @@ export default {
       '/.env',
       '/.env.example',
       // Test/staging HTML pages — not for public consumption
-      '/ga-test-enhanced.html',
-      '/oauth-diagnostic.html',
       '/temp_donate_review.html',
       '/temp_review.html',
-      '/test-ga.html',
-      // Orphan/wrong-domain pages — public access blocked
-      '/globaldeets-live-snapshot.html',
-      '/globaldeets-phase1-live.html',
-      '/main.html',
     ]);
 
     const blockedExtensions = [
@@ -127,6 +120,20 @@ export default {
           'X-Robots-Tag': 'noindex, nofollow',
         },
       });
+    }
+
+    // Protect /admin.html at the edge — require a Clerk session cookie.
+    // Clerk sets __session (JWT) and __client_uat (last update timestamp) on the
+    // same domain. We can't fully verify the JWT here without the secret, but
+    // requiring the cookie's presence prevents drive-by crawlers and adds a
+    // meaningful friction layer. A missing cookie gets a redirect to login.
+    if (pathLower === '/admin.html' || pathLower === '/admin') {
+      const cookieHeader = request.headers.get('Cookie') || '';
+      const hasSession =
+        cookieHeader.includes('__session=') || cookieHeader.includes('__client_uat=');
+      if (!hasSession) {
+        return Response.redirect(`${url.origin}/?auth_required=admin`, 302);
+      }
     }
 
     // Serve branded media assets directly from R2 (no auth required).
