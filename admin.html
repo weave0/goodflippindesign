@@ -8759,8 +8759,8 @@
                     checks: { ga4: null, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: false }
                 },
                 {
-                    id: 'globaldeets', name: 'GlobalDeets', domain: 'globaldeets.com', purpose: 'Portfolio project hub', hosting: 'cf-pages', liveUrl: 'https://globaldeets.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/globaldeets', color: '#8b5cf6', repo: 'weave0/globaldeets', notes: 'Password-gated. No CSP/HSTS/GA4/CI — most gaps.',
-                    checks: { ga4: false, sentry: false, csp: false, ci: false, tests: false, onerror: false, monitor: true }
+                    id: 'globaldeets', name: 'GlobalDeets', domain: 'globaldeets.com', purpose: 'Portfolio project hub', hosting: 'cf-pages', liveUrl: 'https://globaldeets.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/globaldeets', color: '#8b5cf6', repo: 'weave0/globaldeets', notes: 'Password-gated. GA4 was already present. Added onerror, updated CSP (jsdelivr), and CI workflow 2026-03-13.',
+                    checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
                     id: 'jamiemediation', name: 'Jamie Rigling Mediation', domain: 'jamierigling.com', purpose: 'Client landing page (inline GFD)', hosting: 'gfd-inline', liveUrl: 'https://goodflippindesign.com/jamie-rigling-mediation.html', adminUrl: null, color: '#e74c3c', repo: 'weave0/jamie-mediation', notes: 'Lives in GFD repo. GA4 + onerror added 2026-03-13.',
@@ -8771,8 +8771,8 @@
                     checks: { ga4: false, sentry: false, csp: null, ci: false, tests: false, onerror: false, monitor: true }
                 },
                 {
-                    id: 'minnesotapeace', name: 'MN Peace', domain: 'minnesotapeace.com', purpose: 'Jamie Rigling mediation — independent deployment', hosting: 'cf-pages', liveUrl: 'https://minnesotapeace.com', adminUrl: 'https://dash.cloudflare.com', color: '#38bdf8', repo: 'weave0/jamie-mediation', notes: 'Serves same content as jamie-rigling-mediation.html. Cloudflare-hosted. GA4:NO (false positive — CSS classes only), Sentry:NO, onerror:NO. Likely deployed from weave0/jamie-mediation repo.',
-                    checks: { ga4: false, sentry: false, csp: null, ci: null, tests: false, onerror: false, monitor: true }
+                    id: 'minnesotapeace', name: 'MN Peace', domain: 'minnesotapeace.com', purpose: 'Jamie Rigling mediation — independent deployment', hosting: 'cf-pages', liveUrl: 'https://minnesotapeace.com', adminUrl: 'https://dash.cloudflare.com', color: '#38bdf8', repo: 'weave0/jamie-mediation', notes: 'Deployed from weave0/jamie-mediation. GA4 + onerror + _headers (CSP/HSTS/X-Frame) added 2026-03-13.',
+                    checks: { ga4: true, sentry: false, csp: true, ci: false, tests: false, onerror: true, monitor: true }
                 },
                 {
                     id: 'thyown', name: 'ThyOwn', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#64748b', repo: null, notes: 'No repo, not deployed.',
@@ -10304,9 +10304,9 @@
                     detail: 'GA4 property G-WM6Q66W9W0 confirmed on GFD, GFV, AIAimate, Jamie Rigling. Audit CS, CA, GlobalDeets repos and confirm tracking ID is present and firing.'
                 },
                 {
-                    id: 'globaldeets-hardening', severity: 'warning', brand: 'globaldeets', area: 'Ops',
-                    title: 'GlobalDeets missing CSP, HSTS, CI/CD, and GA4',
-                    detail: 'globaldeets.com has no CSP headers, no HSTS, no CI workflow, no GA4. Password-gated site is lowest priority but needs a _headers file and analytics before any public launch.'
+                    id: 'globaldeets-hardening', severity: 'done', brand: 'globaldeets', area: 'Ops',
+                    title: 'GlobalDeets hardened — GA4, onerror, CSP, CI added (2026-03-13)',
+                    detail: 'GA4 was already present. Added window.onerror + unhandledrejection → js_error, updated CSP in _headers to include cdn.jsdelivr.net, created .github/workflows/ci.yml (validates GA4, HSTS, onerror on push/PR).'
                 },
                 {
                     id: 'brettleeweaver-monitoring', severity: 'quality', brand: 'all', area: 'Ops',
@@ -10314,9 +10314,9 @@
                     detail: 'Audited 2026-03-13. Cloudflare-hosted, no known GitHub repo. 308 redirect to www. No GA4, no Sentry SDK, no window.onerror, no CI. Add GA4 + onerror snippet directly to the page, then confirm repo ownership.'
                 },
                 {
-                    id: 'minnesotapeace-monitoring', severity: 'quality', brand: 'all', area: 'Ops',
-                    title: 'minnesotapeace.com — GA4 + Sentry + onerror missing',
-                    detail: 'Audited 2026-03-13. This IS the Jamie Rigling mediation site deployed independently on Cloudflare Pages (likely from weave0/jamie-mediation). GA4:NO (CSS class false positive), Sentry:NO, onerror:NO. Add monitoring via the jamie-mediation repo.'
+                    id: 'minnesotapeace-monitoring', severity: 'done', brand: 'all', area: 'Ops',
+                    title: 'minnesotapeace.com — GA4 + onerror + _headers added (2026-03-13)',
+                    detail: 'Deployed from weave0/jamie-mediation. Added GA4 (G-WM6Q66W9W0), window.onerror + unhandledrejection → js_error GA4 event, and _headers file with CSP/HSTS/X-Frame-Options/Referrer-Policy. Pushed to main 2026-03-13.'
                 },
                 {
                     id: 'citizenapproved-monitor', severity: 'done', brand: 'citizenapproved', area: 'Ops',
