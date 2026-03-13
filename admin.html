@@ -6083,6 +6083,7 @@
             max-height: 340px;
             overflow-y: auto;
         }
+
         .activity-item {
             display: flex;
             align-items: baseline;
@@ -6091,7 +6092,11 @@
             border-bottom: 1px solid var(--border);
             font-size: 0.8rem;
         }
-        .activity-item:last-child { border-bottom: none; }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
         .activity-time {
             color: var(--text-muted);
             font-family: var(--mono, 'JetBrains Mono', monospace);
@@ -6099,6 +6104,7 @@
             white-space: nowrap;
             min-width: 72px;
         }
+
         .activity-dot {
             width: 6px;
             height: 6px;
@@ -6108,13 +6114,24 @@
             position: relative;
             top: 1px;
         }
-        .activity-dot.action { background: var(--accent-violet); }
-        .activity-dot.export { background: var(--accent-gold); }
-        .activity-dot.error { background: var(--accent-rose); }
+
+        .activity-dot.action {
+            background: var(--accent-violet);
+        }
+
+        .activity-dot.export {
+            background: var(--accent-gold);
+        }
+
+        .activity-dot.error {
+            background: var(--accent-rose);
+        }
+
         .activity-action {
             font-weight: 600;
             color: var(--text);
         }
+
         .activity-detail {
             color: var(--text-muted);
             flex: 1;
@@ -6122,6 +6139,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
         .activity-empty {
             color: var(--text-muted);
             font-size: 0.82rem;
@@ -6139,13 +6157,20 @@
             color: var(--text-muted);
             user-select: none;
         }
+
         .cmd-item-sub {
             font-size: 0.72rem;
             color: var(--text-muted);
             margin-left: auto;
         }
-        .cmd-item--action .cmd-item-num { color: var(--accent-gold); }
-        .cmd-item--project .cmd-item-num { color: var(--accent-emerald); }
+
+        .cmd-item--action .cmd-item-num {
+            color: var(--accent-gold);
+        }
+
+        .cmd-item--project .cmd-item-num {
+            color: var(--accent-emerald);
+        }
     </style>
 </head>
 
@@ -8828,8 +8853,8 @@
                     checks: { ga4: true, sentry: true, csp: true, ci: true, tests: true, onerror: true, monitor: true }
                 },
                 {
-                    id: 'gfv', name: 'Good Flippin Vibes', domain: 'goodflippinvibes.com', purpose: 'Wellness platform · origin brand', hosting: 'cf-pages', liveUrl: 'https://goodflippinvibes.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/good-flippin-vibes', color: '#10b981', repo: 'weave0/good-flippin-vibes', notes: 'Vite build. Needs Sentry + onerror.',
-                    checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: true }
+                    id: 'gfv', name: 'Good Flippin Vibes', domain: 'goodflippinvibes.com', purpose: 'Wellness platform · origin brand', hosting: 'cf-pages', liveUrl: 'https://goodflippinvibes.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/good-flippin-vibes', color: '#10b981', repo: 'weave0/good-flippin-vibes', notes: 'Vite build. Uses Plausible analytics. onerror + HSTS added 2026-03-13.',
+                    checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
                     id: 'aiaimate', name: 'AI Aimate', domain: 'aiaimate.com', purpose: 'AI education platform (Next.js)', hosting: 'vercel', liveUrl: 'https://aiaimate.com', adminUrl: 'https://vercel.com/weave0/portal', color: '#3b82f6', repo: 'weave0/aiaimate', notes: '⚠️ Vercel — not CF. Needs Sentry + onerror + test suite.',
@@ -8840,8 +8865,8 @@
                     checks: { ga4: null, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: true }
                 },
                 {
-                    id: 'citizenapproved', name: 'CitizenApproved', domain: 'citizenapproved.com', purpose: 'Civic engagement platform', hosting: 'cf-pages', liveUrl: 'https://citizenapproved.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/citizenapproved', color: '#ef4444', repo: 'weave0/CitizenApproved', notes: 'Next.js + TS. Needs GA4 audit + monitor.',
-                    checks: { ga4: null, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: false }
+                    id: 'citizenapproved', name: 'CitizenApproved', domain: 'citizenapproved.com', purpose: 'Civic engagement platform', hosting: 'cf-pages', liveUrl: 'https://citizenapproved.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/citizenapproved', color: '#ef4444', repo: 'weave0/CitizenApproved', notes: 'Next.js + TS. Needs GA4 audit.',
+                    checks: { ga4: null, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: true }
                 },
                 {
                     id: 'globaldeets', name: 'GlobalDeets', domain: 'globaldeets.com', purpose: 'Portfolio project hub', hosting: 'cf-pages', liveUrl: 'https://globaldeets.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/globaldeets', color: '#8b5cf6', repo: 'weave0/globaldeets', notes: 'Password-gated. GA4 was already present. Added onerror, updated CSP (jsdelivr), and CI workflow 2026-03-13.',
@@ -8856,8 +8881,8 @@
                     checks: { ga4: false, sentry: false, csp: null, ci: false, tests: false, onerror: false, monitor: true }
                 },
                 {
-                    id: 'minnesotapeace', name: 'MN Peace', domain: 'minnesotapeace.com', purpose: 'Jamie Rigling mediation — independent deployment', hosting: 'cf-pages', liveUrl: 'https://minnesotapeace.com', adminUrl: 'https://dash.cloudflare.com', color: '#38bdf8', repo: 'weave0/jamie-mediation', notes: 'Deployed from weave0/jamie-mediation. GA4 + onerror + _headers (CSP/HSTS/X-Frame) added 2026-03-13.',
-                    checks: { ga4: true, sentry: false, csp: true, ci: false, tests: false, onerror: true, monitor: true }
+                    id: 'minnesotapeace', name: 'MN Peace', domain: 'minnesotapeace.com', purpose: 'Jamie Rigling mediation — independent deployment', hosting: 'cf-pages', liveUrl: 'https://minnesotapeace.com', adminUrl: 'https://dash.cloudflare.com', color: '#38bdf8', repo: 'weave0/jamie-mediation', notes: 'Deployed from weave0/jamie-mediation. GA4 + onerror + _headers (CSP/HSTS/X-Frame) added 2026-03-13. CI via shared jamie-mediation repo.',
+                    checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
                     id: 'thyown', name: 'ThyOwn', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#64748b', repo: null, notes: 'No repo, not deployed.',
