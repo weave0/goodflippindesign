@@ -15,11 +15,29 @@
  *   wrangler deploy --config workers/wrangler-stripe.toml
  */
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
+// Ecosystem origins allowed to call this worker
+const ALLOWED_ORIGINS = [
+  'https://goodflippindesign.com',
+  'https://goodflippindesign.pages.dev',
+  'https://goodflippinvibes.com',
+  'https://aiaimate.com',
+  'https://citizenapproved.com',
+  'https://culturesherpa.org',
+  'http://localhost:3000',
+  'http://localhost:8788',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:8788',
+];
+
+function getCorsHeaders(request) {
+  const origin = request.headers.get('Origin') || '';
+  return {
+    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Vary': 'Origin',
+  };
+}
 
 // Allowed donation projects — prevents this endpoint being used for arbitrary charges
 const ALLOWED_PROJECTS = [
@@ -39,7 +57,7 @@ export default {
   async fetch(request, env) {
     // CORS preflight
     if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: CORS_HEADERS });
+      return new Response(null, { status: 204, headers: getCorsHeaders(request) });
     }
 
     const url = new URL(request.url);
@@ -146,11 +164,11 @@ async function createPaymentIntent(secretKey, { amountCents, projectLabel, isRec
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
-function json(body, status = 200) {
+function json(body, status = 200, request = null) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
-      ...CORS_HEADERS,
+      ...(request ? getCorsHeaders(request) : getCorsHeaders({ headers: { get: () => '' } })),
       'Content-Type': 'application/json',
     },
   });

@@ -61,6 +61,9 @@ CREATE TABLE IF NOT EXISTS cms_social_posts (
   external_url TEXT DEFAULT '',            -- link to live post
   status TEXT DEFAULT 'draft',             -- draft, scheduled, publishing, published, failed
   error_message TEXT DEFAULT '',           -- if status = failed
+  campaign_id INTEGER,                     -- FK to cms_campaigns(id)
+  objective TEXT DEFAULT '',               -- campaign objective copy
+  watermark_profile TEXT DEFAULT '',       -- watermark branding preset
   created_by TEXT DEFAULT '',              -- Clerk user ID
   created_at TEXT DEFAULT (datetime('now')),
   updated_at TEXT DEFAULT (datetime('now'))
@@ -178,13 +181,9 @@ CREATE INDEX IF NOT EXISTS idx_cms_campaigns_brand ON cms_campaigns(brand);
 CREATE INDEX IF NOT EXISTS idx_cms_campaigns_status ON cms_campaigns(status);
 CREATE INDEX IF NOT EXISTS idx_cms_campaigns_start ON cms_campaigns(start_date);
 
--- Optional migration for existing databases:
--- ALTER TABLE cms_social_posts ADD COLUMN campaign_id INTEGER;
--- ALTER TABLE cms_social_posts ADD COLUMN objective TEXT DEFAULT '';
--- ALTER TABLE cms_social_posts ADD COLUMN watermark_profile TEXT DEFAULT '';
--- ALTER TABLE cms_post_variants ADD COLUMN retry_count INTEGER DEFAULT 0;
--- ALTER TABLE cms_post_variants ADD COLUMN updated_at TEXT;
--- (Both applied 2026-03-11 via wrangler d1 execute directly)
+-- Migration note (applied 2026-03-11): campaign_id, objective, watermark_profile
+-- now live in the base table above. On existing D1 instances the ALTER TABLEs in
+-- ensureCampaignSchema() handle them safely (ignores duplicate-column errors).
 
 -- ── Asset Overrides (live image swap without redeploy) ─────────────────
 -- When _worker.js serves any brand page, it checks this table.
@@ -326,6 +325,42 @@ CREATE TABLE IF NOT EXISTS cms_generated_assets (
   error_message TEXT DEFAULT '',
   created_at TEXT DEFAULT (datetime('now'))
 );
+
+-- ── Donation Transactions ────────────────────────────────────────────────────
+-- Records processed Stripe donations for admin dashboard KPIs and reporting.
+-- Populated via admin manual entry or future Stripe webhook integration.
+CREATE TABLE IF NOT EXISTS cms_donations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  stripe_payment_id TEXT UNIQUE,
+  amount_cents INTEGER NOT NULL,
+  currency TEXT DEFAULT 'usd',
+  project TEXT,
+  donor_email TEXT,
+  donor_name TEXT,
+  status TEXT DEFAULT 'succeeded',
+  recurring INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+-- ── Admin Operations Board ────────────────────────────────────────────────────
+-- Personal task board for the solo operator. Surfaced in the Overview panel
+-- alongside static GAP_FLAGS. Severity: critical | warning | normal | done.
+CREATE TABLE IF NOT EXISTS admin_ops (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  severity TEXT NOT NULL DEFAULT 'normal',
+  brand TEXT DEFAULT 'all',
+  area TEXT DEFAULT 'General',
+  detail TEXT DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  completed_at TEXT DEFAULT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_admin_ops_severity ON admin_ops(severity);
+CREATE INDEX IF NOT EXISTS idx_admin_ops_completed ON admin_ops(completed_at);
+
+CREATE INDEX IF NOT EXISTS idx_donations_status ON cms_donations(status);
+CREATE INDEX IF NOT EXISTS idx_donations_created ON cms_donations(created_at);
 
 CREATE INDEX IF NOT EXISTS idx_gen_assets_registry ON cms_generated_assets(registry_id);
 CREATE INDEX IF NOT EXISTS idx_gen_assets_status ON cms_generated_assets(status);

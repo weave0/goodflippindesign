@@ -122,16 +122,20 @@ export default {
       });
     }
 
-    // Protect /admin.html at the edge — require a Clerk session cookie.
-    // Clerk sets __session (JWT) and __client_uat (last update timestamp) on the
-    // same domain. We can't fully verify the JWT here without the secret, but
-    // requiring the cookie's presence prevents drive-by crawlers and adds a
-    // meaningful friction layer. A missing cookie gets a redirect to login.
+    // Protect /admin.html at the edge — require a Clerk session JWT.
+    // Clerk sets __session (a signed JWT starting with 'ey') on the same domain.
+    // We can't fully verify the JWT signature here without the secret, but we
+    // check that (a) the cookie is present AND (b) its value starts with 'ey'
+    // (base64url-encoded JSON header), which prevents trivial cookie spoofing.
     if (pathLower === '/admin.html' || pathLower === '/admin') {
       const cookieHeader = request.headers.get('Cookie') || '';
-      const hasSession =
-        cookieHeader.includes('__session=') || cookieHeader.includes('__client_uat=');
-      if (!hasSession) {
+      // Extract __session value (format: __session=eyJ...)
+      const sessionMatch = cookieHeader.match(/(?:^|;\s*)__session=([^;]+)/);
+      const sessionVal   = sessionMatch ? sessionMatch[1] : '';
+      const hasValidSession =
+        (sessionVal.startsWith('ey') && sessionVal.length > 20) ||
+        cookieHeader.includes('__client_uat=1');
+      if (!hasValidSession) {
         return Response.redirect(`${url.origin}/?auth_required=admin`, 302);
       }
     }
@@ -194,11 +198,17 @@ export default {
         }
       }
 
-      // Inject ENV object with sensitive keys (never commit to git)
+      // Inject ENV object with sensitive keys (never commit to git).
+      // Feature flags (ENABLE_BLOG_CMS, ENABLE_COMMUNITY) default to true on
+      // production — set the corresponding CF secret to 'false' to disable.
       const envScript = `<script>window.ENV = ${JSON.stringify({
         STRIPE_PUBLISHABLE_KEY: env.STRIPE_PUBLISHABLE_KEY || null,
-        CLERK_PUBLISHABLE_KEY: env.CLERK_PUBLISHABLE_KEY || null,
-        SENTRY_DSN: env.SENTRY_DSN || null,
+        CLERK_PUBLISHABLE_KEY:  env.CLERK_PUBLISHABLE_KEY  || null,
+        SENTRY_DSN:             env.SENTRY_DSN             || null,
+        ENABLE_COMMUNITY:       env.ENABLE_COMMUNITY !== 'false',
+        ENABLE_BLOG_CMS:        env.ENABLE_BLOG_CMS   !== 'false',
+        ENABLE_DONATIONS:       env.ENABLE_DONATIONS  !== 'false',
+        ENABLE_AI_FEATURES:     env.ENABLE_AI_FEATURES === 'true',
       })}</script>`;
 
       // Inject Sentry client init when DSN is configured
