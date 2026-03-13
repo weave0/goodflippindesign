@@ -1078,21 +1078,38 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // CORS allowlist — only our own ecosystem origins
+    const ALLOWED_ORIGINS = [
+      'https://goodflippindesign.com',
+      'https://goodflippindesign.pages.dev',
+      'https://goodflippinvibes.com',
+      'https://aiaimate.com',
+      'https://citizenapproved.com',
+      'https://culturesherpa.org',
+      'https://globaldeets.com',
+      'http://localhost:3000',
+      'http://localhost:8788',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:8788',
+    ];
+    const requestOrigin = request.headers.get('Origin') || '';
+    const allowedOrigin = ALLOWED_ORIGINS.includes(requestOrigin) ? requestOrigin : ALLOWED_ORIGINS[0];
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': allowedOrigin,
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Vary': 'Origin',
+    };
+
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '*',
-          'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
+        headers: corsHeaders,
       });
     }
 
     if (url.pathname === '/health' && request.method === 'GET') {
-      return json({ ok: true, service: 'social-publisher', time: new Date().toISOString() }, 200, {
-        'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '*',
-      });
+      return json({ ok: true, service: 'social-publisher', time: new Date().toISOString() }, 200, corsHeaders);
     }
 
     if (url.pathname === '/run-now' && request.method === 'POST') {
@@ -1100,18 +1117,12 @@ export default {
 
       try {
         const result = await runScheduler(env);
-        return json({ ok: true, ...result }, 200, {
-          'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '*',
-        });
+        return json({ ok: true, ...result }, 200, corsHeaders);
       } catch (error) {
-        return json({ ok: false, error: error.message || String(error) }, 500, {
-          'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '*',
-        });
+        return json({ ok: false, error: error.message || String(error) }, 500, corsHeaders);
       }
     }
 
-    return json({ error: 'Not found' }, 404, {
-      'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '*',
-    });
+    return json({ error: 'Not found' }, 404, corsHeaders);
   },
 };

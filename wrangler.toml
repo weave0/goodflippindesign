@@ -26,10 +26,19 @@ NODE_ENV = "production"
 # Value will be: https://gfv-social-publisher.<your-account>.workers.dev
 
 # Secrets (set via: wrangler secret put <NAME>)
+# STRIPE_WEBHOOK_SECRET   — Stripe webhook signing secret (get from Stripe Dashboard → Webhooks → your endpoint → Signing secret)
+#                           Webhook URL to register: https://goodflippindesign.com/api/stripe/webhook
+#                           Events to subscribe: payment_intent.succeeded, payment_intent.payment_failed, charge.refunded
 # SENTRY_DSN              — Error tracking (get from sentry.io dashboard)
 # CLERK_SECRET_KEY        — Auth (get from dashboard.clerk.com)
 # TOKEN_ENCRYPTION_KEY    — 32+ char random string for AES-GCM token/state encryption
 # OPENAI_API_KEY          — Required for Content Studio DALL-E 3 image generation
+#
+# Feature flags (optional — default ON in production, set to 'false' to disable):
+# ENABLE_COMMUNITY        — Community portal features (default: true)
+# ENABLE_BLOG_CMS         — Blog CMS editor on public site (default: true)
+# ENABLE_DONATIONS        — Donation page and widgets (default: true)
+# ENABLE_AI_FEATURES      — AI generation features (default: false, set 'true' to enable)
 #
 # OAuth secrets (required for seamless platform connections in admin panel):
 # META_APP_ID             — 882897501450706 (Meta Developer Console → your app → Settings → Basic)

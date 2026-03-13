@@ -17,6 +17,15 @@
         gtag('js', new Date());
         gtag('config', 'G-WM6Q66W9W0', { page_title: 'Community Portal', page_path: '/community-portal.html' });
     </script>
+    <!-- Global error capture (forwards to GA4 when Sentry isn't loaded) -->
+    <script>
+        window.addEventListener('error', function (e) {
+            if (window.gtag) gtag('event', 'js_error', { description: (e.message || '') + ' @ ' + (e.filename || '') + ':' + (e.lineno || ''), fatal: false });
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+            if (window.gtag) gtag('event', 'js_error', { description: 'UnhandledRejection: ' + (e.reason || ''), fatal: false });
+        });
+    </script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

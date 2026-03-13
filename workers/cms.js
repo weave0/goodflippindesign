@@ -508,6 +508,126 @@ async function handleUpload(request, user, env) {
 }
 
 /**
+ * POST /api/cms/upload-url — Batch-import remote URLs into R2 (admin only)
+ * Body: { urls: string[], brand?, category?, tags? }
+ * Each URL is fetched server-side, stored in R2, and recorded in cms_assets as draft.
+ * Returns: { results: [{ url, ok, r2Key?, error? }] }
+ *
+ * SSRF protection: only HTTPS, blocks private IP ranges and localhost.
+ */
+async function handleUploadUrl(request, user, env) {
+  if (!user) return errorResponse('Unauthorized', 401);
+  if (!env.MEDIA_BUCKET) return errorResponse('R2 bucket not configured', 503);
+
+  let body;
+  try { body = await request.json(); } catch { return errorResponse('Invalid JSON body'); }
+
+  const rawUrls = Array.isArray(body?.urls) ? body.urls : [];
+  if (!rawUrls.length) return errorResponse('urls array is required and must not be empty');
+  if (rawUrls.length > 200) return errorResponse('Maximum 200 URLs per batch');
+
+  const brand    = (body.brand    || 'gfv').slice(0, 64).replace(/[^a-zA-Z0-9_-]/g, '');
+  const category = (body.category || 'imports').slice(0, 128).replace(/[^a-zA-Z0-9 _-]/g, '') || 'imports';
+  const tagsRaw  = body.tags || '';
+  let tagsJson = '[]';
+  if (tagsRaw) {
+    try {
+      const parsed = JSON.parse(tagsRaw);
+      tagsJson = JSON.stringify(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      tagsJson = JSON.stringify(String(tagsRaw).split(',').map((t) => t.trim()).filter(Boolean));
+    }
+  }
+
+  // SSRF block-list: disallow non-HTTPS and private/loopback address spaces
+  const SSRF_BLOCKED = /^https?:\/\/(localhost|127\.|0\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|::1|fd[0-9a-f]{2}:)/i;
+  const ALLOWED_TYPES = new Set(['image/jpeg','image/png','image/gif','image/webp','image/svg+xml',
+    'video/mp4','video/webm','video/quicktime','audio/mpeg','audio/ogg','audio/wav','application/pdf']);
+
+  const results = [];
+
+  for (const rawUrl of rawUrls) {
+    const urlStr = String(rawUrl).trim();
+    if (!urlStr) { results.push({ url: urlStr, ok: false, error: 'Empty URL' }); continue; }
+
+    // Only allow HTTPS
+    if (!urlStr.startsWith('https://')) {
+      results.push({ url: urlStr, ok: false, error: 'Only HTTPS URLs are permitted' });
+      continue;
+    }
+
+    // SSRF check
+    if (SSRF_BLOCKED.test(urlStr)) {
+      results.push({ url: urlStr, ok: false, error: 'URL targets a private or loopback address' });
+      continue;
+    }
+
+    let parsedUrl;
+    try { parsedUrl = new URL(urlStr); } catch {
+      results.push({ url: urlStr, ok: false, error: 'Invalid URL' });
+      continue;
+    }
+
+    try {
+      const resp = await fetch(urlStr, { redirect: 'follow', signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) { results.push({ url: urlStr, ok: false, error: `HTTP ${resp.status}` }); continue; }
+
+      const contentType = (resp.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+      if (!ALLOWED_TYPES.has(contentType)) {
+        results.push({ url: urlStr, ok: false, error: `Content-Type '${contentType}' not allowed` });
+        continue;
+      }
+
+      // 50 MB cap — use Content-Length header as early check, full check after reading
+      const clHeader = Number(resp.headers.get('content-length') || 0);
+      if (clHeader > 50 * 1024 * 1024) {
+        results.push({ url: urlStr, ok: false, error: 'File exceeds 50 MB limit (by Content-Length)' });
+        continue;
+      }
+
+      const arrayBuffer = await resp.arrayBuffer();
+      if (arrayBuffer.byteLength > 50 * 1024 * 1024) {
+        results.push({ url: urlStr, ok: false, error: 'File exceeds 50 MB limit' });
+        continue;
+      }
+
+      const filename = decodeURIComponent(parsedUrl.pathname.split('/').pop() || 'import')
+        .replace(/[^a-zA-Z0-9._-]/g, '_').toLowerCase() || 'import';
+      const ext = filename.includes('.') ? '' : (contentType.split('/')[1] || 'bin');
+      const safeFilename = filename + (ext ? '.' + ext : '');
+      const r2Key = `${brand}/${category}/${Date.now()}_${safeFilename}`;
+
+      await env.MEDIA_BUCKET.put(r2Key, arrayBuffer, {
+        httpMetadata: { contentType },
+        customMetadata: { brand, category, sourceUrl: urlStr.slice(0, 500), uploadedBy: user.id },
+      });
+
+      if (env.DB) {
+        const assetId = crypto.randomUUID();
+        const title = filename.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ').slice(0, 255) || 'Imported file';
+        const mediaType = contentType.startsWith('video') ? 'video' : contentType.startsWith('audio') ? 'audio'
+          : contentType === 'application/pdf' ? 'document' : 'image';
+        await env.DB.prepare(
+          `INSERT INTO cms_assets
+             (id, brand, category, title, alt_text, file_path, media_type, mime_type,
+              file_size, tags, review_status, uploaded_by)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?)`
+        ).bind(assetId, brand, category, title, '', r2Key, mediaType,
+          contentType, arrayBuffer.byteLength, tagsJson, user.id).run();
+      }
+
+      await logAudit(env.DB, user.id, 'upload_url', 'file', r2Key, { sourceUrl: urlStr });
+      results.push({ url: urlStr, ok: true, r2Key, url_path: `/api/cms/media/${r2Key}` });
+
+    } catch (err) {
+      results.push({ url: urlStr, ok: false, error: err?.message || 'Fetch failed' });
+    }
+  }
+
+  return jsonResponse({ results }, 207);
+}
+
+/**
  * GET /api/cms/media/* — Serve file from R2 (authenticated admin/preview only)
  */
 async function handleServeMedia(r2Key, env) {
@@ -1905,6 +2025,245 @@ async function handleListCategories(env) {
 }
 
 // ────────────────────────────────────────────────────────────────
+//  Public Gallery — serves approved assets to gallery.html
+//  No auth required. Only review_status='approved' assets exposed.
+// ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/cms/gallery/:brand
+ * Returns categories + items in the format gallery.html expects.
+ * Items are R2-backed assets (approved only), served via /pub/ presigned URLs.
+ */
+async function handlePublicGallery(request, brand, env) {
+  const url = new URL(request.url);
+  const limit = Math.min(parseInt(url.searchParams.get('limit') || '200', 10), 500);
+
+  // Validate brand to prevent injection (only alphanumerics and hyphens)
+  if (brand && !/^[a-z0-9-]+$/i.test(brand)) {
+    return errorResponse('Invalid brand identifier', 400);
+  }
+
+  let query, bindings;
+  if (brand && brand !== 'all') {
+    query = `SELECT id, brand, title, category, media_type, r2_key, public_url, created_at
+             FROM cms_assets
+             WHERE review_status = 'approved' AND active = 1 AND brand = ?
+             ORDER BY created_at DESC LIMIT ?`;
+    bindings = [brand, limit];
+  } else {
+    query = `SELECT id, brand, title, category, media_type, r2_key, public_url, created_at
+             FROM cms_assets
+             WHERE review_status = 'approved' AND active = 1
+             ORDER BY created_at DESC LIMIT ?`;
+    bindings = [limit];
+  }
+
+  const { results } = await env.DB.prepare(query).bind(...bindings).all();
+  const assets = results || [];
+
+  // Build category list from actual data (preserving insertion order)
+  const seenCats = new Set();
+  const categories = [];
+  for (const asset of assets) {
+    const cat = asset.category || 'uncategorized';
+    if (!seenCats.has(cat)) {
+      seenCats.add(cat);
+      categories.push({
+        id: cat,
+        title: cat.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      });
+    }
+  }
+
+  // Map asset rows to the catalog item shape gallery.html expects
+  const siteBase = env.SITE_BASE_URL ? env.SITE_BASE_URL.replace(/\/$/, '') : '';
+  const items = assets.map((a) => {
+    const cat = a.category || 'uncategorized';
+    // Use public_url if stored; otherwise build from /pub/ route
+    const src = a.public_url || (a.r2_key ? `${siteBase}/api/cms/pub/${encodeURIComponent(a.r2_key)}` : null);
+    const type = (a.media_type || '').toLowerCase().includes('video') ? 'video' : 'image';
+    return {
+      id: a.id,
+      title: a.title,
+      type,
+      src,
+      href: src,
+      brand: a.brand,
+      category: cat,
+      categories: [cat],
+      addedAt: a.created_at,
+    };
+  });
+
+  return jsonResponse({ categories, items });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Donations
+// ────────────────────────────────────────────────────────────────
+
+async function ensureDonationsSchema(db) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS cms_donations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      stripe_payment_id TEXT UNIQUE,
+      amount_cents INTEGER NOT NULL,
+      currency TEXT DEFAULT 'usd',
+      project TEXT,
+      donor_email TEXT,
+      donor_name TEXT,
+      status TEXT DEFAULT 'succeeded',
+      recurring INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    )
+  `).run();
+}
+
+async function handleListDonations(request, env) {
+  await ensureDonationsSchema(env.DB);
+  const url = new URL(request.url);
+  const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 200);
+  const offset = parseInt(url.searchParams.get('offset') || '0', 10);
+
+  const [rows, totals, monthTotals] = await Promise.all([
+    env.DB.prepare(`
+      SELECT * FROM cms_donations ORDER BY created_at DESC LIMIT ? OFFSET ?
+    `).bind(limit, offset).all(),
+    env.DB.prepare(`
+      SELECT COUNT(*) as count, COALESCE(SUM(amount_cents),0) as total_cents
+      FROM cms_donations WHERE status='succeeded'
+    `).first(),
+    env.DB.prepare(`
+      SELECT COALESCE(SUM(amount_cents),0) as month_cents
+      FROM cms_donations
+      WHERE status='succeeded'
+        AND created_at >= datetime('now','start of month')
+    `).first(),
+  ]);
+
+  return jsonResponse({
+    donations: rows.results || [],
+    totalRaised: totals?.total_cents || 0,
+    thisMonth: monthTotals?.month_cents || 0,
+    count: totals?.count || 0,
+  });
+}
+
+async function handleRecordDonation(request, user, env) {
+  await ensureDonationsSchema(env.DB);
+  const body = await request.json();
+  const { stripe_payment_id, amount_cents, currency, project, donor_email, donor_name, recurring } = body;
+
+  if (!amount_cents || !Number.isInteger(amount_cents) || amount_cents < 100) {
+    return errorResponse('amount_cents must be an integer >= 100');
+  }
+
+  await env.DB.prepare(`
+    INSERT OR IGNORE INTO cms_donations
+      (stripe_payment_id, amount_cents, currency, project, donor_email, donor_name, status, recurring)
+    VALUES (?, ?, ?, ?, ?, ?, 'succeeded', ?)
+  `).bind(
+    stripe_payment_id || `manual_${Date.now()}`,
+    amount_cents,
+    currency || 'usd',
+    project || 'Good Flippin Design',
+    donor_email || null,
+    donor_name || null,
+    recurring ? 1 : 0,
+  ).run();
+
+  await logAudit(env.DB, user.sub, 'donation_recorded', 'donation', stripe_payment_id || 'manual', `$${(amount_cents/100).toFixed(2)}`);
+  return jsonResponse({ ok: true });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Admin Ops Board
+// ────────────────────────────────────────────────────────────────
+
+async function ensureAdminOpsSchema(db) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS admin_ops (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      severity TEXT NOT NULL DEFAULT 'normal',
+      brand TEXT DEFAULT 'all',
+      area TEXT DEFAULT 'General',
+      detail TEXT DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      completed_at TEXT DEFAULT NULL
+    )
+  `).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_ops_severity ON admin_ops(severity)`).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_admin_ops_completed ON admin_ops(completed_at)`).run();
+}
+
+async function handleAdminOps(request, user, env, method, taskId) {
+  await ensureAdminOpsSchema(env.DB);
+
+  if (method === 'GET') {
+    const url = new URL(request.url);
+    const includeDone = url.searchParams.get('includeDone') === '1';
+    const whereClause = includeDone ? '' : `WHERE completed_at IS NULL`;
+    const rows = await env.DB.prepare(`
+      SELECT * FROM admin_ops
+      ${whereClause}
+      ORDER BY
+        CASE severity WHEN 'critical' THEN 0 WHEN 'warning' THEN 1 WHEN 'normal' THEN 2 ELSE 3 END,
+        created_at DESC
+    `).all();
+    return jsonResponse({ tasks: rows.results || [] });
+  }
+
+  if (method === 'POST') {
+    const body = await request.json();
+    const { title, severity = 'normal', brand = 'all', area = 'General', detail = '' } = body;
+    if (!title || typeof title !== 'string' || title.trim().length === 0) {
+      return errorResponse('title is required');
+    }
+    const id = crypto.randomUUID();
+    await env.DB.prepare(`
+      INSERT INTO admin_ops (id, title, severity, brand, area, detail)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).bind(id, title.trim().slice(0, 200), severity, brand, area, detail.slice(0, 500)).run();
+    const row = await env.DB.prepare(`SELECT * FROM admin_ops WHERE id = ?`).bind(id).first();
+    return jsonResponse({ task: row }, 201);
+  }
+
+  if (!taskId) return errorResponse('task id required', 400);
+
+  if (method === 'PUT') {
+    const body = await request.json();
+    const updates = [];
+    const binds = [];
+    if (body.title !== undefined) { updates.push('title = ?'); binds.push(body.title.trim().slice(0, 200)); }
+    if (body.severity !== undefined) { updates.push('severity = ?'); binds.push(body.severity); }
+    if (body.detail !== undefined) { updates.push('detail = ?'); binds.push(body.detail.slice(0, 500)); }
+    if (body.brand !== undefined) { updates.push('brand = ?'); binds.push(body.brand); }
+    if (body.area !== undefined) { updates.push('area = ?'); binds.push(body.area); }
+    if (body.completed !== undefined) {
+      updates.push('completed_at = ?');
+      binds.push(body.completed ? new Date().toISOString() : null);
+      if (body.completed) { updates.push('severity = ?'); binds.push('done'); }
+    }
+    if (updates.length === 0) return errorResponse('no fields to update', 400);
+    updates.push('updated_at = ?');
+    binds.push(new Date().toISOString());
+    binds.push(taskId);
+    await env.DB.prepare(`UPDATE admin_ops SET ${updates.join(', ')} WHERE id = ?`).bind(...binds).run();
+    const row = await env.DB.prepare(`SELECT * FROM admin_ops WHERE id = ?`).bind(taskId).first();
+    return jsonResponse({ task: row });
+  }
+
+  if (method === 'DELETE') {
+    await env.DB.prepare(`DELETE FROM admin_ops WHERE id = ?`).bind(taskId).run();
+    return jsonResponse({ ok: true });
+  }
+
+  return errorResponse('Method not allowed', 405);
+}
+
+// ────────────────────────────────────────────────────────────────
 //  Router
 // ────────────────────────────────────────────────────────────────
 
@@ -1931,6 +2290,16 @@ export async function handleCMSRequest(request, env, user) {
     }
     if (path === '/platform-rules' && method === 'GET') {
       return jsonResponse(PLATFORM_RULES);
+    }
+
+    // Public gallery — returns approved CMS assets for a brand (used by gallery.html)
+    const galleryPublicMatch = path.match(/^\/gallery\/([a-z0-9-]+)$/i);
+    if (galleryPublicMatch && method === 'GET') {
+      return handlePublicGallery(request, galleryPublicMatch[1], env);
+    }
+    // /gallery with no brand — return all approved assets
+    if (path === '/gallery' && method === 'GET') {
+      return handlePublicGallery(request, null, env);
     }
 
     // Serve approved assets to public pages (image overrides, gallery embeds)
@@ -2002,6 +2371,34 @@ export async function handleCMSRequest(request, env, user) {
     // File upload (admin)
     if (path === '/upload' && method === 'POST') {
       return handleUpload(request, user, env);
+    }
+
+    // Batch URL import (admin)
+    if (path === '/upload-url' && method === 'POST') {
+      return handleUploadUrl(request, user, env);
+    }
+
+    // Donations (admin)
+    if (path === '/donations' && method === 'GET') {
+      return handleListDonations(request, env);
+    }
+    if (path === '/donations' && method === 'POST') {
+      return handleRecordDonation(request, user, env);
+    }
+
+    // Admin Ops Board
+    if (path === '/admin-ops' && method === 'GET') {
+      return handleAdminOps(request, user, env, 'GET', null);
+    }
+    if (path === '/admin-ops' && method === 'POST') {
+      return handleAdminOps(request, user, env, 'POST', null);
+    }
+    const opsIdMatch = path.match(/^\/admin-ops\/([^/]+)$/);
+    if (opsIdMatch && method === 'PUT') {
+      return handleAdminOps(request, user, env, 'PUT', decodeURIComponent(opsIdMatch[1]));
+    }
+    if (opsIdMatch && method === 'DELETE') {
+      return handleAdminOps(request, user, env, 'DELETE', decodeURIComponent(opsIdMatch[1]));
     }
 
     // Social posts (admin)

@@ -12,6 +12,15 @@
 
         gtag('config', 'G-WM6Q66W9W0');
     </script>
+    <!-- Global error capture (forwards to GA4 when Sentry isn't loaded) -->
+    <script>
+        window.addEventListener('error', function (e) {
+            if (window.gtag) gtag('event', 'js_error', { description: (e.message || '') + ' @ ' + (e.filename || '') + ':' + (e.lineno || ''), fatal: false });
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+            if (window.gtag) gtag('event', 'js_error', { description: 'UnhandledRejection: ' + (e.reason || ''), fatal: false });
+        });
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://goodflippindesign.com/donate">

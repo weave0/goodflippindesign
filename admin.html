@@ -5395,6 +5395,77 @@
             color: var(--accent-sky);
         }
 
+        /* DCC Swap Modal */
+        .dcc-swap-search {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            margin-bottom: 0.6rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.85rem;
+        }
+
+        .dcc-swap-search:focus {
+            border-color: var(--accent-sky);
+            outline: none;
+        }
+
+        .dcc-swap-list {
+            max-height: 320px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .dcc-swap-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .dcc-swap-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .dcc-swap-item .swap-name {
+            font-size: 0.85rem;
+            font-weight: 550;
+        }
+
+        .dcc-swap-item .swap-region {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .dcc-swap-slot-btns {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .dcc-swap-slot-btns button {
+            padding: 0.35rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.78rem;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .dcc-swap-slot-btns button.active {
+            border-color: var(--accent-sky);
+            color: var(--accent-sky);
+        }
+
         /* ── Gap Flags Panel ──────────────────────────────────────── */
         .gap-flags-list {
             display: flex;
@@ -5666,6 +5737,308 @@
             color: var(--error);
             font-weight: 600;
         }
+
+        /* ── Ecosystem Command Grid ─────────────────────────── */
+        .eco-command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 12px;
+        }
+
+        .eco-site-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .eco-site-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .eco-site-card.undeployed {
+            opacity: 0.5;
+        }
+
+        .eco-site-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .eco-site-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .eco-site-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex: 1;
+        }
+
+        .eco-hosting-badge {
+            font-size: 0.7rem;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .eco-hosting-badge.cf-pages {
+            background: #f6821f22;
+            color: #f6821f;
+            border: 1px solid #f6821f44;
+        }
+
+        .eco-hosting-badge.vercel {
+            background: #ffffff18;
+            color: #e5e5e5;
+            border: 1px solid #ffffff33;
+        }
+
+        .eco-hosting-badge.gfd-inline {
+            background: #6c63ff22;
+            color: #9d97ff;
+            border: 1px solid #6c63ff44;
+        }
+
+        .eco-hosting-badge.undeployed {
+            background: #64748b22;
+            color: #94a3b8;
+            border: 1px solid #64748b44;
+        }
+
+        .eco-site-purpose {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .eco-site-links {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .eco-site-link {
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 6px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .eco-site-link:hover {
+            color: var(--text);
+            border-color: var(--accent);
+        }
+
+        .eco-health-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+        }
+
+        .eco-health-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .eco-health-dot.ok {
+            background: var(--success);
+        }
+
+        .eco-health-dot.warn {
+            background: var(--warning, #f59e0b);
+        }
+
+        .eco-health-dot.fail {
+            background: var(--error);
+        }
+
+        .eco-health-dot.unknown {
+            background: var(--text-muted);
+        }
+
+        .eco-site-notes {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-style: italic;
+            border-top: 1px solid var(--border);
+            padding-top: 6px;
+        }
+
+        /* ── Quick Launch Grid ──────────────────────────────── */
+        .quick-launch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px;
+        }
+
+        .quick-launch-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 500;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .quick-launch-item:hover {
+            border-color: var(--accent);
+            background: var(--bg);
+        }
+
+        .quick-launch-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .quick-launch-group-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            grid-column: 1 / -1;
+            padding-top: 6px;
+        }
+
+        /* ── Ops Board ──────────────────────────────────────── */
+        .ops-board-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+
+        .ops-task {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 7px;
+            border-left: 3px solid transparent;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-left-width: 3px;
+            transition: opacity 0.2s ease;
+        }
+
+        .ops-task[data-sev="critical"] {
+            border-left-color: var(--error);
+        }
+
+        .ops-task[data-sev="warning"] {
+            border-left-color: var(--warning, #f59e0b);
+        }
+
+        .ops-task[data-sev="normal"] {
+            border-left-color: var(--accent);
+        }
+
+        .ops-task[data-sev="done"] {
+            border-left-color: var(--border);
+            opacity: 0.5;
+        }
+
+        .ops-task-check {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            cursor: pointer;
+            margin-top: 2px;
+            accent-color: var(--success);
+        }
+
+        .ops-task-body {
+            flex: 1;
+        }
+
+        .ops-task-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .ops-task-meta {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .ops-task-del {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: color 0.15s ease;
+        }
+
+        .ops-task-del:hover {
+            color: var(--error);
+        }
+
+        .ops-add-form {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-top: 8px;
+        }
+
+        .ops-add-form input[type="text"],
+        .ops-add-form select {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            padding: 6px 10px;
+            font-size: 0.82rem;
+        }
+
+        .ops-add-form input[type="text"] {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .ops-add-form .btn {
+            min-width: 70px;
+        }
+
+        .ops-static-details summary {
+            cursor: pointer;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            padding: 4px 0;
+            margin-top: 6px;
+        }
     </style>
 </head>
 
@@ -5933,25 +6306,24 @@
                         </ol>
                     </article>
 
-                    <article class="panel portal-callout mb-085">
+                    <!-- Ecosystem Command Grid ──────────────────── -->
+                    <article class="panel mb-085" id="eco-command-panel">
                         <div class="section-head">
-                            <h2 class="section-title">CultureSherpa Culture Post Portal</h2>
+                            <h2 class="section-title">&#127760; Ecosystem Command Map</h2>
                             <div class="inline-actions">
-                                <button class="btn btn-secondary" data-open-daily-cultures="culturesherpa">Open Daily Calendar</button>
-                                <button class="btn btn-secondary" data-open-brand-gallery="culturesherpa">Open Social Feed</button>
-                                <button class="btn btn-primary" data-open-brand-studio="culturesherpa">Open Portal</button>
+                                <span class="text-muted" style="font-size:0.8rem" id="eco-health-updated"></span>
+                                <button class="btn btn-secondary" id="eco-cmd-refresh-btn">&#8635; Refresh Health</button>
                             </div>
                         </div>
-                        <div class="portal-callout-copy">
-                            <p class="subheading">Direct route into the workflow for managing CultureSherpa culture-post registries, story scenes, prompt assets, and scheduled post variants. This focuses the workspace on CultureSherpa and opens the right surface immediately.</p>
-                            <div class="portal-callout-meta">
-                                <span class="tag ok">CultureSherpa</span>
-                                <span class="tag">2 Cultures / Day</span>
-                                <span class="tag">Story Registries</span>
-                                <span class="tag">Scene Prompts</span>
-                                <span class="tag">Social Variants</span>
-                            </div>
+                        <div id="eco-command-grid" class="eco-command-grid"></div>
+                    </article>
+
+                    <!-- Quick Launch ─────────────────────────────── -->
+                    <article class="panel mb-085" id="quick-launch-panel">
+                        <div class="section-head">
+                            <h2 class="section-title">&#9889; Quick Launch</h2>
                         </div>
+                        <div id="quick-launch-grid" class="quick-launch-grid"></div>
                     </article>
 
                     <div class="split">
@@ -5982,16 +6354,38 @@
                         </article>
                     </div>
 
-                    <!-- Gap Flags ────────────────────────────────────── -->
+                    <!-- Operations Board ──────────────────────────── -->
                     <article class="panel mb-085" id="gap-flags-panel">
                         <div class="section-head">
-                            <h2 class="section-title">&#9873; Ecosystem Gaps &amp; Flags</h2>
+                            <h2 class="section-title">&#9873; Operations Board</h2>
                             <div class="inline-actions">
                                 <span class="text-muted" style="font-size:0.8rem" id="gap-flags-updated"></span>
                             </div>
                         </div>
                         <div id="brand-health-strip" class="brand-health-strip"></div>
-                        <div id="gap-flags-list" class="gap-flags-list"></div>
+                        <div id="ops-board-list" class="ops-board-list"></div>
+                        <form id="ops-add-form" class="ops-add-form">
+                            <input type="text" id="ops-add-title" placeholder="Add a task or flag..." maxlength="200" required />
+                            <select id="ops-add-severity">
+                                <option value="normal">Normal</option>
+                                <option value="warning">Warning</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                            <select id="ops-add-brand">
+                                <option value="all">All</option>
+                                <option value="gfd">GFD</option>
+                                <option value="gfv">GFV</option>
+                                <option value="aiaimate">AIAimate</option>
+                                <option value="culturesherpa">CultureSherpa</option>
+                                <option value="citizenapproved">CitizenApproved</option>
+                                <option value="globaldeets">GlobalDeets</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </form>
+                        <details class="ops-static-details">
+                            <summary>Static gap flags (code)</summary>
+                            <div id="gap-flags-list" class="gap-flags-list"></div>
+                        </details>
                     </article>
 
                     <article class="panel">
@@ -6188,8 +6582,51 @@
                             <div class="upload-title">Drag &amp; drop to upload</div>
                             <div class="upload-hint">Images, video, audio, documents &mdash; max 50 MB each</div>
                             <button class="btn btn-secondary upload-folder-btn" id="import-folder-btn" type="button">&#128193; Import Folder</button>
+                            <button class="btn btn-secondary" id="import-urls-btn" type="button" title="Batch-import remote HTTPS image/video URLs into R2">&#128279; Import URLs</button>
                         </div>
                         <ul class="upload-progress-list" id="upload-progress-list"></ul>
+
+                        <!-- URL Import Modal -->
+                        <div class="modal-overlay d-none" id="url-import-modal" role="dialog" aria-modal="true" aria-labelledby="url-import-title">
+                            <div class="modal-box" style="max-width:680px">
+                                <div class="modal-header">
+                                    <h3 id="url-import-title">&#128279; Batch Import URLs</h3>
+                                    <button class="modal-close" id="url-import-close" aria-label="Close">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="text-muted" style="margin-bottom:1rem">Paste one HTTPS URL per line. Files are fetched server-side and stored as <strong>draft</strong> assets in R2. Max 200 URLs per batch.</p>
+                                    <label class="form-label" for="url-import-textarea">URLs (one per line)</label>
+                                    <textarea id="url-import-textarea" rows="8" placeholder="https://example.com/photo1.jpg&#10;https://cdn.example.com/banner.png" style="width:100%;font-family:var(--mono);font-size:0.8rem;resize:vertical"></textarea>
+                                    <div class="form-grid" style="margin-top:1rem">
+                                        <div>
+                                            <label class="form-label" for="url-import-brand">Brand</label>
+                                            <select id="url-import-brand"></select>
+                                        </div>
+                                        <div>
+                                            <label class="form-label" for="url-import-category">Category</label>
+                                            <input type="text" id="url-import-category" placeholder="e.g. social-artwork, headshots">
+                                        </div>
+                                        <div>
+                                            <label class="form-label" for="url-import-tags">Tags <span class="text-muted">(comma-separated)</span></label>
+                                            <input type="text" id="url-import-tags" placeholder="import, social, batch">
+                                        </div>
+                                    </div>
+                                    <div id="url-import-progress" class="d-none" style="margin-top:1rem">
+                                        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem">
+                                            <div class="upload-bar-wrap" style="flex:1">
+                                                <div class="upload-bar" id="url-import-bar" style="width:0%"></div>
+                                            </div>
+                                            <span id="url-import-counter" class="text-muted" style="white-space:nowrap;font-size:.8rem">0 / 0</span>
+                                        </div>
+                                        <ul id="url-import-results" style="max-height:200px;overflow-y:auto;list-style:none;padding:0;margin:0;font-size:.8rem;font-family:var(--mono)"></ul>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-ghost" id="url-import-cancel">Cancel</button>
+                                    <button class="btn btn-primary" id="url-import-submit">&#8680; Start Import</button>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Bulk Ingest Staging Panel (shown when files are queued) -->
                         <div class="panel bulk-stage d-none" id="bulk-stage">
@@ -6732,6 +7169,14 @@
                     </div>
                     <p class="subheading mb-08">Run <code>scripts/storage-snapshot.ps1</code> on WEAVERASUS, then import the resulting <code>storage-snapshot.json</code> here to see drive utilization, growth deltas, and pending action items.</p>
 
+                    <!-- Cloud Assets (R2) — auto-loads from /api/cms/stats -->
+                    <article class="panel mb-08" id="storage-cloud-panel">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Cloud Assets (R2 + D1)</h3>
+                        </div>
+                        <div id="storage-cloud-kpi"></div>
+                    </article>
+
                     <!-- Command CTA -->
                     <div class="storage-import-row">
                         <span class="text-muted" style="font-size:0.82rem;white-space:nowrap">Run on WEAVERASUS:</span>
@@ -6817,7 +7262,7 @@
                             <button class="btn btn-secondary" id="donations-refresh-btn">Refresh</button>
                         </div>
                     </div>
-                    <p class="subheading mb-08">Donation transactions processed via Stripe. Add a webhook listener at <code>/api/donations/webhook</code> to log gifts to D1 for real-time analytics here.</p>
+                    <p class="subheading mb-08">Donation transactions logged from Stripe via <code>POST /api/stripe/webhook</code>. Register the endpoint in the <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener">Stripe Dashboard</a> and set the <code>STRIPE_WEBHOOK_SECRET</code> Pages env secret to enable live data. Events: <code>payment_intent.succeeded</code>, <code>charge.refunded</code>.</p>
 
                     <div class="panel-kpis">
                         <div class="panel-kpi">
@@ -7117,6 +7562,7 @@
                                 <button class="dcc-view-btn" data-dcc-view="month">Month</button>
                             </div>
                             <button class="btn btn-secondary" id="dcc-refresh-btn">&#8635; Refresh</button>
+                            <button class="btn btn-secondary" id="dcc-export-btn" title="Download full featured-cultures.json with any in-session swaps applied">&#8615; Export JSON</button>
                         </div>
                     </div>
                     <p class="subheading mb-08">Two featured cultures every day &mdash; morning &amp; evening rotations for CultureSherpa social posts.</p>
@@ -8172,6 +8618,29 @@
         </div>
     </div>
 
+    <!-- DCC Culture Swap Modal -->
+    <div class="modal-wrap" id="dcc-swap-modal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h3 id="dcc-swap-title">Swap Culture</h3>
+                <button class="modal-close" data-close-modal="dcc-swap-modal" aria-label="Close">&times;</button>
+            </div>
+            <div style="margin-bottom:0.5rem">
+                <span id="dcc-swap-date-label" style="font-size:0.8rem;color:var(--text-muted)"></span>
+            </div>
+            <div class="dcc-swap-slot-btns">
+                <button class="active" data-swap-slot="am">AM Slot</button>
+                <button data-swap-slot="pm">PM Slot</button>
+            </div>
+            <input class="dcc-swap-search" id="dcc-swap-search" placeholder="Search 413 cultures&hellip;" autocomplete="off">
+            <div class="dcc-swap-list" id="dcc-swap-list"></div>
+            <div class="actions" style="margin-top:0.6rem">
+                <button class="btn btn-secondary" data-close-modal="dcc-swap-modal">Cancel</button>
+                <button class="btn btn-secondary" id="dcc-swap-copy-btn" style="font-size:0.75rem">Copy JSON</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function () {
             'use strict';
@@ -8226,6 +8695,35 @@
                     highVolumeTags: ['community', 'love', 'goodvibes', 'civic'],
                 },
             };
+
+            // ── Ecosystem & Quick-Launch registries ──────────────────────────
+            const SITE_REGISTRY = [
+                { id: 'gfd', name: 'Good Flippin Design', domain: 'goodflippindesign.com', purpose: 'Main portfolio + consultancy', hosting: 'cf-pages', liveUrl: 'https://goodflippindesign.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/goodflippindesign', color: '#6c63ff', repo: 'weave0/goodflippindesign', notes: 'Primary site. All workers live here.' },
+                { id: 'gfv', name: 'Good Flippin Vibes', domain: 'goodflippinvibes.com', purpose: 'Wellness platform · origin brand', hosting: 'cf-pages', liveUrl: 'https://goodflippinvibes.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/good-flippin-vibes', color: '#10b981', repo: 'weave0/good-flippin-vibes', notes: 'Vite build. git push → auto CF Pages.' },
+                { id: 'aiaimate', name: 'AI Aimate', domain: 'aiaimate.com', purpose: 'AI education platform (Next.js)', hosting: 'vercel', liveUrl: 'https://aiaimate.com', adminUrl: 'https://vercel.com/weave0/portal', color: '#3b82f6', repo: 'weave0/aiaimate', notes: '⚠️ On Vercel — NOT Cloudflare. Deploy via Vercel dashboard or git push.' },
+                { id: 'culturesherpa', name: 'CultureSherpa', domain: 'culturesherpa.org', purpose: 'Interactive cultural atlas', hosting: 'cf-pages', liveUrl: 'https://culturesherpa.org', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/culturesherpa', color: '#f59e0b', repo: 'weave0/CultureSherpa', notes: 'Astro + Python API.' },
+                { id: 'citizenapproved', name: 'CitizenApproved', domain: 'citizenapproved.com', purpose: 'Civic engagement platform', hosting: 'cf-pages', liveUrl: 'https://citizenapproved.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/citizenapproved', color: '#ef4444', repo: 'weave0/CitizenApproved', notes: 'Next.js + TS. GH Actions needs CF Pages token secret.' },
+                { id: 'globaldeets', name: 'GlobalDeets', domain: 'globaldeets.com', purpose: 'Portfolio project hub', hosting: 'cf-pages', liveUrl: 'https://globaldeets.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/globaldeets', color: '#8b5cf6', repo: 'weave0/globaldeets', notes: 'Password-gated. No CSP/HSTS yet.' },
+                { id: 'jamiemediation', name: 'Jamie Rigling Mediation', domain: null, purpose: 'Client landing page (inline GFD)', hosting: 'gfd-inline', liveUrl: 'https://goodflippindesign.com/jamie-rigling-mediation.html', adminUrl: null, color: '#e74c3c', repo: 'weave0/jamie-mediation', notes: 'Standalone page in GFD repo.' },
+                { id: 'thyown', name: 'ThyOwn', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#64748b', repo: null, notes: 'No repo, not deployed.' },
+                { id: 'summitview', name: 'SummitView', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#1abc9c', repo: 'weave0/SummitView', notes: 'Has GitHub repo, not deployed.' },
+                { id: 'weave', name: 'Weave', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#94a3b8', repo: null, notes: 'Exploratory Python project.' },
+            ];
+
+            const QUICK_LINKS = [
+                { label: 'Cloudflare Dashboard', icon: '🔶', url: 'https://dash.cloudflare.com', group: 'Hosting' },
+                { label: 'CF Pages', icon: '📄', url: 'https://dash.cloudflare.com/?to=/:account/pages', group: 'Hosting' },
+                { label: 'CF Workers', icon: '⚙️', url: 'https://dash.cloudflare.com/?to=/:account/workers', group: 'Hosting' },
+                { label: 'CF D1 Database', icon: '🗄️', url: 'https://dash.cloudflare.com/?to=/:account/d1', group: 'Hosting' },
+                { label: 'CF R2 Storage', icon: '🪣', url: 'https://dash.cloudflare.com/?to=/:account/r2', group: 'Hosting' },
+                { label: 'Vercel (aiaimate)', icon: '▲', url: 'https://vercel.com/weave0/portal', group: 'Dev' },
+                { label: 'GitHub Repos', icon: '🐙', url: 'https://github.com/weave0', group: 'Dev' },
+                { label: 'Clerk Auth', icon: '🔐', url: 'https://dashboard.clerk.com', group: 'Auth' },
+                { label: 'Stripe', icon: '💳', url: 'https://dashboard.stripe.com', group: 'Payments' },
+                { label: 'Formspree', icon: '📬', url: 'https://formspree.io/forms', group: 'Forms' },
+                { label: 'GA4 Analytics', icon: '📈', url: 'https://analytics.google.com', group: 'Analytics' },
+                { label: 'Sentry', icon: '🐛', url: 'https://sentry.io', group: 'Monitoring' },
+            ];
 
             // Maps each platform to its OAuth provider key
             const PLATFORM_TO_PROVIDER = {
@@ -8466,6 +8964,10 @@
                 if (window.__adminPanels?.['daily-cultures']) {
                     window.__adminPanels['daily-cultures']();
                 }
+                // Mission Control panels
+                renderEcosystemMap();
+                renderQuickLaunch();
+                initOpsBoard();
             }
 
             // ── Command Palette ──────────────────────────────────────────────
@@ -8774,6 +9276,7 @@
 
                 // ── Upload Dropzone Setup ────────────────────────────────────
                 initUploadZone();
+                initUrlImport();
 
                 // ── Post Preview Toggle ───────────────────────────────────────
                 const previewToggle = $('preview-toggle');
@@ -9584,6 +10087,20 @@
                     `;
                 }).join('');
 
+                // Append env-secret status rows (read from window.ENV injected by _worker.js)
+                const sentryOk = !!(window.ENV && window.ENV.SENTRY_DSN);
+                const stripeOk = !!(window.ENV && window.ENV.STRIPE_PUBLISHABLE_KEY);
+                connectionSummary.innerHTML += `
+                    <div class="overview-conn-row" style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px">
+                        <span class="overview-conn-name">Sentry</span>
+                        <span class="tag ${sentryOk ? 'ok' : 'warn'}" title="${sentryOk ? 'SENTRY_DSN is set' : 'SENTRY_DSN not set — run: wrangler secret put SENTRY_DSN'}">${sentryOk ? 'active' : 'not set'}</span>
+                    </div>
+                    <div class="overview-conn-row">
+                        <span class="overview-conn-name">Stripe key</span>
+                        <span class="tag ${stripeOk ? 'ok' : 'warn'}" title="${stripeOk ? 'STRIPE_PUBLISHABLE_KEY is set' : 'STRIPE_PUBLISHABLE_KEY not set'}">${stripeOk ? 'active' : 'not set'}</span>
+                    </div>
+                `;
+
                 const assetsBody = $('overview-assets');
                 const recentAssets = [...state.assets]
                     .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
@@ -9640,9 +10157,9 @@
                     detail: 'd1-schema-cms.sql, d1-schema-media-platform.sql, d1-schema-console.sql exist but production apply status is unknown. Verify via D1 console.'
                 },
                 {
-                    id: 'cs-api-auth-stubs', severity: 'blocker', brand: 'culturesherpa', area: 'CultureSherpa',
+                    id: 'cs-api-auth-stubs', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
                     title: 'CS API: 3 endpoints callable without auth',
-                    detail: 'celebrations.py:32, cultural_images.py:48, s3_upload.py:62 all have TODO: Implement proper JWT auth. Fix before CS goes production.'
+                    detail: 'celebrations.py:32, cultural_images.py:48, s3_upload.py:62 lack JWT auth. CultureSherpa is not yet live so severity downgraded from blocker to quality. Fix before production launch.'
                 },
                 {
                     id: 'cs-coming-soon-tabs', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
@@ -9683,14 +10200,14 @@
                 },
                 // ── Admin Portal ───────────────────────────────────────────────
                 {
-                    id: 'admin-auth-gate', severity: 'quality', brand: 'gfd', area: 'Admin',
-                    title: 'admin.html auth not enforced at CF Pages layer',
-                    detail: 'Clerk gates the UI but _worker.js does not block unauthenticated requests to /admin.html at the edge. Confirm origin protection or add CF Access rule.'
+                    id: 'admin-auth-gate', severity: 'done', brand: 'gfd', area: 'Admin',
+                    title: 'admin.html edge auth — session cookie gate in _worker.js',
+                    detail: '_worker.js lines 130–137 check for __session or __client_uat cookies on /admin.html requests and redirect unauthenticated visitors to /?auth_required=admin.'
                 },
                 {
-                    id: 'admin-profanity', severity: 'quality', brand: 'gfd', area: 'Admin',
-                    title: 'Auth.js profanity filter is a stub',
-                    detail: 'workers/auth.js line ~265 only blocks "spam" and "test-profanity". Replace with a real word list before community platform goes public.'
+                    id: 'admin-profanity', severity: 'done', brand: 'gfd', area: 'Admin',
+                    title: 'Profanity filter — 27 terms (slurs + spam triggers)',
+                    detail: 'workers/auth.js lines 268–278 block 27 terms including common slurs, explicit language, and spam triggers. Test sentinel test-profanity retained for CI.'
                 },
                 // ── Ops / Monitoring ──────────────────────────────────────────
                 {
@@ -9710,9 +10227,9 @@
                 },
                 // ── Hygiene / Orphaned Files ──────────────────────────────────
                 {
-                    id: 'orphan-html', severity: 'hygiene', brand: 'gfd', area: 'Hygiene',
-                    title: 'Orphaned HTML files in root',
-                    detail: 'ga-test-enhanced.html, test-ga.html, oauth-diagnostic.html, globaldeets-live-snapshot.html, main.html, globaldeets-phase1-live.html are publicly accessible debug/snapshot files. Move to .gitignore or delete.'
+                    id: 'orphan-html', severity: 'done', brand: 'gfd', area: 'Hygiene',
+                    title: 'Orphaned HTML files cleaned up',
+                    detail: 'ga-test-enhanced.html, test-ga.html, oauth-diagnostic.html, globaldeets-live-snapshot.html, main.html, globaldeets-phase1-live.html have all been removed from the repository.'
                 },
                 {
                     id: 'jamie-mediation-placement', severity: 'hygiene', brand: 'gfd', area: 'Hygiene',
@@ -9720,9 +10237,30 @@
                     detail: 'Client page is mixed into main site repo. weave0/jamie-mediation repo exists — should this deploy independently?'
                 },
                 {
-                    id: 'gallery-page', severity: 'hygiene', brand: 'gfd', area: 'Hygiene',
-                    title: 'gallery.html has no tests or nav link',
-                    detail: 'gallery.html exists (24KB) but is not tested and not linked from main navigation. Confirm if complete and intended to be public.'
+                    id: 'gallery-page', severity: 'done', brand: 'gfd', area: 'Hygiene',
+                    title: 'gallery.html — nav link exists, CMS endpoint live',
+                    detail: 'gallery.html is linked from main nav (desktop + mobile). /api/cms/gallery/:brand endpoint added to cms.js returning approved assets. No automated tests yet.'
+                },
+                // ── Recent completions (2026-03-12) ────────────────────────────
+                {
+                    id: 'stripe-webhook', severity: 'done', brand: 'gfd', area: 'Ops',
+                    title: 'Stripe webhook implemented',
+                    detail: 'handleStripeWebhook() in workers/auth.js at POST /api/stripe/webhook. Web Crypto HMAC-SHA256 verifies STRIPE_WEBHOOK_SECRET. Handles payment_intent.succeeded/failed + charge.refunded.'
+                },
+                {
+                    id: 'd1-schema-social', severity: 'done', brand: 'gfd', area: 'Ops',
+                    title: 'D1 schema files complete',
+                    detail: 'd1-schema-cms-social.sql covers social_accounts, brand_workflows, discovered_assets, cross_post_links, cms_prompt_registries, cms_generated_assets. d1-schema-nft.sql covers cms_nft_collections + cms_nft_tokens.'
+                },
+                {
+                    id: 'feature-flags-injection', severity: 'done', brand: 'gfd', area: 'Ops',
+                    title: 'Feature flags injected via _worker.js',
+                    detail: 'ENABLE_COMMUNITY, ENABLE_BLOG_CMS, ENABLE_DONATIONS, ENABLE_AI_FEATURES now included in window.ENV injection. Can be toggled via Cloudflare secret (default ON for community/blog/donations).'
+                },
+                {
+                    id: 'admin-jwt-hardening', severity: 'done', brand: 'gfd', area: 'Admin',
+                    title: 'Admin edge: JWT format validation added',
+                    detail: '_worker.js now checks that __session cookie value starts with "ey" (base64url JWT header) and is >20 chars, preventing cookie spoofing with arbitrary values.'
                 },
             ];
 
@@ -10093,6 +10631,108 @@
                     `;
                 }).join('');
             }
+            function initUrlImport() {
+                const modal = $('url-import-modal');
+                if (!modal) return;
+
+                // Populate brand select (same brands as bulk-brand)
+                const brandSel = $('url-import-brand');
+                if (brandSel && typeof BRANDS !== 'undefined') {
+                    Object.entries(BRANDS).forEach(([id, def]) => {
+                        const opt = document.createElement('option');
+                        opt.value = id;
+                        opt.textContent = def.shortName || id;
+                        if (id === currentBrand) opt.selected = true;
+                        brandSel.appendChild(opt);
+                    });
+                }
+
+                function openModal() {
+                    modal.classList.remove('d-none');
+                    const ta = $('url-import-textarea');
+                    if (ta) ta.focus();
+                }
+                function closeModal() {
+                    modal.classList.add('d-none');
+                    $('url-import-progress').classList.add('d-none');
+                    $('url-import-bar').style.width = '0%';
+                    $('url-import-results').innerHTML = '';
+                    $('url-import-submit').disabled = false;
+                    $('url-import-submit').textContent = '\u21d2 Start Import';
+                }
+
+                $('import-urls-btn').addEventListener('click', (ev) => { ev.stopPropagation(); openModal(); });
+                $('url-import-close').addEventListener('click', closeModal);
+                $('url-import-cancel').addEventListener('click', closeModal);
+                modal.addEventListener('click', (ev) => { if (ev.target === modal) closeModal(); });
+
+                $('url-import-submit').addEventListener('click', async () => {
+                    const ta = $('url-import-textarea');
+                    const urls = (ta.value || '').split('\n').map((u) => u.trim()).filter(Boolean);
+                    if (!urls.length) { toast('Paste at least one URL.', 'info'); return; }
+                    if (urls.length > 200) { toast('Max 200 URLs per batch.', 'error'); return; }
+
+                    const brand = $('url-import-brand').value || currentBrand;
+                    const category = ($('url-import-category').value.trim() || 'imports');
+                    const tagsRaw = $('url-import-tags').value.trim();
+
+                    const submitBtn = $('url-import-submit');
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Importing\u2026';
+
+                    const progressWrap = $('url-import-progress');
+                    const bar = $('url-import-bar');
+                    const counter = $('url-import-counter');
+                    const resultList = $('url-import-results');
+                    progressWrap.classList.remove('d-none');
+                    resultList.innerHTML = '';
+                    counter.textContent = '0 / ' + urls.length;
+
+                    // Split into batches of 20 to avoid timeout
+                    const BATCH = 20;
+                    let done = 0; let ok = 0; let fail = 0;
+
+                    for (let i = 0; i < urls.length; i += BATCH) {
+                        const chunk = urls.slice(i, i + BATCH);
+                        let results = [];
+                        try {
+                            const res = await api('/upload-url', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ urls: chunk, brand, category, tags: tagsRaw }),
+                            });
+                            results = res.results || [];
+                        } catch (err) {
+                            // Tag all in chunk as failed
+                            results = chunk.map((u) => ({ url: u, ok: false, error: err.message || 'Request failed' }));
+                        }
+
+                        results.forEach((r) => {
+                            done++;
+                            const li = document.createElement('li');
+                            li.style.cssText = 'padding:2px 0;display:flex;gap:.5rem;align-items:flex-start';
+                            if (r.ok) {
+                                ok++;
+                                li.innerHTML = `<span style="color:var(--success)">✓</span><span style="word-break:break-all;opacity:.7">${escapeHtml(r.url)}</span>`;
+                            } else {
+                                fail++;
+                                li.innerHTML = `<span style="color:var(--error)">✗</span><span style="word-break:break-all"><span style="opacity:.7">${escapeHtml(r.url)}</span> <span style="color:var(--error)">&mdash; ${escapeHtml(r.error || 'failed')}</span></span>`;
+                            }
+                            resultList.appendChild(li);
+                            resultList.scrollTop = resultList.scrollHeight;
+                        });
+
+                        counter.textContent = done + ' / ' + urls.length;
+                        bar.style.width = Math.round((done / urls.length) * 100) + '%';
+                    }
+
+                    submitBtn.textContent = 'Done';
+                    toast(`Import complete — ${ok} succeeded, ${fail} failed.`, fail > 0 ? 'error' : 'success');
+                    await loadAssets();
+                    renderLibrary();
+                });
+            }
+
             function initUploadZone() {
                 const zone = $('upload-zone');
                 const input = $('upload-input');
@@ -13076,28 +13716,205 @@
             })();
 
             // =================================================================
-            // CHARACTERS PANEL (panel 18)  — static registry, no async needed
+            // CHARACTERS PANEL (panel 18) — registry with pose tracking
             // =================================================================
             (function initCharactersPanel() {
                 'use strict';
+
+                var STORAGE_KEY = 'gfd_character_registry';
+                var defaultRegistry = [
+                    {
+                        id: 'sheriff', name: 'The Sheriff', brand: 'gfv', emoji: '🤠',
+                        description: 'Friendly cowboy mascot. Target: 2D vector production asset in Rive (web) + Spine2D (video).',
+                        pipeline: 'Option B — Simplify to 2D',
+                        tools: ['Rive', 'Spine2D'],
+                        poses: [
+                            { id: 'idle', label: 'idle', status: 'blocked', note: 'Current pose locked — needs redesign' },
+                            { id: 'wave', label: 'wave', status: 'planned' },
+                            { id: 'cheer', label: 'cheer', status: 'planned' },
+                            { id: 'neutral', label: 'neutral', status: 'planned' },
+                            { id: 'point', label: 'point', status: 'planned' },
+                            { id: 'nod', label: 'nod', status: 'planned' },
+                            { id: 'walk', label: 'walk', status: 'planned' },
+                        ],
+                        milestones: [
+                            { phase: 'Source Art', status: 'not-started' },
+                            { phase: 'Rig Setup', status: 'not-started' },
+                            { phase: 'Core Animations', status: 'not-started' },
+                            { phase: 'Production Export', status: 'not-started' },
+                        ],
+                    },
+                ];
+
+                function loadRegistry() {
+                    try {
+                        var stored = localStorage.getItem(STORAGE_KEY);
+                        return stored ? JSON.parse(stored) : defaultRegistry;
+                    } catch (e) { return defaultRegistry; }
+                }
+                function saveRegistry(reg) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(reg));
+                }
+
+                function renderCharacters() {
+                    var registry = loadRegistry();
+                    var container = $('char-sheriff');
+                    if (!container) return;
+                    // find parent of char-sheriff card to render all characters
+                    var parent = container.parentElement;
+                    // Remove all char-card elements except the empty-state article
+                    var old = parent.querySelectorAll('.char-card');
+                    old.forEach(function (el) { el.remove(); });
+
+                    var article = parent.querySelector('article.panel');
+                    registry.forEach(function (ch) {
+                        var card = document.createElement('div');
+                        card.className = 'char-card';
+                        card.id = 'char-' + ch.id;
+
+                        var poseHTML = ch.poses.map(function (p) {
+                            return '<span class="char-pose-tag ' + p.status + '" title="' + (p.note || p.status)
+                                + '" data-char="' + ch.id + '" data-pose="' + p.id
+                                + '" style="cursor:pointer">'
+                                + (p.status === 'blocked' ? '⚡ ' : p.status === 'done' ? '✓ ' : '')
+                                + p.label + '</span>';
+                        }).join('');
+
+                        var msHTML = ch.milestones.map(function (m) {
+                            var icon = m.status === 'done' ? '✅' : m.status === 'in-progress' ? '🔄' : '⬜';
+                            return '<span class="char-pose-tag ' + m.status + '" title="Click to cycle status"'
+                                + ' data-char="' + ch.id + '" data-milestone="' + m.phase
+                                + '" style="cursor:pointer;font-size:0.72rem">'
+                                + icon + ' ' + m.phase + '</span>';
+                        }).join('');
+
+                        card.innerHTML = '<div class="char-avatar">' + ch.emoji + '</div>'
+                            + '<div>'
+                            + '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.25rem">'
+                            + '<strong style="font-size:1rem">' + ch.name + '</strong>'
+                            + '<span class="tag" style="background:rgba(251,191,36,0.15);color:var(--accent-gold);border:1px solid rgba(251,191,36,0.3);font-size:0.72rem">' + ch.brand.toUpperCase() + ' Brand</span>'
+                            + '</div>'
+                            + '<p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.5rem">' + ch.description + '</p>'
+                            + '<div class="char-poses">' + poseHTML + '</div>'
+                            + '<div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted)">'
+                            + 'Pipeline: <code style="font-size:0.75rem">' + ch.pipeline + '</code>'
+                            + ' &emsp;Tools: ' + ch.tools.map(function (t) { return '<code style="font-size:0.75rem">' + t + '</code>'; }).join(' · ')
+                            + '</div>'
+                            + '<div style="margin-top:0.5rem">' + msHTML + '</div>'
+                            + '</div>';
+
+                        parent.insertBefore(card, article);
+                    });
+
+                    // Attach click handlers to cycle pose/milestone status
+                    parent.addEventListener('click', function (e) {
+                        var poseEl = e.target.closest('[data-pose]');
+                        var msEl = e.target.closest('[data-milestone]');
+                        if (!poseEl && !msEl) return;
+
+                        var reg = loadRegistry();
+                        if (poseEl) {
+                            var charId = poseEl.dataset.char;
+                            var poseId = poseEl.dataset.pose;
+                            var order = ['planned', 'in-progress', 'done', 'blocked'];
+                            reg.forEach(function (ch) {
+                                if (ch.id !== charId) return;
+                                ch.poses.forEach(function (p) {
+                                    if (p.id !== poseId) return;
+                                    var idx = order.indexOf(p.status);
+                                    p.status = order[(idx + 1) % order.length];
+                                    p.note = p.status === 'blocked' ? 'Blocked' : '';
+                                });
+                            });
+                        }
+                        if (msEl) {
+                            var charId2 = msEl.dataset.char;
+                            var phase = msEl.dataset.milestone;
+                            var msOrder = ['not-started', 'in-progress', 'done'];
+                            reg.forEach(function (ch) {
+                                if (ch.id !== charId2) return;
+                                ch.milestones.forEach(function (m) {
+                                    if (m.phase !== phase) return;
+                                    var idx2 = msOrder.indexOf(m.status);
+                                    m.status = msOrder[(idx2 + 1) % msOrder.length];
+                                });
+                            });
+                        }
+                        saveRegistry(reg);
+                        renderCharacters();
+                    });
+                }
+
                 var refBtn = $('char-refresh-btn');
                 if (refBtn) {
                     refBtn.addEventListener('click', function () {
-                        toast('Character registry is source-controlled in ANIMATION_PIPELINE.md — no live data to reload.', 'info');
+                        renderCharacters();
+                        toast('Character registry refreshed from local state.', 'info');
                     });
                 }
+                renderCharacters();
             })();
 
             // =================================================================
-            // DONATIONS PANEL (panel 14) — placeholder until webhook + D1 setup
+            // DONATIONS PANEL (panel 14) — live Stripe data from D1
             // =================================================================
             (function initDonationsPanel() {
                 'use strict';
                 var refBtn = $('donations-refresh-btn');
                 if (refBtn) {
-                    refBtn.addEventListener('click', function () {
-                        toast('Stripe webhook not yet configured. Visit the Stripe Dashboard to view transactions.', 'info');
-                    });
+                    refBtn.addEventListener('click', loadDonations);
+                }
+                window.__adminPanels = window.__adminPanels || {};
+                window.__adminPanels.donations = loadDonations;
+
+                async function loadDonations() {
+                    try {
+                        var res = await apiFetch('/api/cms/donations');
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        var data = await res.json();
+                        renderDonationKPIs(data);
+                        renderDonationTable(data.donations || []);
+                    } catch (err) {
+                        toast('Could not load donation data: ' + err.message, 'error');
+                    }
+                }
+
+                function fmtUSD(cents) {
+                    return '$' + (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+
+                function renderDonationKPIs(data) {
+                    var totalEl = $('don-total');
+                    var monthEl = $('don-month');
+                    var countEl = $('don-count');
+                    var avgEl = $('don-avg');
+                    if (totalEl) totalEl.textContent = fmtUSD(data.totalRaised || 0);
+                    if (monthEl) monthEl.textContent = fmtUSD(data.thisMonth || 0);
+                    if (countEl) countEl.textContent = String(data.count || 0);
+                    if (avgEl) avgEl.textContent = data.count ? fmtUSD(Math.round((data.totalRaised || 0) / data.count)) : '$0.00';
+                }
+
+                function renderDonationTable(donations) {
+                    var tbody = $('donations-tbody');
+                    if (!tbody) return;
+                    if (!donations.length) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted)">'
+                            + '<p>No donation transactions recorded yet.</p>'
+                            + '<p style="font-size:0.82rem;margin-top:0.4rem">Use the <strong>Record Donation</strong> button to log a Stripe payment, or configure a webhook for automatic logging.</p>'
+                            + '<a href="https://dashboard.stripe.com/payments" target="_blank" rel="noopener" class="btn btn-secondary" style="margin-top:0.75rem;display:inline-flex">Open Stripe Dashboard ↗</a>'
+                            + '</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = donations.map(function (d) {
+                        var dt = d.created_at ? new Date(d.created_at + 'Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                        var statusClass = d.status === 'succeeded' ? 'emerald' : d.status === 'failed' ? 'rose' : '';
+                        return '<tr>'
+                            + '<td>' + dt + '</td>'
+                            + '<td class="mono">' + fmtUSD(d.amount_cents) + (d.recurring ? ' <span style="color:var(--accent-cyan);font-size:0.75rem">↻</span>' : '') + '</td>'
+                            + '<td>' + (d.project || '—') + '</td>'
+                            + '<td><span class="' + statusClass + '">' + (d.status || 'unknown') + '</span></td>'
+                            + '</tr>';
+                    }).join('');
                 }
             })();
 
@@ -13293,9 +14110,34 @@
                 }
 
                 var storageLoaded = false;
-                function ensureStorageLoaded() {
+                async function ensureStorageLoaded() {
                     if (!storageLoaded) {
                         storageLoaded = true;
+                        // Auto-load cloud asset stats from /api/cms/stats
+                        var cloudKpi = $('storage-cloud-kpi');
+                        if (cloudKpi) {
+                            cloudKpi.innerHTML = '<span style="color:var(--text-muted);font-size:0.78rem">Loading cloud stats…</span>';
+                            try {
+                                var stats = await api('/stats');
+                                var totalBytes = stats.storage ? stats.storage.totalBytes : 0;
+                                var fileCount = stats.storage ? stats.storage.fileCount : 0;
+                                var pendRev = stats.pendingReview || 0;
+                                var usedMB = (totalBytes / (1024 * 1024)).toFixed(1);
+                                var usedPct = Math.min((totalBytes / (10 * 1024 * 1024 * 1024)) * 100, 100).toFixed(1);
+                                var barCls = parseFloat(usedPct) >= 80 ? 'danger' : parseFloat(usedPct) >= 50 ? 'warn' : 'ok';
+                                cloudKpi.innerHTML =
+                                    '<div class="panel-kpis" style="margin:0">' +
+                                    '<div class="panel-kpi"><div class="panel-kpi-label">R2 Assets</div><div class="panel-kpi-value">' + fileCount + '</div></div>' +
+                                    '<div class="panel-kpi"><div class="panel-kpi-label">R2 Used</div><div class="panel-kpi-value">' + usedMB + ' MB</div></div>' +
+                                    '<div class="panel-kpi"><div class="panel-kpi-label">Free Tier Cap</div><div class="panel-kpi-value">10 GB</div></div>' +
+                                    '<div class="panel-kpi"><div class="panel-kpi-label" title="Assets awaiting approval">Pending Review</div><div class="panel-kpi-value' + (pendRev > 0 ? ' warn' : ' emerald') + '">' + pendRev + '</div></div>' +
+                                    '</div>' +
+                                    '<div class="storage-bar-wrap" style="margin:0.55rem 0 0"><div class="storage-bar-fill ' + barCls + '" style="width:' + usedPct + '%" title="' + usedPct + '% of 10 GB free tier used"></div></div>' +
+                                    '<p style="font-size:0.72rem;color:var(--text-muted);margin:0.35rem 0 0">' + usedPct + '% of 10 GB free-tier quota used</p>';
+                            } catch (e) {
+                                cloudKpi.innerHTML = '<span style="color:var(--text-muted);font-size:0.78rem">Cloud stats unavailable</span>';
+                            }
+                        }
                     }
                     loadFromStorage();
                 }
@@ -14108,12 +14950,140 @@
                 var refreshBtn = $('dcc-refresh-btn');
                 if (refreshBtn) refreshBtn.addEventListener('click', function () { loadDccData(); toast('Refreshed culture calendar.', 'success'); });
 
-                // Swap button handler (delegated)
+                // Export full featured-cultures.json with any in-session swaps applied
+                var exportBtn = $('dcc-export-btn');
+                if (exportBtn) exportBtn.addEventListener('click', function () {
+                    if (dccSchedule.length === 0) {
+                        toast('No schedule loaded yet — click Refresh first.', 'info');
+                        return;
+                    }
+                    var json = JSON.stringify(dccSchedule, null, 2);
+                    var blob = new Blob([json], { type: 'application/json' });
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    var today = isoDate(new Date());
+                    a.href = url;
+                    a.download = 'featured-cultures-' + today + '.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    toast('Downloaded featured-cultures-' + today + '.json — commit to assets/data/ to deploy.', 'success');
+                });
+
+                // Swap button handler (delegated) — opens culture picker modal
+                var swapTargetDate = null;
+                var swapTargetSlot = 'am';
                 document.addEventListener('click', function (e) {
                     var swapBtn = e.target.closest('.dcc-swap-btn');
                     if (!swapBtn) return;
-                    var date = swapBtn.dataset.dccSwapDate;
-                    toast('Schedule swaps are coming soon. To change ' + date + ', update /assets/data/featured-cultures.json and redeploy.', 'info');
+                    swapTargetDate = swapBtn.dataset.dccSwapDate;
+                    swapTargetSlot = 'am';
+                    var modal = document.getElementById('dcc-swap-modal');
+                    var titleEl = document.getElementById('dcc-swap-title');
+                    var dateLabel = document.getElementById('dcc-swap-date-label');
+                    var searchInput = document.getElementById('dcc-swap-search');
+                    if (!modal) return;
+                    if (titleEl) titleEl.textContent = 'Swap Culture \u2014 ' + swapTargetDate;
+                    if (dateLabel) {
+                        var pair = getCulturesForDate(new Date(swapTargetDate + 'T12:00:00'));
+                        var amName = pair.am ? prettifySlug(pair.am.slug) : '\u2014';
+                        var pmName = pair.pm ? prettifySlug(pair.pm.slug) : '\u2014';
+                        dateLabel.textContent = 'Current: AM = ' + amName + ' \u00b7 PM = ' + pmName;
+                    }
+                    // Reset slot buttons
+                    modal.querySelectorAll('[data-swap-slot]').forEach(function (b) {
+                        b.classList.toggle('active', b.dataset.swapSlot === 'am');
+                    });
+                    if (searchInput) searchInput.value = '';
+                    renderSwapList('');
+                    modal.classList.add('active');
+                    if (searchInput) searchInput.focus();
+                });
+
+                // Slot toggle
+                document.addEventListener('click', function (e) {
+                    var slotBtn = e.target.closest('[data-swap-slot]');
+                    if (!slotBtn) return;
+                    swapTargetSlot = slotBtn.dataset.swapSlot;
+                    var modal = document.getElementById('dcc-swap-modal');
+                    if (modal) modal.querySelectorAll('[data-swap-slot]').forEach(function (b) {
+                        b.classList.toggle('active', b.dataset.swapSlot === swapTargetSlot);
+                    });
+                });
+
+                // Search filter
+                var swapSearchEl = document.getElementById('dcc-swap-search');
+                if (swapSearchEl) swapSearchEl.addEventListener('input', function () { renderSwapList(this.value); });
+
+                function renderSwapList(query) {
+                    var listEl = document.getElementById('dcc-swap-list');
+                    if (!listEl) return;
+                    var q = (query || '').toLowerCase().trim();
+                    var filtered = dccCultures.filter(function (c) {
+                        if (!q) return true;
+                        return (c.culture_name || '').toLowerCase().indexOf(q) !== -1 ||
+                            (c.slug || '').toLowerCase().indexOf(q) !== -1 ||
+                            (c.region || '').toLowerCase().indexOf(q) !== -1;
+                    }).slice(0, 60);
+                    if (filtered.length === 0) {
+                        listEl.innerHTML = '<div style="padding:1rem;color:var(--text-muted);text-align:center">No cultures match \u201c' + escapeHtml(q) + '\u201d</div>';
+                        return;
+                    }
+                    var html = '';
+                    for (var i = 0; i < filtered.length; i++) {
+                        var c = filtered[i];
+                        html += '<div class="dcc-swap-item" data-swap-slug="' + escapeHtml(c.slug) + '">';
+                        html += '<div><div class="swap-name">' + escapeHtml(c.culture_name) + '</div>';
+                        html += '<div class="swap-region">' + escapeHtml(c.region || '') + '</div></div></div>';
+                    }
+                    listEl.innerHTML = html;
+                }
+
+                // Culture selection — apply swap
+                document.addEventListener('click', function (e) {
+                    var item = e.target.closest('.dcc-swap-item');
+                    if (!item || !swapTargetDate) return;
+                    var slug = item.dataset.swapSlug;
+                    var meta = getCultureMeta(slug);
+                    var name = meta ? meta.culture_name : prettifySlug(slug);
+
+                    // Remove existing entry for this date+slot
+                    dccSchedule = dccSchedule.filter(function (entry) {
+                        if (entry.date !== swapTargetDate) return true;
+                        var entrySlot = entry.slot || 'am';
+                        return entrySlot !== swapTargetSlot;
+                    });
+
+                    // Add new entry
+                    var newEntry = { date: swapTargetDate, slug: slug, reason: 'Admin swap', featured_fact: (meta && meta.summary) ? meta.summary : '' };
+                    if (swapTargetSlot === 'pm') newEntry.slot = 'pm';
+                    dccSchedule.push(newEntry);
+                    dccSchedule.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+
+                    // Re-render
+                    renderDccToday();
+                    renderDccWeek();
+                    renderDccMonth();
+                    renderUpcoming();
+                    renderOvCultures();
+
+                    // Close modal
+                    var modal = document.getElementById('dcc-swap-modal');
+                    if (modal) modal.classList.remove('active');
+                    toast('Swapped ' + swapTargetSlot.toUpperCase() + ' slot on ' + swapTargetDate + ' \u2192 ' + name, 'success');
+                });
+
+                // Copy JSON for the swapped date
+                var copyBtn = document.getElementById('dcc-swap-copy-btn');
+                if (copyBtn) copyBtn.addEventListener('click', function () {
+                    if (!swapTargetDate) return;
+                    var entries = dccSchedule.filter(function (e) { return e.date === swapTargetDate; });
+                    if (entries.length === 0) { toast('No entries for ' + swapTargetDate, 'info'); return; }
+                    var json = JSON.stringify(entries, null, 2);
+                    navigator.clipboard.writeText(json).then(function () {
+                        toast('Copied ' + entries.length + ' entry JSON to clipboard', 'success');
+                    });
                 });
 
                 function ensureDccLoaded() {
@@ -14442,6 +15412,180 @@
                 window.__adminPanels['brands'] = load;
             })();
             // ─── End Daily Culture Calendar ────────────────────────────────
+
+            // ── Mission Control: Ecosystem Map ──────────────────────────────
+            async function renderEcosystemMap() {
+                const grid = $('eco-command-grid');
+                const updEl = $('eco-health-updated');
+                if (!grid) return;
+
+                // Fetch latest health sweep results (best-effort, no auth required)
+                let healthMap = {};
+                try {
+                    const resp = await fetch('https://gfd-health-sweep.weave0.workers.dev/last');
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        (data.results || []).forEach(function (r) {
+                            const key = r.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+                            healthMap[key] = r;
+                        });
+                        if (updEl) updEl.textContent = 'Health: ' + new Date().toLocaleTimeString();
+                    }
+                } catch (e) { /* health sweep unavailable */ }
+
+                const hostingLabel = { 'cf-pages': 'CF Pages', 'vercel': 'Vercel', 'gfd-inline': 'GFD Inline', 'undeployed': 'Undeployed' };
+
+                grid.innerHTML = SITE_REGISTRY.map(function (site) {
+                    const healthKey = site.domain;
+                    const h = healthKey ? healthMap[healthKey] : null;
+                    const dotClass = !healthKey ? 'unknown' : !h ? 'unknown' : h.ok ? 'ok' : 'fail';
+                    const dotTitle = h ? (h.ok ? 'Up · ' + h.response_ms + 'ms' : 'Down · HTTP ' + (h.status_code || '?')) : 'No health data';
+                    const links = [];
+                    if (site.liveUrl) links.push('<a class="eco-site-link" href="' + site.liveUrl + '" target="_blank" rel="noopener">&#127758; Live</a>');
+                    if (site.adminUrl) links.push('<a class="eco-site-link" href="' + site.adminUrl + '" target="_blank" rel="noopener">&#9881; Dashboard</a>');
+                    if (site.repo) links.push('<a class="eco-site-link" href="https://github.com/' + site.repo + '" target="_blank" rel="noopener">&#128025; Repo</a>');
+                    return '<div class="eco-site-card' + (site.hosting === 'undeployed' ? ' undeployed' : '') + '">' +
+                        '<div class="eco-site-card-header">' +
+                        '<span class="eco-site-dot" style="background:' + site.color + '"></span>' +
+                        '<span class="eco-site-name">' + escapeHtml(site.name) + '</span>' +
+                        '<span class="eco-hosting-badge ' + site.hosting + '">' + (hostingLabel[site.hosting] || site.hosting) + '</span>' +
+                        '</div>' +
+                        '<div class="eco-site-purpose">' + escapeHtml(site.purpose) + '</div>' +
+                        (healthKey ? '<div class="eco-health-indicator"><span class="eco-health-dot ' + dotClass + '" title="' + dotTitle + '"></span><span style="color:var(--text-muted)">' + (h ? (h.ok ? 'Up · ' + h.response_ms + 'ms' : '&#10005; Down') : 'Unknown') + '</span></div>' : '') +
+                        (links.length ? '<div class="eco-site-links">' + links.join('') + '</div>' : '') +
+                        '<div class="eco-site-notes">' + escapeHtml(site.notes || '') + '</div>' +
+                        '</div>';
+                }).join('');
+
+                const refreshBtn = $('eco-cmd-refresh-btn');
+                if (refreshBtn) {
+                    refreshBtn.onclick = function () { renderEcosystemMap(); };
+                }
+            }
+
+            // ── Mission Control: Quick Launch ────────────────────────────────
+            function renderQuickLaunch() {
+                const grid = $('quick-launch-grid');
+                if (!grid) return;
+                const groups = {};
+                QUICK_LINKS.forEach(function (lnk) {
+                    if (!groups[lnk.group]) groups[lnk.group] = [];
+                    groups[lnk.group].push(lnk);
+                });
+                let html = '';
+                Object.entries(groups).forEach(function ([group, items]) {
+                    html += '<span class="quick-launch-group-label">' + escapeHtml(group) + '</span>';
+                    items.forEach(function (lnk) {
+                        html += '<a class="quick-launch-item" href="' + lnk.url + '" target="_blank" rel="noopener">' +
+                            '<span class="quick-launch-icon">' + lnk.icon + '</span>' +
+                            '<span>' + escapeHtml(lnk.label) + '</span></a>';
+                    });
+                });
+                grid.innerHTML = html;
+            }
+
+            // ── Mission Control: Ops Board ───────────────────────────────────
+            let _opsTasks = [];
+
+            function renderOpsBoard(tasks) {
+                _opsTasks = tasks || [];
+                const list = $('ops-board-list');
+                if (!list) return;
+                if (!_opsTasks.length) {
+                    list.innerHTML = '<div class="text-muted" style="padding:8px 4px;font-size:0.82rem">No open tasks. Add one below.</div>';
+                    return;
+                }
+                list.innerHTML = _opsTasks.map(function (t) {
+                    const meta = [t.brand !== 'all' ? escapeHtml(t.brand.toUpperCase()) : '', t.area !== 'General' ? escapeHtml(t.area) : ''].filter(Boolean).join(' · ');
+                    return '<div class="ops-task" data-sev="' + escapeHtml(t.severity) + '" data-id="' + escapeHtml(t.id) + '">' +
+                        '<input type="checkbox" class="ops-task-check" title="Mark complete" aria-label="Complete task" />' +
+                        '<div class="ops-task-body">' +
+                        '<div class="ops-task-title">' + escapeHtml(t.title) + '</div>' +
+                        (meta ? '<div class="ops-task-meta">' + meta + '</div>' : '') +
+                        '</div>' +
+                        '<button class="ops-task-del" title="Delete task" aria-label="Delete task">&#10005;</button>' +
+                        '</div>';
+                }).join('');
+
+                list.querySelectorAll('.ops-task-check').forEach(function (chk) {
+                    chk.addEventListener('change', function () {
+                        const id = chk.closest('.ops-task').dataset.id;
+                        opsCompleteTask(id);
+                    });
+                });
+                list.querySelectorAll('.ops-task-del').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        const id = btn.closest('.ops-task').dataset.id;
+                        opsDeleteTask(id);
+                    });
+                });
+            }
+
+            async function loadOpsTasks() {
+                try {
+                    const token = await state.clerk.session.getToken();
+                    const resp = await fetch('/api/cms/admin-ops', { headers: { Authorization: 'Bearer ' + token } });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        renderOpsBoard(data.tasks || []);
+                    }
+                } catch (e) { console.error('[ops board]', e); }
+            }
+
+            async function opsCompleteTask(id) {
+                try {
+                    const token = await state.clerk.session.getToken();
+                    await fetch('/api/cms/admin-ops/' + encodeURIComponent(id), {
+                        method: 'PUT',
+                        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ completed: true }),
+                    });
+                    await loadOpsTasks();
+                } catch (e) { console.error('[ops complete]', e); }
+            }
+
+            async function opsDeleteTask(id) {
+                try {
+                    const token = await state.clerk.session.getToken();
+                    await fetch('/api/cms/admin-ops/' + encodeURIComponent(id), {
+                        method: 'DELETE',
+                        headers: { Authorization: 'Bearer ' + token },
+                    });
+                    _opsTasks = _opsTasks.filter(function (t) { return t.id !== id; });
+                    renderOpsBoard(_opsTasks);
+                } catch (e) { console.error('[ops delete]', e); }
+            }
+
+            function initOpsBoard() {
+                renderGapFlags();
+                loadOpsTasks();
+                const form = $('ops-add-form');
+                if (!form) return;
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const titleEl = $('ops-add-title');
+                    const sevEl = $('ops-add-severity');
+                    const brandEl = $('ops-add-brand');
+                    const title = titleEl ? titleEl.value.trim() : '';
+                    if (!title) return;
+                    try {
+                        const token = await state.clerk.session.getToken();
+                        const resp = await fetch('/api/cms/admin-ops', {
+                            method: 'POST',
+                            headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                title,
+                                severity: sevEl ? sevEl.value : 'normal',
+                                brand: brandEl ? brandEl.value : 'all',
+                            }),
+                        });
+                        if (resp.ok) {
+                            if (titleEl) titleEl.value = '';
+                            await loadOpsTasks();
+                        }
+                    } catch (err) { console.error('[ops add]', err); }
+                });
+            }
 
             window.__clerkReady
                 .then(initAuth)

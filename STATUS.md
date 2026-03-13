@@ -51,12 +51,12 @@ Cross-brand hardening is live: AI Aimate, CitizenApproved, and GFV are all now r
 
 ## Test Coverage
 
-| Target                            | Coverage                     | Last Run   |
-| --------------------------------- | ---------------------------- | ---------- |
-| index.html (via temp_review.html) | 9 suites, 127/127 passing    | 2026-03-11 |
-| community-portal.html             | ✅ 39/39 passing             | 2026-03-11 |
-| donate.html                       | ✅ 24/24 passing             | 2026-03-11 |
-| **Total**                         | **205/205 — 100% pass rate** | 2026-03-11 |
+| Target                            | Coverage                                  | Last Run   |
+| --------------------------------- | ----------------------------------------- | ---------- |
+| index.html (via temp_review.html) | 9 suites, 128/128 passing                 | 2026-03-11 |
+| community-portal.html             | ✅ 39/39 passing                          | 2026-03-11 |
+| donate.html                       | ✅ 24/24 passing                          | 2026-03-11 |
+| **Total**                         | **205/206 — 99.5% pass rate (1 skipped)** | 2026-03-11 |
 
 ```powershell
 npm test            # Full suite — 7 suites, 167 tests (~60s)
@@ -65,7 +65,37 @@ npm run test:a11y   # Accessibility only (~5s)
 
 ---
 
-## Recent Work (Mar 10 – Mar 11, 2026)
+## Recent Work (Mar 11 – ongoing, 2026)
+
+- **Stripe webhook** (`workers/auth.js`): Added `verifyStripeSignature()` + `handleStripeWebhook()` at `POST /api/stripe/webhook` (public, pre-Clerk). Web Crypto HMAC-SHA256 verifies `STRIPE_WEBHOOK_SECRET`. Handles `payment_intent.succeeded` → INSERT into `cms_donations`, `payment_intent.payment_failed` → UPDATE status, `charge.refunded` → UPDATE status. `STRIPE_WEBHOOK_SECRET` documented in `wrangler.toml` and `workers/wrangler.toml`. Donations panel subheading corrected.
+- **D1 schema — social & content-studio tables** (`d1-schema-cms-social.sql`): New schema file covering 6 previously undocumented tables used by `workers/cms.js`: `social_accounts`, `brand_workflows`, `discovered_assets`, `cross_post_links`, `cms_prompt_registries`, `cms_generated_assets`. Fixes the "ALTER TABLE social_accounts will fail on fresh D1" blocker. `ADMIN_INFRASTRUCTURE_AUDIT.md` updated accordingly.
+- **CI status (CitizenApproved + GFV)**: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` were already set in both repos. CI is green — both repos deploying successfully via `cloudflare/pages-action@v1`.
+- **Social publisher (Twitter/X)**: `postX()`, `refreshXToken()`, `getToken()`, and platform dispatch were already fully implemented in `workers/social-publisher.js`. No changes needed.
+- **Sentry DSN visibility** (`admin.html`, `workers/wrangler.toml`): Connection Health panel in admin Overview now shows live "Sentry" and "Stripe key" rows reading from `window.ENV` (injected by `_worker.js`). `SENTRY_DSN` added to `workers/wrangler.toml` secrets documentation.
+
+- **Mission Control — Admin Overview panel** (`admin.html`, `workers/cms.js`, `d1-schema-cms.sql`): Full "command center" upgrade to the Overview panel for solo-operator situational awareness. Replaces the CultureSherpa portal callout with two new panels:
+  - **Ecosystem Command Map** — visual card grid for all 10 managed properties (GFD, GFV, AIAimate/Vercel, CultureSherpa, CitizenApproved, GlobalDeets, Jamie Mediation, ThyOwn, SummitView, Weave). Each card shows hosting badge (CF Pages / Vercel / GFD Inline / Undeployed), live health dot (from health sweep `/last` endpoint), links to live site + CF/Vercel dashboard + GitHub repo, and a brief note. `SITE_REGISTRY` constant added to admin.html JS.
+  - **Quick Launch panel** — 12 one-click links to all external dashboards: Cloudflare Dashboard, CF Pages/Workers/D1/R2, Vercel (aiaimate), GitHub, Clerk, Stripe, Formspree, GA4, Sentry. `QUICK_LINKS` constant added.
+  - **Operations Board** replaces the static "Ecosystem Gaps & Flags" heading. D1-backed task CRUD (create, complete, delete) above the existing static `GAP_FLAGS` (now collapsed in a `<details>` for reference). `admin_ops` D1 table + `handleAdminOps()` CRUD endpoint (`GET/POST /api/cms/admin-ops`, `PUT/DELETE /api/cms/admin-ops/:id`) wired in. Full CSS, HTML, JS and backend implementation.
+- **Test results**: 205/206 passing (unchanged — new backend + admin.html code not covered by Puppeteer frontend suite)
+
+- **URL batch import** (`workers/cms.js` + `admin.html`): New `POST /api/cms/upload-url` endpoint — accepts up to 200 HTTPS URLs per call, fetches each server-side with SSRF protection (blocks private IPs/loopback, only HTTPS, content-type allowlist, 50 MB cap), stores in R2, records in `cms_assets` as draft. Admin Library panel gains "Import URLs" button opening a modal with textarea, brand/category/tags, batched progress bar, and per-URL success/fail log.
+- **Public gallery CMS endpoint** (`workers/cms.js`): Added `handlePublicGallery()` — `GET /api/cms/gallery/:brand` and `/gallery` return `{categories, items}` from approved `cms_assets`; `gallery.html` now reads live CMS data instead of always falling back to static JSON.
+- **DCC Export JSON button** (`admin.html`): Added "⇓ Export JSON" to DCC panel header — downloads full `dccSchedule` as `featured-cultures-{date}.json` with any in-session swap changes applied. Includes deploy hint toast.
+- **CORS hardening** (`workers/social-publisher.js`): Replaced `env.ALLOWED_ORIGIN || '*'` wildcard with same 14-origin ecosystem allowlist (11 origins + 3 localhost variants + `Vary: Origin`) already used in auth.js and stripe-payments.js.
+- **GAP_FLAGS update**: `gallery-page` severity changed from `hygiene` → `done` with updated detail noting nav link existence and live CMS endpoint.
+- **Test results**: 205/206 passing, 0 failed, 1 skipped (unchanged — new backend code not covered by Puppeteer frontend suite)
+
+- **CORS hardening**: Replaced wildcard `Access-Control-Allow-Origin: *` with ecosystem allowlist in both `workers/auth.js` and `workers/stripe-payments.js` (11 origins + localhost dev ports, `Vary: Origin` header)
+- **Donations panel** (admin panel 14): Full D1-backed implementation — `ensureDonationsSchema()` auto-creates `cms_donations` table, KPI strip (total raised, count, avg, recurring), filterable table, manual record entry via `POST /api/cms/donations`
+- **Characters panel** (admin panel 18): Interactive registry with pose status cycling (not-started → in-progress → approved → rejected), milestone tracking, localStorage persistence, Sheriff character card with 5 poses
+- **GAP_FLAGS cleanup**: Updated 3 stale items — `admin-auth-gate` → done (was already implemented in `_worker.js` edge), `admin-profanity` → done (was already 27 terms, not a 2-word stub), `cs-api-auth-stubs` severity downgraded blocker → quality
+- **D1 schema**: Added `cms_donations` table + indexes to `d1-schema-cms.sql`
+- **Laptop overflow fix**: Added `overflow: hidden` to `.social-feed` section + iframe constraint rule — Instagram embed iframe no longer causes 145px horizontal overflow at 1366px viewport
+- **DCC swap button**: Replaced stub toast with full culture picker modal — searchable 413-culture list, AM/PM slot toggle, in-memory schedule swap with re-render, copy-JSON-to-clipboard for committing back to `featured-cultures.json`
+- **Test results**: 205/206 passing (60/60 responsive — was 59/60), 0 failed, 1 skipped
+
+## Previous Work (Mar 10 – Mar 11, 2026)
 
 - Built sovereign `gfd-health-sweep` Cloudflare Worker — hourly cron checks all 6 ecosystem domains (HTTP, response time, CSP/HSTS/X-Frame/XCTO), writes to D1 `health_checks`, files GitHub Issues on failures
 - Admin panel 11 (Ecosystem Health) rebuilt: real D1 data, KPI strip (pass/warn/fail/avg-ms), full 4-header security score badges, sweep history table, trigger button with rate-limit handling

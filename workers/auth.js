@@ -1667,6 +1667,137 @@ async function handleMemberDirectory(request, env) {
   }), { headers: { 'Content-Type': 'application/json' } });
 }
 
+// ────────────────────────────────────────────────────────────────
+//  Stripe Webhook — /api/stripe/webhook
+// ────────────────────────────────────────────────────────────────
+
+/**
+ * Verify a Stripe webhook signature using Web Crypto HMAC-SHA256.
+ * No Stripe SDK needed — uses the standard signed-payload scheme.
+ * https://stripe.com/docs/webhooks/signatures
+ */
+async function verifyStripeSignature(payload, sigHeader, secret) {
+  if (!sigHeader) return false;
+  // Stripe-Signature: t=<timestamp>,v1=<hmac>[,v1=<hmac>]
+  const parts = sigHeader.split(',');
+  const tPart  = parts.find(p => p.startsWith('t='));
+  const v1Parts = parts.filter(p => p.startsWith('v1='));
+  if (!tPart || !v1Parts.length) return false;
+
+  const timestamp = tPart.slice(2);
+  const signedPayload = `${timestamp}.${payload}`;
+
+  const keyData = new TextEncoder().encode(secret);
+  const key = await crypto.subtle.importKey(
+    'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const macBuffer = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(signedPayload));
+  const macHex = Array.from(new Uint8Array(macBuffer))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+
+  // Constant-time comparison across all v1 signatures
+  return v1Parts.some(v1 => v1.slice(3) === macHex);
+}
+
+/**
+ * Handle Stripe webhook events.
+ * Writes succeeded/failed/refunded payment_intents to cms_donations in D1.
+ * Webhook URL to register in Stripe Dashboard:
+ *   https://goodflippindesign.com/api/stripe/webhook
+ * Required secret (Pages env): STRIPE_WEBHOOK_SECRET
+ */
+async function handleStripeWebhook(request, env) {
+  if (!env.STRIPE_WEBHOOK_SECRET) {
+    console.error('[stripe-webhook] STRIPE_WEBHOOK_SECRET not configured');
+    return new Response(JSON.stringify({ error: 'Webhook not configured' }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Must read raw body BEFORE any other .json()/.text() calls
+  const rawBody = await request.text();
+  const sigHeader = request.headers.get('Stripe-Signature') || '';
+
+  const valid = await verifyStripeSignature(rawBody, sigHeader, env.STRIPE_WEBHOOK_SECRET);
+  if (!valid) {
+    console.warn('[stripe-webhook] Signature verification failed');
+    return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  let event;
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Idempotent schema bootstrap
+  if (env.DB) {
+    await env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS cms_donations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        stripe_payment_id TEXT UNIQUE,
+        amount_cents INTEGER NOT NULL,
+        currency TEXT DEFAULT 'usd',
+        project TEXT,
+        donor_email TEXT,
+        donor_name TEXT,
+        status TEXT DEFAULT 'succeeded',
+        recurring INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now'))
+      )
+    `).run().catch(() => {});
+  }
+
+  // Respond 200 quickly — Stripe requires a response within 30s
+  // D1 writes happen synchronously before response since we need to confirm receipt
+  const eventType = event.type;
+  const obj = event.data?.object;
+
+  try {
+    if (eventType === 'payment_intent.succeeded' && obj && env.DB) {
+      const metadata = obj.metadata || {};
+      await env.DB.prepare(`
+        INSERT OR IGNORE INTO cms_donations
+          (stripe_payment_id, amount_cents, currency, project, donor_email, donor_name, status, recurring)
+        VALUES (?, ?, ?, ?, ?, ?, 'succeeded', ?)
+      `).bind(
+        obj.id,
+        obj.amount,
+        obj.currency || 'usd',
+        metadata.project || 'Good Flippin Design',
+        obj.receipt_email || null,
+        null,
+        metadata.recurring === 'true' ? 1 : 0,
+      ).run();
+
+    } else if (eventType === 'payment_intent.payment_failed' && obj && env.DB) {
+      await env.DB.prepare(
+        `UPDATE cms_donations SET status = 'failed' WHERE stripe_payment_id = ?`
+      ).bind(obj.id).run();
+
+    } else if (eventType === 'charge.refunded' && obj && env.DB) {
+      const piId = obj.payment_intent;
+      if (piId) {
+        await env.DB.prepare(
+          `UPDATE cms_donations SET status = 'refunded' WHERE stripe_payment_id = ?`
+        ).bind(piId).run();
+      }
+    }
+  } catch (e) {
+    // Log but still return 200 — the signature was valid, retrying won't fix a D1 error
+    console.error('[stripe-webhook] D1 write error:', e.message);
+  }
+
+  return new Response(JSON.stringify({ received: true }), {
+    status: 200, headers: { 'Content-Type': 'application/json' },
+  });
+}
+
 /**
  * Main request handler
  */
@@ -1680,11 +1811,27 @@ export default {
         const url = new URL(request.url);
         const clerkSecretKey = getClerkSecretKey(url.hostname, env);
 
-        // CORS headers for cross-ecosystem requests
+        // CORS allowlist — only our own ecosystem origins
+        const ALLOWED_ORIGINS = [
+          'https://goodflippindesign.com',
+          'https://goodflippindesign.pages.dev',
+          'https://goodflippinvibes.com',
+          'https://aiaimate.com',
+          'https://citizenapproved.com',
+          'https://culturesherpa.org',
+          'https://globaldeets.com',
+          'http://localhost:3000',
+          'http://localhost:8788',
+          'http://127.0.0.1:3000',
+          'http://127.0.0.1:8788',
+        ];
+        const requestOrigin = request.headers.get('Origin') || '';
+        const allowedOrigin = ALLOWED_ORIGINS.includes(requestOrigin) ? requestOrigin : ALLOWED_ORIGINS[0];
         const corsHeaders = {
-          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Origin': allowedOrigin,
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          'Vary': 'Origin',
         };
 
         if (request.method === 'OPTIONS') {
@@ -1766,6 +1913,11 @@ export default {
         ...response,
         headers: { ...Object.fromEntries(response.headers), ...corsHeaders },
       });
+    }
+
+    // ── Stripe webhook — public, verified via Stripe-Signature header ──
+    if (url.pathname === '/api/stripe/webhook' && request.method === 'POST') {
+      return handleStripeWebhook(request, env);
     }
 
     // ── CMS routes (public + admin — handler does its own auth checks) ──

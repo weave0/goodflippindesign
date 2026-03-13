@@ -17,6 +17,11 @@ bucket_name = "gfv-media"
 
 [vars]
 NODE_ENV = "production"
-# SOCIAL_PUBLISHER_URL — set via `wrangler secret put SOCIAL_PUBLISHER_URL`
-# TOKEN_ENCRYPTION_KEY  — set via `wrangler secret put TOKEN_ENCRYPTION_KEY`
-# INTERNAL_SECRET       — set via `wrangler secret put INTERNAL_SECRET`
+# SOCIAL_PUBLISHER_URL    — set via `wrangler secret put SOCIAL_PUBLISHER_URL`
+# TOKEN_ENCRYPTION_KEY    — set via `wrangler secret put TOKEN_ENCRYPTION_KEY`
+# INTERNAL_SECRET         — set via `wrangler secret put INTERNAL_SECRET`
+# STRIPE_WEBHOOK_SECRET   — Stripe webhook signing secret (same value as in root wrangler.toml)
+#                           Required for POST /api/stripe/webhook to verify Stripe events
+# SENTRY_DSN              — Error tracking DSN (get from sentry.io → Settings → Projects → DSN)
+#                           When set, auth.js sends Worker errors to Sentry automatically
+#                           Run: wrangler secret put SENTRY_DSN --name gfd-auth
