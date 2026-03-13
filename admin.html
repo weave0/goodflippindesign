@@ -8857,16 +8857,16 @@
                     checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
-                    id: 'aiaimate', name: 'AI Aimate', domain: 'aiaimate.com', purpose: 'AI education platform (Next.js)', hosting: 'vercel', liveUrl: 'https://aiaimate.com', adminUrl: 'https://vercel.com/weave0/portal', color: '#3b82f6', repo: 'weave0/aiaimate', notes: '⚠️ Vercel — not CF. Needs Sentry + onerror + test suite.',
-                    checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: true }
+                    id: 'aiaimate', name: 'AI Aimate', domain: 'aiaimate.com', purpose: 'AI education platform (Next.js)', hosting: 'vercel', liveUrl: 'https://aiaimate.com', adminUrl: 'https://vercel.com/weave0/portal', color: '#3b82f6', repo: 'weave0/aiaimate', notes: '⚠️ Vercel — not CF. ErrorMonitor component added 2026-03-13. Needs Sentry + test suite.',
+                    checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
-                    id: 'culturesherpa', name: 'CultureSherpa', domain: 'culturesherpa.org', purpose: 'Interactive cultural atlas', hosting: 'cf-pages', liveUrl: 'https://culturesherpa.org', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/culturesherpa', color: '#f59e0b', repo: 'weave0/CultureSherpa', notes: 'Astro + Python API. Not yet launched.',
-                    checks: { ga4: null, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: true }
+                    id: 'culturesherpa', name: 'CultureSherpa', domain: 'culturesherpa.org', purpose: 'Interactive cultural atlas', hosting: 'cf-pages', liveUrl: 'https://culturesherpa.org', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/culturesherpa', color: '#f59e0b', repo: 'weave0/CultureSherpa', notes: 'Astro + Python API. GA4 (G-WM6Q66W9W0) confirmed. onerror inline script added to BaseLayout 2026-03-13.',
+                    checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
-                    id: 'citizenapproved', name: 'CitizenApproved', domain: 'citizenapproved.com', purpose: 'Civic engagement platform', hosting: 'cf-pages', liveUrl: 'https://citizenapproved.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/citizenapproved', color: '#ef4444', repo: 'weave0/CitizenApproved', notes: 'Next.js + TS. Needs GA4 audit.',
-                    checks: { ga4: null, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: true }
+                    id: 'citizenapproved', name: 'CitizenApproved', domain: 'citizenapproved.com', purpose: 'Civic engagement platform', hosting: 'cf-pages', liveUrl: 'https://citizenapproved.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/citizenapproved', color: '#ef4444', repo: 'weave0/CitizenApproved', notes: 'Next.js + TS. GA4 (G-WM6Q66W9W0) confirmed in layout. ErrorMonitor component added 2026-03-13.',
+                    checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
                     id: 'globaldeets', name: 'GlobalDeets', domain: 'globaldeets.com', purpose: 'Portfolio project hub', hosting: 'cf-pages', liveUrl: 'https://globaldeets.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/globaldeets', color: '#8b5cf6', repo: 'weave0/globaldeets', notes: 'Password-gated. GA4 was already present. Added onerror, updated CSP (jsdelivr), and CI workflow 2026-03-13.',
