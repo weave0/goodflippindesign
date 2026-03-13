@@ -74,7 +74,7 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "@sentry/cloudflare": "^8.0.0"
+    "@sentry/cloudflare": "^10.43.0"
   },
   "devDependencies": {
     "html-validate": "^8.18.0",
