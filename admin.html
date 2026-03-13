@@ -8877,8 +8877,8 @@
                     checks: { ga4: true, sentry: true, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
-                    id: 'brettleeweaver', name: 'Brett Lee Weaver', domain: 'www.brettleeweaver.com', purpose: 'Personal site / brand hub', hosting: 'cf-pages', liveUrl: 'https://www.brettleeweaver.com', adminUrl: 'https://dash.cloudflare.com', color: '#c084fc', repo: null, notes: 'Cloudflare-hosted. 308 → www. No GA4, Sentry, onerror, or CI detected. Standalone personal site — no known repo.',
-                    checks: { ga4: false, sentry: false, csp: null, ci: false, tests: false, onerror: false, monitor: true }
+                    id: 'brettleeweaver', name: 'Brett Lee Weaver', domain: 'www.brettleeweaver.com', purpose: 'Personal site / brand hub', hosting: 'cf-pages', liveUrl: 'https://www.brettleeweaver.com', adminUrl: 'https://dash.cloudflare.com', color: '#c084fc', repo: 'weave0/brettleeweaver', notes: 'Cloudflare-hosted personal showcase. Created repo 2026-03-13. GA4 + onerror + _headers (CSP/HSTS/X-Frame) + CI added. Connect to CF Pages to deploy.',
+                    checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
                     id: 'minnesotapeace', name: 'MN Peace', domain: 'minnesotapeace.com', purpose: 'Jamie Rigling mediation — independent deployment', hosting: 'cf-pages', liveUrl: 'https://minnesotapeace.com', adminUrl: 'https://dash.cloudflare.com', color: '#38bdf8', repo: 'weave0/jamie-mediation', notes: 'Deployed from weave0/jamie-mediation. GA4 + onerror + _headers (CSP/HSTS/X-Frame) added 2026-03-13. CI via shared jamie-mediation repo.',
@@ -10470,9 +10470,9 @@
                     detail: 'GA4 was already present. Added window.onerror + unhandledrejection → js_error, updated CSP in _headers to include cdn.jsdelivr.net, created .github/workflows/ci.yml (validates GA4, HSTS, onerror on push/PR).'
                 },
                 {
-                    id: 'brettleeweaver-monitoring', severity: 'quality', brand: 'all', area: 'Ops',
-                    title: 'brettleeweaver.com — GA4, Sentry, onerror all missing',
-                    detail: 'Audited 2026-03-13. Cloudflare-hosted, no known GitHub repo. 308 redirect to www. No GA4, no Sentry SDK, no window.onerror, no CI. Add GA4 + onerror snippet directly to the page, then confirm repo ownership.'
+                    id: 'brettleeweaver-monitoring', severity: 'done', brand: 'all', area: 'Ops',
+                    title: 'brettleeweaver.com — GA4 + onerror + _headers + CI added (2026-03-13)',
+                    detail: 'Created private repo weave0/brettleeweaver from live source. Added GA4 (G-WM6Q66W9W0), window.onerror → GA4 js_error, _headers with CSP/HSTS/X-Frame-Options, and CI workflow. Connect repo to Cloudflare Pages to deploy. Sentry + tests still pending.'
                 },
                 {
                     id: 'minnesotapeace-monitoring', severity: 'done', brand: 'all', area: 'Ops',
