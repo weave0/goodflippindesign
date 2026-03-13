@@ -8767,12 +8767,12 @@
                     checks: { ga4: true, sentry: true, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
-                    id: 'brettleeweaver', name: 'Brett Lee Weaver', domain: 'brettleeweaver.com', purpose: 'Personal site / brand hub', hosting: 'unknown', liveUrl: 'https://brettleeweaver.com', adminUrl: null, color: '#c084fc', repo: null, notes: 'Status unknown — needs audit.',
-                    checks: { ga4: null, sentry: null, csp: null, ci: null, tests: null, onerror: null, monitor: false }
+                    id: 'brettleeweaver', name: 'Brett Lee Weaver', domain: 'www.brettleeweaver.com', purpose: 'Personal site / brand hub', hosting: 'cf-pages', liveUrl: 'https://www.brettleeweaver.com', adminUrl: 'https://dash.cloudflare.com', color: '#c084fc', repo: null, notes: 'Cloudflare-hosted. 308 → www. No GA4, Sentry, onerror, or CI detected. Standalone personal site — no known repo.',
+                    checks: { ga4: false, sentry: false, csp: null, ci: false, tests: false, onerror: false, monitor: true }
                 },
                 {
-                    id: 'minnesotapeace', name: 'MN Peace', domain: 'minnesotapeace.com', purpose: 'Mediation / peace initiative', hosting: 'unknown', liveUrl: 'https://minnesotapeace.com', adminUrl: null, color: '#38bdf8', repo: null, notes: 'Status unknown — needs audit.',
-                    checks: { ga4: null, sentry: null, csp: null, ci: null, tests: null, onerror: null, monitor: false }
+                    id: 'minnesotapeace', name: 'MN Peace', domain: 'minnesotapeace.com', purpose: 'Jamie Rigling mediation — independent deployment', hosting: 'cf-pages', liveUrl: 'https://minnesotapeace.com', adminUrl: 'https://dash.cloudflare.com', color: '#38bdf8', repo: 'weave0/jamie-mediation', notes: 'Serves same content as jamie-rigling-mediation.html. Cloudflare-hosted. GA4:NO (false positive — CSS classes only), Sentry:NO, onerror:NO. Likely deployed from weave0/jamie-mediation repo.',
+                    checks: { ga4: false, sentry: false, csp: null, ci: null, tests: false, onerror: false, monitor: true }
                 },
                 {
                     id: 'thyown', name: 'ThyOwn', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#64748b', repo: null, notes: 'No repo, not deployed.',
@@ -10309,19 +10309,19 @@
                     detail: 'globaldeets.com has no CSP headers, no HSTS, no CI workflow, no GA4. Password-gated site is lowest priority but needs a _headers file and analytics before any public launch.'
                 },
                 {
-                    id: 'brettleeweaver-audit', severity: 'hygiene', brand: 'all', area: 'Ops',
-                    title: 'brettleeweaver.com — full audit needed',
-                    detail: 'Site exists but not in any monitoring, no known repo, no GA4/Sentry/CSP confirmed. Add to SITE_REGISTRY checks once audited.'
+                    id: 'brettleeweaver-monitoring', severity: 'quality', brand: 'all', area: 'Ops',
+                    title: 'brettleeweaver.com — GA4, Sentry, onerror all missing',
+                    detail: 'Audited 2026-03-13. Cloudflare-hosted, no known GitHub repo. 308 redirect to www. No GA4, no Sentry SDK, no window.onerror, no CI. Add GA4 + onerror snippet directly to the page, then confirm repo ownership.'
                 },
                 {
-                    id: 'minnesotapeace-audit', severity: 'hygiene', brand: 'all', area: 'Ops',
-                    title: 'minnesotapeace.com — full audit needed',
-                    detail: 'Site exists but not in any monitoring, no known repo, no GA4/Sentry/CSP confirmed. Add to SITE_REGISTRY checks once audited.'
+                    id: 'minnesotapeace-monitoring', severity: 'quality', brand: 'all', area: 'Ops',
+                    title: 'minnesotapeace.com — GA4 + Sentry + onerror missing',
+                    detail: 'Audited 2026-03-13. This IS the Jamie Rigling mediation site deployed independently on Cloudflare Pages (likely from weave0/jamie-mediation). GA4:NO (CSS class false positive), Sentry:NO, onerror:NO. Add monitoring via the jamie-mediation repo.'
                 },
                 {
-                    id: 'citizenapproved-monitor', severity: 'hygiene', brand: 'citizenapproved', area: 'Ops',
-                    title: 'CitizenApproved not in health-check.yml',
-                    detail: 'citizenapproved.com is not included in the 6-hour GitHub Actions health sweep. Add a check-citizenapproved step to .github/workflows/health-check.yml.'
+                    id: 'citizenapproved-monitor', severity: 'done', brand: 'citizenapproved', area: 'Ops',
+                    title: 'CitizenApproved added to health-check.yml (2026-03-13)',
+                    detail: 'citizenapproved.com added to 6-hour GitHub Actions health sweep. Total monitored sites: 8.'
                 },
                 {
                     id: 'branch-protection', severity: 'hygiene', brand: 'gfd', area: 'Ops',
