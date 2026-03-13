@@ -5881,6 +5881,41 @@
             padding-top: 6px;
         }
 
+        /* ── Ecosystem Check Badges ─────────────────────────── */
+        .eco-check-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 2px;
+        }
+
+        .eco-check-pill {
+            font-size: 0.66rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 8px;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        .eco-check-pill.pass {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .eco-check-pill.fail {
+            background: rgba(239, 68, 68, 0.13);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .eco-check-pill.unknown {
+            background: rgba(100, 116, 139, 0.15);
+            color: var(--text-muted);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+        }
+
         /* ── Quick Launch Grid ──────────────────────────────── */
         .quick-launch-grid {
             display: grid;
@@ -6379,6 +6414,9 @@
                                 <option value="culturesherpa">CultureSherpa</option>
                                 <option value="citizenapproved">CitizenApproved</option>
                                 <option value="globaldeets">GlobalDeets</option>
+                                <option value="jamiemediation">Jamie Mediation</option>
+                                <option value="brettleeweaver">Brett Lee Weaver</option>
+                                <option value="minnesotapeace">MN Peace</option>
                             </select>
                             <button type="submit" class="btn btn-primary">Add</button>
                         </form>
@@ -8697,17 +8735,57 @@
             };
 
             // ── Ecosystem & Quick-Launch registries ──────────────────────────
+            // checks: { ga4, sentry, csp, ci, tests, onerror, monitor }
+            // true = confirmed ✓ | false = confirmed ✗ | null = unknown/N/A
             const SITE_REGISTRY = [
-                { id: 'gfd', name: 'Good Flippin Design', domain: 'goodflippindesign.com', purpose: 'Main portfolio + consultancy', hosting: 'cf-pages', liveUrl: 'https://goodflippindesign.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/goodflippindesign', color: '#6c63ff', repo: 'weave0/goodflippindesign', notes: 'Primary site. All workers live here.' },
-                { id: 'gfv', name: 'Good Flippin Vibes', domain: 'goodflippinvibes.com', purpose: 'Wellness platform · origin brand', hosting: 'cf-pages', liveUrl: 'https://goodflippinvibes.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/good-flippin-vibes', color: '#10b981', repo: 'weave0/good-flippin-vibes', notes: 'Vite build. git push → auto CF Pages.' },
-                { id: 'aiaimate', name: 'AI Aimate', domain: 'aiaimate.com', purpose: 'AI education platform (Next.js)', hosting: 'vercel', liveUrl: 'https://aiaimate.com', adminUrl: 'https://vercel.com/weave0/portal', color: '#3b82f6', repo: 'weave0/aiaimate', notes: '⚠️ On Vercel — NOT Cloudflare. Deploy via Vercel dashboard or git push.' },
-                { id: 'culturesherpa', name: 'CultureSherpa', domain: 'culturesherpa.org', purpose: 'Interactive cultural atlas', hosting: 'cf-pages', liveUrl: 'https://culturesherpa.org', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/culturesherpa', color: '#f59e0b', repo: 'weave0/CultureSherpa', notes: 'Astro + Python API.' },
-                { id: 'citizenapproved', name: 'CitizenApproved', domain: 'citizenapproved.com', purpose: 'Civic engagement platform', hosting: 'cf-pages', liveUrl: 'https://citizenapproved.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/citizenapproved', color: '#ef4444', repo: 'weave0/CitizenApproved', notes: 'Next.js + TS. GH Actions needs CF Pages token secret.' },
-                { id: 'globaldeets', name: 'GlobalDeets', domain: 'globaldeets.com', purpose: 'Portfolio project hub', hosting: 'cf-pages', liveUrl: 'https://globaldeets.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/globaldeets', color: '#8b5cf6', repo: 'weave0/globaldeets', notes: 'Password-gated. No CSP/HSTS yet.' },
-                { id: 'jamiemediation', name: 'Jamie Rigling Mediation', domain: null, purpose: 'Client landing page (inline GFD)', hosting: 'gfd-inline', liveUrl: 'https://goodflippindesign.com/jamie-rigling-mediation.html', adminUrl: null, color: '#e74c3c', repo: 'weave0/jamie-mediation', notes: 'Standalone page in GFD repo.' },
-                { id: 'thyown', name: 'ThyOwn', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#64748b', repo: null, notes: 'No repo, not deployed.' },
-                { id: 'summitview', name: 'SummitView', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#1abc9c', repo: 'weave0/SummitView', notes: 'Has GitHub repo, not deployed.' },
-                { id: 'weave', name: 'Weave', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#94a3b8', repo: null, notes: 'Exploratory Python project.' },
+                {
+                    id: 'gfd', name: 'Good Flippin Design', domain: 'goodflippindesign.com', purpose: 'Main portfolio + consultancy', hosting: 'cf-pages', liveUrl: 'https://goodflippindesign.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/goodflippindesign', color: '#6c63ff', repo: 'weave0/goodflippindesign', notes: 'Primary site. All workers live here.',
+                    checks: { ga4: true, sentry: true, csp: true, ci: true, tests: true, onerror: true, monitor: true }
+                },
+                {
+                    id: 'gfv', name: 'Good Flippin Vibes', domain: 'goodflippinvibes.com', purpose: 'Wellness platform · origin brand', hosting: 'cf-pages', liveUrl: 'https://goodflippinvibes.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/good-flippin-vibes', color: '#10b981', repo: 'weave0/good-flippin-vibes', notes: 'Vite build. Needs Sentry + onerror.',
+                    checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: true }
+                },
+                {
+                    id: 'aiaimate', name: 'AI Aimate', domain: 'aiaimate.com', purpose: 'AI education platform (Next.js)', hosting: 'vercel', liveUrl: 'https://aiaimate.com', adminUrl: 'https://vercel.com/weave0/portal', color: '#3b82f6', repo: 'weave0/aiaimate', notes: '⚠️ Vercel — not CF. Needs Sentry + onerror + test suite.',
+                    checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: true }
+                },
+                {
+                    id: 'culturesherpa', name: 'CultureSherpa', domain: 'culturesherpa.org', purpose: 'Interactive cultural atlas', hosting: 'cf-pages', liveUrl: 'https://culturesherpa.org', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/culturesherpa', color: '#f59e0b', repo: 'weave0/CultureSherpa', notes: 'Astro + Python API. Not yet launched.',
+                    checks: { ga4: null, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: true }
+                },
+                {
+                    id: 'citizenapproved', name: 'CitizenApproved', domain: 'citizenapproved.com', purpose: 'Civic engagement platform', hosting: 'cf-pages', liveUrl: 'https://citizenapproved.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/citizenapproved', color: '#ef4444', repo: 'weave0/CitizenApproved', notes: 'Next.js + TS. Needs GA4 audit + monitor.',
+                    checks: { ga4: null, sentry: false, csp: true, ci: true, tests: false, onerror: false, monitor: false }
+                },
+                {
+                    id: 'globaldeets', name: 'GlobalDeets', domain: 'globaldeets.com', purpose: 'Portfolio project hub', hosting: 'cf-pages', liveUrl: 'https://globaldeets.com', adminUrl: 'https://dash.cloudflare.com/?to=/:account/pages/view/globaldeets', color: '#8b5cf6', repo: 'weave0/globaldeets', notes: 'Password-gated. No CSP/HSTS/GA4/CI — most gaps.',
+                    checks: { ga4: false, sentry: false, csp: false, ci: false, tests: false, onerror: false, monitor: true }
+                },
+                {
+                    id: 'jamiemediation', name: 'Jamie Rigling Mediation', domain: 'jamierigling.com', purpose: 'Client landing page (inline GFD)', hosting: 'gfd-inline', liveUrl: 'https://goodflippindesign.com/jamie-rigling-mediation.html', adminUrl: null, color: '#e74c3c', repo: 'weave0/jamie-mediation', notes: 'Lives in GFD repo. GA4 + onerror added 2026-03-13.',
+                    checks: { ga4: true, sentry: true, csp: true, ci: true, tests: false, onerror: true, monitor: true }
+                },
+                {
+                    id: 'brettleeweaver', name: 'Brett Lee Weaver', domain: 'brettleeweaver.com', purpose: 'Personal site / brand hub', hosting: 'unknown', liveUrl: 'https://brettleeweaver.com', adminUrl: null, color: '#c084fc', repo: null, notes: 'Status unknown — needs audit.',
+                    checks: { ga4: null, sentry: null, csp: null, ci: null, tests: null, onerror: null, monitor: false }
+                },
+                {
+                    id: 'minnesotapeace', name: 'MN Peace', domain: 'minnesotapeace.com', purpose: 'Mediation / peace initiative', hosting: 'unknown', liveUrl: 'https://minnesotapeace.com', adminUrl: null, color: '#38bdf8', repo: null, notes: 'Status unknown — needs audit.',
+                    checks: { ga4: null, sentry: null, csp: null, ci: null, tests: null, onerror: null, monitor: false }
+                },
+                {
+                    id: 'thyown', name: 'ThyOwn', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#64748b', repo: null, notes: 'No repo, not deployed.',
+                    checks: { ga4: null, sentry: null, csp: null, ci: null, tests: null, onerror: null, monitor: null }
+                },
+                {
+                    id: 'summitview', name: 'SummitView', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#1abc9c', repo: 'weave0/SummitView', notes: 'Has GitHub repo, not deployed.',
+                    checks: { ga4: null, sentry: null, csp: null, ci: null, tests: null, onerror: null, monitor: null }
+                },
+                {
+                    id: 'weave', name: 'Weave', domain: null, purpose: 'In development · Python', hosting: 'undeployed', liveUrl: null, adminUrl: null, color: '#94a3b8', repo: null, notes: 'Exploratory Python project.',
+                    checks: { ga4: null, sentry: null, csp: null, ci: null, tests: null, onerror: null, monitor: null }
+                },
             ];
 
             const QUICK_LINKS = [
@@ -10211,9 +10289,39 @@
                 },
                 // ── Ops / Monitoring ──────────────────────────────────────────
                 {
-                    id: 'sentry-dsn', severity: 'quality', brand: 'gfd', area: 'Ops',
-                    title: 'Sentry DSN secret not set',
-                    detail: 'SENTRY_DSN env var is empty. Run: wrangler secret put SENTRY_DSN. Dep is installed, auth.js degrades gracefully.'
+                    id: 'sentry-dsn', severity: 'done', brand: 'gfd', area: 'Ops',
+                    title: 'Sentry DSN configured (2026-03-13)',
+                    detail: 'wrangler pages secret put SENTRY_DSN — uploaded to goodflippindesign production. Browser SDK injected by _worker.js; server-side boundary in auth.js. Active.'
+                },
+                {
+                    id: 'sentry-ecosystem', severity: 'quality', brand: 'all', area: 'Ops',
+                    title: 'Sentry not yet on GFV, AIAimate, CultureSherpa, CitizenApproved',
+                    detail: 'Only GFD + GFV inline pages (via _worker.js injection) have Sentry. Standalone CF Pages sites and Vercel (AIAimate) need their own DSN + SDK setup.'
+                },
+                {
+                    id: 'ga4-ecosystem', severity: 'quality', brand: 'all', area: 'Ops',
+                    title: 'GA4 unconfirmed on CultureSherpa, CitizenApproved, GlobalDeets',
+                    detail: 'GA4 property G-WM6Q66W9W0 confirmed on GFD, GFV, AIAimate, Jamie Rigling. Audit CS, CA, GlobalDeets repos and confirm tracking ID is present and firing.'
+                },
+                {
+                    id: 'globaldeets-hardening', severity: 'warning', brand: 'globaldeets', area: 'Ops',
+                    title: 'GlobalDeets missing CSP, HSTS, CI/CD, and GA4',
+                    detail: 'globaldeets.com has no CSP headers, no HSTS, no CI workflow, no GA4. Password-gated site is lowest priority but needs a _headers file and analytics before any public launch.'
+                },
+                {
+                    id: 'brettleeweaver-audit', severity: 'hygiene', brand: 'all', area: 'Ops',
+                    title: 'brettleeweaver.com — full audit needed',
+                    detail: 'Site exists but not in any monitoring, no known repo, no GA4/Sentry/CSP confirmed. Add to SITE_REGISTRY checks once audited.'
+                },
+                {
+                    id: 'minnesotapeace-audit', severity: 'hygiene', brand: 'all', area: 'Ops',
+                    title: 'minnesotapeace.com — full audit needed',
+                    detail: 'Site exists but not in any monitoring, no known repo, no GA4/Sentry/CSP confirmed. Add to SITE_REGISTRY checks once audited.'
+                },
+                {
+                    id: 'citizenapproved-monitor', severity: 'hygiene', brand: 'citizenapproved', area: 'Ops',
+                    title: 'CitizenApproved not in health-check.yml',
+                    detail: 'citizenapproved.com is not included in the 6-hour GitHub Actions health sweep. Add a check-citizenapproved step to .github/workflows/health-check.yml.'
                 },
                 {
                     id: 'branch-protection', severity: 'hygiene', brand: 'gfd', area: 'Ops',
@@ -15435,6 +15543,16 @@
 
                 const hostingLabel = { 'cf-pages': 'CF Pages', 'vercel': 'Vercel', 'gfd-inline': 'GFD Inline', 'undeployed': 'Undeployed' };
 
+                const CHECK_LABELS = [
+                    { key: 'ga4', label: 'GA4' },
+                    { key: 'sentry', label: 'Sentry' },
+                    { key: 'csp', label: 'CSP' },
+                    { key: 'ci', label: 'CI' },
+                    { key: 'tests', label: 'Tests' },
+                    { key: 'onerror', label: 'onerror' },
+                    { key: 'monitor', label: 'Uptime' },
+                ];
+
                 grid.innerHTML = SITE_REGISTRY.map(function (site) {
                     const healthKey = site.domain;
                     const h = healthKey ? healthMap[healthKey] : null;
@@ -15444,15 +15562,30 @@
                     if (site.liveUrl) links.push('<a class="eco-site-link" href="' + site.liveUrl + '" target="_blank" rel="noopener">&#127758; Live</a>');
                     if (site.adminUrl) links.push('<a class="eco-site-link" href="' + site.adminUrl + '" target="_blank" rel="noopener">&#9881; Dashboard</a>');
                     if (site.repo) links.push('<a class="eco-site-link" href="https://github.com/' + site.repo + '" target="_blank" rel="noopener">&#128025; Repo</a>');
+                    if (site.repo) links.push('<a class="eco-site-link" href="https://github.com/' + site.repo + '/commits/main" target="_blank" rel="noopener">&#128336; Commits</a>');
+
+                    // Check badges
+                    const checks = site.checks || {};
+                    const checkFails = CHECK_LABELS.filter(function (c) { return checks[c.key] === false; }).length;
+                    const checkBadges = CHECK_LABELS.map(function (c) {
+                        const val = checks[c.key];
+                        const cls = val === true ? 'pass' : val === false ? 'fail' : 'unknown';
+                        const sym = val === true ? '✓' : val === false ? '✗' : '?';
+                        return '<span class="eco-check-pill ' + cls + '" title="' + escapeHtml(c.label) + ': ' + (val === true ? 'confirmed' : val === false ? 'missing' : 'unknown') + '">' + sym + ' ' + escapeHtml(c.label) + '</span>';
+                    }).join('');
+
+                    const gapBadge = checkFails > 0 ? '<span style="font-size:0.7rem;font-weight:700;color:#f87171;margin-left:4px" title="' + checkFails + ' integration gap(s) found">' + checkFails + ' gap' + (checkFails > 1 ? 's' : '') + '</span>' : '';
+
                     return '<div class="eco-site-card' + (site.hosting === 'undeployed' ? ' undeployed' : '') + '">' +
                         '<div class="eco-site-card-header">' +
                         '<span class="eco-site-dot" style="background:' + site.color + '"></span>' +
-                        '<span class="eco-site-name">' + escapeHtml(site.name) + '</span>' +
+                        '<span class="eco-site-name">' + escapeHtml(site.name) + gapBadge + '</span>' +
                         '<span class="eco-hosting-badge ' + site.hosting + '">' + (hostingLabel[site.hosting] || site.hosting) + '</span>' +
                         '</div>' +
                         '<div class="eco-site-purpose">' + escapeHtml(site.purpose) + '</div>' +
                         (healthKey ? '<div class="eco-health-indicator"><span class="eco-health-dot ' + dotClass + '" title="' + dotTitle + '"></span><span style="color:var(--text-muted)">' + (h ? (h.ok ? 'Up · ' + h.response_ms + 'ms' : '&#10005; Down') : 'Unknown') + '</span></div>' : '') +
                         (links.length ? '<div class="eco-site-links">' + links.join('') + '</div>' : '') +
+                        '<div class="eco-check-row">' + checkBadges + '</div>' +
                         '<div class="eco-site-notes">' + escapeHtml(site.notes || '') + '</div>' +
                         '</div>';
                 }).join('');
