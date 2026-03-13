@@ -6074,6 +6074,78 @@
             padding: 4px 0;
             margin-top: 6px;
         }
+
+        /* ── Activity Timeline ─────────────────────────────────────── */
+        .activity-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            max-height: 340px;
+            overflow-y: auto;
+        }
+        .activity-item {
+            display: flex;
+            align-items: baseline;
+            gap: 0.6rem;
+            padding: 0.45rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8rem;
+        }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-time {
+            color: var(--text-muted);
+            font-family: var(--mono, 'JetBrains Mono', monospace);
+            font-size: 0.72rem;
+            white-space: nowrap;
+            min-width: 72px;
+        }
+        .activity-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            flex-shrink: 0;
+            position: relative;
+            top: 1px;
+        }
+        .activity-dot.action { background: var(--accent-violet); }
+        .activity-dot.export { background: var(--accent-gold); }
+        .activity-dot.error { background: var(--accent-rose); }
+        .activity-action {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .activity-detail {
+            color: var(--text-muted);
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .activity-empty {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        /* ── Extended command palette (groups + actions) ───────────── */
+        .cmd-section-group {
+            padding: 4px 14px 2px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            user-select: none;
+        }
+        .cmd-item-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+        .cmd-item--action .cmd-item-num { color: var(--accent-gold); }
+        .cmd-item--project .cmd-item-num { color: var(--accent-emerald); }
     </style>
 </head>
 
@@ -6443,6 +6515,18 @@
                                 <tbody id="overview-assets"></tbody>
                             </table>
                         </div>
+                    </article>
+
+                    <!-- Activity Timeline ────────────────────────────── -->
+                    <article class="panel mt-085" id="activity-log-panel">
+                        <div class="section-head">
+                            <h2 class="section-title">&#128336; Studio Activity Log</h2>
+                            <div class="inline-actions">
+                                <button class="btn btn-micro" id="activity-clear-btn" title="Clear activity log">Clear</button>
+                            </div>
+                        </div>
+                        <p class="subheading mb-06" style="font-size:0.78rem">Chronological record of admin actions this session &mdash; navigation, sweeps, publishes, exports.</p>
+                        <div class="activity-timeline" id="activity-timeline"></div>
                     </article>
                 </section>
 
@@ -7070,6 +7154,7 @@
                             <h2 class="section-title">Ecosystem Health Sweep</h2>
                             <div class="inline-actions">
                                 <span class="text-muted" id="eco-sweep-age" style="font-size:0.78rem"></span>
+                                <button class="btn btn-secondary" id="eco-export-manifest-btn" title="Download studio-manifest.json — Single Source of Truth for the ecosystem">&#8659; Export Manifest</button>
                                 <button class="btn btn-secondary" id="eco-refresh-btn">↻ Refresh</button>
                                 <button class="btn btn-primary" id="eco-sweep-btn">▶ Run Sweep Now</button>
                             </div>
@@ -9051,12 +9136,35 @@
             // ── Command Palette ──────────────────────────────────────────────
             function initCommandPalette() {
                 const NAV_ITEMS = Object.entries(PAGE_CONTEXTS).map(([view, ctx]) => ({
+                    type: 'view',
                     view,
                     num: document.querySelector(`.nav-btn[data-view="${view}"] .nav-num`)?.textContent || '',
                     icon: document.querySelector(`.nav-btn[data-view="${view}"] .nav-icon`)?.innerHTML || '',
                     label: ctx.name,
-                    group: ctx.title,
+                    group: 'Panels',
                 }));
+
+                const PROJECT_ITEMS = SITE_REGISTRY
+                    .filter(s => s.liveUrl)
+                    .map(s => ({
+                        type: 'project',
+                        view: null,
+                        url: s.liveUrl,
+                        num: '↗',
+                        icon: '',
+                        label: s.name,
+                        sub: s.domain,
+                        group: 'Projects',
+                    }));
+
+                const ACTION_ITEMS = [
+                    { type: 'action', view: null, num: '▶', icon: '', label: 'Run Ecosystem Sweep', group: 'Actions', action: () => { $('eco-sweep-btn')?.click(); logActivity('Sweep', 'Triggered ecosystem sweep via command palette'); } },
+                    { type: 'action', view: null, num: '⬇', icon: '', label: 'Export Studio Manifest', group: 'Actions', action: exportStudioManifest },
+                    { type: 'action', view: null, num: '+', icon: '', label: 'Add Ops Flag', group: 'Actions', action: () => { navigateToView('overview'); setTimeout(() => $('ops-add-title')?.focus(), 250); } },
+                    { type: 'action', view: null, num: '⟳', icon: '', label: 'Refresh All Data', group: 'Actions', action: () => { $('refresh-btn')?.click(); } },
+                ];
+
+                const ALL_ITEMS = [...NAV_ITEMS, ...PROJECT_ITEMS, ...ACTION_ITEMS];
 
                 const wrap = $('cmd-palette-wrap');
                 const input = $('cmd-input');
@@ -9064,25 +9172,52 @@
                 let selected = 0;
                 let filtered = [];
 
-                function render(items) {
-                    filtered = items;
-                    selected = 0;
-                    list.innerHTML = items.length ? items.map((it, i) =>
-                        `<div class="cmd-item" data-view="${escapeHtml(it.view)}" aria-selected="${i === 0 ? 'true' : 'false'}" role="option">` +
+                function renderItem(it, i) {
+                    const selAttr = i === 0 ? 'true' : 'false';
+                    const cls = it.type === 'action' ? ' cmd-item--action' : it.type === 'project' ? ' cmd-item--project' : '';
+                    const sub = it.sub ? `<span class="cmd-item-sub">${escapeHtml(it.sub)}</span>` : '';
+                    return `<div class="cmd-item${cls}" data-idx="${i}" aria-selected="${selAttr}" role="option">` +
                         `<span class="cmd-item-num">${escapeHtml(it.num)}</span>` +
                         `<span class="cmd-item-icon">${it.icon}</span>` +
                         `<span class="cmd-item-label">${escapeHtml(it.label)}</span>` +
-                        `</div>`
-                    ).join('') :
-                        '<div class="cmd-section-label">No matching panels</div>';
+                        sub +
+                        `</div>`;
+                }
+
+                function render(items) {
+                    filtered = items;
+                    selected = 0;
+                    if (!items.length) {
+                        list.innerHTML = '<div class="cmd-section-label">No matches found</div>';
+                        return;
+                    }
+                    // Group results
+                    const groups = {};
+                    items.forEach((it, i) => {
+                        if (!groups[it.group]) groups[it.group] = [];
+                        groups[it.group].push({ it, i });
+                    });
+                    list.innerHTML = Object.entries(groups).map(([grp, entries]) =>
+                        `<div class="cmd-section-group">${escapeHtml(grp)}</div>` +
+                        entries.map(({ it, i }) => renderItem(it, i)).join('')
+                    ).join('');
 
                     list.querySelectorAll('.cmd-item').forEach((el) => {
-                        el.addEventListener('click', () => {
-                            const v = el.dataset.view;
-                            closeCmd();
-                            navigateToView(v);
-                        });
+                        el.addEventListener('click', () => activateItem(filtered[parseInt(el.dataset.idx, 10)]));
                     });
+                }
+
+                function activateItem(it) {
+                    if (!it) return;
+                    closeCmd();
+                    if (it.type === 'view') {
+                        navigateToView(it.view);
+                    } else if (it.type === 'project' && it.url) {
+                        logActivity('Open', it.label, 'external');
+                        window.open(it.url, '_blank', 'noopener');
+                    } else if (it.type === 'action' && it.action) {
+                        it.action();
+                    }
                 }
 
                 function updateSelection(newIdx) {
@@ -9095,7 +9230,7 @@
                 }
 
                 function openCmd() {
-                    render(NAV_ITEMS);
+                    render(ALL_ITEMS);
                     input.value = '';
                     wrap.classList.add('active');
                     requestAnimationFrame(() => input.focus());
@@ -9108,19 +9243,19 @@
 
                 input.addEventListener('input', () => {
                     const q = input.value.trim().toLowerCase();
-                    render(q ? NAV_ITEMS.filter(it =>
+                    render(q ? ALL_ITEMS.filter(it =>
                         it.label.toLowerCase().includes(q) ||
-                        it.num.includes(q) ||
+                        it.num.toLowerCase().includes(q) ||
+                        (it.sub || '').toLowerCase().includes(q) ||
                         it.group.toLowerCase().includes(q)
-                    ) : NAV_ITEMS);
+                    ) : ALL_ITEMS);
                 });
 
                 input.addEventListener('keydown', (e) => {
                     if (e.key === 'ArrowDown') { e.preventDefault(); updateSelection(selected + 1); }
                     else if (e.key === 'ArrowUp') { e.preventDefault(); updateSelection(selected - 1); }
                     else if (e.key === 'Enter') {
-                        const v = list.querySelectorAll('.cmd-item')[selected]?.dataset?.view;
-                        if (v) { closeCmd(); navigateToView(v); }
+                        activateItem(filtered[selected]);
                     } else if (e.key === 'Escape') { closeCmd(); }
                 });
 
@@ -9142,6 +9277,7 @@
                     'library', 'drip', 'review-queue', 'overrides', 'galleries',
                     'content-studio', 'ecosystem', 'blog-manager', 'storage',
                     'donations', 'analytics', 'community', 'notifications', 'characters', 'daily-cultures',
+                    'nft-studio', 'brands',
                 ];
 
                 document.addEventListener('keydown', (e) => {
@@ -11197,6 +11333,7 @@
                     el.classList.toggle('active', el.id === 'view-' + view);
                 });
                 updatePageContext(view);
+                logActivity('Navigate', PAGE_CONTEXTS[view]?.name || view);
             }
 
             function loadViewData(view) {
@@ -13028,6 +13165,7 @@
 
             // ── Sweep trigger button ──
             $('eco-sweep-btn').addEventListener('click', async function () {
+                logActivity('Sweep', 'Triggered ecosystem health sweep', 'action');
                 const btn = $('eco-sweep-btn');
                 const ageEl = $('eco-sweep-age');
                 btn.disabled = true;
@@ -15713,11 +15851,102 @@
                             }),
                         });
                         if (resp.ok) {
+                            logActivity('Ops Flag', title + ' [' + (sevEl ? sevEl.value : 'normal') + ']', 'action');
                             if (titleEl) titleEl.value = '';
                             await loadOpsTasks();
                         }
                     } catch (err) { console.error('[ops add]', err); }
                 });
+            }
+
+            // ── Activity Log ─────────────────────────────────────────────────
+            const ACTIVITY_MAX = 60;
+            const ACTIVITY_KEY = 'gfd_activity_log';
+
+            // Wire buttons + render on load
+            (function () {
+                const clearBtn = $('activity-clear-btn');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', function () {
+                        try { localStorage.removeItem(ACTIVITY_KEY); } catch (e) { /* */ }
+                        renderActivityTimeline();
+                    });
+                }
+                const exportBtn = $('eco-export-manifest-btn');
+                if (exportBtn) exportBtn.addEventListener('click', exportStudioManifest);
+                renderActivityTimeline();
+            }());
+
+            function logActivity(action, detail, type) {
+                try {
+                    const log = JSON.parse(localStorage.getItem(ACTIVITY_KEY) || '[]');
+                    log.unshift({ ts: new Date().toISOString(), action, detail: detail || '', type: type || 'nav' });
+                    if (log.length > ACTIVITY_MAX) log.length = ACTIVITY_MAX;
+                    localStorage.setItem(ACTIVITY_KEY, JSON.stringify(log));
+                } catch (e) { /* localStorage unavailable */ }
+                renderActivityTimeline();
+            }
+
+            function renderActivityTimeline() {
+                const el = $('activity-timeline');
+                if (!el) return;
+                let log = [];
+                try { log = JSON.parse(localStorage.getItem(ACTIVITY_KEY) || '[]'); } catch (e) { /* */ }
+                if (!log.length) {
+                    el.innerHTML = '<div class="activity-empty">No activity yet &mdash; navigation, sweeps, publishes, and exports will appear here.</div>';
+                    return;
+                }
+                el.innerHTML = log.map(e => {
+                    const ago = relTimeFromIso(e.ts);
+                    const dotCls = (e.type === 'action' || e.type === 'export') ? e.type : 'nav';
+                    return `<div class="activity-item">` +
+                        `<span class="activity-time">${escapeHtml(ago)}</span>` +
+                        `<span class="activity-dot ${escapeHtml(dotCls)}"></span>` +
+                        `<span class="activity-action">${escapeHtml(e.action)}</span>` +
+                        (e.detail ? `<span class="activity-detail">${escapeHtml(e.detail)}</span>` : '') +
+                        `</div>`;
+                }).join('');
+            }
+
+            function relTimeFromIso(iso) {
+                try {
+                    const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+                    if (diff < 5) return 'just now';
+                    if (diff < 60) return diff + 's ago';
+                    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+                    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+                    return Math.floor(diff / 86400) + 'd ago';
+                } catch (e) { return ''; }
+            }
+
+            // ── Export Studio Manifest ───────────────────────────────────────
+            function exportStudioManifest() {
+                const manifest = {
+                    generated: new Date().toISOString(),
+                    version: '1.0',
+                    description: 'GFD Studio Manifest — Single Source of Truth for the ecosystem',
+                    sites: SITE_REGISTRY.map(s => ({
+                        id: s.id,
+                        name: s.name,
+                        domain: s.domain || null,
+                        purpose: s.purpose,
+                        hosting: s.hosting,
+                        liveUrl: s.liveUrl || null,
+                        repo: s.repo || null,
+                        checks: s.checks,
+                        notes: s.notes || '',
+                    })),
+                };
+                const blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'studio-manifest.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                logActivity('Export', 'Downloaded studio-manifest.json', 'export');
             }
 
             window.__clerkReady
