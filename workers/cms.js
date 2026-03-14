@@ -2152,16 +2152,18 @@ async function handleListDonations(request, env) {
 async function handleRecordDonation(request, user, env) {
   await ensureDonationsSchema(env.DB);
   const body = await request.json();
-  const { stripe_payment_id, amount_cents, currency, project, donor_email, donor_name, recurring } = body;
+  const { stripe_payment_id, amount_cents, currency, project, donor_email, donor_name, recurring, status } = body;
 
-  if (!amount_cents || !Number.isInteger(amount_cents) || amount_cents < 100) {
-    return errorResponse('amount_cents must be an integer >= 100');
+  if (!amount_cents || !Number.isInteger(amount_cents) || amount_cents < 1) {
+    return errorResponse('amount_cents must be a positive integer');
   }
+  const validStatuses = ['succeeded', 'pending', 'failed', 'refunded'];
+  const resolvedStatus = validStatuses.includes(status) ? status : 'succeeded';
 
   await env.DB.prepare(`
     INSERT OR IGNORE INTO cms_donations
       (stripe_payment_id, amount_cents, currency, project, donor_email, donor_name, status, recurring)
-    VALUES (?, ?, ?, ?, ?, ?, 'succeeded', ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
     stripe_payment_id || `manual_${Date.now()}`,
     amount_cents,
@@ -2169,6 +2171,7 @@ async function handleRecordDonation(request, user, env) {
     project || 'Good Flippin Design',
     donor_email || null,
     donor_name || null,
+    resolvedStatus,
     recurring ? 1 : 0,
   ).run();
 
@@ -2257,6 +2260,109 @@ async function handleAdminOps(request, user, env, method, taskId) {
 
   if (method === 'DELETE') {
     await env.DB.prepare(`DELETE FROM admin_ops WHERE id = ?`).bind(taskId).run();
+    return jsonResponse({ ok: true });
+  }
+
+  return errorResponse('Method not allowed', 405);
+}
+
+// ────────────────────────────────────────────────────────────────
+//  Character Registry
+// ────────────────────────────────────────────────────────────────
+
+async function ensureCharactersSchema(db) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS cms_characters (
+      id TEXT PRIMARY KEY,
+      brand TEXT NOT NULL DEFAULT 'gfv',
+      name TEXT NOT NULL,
+      emoji TEXT DEFAULT '',
+      description TEXT DEFAULT '',
+      pipeline TEXT DEFAULT '',
+      tools TEXT DEFAULT '[]',
+      stage TEXT DEFAULT 'planned',
+      poses TEXT DEFAULT '[]',
+      milestones TEXT DEFAULT '[]',
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `).run();
+  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_cms_characters_brand ON cms_characters(brand)`).run();
+}
+
+function parseCharacter(row) {
+  if (!row) return null;
+  try { row.tools = JSON.parse(row.tools || '[]'); } catch (e) { row.tools = []; }
+  try { row.poses = JSON.parse(row.poses || '[]'); } catch (e) { row.poses = []; }
+  try { row.milestones = JSON.parse(row.milestones || '[]'); } catch (e) { row.milestones = []; }
+  return row;
+}
+
+async function handleCharacters(request, user, env, method, charId) {
+  await ensureCharactersSchema(env.DB);
+
+  if (method === 'GET') {
+    if (charId) {
+      const row = await env.DB.prepare(`SELECT * FROM cms_characters WHERE id = ?`).bind(charId).first();
+      if (!row) return errorResponse('Not found', 404);
+      return jsonResponse({ character: parseCharacter(row) });
+    }
+    const url = new URL(request.url);
+    const brand = url.searchParams.get('brand') || null;
+    const stmt = brand
+      ? env.DB.prepare(`SELECT * FROM cms_characters WHERE brand = ? ORDER BY sort_order ASC, created_at ASC`).bind(brand)
+      : env.DB.prepare(`SELECT * FROM cms_characters ORDER BY sort_order ASC, created_at ASC`);
+    const rows = await stmt.all();
+    return jsonResponse({ characters: (rows.results || []).map(parseCharacter) });
+  }
+
+  if (method === 'POST') {
+    const body = await request.json();
+    const { name, brand = 'gfv', emoji = '', description = '', pipeline = '', tools = [], stage = 'planned', poses = [], milestones = [] } = body;
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      return errorResponse('name is required');
+    }
+    const id = crypto.randomUUID();
+    await env.DB.prepare(`
+      INSERT INTO cms_characters (id, brand, name, emoji, description, pipeline, tools, stage, poses, milestones)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      id, brand, name.trim().slice(0, 100), emoji.slice(0, 10), description.slice(0, 500),
+      pipeline.slice(0, 200), JSON.stringify(tools), stage,
+      JSON.stringify(poses), JSON.stringify(milestones)
+    ).run();
+    const row = await env.DB.prepare(`SELECT * FROM cms_characters WHERE id = ?`).bind(id).first();
+    return jsonResponse({ character: parseCharacter(row) }, 201);
+  }
+
+  if (!charId) return errorResponse('character id required', 400);
+
+  if (method === 'PUT') {
+    const body = await request.json();
+    const updates = [];
+    const binds = [];
+    if (body.name !== undefined) { updates.push('name = ?'); binds.push(body.name.trim().slice(0, 100)); }
+    if (body.brand !== undefined) { updates.push('brand = ?'); binds.push(body.brand); }
+    if (body.emoji !== undefined) { updates.push('emoji = ?'); binds.push(body.emoji.slice(0, 10)); }
+    if (body.description !== undefined) { updates.push('description = ?'); binds.push(body.description.slice(0, 500)); }
+    if (body.pipeline !== undefined) { updates.push('pipeline = ?'); binds.push(body.pipeline.slice(0, 200)); }
+    if (body.tools !== undefined) { updates.push('tools = ?'); binds.push(JSON.stringify(body.tools)); }
+    if (body.stage !== undefined) { updates.push('stage = ?'); binds.push(body.stage); }
+    if (body.poses !== undefined) { updates.push('poses = ?'); binds.push(JSON.stringify(body.poses)); }
+    if (body.milestones !== undefined) { updates.push('milestones = ?'); binds.push(JSON.stringify(body.milestones)); }
+    if (body.sort_order !== undefined) { updates.push('sort_order = ?'); binds.push(Number(body.sort_order) || 0); }
+    if (updates.length === 0) return errorResponse('no fields to update', 400);
+    updates.push('updated_at = ?');
+    binds.push(new Date().toISOString());
+    binds.push(charId);
+    await env.DB.prepare(`UPDATE cms_characters SET ${updates.join(', ')} WHERE id = ?`).bind(...binds).run();
+    const row = await env.DB.prepare(`SELECT * FROM cms_characters WHERE id = ?`).bind(charId).first();
+    return jsonResponse({ character: parseCharacter(row) });
+  }
+
+  if (method === 'DELETE') {
+    await env.DB.prepare(`DELETE FROM cms_characters WHERE id = ?`).bind(charId).run();
     return jsonResponse({ ok: true });
   }
 
@@ -2399,6 +2505,24 @@ export async function handleCMSRequest(request, env, user) {
     }
     if (opsIdMatch && method === 'DELETE') {
       return handleAdminOps(request, user, env, 'DELETE', decodeURIComponent(opsIdMatch[1]));
+    }
+
+    // Characters registry (admin)
+    if (path === '/characters' && method === 'GET') {
+      return handleCharacters(request, user, env, 'GET', null);
+    }
+    if (path === '/characters' && method === 'POST') {
+      return handleCharacters(request, user, env, 'POST', null);
+    }
+    const charIdMatch = path.match(/^\/characters\/([^/]+)$/);
+    if (charIdMatch && method === 'GET') {
+      return handleCharacters(request, user, env, 'GET', decodeURIComponent(charIdMatch[1]));
+    }
+    if (charIdMatch && method === 'PUT') {
+      return handleCharacters(request, user, env, 'PUT', decodeURIComponent(charIdMatch[1]));
+    }
+    if (charIdMatch && method === 'DELETE') {
+      return handleCharacters(request, user, env, 'DELETE', decodeURIComponent(charIdMatch[1]));
     }
 
     // Social posts (admin)
