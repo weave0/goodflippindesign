@@ -7407,6 +7407,7 @@
                     <div class="section-head">
                         <h2 class="section-title">Donations Dashboard</h2>
                         <div class="inline-actions">
+                            <button class="btn btn-primary" id="donations-record-btn">&#43; Record Donation</button>
                             <button class="btn btn-secondary" id="donations-refresh-btn">Refresh</button>
                         </div>
                     </div>
@@ -7441,16 +7442,17 @@
                                     <tr>
                                         <th>Date</th>
                                         <th>Amount</th>
+                                        <th>Donor</th>
                                         <th>Project</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="donations-tbody">
                                     <tr>
-                                        <td colspan="4" style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted)">
-                                            <p>No donation transactions stored yet.</p>
-                                            <p style="font-size:0.82rem;margin-top:0.4rem">Configure a Stripe webhook at <code>/api/donations/webhook</code> to automatically log donations to D1.</p>
-                                            <a href="https://dashboard.stripe.com/payments" target="_blank" rel="noopener" class="btn btn-secondary" style="margin-top:0.75rem;display:inline-flex">Open Stripe Dashboard ↗</a>
+                                        <td colspan="5" style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted)">
+                                            <p>No donation transactions recorded yet.</p>
+                                            <p style="font-size:0.82rem;margin-top:0.4rem">Use <strong>Record Donation</strong> to log manually, or configure a Stripe webhook at <code>/api/stripe/webhook</code> for automatic logging.</p>
+                                            <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener" class="btn btn-secondary" style="margin-top:0.75rem;display:inline-flex">Configure Stripe Webhook ↗</a>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -7488,13 +7490,48 @@
                             <div class="panel-kpi-label">Campaigns</div>
                             <div class="panel-kpi-value gold" id="an-campaigns">—</div>
                         </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Delivery Rate</div>
+                            <div class="panel-kpi-value" id="an-delivery-rate">—</div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;margin-bottom:0.85rem">
+                        <article class="panel">
+                            <div class="section-head">
+                                <h3 class="panel-subtitle">Published by Platform</h3>
+                            </div>
+                            <div id="analytics-by-platform" style="display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.5rem 0"></div>
+                        </article>
+                        <article class="panel">
+                            <div class="section-head">
+                                <h3 class="panel-subtitle">Published by Brand</h3>
+                            </div>
+                            <div id="analytics-by-brand" style="display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.5rem 0"></div>
+                        </article>
                     </div>
 
                     <article class="panel">
                         <div class="section-head">
-                            <h3 class="panel-subtitle">Published by Platform</h3>
+                            <h3 class="panel-subtitle">Brand Performance Breakdown</h3>
                         </div>
-                        <div id="analytics-by-platform" style="display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.5rem 0"></div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Brand</th>
+                                        <th>Published</th>
+                                        <th>Failed</th>
+                                        <th>Scheduled</th>
+                                        <th>Delivery Rate</th>
+                                        <th>Campaigns</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-brand-tbody">
+                                    <tr><td colspan="6" class="text-muted">Loading…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </article>
 
                     <article class="panel mt-085">
@@ -7660,41 +7697,45 @@
                     <div class="section-head">
                         <h2 class="section-title">Character &amp; Animation Registry</h2>
                         <div class="inline-actions">
+                            <button class="btn btn-primary" id="char-add-btn">+ Add Character</button>
                             <button class="btn btn-secondary" id="char-refresh-btn">Refresh Registry</button>
                         </div>
                     </div>
                     <p class="subheading mb-08">Track branded characters, pose libraries, and animation pipeline status. Full production brief in <code>ANIMATION_PIPELINE.md</code>.</p>
 
-                    <!-- Sheriff character card -->
-                    <div class="char-card" id="char-sheriff">
-                        <div class="char-avatar">🤠</div>
-                        <div>
-                            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.25rem">
-                                <strong style="font-size:1rem">The Sheriff</strong>
-                                <span class="tag" style="background:rgba(251,191,36,0.15);color:var(--accent-gold);border:1px solid rgba(251,191,36,0.3);font-size:0.72rem">GFV Brand</span>
-                                <span class="tag planned" id="char-sheriff-stage" style="font-size:0.72rem">In Progress</span>
-                            </div>
-                            <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.5rem">Friendly cowboy mascot. Target: 2D vector production asset in <strong>Rive</strong> (web) + <strong>Spine2D</strong> (video). Current blocker: locked &#8220;single raised paw&#8221; pose must be replaced with 7-pose library via Option B (Simplify to 2D).</p>
-                            <div class="char-poses" id="char-sheriff-poses">
-                                <span class="char-pose-tag blocked" title="Current pose locked — needs redesign">⚡ idle (blocked)</span>
-                                <span class="char-pose-tag planned">wave</span>
-                                <span class="char-pose-tag planned">cheer</span>
-                                <span class="char-pose-tag planned">neutral</span>
-                                <span class="char-pose-tag planned">point</span>
-                                <span class="char-pose-tag planned">nod</span>
-                                <span class="char-pose-tag planned">walk</span>
-                            </div>
-                            <div style="margin-top:0.6rem;font-size:0.78rem;color:var(--text-muted)">
-                                Pipeline option: <span class="char-pose-tag planned" style="font-size:0.72rem">Option B — Simplify to 2D</span>
-                                &emsp;Tools: <code style="font-size:0.75rem">Rive</code> (web animations) &middot; <code style="font-size:0.75rem">Spine2D</code> (video export)
+                    <!-- Character cards rendered by JS -->
+                    <div id="char-cards-container">
+                        <!-- Static Sheriff placeholder — replaced on load -->
+                        <div class="char-card" id="char-sheriff">
+                            <div class="char-avatar">🤠</div>
+                            <div>
+                                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.25rem">
+                                    <strong style="font-size:1rem">The Sheriff</strong>
+                                    <span class="tag" style="background:rgba(251,191,36,0.15);color:var(--accent-gold);border:1px solid rgba(251,191,36,0.3);font-size:0.72rem">GFV Brand</span>
+                                    <span class="tag planned" id="char-sheriff-stage" style="font-size:0.72rem">In Progress</span>
+                                </div>
+                                <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.5rem">Friendly cowboy mascot. Target: 2D vector production asset in <strong>Rive</strong> (web) + <strong>Spine2D</strong> (video). Current blocker: locked &#8220;single raised paw&#8221; pose must be replaced with 7-pose library via Option B (Simplify to 2D).</p>
+                                <div class="char-poses" id="char-sheriff-poses">
+                                    <span class="char-pose-tag blocked" title="Current pose locked — needs redesign">⚡ idle (blocked)</span>
+                                    <span class="char-pose-tag planned">wave</span>
+                                    <span class="char-pose-tag planned">cheer</span>
+                                    <span class="char-pose-tag planned">neutral</span>
+                                    <span class="char-pose-tag planned">point</span>
+                                    <span class="char-pose-tag planned">nod</span>
+                                    <span class="char-pose-tag planned">walk</span>
+                                </div>
+                                <div style="margin-top:0.6rem;font-size:0.78rem;color:var(--text-muted)">
+                                    Pipeline option: <span class="char-pose-tag planned" style="font-size:0.72rem">Option B — Simplify to 2D</span>
+                                    &emsp;Tools: <code style="font-size:0.75rem">Rive</code> (web animations) &middot; <code style="font-size:0.75rem">Spine2D</code> (video export)
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <article class="panel" style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.88rem">
-                        <p>Additional characters will appear here as they enter the production pipeline.</p>
-                        <p style="font-size:0.8rem;margin-top:0.35rem">See <strong>ANIMATION_PIPELINE.md</strong> for the full project brief and tool-stack recommendations.</p>
-                    </article>
+                        <article class="panel char-empty-state" style="text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:0.88rem">
+                            <p>Additional characters will appear here as they enter the production pipeline.</p>
+                            <p style="font-size:0.8rem;margin-top:0.35rem">Click <strong>+ Add Character</strong> to register a new character, or see <strong>ANIMATION_PIPELINE.md</strong> for the full project brief.</p>
+                        </article>
+                    </div>
                 </section>
 
                 <!-- ─────────────────────────────────────────────────────── -->
@@ -8559,6 +8600,117 @@
                     <button class="btn btn-secondary" data-close-modal="connection-modal">Cancel</button>
                     <button class="btn btn-primary" id="save-connection-btn">Save Connection</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Donation Modal -->
+    <div class="modal-overlay d-none" id="don-modal" role="dialog" aria-modal="true" aria-labelledby="don-modal-title">
+        <div class="modal-box" style="max-width:480px">
+            <div class="modal-header">
+                <h3 id="don-modal-title">&#43; Record Donation</h3>
+                <button class="modal-close" id="don-modal-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted" style="margin-bottom:1rem;font-size:0.85rem">Manually log a donation that was processed through Stripe or collected offline.</p>
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label" for="don-amount">Amount (USD) <span style="color:var(--rose)">*</span></label>
+                        <input type="number" id="don-amount" min="0.01" step="0.01" placeholder="25.00" required>
+                    </div>
+                    <div>
+                        <label class="form-label" for="don-project">Project / Campaign</label>
+                        <input type="text" id="don-project" placeholder="e.g. GFV Community Fund">
+                    </div>
+                    <div>
+                        <label class="form-label" for="don-donor">Donor Name <span class="text-muted">(optional)</span></label>
+                        <input type="text" id="don-donor" placeholder="Anonymous">
+                    </div>
+                    <div>
+                        <label class="form-label" for="don-stripe-id">Stripe Payment ID <span class="text-muted">(optional)</span></label>
+                        <input type="text" id="don-stripe-id" placeholder="pi_3..." style="font-family:var(--mono);font-size:0.82rem">
+                    </div>
+                    <div>
+                        <label class="form-label" for="don-status">Status</label>
+                        <select id="don-status">
+                            <option value="succeeded">Succeeded</option>
+                            <option value="pending">Pending</option>
+                            <option value="failed">Failed</option>
+                            <option value="refunded">Refunded</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="don-recurring">Type</label>
+                        <select id="don-recurring">
+                            <option value="0">One-time</option>
+                            <option value="1">Recurring</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="don-modal-cancel">Cancel</button>
+                <button class="btn btn-primary" id="don-modal-save">Save Donation</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add / Edit Character Modal -->
+    <div class="modal-overlay d-none" id="char-modal" role="dialog" aria-modal="true" aria-labelledby="char-modal-title">
+        <div class="modal-box" style="max-width:520px">
+            <div class="modal-header">
+                <h3 id="char-modal-title">&#43; Add Character</h3>
+                <button class="modal-close" id="char-modal-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted" style="margin-bottom:1rem;font-size:0.85rem">Register a new character or brand mascot to the animation pipeline.</p>
+                <input type="hidden" id="char-modal-id">
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label" for="char-modal-name">Character Name <span style="color:var(--rose)">*</span></label>
+                        <input type="text" id="char-modal-name" placeholder="The Sheriff">
+                    </div>
+                    <div>
+                        <label class="form-label" for="char-modal-emoji">Emoji / Avatar</label>
+                        <input type="text" id="char-modal-emoji" placeholder="🤠" style="font-size:1.25rem;width:4rem">
+                    </div>
+                    <div>
+                        <label class="form-label" for="char-modal-brand">Brand <span style="color:var(--rose)">*</span></label>
+                        <select id="char-modal-brand">
+                            <option value="gfv">GFV (Good Flippin Vibes)</option>
+                            <option value="aiaimate">AI Aimate</option>
+                            <option value="culturesherpa">CultureSherpa</option>
+                            <option value="citizenApproved">CitizenApproved</option>
+                            <option value="jamie">Jamie Rigling</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="char-modal-stage">Stage</label>
+                        <select id="char-modal-stage">
+                            <option value="concept">Concept</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="done">Done</option>
+                            <option value="blocked">Blocked</option>
+                        </select>
+                    </div>
+                    <div style="grid-column:1/-1">
+                        <label class="form-label" for="char-modal-description">Description</label>
+                        <textarea id="char-modal-description" rows="2" placeholder="Brief character brief / production target…"></textarea>
+                    </div>
+                    <div>
+                        <label class="form-label" for="char-modal-pipeline">Pipeline Option</label>
+                        <input type="text" id="char-modal-pipeline" placeholder="Option B — Simplify to 2D">
+                    </div>
+                    <div>
+                        <label class="form-label" for="char-modal-tools">Tools <span class="text-muted">(comma-separated)</span></label>
+                        <input type="text" id="char-modal-tools" placeholder="Rive, Spine2D">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="char-modal-cancel">Cancel</button>
+                <button class="btn btn-primary" id="char-modal-save">Save Character</button>
             </div>
         </div>
     </div>
@@ -13750,50 +13902,113 @@
             // =================================================================
             (function initAnalyticsPanel() {
                 'use strict';
-                var loaded = false;
+
+                function renderTagCloud(elId, mapObj, cssClass) {
+                    var el = $(elId);
+                    if (!el) return;
+                    var entries = Object.entries(mapObj).sort(function (a, b) { return b[1] - a[1]; });
+                    el.innerHTML = entries.length
+                        ? entries.map(function (e) {
+                            return '<span class="tag ' + cssClass + '" style="font-size:0.8rem">' +
+                                escapeHtml(e[0]) + ' <strong>' + e[1] + '</strong></span>';
+                        }).join('')
+                        : '<span class="text-muted" style="font-size:0.85rem">No data yet.</span>';
+                }
+
+                function rate(pub, fail) {
+                    return (pub + fail) > 0
+                        ? ((pub / (pub + fail)) * 100).toFixed(1) + '%'
+                        : '—';
+                }
+
+                function rateClass(pub, fail) {
+                    if ((pub + fail) === 0) return '';
+                    var r = pub / (pub + fail) * 100;
+                    if (r >= 90) return 'emerald';
+                    if (r >= 70) return 'gold';
+                    return 'rose';
+                }
 
                 async function load() {
                     try {
-                        // Reuse already-loaded state.variants from refreshAll()
                         var variants = state.variants || [];
-                        var socialStats = {};
-                        // Count by status
-                        var published = variants.filter(function (v) { return v.status === 'published'; }).length;
-                        var failed = variants.filter(function (v) { return v.status === 'failed'; }).length;
-                        var scheduled = variants.filter(function (v) { return v.status === 'scheduled'; }).length;
-                        var campaigns = (state.campaigns || []).length;
+                        var publishedV = variants.filter(function (v) { return v.status === 'published'; });
+                        var failedV    = variants.filter(function (v) { return v.status === 'failed'; });
+                        var scheduledV = variants.filter(function (v) { return v.status === 'scheduled'; });
+                        var campaignCount = (state.campaigns || []).length;
 
-                        $('an-published').textContent = published;
-                        $('an-failed').textContent = failed;
-                        $('an-scheduled').textContent = scheduled;
-                        $('an-campaigns').textContent = campaigns;
+                        var pub  = publishedV.length;
+                        var fail = failedV.length;
+                        var sched = scheduledV.length;
 
-                        // Published by platform
+                        var delivKlass = rateClass(pub, fail);
+                        var delivEl = $('an-delivery-rate');
+
+                        $('an-published').textContent = pub;
+                        $('an-failed').textContent    = fail;
+                        $('an-scheduled').textContent = sched;
+                        $('an-campaigns').textContent = campaignCount;
+                        if (delivEl) {
+                            delivEl.textContent = rate(pub, fail);
+                            delivEl.className   = 'panel-kpi-value ' + delivKlass;
+                        }
+
+                        // Published by platform tag cloud
                         var byPlatform = {};
-                        variants.filter(function (v) { return v.status === 'published'; }).forEach(function (v) {
+                        publishedV.forEach(function (v) {
                             var p = v.platform || 'unknown';
                             byPlatform[p] = (byPlatform[p] || 0) + 1;
                         });
-                        var platformEl = $('analytics-by-platform');
-                        if (platformEl) {
-                            if (Object.keys(byPlatform).length) {
-                                platformEl.innerHTML = Object.entries(byPlatform).sort(function (a, b) { return b[1] - a[1]; }).map(function (e) {
-                                    return '<span class="tag ok" style="font-size:0.8rem">' + escapeHtml(e[0]) + ' <strong>' + e[1] + '</strong></span>';
-                                }).join('');
-                            } else {
-                                platformEl.innerHTML = '<span class="text-muted" style="font-size:0.85rem">No published variants yet.</span>';
-                            }
+                        renderTagCloud('analytics-by-platform', byPlatform, 'ok');
+
+                        // Published by brand tag cloud
+                        var byBrandPub = {};
+                        publishedV.forEach(function (v) {
+                            var b = v.brand || 'unknown';
+                            byBrandPub[b] = (byBrandPub[b] || 0) + 1;
+                        });
+                        renderTagCloud('analytics-by-brand', byBrandPub, 'cyan');
+
+                        // Brand performance breakdown table
+                        var brandMap = {};
+                        variants.forEach(function (v) {
+                            var b = v.brand || 'unknown';
+                            if (!brandMap[b]) brandMap[b] = { pub: 0, fail: 0, sched: 0, campaigns: new Set() };
+                            if (v.status === 'published') brandMap[b].pub++;
+                            else if (v.status === 'failed') brandMap[b].fail++;
+                            else if (v.status === 'scheduled') brandMap[b].sched++;
+                            if (v.campaign_id) brandMap[b].campaigns.add(v.campaign_id);
+                        });
+                        var brandTbody = $('analytics-brand-tbody');
+                        if (brandTbody) {
+                            var rows = Object.entries(brandMap).sort(function (a, b) { return b[1].pub - a[1].pub; });
+                            brandTbody.innerHTML = rows.length
+                                ? rows.map(function (entry) {
+                                    var b = entry[0], s = entry[1];
+                                    var r = rate(s.pub, s.fail);
+                                    var rc = rateClass(s.pub, s.fail);
+                                    return '<tr>' +
+                                        '<td>' + escapeHtml(b) + '</td>' +
+                                        '<td>' + s.pub + '</td>' +
+                                        '<td>' + s.fail + '</td>' +
+                                        '<td>' + s.sched + '</td>' +
+                                        '<td><span class="' + rc + '">' + r + '</span></td>' +
+                                        '<td>' + s.campaigns.size + '</td>' +
+                                        '</tr>';
+                                }).join('')
+                                : '<tr><td colspan="6" class="text-muted">No variant data found.</td></tr>';
                         }
 
-                        // Recent published variants table
-                        var recent = variants.filter(function (v) { return v.status === 'published'; })
+                        // Recent published variants table (last 50, sorted newest first)
+                        var recent = publishedV
                             .sort(function (a, b) { return new Date(b.scheduled_at || 0) - new Date(a.scheduled_at || 0); })
-                            .slice(0, 25);
+                            .slice(0, 50);
                         var tbody = $('analytics-variants-tbody');
                         if (tbody) {
                             tbody.innerHTML = recent.length
                                 ? recent.map(function (v) {
-                                    var caption = (v.content || v.caption || '').slice(0, 60) + ((v.content || v.caption || '').length > 60 ? '…' : '');
+                                    var raw = v.content || v.caption || '';
+                                    var caption = raw.slice(0, 70) + (raw.length > 70 ? '…' : '');
                                     return '<tr>' +
                                         '<td>' + escapeHtml(caption || '—') + '</td>' +
                                         '<td><span class="tag ok">' + escapeHtml(v.platform || '—') + '</span></td>' +
@@ -13999,6 +14214,7 @@
                         description: 'Friendly cowboy mascot. Target: 2D vector production asset in Rive (web) + Spine2D (video).',
                         pipeline: 'Option B — Simplify to 2D',
                         tools: ['Rive', 'Spine2D'],
+                        stage: 'in-progress',
                         poses: [
                             { id: 'idle', label: 'idle', status: 'blocked', note: 'Current pose locked — needs redesign' },
                             { id: 'wave', label: 'wave', status: 'planned' },
@@ -14017,85 +14233,143 @@
                     },
                 ];
 
-                function loadRegistry() {
+                // ─── Data layer ────────────────────────────────────────────
+                var registryCache = null; // in-memory cache for the session
+
+                async function loadRegistry() {
+                    // 1. Try D1 via API
+                    try {
+                        var data = await api('/characters');
+                        var reg = (data.characters && data.characters.length) ? data.characters : defaultRegistry;
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(reg)); // write-through cache
+                        registryCache = reg;
+                        return reg;
+                    } catch (e) {
+                        console.warn('[characters] API load failed, using localStorage:', e.message);
+                    }
+                    // 2. Fall back to localStorage
                     try {
                         var stored = localStorage.getItem(STORAGE_KEY);
-                        return stored ? JSON.parse(stored) : defaultRegistry;
-                    } catch (e) { return defaultRegistry; }
-                }
-                function saveRegistry(reg) {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(reg));
+                        if (stored) { registryCache = JSON.parse(stored); return registryCache; }
+                    } catch (e2) { /* ignore */ }
+                    // 3. Fall back to defaults
+                    registryCache = defaultRegistry;
+                    return registryCache;
                 }
 
-                function renderCharacters() {
-                    var registry = loadRegistry();
-                    var container = $('char-sheriff');
+                function cacheSet(reg) {
+                    registryCache = reg;
+                    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(reg)); } catch (e) { /* ignore */ }
+                }
+
+                async function persistCharacter(ch) {
+                    // Persist pose/milestone updates back to API (best-effort)
+                    try {
+                        await api('/characters/' + ch.id, { method: 'PUT', body: ch });
+                    } catch (e) {
+                        console.warn('[characters] Could not persist to API, localStorage-only:', e.message);
+                    }
+                }
+
+                // ─── Render ────────────────────────────────────────────────
+                function renderRegistry(registry) {
+                    var container = $('char-cards-container');
                     if (!container) return;
-                    // find parent of char-sheriff card to render all characters
-                    var parent = container.parentElement;
-                    // Remove all char-card elements except the empty-state article
-                    var old = parent.querySelectorAll('.char-card');
-                    old.forEach(function (el) { el.remove(); });
+                    // Remove all dynamically generated char-cards (keep the static placeholder + empty-state)
+                    container.querySelectorAll('.char-card.dynamic').forEach(function (el) { el.remove(); });
+                    var emptyState = container.querySelector('.char-empty-state');
+                    // Hide empty state if there are characters
+                    if (emptyState) emptyState.style.display = registry.length ? 'none' : '';
 
-                    var article = parent.querySelector('article.panel');
                     registry.forEach(function (ch) {
+                        // Skip the static Sheriff — we'll update it in place instead
+                        if (ch.id === 'sheriff') {
+                            var staticCard = $('char-sheriff');
+                            if (staticCard) {
+                                // update poses in the static card
+                                var posesEl = $('char-sheriff-poses');
+                                if (posesEl && ch.poses) {
+                                    posesEl.innerHTML = (ch.poses || []).map(function (p) {
+                                        return '<span class="char-pose-tag ' + p.status + '" title="' + escapeHtml(p.note || p.status) + '"'
+                                            + ' data-char="' + ch.id + '" data-pose="' + p.id + '" style="cursor:pointer">'
+                                            + (p.status === 'blocked' ? '⚡ ' : p.status === 'done' ? '✓ ' : '')
+                                            + escapeHtml(p.label) + '</span>';
+                                    }).join('');
+                                }
+                                return;
+                            }
+                        }
+
                         var card = document.createElement('div');
-                        card.className = 'char-card';
+                        card.className = 'char-card dynamic';
                         card.id = 'char-' + ch.id;
 
-                        var poseHTML = ch.poses.map(function (p) {
-                            return '<span class="char-pose-tag ' + p.status + '" title="' + (p.note || p.status)
-                                + '" data-char="' + ch.id + '" data-pose="' + p.id
-                                + '" style="cursor:pointer">'
+                        var poseHTML = (ch.poses || []).map(function (p) {
+                            return '<span class="char-pose-tag ' + p.status + '" title="' + escapeHtml(p.note || p.status) + '"'
+                                + ' data-char="' + ch.id + '" data-pose="' + p.id + '" style="cursor:pointer">'
                                 + (p.status === 'blocked' ? '⚡ ' : p.status === 'done' ? '✓ ' : '')
-                                + p.label + '</span>';
+                                + escapeHtml(p.label) + '</span>';
                         }).join('');
 
-                        var msHTML = ch.milestones.map(function (m) {
+                        var msHTML = (ch.milestones || []).map(function (m) {
                             var icon = m.status === 'done' ? '✅' : m.status === 'in-progress' ? '🔄' : '⬜';
                             return '<span class="char-pose-tag ' + m.status + '" title="Click to cycle status"'
-                                + ' data-char="' + ch.id + '" data-milestone="' + m.phase
-                                + '" style="cursor:pointer;font-size:0.72rem">'
-                                + icon + ' ' + m.phase + '</span>';
+                                + ' data-char="' + ch.id + '" data-milestone="' + escapeHtml(m.phase) + '"'
+                                + ' style="cursor:pointer;font-size:0.72rem">'
+                                + icon + ' ' + escapeHtml(m.phase) + '</span>';
                         }).join('');
 
-                        card.innerHTML = '<div class="char-avatar">' + ch.emoji + '</div>'
+                        var toolsArr = Array.isArray(ch.tools) ? ch.tools
+                            : (typeof ch.tools === 'string' ? ch.tools.split(',').map(function (t) { return t.trim(); }) : []);
+
+                        card.innerHTML = '<div class="char-avatar">' + escapeHtml(ch.emoji || '🎭') + '</div>'
                             + '<div>'
                             + '<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.25rem">'
-                            + '<strong style="font-size:1rem">' + ch.name + '</strong>'
-                            + '<span class="tag" style="background:rgba(251,191,36,0.15);color:var(--accent-gold);border:1px solid rgba(251,191,36,0.3);font-size:0.72rem">' + ch.brand.toUpperCase() + ' Brand</span>'
+                            + '<strong style="font-size:1rem">' + escapeHtml(ch.name) + '</strong>'
+                            + '<span class="tag" style="background:rgba(251,191,36,0.15);color:var(--accent-gold);border:1px solid rgba(251,191,36,0.3);font-size:0.72rem">' + escapeHtml((ch.brand || '').toUpperCase()) + ' Brand</span>'
+                            + (ch.stage ? '<span class="tag ' + escapeHtml(ch.stage) + '" style="font-size:0.72rem">' + escapeHtml(ch.stage) + '</span>' : '')
                             + '</div>'
-                            + '<p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.5rem">' + ch.description + '</p>'
-                            + '<div class="char-poses">' + poseHTML + '</div>'
+                            + '<p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.5rem">' + escapeHtml(ch.description || '') + '</p>'
+                            + (poseHTML ? '<div class="char-poses">' + poseHTML + '</div>' : '')
                             + '<div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted)">'
-                            + 'Pipeline: <code style="font-size:0.75rem">' + ch.pipeline + '</code>'
-                            + ' &emsp;Tools: ' + ch.tools.map(function (t) { return '<code style="font-size:0.75rem">' + t + '</code>'; }).join(' · ')
+                            + (ch.pipeline ? 'Pipeline: <code style="font-size:0.75rem">' + escapeHtml(ch.pipeline) + '</code>' : '')
+                            + (toolsArr.length ? ' &emsp;Tools: ' + toolsArr.map(function (t) { return '<code style="font-size:0.75rem">' + escapeHtml(t) + '</code>'; }).join(' · ') : '')
                             + '</div>'
-                            + '<div style="margin-top:0.5rem">' + msHTML + '</div>'
+                            + (msHTML ? '<div style="margin-top:0.5rem">' + msHTML + '</div>' : '')
                             + '</div>';
 
-                        parent.insertBefore(card, article);
+                        if (emptyState) {
+                            container.insertBefore(card, emptyState);
+                        } else {
+                            container.appendChild(card);
+                        }
                     });
+                }
 
-                    // Attach click handlers to cycle pose/milestone status
-                    parent.addEventListener('click', function (e) {
+                // ─── Click handler: cycle pose / milestone status ──────────
+                var container = $('char-cards-container');
+                if (container) {
+                    container.addEventListener('click', async function (e) {
                         var poseEl = e.target.closest('[data-pose]');
                         var msEl = e.target.closest('[data-milestone]');
                         if (!poseEl && !msEl) return;
 
-                        var reg = loadRegistry();
+                        var reg = registryCache ? registryCache.slice() : await loadRegistry();
+                        var updated = null;
+
                         if (poseEl) {
                             var charId = poseEl.dataset.char;
                             var poseId = poseEl.dataset.pose;
-                            var order = ['planned', 'in-progress', 'done', 'blocked'];
+                            var poseOrder = ['planned', 'in-progress', 'done', 'blocked'];
                             reg.forEach(function (ch) {
                                 if (ch.id !== charId) return;
-                                ch.poses.forEach(function (p) {
+                                (ch.poses || []).forEach(function (p) {
                                     if (p.id !== poseId) return;
-                                    var idx = order.indexOf(p.status);
-                                    p.status = order[(idx + 1) % order.length];
+                                    var idx = poseOrder.indexOf(p.status);
+                                    p.status = poseOrder[(idx + 1) % poseOrder.length];
                                     p.note = p.status === 'blocked' ? 'Blocked' : '';
                                 });
+                                updated = ch;
                             });
                         }
                         if (msEl) {
@@ -14104,26 +14378,101 @@
                             var msOrder = ['not-started', 'in-progress', 'done'];
                             reg.forEach(function (ch) {
                                 if (ch.id !== charId2) return;
-                                ch.milestones.forEach(function (m) {
+                                (ch.milestones || []).forEach(function (m) {
                                     if (m.phase !== phase) return;
                                     var idx2 = msOrder.indexOf(m.status);
                                     m.status = msOrder[(idx2 + 1) % msOrder.length];
                                 });
+                                updated = ch;
                             });
                         }
-                        saveRegistry(reg);
-                        renderCharacters();
+
+                        cacheSet(reg);
+                        renderRegistry(reg);
+                        if (updated) persistCharacter(updated);
                     });
                 }
 
-                var refBtn = $('char-refresh-btn');
-                if (refBtn) {
-                    refBtn.addEventListener('click', function () {
-                        renderCharacters();
-                        toast('Character registry refreshed from local state.', 'info');
+                // ─── Add Character modal ───────────────────────────────────
+                var charModal = $('char-modal');
+
+                function openCharModal() {
+                    if (!charModal) return;
+                    $('char-modal-id').value = '';
+                    $('char-modal-name').value = '';
+                    $('char-modal-emoji').value = '';
+                    $('char-modal-brand').value = 'gfv';
+                    $('char-modal-stage').value = 'concept';
+                    $('char-modal-description').value = '';
+                    $('char-modal-pipeline').value = '';
+                    $('char-modal-tools').value = '';
+                    $('char-modal-title').textContent = '+ Add Character';
+                    charModal.classList.remove('d-none');
+                    $('char-modal-name').focus();
+                }
+                function closeCharModal() { if (charModal) charModal.classList.add('d-none'); }
+
+                var addBtn = $('char-add-btn');
+                var closeBtn2 = $('char-modal-close');
+                var cancelBtn2 = $('char-modal-cancel');
+                if (addBtn) addBtn.addEventListener('click', openCharModal);
+                if (closeBtn2) closeBtn2.addEventListener('click', closeCharModal);
+                if (cancelBtn2) cancelBtn2.addEventListener('click', closeCharModal);
+                if (charModal) charModal.addEventListener('click', function (e) { if (e.target === charModal) closeCharModal(); });
+
+                var saveCharBtn = $('char-modal-save');
+                if (saveCharBtn) {
+                    saveCharBtn.addEventListener('click', async function () {
+                        var name = ($('char-modal-name').value || '').trim();
+                        if (!name) { toast('Character name is required.', 'error'); return; }
+                        var toolsRaw = ($('char-modal-tools').value || '').trim();
+                        var payload = {
+                            name: name,
+                            emoji: ($('char-modal-emoji').value || '').trim() || '🎭',
+                            brand: $('char-modal-brand').value || 'gfv',
+                            stage: $('char-modal-stage').value || 'concept',
+                            description: ($('char-modal-description').value || '').trim(),
+                            pipeline: ($('char-modal-pipeline').value || '').trim(),
+                            tools: toolsRaw ? toolsRaw.split(',').map(function (t) { return t.trim(); }).filter(Boolean) : [],
+                            poses: [],
+                            milestones: [],
+                        };
+                        try {
+                            saveCharBtn.disabled = true;
+                            saveCharBtn.textContent = 'Saving…';
+                            await api('/characters', { method: 'POST', body: payload });
+                            closeCharModal();
+                            toast('Character "' + name + '" added.', 'success');
+                            registryCache = null; // force reload
+                            await loadAndRender();
+                        } catch (err) {
+                            toast('Save failed: ' + err.message, 'error');
+                        } finally {
+                            saveCharBtn.disabled = false;
+                            saveCharBtn.textContent = 'Save Character';
+                        }
                     });
                 }
-                renderCharacters();
+
+                // ─── Load + render ─────────────────────────────────────────
+                async function loadAndRender() {
+                    var reg = await loadRegistry();
+                    renderRegistry(reg);
+                }
+
+                var refBtn3 = $('char-refresh-btn');
+                if (refBtn3) {
+                    refBtn3.addEventListener('click', async function () {
+                        registryCache = null;
+                        await loadAndRender();
+                        toast('Character registry refreshed from D1.', 'info');
+                    });
+                }
+
+                window.__adminPanels = window.__adminPanels || {};
+                window.__adminPanels.characters = loadAndRender;
+
+                loadAndRender();
             })();
 
             // =================================================================
@@ -14132,9 +14481,61 @@
             (function initDonationsPanel() {
                 'use strict';
                 var refBtn = $('donations-refresh-btn');
-                if (refBtn) {
-                    refBtn.addEventListener('click', loadDonations);
+                var recordBtn = $('donations-record-btn');
+                if (refBtn) refBtn.addEventListener('click', loadDonations);
+                if (recordBtn) recordBtn.addEventListener('click', openDonationModal);
+
+                // Modal wiring
+                var modal = $('don-modal');
+                function openDonationModal() {
+                    if (!modal) return;
+                    $('don-amount').value = '';
+                    $('don-project').value = '';
+                    $('don-donor').value = '';
+                    $('don-stripe-id').value = '';
+                    $('don-status').value = 'succeeded';
+                    $('don-recurring').value = '0';
+                    modal.classList.remove('d-none');
+                    $('don-amount').focus();
                 }
+                function closeDonationModal() { if (modal) modal.classList.add('d-none'); }
+
+                var closeBtn = $('don-modal-close');
+                var cancelBtn = $('don-modal-cancel');
+                if (closeBtn) closeBtn.addEventListener('click', closeDonationModal);
+                if (cancelBtn) cancelBtn.addEventListener('click', closeDonationModal);
+                if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) closeDonationModal(); });
+
+                var saveBtn = $('don-modal-save');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', async function () {
+                        var amtRaw = parseFloat($('don-amount').value);
+                        if (!amtRaw || amtRaw <= 0) { toast('Enter a valid amount.', 'error'); return; }
+                        var payload = {
+                            amount_cents: Math.round(amtRaw * 100),
+                            project: ($('don-project').value || '').trim() || null,
+                            donor_name: ($('don-donor').value || '').trim() || null,
+                            stripe_payment_id: ($('don-stripe-id').value || '').trim() || null,
+                            status: $('don-status').value || 'succeeded',
+                            recurring: parseInt($('don-recurring').value, 10) === 1 ? 1 : 0,
+                        };
+                        try {
+                            saveBtn.disabled = true;
+                            saveBtn.textContent = 'Saving…';
+                            var res = await apiFetch('/api/cms/donations', { method: 'POST', body: JSON.stringify(payload) });
+                            if (!res.ok) { var err2 = await res.json().catch(function () { return {}; }); throw new Error(err2.error || 'HTTP ' + res.status); }
+                            closeDonationModal();
+                            toast('Donation recorded.', 'success');
+                            await loadDonations();
+                        } catch (err) {
+                            toast('Save failed: ' + err.message, 'error');
+                        } finally {
+                            saveBtn.disabled = false;
+                            saveBtn.textContent = 'Save Donation';
+                        }
+                    });
+                }
+
                 window.__adminPanels = window.__adminPanels || {};
                 window.__adminPanels.donations = loadDonations;
 
@@ -14169,25 +14570,27 @@
                     var tbody = $('donations-tbody');
                     if (!tbody) return;
                     if (!donations.length) {
-                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted)">'
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted)">'
                             + '<p>No donation transactions recorded yet.</p>'
-                            + '<p style="font-size:0.82rem;margin-top:0.4rem">Use the <strong>Record Donation</strong> button to log a Stripe payment, or configure a webhook for automatic logging.</p>'
-                            + '<a href="https://dashboard.stripe.com/payments" target="_blank" rel="noopener" class="btn btn-secondary" style="margin-top:0.75rem;display:inline-flex">Open Stripe Dashboard ↗</a>'
+                            + '<p style="font-size:0.82rem;margin-top:0.4rem">Click <strong>+ Record Donation</strong> above to log one manually, or configure the Stripe webhook for automatic logging.</p>'
+                            + '<a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener" class="btn btn-secondary" style="margin-top:0.75rem;display:inline-flex">Configure Stripe Webhook ↗</a>'
                             + '</td></tr>';
                         return;
                     }
                     tbody.innerHTML = donations.map(function (d) {
-                        var dt = d.created_at ? new Date(d.created_at + 'Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-                        var statusClass = d.status === 'succeeded' ? 'emerald' : d.status === 'failed' ? 'rose' : '';
+                        var dt = d.created_at ? new Date(d.created_at + (d.created_at.includes('T') ? '' : 'T00:00:00Z')).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                        var statusClass = d.status === 'succeeded' ? 'emerald' : d.status === 'failed' ? 'rose' : d.status === 'refunded' ? 'warn' : '';
                         return '<tr>'
                             + '<td>' + dt + '</td>'
                             + '<td class="mono">' + fmtUSD(d.amount_cents) + (d.recurring ? ' <span style="color:var(--accent-cyan);font-size:0.75rem">↻</span>' : '') + '</td>'
-                            + '<td>' + (d.project || '—') + '</td>'
-                            + '<td><span class="' + statusClass + '">' + (d.status || 'unknown') + '</span></td>'
+                            + '<td>' + escapeHtml(d.donor_name || '—') + '</td>'
+                            + '<td>' + escapeHtml(d.project || '—') + '</td>'
+                            + '<td><span class="' + statusClass + '">' + escapeHtml(d.status || 'unknown') + '</span></td>'
                             + '</tr>';
                     }).join('');
                 }
             })();
+
 
             // ─────────────────────────────────────────────────────────────────
             // STORAGE INTELLIGENCE (panel 13)
