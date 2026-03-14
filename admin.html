@@ -6374,6 +6374,14 @@
                         <div class="chip-value emerald" id="kpi-sites-online">—</div>
                         <div class="chip-label">Sites Up</div>
                     </div>
+                    <div class="status-chip">
+                        <div class="chip-value emerald" id="kpi-donations">—</div>
+                        <div class="chip-label">Raised</div>
+                    </div>
+                    <div class="status-chip">
+                        <div class="chip-value gold" id="kpi-characters">—</div>
+                        <div class="chip-label">Characters</div>
+                    </div>
                 </div>
 
                 <section class="view active" id="view-overview">
@@ -6552,6 +6560,32 @@
                         </div>
                         <p class="subheading mb-06" style="font-size:0.78rem">Chronological record of admin actions this session &mdash; navigation, sweeps, publishes, exports.</p>
                         <div class="activity-timeline" id="activity-timeline"></div>
+                    </article>
+
+                    <!-- Server Audit Log ─────────────────────────────── -->
+                    <article class="panel mt-085" id="server-audit-panel">
+                        <div class="section-head">
+                            <h2 class="section-title">&#128274; Server Audit Log</h2>
+                            <div class="inline-actions">
+                                <span class="text-muted" id="audit-total-label" style="font-size:0.78rem"></span>
+                                <button class="btn btn-micro" id="audit-refresh-btn">Refresh</button>
+                            </div>
+                        </div>
+                        <p class="subheading mb-06" style="font-size:0.78rem">Last 15 write operations recorded in D1 <code>cms_audit_log</code>. Every asset, social, campaign, and connection mutation is tracked.</p>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Action</th>
+                                        <th>Type</th>
+                                        <th>Target ID</th>
+                                        <th>User</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="server-audit-tbody"></tbody>
+                            </table>
+                        </div>
                     </article>
                 </section>
 
@@ -7528,7 +7562,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="analytics-brand-tbody">
-                                    <tr><td colspan="6" class="text-muted">Loading…</td></tr>
+                                    <tr>
+                                        <td colspan="6" class="text-muted">Loading…</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -9907,6 +9943,23 @@
                     const el = $('kpi-community-members');
                     if (el) el.textContent = Number(stats.communityMembers);
                 }
+                // Characters count
+                if (stats.characters !== undefined) {
+                    const el = $('kpi-characters');
+                    if (el) el.textContent = Number(stats.characters);
+                }
+                // Donations total raised
+                if (stats.donations !== undefined) {
+                    const el = $('kpi-donations');
+                    if (el) {
+                        const dollars = (Number(stats.donations.totalCents || 0) / 100).toFixed(0);
+                        el.textContent = '$' + Number(dollars).toLocaleString();
+                    }
+                }
+                // Server audit log
+                if (stats.recentAudit) {
+                    renderServerAuditLog(stats.recentAudit, Number(stats.auditTotal || 0));
+                }
 
                 updateGettingStarted();
                 checkSiteUptime();
@@ -10682,6 +10735,27 @@
                     id: 'admin-jwt-hardening', severity: 'done', brand: 'gfd', area: 'Admin',
                     title: 'Admin edge: JWT format validation added',
                     detail: '_worker.js now checks that __session cookie value starts with "ey" (base64url JWT header) and is >20 chars, preventing cookie spoofing with arbitrary values.'
+                },
+                // ── Recent completions (2026-03-14) ────────────────────────────
+                {
+                    id: 'characters-d1-api', severity: 'done', brand: 'gfd', area: 'Admin',
+                    title: 'Characters panel — D1 persistence + Add Modal (2026-03-14)',
+                    detail: 'cms_characters D1 table + handleCharacters() CRUD in cms.js. Characters panel rewritten API-first (localStorage fallback). Add Character modal with name, emoji, brand, stage, pipeline, tools fields. Pose/milestone status cycles write back to D1.'
+                },
+                {
+                    id: 'donations-modal', severity: 'done', brand: 'gfd', area: 'Admin',
+                    title: 'Donations panel — Record Donation modal + status field (2026-03-14)',
+                    detail: 'Record Donation modal added to Donations panel (donor name, amount, payment ID, status). handleRecordDonation() in cms.js accepts status field. KPI strip now shows total raised from D1.'
+                },
+                {
+                    id: 'analytics-enhanced', severity: 'done', brand: 'gfd', area: 'Admin',
+                    title: 'Analytics panel — Delivery Rate KPI + Brand Breakdown table (2026-03-14)',
+                    detail: 'Analytics panel gained Delivery Rate KPI (emerald ≥90% / gold ≥70% / rose below), tag cloud rows for platform + brand, and a Brand Performance Breakdown table with published/failed/scheduled/delivery-rate per brand. Stats call bumped to last 50 variants.'
+                },
+                {
+                    id: 'audit-log-viewer', severity: 'done', brand: 'gfd', area: 'Admin',
+                    title: 'Server Audit Log viewer in Overview (2026-03-14)',
+                    detail: 'Overview panel now renders last 15 cms_audit_log rows (action, target, user, time). Refresh button calls /api/cms/stats. /api/cms/stats augmented with characters count, donations totals, open ops count, audit total, and recentAudit rows.'
                 },
             ];
 
@@ -13933,11 +14007,11 @@
                     try {
                         var variants = state.variants || [];
                         var publishedV = variants.filter(function (v) { return v.status === 'published'; });
-                        var failedV    = variants.filter(function (v) { return v.status === 'failed'; });
+                        var failedV = variants.filter(function (v) { return v.status === 'failed'; });
                         var scheduledV = variants.filter(function (v) { return v.status === 'scheduled'; });
                         var campaignCount = (state.campaigns || []).length;
 
-                        var pub  = publishedV.length;
+                        var pub = publishedV.length;
                         var fail = failedV.length;
                         var sched = scheduledV.length;
 
@@ -13945,12 +14019,12 @@
                         var delivEl = $('an-delivery-rate');
 
                         $('an-published').textContent = pub;
-                        $('an-failed').textContent    = fail;
+                        $('an-failed').textContent = fail;
                         $('an-scheduled').textContent = sched;
                         $('an-campaigns').textContent = campaignCount;
                         if (delivEl) {
                             delivEl.textContent = rate(pub, fail);
-                            delivEl.className   = 'panel-kpi-value ' + delivKlass;
+                            delivEl.className = 'panel-kpi-value ' + delivKlass;
                         }
 
                         // Published by platform tag cloud
@@ -14799,6 +14873,13 @@
                                 var usedMB = (totalBytes / (1024 * 1024)).toFixed(1);
                                 var usedPct = Math.min((totalBytes / (10 * 1024 * 1024 * 1024)) * 100, 100).toFixed(1);
                                 var barCls = parseFloat(usedPct) >= 80 ? 'danger' : parseFloat(usedPct) >= 50 ? 'warn' : 'ok';
+                                // D1 data from enriched stats
+                                var chars = stats.characters || 0;
+                                var donCount = stats.donations ? (stats.donations.total || 0) : 0;
+                                var donCents = stats.donations ? (stats.donations.totalCents || 0) : 0;
+                                var openOps = stats.openOps || 0;
+                                var auditTotal = stats.auditTotal || 0;
+                                var donDollars = (donCents / 100).toFixed(0);
                                 cloudKpi.innerHTML =
                                     '<div class="panel-kpis" style="margin:0">' +
                                     '<div class="panel-kpi"><div class="panel-kpi-label">R2 Assets</div><div class="panel-kpi-value">' + fileCount + '</div></div>' +
@@ -14807,7 +14888,16 @@
                                     '<div class="panel-kpi"><div class="panel-kpi-label" title="Assets awaiting approval">Pending Review</div><div class="panel-kpi-value' + (pendRev > 0 ? ' warn' : ' emerald') + '">' + pendRev + '</div></div>' +
                                     '</div>' +
                                     '<div class="storage-bar-wrap" style="margin:0.55rem 0 0"><div class="storage-bar-fill ' + barCls + '" style="width:' + usedPct + '%" title="' + usedPct + '% of 10 GB free tier used"></div></div>' +
-                                    '<p style="font-size:0.72rem;color:var(--text-muted);margin:0.35rem 0 0">' + usedPct + '% of 10 GB free-tier quota used</p>';
+                                    '<p style="font-size:0.72rem;color:var(--text-muted);margin:0.35rem 0 0">' + usedPct + '% of 10 GB free-tier quota used</p>' +
+                                    '<div style="margin-top:0.85rem;border-top:1px solid var(--border);padding-top:0.75rem">' +
+                                    '<div style="font-size:0.72rem;color:var(--text-muted);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:0.45rem">D1 Table Counts</div>' +
+                                    '<div class="panel-kpis" style="margin:0;gap:0.6rem">' +
+                                    '<div class="panel-kpi"><div class="panel-kpi-label">Characters</div><div class="panel-kpi-value gold">' + chars + '</div></div>' +
+                                    '<div class="panel-kpi"><div class="panel-kpi-label">Donations</div><div class="panel-kpi-value emerald">' + donCount + ' ($' + Number(donDollars).toLocaleString() + ')</div></div>' +
+                                    '<div class="panel-kpi"><div class="panel-kpi-label">Open Tasks</div><div class="panel-kpi-value' + (openOps > 0 ? ' gold' : '') + '">' + openOps + '</div></div>' +
+                                    '<div class="panel-kpi"><div class="panel-kpi-label">Audit Entries</div><div class="panel-kpi-value">' + Number(auditTotal).toLocaleString() + '</div></div>' +
+                                    '</div>' +
+                                    '</div>';
                             } catch (e) {
                                 cloudKpi.innerHTML = '<span style="color:var(--text-muted);font-size:0.78rem">Cloud stats unavailable</span>';
                             }
@@ -16345,6 +16435,58 @@
                     if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
                     return Math.floor(diff / 86400) + 'd ago';
                 } catch (e) { return ''; }
+            }
+
+            function renderServerAuditLog(entries, total) {
+                const tbody = $('server-audit-tbody');
+                const totalLabel = $('audit-total-label');
+                if (!tbody) return;
+                if (totalLabel) totalLabel.textContent = total ? total.toLocaleString() + ' total entries' : '';
+                if (!entries || !entries.length) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-muted">No audit entries yet — write operations will appear here.</td></tr>';
+                    return;
+                }
+                const actionIcon = {
+                    'asset.create': '➕', 'asset.update': '✏️', 'asset.delete': '🗑️',
+                    'upload': '⬆️', 'upload_url': '🔗', 'bulk_approve': '✅',
+                    'asset.approve': '✅', 'asset.reject': '❌',
+                    'social.create': '📤', 'social.update': '✏️', 'social.delete': '🗑️',
+                    'social.campaign.create': '📣', 'social.connection.upsert': '🔌',
+                    'social.account.upsert': '👤', 'campaign.create': '🚀',
+                    'character.create': '🎭', 'character.update': '✏️', 'character.delete': '🗑️',
+                    'donation.record': '💰', 'admin.ops.create': '📋',
+                };
+                tbody.innerHTML = entries.map(function (e) {
+                    const icon = actionIcon[e.action] || '·';
+                    const userShort = (e.user_id || '').slice(0, 8);
+                    const targetShort = String(e.target_id || '').slice(0, 16);
+                    return '<tr>' +
+                        '<td style="white-space:nowrap;font-size:0.75rem">' + escapeHtml(relTimeFromIso(e.created_at)) + '</td>' +
+                        '<td><span title="' + escapeHtml(e.action) + '">' + escapeHtml(icon) + '</span> <span style="font-size:0.8rem">' + escapeHtml(e.action) + '</span></td>' +
+                        '<td><span class="tag" style="font-size:0.73rem">' + escapeHtml(e.target_type || '—') + '</span></td>' +
+                        '<td style="font-family:\'JetBrains Mono\',monospace;font-size:0.73rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escapeHtml(String(e.target_id || '')) + '">' + escapeHtml(targetShort) + '</td>' +
+                        '<td style="font-family:\'JetBrains Mono\',monospace;font-size:0.73rem;color:var(--text-muted)">' + escapeHtml(userShort) + '</td>' +
+                        '</tr>';
+                }).join('');
+
+                // Wire refresh button once
+                const refreshBtn = $('audit-refresh-btn');
+                if (refreshBtn && !refreshBtn._wired) {
+                    refreshBtn._wired = true;
+                    refreshBtn.addEventListener('click', async function () {
+                        refreshBtn.disabled = true;
+                        refreshBtn.textContent = '…';
+                        try {
+                            const stats = await api('/stats');
+                            renderServerAuditLog(stats.recentAudit || [], Number(stats.auditTotal || 0));
+                        } catch (e) {
+                            toast('Failed to reload audit log: ' + e.message, 'error');
+                        } finally {
+                            refreshBtn.disabled = false;
+                            refreshBtn.textContent = 'Refresh';
+                        }
+                    });
+                }
             }
 
             // ── Export Studio Manifest ───────────────────────────────────────
