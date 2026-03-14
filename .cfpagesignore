@@ -51,6 +51,23 @@ generate_*.py
 # One-off / side sites
 mediation-site/
 
+# Internal dev HTML tools (redirects to admin, not for public)
+_social-post-generator.html
+
+# Internal TTS / voice dev scripts
+assets/voice/
+
+# Raw unfinished brand asset files
+"assets/CA Logo.png"
+assets/coin_gd_master.png
+assets/GFD-logo.png
+assets/logo-master.png
+assets/logo-vector.png
+"assets/GFV/GFV Logo Final Vector.jpg"
+"assets/GFV/GFV Logo Final Vector.png"
+"assets/brand/GFV Master Logo Files.png"
+assets/Screenshot*.png
+
 # Misc
 desktop.ini
 *.txt.bak

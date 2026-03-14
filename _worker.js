@@ -79,6 +79,8 @@ export default {
       // Test/staging HTML pages — not for public consumption
       '/temp_donate_review.html',
       '/temp_review.html',
+      // Internal tools — not for public access
+      '/_social-post-generator.html',
     ]);
 
     const blockedExtensions = [
@@ -93,6 +95,7 @@ export default {
       '.yaml',
       '.bak',
       '.log',
+      '.ssml',
     ];
 
     const isAllowed = allowedExact.has(pathLower);

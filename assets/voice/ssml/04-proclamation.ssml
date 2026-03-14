@@ -1,9 +1,0 @@
-<speak>
-  <prosody rate="88%" pitch="-10%" volume="loud">
-    X...
-    <break time="500ms"/>
-    IS the set...
-    <break time="400ms"/>
-    of <emphasis level="strong">ALL</emphasis> things.
-  </prosody>
-</speak>

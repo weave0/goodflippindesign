@@ -79,6 +79,20 @@ jamie-rigling-mediation.html
 JAMIE_RIGLING_SETUP.md
 JAMIE_MEDIATION_LIVE.md
 
+# Internal TTS / voice dev files (SSML scripts, performance notes)
+assets/voice/
+
+# Raw brand asset files (unfinished, dev-named, or duplicate)
+# Use assets/logos/ and assets/brand/logo/ for production-ready files
+assets/Screenshot*.png
+assets/CA Logo.png
+assets/coin_gd_master.png
+assets/GFD-logo.png
+assets/logo-master.png
+assets/logo-vector.png
+assets/GFV/GFV Logo Final Vector.*
+assets/brand/GFV Master Logo Files.png
+
 # Local finance staging and generated submissions
 CASHMONEY/
 
