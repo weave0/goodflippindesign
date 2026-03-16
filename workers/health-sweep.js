@@ -40,6 +40,9 @@ const TARGETS = [
 
   // ── GlobalDeets ───────────────────────────────────────────────────────────
   { brand: 'globaldeets', name: 'GlobalDeets Home', url: 'https://globaldeets.com' },
+
+  // ── MN Peace (Jamie Rigling Mediation) ────────────────────────────────────
+  { brand: 'minnesotapeace', name: 'MN Peace', url: 'https://minnesotapeace.com' },
 ];
 
 // Performance thresholds (milliseconds)

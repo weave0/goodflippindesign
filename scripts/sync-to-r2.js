@@ -187,23 +187,43 @@ function scanSource(sourceConfig, excludePatterns) {
 
 // ── R2 Upload via Wrangler CLI ──────────────────────────────────
 
-function uploadToR2(filePath, r2Key, bucketName) {
-  const cmd = `npx wrangler r2 object put "${bucketName}/${r2Key}" --file="${filePath}" --content-type="${MIME_MAP[path.extname(filePath).toLowerCase()] || 'application/octet-stream'}"`;
-  execSync(cmd, { stdio: 'pipe', timeout: 120000 });
+/**
+ * Stable asset ID — deterministic from source+path so re-runs never create duplicate D1 rows.
+ */
+function makeAssetId(sourceId, relativePath) {
+  return 'asset_' + crypto.createHash('sha256').update(`${sourceId}:${relativePath}`).digest('hex').slice(0, 16);
 }
 
-function registerInD1(asset, r2Key, contentHash, databaseName) {
-  const assetId = `asset_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+/**
+ * Stable R2 key — no timestamp so re-uploads land at the same object path (idempotent).
+ */
+function makeR2Key(brand, category, filename) {
+  return `${brand}/${category}/${sanitizeFilename(filename)}`;
+}
+
+function uploadToR2(filePath, r2Key, bucketName) {
+  // Use spawn-style escaping: pass file path as a separate argument to avoid shell quoting issues
+  const cmd = `npx wrangler r2 object put "${bucketName}/${r2Key}" --file="${filePath.replace(/\\/g, '/')}" --content-type "${MIME_MAP[path.extname(filePath).toLowerCase()] || 'application/octet-stream'}"`;
+  try {
+    execSync(cmd, { stdio: 'pipe', timeout: 120000 });
+  } catch (e) {
+    const detail = (e.stderr || e.stdout || e.message || '').toString().slice(0, 300);
+    throw new Error(`R2 upload failed: ${detail}`);
+  }
+}
+
+function registerInD1(asset, r2Key, assetId, contentHash, databaseName) {
   const now = new Date().toISOString();
   const tags = JSON.stringify([asset.category, asset.brand]);
 
   // Escape single quotes in title for SQL
   const safeTitle = asset.filename.replace(/'/g, "''");
+  const safeSrcPath = asset.fullPath.replace(/\\/g, '/').replace(/'/g, "''");
 
-  const sql = `INSERT OR IGNORE INTO cms_assets (id, brand, category, title, file_path, media_type, mime_type, file_size, source_type, source_path, content_hash, uploaded_by, created_at, updated_at, tags) VALUES ('${assetId}', '${asset.brand}', '${asset.category}', '${safeTitle}', '${r2Key}', '${asset.assetType}', '${asset.mimeType}', ${asset.sizeBytes}, 'local_sync', '${asset.fullPath.replace(/\\/g, '\\\\').replace(/'/g, "''")}', '${contentHash}', 'sync-agent', '${now}', '${now}', '${tags}')`;
+  const sql = `INSERT OR IGNORE INTO cms_assets (id, brand, category, title, file_path, media_type, mime_type, file_size, source_type, source_path, content_hash, uploaded_by, created_at, updated_at, tags) VALUES ('${assetId}', '${asset.brand}', '${asset.category}', '${safeTitle}', '${r2Key}', '${asset.assetType}', '${asset.mimeType}', ${asset.sizeBytes}, 'local_sync', '${safeSrcPath}', '${contentHash}', 'sync-agent', '${now}', '${now}', '${tags}')`;
 
   try {
-    execSync(`npx wrangler d1 execute "${databaseName}" --remote --command="${sql}"`, {
+    execSync(`npx wrangler d1 execute "${databaseName}" --remote --command "${sql.replace(/"/g, '\\"')}"`, {
       stdio: 'pipe',
       timeout: 30000,
     });
@@ -211,10 +231,15 @@ function registerInD1(asset, r2Key, contentHash, databaseName) {
   } catch (e) {
     // If source_type column doesn't exist yet, retry without it
     const fallbackSql = `INSERT OR IGNORE INTO cms_assets (id, brand, category, title, file_path, media_type, mime_type, file_size, uploaded_by, created_at, updated_at, tags) VALUES ('${assetId}', '${asset.brand}', '${asset.category}', '${safeTitle}', '${r2Key}', '${asset.assetType}', '${asset.mimeType}', ${asset.sizeBytes}, 'sync-agent', '${now}', '${now}', '${tags}')`;
-    execSync(`npx wrangler d1 execute "${databaseName}" --remote --command="${fallbackSql}"`, {
-      stdio: 'pipe',
-      timeout: 30000,
-    });
+    try {
+      execSync(`npx wrangler d1 execute "${databaseName}" --remote --command "${fallbackSql.replace(/"/g, '\\"')}"`, {
+        stdio: 'pipe',
+        timeout: 30000,
+      });
+    } catch (e2) {
+      const detail = (e2.stderr || e2.stdout || e2.message || '').toString().slice(0, 300);
+      throw new Error(`D1 insert failed: ${detail}`);
+    }
     return assetId;
   }
 }
@@ -307,7 +332,8 @@ function main() {
     const toSync = newAssets.filter(a => a.sizeMB <= (config.maxFileSizeMB || 50));
 
     for (const asset of toSync) {
-      const r2Key = `${asset.brand}/${asset.category}/${Date.now()}_${sanitizeFilename(asset.filename)}`;
+      const r2Key = makeR2Key(asset.brand, asset.category, asset.filename);
+      const assetId = makeAssetId(source.id, asset.relativePath);
       const manifestKey = `${source.id}:${asset.relativePath}`;
 
       if (dryRun) {
@@ -325,10 +351,10 @@ function main() {
         // Upload to R2
         uploadToR2(asset.fullPath, r2Key, config.r2BucketName || 'gfv-media');
 
-        // Register in D1
-        const assetId = registerInD1(asset, r2Key, contentHash, 'gfd_community');
+        // Register in D1 (stable assetId means INSERT OR IGNORE is safe on re-run)
+        registerInD1(asset, r2Key, assetId, contentHash, 'gfd_community');
 
-        // Update manifest
+        // Update manifest + save incrementally so partial runs don't lose progress
         manifest.synced[manifestKey] = {
           r2Key,
           assetId,
@@ -338,6 +364,7 @@ function main() {
           category: asset.category,
           sizeBytes: asset.sizeBytes,
         };
+        saveManifest(manifest, manifestPath); // incremental save
 
         console.log('✓');
         totalUploaded++;
@@ -348,6 +375,7 @@ function main() {
           error: err.message,
           timestamp: new Date().toISOString(),
         });
+        saveManifest(manifest, manifestPath); // save error entry too
         totalFailed++;
       }
     }

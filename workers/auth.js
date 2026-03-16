@@ -1632,11 +1632,11 @@ async function handlePinPost(request, user, env) {
 async function handleMemberDirectory(request, env) {
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get('page') || '1');
-  const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 50);
+  const limit = Math.min(parseInt(url.searchParams.get('limit') || '100'), 200);
   const offset = (page - 1) * limit;
 
   const { results } = await env.DB.prepare(`
-    SELECT user_id, display_name, avatar_url, bio, location, total_xp, level, badges, post_count, reply_count, current_streak, created_at
+    SELECT user_id, display_name, avatar_url, bio, location, total_xp, level, badges, post_count, reply_count, current_streak, created_at, COALESCE(suspended, 0) as suspended
     FROM community_profiles
     ORDER BY total_xp DESC
     LIMIT ? OFFSET ?
@@ -1652,11 +1652,13 @@ async function handleMemberDirectory(request, env) {
     location: p.location || '',
     totalXP: p.total_xp,
     level: getLevelForXP(p.total_xp),
+    badges: JSON.parse(p.badges || '[]'),
     badgeCount: JSON.parse(p.badges || '[]').length,
     postCount: p.post_count,
     replyCount: p.reply_count,
     streak: p.current_streak,
     joinedAt: p.created_at,
+    suspended: !!p.suspended,
   }));
 
   return new Response(JSON.stringify({
@@ -2134,7 +2136,75 @@ export default {
         }
         break;
 
+      case '/api/comments/all':
+        // Admin-only: list ALL comments across all articles
+        if (request.method === 'GET') {
+          if (user.publicMetadata?.role !== 'admin') {
+            return new Response('Forbidden', { status: 403, headers: corsHeaders });
+          }
+          try {
+            const { results } = await env.DB.prepare(`
+              SELECT id, article_id, user_name, text, created_at
+              FROM comments ORDER BY created_at DESC LIMIT 200
+            `).all();
+            return new Response(JSON.stringify(results || []), {
+              headers: { 'Content-Type': 'application/json', ...corsHeaders },
+            });
+          } catch (e) {
+            return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: corsHeaders });
+          }
+        }
+        break;
+
       default:
+        // ── Admin community member actions: /api/community/members/:userId/* ──
+        if (url.pathname.startsWith('/api/community/members/') && user.publicMetadata?.role === 'admin') {
+          const parts = url.pathname.split('/');
+          const targetUserId = parts[4]; // /api/community/members/{userId}/...
+          const action = parts[5]; // badges | suspend | role
+          if (!targetUserId) {
+            return new Response('Missing userId', { status: 400, headers: corsHeaders });
+          }
+
+          // GET /api/community/members/:userId/badges — fetch badges for member
+          if (action === 'badges' && request.method === 'GET') {
+            const profile = await env.DB.prepare(
+              'SELECT badges, total_xp, level, display_name FROM community_profiles WHERE user_id = ?'
+            ).bind(targetUserId).first();
+            if (!profile) return new Response('Member not found', { status: 404, headers: corsHeaders });
+            return new Response(JSON.stringify({
+              userId: targetUserId,
+              displayName: profile.display_name,
+              badges: JSON.parse(profile.badges || '[]'),
+              totalXP: profile.total_xp,
+              level: getLevelForXP(profile.total_xp),
+            }), { headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+          }
+
+          // PUT /api/community/members/:userId/suspend — toggle suspended status
+          if (action === 'suspend' && request.method === 'PUT') {
+            const body = await request.json();
+            const suspended = body.suspended ? 1 : 0;
+            await env.DB.prepare(
+              'UPDATE community_profiles SET suspended = ?, updated_at = ? WHERE user_id = ?'
+            ).bind(suspended, new Date().toISOString(), targetUserId).run();
+            return new Response(JSON.stringify({ success: true, suspended: !!suspended }), {
+              headers: { 'Content-Type': 'application/json', ...corsHeaders },
+            });
+          }
+
+          // PUT /api/community/members/:userId/role — grant/revoke role via note field
+          if (action === 'role' && request.method === 'PUT') {
+            const body = await request.json();
+            const role = (body.role || 'user').substring(0, 20);
+            await env.DB.prepare(
+              'UPDATE community_profiles SET bio = ?, updated_at = ? WHERE user_id = ?'
+            ).bind('[role:' + role + '] ' + ((await env.DB.prepare('SELECT bio FROM community_profiles WHERE user_id = ?').bind(targetUserId).first())?.bio || '').replace(/^\[role:[^\]]*\]\s*/, ''), new Date().toISOString(), targetUserId).run();
+            return new Response(JSON.stringify({ success: true, role }), {
+              headers: { 'Content-Type': 'application/json', ...corsHeaders },
+            });
+          }
+        }
         return new Response('Not found', { status: 404, headers: corsHeaders });
     }
 
