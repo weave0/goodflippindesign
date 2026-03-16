@@ -18,6 +18,11 @@ node_modules/
 **/_SECURE_KEYS/
 STRIPE_API_KEY.txt
 
+# Personal / legal / financial documents - NEVER in public repos
+Business Registration/
+_private/
+_personal/
+
 # Development projects (too large for main repo)
 GFD Dev Projects/
 
