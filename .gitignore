@@ -10,6 +10,12 @@ node_modules/
 
 # Office temp files
 ~$*.docx
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.pptx
+*.ppt
 ~$*.pptx
 ~$*.xlsx
 
