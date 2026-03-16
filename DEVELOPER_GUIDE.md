@@ -385,3 +385,110 @@ npm run test:a11y
 **Version:** 1.0.0
 **Status:** Production Ready ✅
 
+---
+
+## 📥 Asset Intake SOP
+
+_Standard procedure for bringing new media assets into the project._
+
+### Intake Staging
+
+`Z:\MediaDrop\` is the **only** landing zone for incoming assets. Never place raw assets directly into the repo or R2.
+
+```
+Z:\MediaDrop\
+├── images\          ← screenshots, portfolio art, brand assets
+├── video\           ← clips, exports, reels
+└── documents\       ← PDFs, print-ready files (never commit to git)
+```
+
+### Processing Pipeline
+
+1. **Drop** asset into `Z:\MediaDrop\<type>\`
+2. **Convert** images → WebP (lossless for UI; 85% quality for portfolio):
+   ```powershell
+   node convert-to-webp.js
+   ```
+3. **Verify** dimensions — portfolio thumbnails: 800×600px minimum; hero images: 1920×1080px
+4. **Upload** to Cloudflare R2 via wrangler:
+   ```powershell
+   wrangler r2 object put gfd-media/<destination-path> --file=<file>
+   ```
+5. **Reference** via CDN in HTML:
+   ```html
+   <img src="https://media.goodflippindesign.com/<path>" alt="..." width="800" height="600" loading="lazy">
+   ```
+6. **Delete** the original from `Z:\MediaDrop\` after confirmed upload
+
+### Rules
+
+- ❌ Never commit binary media (images, video, audio) to git
+- ❌ Never commit PDFs or Office documents (`.docx`, `.xlsx`, `.pdf`)
+- ✅ Only reference assets via CDN URL or `assets/` folder (small SVGs only)
+- ✅ Always include `width`, `height`, and `alt` on `<img>` tags (LCP + a11y)
+- ✅ Run `npm test` after adding new images to verify no layout regressions
+
+---
+
+## 🔒 Deployment & Feature-Gating Rules
+
+_How changes reach production safely._
+
+### Branch Rules
+
+| Rule | Enforcement |
+| ---- | ----------- |
+| No direct commits to `main` | Branch protection (PR required) |
+| CI must pass before merge | Required status check: `CI - Tests / Run Tests` |
+| At least 1 review required | Branch protection: `required_pull_request_reviews` |
+| All work on `feature/<name>` or `fix/<name>` branches | Convention |
+
+```powershell
+# Start any new work:
+git checkout -b feature/my-change
+# When ready:
+git push origin feature/my-change
+# Open PR on GitHub — CI runs, request review, merge
+```
+
+### Environment Variable Discipline
+
+- All new secrets are added to `.env.example` with a **placeholder value only**, never the real value
+- Production values are set via **Cloudflare dashboard → Settings → Environment Variables**
+- Frontend code always reads `window.ENV?.KEY || null` — never hardcode keys in HTML/JS
+- Workers read `env.KEY` via the Workers runtime binding — no `.env` files at runtime
+- `.env` file at root is gitignored — local dev only
+
+### Feature-Gating
+
+New features on `community-portal.html` or `donate.html` that aren't ready for all users:
+
+```javascript
+// At top of the IIFE in the relevant page:
+const FEATURE_FLAGS = {
+  newCommunityFeature: false,   // flip to true when verified
+};
+
+if (FEATURE_FLAGS.newCommunityFeature) {
+  // gated code
+}
+```
+
+### Deployment Trigger
+
+```powershell
+git push origin main     # → Cloudflare Pages auto-deploys in ~2 min
+```
+
+Force-deploy if Pages doesn't trigger:
+→ GitHub → Actions → **Force Cloudflare Pages Deployment** → Run workflow
+
+### R2 / Storage Deploy Checklist
+
+Before uploading new R2 assets to production:
+
+- [ ] Asset processed through MediaDrop pipeline (WebP, correct dimensions)
+- [ ] CDN URL confirmed accessible after upload
+- [ ] `_headers` CSP allows the media domain (already whitelisted for `media.goodflippindesign.com`)
+- [ ] No sensitive metadata in image EXIF (run `exiftool -all= file.jpg` to strip)
+
