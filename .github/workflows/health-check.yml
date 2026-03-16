@@ -113,18 +113,18 @@ jobs:
             echo "::warning::CultureSherpa returned $STATUS"
           fi
 
-      - name: Check Jamie Rigling Mediation
+      - name: Check MN Peace (Jamie Rigling Mediation)
         id: check-jamie
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             -L --max-redirs 5 \
             --connect-timeout 15 --max-time 30 \
             -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://jamierigling.com)
+            https://minnesotapeace.com)
           echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "Jamie Rigling → HTTP $STATUS"
+          echo "MN Peace → HTTP $STATUS"
           if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
-            echo "::warning::Jamie Rigling Mediation returned $STATUS"
+            echo "::warning::minnesotapeace.com returned $STATUS"
           fi
 
       - name: Check CitizenApproved
@@ -153,20 +153,6 @@ jobs:
           echo "Brett Lee Weaver → HTTP $STATUS"
           if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
             echo "::warning::brettleeweaver.com returned $STATUS"
-          fi
-
-      - name: Check MN Peace
-        id: check-minnesotapeace
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -L --max-redirs 5 \
-            --connect-timeout 15 --max-time 30 \
-            -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://minnesotapeace.com)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "MN Peace → HTTP $STATUS"
-          if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
-            echo "::warning::minnesotapeace.com returned $STATUS"
           fi
 
       - name: Create incident issue on failure
@@ -216,7 +202,6 @@ jobs:
           echo "- Eliassen:              ${{ steps.check-eliassen.outputs.status }}"
           echo "- Good Flippin Vibes:    ${{ steps.check-gfv.outputs.status }}"
           echo "- CultureSherpa:         ${{ steps.check-culturesherpa.outputs.status }}"
-          echo "- Jamie Rigling:         ${{ steps.check-jamie.outputs.status }}"
+          echo "- MN Peace:              ${{ steps.check-jamie.outputs.status }}"
           echo "- CitizenApproved:       ${{ steps.check-citizenapproved.outputs.status }}"
           echo "- Brett Lee Weaver:      ${{ steps.check-brettleeweaver.outputs.status }}"
-          echo "- MN Peace:              ${{ steps.check-minnesotapeace.outputs.status }}"

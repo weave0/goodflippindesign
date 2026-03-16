@@ -75,9 +75,6 @@ storage-snapshot.json
 
 # One-off / side sites (keep out of GFD)
 mediation-site/
-jamie-rigling-mediation.html
-JAMIE_RIGLING_SETUP.md
-JAMIE_MEDIATION_LIVE.md
 
 # Internal TTS / voice dev files (SSML scripts, performance notes)
 assets/voice/
@@ -98,3 +95,5 @@ CASHMONEY/
 
 # Local scratch
 assets/VECTOR/
+.sync-manifest.json
+r2-upload-log.txt

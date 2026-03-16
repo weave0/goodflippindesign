@@ -941,6 +941,40 @@ async function handleListSocialVariants(request, env) {
   return jsonResponse(results || []);
 }
 
+/**
+ * PATCH /api/cms/social/variants/:id — Attach or detach artwork on a variant
+ * Body: { media_asset_id: string|null }
+ */
+async function handlePatchVariant(request, user, env, variantId) {
+  if (!env.DB) return errorResponse('DB not configured', 503);
+  let body = {};
+  try { body = await request.json(); } catch { return errorResponse('Invalid JSON', 400); }
+
+  const mediaAssetId = body.media_asset_id !== undefined ? body.media_asset_id : undefined;
+  if (mediaAssetId === undefined) return errorResponse('media_asset_id is required', 400);
+
+  // Verify variant exists and belongs to a brand the admin can modify
+  const variant = await env.DB.prepare('SELECT v.id, sp.brand FROM cms_post_variants v JOIN cms_social_posts sp ON sp.id = v.post_id WHERE v.id = ?').bind(variantId).first();
+  if (!variant) return errorResponse('Variant not found', 404);
+
+  // If linking an asset, verify it exists
+  let assetTitle = null;
+  let thumbnailPath = null;
+  if (mediaAssetId) {
+    const asset = await env.DB.prepare('SELECT id, title, thumbnail_path, file_path FROM cms_assets WHERE id = ?').bind(mediaAssetId).first();
+    if (!asset) return errorResponse('Asset not found', 404);
+    assetTitle = asset.title;
+    thumbnailPath = asset.thumbnail_path || asset.file_path;
+  }
+
+  await env.DB.prepare(
+    `UPDATE cms_post_variants SET media_asset_id = ?, updated_at = datetime('now') WHERE id = ?`
+  ).bind(mediaAssetId || null, variantId).run();
+
+  await logAudit(env.DB, user.id, 'attach_asset', 'variant', variantId, { media_asset_id: mediaAssetId, brand: variant.brand });
+  return jsonResponse({ success: true, variant_id: variantId, media_asset_id: mediaAssetId, asset_title: assetTitle, thumbnail_path: thumbnailPath });
+}
+
 async function handleCreateCampaignSocialPost(request, user, env) {
   await ensureCampaignSchema(env.DB);
 
@@ -2674,6 +2708,11 @@ export async function handleCMSRequest(request, env, user) {
     }
     if (path === '/social/variants' && method === 'GET') {
       return handleListSocialVariants(request, env);
+    }
+    // PATCH /social/variants/:id — update media_asset_id (artwork attachment)
+    const variantPatchMatch = path.match(/^\/social\/variants\/([^/]+)$/);
+    if (variantPatchMatch && method === 'PATCH') {
+      return handlePatchVariant(request, user, env, variantPatchMatch[1]);
     }
     if (path === '/social/campaign' && method === 'POST') {
       return handleCreateCampaignSocialPost(request, user, env);
