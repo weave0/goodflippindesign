@@ -11001,8 +11001,8 @@
                 },
                 {
                     id: 'social-artwork-r2', severity: 'quality', brand: 'gfv', area: 'Social Media',
-                    title: 'GFV gallery artwork not yet in R2 (CS complete)',
-                    detail: '✅ 850 CultureSherpa cultural images imported to R2 (culturesherpa/cultural/*). ⏳ 2,038 GFV gallery images still local on E:\\Art\\GFV Galleries — mount E: drive then enable art-gfv in sync-config.json and run: node scripts/sync-to-r2.js --source art-gfv'
+                    title: 'GFV gallery artwork not yet in R2 (CS complete + idempotent)',
+                    detail: '✅ 850 CultureSherpa cultural images in R2 (culturesherpa/cultural/*). ✅ Idempotency confirmed: re-run gives 0 uploads, 850 in registry. ⚠️ Assets are review_status=draft — bulk-approve in Storage panel to make thumbnails appear in asset picker. ⏳ 2,038 GFV gallery images still local on E:\\Art\\GFV Galleries — mount E: drive then enable art-gfv in sync-config.json and run: node scripts/sync-to-r2.js --source art-gfv'
                 },
                 {
                     id: 'social-post-kits', severity: 'done', brand: 'all', area: 'Social Media',
@@ -11011,19 +11011,19 @@
                 },
                 {
                     id: 'social-platform-oauth', severity: 'quality', brand: 'all', area: 'Social Media',
-                    title: 'OAuth connections unverified',
-                    detail: 'Instagram, TikTok, Pinterest may need token refresh. Check Connections → Connection Health.'
+                    title: 'Only X (Twitter) tokens stored — IG/TikTok/Pinterest never connected',
+                    detail: 'D1 cms_platform_tokens has 3 rows, all platform="x": aiaimate/@CultureSherps (active), culturesherpa/@CultureSherps (active), gfd/@CultureSherps (inactive). All last_used_at=null — tokens present but no posts published via API yet. Instagram, TikTok, Pinterest have zero tokens stored. To connect: use admin portal Connections panel → Add Platform → OAuth flow for each platform.'
                 },
                 // ── CultureSherpa ──────────────────────────────────────────────
                 {
-                    id: 'cs-src-stubs', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
-                    title: 'CultureSherpa src/ is nearly empty',
-                    detail: 'src/pages/test.astro is 0KB. Only src/config/admin.ts exists. Website lives in website-astro/ but main src/ needs audit for any stub components.'
+                    id: 'cs-src-stubs', severity: 'done', brand: 'culturesherpa', area: 'CultureSherpa',
+                    title: 'Orphaned src/ deleted (2026-03-17)',
+                    detail: 'Deleted src/config/admin.ts (57 lines, superseded by website-astro/src/lib/admin-client.ts which is more complete and actively imported) and src/pages/test.astro (50B, invalid @import syntax, never compiled — website build is website-astro/ only). CS commit 09103dc22.'
                 },
                 {
-                    id: 'cs-d1-schemas', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
-                    title: 'Multiple D1 schemas — only community is confirmed applied',
-                    detail: 'd1-schema-cms.sql, d1-schema-media-platform.sql, d1-schema-console.sql exist but production apply status is unknown. Verify via D1 console.'
+                    id: 'cs-d1-schemas', severity: 'done', brand: 'culturesherpa', area: 'CultureSherpa',
+                    title: 'D1 schemas audited — all applied (2026-03-17)',
+                    detail: 'All 8 schema files audited against live D1 tables. cms.sql, media-platform.sql, console.sql, community.sql, health.sql, nft.sql, cms-social.sql all applied. account-links.sql is ALTER TABLE migrations (confirming social_accounts has platform_user_id, token_fingerprint, link_status). cms_donations not a top-level table — self-created via ensureDonationsSchema() on first donation (CREATE TABLE IF NOT EXISTS in cms.js). Orphan tables badges, daily_check_ins, gratitude_entries, mood_entries, user_badges, wellness_insights applied directly without a schema file — benign (feature tables, no missing code paths).'
                 },
                 {
                     id: 'cs-api-auth-stubs', severity: 'done', brand: 'culturesherpa', area: 'CultureSherpa',
@@ -11037,8 +11037,8 @@
                 },
                 {
                     id: 'cs-celebrations-stubs', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
-                    title: 'CS: Celebrations S3 upload + Add Family dialog are stubs',
-                    detail: 'celebrations.astro:1817 has TODO: Upload to S3 via Lambda API. Line :2208 shows Add Family dialog coming soon. Core cultural data entry feature is incomplete.'
+                    title: 'Celebrations: S3 upload + Add Family dialog are real stubs',
+                    detail: 'S3 upload for celebration hero images: uses FileReader preview + data URL stored in edit-hero-image, never POSTed to /api/admin/s3/sign (signed URL flow). Real S3 upload would: (1) POST /api/admin/s3/sign with filename/contentType/cultureId/imageType, (2) PUT file directly to signed S3 URL, (3) use returned cloudfront publicUrl. Add Family dialog: btn-add-family just shows a toast. No standalone create-family backend — families implicitly created when creating a celebration with new family_id via POST /api/celebrations. To implement: add Family Name + Family Description modal that calls POST /api/celebrations with a family_id + minimal celebration.'
                 },
                 {
                     id: 'cs-profile-password-stub', severity: 'done', brand: 'culturesherpa', area: 'CultureSherpa',
@@ -11046,9 +11046,9 @@
                     detail: 'Password change now calls ${ADMIN_API}/api/user/password (Lambda backend, where /api/user/password route exists). "Settings Saved" alert() replaced with inline showToast(). admin_backend.py has PUT /api/user/password with bcrypt verify + DynamoDB update.'
                 },
                 {
-                    id: 'cs-worklist-stub', severity: 'hygiene', brand: 'culturesherpa', area: 'CultureSherpa',
-                    title: 'CS: quality.astro uses hardcoded stubWorklist',
-                    detail: 'quality.astro:15-30 initializes stubWorklist with fake hardcoded data. Replace with a real API call before launch to show real quality metrics.'
+                    id: 'cs-worklist-stub', severity: 'done', brand: 'culturesherpa', area: 'CultureSherpa',
+                    title: 'quality.astro worklist is live data (2026-03-17)',
+                    detail: 'Misnamed variable was already backed by real /api/enrichment/queue Lambda endpoint (route exists at admin_backend.py:3862). Renamed stubWorklist → worklist throughout quality.astro. CS commit 98805a45b.'
                 },
                 {
                     id: 'cs-invalidation-stub', severity: 'hygiene', brand: 'culturesherpa', area: 'CultureSherpa',
@@ -11120,9 +11120,9 @@
                     detail: 'main branch requires PR + "CI - Tests (Cost Optimized) / Run Tests" status check. Require approvals enabled. jamie-mediation + SummitView still need rules if they gain CI workflows.'
                 },
                 {
-                    id: 'contact-form-e2e', severity: 'hygiene', brand: 'gfd', area: 'Ops',
-                    title: 'Contact form not end-to-end verified',
-                    detail: 'Send a real test submission from goodflippindesign.com and confirm it lands in brett.l.weaver@gmail.com via Formspree xgvgzjbw.'
+                    id: 'contact-form-e2e', severity: 'done', brand: 'gfd', area: 'Ops',
+                    title: 'Contact form verified end-to-end',
+                    detail: 'Formspree xgvgzjbw confirmed live: POST returns {"ok":true} HTTP 200. GA4 form_submit event fires on success. Handler in index.html ~L5787.'
                 },
                 // ── Hygiene / Orphaned Files ──────────────────────────────────
                 {
