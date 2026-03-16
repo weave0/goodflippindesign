@@ -11000,14 +11000,14 @@
                     detail: 'Each brand auto-populates its hashtag bank (incl. #art, #love, #goodvibes, #culture, #cultura) when selected.'
                 },
                 {
-                    id: 'social-artwork-r2', severity: 'blocker', brand: 'gfv,culturesherpa', area: 'Social Media',
-                    title: 'Branded artwork not in R2 asset library',
-                    detail: '2,038 GFV images + 850 CultureSherpa images exist locally but are NOT uploaded to R2. Post Kits cannot link to them until imported. Run: Asset Library → Import Folder.'
+                    id: 'social-artwork-r2', severity: 'quality', brand: 'gfv', area: 'Social Media',
+                    title: 'GFV gallery artwork not yet in R2 (CS complete)',
+                    detail: '✅ 850 CultureSherpa cultural images imported to R2 (culturesherpa/cultural/*). ⏳ 2,038 GFV gallery images still local on E:\\Art\\GFV Galleries — mount E: drive then enable art-gfv in sync-config.json and run: node scripts/sync-to-r2.js --source art-gfv'
                 },
                 {
-                    id: 'social-post-kits', severity: 'quality', brand: 'all', area: 'Social Media',
-                    title: 'Post Kits lack artwork links',
-                    detail: 'Post Kit entries have captions but asset_id fields are empty — post is not truly "click-click" until each kit entry references a branded R2 asset.'
+                    id: 'social-post-kits', severity: 'done', brand: 'all', area: 'Social Media',
+                    title: 'Post Kit asset picker built (2026-03-17)',
+                    detail: 'PATCH /api/social/variants/:id wired. Asset picker modal in Post Kits panel — search by brand/category/keyword, single-click attaches R2 asset to variant, thumbnail updates in-place. Detach also supported.'
                 },
                 {
                     id: 'social-platform-oauth', severity: 'quality', brand: 'all', area: 'Social Media',
@@ -11026,9 +11026,9 @@
                     detail: 'd1-schema-cms.sql, d1-schema-media-platform.sql, d1-schema-console.sql exist but production apply status is unknown. Verify via D1 console.'
                 },
                 {
-                    id: 'cs-api-auth-stubs', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
-                    title: 'CS API: 3 endpoints callable without auth',
-                    detail: 'celebrations.py:32, cultural_images.py:48, s3_upload.py:62 lack JWT auth. CultureSherpa is not yet live so severity downgraded from blocker to quality. Fix before production launch.'
+                    id: 'cs-api-auth-stubs', severity: 'done', brand: 'culturesherpa', area: 'CultureSherpa',
+                    title: 'CS authz.py X-User-Id bypass fixed (2026-03-17)',
+                    detail: 'All API endpoints in celebrations.py, cultural_images.py, s3_upload.py already had @require_roles("admin"). Fixed critical bypass: X-User-Id header now requires matching X-Internal-Secret env var — external callers can no longer spoof admin identity. RBAC_DISABLED still available for local dev (not present in prod).'
                 },
                 {
                     id: 'cs-coming-soon-tabs', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
@@ -11090,9 +11090,9 @@
                     detail: 'Only GFD + GFV inline pages (via _worker.js injection) have Sentry. Standalone CF Pages sites and Vercel (AIAimate) need their own DSN + SDK setup.'
                 },
                 {
-                    id: 'ga4-ecosystem', severity: 'quality', brand: 'all', area: 'Ops',
-                    title: 'GA4 unconfirmed on CultureSherpa, CitizenApproved, GlobalDeets',
-                    detail: 'GA4 property G-WM6Q66W9W0 confirmed on GFD, GFV, AIAimate, Jamie Rigling. Audit CS, CA, GlobalDeets repos and confirm tracking ID is present and firing.'
+                    id: 'ga4-ecosystem', severity: 'done', brand: 'all', area: 'Ops',
+                    title: 'GA4 confirmed across all 8 monitored sites (2026-03-17)',
+                    detail: 'CultureSherpa: G-EDHFZ472P7 in BaseLayout.astro + AdminLayout.astro. CitizenApproved: G-WM6Q66W9W0 in src/app/layout.tsx. GlobalDeets hardened (2026-03-13). GFD/GFV/AIAimate/Jamie/MN Peace all confirmed. Full ecosystem covered.'
                 },
                 {
                     id: 'globaldeets-hardening', severity: 'done', brand: 'globaldeets', area: 'Ops',
