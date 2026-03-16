@@ -180,6 +180,20 @@ async function encryptAesGcm(plaintext, keyMaterial) {
   return btoa(String.fromCharCode(...combined));
 }
 
+async function decryptAesGcm(ciphertext, keyMaterial) {
+  try {
+    const keyBytes = new TextEncoder().encode(String(keyMaterial).substring(0, 32).padEnd(32, '0'));
+    const key = await crypto.subtle.importKey('raw', keyBytes, 'AES-GCM', false, ['decrypt']);
+    const combined = Uint8Array.from(atob(ciphertext), (c) => c.charCodeAt(0));
+    const iv = combined.slice(0, 12);
+    const data = combined.slice(12);
+    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+    return new TextDecoder().decode(decrypted);
+  } catch (_e) {
+    return null;
+  }
+}
+
 async function encodeConnectionPayloadForStorage(payloadString, encryptionKey) {
   const raw = String(payloadString || '').trim();
   if (!raw) throw new Error('Token payload cannot be empty');
@@ -1511,6 +1525,86 @@ async function handleDeleteConnection(request, user, env) {
   return jsonResponse({ message: 'Connection deactivated' });
 }
 
+// Lightweight profile endpoints per platform for token verification
+const CONN_TEST_ENDPOINTS = {
+  linkedin:  { url: 'https://api.linkedin.com/v2/userinfo', authHeader: true },
+  x:         { url: 'https://api.twitter.com/2/users/me', authHeader: true },
+  instagram: { url: 'https://graph.instagram.com/me?fields=id,username', authHeader: false },
+  facebook:  { url: 'https://graph.facebook.com/me', authHeader: false },
+  tiktok:    { url: 'https://open.tiktokapis.com/v2/user/info/?fields=open_id', authHeader: true },
+  pinterest: { url: 'https://api.pinterest.com/v5/user_account', authHeader: true },
+  youtube:   { url: 'https://www.googleapis.com/youtube/v3/channels?part=id&mine=true', authHeader: true },
+};
+
+async function handleTestConnection(request, user, env) {
+  const parts = new URL(request.url).pathname.split('/');
+  // path: /connections/:id/test
+  const id = parts[parts.length - 2];
+  if (!id || isNaN(Number(id))) return errorResponse('Invalid connection ID', 400);
+
+  const row = await env.DB.prepare(
+    'SELECT * FROM cms_platform_tokens WHERE id = ? AND is_active = 1'
+  ).bind(id).first();
+  if (!row) return errorResponse('Connection not found', 404);
+
+  // Decrypt payload
+  let tokenData = {};
+  const raw = row.encrypted_payload || '';
+  let plaintext = raw.startsWith('{') ? raw : null;
+  if (!plaintext && raw && env.TOKEN_ENCRYPTION_KEY) {
+    plaintext = await decryptAesGcm(raw, env.TOKEN_ENCRYPTION_KEY);
+  }
+  if (plaintext) {
+    try { tokenData = JSON.parse(plaintext); } catch (_e) { tokenData = { access_token: plaintext }; }
+  }
+
+  const token = tokenData.access_token || tokenData.token || '';
+  const now = new Date().toISOString();
+
+  if (!token) {
+    return jsonResponse({ ok: false, error: 'No access token in payload', platform: row.platform, checked_at: now });
+  }
+
+  // Check expiry before hitting the network
+  if (tokenData.expires_at) {
+    const exp = new Date(tokenData.expires_at);
+    if (!isNaN(exp.getTime()) && exp < new Date()) {
+      return jsonResponse({ ok: false, error: 'Token expired at ' + tokenData.expires_at, platform: row.platform, checked_at: now });
+    }
+  }
+
+  const testDef = CONN_TEST_ENDPOINTS[row.platform.toLowerCase()];
+  if (!testDef) {
+    return jsonResponse({ ok: null, error: 'No test endpoint for ' + row.platform, platform: row.platform, checked_at: now });
+  }
+
+  let testUrl = testDef.url;
+  const headers = {};
+  if (testDef.authHeader) {
+    headers['Authorization'] = 'Bearer ' + token;
+  } else {
+    testUrl += (testUrl.includes('?') ? '&' : '?') + 'access_token=' + encodeURIComponent(token);
+  }
+
+  let ok = false;
+  let errorMsg = null;
+  try {
+    const resp = await fetch(testUrl, { headers, signal: AbortSignal.timeout(8000) });
+    ok = resp.status < 400;
+    if (!ok) errorMsg = 'HTTP ' + resp.status;
+  } catch (e) {
+    errorMsg = e.message || 'Request failed';
+  }
+
+  if (ok) {
+    await env.DB.prepare('UPDATE cms_platform_tokens SET last_used_at = ? WHERE id = ?')
+      .bind(now, id).run();
+    await logAudit(env.DB, user.id, 'social.connection.test', 'platform_token', id, { result: 'ok', platform: row.platform });
+  }
+
+  return jsonResponse({ ok, error: errorMsg, platform: row.platform, account_label: row.account_label, checked_at: now });
+}
+
 async function handleListCampaigns(request, env) {
   await ensureCampaignSchema(env.DB);
 
@@ -2042,6 +2136,7 @@ async function handleCMSStats(env) {
     recentAudit: recentAudit?.results || [],
     auditTotal: auditTotal?.total || 0,
     storage: storageInfo,
+    assetsByBrand: Object.fromEntries((assets?.results || []).map((r) => [r.brand, Number(r.total || 0)])),
   });
 }
 
@@ -2634,6 +2729,9 @@ export async function handleCMSRequest(request, env, user) {
     }
     if (path === '/connections' && method === 'DELETE') {
       return handleDeleteConnection(request, user, env);
+    }
+    if (/^\/connections\/\d+\/test$/.test(path) && method === 'POST') {
+      return handleTestConnection(request, user, env);
     }
 
     // Campaigns and calendar

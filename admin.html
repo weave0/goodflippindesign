@@ -5916,6 +5916,28 @@
             border: 1px solid rgba(100, 116, 139, 0.2);
         }
 
+        /* ── Overview Health Alert Banner ────────────────────── */
+        #overview-health-alert {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: var(--radius);
+            padding: 0.65rem 1rem;
+            margin-bottom: 1rem;
+            color: #fca5a5;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        #overview-health-alert strong {
+            color: #f87171;
+        }
+
+        #overview-health-alert .alert-dismiss {
+            margin-left: auto;
+        }
+
         /* ── Quick Launch Grid ──────────────────────────────── */
         .quick-launch-grid {
             display: grid;
@@ -6385,6 +6407,9 @@
                 </div>
 
                 <section class="view active" id="view-overview">
+                    <!-- Health Alert Banner (shown when sweep detects downed sites) -->
+                    <div id="overview-health-alert" style="display:none" role="alert" aria-live="polite"></div>
+
                     <!-- Today's Cultures quick-look ─────────────────────── -->
                     <article class="panel mb-085" id="ov-cultures-today">
                         <div class="section-head">
@@ -6470,6 +6495,7 @@
                         <article class="panel">
                             <div class="section-head">
                                 <h2 class="section-title">Upcoming Queue</h2>
+                                <span id="ov-next-post-timer" style="font-size:0.78rem;color:var(--text-muted)"></span>
                             </div>
                             <div class="table-wrap">
                                 <table>
@@ -6519,7 +6545,6 @@
                                 <option value="culturesherpa">CultureSherpa</option>
                                 <option value="citizenapproved">CitizenApproved</option>
                                 <option value="globaldeets">GlobalDeets</option>
-                                <option value="jamiemediation">Jamie Mediation</option>
                                 <option value="brettleeweaver">Brett Lee Weaver</option>
                                 <option value="minnesotapeace">MN Peace</option>
                             </select>
@@ -7262,6 +7287,12 @@
                                 <tbody id="eco-history-body"></tbody>
                             </table>
                         </details>
+
+                        <!-- Per-site response time trend (7 sweeps) -->
+                        <details class="mt-085" id="eco-trend-details" style="display:none">
+                            <summary style="font-size:0.78rem;color:var(--text-muted);cursor:pointer;user-select:none">Performance trend (per site, last 7 sweeps)</summary>
+                            <div id="eco-trend-grid" class="eco-sites-grid" style="margin-top:0.5rem"></div>
+                        </details>
                     </article>
 
                     <!-- ── CI Status ── -->
@@ -7335,6 +7366,35 @@
                             </table>
                         </div>
                         <p class="text-muted mt-06 d-none" id="blog-empty-msg">No posts found. Click <strong>+ New Post</strong> to write your first one.</p>
+                    </article>
+
+                    <!-- Comment Moderation ───────────────────────── -->
+                    <article class="panel mt-085">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">&#128172; Comment Moderation</h3>
+                            <div class="inline-actions">
+                                <span class="text-muted" style="font-size:0.8rem" id="blog-comments-count"></span>
+                                <button class="btn btn-micro" id="blog-comments-refresh-btn">Refresh</button>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Article</th>
+                                        <th>Author</th>
+                                        <th>Comment</th>
+                                        <th>Date</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="blog-comments-tbody">
+                                    <tr>
+                                        <td colspan="5" class="text-muted" style="text-align:center;padding:1rem">Click refresh to load comments.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </article>
                 </section>
 
@@ -7618,8 +7678,16 @@
                             <div class="panel-kpi-value emerald" id="cm-active">—</div>
                         </div>
                         <div class="panel-kpi">
-                            <div class="panel-kpi-label">Total XP Awarded</div>
+                            <div class="panel-kpi-label">Total XP</div>
                             <div class="panel-kpi-value gold" id="cm-xp">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Badges Earned</div>
+                            <div class="panel-kpi-value violet" id="cm-badges">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Suspended</div>
+                            <div class="panel-kpi-value rose" id="cm-suspended">—</div>
                         </div>
                     </div>
 
@@ -7632,14 +7700,16 @@
                                         <th>Level</th>
                                         <th>XP</th>
                                         <th>Posts</th>
-                                        <th>Check-ins</th>
+                                        <th>Badges</th>
+                                        <th>Streak</th>
                                         <th>Joined</th>
-                                        <th>Last Active</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="community-members-tbody">
                                     <tr>
-                                        <td colspan="7" class="text-muted" style="text-align:center;padding:2rem">No data — click the panel to load.</td>
+                                        <td colspan="9" class="text-muted" style="text-align:center;padding:2rem">No data — click the panel to load.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -7662,7 +7732,7 @@
 
                     <div class="panel-kpis">
                         <div class="panel-kpi">
-                            <div class="panel-kpi-label">Failed Variants</div>
+                            <div class="panel-kpi-label">Failed</div>
                             <div class="panel-kpi-value rose" id="qh-failed">—</div>
                         </div>
                         <div class="panel-kpi">
@@ -7670,9 +7740,30 @@
                             <div class="panel-kpi-value gold" id="qh-pending">—</div>
                         </div>
                         <div class="panel-kpi">
-                            <div class="panel-kpi-label">Published (total)</div>
+                            <div class="panel-kpi-label">Published</div>
                             <div class="panel-kpi-value emerald" id="qh-published">—</div>
                         </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Success Rate</div>
+                            <div class="panel-kpi-value" id="qh-success-rate">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">High-Retry (≥3)</div>
+                            <div class="panel-kpi-value rose" id="qh-high-retry">—</div>
+                        </div>
+                    </div>
+
+                    <!-- Error classification breakdown -->
+                    <article class="panel mb-085">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Error Classification</h3>
+                        </div>
+                        <div id="qh-error-breakdown" class="panel-kpis" style="flex-wrap:wrap"></div>
+                    </article>
+
+                    <!-- Platform filter tabs -->
+                    <div class="dcc-view-toggle mb-08" id="qh-platform-filter" style="flex-wrap:wrap">
+                        <button class="dcc-view-btn active" data-qh-platform="all">All Platforms</button>
                     </div>
 
                     <article class="panel">
@@ -7689,12 +7780,13 @@
                                         <th>Brand</th>
                                         <th>Scheduled At</th>
                                         <th>Retries</th>
+                                        <th>Error Type</th>
                                         <th>Last Error</th>
                                     </tr>
                                 </thead>
                                 <tbody id="qh-failed-tbody">
                                     <tr>
-                                        <td colspan="6" class="text-muted" style="text-align:center;padding:2rem">No data — click the panel to load.</td>
+                                        <td colspan="7" class="text-muted" style="text-align:center;padding:2rem">No data — click the panel to load.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -8717,7 +8809,7 @@
                             <option value="aiaimate">AI Aimate</option>
                             <option value="culturesherpa">CultureSherpa</option>
                             <option value="citizenApproved">CitizenApproved</option>
-                            <option value="jamie">Jamie Rigling</option>
+                            <option value="minnesotapeace">MN Peace</option>
                             <option value="other">Other</option>
                         </select>
                     </div>
@@ -9061,15 +9153,11 @@
                     checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
-                    id: 'jamiemediation', name: 'Jamie Rigling Mediation', domain: 'jamierigling.com', purpose: 'Client landing page (inline GFD)', hosting: 'gfd-inline', liveUrl: 'https://goodflippindesign.com/jamie-rigling-mediation.html', adminUrl: null, color: '#e74c3c', repo: 'weave0/jamie-mediation', notes: 'Lives in GFD repo. GA4 + onerror added 2026-03-13.',
-                    checks: { ga4: true, sentry: true, csp: true, ci: true, tests: false, onerror: true, monitor: true }
-                },
-                {
                     id: 'brettleeweaver', name: 'Brett Lee Weaver', domain: 'www.brettleeweaver.com', purpose: 'Personal site / brand hub', hosting: 'cf-pages', liveUrl: 'https://www.brettleeweaver.com', adminUrl: 'https://dash.cloudflare.com', color: '#c084fc', repo: 'weave0/brettleeweaver', notes: 'Cloudflare-hosted personal showcase. Created repo 2026-03-13. GA4 + onerror + _headers (CSP/HSTS/X-Frame) + CI added. Connect to CF Pages to deploy.',
                     checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
-                    id: 'minnesotapeace', name: 'MN Peace', domain: 'minnesotapeace.com', purpose: 'Jamie Rigling mediation — independent deployment', hosting: 'cf-pages', liveUrl: 'https://minnesotapeace.com', adminUrl: 'https://dash.cloudflare.com', color: '#38bdf8', repo: 'weave0/jamie-mediation', notes: 'Deployed from weave0/jamie-mediation. GA4 + onerror + _headers (CSP/HSTS/X-Frame) added 2026-03-13. CI via shared jamie-mediation repo.',
+                    id: 'minnesotapeace', name: 'MN Peace', domain: 'minnesotapeace.com', purpose: 'Jamie Rigling mediation (consolidated from jamierigling.com)', hosting: 'cf-pages', liveUrl: 'https://minnesotapeace.com', adminUrl: 'https://dash.cloudflare.com', color: '#38bdf8', repo: 'weave0/jamie-mediation', notes: 'Canonical home for Jamie Rigling Mediation. jamierigling.com + GFD inline page sunsetted 2026-03-15. GA4 + onerror + _headers + CI.',
                     checks: { ga4: true, sentry: false, csp: true, ci: true, tests: false, onerror: true, monitor: true }
                 },
                 {
@@ -9152,6 +9240,7 @@
                 csCurrentRegistry: null,
                 csCurrentScene: 0,
                 csPromptStudioBaseUrl: '',
+                lastHealthMap: {},
             };
 
             function $(id) {
@@ -9328,6 +9417,15 @@
                 bindUI();
                 await refreshMediaToken();
                 setInterval(refreshMediaToken, 55 * 1000); // Clerk short-lived JWTs; refresh before expiry
+                // Live countdown for next scheduled post (refreshes every 30s)
+                setInterval(function () {
+                    if (state.currentView !== 'overview') return;
+                    const upcoming2 = [...state.variants]
+                        .filter((r) => r.scheduled_at && new Date(r.scheduled_at) > new Date())
+                        .sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at));
+                    const tel = $('ov-next-post-timer');
+                    if (tel) tel.textContent = upcoming2[0] ? '&#9201; ' + formatCountdown(upcoming2[0].scheduled_at) : '';
+                }, 30000);
                 await refreshAll();
                 renderPlatformPicker();
                 renderBrandSwitcher();
@@ -10496,12 +10594,63 @@
                 renderCalendar(data.events || [], start);
             }
 
+            function formatCountdown(iso) {
+                const diff = Math.floor((new Date(iso) - Date.now()) / 1000);
+                if (diff <= 0) return 'now';
+                if (diff < 60) return 'in ' + diff + 's';
+                if (diff < 3600) return 'in ' + Math.floor(diff / 60) + 'm ' + (diff % 60) + 's';
+                if (diff < 86400) return 'in ' + Math.floor(diff / 3600) + 'h ' + Math.floor((diff % 3600) / 60) + 'm';
+                return 'in ' + Math.floor(diff / 86400) + 'd ' + Math.floor((diff % 86400) / 3600) + 'h';
+            }
+
+            function renderHealthAlertBanner() {
+                const el = $('overview-health-alert');
+                if (!el) return;
+                const downSites = Object.values(state.lastHealthMap).filter((r) => !r.ok);
+                if (downSites.length === 0) { el.style.display = 'none'; return; }
+                el.style.display = 'flex';
+                el.innerHTML = '<span style="font-size:1.1rem">&#9888;</span>' +
+                    '<span><strong>' + downSites.length + ' site' + (downSites.length > 1 ? 's' : '') + ' down:</strong> ' +
+                    downSites.map((r) => escapeHtml((r.url || '').replace('https://', '')) + ' (HTTP&nbsp;' + (r.status_code || '?') + ')').join(', ') +
+                    '</span>' +
+                    '<button class="btn btn-micro alert-dismiss" onclick="document.getElementById(\'overview-health-alert\').style.display=\'none\'">Dismiss</button>';
+            }
+
+            async function testConnectionById(connId) {
+                try {
+                    const result = await api('/connections/' + connId + '/test', { method: 'POST' });
+                    toast((result.ok ? '&#10003; ' : '&#10005; ') + escapeHtml(result.platform || '') + ': ' +
+                        (result.ok ? 'token valid' : (result.error || 'failed')),
+                        result.ok ? 'success' : 'error');
+                    if (result.ok) {
+                        const conn = state.connections.find((c) => String(c.id) === String(connId));
+                        if (conn) conn.last_used_at = result.checked_at;
+                        renderOverview();
+                    }
+                } catch (err) {
+                    toast('Test failed: ' + escapeHtml(err.message), 'error');
+                }
+            }
+
             function renderOverview() {
                 const queueBody = $('overview-queue');
+                const now = new Date();
                 const upcoming = [...state.variants]
                     .filter((row) => row.scheduled_at)
                     .sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at))
                     .slice(0, 12);
+
+                // Next scheduled post countdown
+                const nextUp = upcoming.find((r) => new Date(r.scheduled_at) > now);
+                const timerEl = $('ov-next-post-timer');
+                if (timerEl) {
+                    if (nextUp) {
+                        timerEl.textContent = '&#9201; ' + formatCountdown(nextUp.scheduled_at);
+                        timerEl.title = (nextUp.platform || '') + ' \u00b7 ' + (nextUp.campaign_name || 'General');
+                    } else {
+                        timerEl.textContent = '';
+                    }
+                }
 
                 queueBody.innerHTML = upcoming.length
                     ? upcoming.map((row) => `
@@ -10515,21 +10664,35 @@
                     : '<tr><td colspan="4">No queued variants yet.</td></tr>';
 
                 const connectionSummary = $('overview-connections');
-                const byPlatform = {};
-                for (const platform of PLATFORM_ORDER) {
-                    const active = state.connections.filter((c) => c.platform === platform && Number(c.is_active) === 1);
-                    byPlatform[platform] = active.length;
-                }
 
                 connectionSummary.innerHTML = PLATFORM_ORDER.map((platform) => {
-                    const connected = byPlatform[platform] > 0;
-                    return `
-                        <div class="overview-conn-row">
-                            <span class="overview-conn-name">${escapeHtml(platform)}</span>
+                    const conn = state.connections.find((c) => c.platform === platform && Number(c.is_active) === 1);
+                    const connected = Boolean(conn);
+                    const lastTested = conn && conn.last_used_at
+                        ? '<span style="font-size:0.7rem;color:var(--text-muted);margin-left:4px" title="' + escapeHtml(conn.last_used_at) + '">tested ' + escapeHtml(relTimeFromIso(conn.last_used_at)) + '</span>'
+                        : '';
+                    const testBtn = connected && conn.id
+                        ? '<button class="btn btn-micro ov-conn-test-btn" data-conn-id="' + conn.id + '" style="padding:1px 5px;font-size:0.68rem;margin-left:4px" title="Test token" aria-label="Test ' + escapeHtml(platform) + ' token">&#128268;</button>'
+                        : '';
+                    return `<div class="overview-conn-row">
+                        <span class="overview-conn-name">${escapeHtml(platform)}</span>
+                        <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap">
                             <span class="tag ${connected ? 'ok' : 'fail'}">${connected ? 'connected' : 'missing'}</span>
+                            ${lastTested}${testBtn}
                         </div>
-                    `;
+                    </div>`;
                 }).join('');
+
+                // Wire test buttons
+                connectionSummary.querySelectorAll('.ov-conn-test-btn').forEach((btn) => {
+                    btn.addEventListener('click', async () => {
+                        btn.textContent = '&#8987;';
+                        btn.disabled = true;
+                        await testConnectionById(btn.dataset.connId);
+                        btn.textContent = '&#128268;';
+                        btn.disabled = false;
+                    });
+                });
 
                 // Append env-secret status rows (read from window.ENV injected by _worker.js)
                 const sentryOk = !!(window.ENV && window.ENV.SENTRY_DSN);
@@ -10537,7 +10700,7 @@
                 connectionSummary.innerHTML += `
                     <div class="overview-conn-row" style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px">
                         <span class="overview-conn-name">Sentry</span>
-                        <span class="tag ${sentryOk ? 'ok' : 'warn'}" title="${sentryOk ? 'SENTRY_DSN is set' : 'SENTRY_DSN not set — run: wrangler secret put SENTRY_DSN'}">${sentryOk ? 'active' : 'not set'}</span>
+                        <span class="tag ${sentryOk ? 'ok' : 'warn'}" title="${sentryOk ? 'SENTRY_DSN is set' : 'SENTRY_DSN not set \u2014 run: wrangler secret put SENTRY_DSN'}">${sentryOk ? 'active' : 'not set'}</span>
                     </div>
                     <div class="overview-conn-row">
                         <span class="overview-conn-name">Stripe key</span>
@@ -10562,6 +10725,7 @@
                     : '<tr><td colspan="4">No assets available.</td></tr>';
 
                 renderGapFlags();
+                renderHealthAlertBanner();
             }
 
             // ── Gap Flags ─────────────────────────────────────────────────────
@@ -10690,9 +10854,9 @@
                     detail: 'citizenapproved.com added to 6-hour GitHub Actions health sweep. Total monitored sites: 8.'
                 },
                 {
-                    id: 'branch-protection', severity: 'hygiene', brand: 'gfd', area: 'Ops',
-                    title: 'Branch protection not enforced',
-                    detail: 'Direct pushes to main bypass CI. Go to GitHub → Settings → Branches → require PR + test-suite status check.'
+                    id: 'branch-protection', severity: 'done', brand: 'gfd', area: 'Ops',
+                    title: 'Branch protection enforced on goodflippindesign (2026-03-15)',
+                    detail: 'main branch requires PR + "CI - Tests (Cost Optimized) / Run Tests" status check. Require approvals enabled. jamie-mediation + SummitView still need rules if they gain CI workflows.'
                 },
                 {
                     id: 'contact-form-e2e', severity: 'hygiene', brand: 'gfd', area: 'Ops',
@@ -10706,9 +10870,9 @@
                     detail: 'ga-test-enhanced.html, test-ga.html, oauth-diagnostic.html, globaldeets-live-snapshot.html, main.html, globaldeets-phase1-live.html have all been removed from the repository.'
                 },
                 {
-                    id: 'jamie-mediation-placement', severity: 'hygiene', brand: 'gfd', area: 'Hygiene',
-                    title: 'jamie-rigling-mediation.html in GFD root',
-                    detail: 'Client page is mixed into main site repo. weave0/jamie-mediation repo exists — should this deploy independently?'
+                    id: 'jamie-mediation-placement', severity: 'done', brand: 'gfd', area: 'Hygiene',
+                    title: 'Jamie Mediation consolidated to minnesotapeace.com (2026-03-15)',
+                    detail: 'jamierigling.com (dead DNS) + GFD-inline jamie-rigling-mediation.html sunsetted. Canonical deploy is minnesotapeace.com from weave0/jamie-mediation via CF Pages. Duplicate brand entry removed from admin. GFD-local file deleted.'
                 },
                 {
                     id: 'gallery-page', severity: 'done', brand: 'gfd', area: 'Hygiene',
@@ -10881,6 +11045,7 @@
                                     <span>${isConnected ? label : 'connect'}</span>
                                 </button>
                                 ${handleText ? `<span class="eco-cell-handle">${handleText}</span>` : ''}
+                                ${isConnected && conn && conn.id ? `<button class="eco-cell-test-btn btn btn-micro" data-conn-id="${escapeHtml(String(conn.id))}" data-platform="${escapeHtml(platform)}" style="font-size:0.68rem;padding:1px 5px;margin-top:2px;width:100%" title="Test access token" aria-label="Test ${escapeHtml(platform)} token">&#128268; Test</button>` : ''}
                             </div>
                         </td>`;
                     }).join('');
@@ -10908,6 +11073,18 @@
                         $('conn-platform').value = platform;
                         renderOAuthProviderGrid();
                         openModal('connection-modal');
+                    });
+                });
+
+                // Wire up test buttons
+                body.querySelectorAll('.eco-cell-test-btn').forEach((btn) => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        btn.innerHTML = '&#8987; Testing…';
+                        btn.disabled = true;
+                        await testConnectionById(btn.dataset.connId);
+                        btn.innerHTML = '&#128268; Test';
+                        btn.disabled = false;
                     });
                 });
             }
@@ -13236,7 +13413,7 @@
             const ECO_REPOS = [
                 { owner: 'weave0', repo: 'goodflippindesign', label: 'Good Flippin Design' },
                 { owner: 'weave0', repo: 'SummitView', label: 'SummitView' },
-                { owner: 'weave0', repo: 'jamie-mediation', label: 'Jamie Mediation' },
+                { owner: 'weave0', repo: 'jamie-mediation', label: 'MN Peace' },
             ];
 
             function ecoRelTime(iso) {
@@ -13364,6 +13541,42 @@
                                     <td style="color:#f59e0b">${h.warn || 0}</td>
                                     <td style="color:#f43f5e">${h.fail || 0}</td>
                                 </tr>`;
+                            }).join('');
+                        }
+                    }
+                    // Per-site performance trend
+                    const trendDetails = $('eco-trend-details');
+                    const trendGrid = $('eco-trend-grid');
+                    if (trendDetails && trendGrid) {
+                        // Group rows by URL across multiple sweeps
+                        const byUrl = {};
+                        rows.forEach(r => {
+                            if (!byUrl[r.url]) byUrl[r.url] = { name: r.name, url: r.url, points: [] };
+                            byUrl[r.url].points.push({ ts: r.checked_at, ms: r.response_time_ms || 0, status: r.overall_status });
+                        });
+                        // Only show if multiple data points exist for at least one site
+                        const multiSites = Object.values(byUrl).filter(s => s.points.length > 1);
+                        if (multiSites.length) {
+                            trendDetails.style.display = '';
+                            trendGrid.innerHTML = multiSites.map(site => {
+                                // Sort chronologically, take last 7
+                                var pts = site.points.sort((a, b) => a.ts.localeCompare(b.ts)).slice(-7);
+                                var maxMs = Math.max.apply(null, pts.map(p => p.ms)) || 1;
+                                var bars = pts.map(p => {
+                                    var h = Math.max(6, Math.round((p.ms / maxMs) * 48));
+                                    var color = p.status === 'pass' ? '#22c55e' : p.status === 'warn' ? '#f59e0b' : '#f43f5e';
+                                    var dt = new Date(p.ts);
+                                    var label = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                    return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px" title="' + escapeHtml(label) + ': ' + p.ms + 'ms">' +
+                                        '<div style="width:14px;height:' + h + 'px;background:' + color + ';border-radius:3px"></div>' +
+                                        '<span style="font-size:0.6rem;color:#666">' + p.ms + '</span></div>';
+                                }).join('');
+                                var latest = pts[pts.length - 1];
+                                var arrow = pts.length >= 2 ? (latest.ms > pts[pts.length - 2].ms ? '↑' : latest.ms < pts[pts.length - 2].ms ? '↓' : '→') : '';
+                                return '<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px">' +
+                                    '<div style="font-weight:500;font-size:0.82rem;margin-bottom:6px">' + escapeHtml(site.name) + ' ' + arrow + '</div>' +
+                                    '<div style="display:flex;align-items:flex-end;gap:4px;height:56px">' + bars + '</div>' +
+                                    '</div>';
                             }).join('');
                         }
                     }
@@ -13968,6 +14181,58 @@
                 }
 
                 wireBlogEvents();
+
+                // ── Comment Moderation ────────────────────────────────────
+                async function loadComments() {
+                    var tbody = $('blog-comments-tbody');
+                    var countEl = $('blog-comments-count');
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-muted">Loading…</td></tr>';
+                    try {
+                        var data = await blogFetch('/api/comments/all');
+                        var comments = Array.isArray(data) ? data : (data.comments || []);
+                        if (countEl) countEl.textContent = comments.length;
+                        if (!tbody) return;
+                        if (!comments.length) {
+                            tbody.innerHTML = '<tr><td colspan="5" class="text-muted">No comments found.</td></tr>';
+                            return;
+                        }
+                        tbody.innerHTML = comments.map(function (c) {
+                            var snippet = (c.content || c.body || '').slice(0, 100) + ((c.content || c.body || '').length > 100 ? '…' : '');
+                            return '<tr>' +
+                                '<td>' + escapeHtml(c.article_title || c.article_id || '—') + '</td>' +
+                                '<td>' + escapeHtml(c.author_name || c.user_id || '—') + '</td>' +
+                                '<td style="max-width:240px;word-break:break-word;font-size:0.8rem">' + escapeHtml(snippet) + '</td>' +
+                                '<td class="text-muted">' + escapeHtml(formatDateTime(c.created_at)) + '</td>' +
+                                '<td><button class="btn btn-sm btn-danger blog-comment-del-btn" data-comment-id="' + escapeHtml(c.id) + '" aria-label="Delete comment">🗑</button></td>' +
+                                '</tr>';
+                        }).join('');
+                        tbody.querySelectorAll('.blog-comment-del-btn').forEach(function (btn) {
+                            btn.addEventListener('click', function () { deleteComment(btn.dataset.commentId); });
+                        });
+                    } catch (e) {
+                        if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-muted">Failed: ' + escapeHtml(e.message) + '</td></tr>';
+                    }
+                }
+
+                async function deleteComment(commentId) {
+                    if (!confirm('Delete this comment permanently?')) return;
+                    try {
+                        await blogFetch('/api/comments', { method: 'DELETE', body: { commentId: commentId } });
+                        toast('Comment deleted.', 'success');
+                        loadComments();
+                    } catch (e) {
+                        toast('Delete failed: ' + e.message, 'error');
+                    }
+                }
+
+                var cmtRefBtn = $('blog-comments-refresh-btn');
+                if (cmtRefBtn) cmtRefBtn.addEventListener('click', loadComments);
+
+                // Auto-load comments when blog panel opens
+                var origBlogNav = document.querySelector('[data-view="blog-manager"]');
+                if (origBlogNav) {
+                    origBlogNav.addEventListener('click', function () { loadComments(); });
+                }
             })();
             // ─── End Blog Manager ─────────────────────────────────────────
 
@@ -14114,7 +14379,7 @@
 
                 async function load() {
                     var tbody = $('community-members-tbody');
-                    if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Loading…</td></tr>';
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-muted">Loading…</td></tr>';
                     try {
                         var token = await (state.clerk && state.clerk.session ? state.clerk.session.getToken() : Promise.resolve(null));
                         if (!token) throw new Error('Not signed in');
@@ -14125,7 +14390,7 @@
                         renderTable(allMembers);
                         updateKPIs(allMembers);
                     } catch (e) {
-                        if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Failed to load: ' + escapeHtml(e.message) + '</td></tr>';
+                        if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-muted">Failed to load: ' + escapeHtml(e.message) + '</td></tr>';
                     }
                 }
 
@@ -14139,6 +14404,12 @@
                     $('cm-active').textContent = active;
                     var totalXP = members.reduce(function (s, m) { return s + Number(m.xp || m.total_xp || 0); }, 0);
                     $('cm-xp').textContent = totalXP.toLocaleString();
+
+                    // New KPIs
+                    var totalBadges = members.reduce(function (s, m) { return s + (Array.isArray(m.badges) ? m.badges.length : Number(m.badge_count || 0)); }, 0);
+                    var suspendedCount = members.filter(function (m) { return m.suspended; }).length;
+                    if ($('cm-badges')) $('cm-badges').textContent = totalBadges;
+                    if ($('cm-suspended')) $('cm-suspended').textContent = suspendedCount;
                 }
 
                 function renderTable(members) {
@@ -14155,23 +14426,58 @@
                     var tbody = $('community-members-tbody');
                     if (!tbody) return;
                     if (!filtered.length) {
-                        tbody.innerHTML = '<tr><td colspan="7" class="text-muted">No members found.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="9" class="text-muted">No members found.</td></tr>';
                         return;
                     }
                     tbody.innerHTML = filtered.map(function (m) {
                         var xp = Number(m.xp || m.total_xp || 0);
                         var level = m.level || (Math.floor(xp / 100) + 1);
+                        var badgeCount = Array.isArray(m.badges) ? m.badges.length : Number(m.badge_count || 0);
+                        var streak = Number(m.current_streak || 0);
+                        var isSuspended = !!m.suspended;
+                        var statusClass = isSuspended ? 'fail' : 'pass';
+                        var statusLabel = isSuspended ? 'Suspended' : 'Active';
+                        var suspendLabel = isSuspended ? 'Unsuspend' : 'Suspend';
+                        var uid = encodeURIComponent(m.user_id || m.id || '');
                         return '<tr>' +
                             '<td>' + escapeHtml(m.full_name || m.username || m.email || '—') + '</td>' +
                             '<td>Lv ' + level + '</td>' +
                             '<td>' + xp.toLocaleString() + '</td>' +
                             '<td>' + Number(m.post_count || 0) + '</td>' +
-                            '<td>' + Number(m.checkin_count || 0) + '</td>' +
+                            '<td>' + badgeCount + '</td>' +
+                            '<td>' + (streak > 0 ? '🔥 ' + streak + 'd' : '—') + '</td>' +
+                            '<td><span class="tag ' + statusClass + '">' + statusLabel + '</span></td>' +
                             '<td>' + escapeHtml(formatDateTime(m.created_at)) + '</td>' +
-                            '<td>' + escapeHtml(formatDateTime(m.last_active || m.updated_at)) + '</td>' +
+                            '<td>' +
+                            '<button class="admin-action-btn cm-suspend-btn" data-uid="' + uid + '" data-suspended="' + isSuspended + '" title="' + suspendLabel + '" style="padding:2px 6px;font-size:0.72rem;cursor:pointer">' + (isSuspended ? '▶' : '⏸') + '</button>' +
+                            '</td>' +
                             '</tr>';
                     }).join('');
                 }
+
+                // Suspend / unsuspend action
+                document.addEventListener('click', function (e) {
+                    var btn = e.target.closest('.cm-suspend-btn');
+                    if (!btn) return;
+                    var uid = btn.getAttribute('data-uid');
+                    var wasSuspended = btn.getAttribute('data-suspended') === 'true';
+                    (async function () {
+                        try {
+                            var token = await (state.clerk && state.clerk.session ? state.clerk.session.getToken() : Promise.resolve(null));
+                            if (!token) throw new Error('Not signed in');
+                            var resp = await fetch('/api/community/members/' + uid + '/suspend', {
+                                method: 'PUT',
+                                headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ suspended: !wasSuspended })
+                            });
+                            if (!resp.ok) throw new Error(resp.status);
+                            toast((wasSuspended ? 'Unsuspended' : 'Suspended') + ' member.', 'success');
+                            load();
+                        } catch (ex) {
+                            toast('Action failed: ' + ex.message, 'error');
+                        }
+                    })();
+                });
 
                 var searchTimer;
                 var searchEl = $('community-search');
@@ -14193,57 +14499,122 @@
             // =================================================================
             (function initQueueHealthPanel() {
                 'use strict';
+                var activePlatform = 'all';
 
-                async function load() {
-                    try {
-                        var variants = state.variants || [];
-                        var failed = variants.filter(function (v) { return v.status === 'failed'; });
-                        var pending = variants.filter(function (v) { return v.status === 'scheduled' || v.status === 'pending'; });
-                        var published = variants.filter(function (v) { return v.status === 'published'; });
+                // Classify error messages into categories
+                function classifyError(err) {
+                    if (!err) return 'unknown';
+                    var e = err.toLowerCase();
+                    if (e.includes('401') || e.includes('403') || e.includes('unauthorized') || e.includes('token') || e.includes('auth') || e.includes('expired')) return 'auth';
+                    if (e.includes('429') || e.includes('rate') || e.includes('throttl') || e.includes('too many')) return 'rate-limit';
+                    if (e.includes('timeout') || e.includes('timed out') || e.includes('econnrefused') || e.includes('network') || e.includes('dns') || e.includes('502') || e.includes('503') || e.includes('504')) return 'api-down';
+                    if (e.includes('too long') || e.includes('character') || e.includes('length') || e.includes('format') || e.includes('invalid') || e.includes('400') || e.includes('missing')) return 'format';
+                    if (e.includes('duplicate') || e.includes('already')) return 'duplicate';
+                    return 'other';
+                }
 
-                        $('qh-failed').textContent = failed.length;
-                        $('qh-pending').textContent = pending.length;
-                        $('qh-published').textContent = published.length;
+                var errLabels = { 'auth': '🔑 Auth', 'rate-limit': '⏱ Rate Limit', 'api-down': '🔌 API Down', 'format': '📝 Format', 'duplicate': '♻ Duplicate', 'other': '❓ Other', 'unknown': '—' };
+                var errColors = { 'auth': 'rose', 'rate-limit': 'gold', 'api-down': 'rose', 'format': 'cyan', 'duplicate': 'violet', 'other': '', 'unknown': '' };
 
-                        // Failed variants table
-                        var failedTbody = $('qh-failed-tbody');
-                        if (failedTbody) {
-                            failedTbody.innerHTML = failed.length
-                                ? failed.map(function (v) {
-                                    var caption = (v.content || v.caption || '').slice(0, 55) + ((v.content || v.caption || '').length > 55 ? '…' : '');
-                                    return '<tr>' +
-                                        '<td>' + escapeHtml(caption || '—') + '</td>' +
-                                        '<td><span class="tag fail">' + escapeHtml(v.platform || '—') + '</span></td>' +
-                                        '<td>' + escapeHtml(v.brand || '—') + '</td>' +
-                                        '<td>' + escapeHtml(formatDateTime(v.scheduled_at)) + '</td>' +
-                                        '<td>' + Number(v.retry_count || 0) + '</td>' +
-                                        '<td style="max-width:200px;word-break:break-all;font-size:0.75rem">' + escapeHtml(v.last_error || '—') + '</td>' +
-                                        '</tr>';
-                                }).join('')
-                                : '<tr><td colspan="6" class="text-muted">No failed variants — publisher is healthy.</td></tr>';
+                function load() {
+                    var variants = state.variants || [];
+                    var failed = variants.filter(function (v) { return v.status === 'failed'; });
+                    var pending = variants.filter(function (v) { return v.status === 'scheduled' || v.status === 'pending'; });
+                    var published = variants.filter(function (v) { return v.status === 'published'; });
+                    var highRetry = failed.filter(function (v) { return Number(v.retry_count || 0) >= 3; });
+
+                    $('qh-failed').textContent = failed.length;
+                    $('qh-pending').textContent = pending.length;
+                    $('qh-published').textContent = published.length;
+                    $('qh-high-retry').textContent = highRetry.length;
+
+                    // Success rate
+                    var total = published.length + failed.length;
+                    var rate = total > 0 ? Math.round((published.length / total) * 100) : 0;
+                    var rateEl = $('qh-success-rate');
+                    if (rateEl) {
+                        rateEl.textContent = total > 0 ? rate + '%' : '—';
+                        rateEl.className = 'panel-kpi-value ' + (rate >= 90 ? 'emerald' : rate >= 70 ? 'gold' : 'rose');
+                    }
+
+                    // Error breakdown
+                    var errCounts = {};
+                    failed.forEach(function (v) { var t = classifyError(v.last_error); errCounts[t] = (errCounts[t] || 0) + 1; });
+                    var breakdownEl = $('qh-error-breakdown');
+                    if (breakdownEl) {
+                        if (!failed.length) {
+                            breakdownEl.innerHTML = '<div class="panel-kpi"><div class="panel-kpi-value emerald">0</div><div class="panel-kpi-label">No errors</div></div>';
+                        } else {
+                            breakdownEl.innerHTML = Object.keys(errCounts).map(function (t) {
+                                return '<div class="panel-kpi"><div class="panel-kpi-value ' + (errColors[t] || '') + '">' + errCounts[t] + '</div><div class="panel-kpi-label">' + (errLabels[t] || t) + '</div></div>';
+                            }).join('');
                         }
+                    }
 
-                        // All variants table (recent 50)
-                        var allTbody = $('qh-all-tbody');
-                        if (allTbody) {
-                            var recent = [...variants].sort(function (a, b) { return new Date(b.scheduled_at || 0) - new Date(a.scheduled_at || 0); }).slice(0, 50);
-                            allTbody.innerHTML = recent.length
-                                ? recent.map(function (v) {
-                                    var caption = (v.content || v.caption || '').slice(0, 55) + ((v.content || v.caption || '').length > 55 ? '…' : '');
-                                    return '<tr>' +
-                                        '<td>' + escapeHtml(caption || '—') + '</td>' +
-                                        '<td>' + escapeHtml(v.platform || '—') + '</td>' +
-                                        '<td>' + escapeHtml(v.brand || '—') + '</td>' +
-                                        '<td>' + statusTag(v.status) + '</td>' +
-                                        '<td>' + escapeHtml(formatDateTime(v.scheduled_at)) + '</td>' +
-                                        '</tr>';
-                                }).join('')
-                                : '<tr><td colspan="5" class="text-muted">No variants loaded yet.</td></tr>';
-                        }
-                    } catch (e) {
-                        console.error('[queue health panel]', e);
+                    // Platform filter tabs — build dynamically
+                    var platforms = {};
+                    variants.forEach(function (v) { if (v.platform) platforms[v.platform] = true; });
+                    var filterEl = $('qh-platform-filter');
+                    if (filterEl) {
+                        var btns = '<button class="dcc-view-btn' + (activePlatform === 'all' ? ' active' : '') + '" data-qh-platform="all">All</button>';
+                        Object.keys(platforms).sort().forEach(function (p) {
+                            btns += '<button class="dcc-view-btn' + (activePlatform === p ? ' active' : '') + '" data-qh-platform="' + escapeHtml(p) + '">' + escapeHtml(p) + '</button>';
+                        });
+                        filterEl.innerHTML = btns;
+                    }
+
+                    // Apply platform filter
+                    var filteredFailed = activePlatform === 'all' ? failed : failed.filter(function (v) { return v.platform === activePlatform; });
+
+                    // Failed variants table with error type column
+                    var failedTbody = $('qh-failed-tbody');
+                    if (failedTbody) {
+                        failedTbody.innerHTML = filteredFailed.length
+                            ? filteredFailed.map(function (v) {
+                                var caption = (v.content || v.caption || '').slice(0, 55) + ((v.content || v.caption || '').length > 55 ? '…' : '');
+                                var errType = classifyError(v.last_error);
+                                var retryWarn = Number(v.retry_count || 0) >= 3 ? ' style="color:var(--accent-rose);font-weight:600"' : '';
+                                return '<tr>' +
+                                    '<td>' + escapeHtml(caption || '—') + '</td>' +
+                                    '<td><span class="tag fail">' + escapeHtml(v.platform || '—') + '</span></td>' +
+                                    '<td>' + escapeHtml(v.brand || '—') + '</td>' +
+                                    '<td>' + escapeHtml(formatDateTime(v.scheduled_at)) + '</td>' +
+                                    '<td' + retryWarn + '>' + Number(v.retry_count || 0) + '</td>' +
+                                    '<td><span class="tag ' + (errColors[errType] ? errColors[errType] : 'warn') + '" style="font-size:0.72rem">' + (errLabels[errType] || errType) + '</span></td>' +
+                                    '<td style="max-width:180px;word-break:break-all;font-size:0.72rem">' + escapeHtml(v.last_error || '—') + '</td>' +
+                                    '</tr>';
+                            }).join('')
+                            : '<tr><td colspan="7" class="text-muted">No failed variants — publisher is healthy.</td></tr>';
+                    }
+
+                    // All variants table (recent 50)
+                    var filteredAll = activePlatform === 'all' ? variants : variants.filter(function (v) { return v.platform === activePlatform; });
+                    var allTbody = $('qh-all-tbody');
+                    if (allTbody) {
+                        var recent = [...filteredAll].sort(function (a, b) { return new Date(b.scheduled_at || 0) - new Date(a.scheduled_at || 0); }).slice(0, 50);
+                        allTbody.innerHTML = recent.length
+                            ? recent.map(function (v) {
+                                var caption = (v.content || v.caption || '').slice(0, 55) + ((v.content || v.caption || '').length > 55 ? '…' : '');
+                                return '<tr>' +
+                                    '<td>' + escapeHtml(caption || '—') + '</td>' +
+                                    '<td>' + escapeHtml(v.platform || '—') + '</td>' +
+                                    '<td>' + escapeHtml(v.brand || '—') + '</td>' +
+                                    '<td>' + statusTag(v.status) + '</td>' +
+                                    '<td>' + escapeHtml(formatDateTime(v.scheduled_at)) + '</td>' +
+                                    '</tr>';
+                            }).join('')
+                            : '<tr><td colspan="5" class="text-muted">No variants loaded yet.</td></tr>';
                     }
                 }
+
+                // Platform filter delegation
+                var filterEl = $('qh-platform-filter');
+                if (filterEl) filterEl.addEventListener('click', function (e) {
+                    var btn = e.target.closest('[data-qh-platform]');
+                    if (!btn) return;
+                    activePlatform = btn.getAttribute('data-qh-platform');
+                    load();
+                });
 
                 var refBtn = $('qh-refresh-btn');
                 if (refBtn) refBtn.addEventListener('click', load);
@@ -16083,10 +16454,12 @@
                     if (!grid) return;
                     var accountsMap = {};
                     var workflowMap = {};
+                    var assetsByBrand = {};
                     try {
-                        var [socRes, wfRes] = await Promise.all([
+                        var [socRes, wfRes, statsRes] = await Promise.all([
                             api('/social-accounts?limit=200'),
                             api('/workflows?limit=200'),
+                            api('/stats'),
                         ]);
                         var accounts = socRes.accounts || socRes || [];
                         accounts.forEach(function (a) {
@@ -16097,6 +16470,7 @@
                         workflows.forEach(function (w) {
                             workflowMap[w.brand] = (workflowMap[w.brand] || 0) + 1;
                         });
+                        assetsByBrand = statsRes.assetsByBrand || {};
                     } catch (err) {
                         console.warn('[brands panel] Could not load live data:', err.message);
                     }
@@ -16113,6 +16487,7 @@
                     grid.innerHTML = BRAND_DEFS.map(function (b) {
                         var accts = accountsMap[b.id] || [];
                         var wfCount = workflowMap[b.id] || 0;
+                        var assetCount = assetsByBrand[b.id] || 0;
                         var acctTags = accts.slice(0, 6).map(function (a) {
                             var isLinked = a.link_status === 'linked';
                             var dot = '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:' +
@@ -16136,6 +16511,7 @@
                             '<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">' +
                             '<span class="tag" style="font-size:0.72rem;background:rgba(255,255,255,0.06)">' + accts.length + ' accounts</span>' +
                             '<span class="tag" style="font-size:0.72rem;background:rgba(255,255,255,0.06)">' + wfCount + ' workflows</span>' +
+                            '<span class="tag" style="font-size:0.72rem;background:rgba(255,255,255,0.06)">' + assetCount + ' assets</span>' +
                             linkBadge +
                             '</div>' +
                             (acctTags ? '<div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:0.75rem">' + acctTags + '</div>' : '') +
@@ -16194,6 +16570,8 @@
                             healthMap[key] = r;
                         });
                         if (updEl) updEl.textContent = 'Health: ' + new Date().toLocaleTimeString();
+                        state.lastHealthMap = healthMap;
+                        renderHealthAlertBanner();
                     }
                 } catch (e) { /* health sweep unavailable */ }
 
