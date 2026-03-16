@@ -326,118 +326,118 @@ _Executed: 2026-03-17 · Agent: Copilot Phase 1 execution_
 
 ### Z: Drive Top-Level Breakdown
 
-| Directory | Size |
-| --------- | ---- |
-| GFD Dev Projects/ | 39.91 GB |
-| ThyOwn/ | 19.99 GB |
-| OneWhat/ | 11.09 GB |
-| Weave/ | 8.45 GB |
-| Paused Projects/ | 1.80 GB |
-| CultureSherpa/ | 0.68 GB |
-| GFD/ (this repo) | ~0.5 GB |
-| Other | ~5 GB |
-| **Total used** | **~313.5 GB** |
+| Directory         | Size          |
+| ----------------- | ------------- |
+| GFD Dev Projects/ | 39.91 GB      |
+| ThyOwn/           | 19.99 GB      |
+| OneWhat/          | 11.09 GB      |
+| Weave/            | 8.45 GB       |
+| Paused Projects/  | 1.80 GB       |
+| CultureSherpa/    | 0.68 GB       |
+| GFD/ (this repo)  | ~0.5 GB       |
+| Other             | ~5 GB         |
+| **Total used**    | **~313.5 GB** |
 
 ---
 
 ### GFD Dev Projects/ Breakdown
 
-| Directory | Size | Notes |
-| --------- | ---- | ----- |
-| AI/ (portal) | ~12 GB | node_modules=0.71GB, Next.js app |
-| CitizenApproved/ | ~8 GB | node_modules=0.36GB |
-| CultureSherpa/ | 0.57 GB | node_modules only |
-| GFV/ | ~2 GB | website |
-| Other projects | ~17 GB | Various |
+| Directory        | Size    | Notes                            |
+| ---------------- | ------- | -------------------------------- |
+| AI/ (portal)     | ~12 GB  | node_modules=0.71GB, Next.js app |
+| CitizenApproved/ | ~8 GB   | node_modules=0.36GB              |
+| CultureSherpa/   | 0.57 GB | node_modules only                |
+| GFV/             | ~2 GB   | website                          |
+| Other projects   | ~17 GB  | Various                          |
 
 ---
 
 ### ThyOwn/ Drill-Down
 
-| Path | Size | Notes |
-| ---- | ---- | ----- |
-| .venv | 5.77 GB | Python AI venv |
-| models/ | (SVD-XT) | see Top 20 below |
-| SummitView/ | | |
-| — .venv | 5.62 GB | Main venv |
-| — .venv_cuda | 5.13 GB | GPU-specific venv |
+| Path         | Size     | Notes             |
+| ------------ | -------- | ----------------- |
+| .venv        | 5.77 GB  | Python AI venv    |
+| models/      | (SVD-XT) | see Top 20 below  |
+| SummitView/  |          |                   |
+| — .venv      | 5.62 GB  | Main venv         |
+| — .venv_cuda | 5.13 GB  | GPU-specific venv |
 
 ---
 
 ### Weave/ Drill-Down
 
-| Directory | Size | Notes |
-| --------- | ---- | ----- |
+| Directory              | Size    | Notes              |
+| ---------------------- | ------- | ------------------ |
 | piedmont-account-plan/ | 4.52 GB | Client work / data |
-| Email Mining/ | 1.38 GB | Data project |
-| The Word Point/ | 1.14 GB | Content project |
-| .venv | 0.67 GB | Python venv |
+| Email Mining/          | 1.38 GB | Data project       |
+| The Word Point/        | 1.14 GB | Content project    |
+| .venv                  | 0.67 GB | Python venv        |
 
 ---
 
 ### OneWhat/ Drill-Down
 
-| Directory | Size | Notes |
-| --------- | ---- | ----- |
-| models/ | 9.21 GB | AI model weights |
-| venv | 0.77 GB | Python venv |
+| Directory   | Size    | Notes              |
+| ----------- | ------- | ------------------ |
+| models/     | 9.21 GB | AI model weights   |
+| venv        | 0.77 GB | Python venv        |
 | .mypy_cache | 0.22 GB | Type checker cache |
 
 ---
 
 ### Paused Projects/ Drill-Down
 
-| Directory | Size | Notes |
-| --------- | ---- | ----- |
-| ToneDef/ | 0.90 GB | |
-| fantasy-penpal/ | 0.32 GB | |
-| elliasssan/ | 0.31 GB | |
-| steveb/ | 0.27 GB | |
+| Directory       | Size    | Notes |
+| --------------- | ------- | ----- |
+| ToneDef/        | 0.90 GB |       |
+| fantasy-penpal/ | 0.32 GB |       |
+| elliasssan/     | 0.31 GB |       |
+| steveb/         | 0.27 GB |       |
 
 ---
 
 ### Top 20 Largest Files
 
-| # | File | Size |
-| - | ---- | ---- |
-| 1 | ThyOwn/models/svd_xt.safetensors | 8.90 GB |
-| 2 | ThyOwn/models/svd_xt_image_decoder.safetensors | 8.85 GB |
-| 3 | SummitView/models/unet/diffusion_pytorch_model.safetensors | 5.68 GB |
-| 4-20 | Various model weights, dataset files | 0.5–2 GB each |
+| #    | File                                                       | Size          |
+| ---- | ---------------------------------------------------------- | ------------- |
+| 1    | ThyOwn/models/svd_xt.safetensors                           | 8.90 GB       |
+| 2    | ThyOwn/models/svd_xt_image_decoder.safetensors             | 8.85 GB       |
+| 3    | SummitView/models/unet/diffusion_pytorch_model.safetensors | 5.68 GB       |
+| 4-20 | Various model weights, dataset files                       | 0.5–2 GB each |
 
 ---
 
 ### Python Venv Inventory
 
-| Path | Size | Status |
-| ---- | ---- | ------ |
-| ThyOwn/.venv | 5.77 GB | Active |
-| SummitView/.venv | 5.62 GB | Active |
-| SummitView/.venv_cuda | 5.13 GB | GPU variant — may be redundant |
-| OneWhat/venv | 0.77 GB | Active |
-| Weave/.venv | 0.67 GB | Active |
-| **Total** | **~17.96 GB** | All reclaimable if projects archived |
+| Path                  | Size          | Status                               |
+| --------------------- | ------------- | ------------------------------------ |
+| ThyOwn/.venv          | 5.77 GB       | Active                               |
+| SummitView/.venv      | 5.62 GB       | Active                               |
+| SummitView/.venv_cuda | 5.13 GB       | GPU variant — may be redundant       |
+| OneWhat/venv          | 0.77 GB       | Active                               |
+| Weave/.venv           | 0.67 GB       | Active                               |
+| **Total**             | **~17.96 GB** | All reclaimable if projects archived |
 
 ---
 
 ### Node Modules Inventory
 
-| Path | Size |
-| ---- | ---- |
-| AI/portal/node_modules | 0.71 GB |
-| CultureSherpa/node_modules | 0.57 GB |
+| Path                         | Size    |
+| ---------------------------- | ------- |
+| AI/portal/node_modules       | 0.71 GB |
+| CultureSherpa/node_modules   | 0.57 GB |
 | CitizenApproved/node_modules | 0.36 GB |
 
 ---
 
 ### Storage Recommendations
 
-| Action | Recovery | Priority |
-| ------ | -------- | -------- |
-| `pnpm store prune` | ~1.47 GB | Low — quick win |
-| Delete SummitView/.venv_cuda | 5.13 GB | Medium — only if .venv handles GPU |
-| Archive ThyOwn SVD-XT models to E: | ~17.75 GB | High — largest reclaimable |
-| Archive inactive venvs (ThyOwn, SummitView) | 11.39 GB | High — if projects paused |
-| Remove .mypy_cache directories | ~0.22 GB+ | Low — auto-regenerated |
+| Action                                      | Recovery  | Priority                           |
+| ------------------------------------------- | --------- | ---------------------------------- |
+| `pnpm store prune`                          | ~1.47 GB  | Low — quick win                    |
+| Delete SummitView/.venv_cuda                | 5.13 GB   | Medium — only if .venv handles GPU |
+| Archive ThyOwn SVD-XT models to E:          | ~17.75 GB | High — largest reclaimable         |
+| Archive inactive venvs (ThyOwn, SummitView) | 11.39 GB  | High — if projects paused          |
+| Remove .mypy_cache directories              | ~0.22 GB+ | Low — auto-regenerated             |
 
 _Phase 1 deep scan completed: 2026-03-17_
