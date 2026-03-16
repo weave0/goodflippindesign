@@ -5,16 +5,26 @@
             "path": "Z:\\MediaDrop",
             "recursive": true,
             "brandInference": "auto",
-            "enabled": true
+            "enabled": false,
+            "note": "Z:\\MediaDrop does not exist yet — create it or disable this source"
+        },
+        {
+            "id": "cs-cultural-images",
+            "path": "Z:\\GFD\\GFD Dev Projects\\CultureSherpa\\cultural_images",
+            "recursive": false,
+            "brand": "culturesherpa",
+            "category": "cultural",
+            "enabled": true,
+            "note": "~850 webp files (culture_card + culture_hero pairs). Confirmed present March 2026."
         },
         {
             "id": "cs-branded-previews",
-            "path": "z:\\GFD\\GFD Dev Projects\\SummitView\\analytics\\branded_previews",
+            "path": "Z:\\GFD\\GFD Dev Projects\\CultureSherpa\\branded_previews",
             "recursive": false,
             "brand": "culturesherpa",
             "category": "branded",
-            "enabled": true,
-            "note": "425 dual-logo branded JPEGs (GFD badge + CS wordmark) from brand_watermark.py pipeline, March 2026"
+            "enabled": false,
+            "note": "Branded preview JPEGs — enable after confirming branded_previews folder exists under CultureSherpa root"
         },
         {
             "id": "art-gfv",
@@ -23,7 +33,7 @@
             "brand": "gfv",
             "category": "gallery",
             "enabled": false,
-            "note": "Enable after confirming E: Art Drive directory structure"
+            "note": "~2,038 GFV gallery images on E: 4TB HDD. Enable after confirming E: drive is mounted and path exists."
         },
         {
             "id": "art-portfolio",
@@ -55,7 +65,7 @@
         "*.bak"
     ],
     "maxFileSizeMB": 50,
-    "manifestPath": "Z:\\MediaDrop\\.sync-manifest.json",
+    "manifestPath": "Z:\\GFD\\.sync-manifest.json",
     "cmsApiBase": "https://goodflippindesign.com/api/cms",
     "r2BucketName": "gfv-media",
     "ecosystemSites": [
