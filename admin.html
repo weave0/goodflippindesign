@@ -9976,7 +9976,20 @@
                 });
 
                 $('drip-start-date').addEventListener('change', updateDripSummary);
-                $('drip-campaign').addEventListener('change', () => { });
+                $('drip-campaign').addEventListener('change', updateDripSummary);
+
+                // ── Gallery panel button wiring ─────────────────────────────
+                $('open-gallery-modal')?.addEventListener('click', () => openGalleryModal());
+                $('save-gallery-btn')?.addEventListener('click', saveGallery);
+                $('gallery-add-btn')?.addEventListener('click', () => {
+                    const assetId = $('gallery-add-asset')?.value;
+                    if (!assetId) { toast('Select an asset first.', 'warn'); return; }
+                    addGalleryItem(state.selectedGalleryId, assetId);
+                });
+                $('gallery-filter-brand')?.addEventListener('change', async () => {
+                    await loadGalleries();
+                    renderGalleriesList();
+                });
 
                 document.querySelectorAll('[data-close-modal]').forEach((btn) => {
                     btn.addEventListener('click', () => closeModal(btn.getAttribute('data-close-modal')));
@@ -14206,7 +14219,7 @@
                     var status = ($('blog-post-status') || {}).value || 'draft';
 
                     if (!title.trim()) {
-                        alert('Title is required.');
+                        toast('Title is required.', 'error');
                         return;
                     }
                     if (!slug.trim()) slug = slugify(title);
@@ -14235,7 +14248,7 @@
                         await fetchBlogPosts();
                     } catch (err) {
                         console.error('[blog] save failed', err);
-                        alert('Save failed: ' + (err.message || 'Unknown error'));
+                        toast('Save failed: ' + (err.message || 'Unknown error'), 'error');
                     } finally {
                         if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = blogEditingId ? 'Save Changes' : 'Create Post'; }
                     }
@@ -14246,15 +14259,16 @@
                     if (!id) return;
                     var post = blogPosts.find(function (p) { return p.id === id; });
                     var title = post ? post.title : 'this post';
-                    if (!confirm('Permanently delete "' + title + '"? This cannot be undone.')) return;
-                    try {
-                        await blogFetch('/api/blog?id=' + encodeURIComponent(id), { method: 'DELETE' });
-                        closeModal('blog-post-modal');
-                        await fetchBlogPosts();
-                    } catch (err) {
-                        console.error('[blog] delete failed', err);
-                        alert('Delete failed: ' + (err.message || 'Unknown error'));
-                    }
+                    showConfirm('Permanently delete "' + title + '"? This cannot be undone.', async function () {
+                        try {
+                            await blogFetch('/api/blog?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                            closeModal('blog-post-modal');
+                            await fetchBlogPosts();
+                        } catch (err) {
+                            console.error('[blog] delete failed', err);
+                            toast('Delete failed: ' + (err.message || 'Unknown error'), 'error');
+                        }
+                    });
                 }
 
                 // ── event wiring ──────────────────────────────────────────
@@ -14476,14 +14490,15 @@
                 }
 
                 async function deleteComment(commentId) {
-                    if (!confirm('Delete this comment permanently?')) return;
-                    try {
-                        await blogFetch('/api/comments', { method: 'DELETE', body: { commentId: commentId } });
-                        toast('Comment deleted.', 'success');
-                        loadComments();
-                    } catch (e) {
-                        toast('Delete failed: ' + e.message, 'error');
-                    }
+                    showConfirm('Delete this comment permanently?', async function () {
+                        try {
+                            await blogFetch('/api/comments', { method: 'DELETE', body: { commentId: commentId } });
+                            toast('Comment deleted.', 'success');
+                            loadComments();
+                        } catch (e) {
+                            toast('Delete failed: ' + e.message, 'error');
+                        }
+                    });
                 }
 
                 var cmtRefBtn = $('blog-comments-refresh-btn');
