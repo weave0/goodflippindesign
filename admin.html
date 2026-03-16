@@ -11041,9 +11041,9 @@
                     detail: 'celebrations.astro:1817 has TODO: Upload to S3 via Lambda API. Line :2208 shows Add Family dialog coming soon. Core cultural data entry feature is incomplete.'
                 },
                 {
-                    id: 'cs-profile-password-stub', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
-                    title: 'CS: Password change shows alert() stub',
-                    detail: 'profile.astro:172 — onclick shows alert("Password change is not yet implemented. Contact support."). Users cannot self-serve a password reset.'
+                    id: 'cs-profile-password-stub', severity: 'done', brand: 'culturesherpa', area: 'CultureSherpa',
+                    title: 'CS profile: password change + settings toast fixed (2026-03-17)',
+                    detail: 'Password change now calls ${ADMIN_API}/api/user/password (Lambda backend, where /api/user/password route exists). "Settings Saved" alert() replaced with inline showToast(). admin_backend.py has PUT /api/user/password with bcrypt verify + DynamoDB update.'
                 },
                 {
                     id: 'cs-worklist-stub', severity: 'hygiene', brand: 'culturesherpa', area: 'CultureSherpa',
