@@ -9442,6 +9442,21 @@
                 renderEcosystemMap();
                 renderQuickLaunch();
                 initOpsBoard();
+                // Background pre-fetch CI status so Overview KPI is populated on load
+                // (public repo — no PAT needed; calls ecoFetchCIRuns which is hoisted)
+                (async function prefetchCIStatus() {
+                    const ciEl = $('kpi-ci-failures');
+                    if (!ciEl) return;
+                    let totalFail = 0;
+                    for (const r of ECO_REPOS) {
+                        const d = await ecoFetchCIRuns(r.owner, r.repo);
+                        if (d.runs) totalFail += d.runs.filter(x => x.conclusion === 'failure').length;
+                    }
+                    if (ciEl.textContent === '—') {
+                        ciEl.textContent = String(totalFail);
+                        ciEl.className = 'kpi-value ' + (totalFail === 0 ? 'emerald' : totalFail <= 2 ? 'gold' : 'rose');
+                    }
+                })();
             }
 
             // ── Command Palette ──────────────────────────────────────────────
@@ -10081,10 +10096,10 @@
                     el.textContent = online + '/' + sites.length;
                     el.className = 'kpi-value ' + (online === sites.length ? 'emerald' : online > 0 ? 'gold' : 'rose');
                 }
-                // CI failures — cleared until GitHub token is configured
+                // CI failures — pre-fetched in boot(); tooltip is for 0-state clarity
                 const ciEl = $('kpi-ci-failures');
                 if (ciEl && ciEl.textContent === '—') {
-                    ciEl.title = 'Connect a GitHub token in Settings to enable CI failure tracking';
+                    ciEl.title = 'Pre-fetching CI status from GitHub…';
                 }
             }
 
