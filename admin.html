@@ -11086,8 +11086,8 @@
                 },
                 {
                     id: 'sentry-ecosystem', severity: 'quality', brand: 'all', area: 'Ops',
-                    title: 'Sentry not yet on GFV, AIAimate, CultureSherpa, CitizenApproved',
-                    detail: 'Only GFD + GFV inline pages (via _worker.js injection) have Sentry. Standalone CF Pages sites and Vercel (AIAimate) need their own DSN + SDK setup.'
+                    title: 'Sentry DSN needed on AIAimate, CitizenApproved + CultureSherpa pending',
+                    detail: '⚠️ CultureSherpa: window.onerror → GA4 js_error added to BaseLayout.astro (2026-03-17). @sentry/astro ^10.27.0 installed; integration disabled (module specifier error). Set PUBLIC_SENTRY_DSN env var to activate sentry.client.config.js. AIAimate (Vercel) and CitizenApproved (Next.js) still need Sentry DSN + SDK setup.'
                 },
                 {
                     id: 'ga4-ecosystem', severity: 'done', brand: 'all', area: 'Ops',
