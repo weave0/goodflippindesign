@@ -11014,8 +11014,8 @@
                 },
                 {
                     id: 'social-artwork-r2', severity: 'quality', brand: 'gfv', area: 'Social Media',
-                    title: 'GFV gallery artwork not yet in R2 (CS complete + idempotent)',
-                    detail: '✅ 850 CultureSherpa cultural images in R2 (culturesherpa/cultural/*). ✅ Idempotency confirmed: re-run gives 0 uploads, 850 in registry. ⚠️ Assets are review_status=draft — bulk-approve in Storage panel to make thumbnails appear in asset picker. ⏳ 2,038 GFV gallery images still local on E:\\Art\\GFV Galleries — mount E: drive then enable art-gfv in sync-config.json and run: node scripts/sync-to-r2.js --source art-gfv'
+                    title: 'GFV art on E: drive — cataloged, selective import pending',
+                    detail: '✅ CS 1,283 assets in R2 (858 cultural + 425 branded), all approved. ✅ 859 phantom GFV D1 records purged (no R2 file, no thumbnail). ✅ 591 CS bad-category records cleaned. ✅ art-catalog.json generated: 15 GFV series, 250 social-ready images across Sheriff(60), Luminous(58), Posters(25), Mascot(14), Street Life(14), etc. ⏳ Next: review catalog, selectively import social-ready series via sync-to-r2.js. sync-config.json updated with correct E:\\art\\GFV path. Category inference fixed (no more filename-as-category).'
                 },
                 {
                     id: 'social-post-kits', severity: 'done', brand: 'all', area: 'Social Media',
@@ -11072,13 +11072,13 @@
                 {
                     id: 'gfv-stubs', severity: 'quality', brand: 'gfv', area: 'GFV',
                     title: 'goodflippinvibes.com stubs unaudited',
-                    detail: 'GFV has 2,038 images locally. Website stubs / incomplete components have not been formally catalogued. Needs walkthrough audit.'
+                    detail: 'E:\\art\\GFV has 488 files (395 images, 24 videos, 15 audio) across 15 series — cataloged in art-catalog.json. Website stubs / incomplete components still need walkthrough audit.'
                 },
                 // ── AIAimate ──────────────────────────────────────────────────
                 {
                     id: 'aiaimate-stubs', severity: 'quality', brand: 'aiaimate', area: 'AIAimate',
                     title: 'aiaimate.com stubs unaudited',
-                    detail: 'AIAimate has 41 images. No formal stub inventory. Needs walkthrough.'
+                    detail: 'E:\\art\\AIAIMate has 48 files (40 images, 1 video, 84MB). No formal stub inventory. Needs walkthrough.'
                 },
                 // ── Admin Portal ───────────────────────────────────────────────
                 {

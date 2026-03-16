@@ -96,6 +96,8 @@ function inferBrand(relativePath, sourceConfig) {
 function inferCategory(relativePath, sourceConfig) {
   if (sourceConfig.category) return sourceConfig.category;
   const parts = relativePath.split(path.sep);
+  // If the file is at root level (no subdirectory), use 'general' — never use filename as category
+  if (parts.length <= 1) return 'general';
   // Strip descriptions after " — "
   const folder = parts[0].split(' — ')[0].trim();
   return folder.toLowerCase().replace(/\s+/g, '-');

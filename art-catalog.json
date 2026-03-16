@@ -1,0 +1,528 @@
+{
+  "generatedAt": "2026-03-16T18:44:25.226Z",
+  "sources": [
+    {
+      "brand": "gfv",
+      "root": "E:\\art\\GFV",
+      "description": "Good Flippin Vibes — original AI art series",
+      "available": true,
+      "totalImages": 395,
+      "totalVideos": 24,
+      "totalSizeMB": 1119.1,
+      "seriesCount": 27,
+      "series": [
+        {
+          "name": "Sheriff",
+          "path": "E:\\art\\GFV\\Sheriff",
+          "images": 60,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 116.2,
+          "sampleFiles": [
+            "sheriffbt.png",
+            "sheriffdisco1.png",
+            "sheriffdisco2.png"
+          ],
+          "social": true,
+          "gallery": true,
+          "description": "60 character illustrations — social-ready"
+        },
+        {
+          "name": "art/luminous",
+          "path": "E:\\art\\GFV\\art\\luminous",
+          "images": 58,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 5.9,
+          "sampleFiles": [
+            "luminous-badge-community.webp",
+            "luminous-badge-first-light.webp",
+            "luminous-badge-streak.webp"
+          ],
+          "social": true,
+          "gallery": true,
+          "description": "Luminous neon/glow art — brand signature"
+        },
+        {
+          "name": "Posters",
+          "path": "E:\\art\\GFV\\Posters",
+          "images": 25,
+          "videos": 1,
+          "audio": 0,
+          "totalSizeMB": 69,
+          "sampleFiles": [
+            "WutheringGFV.png",
+            "Cartoon Cat Changes World.png",
+            "ALifeAquatic.png"
+          ],
+          "social": true,
+          "gallery": true,
+          "description": "Movie/show poster art"
+        },
+        {
+          "name": "80s Ideas That Didn't",
+          "path": "E:\\art\\GFV\\80s Ideas That Didn't",
+          "images": 17,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 46.9,
+          "sampleFiles": [
+            "Greed Is Good as Life Philosphy.png",
+            "Leg Warmers in Public.png",
+            "Parachute Pants.png"
+          ],
+          "social": true,
+          "gallery": false,
+          "description": "80s retro concept art"
+        },
+        {
+          "name": "art/mascot",
+          "path": "E:\\art\\GFV\\art\\mascot",
+          "images": 14,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 15.7,
+          "sampleFiles": [
+            "community-circle.png",
+            "community-circle.webp",
+            "healing-garden.png"
+          ],
+          "social": true,
+          "gallery": true,
+          "description": "Brand mascot variations"
+        },
+        {
+          "name": "Street Life",
+          "path": "E:\\art\\GFV\\Street Life",
+          "images": 14,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 21.3,
+          "sampleFiles": [
+            "Breakfast Thug Pose.png",
+            "Baby-Caring Thug.png",
+            "Plane Thug Pose.png"
+          ],
+          "social": true,
+          "gallery": true,
+          "description": "Street culture illustrations"
+        },
+        {
+          "name": "Oscars",
+          "path": "E:\\art\\GFV\\Oscars",
+          "images": 10,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 25,
+          "sampleFiles": [
+            "Now Streaming... The Oscars.png",
+            "Camp But Make It Award Season..png",
+            "Best Visitor From Another World.png"
+          ],
+          "social": true,
+          "gallery": false,
+          "description": "Oscar-themed art — seasonal"
+        },
+        {
+          "name": "Zebra",
+          "path": "E:\\art\\GFV\\Zebra",
+          "images": 10,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 22.2,
+          "sampleFiles": [
+            "Zebra.png",
+            "cool_zebra_vector_trace.svg",
+            "ChatGPT Image Mar 8, 2026, 09_07_04 PM.png"
+          ],
+          "social": true,
+          "gallery": true,
+          "description": "Zebra character art"
+        },
+        {
+          "name": "PIckleFish",
+          "path": "E:\\art\\GFV\\PIckleFish",
+          "images": 9,
+          "videos": 5,
+          "audio": 2,
+          "totalSizeMB": 59.3,
+          "sampleFiles": [
+            "ChatGPT Image Mar 16, 2026, 09_26_29 AM.png",
+            "picklefish2.1.png",
+            "picklefish2.png"
+          ],
+          "social": true,
+          "gallery": false,
+          "description": "PickleFish character art with video"
+        },
+        {
+          "name": "art/abstract",
+          "path": "E:\\art\\GFV\\art\\abstract",
+          "images": 8,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 1,
+          "sampleFiles": [
+            "first-light.webp",
+            "found-family.webp",
+            "held.webp"
+          ],
+          "social": true,
+          "gallery": true,
+          "description": "Abstract art — good for backgrounds"
+        },
+        {
+          "name": "art/comedy",
+          "path": "E:\\art\\GFV\\art\\comedy",
+          "images": 8,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 1.4,
+          "sampleFiles": [
+            "before-after-coffee.webp",
+            "brain-lab.webp",
+            "emotional-support-snacks.webp"
+          ],
+          "social": true,
+          "gallery": false,
+          "description": "Comedy-themed art"
+        },
+        {
+          "name": "Chill Bee's",
+          "path": "E:\\art\\GFV\\Chill Bee's",
+          "images": 7,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 18.9,
+          "sampleFiles": [
+            "Chill Bee's.png",
+            "ChatGPT Image Mar 15, 2026, 03_36_57 PM.png",
+            "Chill Bee's Insides.png"
+          ],
+          "social": true,
+          "gallery": false,
+          "description": "7 chill bee illustrations"
+        },
+        {
+          "name": "Paddy Dill",
+          "path": "E:\\art\\GFV\\Paddy Dill",
+          "images": 4,
+          "videos": 1,
+          "audio": 8,
+          "totalSizeMB": 16,
+          "sampleFiles": [
+            "PADDYDILL.png",
+            "paddycool.png",
+            "paddy-black.png"
+          ],
+          "social": true,
+          "gallery": true,
+          "description": "Character series with audio/video"
+        },
+        {
+          "name": "Flippin Rocky",
+          "path": "E:\\art\\GFV\\Flippin Rocky",
+          "images": 3,
+          "videos": 5,
+          "audio": 0,
+          "totalSizeMB": 22.5,
+          "sampleFiles": [
+            "2cd788c8-0858-41d3-bec6-f605ab15b686.png",
+            "ChatGPT Image Feb 26, 2026, 09_38_56 PM.png",
+            "ChatGPT Image Feb 26, 2026, 09_25_28 PM.png"
+          ],
+          "social": true,
+          "gallery": false,
+          "description": "Rocky-themed art with video"
+        },
+        {
+          "name": "Wii Todd",
+          "path": "E:\\art\\GFV\\Wii Todd",
+          "images": 3,
+          "videos": 5,
+          "audio": 2,
+          "totalSizeMB": 27.7,
+          "sampleFiles": [
+            "Wii Todd Hero.png",
+            "ChatGPT Image Mar 4, 2026, 09_47_49 PM.png",
+            "Wii Todd Hero-Vector.png"
+          ],
+          "social": true,
+          "gallery": false,
+          "description": "Character series with video/audio"
+        },
+        {
+          "name": "(root)",
+          "path": "E:\\art\\GFV",
+          "images": 57,
+          "videos": 1,
+          "audio": 0,
+          "totalSizeMB": 460.2,
+          "sampleFiles": [
+            "Gemini_Generated_Image_vmyh58vmyh58vmyh (1).png",
+            "Gemini_Generated_Image_vmyh58vmyh58vmyh.png",
+            "Gemini_Generated_Image_1qw0br1qw0br1qw0.png"
+          ],
+          "social": false,
+          "gallery": false,
+          "description": "Root-level files"
+        },
+        {
+          "name": "art/video-assets",
+          "path": "E:\\art\\GFV\\art\\video-assets",
+          "images": 22,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 42.2,
+          "sampleFiles": [
+            "distraction-1-something-shiny_20251206_233512.png",
+            "distraction-2-snack-break_20251206_233550.png",
+            "distraction-3-accidental-nap_20251206_233653.png"
+          ],
+          "social": false,
+          "gallery": false,
+          "description": "Video production assets — not standalone"
+        },
+        {
+          "name": "80s Ideas That Didn't/Posted",
+          "path": "E:\\art\\GFV\\80s Ideas That Didn't\\Posted",
+          "images": 17,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 49.3,
+          "sampleFiles": [
+            "Tanning Bed Self Care.png",
+            "Waterbeds.png",
+            "Trap Music.png"
+          ],
+          "social": null,
+          "gallery": null,
+          "description": ""
+        },
+        {
+          "name": "Paddy Dill/Portrait",
+          "path": "E:\\art\\GFV\\Paddy Dill\\Portrait",
+          "images": 12,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 19.7,
+          "sampleFiles": [
+            "XQW2E.jpg",
+            "portrait.png",
+            "qGt2s.jpg"
+          ],
+          "social": null,
+          "gallery": null,
+          "description": ""
+        },
+        {
+          "name": "art",
+          "path": "E:\\art\\GFV\\art",
+          "images": 11,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 0,
+          "sampleFiles": [
+            "abstract-breath.svg",
+            "abstract-connection.svg",
+            "abstract-creativity.svg"
+          ],
+          "social": null,
+          "gallery": null,
+          "description": ""
+        },
+        {
+          "name": "art/artts",
+          "path": "E:\\art\\GFV\\art\\artts",
+          "images": 8,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 13,
+          "sampleFiles": [
+            "5125758a-670a-4cbd-9e7f-8d416041f2e3.png",
+            "ChatGPT Image Feb 15, 2026, 12_01_18 AM.png",
+            "ChatGPT Image Feb 15, 2026, 12_02_22 AM.png"
+          ],
+          "social": false,
+          "gallery": false,
+          "description": "Unclear purpose — review manually"
+        },
+        {
+          "name": "Irivine",
+          "path": "E:\\art\\GFV\\Irivine",
+          "images": 4,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 9.3,
+          "sampleFiles": [
+            "Pork.png",
+            "ChatGPT Image Feb 12, 2026, 10_22_25 AM.png",
+            "ChatGPT Image Feb 12, 2026, 10_22_36 AM.png"
+          ],
+          "social": false,
+          "gallery": false,
+          "description": "4 images — assess for relevance"
+        },
+        {
+          "name": "Paddy Dill/Social Content",
+          "path": "E:\\art\\GFV\\Paddy Dill\\Social Content",
+          "images": 4,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 9.2,
+          "sampleFiles": [
+            "shot_02_retro_frame_16x9.png",
+            "ChatGPT Image Feb 22, 2026, 10_54_03 PM.png",
+            "ChatGPT Image Feb 22, 2026, 10_55_12 PM.png"
+          ],
+          "social": null,
+          "gallery": null,
+          "description": ""
+        },
+        {
+          "name": "Paddy Dill/Stories",
+          "path": "E:\\art\\GFV\\Paddy Dill\\Stories",
+          "images": 4,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 13.6,
+          "sampleFiles": [
+            "hero poster.png",
+            "paddonthebeat.png",
+            "PaddyDill1.png"
+          ],
+          "social": null,
+          "gallery": null,
+          "description": ""
+        },
+        {
+          "name": "Right's Dispute",
+          "path": "E:\\art\\GFV\\Right's Dispute",
+          "images": 4,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 1.7,
+          "sampleFiles": [
+            "Files and dates.png",
+            "Files and dates2.png",
+            "files-dates-visual.png"
+          ],
+          "social": false,
+          "gallery": false,
+          "description": "4 small images — likely archival"
+        },
+        {
+          "name": "Paddy Dill/SL Philosophy",
+          "path": "E:\\art\\GFV\\Paddy Dill\\SL Philosophy",
+          "images": 2,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 5.3,
+          "sampleFiles": [
+            "ChatGPT Image Mar 1, 2026, 08_38_41 PM.png",
+            "ChatGPT Image Mar 1, 2026, 08_50_56 PM.png"
+          ],
+          "social": null,
+          "gallery": null,
+          "description": ""
+        },
+        {
+          "name": "Paddy Dill/videos",
+          "path": "E:\\art\\GFV\\Paddy Dill\\videos",
+          "images": 0,
+          "videos": 6,
+          "audio": 0,
+          "totalSizeMB": 26.6,
+          "sampleFiles": [],
+          "social": null,
+          "gallery": null,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "brand": "gfd",
+      "root": "E:\\art\\GFD",
+      "description": "Good Flippin Design — consultancy brand assets",
+      "available": true,
+      "totalImages": 30,
+      "totalVideos": 0,
+      "totalSizeMB": 29.5,
+      "seriesCount": 1,
+      "series": [
+        {
+          "name": "(root)",
+          "path": "E:\\art\\GFD",
+          "images": 30,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 29.5,
+          "sampleFiles": [
+            "apple-touch-icon.png",
+            "favicon-128x128.png",
+            "favicon-16x16.png"
+          ],
+          "social": false,
+          "gallery": false,
+          "description": "Root-level files"
+        }
+      ]
+    },
+    {
+      "brand": "aiaimate",
+      "root": "E:\\art\\AIAIMate",
+      "description": "AI Aimate — brand assets",
+      "available": true,
+      "totalImages": 40,
+      "totalVideos": 1,
+      "totalSizeMB": 78.8,
+      "seriesCount": 1,
+      "series": [
+        {
+          "name": "(root)",
+          "path": "E:\\art\\AIAIMate",
+          "images": 40,
+          "videos": 1,
+          "audio": 0,
+          "totalSizeMB": 78.8,
+          "sampleFiles": [
+            "AIAImatey.png",
+            "ChatGPT Image Feb 14, 2026, 09_31_45 PM.png",
+            "ChatGPT Image Feb 14, 2026, 09_34_00 PM.png"
+          ],
+          "social": false,
+          "gallery": false,
+          "description": "Root-level files"
+        }
+      ]
+    },
+    {
+      "brand": "citizenapproved",
+      "root": "E:\\art\\CitizenApproved",
+      "description": "CitizenApproved — brand assets",
+      "available": true,
+      "totalImages": 18,
+      "totalVideos": 0,
+      "totalSizeMB": 3.4,
+      "seriesCount": 1,
+      "series": [
+        {
+          "name": "(root)",
+          "path": "E:\\art\\CitizenApproved",
+          "images": 18,
+          "videos": 0,
+          "audio": 0,
+          "totalSizeMB": 3.4,
+          "sampleFiles": [
+            "citizenapprovedss.png",
+            "CA Logo.png",
+            "ca-logo.png"
+          ],
+          "social": false,
+          "gallery": false,
+          "description": "Root-level files"
+        }
+      ]
+    }
+  ]
+}

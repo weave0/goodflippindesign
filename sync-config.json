@@ -28,12 +28,11 @@
         },
         {
             "id": "art-gfv",
-            "path": "E:\\Art\\GFV Galleries",
+            "path": "E:\\art\\GFV",
             "recursive": true,
             "brand": "gfv",
-            "category": "gallery",
             "enabled": false,
-            "note": "~2,038 GFV gallery images on E: 4TB HDD. Enable after confirming E: drive is mounted and path exists."
+            "note": "488 files across 15 art series. Use catalog-art.js to review before enabling. Category inferred from subfolder name."
         },
         {
             "id": "art-portfolio",
