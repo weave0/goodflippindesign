@@ -11160,9 +11160,9 @@
                     detail: 'All API endpoints in celebrations.py, cultural_images.py, s3_upload.py already had @require_roles("admin"). Fixed critical bypass: X-User-Id header now requires matching X-Internal-Secret env var — external callers can no longer spoof admin identity. RBAC_DISABLED still available for local dev (not present in prod).'
                 },
                 {
-                    id: 'cs-coming-soon-tabs', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
-                    title: 'CS: ConnectTab + ResearchTab + CultureRenderer show "coming soon"',
-                    detail: 'ConnectTab.astro:90, ResearchTab.astro:180, CultureRenderer.astro:451 display placeholder text to visitors. Implement or hide until content is ready.'
+                    id: 'cs-coming-soon-tabs', severity: 'done', brand: 'culturesherpa', area: 'CultureSherpa',
+                    title: 'CS: Empty-profile state improved + orphaned tabs clarified (2026-03-17)',
+                    detail: 'CultureRenderer.astro:451 empty state improved: removed generic heading, added region+languages meta line, added "Help expand this profile" → /contribute CTA and "← Back to Explore" link. fallbackSummary still shown when available. ConnectTab.astro + ResearchTab.astro are orphaned components (not imported anywhere in site) — dead code, not user-visible.'
                 },
                 {
                     id: 'cs-celebrations-stubs', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
