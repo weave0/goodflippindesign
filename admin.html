@@ -6401,6 +6401,10 @@
                                 <circle cx="8" cy="8" r="2.5" />
                                 <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" />
                             </svg></span><span class="nav-label">Settings</span></button>
+                    <button class="nav-btn" data-view="docs"><span class="nav-num">25</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M2 1.5h5a1 1 0 0 1 1 1v12l-3-2-3 2V2.5a1 1 0 0 1 1-1Z" />
+                                <path d="M8 2.5h5a1 1 0 0 1 1 1v12l-3-2-3 2V2.5Z" />
+                            </svg></span><span class="nav-label">Documentation</span></button>
 
                 </nav>
 
@@ -8286,11 +8290,111 @@
                     </article>
                 </section>
 
-            </main>
-        </div>
-    </div>
+                <!-- ─── Documentation Hub ─── -->
+                <section class="view" id="view-docs">
+                    <div class="section-head">
+                        <h2 class="section-title">Documentation Hub</h2>
+                    </div>
+                    <p class="subheading mb-08">Central index of all project documentation, SOPs, and architecture records.</p>
 
-    <!-- Blog Post Create / Edit Modal -->
+                    <article class="panel mb-085">
+                        <h3 style="font-size:0.85rem;margin-bottom:0.75rem;color:var(--text)">Architecture &amp; Strategy</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0.6rem">
+                            <a href="gfd_master_charter.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Master Charter</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">5-phase roadmap, workstreams A–G, module map</div>
+                            </a>
+                            <a href="ADR.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Architecture Decision Records</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">15 ADRs — tech choices, trade-offs, rationale</div>
+                            </a>
+                            <a href="ROADMAP.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Roadmap</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">Priorities and upcoming milestones</div>
+                            </a>
+                            <a href="ECOSYSTEM_CMS_ROADMAP.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Ecosystem CMS Roadmap</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">Cross-brand CMS strategy</div>
+                            </a>
+                        </div>
+                    </article>
+
+                    <article class="panel mb-085">
+                        <h3 style="font-size:0.85rem;margin-bottom:0.75rem;color:var(--text)">Operations &amp; SOPs</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0.6rem">
+                            <a href="ASSET_INTAKE_SOP.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Asset Intake SOP</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">Naming convention, drop directory, sync pipeline</div>
+                            </a>
+                            <a href="DEVELOPER_GUIDE.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Developer Guide</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">Setup, toolchain, testing, deployment</div>
+                            </a>
+                            <a href="CONTRIBUTING.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Contributing</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">PR workflow, code standards, review process</div>
+                            </a>
+                            <a href="PROJECT_INQUIRY_FLOW.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Project Inquiry Flow</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">Contact → budget tier → scheduling pipeline</div>
+                            </a>
+                        </div>
+                    </article>
+
+                    <article class="panel mb-085">
+                        <h3 style="font-size:0.85rem;margin-bottom:0.75rem;color:var(--text)">Platform &amp; Media</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0.6rem">
+                            <a href="MEDIA_PLATFORM_ARCHITECTURE.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Media Platform Architecture</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">R2 + D1 asset registry design</div>
+                            </a>
+                            <a href="MEDIA_PLATFORM_VISION.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Media Platform Vision</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">Long-term media pipeline direction</div>
+                            </a>
+                            <a href="MEDIA_PIPELINE_AUDIT.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Media Pipeline Audit</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">Current pipeline status and gaps</div>
+                            </a>
+                            <a href="ANIMATION_PIPELINE.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Animation Pipeline</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">GPU-only animation standards</div>
+                            </a>
+                        </div>
+                    </article>
+
+                    <article class="panel mb-085">
+                        <h3 style="font-size:0.85rem;margin-bottom:0.75rem;color:var(--text)">Status &amp; Audits</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0.6rem">
+                            <a href="STATUS.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Status</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">Current project status snapshot</div>
+                            </a>
+                            <a href="DASHBOARD.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Dashboard</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">KPIs, metrics, and gap tracker</div>
+                            </a>
+                            <a href="TECHNICAL_AUDIT_2026-02-17.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Technical Audit</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">Feb 2026 infrastructure audit</div>
+                            </a>
+                            <a href="STORAGE_AUDIT_2026-03-08.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Storage Audit</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">Mar 2026 R2/D1 storage audit</div>
+                            </a>
+                            <a href="SECURITY.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Security</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">Security policy and CSP approach</div>
+                            </a>
+                            <a href="BRAND_PROMPT_PACK.md" target="_blank" rel="noopener" class="doc-link-card" style="display:block;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:8px;text-decoration:none;color:var(--text);transition:border-color 0.2s ease">
+                                <strong style="font-size:0.82rem">Brand Prompt Pack</strong>
+                                <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">AI prompt templates for brand consistency</div>
+                            </a>
+                        </div>
+                    </article>
+                </section>
+
+            </main>
     <div class="modal-wrap" id="blog-post-modal">
         <div class="modal modal-wide blog-editor-modal">
 
@@ -11311,6 +11415,32 @@
                     title: 'Server Audit Log viewer in Overview (2026-03-14)',
                     detail: 'Overview panel now renders last 15 cms_audit_log rows (action, target, user, time). Refresh button calls /api/cms/stats. /api/cms/stats augmented with characters count, donations totals, open ops count, audit total, and recentAudit rows.'
                 },
+                // ── Phase 4 gaps (identified 2026-03-17) ──────────────────────
+                {
+                    id: 'characters-panel-shell', severity: 'quality', brand: 'gfd', area: 'Admin',
+                    title: 'Characters panel is a shell — needs full CRUD UI',
+                    detail: 'Characters button (nav #19) loads data from D1 cms_characters but the view section has minimal rendering. Needs full card grid, edit modal, and pose/milestone inline editing to match other panels.'
+                },
+                {
+                    id: 'community-donate-tests', severity: 'quality', brand: 'gfd', area: 'Ops',
+                    title: 'community-portal.html and donate.html have 0% test coverage',
+                    detail: 'Charter workstream E requires automated test suites for all pages. community-portal.html (~4,045 lines) and donate.html (~1,000 lines) have no Puppeteer tests. Need a11y + responsive + form-flow suites matching the index.html pattern.'
+                },
+                {
+                    id: 'asset-intake-sop', severity: 'done', brand: 'all', area: 'Ops',
+                    title: 'ASSET_INTAKE_SOP.md created (2026-03-17)',
+                    detail: 'Workstream A deliverable: naming convention (brand-category-descriptor.ext), E:\\art drop directory standard (16 brand folders, 2,232 files), sync-config.json pipeline docs, R2 bucket structure, D1 registration schema, step-by-step for new series/brand.'
+                },
+                {
+                    id: 'adr-log', severity: 'done', brand: 'all', area: 'Ops',
+                    title: 'ADR.md created — 15 architecture decision records (2026-03-17)',
+                    detail: 'Workstream G deliverable: ADR-001 through ADR-015 covering vanilla stack, Cloudflare edge-first, D1, R2, Clerk, Stripe, Formspree, window.ENV injection, test strategy, WCAG, CSP, monorepo, graceful degradation, GPU animation policy.'
+                },
+                {
+                    id: 'docs-hub-panel', severity: 'done', brand: 'gfd', area: 'Admin',
+                    title: 'Documentation Hub panel added to admin (view #25) (2026-03-17)',
+                    detail: 'Charter §10 essential module — was the only missing one. Nav button #25, view-docs section with 4 grouped panels: Architecture & Strategy (charter, ADR, roadmaps), Operations & SOPs (intake SOP, dev guide, contributing, inquiry flow), Platform & Media (architecture, vision, pipeline, animation), Status & Audits (status, dashboard, audits, security, brand pack). All links open in new tab with rel=noopener.'
+                },
             ];
 
             function renderBrandHealth() {
@@ -12206,6 +12336,7 @@
                 'projects': { name: 'Projects', title: 'Projects', sub: 'All ecosystem repositories \u2014 CI status, last commit, open PRs, and branch protection.' },
                 'deployments': { name: 'Deployments', title: 'Deployments', sub: 'Recent deployments across all ecosystem repos \u2014 workflow runs, success rates, and timing.' },
                 'settings': { name: 'Settings', title: 'Settings & Integrations', sub: 'Integration health, environment variable status, and configuration overview.' },
+                'docs': { name: 'Documentation', title: 'Documentation Hub', sub: 'Central index of all project documentation, SOPs, and architecture records.' },
             };
 
             function updatePageContext(view) {
