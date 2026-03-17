@@ -11,14 +11,14 @@
 
 ## 1. Pipeline Inventory
 
-| Pipeline | Location | Entry Points | Status |
-| -------- | -------- | ------------ | ------ |
-| AI Video Generation (T2V/I2V) | `ThyOwn/` | `video_studio.py`, `studio.py`, `studio_fast.py`, `video_cli.py` | ⚠️ Functional but fragmented |
-| Character Animation | `ThyOwn/animate_character.py` + Sheriff scripts | Multiple one-off scripts | ❌ Fragile — see §4 |
-| Audio / Music Generation | `ThyOwn/audio_studio.py`, `desktop_audio_studio.py`, `generate_gfv_track.py` | `START_AUDIO_STUDIO.ps1` | ✅ Live (last run: 2026-03-16) |
-| Documentary Production | `SummitView/` | `docs/QUICKSTART.md` | ✅ Production-ready |
-| GFV Art Generation | `ThyOwn/generate.py`, DALL-E 3 | `batch_generate.py` or similar | ✅ Working — 216 assets in gallery manifest |
-| Image → WebP / Asset Processing | `GFD/convert-to-webp.js` | `node convert-to-webp.js` | ✅ Working |
+| Pipeline                        | Location                                                                     | Entry Points                                                     | Status                                      |
+| ------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------- |
+| AI Video Generation (T2V/I2V)   | `ThyOwn/`                                                                    | `video_studio.py`, `studio.py`, `studio_fast.py`, `video_cli.py` | ⚠️ Functional but fragmented                |
+| Character Animation             | `ThyOwn/animate_character.py` + Sheriff scripts                              | Multiple one-off scripts                                         | ❌ Fragile — see §4                         |
+| Audio / Music Generation        | `ThyOwn/audio_studio.py`, `desktop_audio_studio.py`, `generate_gfv_track.py` | `START_AUDIO_STUDIO.ps1`                                         | ✅ Live (last run: 2026-03-16)              |
+| Documentary Production          | `SummitView/`                                                                | `docs/QUICKSTART.md`                                             | ✅ Production-ready                         |
+| GFV Art Generation              | `ThyOwn/generate.py`, DALL-E 3                                               | `batch_generate.py` or similar                                   | ✅ Working — 216 assets in gallery manifest |
+| Image → WebP / Asset Processing | `GFD/convert-to-webp.js`                                                     | `node convert-to-webp.js`                                        | ✅ Working                                  |
 
 ---
 
@@ -92,16 +92,16 @@
 
 ## 3. Failure Points Diagnosed
 
-| Failure | Pipeline | Root Cause | Severity |
-| ------- | -------- | ---------- | -------- |
-| **No multi-image character consistency** | T2V/I2V | SVD only constrains first frame; no IP-Adapter integration | Critical |
-| **No undo/save/load/checkpointing in video studio** | T2V/I2V | Gradio stateless; no session persistence layer | High |
-| **No preview-before-generate workflow** | T2V/I2V | Users commit to 5-min waits without seeing thumbnail | High |
-| **Fragmented entry points** | T2V/I2V | 6+ scripts; unclear canonical entry | Medium |
-| **Character animation requires AI per-clip** | Character | Source assets are flat PNGs; no rig | Critical |
-| **Gallery manifest sync is manual** | Art gen | No automation hook from generation → JSON update | Medium |
-| **OPENAI_API_KEY not in CF Pages env** | Art gen / SummitView | Blocks DALL-E generation from admin Content Studio | High |
-| **venv_cuda may be redundant** | All | Two venvs (5.62 GB + 5.13 GB) for same project; unclear distinction | Low |
+| Failure                                             | Pipeline             | Root Cause                                                          | Severity |
+| --------------------------------------------------- | -------------------- | ------------------------------------------------------------------- | -------- |
+| **No multi-image character consistency**            | T2V/I2V              | SVD only constrains first frame; no IP-Adapter integration          | Critical |
+| **No undo/save/load/checkpointing in video studio** | T2V/I2V              | Gradio stateless; no session persistence layer                      | High     |
+| **No preview-before-generate workflow**             | T2V/I2V              | Users commit to 5-min waits without seeing thumbnail                | High     |
+| **Fragmented entry points**                         | T2V/I2V              | 6+ scripts; unclear canonical entry                                 | Medium   |
+| **Character animation requires AI per-clip**        | Character            | Source assets are flat PNGs; no rig                                 | Critical |
+| **Gallery manifest sync is manual**                 | Art gen              | No automation hook from generation → JSON update                    | Medium   |
+| **OPENAI_API_KEY not in CF Pages env**              | Art gen / SummitView | Blocks DALL-E generation from admin Content Studio                  | High     |
+| **venv_cuda may be redundant**                      | All                  | Two venvs (5.62 GB + 5.13 GB) for same project; unclear distinction | Low      |
 
 ---
 
@@ -112,6 +112,7 @@
 ### Decision: Simplified 2D Production Character (Option B)
 
 **Rationale**: Detailed rendered PNG assets cannot be consistently animated without regenerating each frame. A production character must be:
+
 - Layered (separate body parts as distinct layers)
 - Stylized (thick outlines, flat fills, limited palette)
 - Rigged (Spine2D for games/video; Rive for web embeds)
@@ -148,13 +149,13 @@ This is a **design-first task** — no code until the redesigned art exists. Est
 
 For each content type, the recommended minimum-friction path:
 
-| Content Need | Tool | Steps | Cost |
-| ------------ | ---- | ----- | ---- |
-| Static art (social, gallery) | DALL-E 3 via `generate.py` | Prompt → generate → convert-to-webp → R2 upload | ~$0.04/image |
-| Documentary episode | SummitView pipeline | `docs/QUICKSTART.md` → 55 min | $1.39/episode |
-| Background music / GFV tracks | Audio Studio (`START_AUDIO_STUDIO.ps1`) | Prompt → generate → `output/` | Local (no API cost) |
-| Short video clip (social content) | `studio_fast.py` | Template → generate (5 min) → `output/` | Local (GPU) |
-| GFD character animation (web) | Rive (after redesign) | `.riv` → `<canvas>` embed | $0 |
+| Content Need                      | Tool                                    | Steps                                           | Cost                |
+| --------------------------------- | --------------------------------------- | ----------------------------------------------- | ------------------- |
+| Static art (social, gallery)      | DALL-E 3 via `generate.py`              | Prompt → generate → convert-to-webp → R2 upload | ~$0.04/image        |
+| Documentary episode               | SummitView pipeline                     | `docs/QUICKSTART.md` → 55 min                   | $1.39/episode       |
+| Background music / GFV tracks     | Audio Studio (`START_AUDIO_STUDIO.ps1`) | Prompt → generate → `output/`                   | Local (no API cost) |
+| Short video clip (social content) | `studio_fast.py`                        | Template → generate (5 min) → `output/`         | Local (GPU)         |
+| GFD character animation (web)     | Rive (after redesign)                   | `.riv` → `<canvas>` embed                       | $0                  |
 
 **What to avoid**: Running `video_studio.py` or `demo_video_generation.py` — use `studio.py` (full UI) or `studio_fast.py` (drafts) instead.
 
@@ -175,14 +176,14 @@ For each content type, the recommended minimum-friction path:
 
 For video clips intended for use with audio (SummitView narration, GFV tracks):
 
-| Parameter | Recommended | Why |
-| --------- | ----------- | --- |
-| FPS | 24 | Standard narrative; matches TTS pacing |
-| Duration per clip | 4–8 seconds | Matches one sentence of narration |
-| Resolution | 1280×720 | Balance quality vs generation time |
-| Aspect ratio | 16:9 | Social + web compatible |
-| Audio sync method | moviepy `VideoFileClip.set_audio()` | Tried in SummitView; proven reliable |
-| Transition | `crossfadein(0.5)` | Smooth between AI-generated frames |
+| Parameter         | Recommended                         | Why                                    |
+| ----------------- | ----------------------------------- | -------------------------------------- |
+| FPS               | 24                                  | Standard narrative; matches TTS pacing |
+| Duration per clip | 4–8 seconds                         | Matches one sentence of narration      |
+| Resolution        | 1280×720                            | Balance quality vs generation time     |
+| Aspect ratio      | 16:9                                | Social + web compatible                |
+| Audio sync method | moviepy `VideoFileClip.set_audio()` | Tried in SummitView; proven reliable   |
+| Transition        | `crossfadein(0.5)`                  | Smooth between AI-generated frames     |
 
 **Known sync issue**: SVD-XT generates 25 frames regardless of duration setting — crop or pad to target duration after generation, not before.
 
@@ -190,15 +191,15 @@ For video clips intended for use with audio (SummitView narration, GFV tracks):
 
 ## 8. Recommended Next Actions
 
-| Priority | Action | Effort | Blocks |
-| -------- | ------ | ------ | ------ |
-| 🔴 Critical | Redesign Sheriff as simplified 2D character | 2–4 hrs design | Character animation sovereignty |
-| 🔴 Critical | Set `OPENAI_API_KEY` in CF Pages env vars | 5 min | Admin Content Studio DALL-E gen |
-| 🟠 High | Retire/archive legacy video scripts | 30 min | Cognitive overhead / wrong entry points |
-| 🟠 High | Add preview-before-generate to `studio.py` | 2–4 hrs dev | Reduces wasted generation runs |
-| 🟡 Medium | Consolidate `.venv` and `.venv_cuda` in SummitView | 1 hr | Reclaims 5.13 GB |
-| 🟡 Medium | Archive SVD-XT models to E: drive | 30 min | Reclaims 17.75 GB on Z: |
-| 🟢 Low | Automate gallery manifest sync post-generation | 2 hrs dev | Reduces manual steps |
+| Priority    | Action                                             | Effort         | Blocks                                  |
+| ----------- | -------------------------------------------------- | -------------- | --------------------------------------- |
+| 🔴 Critical | Redesign Sheriff as simplified 2D character        | 2–4 hrs design | Character animation sovereignty         |
+| 🔴 Critical | Set `OPENAI_API_KEY` in CF Pages env vars          | 5 min          | Admin Content Studio DALL-E gen         |
+| 🟠 High     | Retire/archive legacy video scripts                | 30 min         | Cognitive overhead / wrong entry points |
+| 🟠 High     | Add preview-before-generate to `studio.py`         | 2–4 hrs dev    | Reduces wasted generation runs          |
+| 🟡 Medium   | Consolidate `.venv` and `.venv_cuda` in SummitView | 1 hr           | Reclaims 5.13 GB                        |
+| 🟡 Medium   | Archive SVD-XT models to E: drive                  | 30 min         | Reclaims 17.75 GB on Z:                 |
+| 🟢 Low      | Automate gallery manifest sync post-generation     | 2 hrs dev      | Reduces manual steps                    |
 
 ---
 

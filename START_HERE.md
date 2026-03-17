@@ -64,7 +64,7 @@ Full detail: [STORAGE_AUDIT_2026-03-08.md](STORAGE_AUDIT_2026-03-08.md) → Phas
 
 ## 3. Admin Suite — Current State (admin.html)
 
-**File size**: ~17,000+ lines | **Panels**: 22 | **Fully implemented**: 20/22
+**File size**: ~17,500+ lines | **Panels**: 25 | **Fully implemented**: 25/25
 
 | #   | Panel          | Key            | Status                                           |
 | --- | -------------- | -------------- | ------------------------------------------------ |
@@ -91,15 +91,15 @@ Full detail: [STORAGE_AUDIT_2026-03-08.md](STORAGE_AUDIT_2026-03-08.md) → Phas
 | 20  | NFT Studio     | nft-studio     | ✅ Collection + token manager                    |
 | 21  | Brands         | brands         | ✅ Brand switcher + identity                     |
 
-**Charter module gaps** (charter §10 — not yet in admin):
+| 22  | Projects       | projects       | ✅ Repo CI status, PRs, branch protection (GitHub API) |
+| 23  | Deployments    | deployments    | ✅ Push-event workflow timeline, 7d KPIs               |
+| 24  | Settings       | settings       | ✅ Integration health, env vars, worker reachability   |
 
-| Charter Module        | Gap                                                    | Priority |
-| --------------------- | ------------------------------------------------------ | -------- |
-| Projects status panel | Not present                                            | Phase 2  |
-| Repositories health   | Partial (Ecosystem panel has site health, not repo CI) | Phase 2  |
-| Deployments panel     | Not present (Quick Launch links out)                   | Phase 2  |
-| Settings/integrations | Not present (secrets managed outside)                  | Phase 2  |
-| Documentation hub     | Not present                                            | Phase 3  |
+**Remaining charter module gap:**
+
+| Charter Module    | Gap         | Priority |
+| ----------------- | ----------- | -------- |
+| Documentation hub | Not present | Phase 3  |
 
 ---
 
@@ -157,19 +157,29 @@ Full detail: [STORAGE_AUDIT_2026-03-08.md](STORAGE_AUDIT_2026-03-08.md) → Phas
 | TOKEN_ENCRYPTION_KEY not in CF Pages            | High     | Blocks social publisher OAuth flows             |
 | OPENAI_API_KEY not in CF Pages                  | Medium   | Blocks DALL-E generation in Content Studio      |
 | BrettLeeWeaver.com (Weave) has no remote/domain | Medium   | Local only — intentional for now                |
-| Branch protection unconfirmed on 5 repos        | Medium   | Direct pushes to main possible                  |
 | Sentry DSN set but not re-verified              | Low      | Set 2026-03-09                                  |
+
+### Resolved This Session (2026-03-16)
+
+| Item | Resolution |
+| --- | --- |
+| Branch protection on all public repos | ✅ Applied — CitizenApproved, aiaimate, globaldeets, jamie-mediation |
+| Admin: Projects panel | ✅ Panel 22 — repo CI, PRs, branch protection |
+| Admin: Deployments panel | ✅ Panel 23 — push-event workflow timeline |
+| Admin: Settings/integrations panel | ✅ Panel 24 — integration health, env vars, workers |
+| Sensitive docs in git history | ✅ Full purge via filter-repo + force push |
+| Asset intake SOP | ✅ Added to DEVELOPER_GUIDE.md |
+| Deployment/feature-gating rules | ✅ Added to DEVELOPER_GUIDE.md |
+| CultureSherpa community plan | ✅ CULTURESHERPA_COMMUNITY_PLAN.md |
+| Media pipeline audit | ✅ MEDIA_PIPELINE_AUDIT.md |
+
 
 ### Phase 2 (Structural)
 
-| Gap                                                 | Notes                  |
-| --------------------------------------------------- | ---------------------- |
-| Admin: Projects panel (status + CI health per repo) | Charter §10 essential  |
-| Admin: Deployments panel                            | Charter §10 essential  |
-| Admin: Settings/integrations panel                  | Charter §10 essential  |
-| GA4 unified tracking across all brands              | Currently fragmented   |
-| CitizenApproved: no CI/CD workflow                  | Manually deployed only |
-| CultureSherpa community architecture                | Charter Workstream C   |
+| Gap                                | Notes              |
+| ---------------------------------- | ------------------ |
+| GA4 unified tracking across brands | Currently fragmented |
+| CitizenApproved: CI workflow       | Has CI now — needs test suite |
 
 ### Phase 3 (Experience & Capability)
 
@@ -189,10 +199,12 @@ Full detail: [STORAGE_AUDIT_2026-03-08.md](STORAGE_AUDIT_2026-03-08.md) → Phas
 - [x] Security — sensitive docs removed from repo tip AND full git history purge completed 2026-03-17
 - [x] Admin suite module inventory — section 3 above
 - [x] Documentation spine established (EVERYTHING.md + this doc + charter)
-- [ ] Asset intake standard defined (master drop directory + naming SOP)
-- [ ] Deployment/feature-gating rules locked (doc in DEVELOPER_GUIDE.md)
-- [ ] CultureSherpa community architecture plan
-- [ ] Media generation pipeline audit
+- [x] Asset intake standard defined — see DEVELOPER_GUIDE.md § Asset Intake SOP
+- [x] Deployment/feature-gating rules locked — see DEVELOPER_GUIDE.md § Deployment & Feature-Gating Rules
+- [x] CultureSherpa community architecture plan — see [CULTURESHERPA_COMMUNITY_PLAN.md](CULTURESHERPA_COMMUNITY_PLAN.md)
+- [x] Media generation pipeline audit — see [MEDIA_PIPELINE_AUDIT.md](MEDIA_PIPELINE_AUDIT.md)
+- [x] Branch protection applied to all public repos (2026-03-16)
+- [x] Admin panels 22-24 built: Projects, Deployments, Settings (charter §10)
 
 ---
 

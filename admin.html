@@ -6386,6 +6386,22 @@
                                 <circle cx="8" cy="8.5" r="1.5" />
                             </svg></span><span class="nav-label">Brand Registry</span></button>
 
+                    <div class="nav-group-label">Operations</div>
+                    <button class="nav-btn" data-view="projects"><span class="nav-num">22</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="1" y="1" width="14" height="14" rx="2" />
+                                <path d="M1 5h14" />
+                                <path d="M5 5v10" />
+                            </svg></span><span class="nav-label">Projects</span></button>
+                    <button class="nav-btn" data-view="deployments"><span class="nav-num">23</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M8 1v10" />
+                                <path d="M4 7l4 4 4-4" />
+                                <path d="M2 13h12" />
+                            </svg></span><span class="nav-label">Deployments</span></button>
+                    <button class="nav-btn" data-view="settings"><span class="nav-num">24</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="8" cy="8" r="2.5" />
+                                <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" />
+                            </svg></span><span class="nav-label">Settings</span></button>
+
                 </nav>
 
                 <div class="sidebar-footer">
@@ -8168,6 +8184,106 @@
                     <div id="brands-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem">
                         <div class="text-muted" style="text-align:center;padding:2rem">Loading&hellip;</div>
                     </div>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Projects (panel 22) — Charter §10                -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-projects">
+                    <div class="section-head">
+                        <h2 class="section-title">Projects</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="proj-refresh-btn">&#8635; Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">All ecosystem repos &mdash; CI status, last commit, open PRs, and branch protection. Data from GitHub REST API.</p>
+                    <div style="display:flex;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap">
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Repos</div>
+                            <div id="proj-kpi-total" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">CI Passing</div>
+                            <div id="proj-kpi-passing" style="font-size:1.5rem;font-weight:600;color:#10b981">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">CI Failing</div>
+                            <div id="proj-kpi-failing" style="font-size:1.5rem;font-weight:600;color:#ef4444">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Open PRs</div>
+                            <div id="proj-kpi-prs" style="font-size:1.5rem;font-weight:600;color:#3b82f6">&mdash;</div>
+                        </div>
+                    </div>
+                    <div id="proj-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem">
+                        <div class="text-muted" style="text-align:center;padding:2rem">Loading&hellip;</div>
+                    </div>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Deployments (panel 23) — Charter §10             -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-deployments">
+                    <div class="section-head">
+                        <h2 class="section-title">Deployments</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="deploy-refresh-btn">&#8635; Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Recent deployments across all ecosystem repos. Shows the latest workflow runs triggered by push events.</p>
+                    <div style="display:flex;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap">
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Deploys (7d)</div>
+                            <div id="deploy-kpi-total" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Success</div>
+                            <div id="deploy-kpi-success" style="font-size:1.5rem;font-weight:600;color:#10b981">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Failed</div>
+                            <div id="deploy-kpi-failed" style="font-size:1.5rem;font-weight:600;color:#ef4444">&mdash;</div>
+                        </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Last Deploy</div>
+                            <div id="deploy-kpi-last" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
+                    </div>
+                    <div id="deploy-timeline" style="display:flex;flex-direction:column;gap:0.5rem">
+                        <div class="text-muted" style="text-align:center;padding:2rem">Loading&hellip;</div>
+                    </div>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Settings (panel 24) — Charter §10                -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-settings">
+                    <div class="section-head">
+                        <h2 class="section-title">Settings &amp; Integrations</h2>
+                    </div>
+                    <p class="subheading mb-08">Integration health, environment variable status, and configuration overview. Read-only &mdash; secrets are managed via Cloudflare dashboard.</p>
+
+                    <article class="panel mb-085">
+                        <h3 style="font-size:0.85rem;margin-bottom:0.75rem;color:var(--text)">Integration Status</h3>
+                        <div id="settings-integrations" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0.75rem">
+                            <div class="text-muted" style="text-align:center;padding:1rem">Loading&hellip;</div>
+                        </div>
+                    </article>
+
+                    <article class="panel mb-085">
+                        <h3 style="font-size:0.85rem;margin-bottom:0.75rem;color:var(--text)">Environment Variables</h3>
+                        <p class="subheading mb-08">Shows which required env vars are set. Values are never displayed &mdash; only presence is checked.</p>
+                        <div id="settings-env-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0.75rem">
+                            <div class="text-muted" style="text-align:center;padding:1rem">Loading&hellip;</div>
+                        </div>
+                    </article>
+
+                    <article class="panel">
+                        <h3 style="font-size:0.85rem;margin-bottom:0.75rem;color:var(--text)">Workers &amp; Cron</h3>
+                        <div id="settings-workers" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:0.75rem">
+                            <div class="text-muted" style="text-align:center;padding:1rem">Loading&hellip;</div>
+                        </div>
+                    </article>
                 </section>
 
             </main>
@@ -12087,6 +12203,9 @@
                 'daily-cultures': { name: 'Daily Calendar', title: 'Daily Culture Calendar', sub: 'Two featured cultures every day — morning & evening rotations for CultureSherpa.' },
                 'nft-studio': { name: 'NFT Studio', title: 'NFT Studio', sub: 'Manage NFT collections, token registry, rarity tiers, IPFS metadata, and on-chain mint records.' },
                 'brands': { name: 'Brands', title: 'Brand Registry', sub: 'Overview of all brands in the ecosystem \u2014 social accounts, workflow counts, and external links.' },
+                'projects': { name: 'Projects', title: 'Projects', sub: 'All ecosystem repositories \u2014 CI status, last commit, open PRs, and branch protection.' },
+                'deployments': { name: 'Deployments', title: 'Deployments', sub: 'Recent deployments across all ecosystem repos \u2014 workflow runs, success rates, and timing.' },
+                'settings': { name: 'Settings', title: 'Settings & Integrations', sub: 'Integration health, environment variable status, and configuration overview.' },
             };
 
             function updatePageContext(view) {
@@ -17172,6 +17291,288 @@
                 URL.revokeObjectURL(url);
                 logActivity('Export', 'Downloaded studio-manifest.json', 'export');
             }
+
+            // ─── Projects Panel (Charter §10) ─────────────────────────────
+            (function initProjectsPanel() {
+                var PROJ_REPOS = SITE_REGISTRY
+                    .filter(function (s) { return s.repo; })
+                    .map(function (s) {
+                        var parts = s.repo.split('/');
+                        return { owner: parts[0], repo: parts[1], label: s.name, color: s.color, domain: s.domain };
+                    });
+
+                async function fetchRepoData(owner, repo) {
+                    var headers = { 'Accept': 'application/vnd.github+json' };
+                    try {
+                        var repoRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo, { headers: headers });
+                        var repoData = repoRes.ok ? await repoRes.json() : null;
+
+                        var runsRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/actions/runs?per_page=1', { headers: headers });
+                        var runsData = runsRes.ok ? await runsRes.json() : { workflow_runs: [] };
+
+                        var prsRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/pulls?state=open&per_page=100', { headers: headers });
+                        var prs = prsRes.ok ? await prsRes.json() : [];
+
+                        var protRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/branches/main/protection', { headers: headers });
+                        var hasProt = protRes.ok;
+
+                        return {
+                            repo: repoData,
+                            lastRun: (runsData.workflow_runs || [])[0] || null,
+                            openPRs: Array.isArray(prs) ? prs.length : 0,
+                            branchProtection: hasProt
+                        };
+                    } catch (e) {
+                        return { error: e.message };
+                    }
+                }
+
+                async function loadProjects() {
+                    var grid = $('proj-grid');
+                    if (!grid) return;
+                    grid.innerHTML = '<div class="text-muted" style="text-align:center;padding:2rem">Fetching from GitHub&hellip;</div>';
+
+                    var results = await Promise.all(PROJ_REPOS.map(function (r) {
+                        return fetchRepoData(r.owner, r.repo).then(function (data) {
+                            return Object.assign({}, r, data);
+                        });
+                    }));
+
+                    var passing = 0, failing = 0, totalPRs = 0;
+                    results.forEach(function (r) {
+                        if (r.lastRun) {
+                            if (r.lastRun.conclusion === 'success') passing++;
+                            else if (r.lastRun.conclusion === 'failure') failing++;
+                        }
+                        totalPRs += r.openPRs || 0;
+                    });
+
+                    $('proj-kpi-total').textContent = results.length;
+                    $('proj-kpi-passing').textContent = passing;
+                    $('proj-kpi-failing').textContent = failing;
+                    $('proj-kpi-prs').textContent = totalPRs;
+
+                    grid.innerHTML = results.map(function (r) {
+                        var ciStatus = 'none';
+                        var ciLabel = 'No CI';
+                        var ciCls = 'tag';
+                        if (r.lastRun) {
+                            ciStatus = r.lastRun.conclusion || r.lastRun.status || 'unknown';
+                            ciLabel = ciStatus;
+                            ciCls = ciStatus === 'success' ? 'tag ok' : ciStatus === 'failure' ? 'tag fail' : 'tag warn';
+                        }
+
+                        var protLabel = r.branchProtection ? '🔒 Protected' : '⚠️ Unprotected';
+                        var protCls = r.branchProtection ? 'color:#10b981' : 'color:#ef4444';
+
+                        var lastCommit = r.repo && r.repo.pushed_at ? ecoRelTime(r.repo.pushed_at) : '—';
+                        var desc = r.repo && r.repo.description ? escapeHtml(r.repo.description) : r.domain || '';
+
+                        return '<div class="panel" style="padding:1rem;border-left:3px solid ' + r.color + '">' +
+                            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">' +
+                            '<strong>' + escapeHtml(r.label) + '</strong>' +
+                            '<span class="' + ciCls + '">' + escapeHtml(ciLabel) + '</span></div>' +
+                            '<div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem">' + desc + '</div>' +
+                            '<div style="display:flex;gap:1rem;font-size:0.75rem;flex-wrap:wrap">' +
+                            '<span>Last push: ' + lastCommit + '</span>' +
+                            '<span>PRs: <strong>' + (r.openPRs || 0) + '</strong></span>' +
+                            '<span style="' + protCls + '">' + protLabel + '</span>' +
+                            '</div>' +
+                            '<div style="margin-top:0.5rem;font-size:0.72rem">' +
+                            '<a href="https://github.com/' + r.owner + '/' + r.repo + '" target="_blank" rel="noopener" style="color:var(--accent-cyan)">GitHub</a>' +
+                            (r.domain ? ' · <a href="https://' + r.domain + '" target="_blank" rel="noopener" style="color:var(--accent-cyan)">' + r.domain + '</a>' : '') +
+                            '</div></div>';
+                    }).join('');
+                }
+
+                var projRefresh = $('proj-refresh-btn');
+                if (projRefresh) projRefresh.addEventListener('click', loadProjects);
+                window.__adminPanels = window.__adminPanels || {};
+                window.__adminPanels['projects'] = loadProjects;
+            })();
+
+            // ─── Deployments Panel (Charter §10) ──────────────────────────
+            (function initDeploymentsPanel() {
+                var DEPLOY_REPOS = SITE_REGISTRY
+                    .filter(function (s) { return s.repo; })
+                    .map(function (s) {
+                        var parts = s.repo.split('/');
+                        return { owner: parts[0], repo: parts[1], label: s.name, color: s.color };
+                    });
+
+                async function loadDeployments() {
+                    var timeline = $('deploy-timeline');
+                    if (!timeline) return;
+                    timeline.innerHTML = '<div class="text-muted" style="text-align:center;padding:2rem">Fetching deployments&hellip;</div>';
+
+                    var allRuns = [];
+                    var headers = { 'Accept': 'application/vnd.github+json' };
+
+                    await Promise.all(DEPLOY_REPOS.map(async function (r) {
+                        try {
+                            var res = await fetch(
+                                'https://api.github.com/repos/' + r.owner + '/' + r.repo + '/actions/runs?per_page=10&event=push',
+                                { headers: headers }
+                            );
+                            if (!res.ok) return;
+                            var data = await res.json();
+                            (data.workflow_runs || []).forEach(function (run) {
+                                allRuns.push(Object.assign({}, run, { _label: r.label, _color: r.color }));
+                            });
+                        } catch (e) { /* skip */ }
+                    }));
+
+                    allRuns.sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+
+                    var sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                    var recent = allRuns.filter(function (r) { return new Date(r.created_at).getTime() > sevenDaysAgo; });
+
+                    var success = recent.filter(function (r) { return r.conclusion === 'success'; }).length;
+                    var failed = recent.filter(function (r) { return r.conclusion === 'failure'; }).length;
+
+                    $('deploy-kpi-total').textContent = recent.length;
+                    $('deploy-kpi-success').textContent = success;
+                    $('deploy-kpi-failed').textContent = failed;
+                    $('deploy-kpi-last').textContent = allRuns.length ? ecoRelTime(allRuns[0].created_at) : '—';
+
+                    var shown = allRuns.slice(0, 30);
+                    if (!shown.length) {
+                        timeline.innerHTML = '<div class="text-muted" style="text-align:center;padding:2rem">No deployment runs found</div>';
+                        return;
+                    }
+
+                    timeline.innerHTML = shown.map(function (run) {
+                        var cls = run.conclusion === 'success' ? 'ok' : run.conclusion === 'failure' ? 'fail' : 'warn';
+                        var icon = run.conclusion === 'success' ? '✅' : run.conclusion === 'failure' ? '❌' : '🔄';
+                        var dur = '';
+                        if (run.updated_at && run.created_at) {
+                            var ms = new Date(run.updated_at) - new Date(run.created_at);
+                            dur = Math.round(ms / 1000) + 's';
+                        }
+                        return '<div class="panel" style="padding:0.75rem 1rem;border-left:3px solid ' + run._color + ';display:flex;align-items:center;gap:1rem;flex-wrap:wrap">' +
+                            '<span style="font-size:1.1rem">' + icon + '</span>' +
+                            '<div style="flex:1;min-width:200px">' +
+                            '<strong style="font-size:0.85rem">' + escapeHtml(run._label) + '</strong>' +
+                            '<span style="color:var(--text-muted);font-size:0.78rem;margin-left:0.5rem">' + escapeHtml(run.name || '') + '</span>' +
+                            '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem">' +
+                            escapeHtml(run.head_commit ? run.head_commit.message.split('\n')[0] : run.display_title || '') +
+                            '</div></div>' +
+                            '<span class="tag ' + cls + '" style="font-size:0.72rem">' + escapeHtml(run.conclusion || run.status || 'running') + '</span>' +
+                            (dur ? '<span style="font-size:0.72rem;color:var(--text-muted)">' + dur + '</span>' : '') +
+                            '<span style="font-size:0.72rem;color:var(--text-muted)">' + ecoRelTime(run.created_at) + '</span>' +
+                            '<a href="' + escapeHtml(run.html_url) + '" target="_blank" rel="noopener" style="font-size:0.72rem;color:var(--accent-cyan)">View</a>' +
+                            '</div>';
+                    }).join('');
+                }
+
+                var deployRefresh = $('deploy-refresh-btn');
+                if (deployRefresh) deployRefresh.addEventListener('click', loadDeployments);
+                window.__adminPanels = window.__adminPanels || {};
+                window.__adminPanels['deployments'] = loadDeployments;
+            })();
+
+            // ─── Settings Panel (Charter §10) ─────────────────────────────
+            (function initSettingsPanel() {
+                var INTEGRATIONS = [
+                    { name: 'Clerk', desc: 'Auth for community + admin', icon: '🔐', checkFn: function () { return !!window.Clerk; } },
+                    { name: 'Stripe', desc: 'Donation payments', icon: '💳', checkFn: function () { return !!(window.ENV && window.ENV.STRIPE_PUBLISHABLE_KEY); } },
+                    { name: 'Formspree', desc: 'Contact form processing', icon: '📬', checkFn: function () { return true; } },
+                    { name: 'GA4', desc: 'Analytics tracking', icon: '📈', checkFn: function () { return typeof gtag === 'function'; } },
+                    { name: 'Sentry', desc: 'Error tracking', icon: '🐛', checkFn: function () { return !!(window.ENV && window.ENV.SENTRY_DSN); } },
+                    { name: 'OpenAI', desc: 'DALL-E image generation', icon: '🤖', checkFn: function () { return !!(window.ENV && window.ENV.OPENAI_API_KEY); } },
+                ];
+
+                var ENV_VARS = [
+                    { key: 'CLERK_PUBLISHABLE_KEY', scope: 'Pages', required: true },
+                    { key: 'CLERK_SECRET_KEY', scope: 'Auth Worker', required: true },
+                    { key: 'STRIPE_PUBLISHABLE_KEY', scope: 'Pages', required: true },
+                    { key: 'STRIPE_SECRET_KEY', scope: 'Stripe Worker', required: true },
+                    { key: 'SENTRY_DSN', scope: 'Auth Worker', required: false },
+                    { key: 'OPENAI_API_KEY', scope: 'Pages', required: false },
+                    { key: 'TOKEN_ENCRYPTION_KEY', scope: 'Pages', required: true },
+                ];
+
+                var WORKERS = [
+                    { name: 'gfd-stripe', url: 'https://gfd-stripe.weave0.workers.dev', purpose: 'Stripe payment intents' },
+                    { name: 'gfd-health-sweep', url: 'https://gfd-health-sweep.weave0.workers.dev', purpose: 'Nightly ecosystem health checks' },
+                    { name: 'gfv-social-publisher', url: 'https://gfv-social-publisher.weave0.workers.dev', purpose: 'Social scheduling & publishing' },
+                    { name: 'GFD Pages (_worker.js)', url: '/api/health', purpose: 'Auth, CMS, media routing' },
+                ];
+
+                function renderSettings() {
+                    // Integrations
+                    var intGrid = $('settings-integrations');
+                    if (intGrid) {
+                        intGrid.innerHTML = INTEGRATIONS.map(function (i) {
+                            var ok = false;
+                            try { ok = i.checkFn(); } catch (e) { /* */ }
+                            var cls = ok ? 'border-left:3px solid #10b981' : 'border-left:3px solid #ef4444';
+                            return '<div class="panel" style="padding:0.75rem 1rem;' + cls + '">' +
+                                '<div style="display:flex;justify-content:space-between;align-items:center">' +
+                                '<span>' + i.icon + ' <strong>' + escapeHtml(i.name) + '</strong></span>' +
+                                '<span class="tag ' + (ok ? 'ok' : 'fail') + '">' + (ok ? 'Connected' : 'Not detected') + '</span>' +
+                                '</div>' +
+                                '<div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem">' + escapeHtml(i.desc) + '</div>' +
+                                '</div>';
+                        }).join('');
+                    }
+
+                    // Env vars — we can only check what's injected via window.ENV
+                    var envGrid = $('settings-env-grid');
+                    if (envGrid) {
+                        envGrid.innerHTML = ENV_VARS.map(function (v) {
+                            var present = window.ENV && window.ENV[v.key] != null && window.ENV[v.key] !== '';
+                            var scopeOnly = v.scope !== 'Pages';
+                            var label = present ? '✅ Set' : scopeOnly ? '🔒 Worker-only' : (v.required ? '❌ Missing' : '⚪ Optional');
+                            var cls = present ? 'ok' : scopeOnly ? 'warn' : (v.required ? 'fail' : '');
+                            return '<div class="panel" style="padding:0.5rem 0.75rem">' +
+                                '<div style="display:flex;justify-content:space-between;align-items:center">' +
+                                '<code style="font-size:0.78rem">' + escapeHtml(v.key) + '</code>' +
+                                '<span class="tag ' + cls + '" style="font-size:0.68rem">' + label + '</span>' +
+                                '</div>' +
+                                '<div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.15rem">Scope: ' + escapeHtml(v.scope) + '</div>' +
+                                '</div>';
+                        }).join('');
+                    }
+
+                    // Workers — ping each
+                    var wGrid = $('settings-workers');
+                    if (wGrid) {
+                        wGrid.innerHTML = WORKERS.map(function (w) {
+                            return '<div class="panel" style="padding:0.75rem 1rem" id="settings-worker-' + w.name.replace(/[^a-z0-9]/g, '') + '">' +
+                                '<div style="display:flex;justify-content:space-between;align-items:center">' +
+                                '<strong style="font-size:0.82rem">' + escapeHtml(w.name) + '</strong>' +
+                                '<span class="tag warn" data-worker-status>Checking&hellip;</span>' +
+                                '</div>' +
+                                '<div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem">' + escapeHtml(w.purpose) + '</div>' +
+                                '</div>';
+                        }).join('');
+
+                        WORKERS.forEach(function (w) {
+                            var cardId = 'settings-worker-' + w.name.replace(/[^a-z0-9]/g, '');
+                            fetch(w.url, { method: 'GET', mode: 'cors' })
+                                .then(function (res) {
+                                    var card = $(cardId);
+                                    if (!card) return;
+                                    var badge = card.querySelector('[data-worker-status]');
+                                    if (badge) {
+                                        badge.className = 'tag ' + (res.ok || res.status === 405 || res.status === 401 ? 'ok' : 'fail');
+                                        badge.textContent = res.ok || res.status === 405 || res.status === 401 ? '✅ Reachable' : 'HTTP ' + res.status;
+                                    }
+                                })
+                                .catch(function () {
+                                    var card = $(cardId);
+                                    if (!card) return;
+                                    var badge = card.querySelector('[data-worker-status]');
+                                    if (badge) { badge.className = 'tag fail'; badge.textContent = '❌ Unreachable'; }
+                                });
+                        });
+                    }
+                }
+
+                window.__adminPanels = window.__adminPanels || {};
+                window.__adminPanels['settings'] = renderSettings;
+            })();
 
             window.__clerkReady
                 .then(initAuth)
