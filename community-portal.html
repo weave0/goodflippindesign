@@ -1339,6 +1339,18 @@
             border-color: rgba(34, 211, 238, 0.3);
         }
 
+        .badge-card.just-earned {
+            animation: badgePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-color: rgba(251, 191, 36, 0.5);
+            box-shadow: 0 0 16px rgba(251, 191, 36, 0.2);
+        }
+
+        @keyframes badgePop {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
         .badge-card.locked {
             opacity: 0.45;
         }
@@ -3222,6 +3234,9 @@
                     if (this.disabled) return;
                     this.disabled = true;
 
+                    // Capture current badges before check-in
+                    const badgesBefore = profileData ? (profileData.badges || []).slice() : [];
+
                     try {
                         const result = await apiPost('/api/community/checkin', {});
 
@@ -3235,6 +3250,15 @@
                             const reward = $('#checkin-reward');
                             reward.innerHTML = '⚡ +' + result.xpEarned + ' XP &middot; 🔥 ' + result.streak + '-day streak';
                             reward.classList.add('visible');
+
+                            // Show toasts for newly earned badges
+                            if (result.badges) {
+                                const newBadges = result.badges.filter(b => !badgesBefore.includes(b));
+                                newBadges.forEach(key => {
+                                    const badge = ALL_BADGES[key];
+                                    if (badge) showToast(badge.icon + ' Badge earned: ' + badge.name + '!', 'badge');
+                                });
+                            }
 
                             // Reload profile to update XP bar
                             loadProfile();
@@ -3735,12 +3759,15 @@
             function updateBadgeEarnedState(earnedBadges) {
                 $$('.badge-card').forEach(card => {
                     const key = card.dataset.badge;
+                    const wasEarned = card.classList.contains('earned');
                     if (earnedBadges.includes(key)) {
                         card.classList.remove('locked');
                         card.classList.add('earned');
+                        if (!wasEarned) card.classList.add('just-earned');
                     } else {
                         card.classList.add('locked');
                         card.classList.remove('earned');
+                        card.classList.remove('just-earned');
                     }
                 });
             }

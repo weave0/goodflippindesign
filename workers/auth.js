@@ -710,8 +710,11 @@ async function ensureCommunityProfile(env, userId, displayName, avatarUrl) {
     VALUES (?, ?, ?, '["founding-member"]', ?, ?)
   `).bind(userId, displayName, avatarUrl, now, now).run();
 
-  // Log "joined" activity
+  // Log "joined" activity + welcome notification
   await logActivity(env, userId, displayName, avatarUrl, 'joined', JSON.stringify({ name: displayName }));
+  await createNotification(env, userId, null, 'CultureSherpa', '', 'welcome',
+    '👋 Welcome to CultureSherpa! Check in daily, post threads, and earn badges.', null
+  );
 
   return await env.DB.prepare(
     'SELECT * FROM community_profiles WHERE user_id = ?'
@@ -744,11 +747,14 @@ async function awardXP(env, userId, action, amount, sourceId) {
     UPDATE community_profiles SET total_xp = ?, level = ?, updated_at = ? WHERE user_id = ?
   `).bind(newXP, newLevel.level, now, userId).run();
 
-  // If leveled up, log it
+  // If leveled up, log it + notify user
   if (newLevel.level > (profile.level || 1)) {
     const p = await env.DB.prepare('SELECT display_name, avatar_url FROM community_profiles WHERE user_id = ?').bind(userId).first();
     await logActivity(env, userId, p?.display_name || 'Member', p?.avatar_url || '', 'leveled_up',
       JSON.stringify({ level: newLevel.level, name: newLevel.name, icon: newLevel.icon })
+    );
+    await createNotification(env, userId, null, 'CultureSherpa', '', 'level_up',
+      newLevel.icon + ' Level up! You reached Level ' + newLevel.level + ' — ' + newLevel.name + '!', null
     );
   }
 
@@ -802,12 +808,15 @@ async function checkAndAwardBadges(env, userId, profile) {
       'UPDATE community_profiles SET badges = ?, updated_at = ? WHERE user_id = ?'
     ).bind(JSON.stringify(allBadges), now, userId).run();
 
-    // Log badge activities
+    // Log badge activities + create notifications
     const p = await env.DB.prepare('SELECT display_name, avatar_url FROM community_profiles WHERE user_id = ?').bind(userId).first();
     for (const badge of newBadges) {
       const def = BADGE_DEFS[badge];
       await logActivity(env, userId, p?.display_name || 'Member', p?.avatar_url || '', 'earned_badge',
         JSON.stringify({ badge, name: def?.name || badge, icon: def?.icon || '🏷️' })
+      );
+      await createNotification(env, userId, null, 'CultureSherpa', '', 'badge',
+        (def?.icon || '🏷️') + ' You earned the ' + (def?.name || badge) + ' badge!', badge
       );
     }
 
@@ -899,6 +908,9 @@ async function handleCommunityCheckin(user, env) {
     await logActivity(env, userId, userName, avatar, 'earned_badge',
       JSON.stringify({ badge: 'early-bird', name: 'Early Bird', icon: '🐦' })
     );
+    await createNotification(env, userId, null, 'CultureSherpa', '', 'badge',
+      '🐦 You earned the Early Bird badge!', 'early-bird'
+    );
   }
   if (hour >= 0 && hour < 5 && !currentBadges.includes('night-owl')) {
     const allBadges = [...currentBadges, 'night-owl'];
@@ -907,6 +919,9 @@ async function handleCommunityCheckin(user, env) {
     ).bind(JSON.stringify(allBadges), userId).run();
     await logActivity(env, userId, userName, avatar, 'earned_badge',
       JSON.stringify({ badge: 'night-owl', name: 'Night Owl', icon: '🦉' })
+    );
+    await createNotification(env, userId, null, 'CultureSherpa', '', 'badge',
+      '🦉 You earned the Night Owl badge!', 'night-owl'
     );
   }
 
@@ -1122,6 +1137,9 @@ async function handleCreateCommunityPost(request, user, env) {
       await logActivity(env, userId, userName, avatar, 'earned_badge',
         JSON.stringify({ badge: 'storyteller', name: 'Storyteller', icon: '📝' })
       );
+      await createNotification(env, userId, null, 'CultureSherpa', '', 'badge',
+        '📝 You earned the Storyteller badge!', 'storyteller'
+      );
     }
   }
 
@@ -1135,6 +1153,9 @@ async function handleCreateCommunityPost(request, user, env) {
         .bind(JSON.stringify(badges), userId).run();
       await logActivity(env, userId, userName, avatar, 'earned_badge',
         JSON.stringify({ badge: 'creative', name: 'Creative', icon: '🎨' })
+      );
+      await createNotification(env, userId, null, 'CultureSherpa', '', 'badge',
+        '🎨 You earned the Creative badge!', 'creative'
       );
     }
   }
@@ -1234,6 +1255,9 @@ async function handleCreateReply(request, user, env) {
         await logActivity(env, userId, userName, avatar, 'earned_badge',
           JSON.stringify({ badge: 'helping-hand', name: 'Helping Hand', icon: '🙌' })
         );
+        await createNotification(env, userId, null, 'CultureSherpa', '', 'badge',
+          '🙌 You earned the Helping Hand badge!', 'helping-hand'
+        );
       }
     }
   }
@@ -1330,6 +1354,9 @@ async function handleReact(request, user, env) {
         await logActivity(env, post.user_id, post.user_name, post.user_avatar || '', 'earned_badge',
           JSON.stringify({ badge: 'vibe-check', name: 'Vibe Check', icon: '🌈' })
         );
+        await createNotification(env, post.user_id, null, 'CultureSherpa', '', 'badge',
+          '🌈 You earned the Vibe Check badge!', 'vibe-check'
+        );
       }
     }
 
@@ -1424,38 +1451,46 @@ async function handleUpdateCommunityProfile(request, user, env) {
     'SELECT * FROM community_profiles WHERE user_id = ?'
   ).bind(userId).first();
 
+  const badges = JSON.parse(updated.badges || '[]');
+  let badgesChanged = false;
+
+  // Check profile-pro badge (all fields completed)
   if (updated.display_name && updated.bio && updated.location && updated.website) {
-    const badges = JSON.parse(updated.badges || '[]');
     if (!badges.includes('profile-pro')) {
       badges.push('profile-pro');
-      await env.DB.prepare('UPDATE community_profiles SET badges = ? WHERE user_id = ?')
-        .bind(JSON.stringify(badges), userId).run();
+      badgesChanged = true;
       await logActivity(env, userId, updated.display_name, updated.avatar_url || '', 'earned_badge',
         JSON.stringify({ badge: 'profile-pro', name: 'Profile Pro', icon: '🎯' })
       );
+      await createNotification(env, userId, null, 'CultureSherpa', null, 'badge', '🎯 You earned the Profile Pro badge!', null);
       // Award profile complete XP
       await awardXP(env, userId, 'profile_complete', XP_ACTIONS.profile_complete, null);
     }
+  }
 
-    // Check global-citizen badge
-    if (updated.location && !badges.includes('global-citizen')) {
-      badges.push('global-citizen');
-      await env.DB.prepare('UPDATE community_profiles SET badges = ? WHERE user_id = ?')
-        .bind(JSON.stringify(badges), userId).run();
-      await logActivity(env, userId, updated.display_name, updated.avatar_url || '', 'earned_badge',
-        JSON.stringify({ badge: 'global-citizen', name: 'Global Citizen', icon: '🌍' })
-      );
-    }
+  // Check global-citizen badge (has location — independent of other fields)
+  if (updated.location && !badges.includes('global-citizen')) {
+    badges.push('global-citizen');
+    badgesChanged = true;
+    await logActivity(env, userId, updated.display_name, updated.avatar_url || '', 'earned_badge',
+      JSON.stringify({ badge: 'global-citizen', name: 'Global Citizen', icon: '🌍' })
+    );
+    await createNotification(env, userId, null, 'CultureSherpa', null, 'badge', '🌍 You earned the Global Citizen badge!', null);
+  }
 
-    // Check web-presence badge
-    if (updated.website && !badges.includes('web-presence')) {
-      badges.push('web-presence');
-      await env.DB.prepare('UPDATE community_profiles SET badges = ? WHERE user_id = ?')
-        .bind(JSON.stringify(badges), userId).run();
-      await logActivity(env, userId, updated.display_name, updated.avatar_url || '', 'earned_badge',
-        JSON.stringify({ badge: 'web-presence', name: 'Web Presence', icon: '🔗' })
-      );
-    }
+  // Check web-presence badge (has website — independent of other fields)
+  if (updated.website && !badges.includes('web-presence')) {
+    badges.push('web-presence');
+    badgesChanged = true;
+    await logActivity(env, userId, updated.display_name, updated.avatar_url || '', 'earned_badge',
+      JSON.stringify({ badge: 'web-presence', name: 'Web Presence', icon: '🔗' })
+    );
+    await createNotification(env, userId, null, 'CultureSherpa', null, 'badge', '🔗 You earned the Web Presence badge!', null);
+  }
+
+  if (badgesChanged) {
+    await env.DB.prepare('UPDATE community_profiles SET badges = ? WHERE user_id = ?')
+      .bind(JSON.stringify(badges), userId).run();
   }
 
   const finalProfile = await env.DB.prepare(
