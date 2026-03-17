@@ -1012,23 +1012,42 @@ async function handleListCommunityPosts(request, env) {
   }
 
   // List posts
+  const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 50);
+  const offset = parseInt(url.searchParams.get('offset') || '0');
+
   let query = `SELECT * FROM community_posts WHERE parent_id IS NULL`;
+  let countQuery = `SELECT COUNT(*) as total FROM community_posts WHERE parent_id IS NULL`;
   const bindings = [];
+  const countBindings = [];
 
   if (type !== 'all') {
     query += ` AND post_type = ?`;
+    countQuery += ` AND post_type = ?`;
     bindings.push(type);
+    countBindings.push(type);
   }
 
-  query += ` ORDER BY is_pinned DESC, created_at DESC LIMIT 50`;
+  query += ` ORDER BY is_pinned DESC, created_at DESC LIMIT ? OFFSET ?`;
+  bindings.push(limit, offset);
 
   const stmt = bindings.length > 0
     ? env.DB.prepare(query).bind(...bindings)
     : env.DB.prepare(query);
 
-  const { results } = await stmt.all();
+  const countStmt = countBindings.length > 0
+    ? env.DB.prepare(countQuery).bind(...countBindings)
+    : env.DB.prepare(countQuery);
 
-  return new Response(JSON.stringify(results || []), {
+  const [{ results }, countResult] = await Promise.all([stmt.all(), countStmt.first()]);
+  const total = countResult?.total || 0;
+
+  return new Response(JSON.stringify({
+    posts: results || [],
+    total,
+    limit,
+    offset,
+    hasMore: offset + limit < total,
+  }), {
     headers: { 'Content-Type': 'application/json' },
   });
 }

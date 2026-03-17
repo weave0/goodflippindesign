@@ -591,7 +591,10 @@
             border-radius: var(--radius);
             margin-bottom: 2rem;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
+        .tab-bar::-webkit-scrollbar { display: none; }
 
         .tab-btn {
             flex: 1;
@@ -861,6 +864,24 @@
             gap: 0.3rem;
             font-size: 0.8rem;
             color: var(--text-muted);
+        }
+
+        .load-more-btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-top: 1rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--accent);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .load-more-btn:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--accent);
         }
 
         /* ── Thread Detail (Inline) ──────────────────────── */
@@ -1530,6 +1551,7 @@
             }
 
             .tab-btn {
+                flex: 0 0 auto;
                 font-size: 0.8rem;
                 padding: 0.5rem 0.65rem;
             }
@@ -2634,6 +2656,29 @@
         </div>
     </div>
 
+    <!-- ── Edit Post Modal ─────────────────────────────── -->
+    <div class="modal-overlay" id="modal-edit-post" role="dialog" aria-modal="true" aria-label="Edit post">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Post</h2>
+                <button class="modal-close" id="edit-modal-close" aria-label="Close">&times;</button>
+            </div>
+            <form id="form-edit-post">
+                <input type="hidden" id="edit-post-id">
+                <div class="form-group">
+                    <label for="edit-post-title">Title</label>
+                    <input class="form-input" type="text" id="edit-post-title" placeholder="Post title..." maxlength="120">
+                </div>
+                <div class="form-group">
+                    <label for="edit-post-content">Content</label>
+                    <textarea class="form-textarea" id="edit-post-content" placeholder="Edit your post..." maxlength="5000" required></textarea>
+                    <div class="char-count" id="edit-char-count">0 / 5,000</div>
+                </div>
+                <button class="btn-submit-post" type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
     <!-- ── Toast Container ─────────────────────────────── -->
     <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
@@ -3196,6 +3241,7 @@
                         $$('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
                         this.classList.add('active');
                         this.setAttribute('aria-selected', 'true');
+                        this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
 
                         $$('.tab-panel').forEach(p => p.classList.remove('active'));
                         $('#panel-' + tab).classList.add('active');
@@ -3254,12 +3300,15 @@
                     }
                     list.innerHTML = html;
                 } catch (e) {
-                    // Feed is non-critical
+                    const list = $('#feed-list');
+                    if (list) list.innerHTML = '<div class="feed-empty"><div class="icon">⚠️</div><p>Couldn\'t load the feed right now.</p></div>';
                 }
             }
 
             // ── Threads ─────────────────────────────────────
             let currentFilter = 'all';
+            let threadOffset = 0;
+            const THREAD_PAGE_SIZE = 20;
 
             function setupThreadFilters() {
                 $$('.filter-chip').forEach(chip => {
@@ -3267,25 +3316,31 @@
                         $$('.filter-chip').forEach(c => c.classList.remove('active'));
                         this.classList.add('active');
                         currentFilter = this.dataset.type;
+                        threadOffset = 0;
                         loadThreads();
                     });
                 });
             }
 
-            async function loadThreads() {
+            async function loadThreads(append) {
                 try {
                     const typePart = currentFilter !== 'all' ? '&type=' + currentFilter : '';
-                    const posts = await apiGet('/api/community/posts?limit=50' + typePart);
-                    renderThreadList(posts);
+                    const data = await apiGet('/api/community/posts?limit=' + THREAD_PAGE_SIZE + '&offset=' + threadOffset + typePart);
+                    // Support both old (array) and new (paginated object) response
+                    const posts = Array.isArray(data) ? data : (data.posts || []);
+                    const hasMore = Array.isArray(data) ? false : !!data.hasMore;
+                    renderThreadList(posts, hasMore, append);
                 } catch (e) {
                     console.error('Failed to load threads:', e);
+                    const list = $('#thread-list');
+                    if (list && !append) list.innerHTML = '<div class="feed-empty"><div class="icon">⚠️</div><p>Couldn\'t load threads — try again later.</p></div>';
                 }
             }
 
-            function renderThreadList(posts) {
+            function renderThreadList(posts, hasMore, append) {
                 const list = $('#thread-list');
 
-                if (!posts || posts.length === 0) {
+                if (!append && (!posts || posts.length === 0)) {
                     list.innerHTML = '<div class="feed-empty" id="threads-empty"><div class="icon">💬</div><p>No threads yet — start the conversation!</p></div>';
                     return;
                 }
@@ -3318,10 +3373,31 @@
                         '</div>' +
                         '</div>';
                 }
-                list.innerHTML = html;
+                // Remove old load-more button
+                const oldBtn = list.querySelector('.load-more-btn');
+                if (oldBtn) oldBtn.remove();
 
-                // Add click handlers
-                list.querySelectorAll('.thread-card').forEach(card => {
+                if (append) {
+                    list.insertAdjacentHTML('beforeend', html);
+                } else {
+                    list.innerHTML = html;
+                }
+
+                // Add Load More button
+                if (hasMore) {
+                    const loadMoreBtn = document.createElement('button');
+                    loadMoreBtn.className = 'load-more-btn';
+                    loadMoreBtn.textContent = 'Load more threads';
+                    loadMoreBtn.addEventListener('click', () => {
+                        threadOffset += THREAD_PAGE_SIZE;
+                        loadThreads(true);
+                    });
+                    list.appendChild(loadMoreBtn);
+                }
+
+                // Add click handlers to new cards
+                list.querySelectorAll('.thread-card:not([data-bound])').forEach(card => {
+                    card.dataset.bound = '1';
                     card.addEventListener('click', () => openThread(card.dataset.id));
                 });
             }
@@ -3585,7 +3661,8 @@
                     }
                     list.innerHTML = html;
                 } catch (e) {
-                    // Non-critical
+                    const list = $('#leaderboard-list');
+                    if (list) list.innerHTML = '<div class="feed-empty"><div class="icon">⚠️</div><p>Leaderboard unavailable right now.</p></div>';
                 }
             }
 
@@ -4031,15 +4108,43 @@
             }
 
             async function editPost(postId, currentTitle, currentContent) {
-                const newContent = prompt('Edit your post:', currentContent);
-                if (newContent === null) return;
-                try {
-                    await apiPut('/api/community/posts?id=' + postId, { content: newContent });
-                    showToast('Post updated!', 'xp');
-                    openThread(postId);
-                } catch (e) {
-                    showToast('Edit failed: ' + e.message, 'error');
-                }
+                const modal = $('#modal-edit-post');
+                const titleInput = $('#edit-post-title');
+                const contentInput = $('#edit-post-content');
+                const idInput = $('#edit-post-id');
+                const charCount = $('#edit-char-count');
+
+                idInput.value = postId;
+                titleInput.value = currentTitle || '';
+                contentInput.value = currentContent || '';
+                charCount.textContent = (currentContent || '').length + ' / 5,000';
+                modal.classList.add('active');
+
+                contentInput.oninput = () => {
+                    charCount.textContent = contentInput.value.length + ' / 5,000';
+                };
+
+                const form = $('#form-edit-post');
+                form.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const newContent = contentInput.value.trim();
+                    if (!newContent) return;
+                    try {
+                        await apiPut('/api/community/posts?id=' + postId, {
+                            postId,
+                            title: titleInput.value.trim(),
+                            content: newContent,
+                        });
+                        modal.classList.remove('active');
+                        showToast('Post updated!', 'xp');
+                        openThread(postId);
+                    } catch (err) {
+                        showToast('Edit failed: ' + err.message, 'error');
+                    }
+                };
+
+                $('#edit-modal-close').onclick = () => modal.classList.remove('active');
+                modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
             }
 
             async function deletePost(postId) {

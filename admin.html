@@ -17484,12 +17484,19 @@
 
                 var ENV_VARS = [
                     { key: 'CLERK_PUBLISHABLE_KEY', scope: 'Pages', required: true },
-                    { key: 'CLERK_SECRET_KEY', scope: 'Auth Worker', required: true },
+                    { key: 'CLERK_SECRET_KEY', scope: 'Pages + Auth Worker', required: true },
                     { key: 'STRIPE_PUBLISHABLE_KEY', scope: 'Pages', required: true },
                     { key: 'STRIPE_SECRET_KEY', scope: 'Stripe Worker', required: true },
-                    { key: 'SENTRY_DSN', scope: 'Auth Worker', required: false },
+                    { key: 'SENTRY_DSN', scope: 'Pages + Auth Worker', required: false },
                     { key: 'OPENAI_API_KEY', scope: 'Pages', required: false },
                     { key: 'TOKEN_ENCRYPTION_KEY', scope: 'Pages', required: true },
+                    { key: 'INTERNAL_SECRET', scope: 'Pages', required: true },
+                    { key: 'SOCIAL_PUBLISHER_URL', scope: 'Pages', required: false },
+                    { key: 'META_APP_SECRET', scope: 'Pages', required: false },
+                    { key: 'THREADS_APP_SECRET', scope: 'Pages', required: false },
+                    { key: 'X_CLIENT_ID', scope: 'Pages', required: false },
+                    { key: 'LINKEDIN_CLIENT_ID', scope: 'Pages', required: false },
+                    { key: 'GOOGLE_CLIENT_ID', scope: 'Pages', required: false },
                 ];
 
                 var WORKERS = [
