@@ -11165,9 +11165,9 @@
                     detail: 'CultureRenderer.astro:451 empty state improved: removed generic heading, added region+languages meta line, added "Help expand this profile" → /contribute CTA and "← Back to Explore" link. fallbackSummary still shown when available. ConnectTab.astro + ResearchTab.astro are orphaned components (not imported anywhere in site) — dead code, not user-visible.'
                 },
                 {
-                    id: 'cs-celebrations-stubs', severity: 'quality', brand: 'culturesherpa', area: 'CultureSherpa',
-                    title: 'Celebrations: S3 upload + Add Family dialog are real stubs',
-                    detail: 'S3 upload for celebration hero images: uses FileReader preview + data URL stored in edit-hero-image, never POSTed to /api/admin/s3/sign (signed URL flow). Real S3 upload would: (1) POST /api/admin/s3/sign with filename/contentType/cultureId/imageType, (2) PUT file directly to signed S3 URL, (3) use returned cloudfront publicUrl. Add Family dialog: btn-add-family just shows a toast. No standalone create-family backend — families implicitly created when creating a celebration with new family_id via POST /api/celebrations. To implement: add Family Name + Family Description modal that calls POST /api/celebrations with a family_id + minimal celebration.'
+                    id: 'cs-celebrations-stubs', severity: 'done', brand: 'culturesherpa', area: 'CultureSherpa',
+                    title: 'CS celebrations: S3 upload + Add Family dialog wired (2026-03-17)',
+                    detail: 'handleImageUpload() now POSTs to /api/admin/image/presign (Lambda route in lambda_handler_minimal.py:1574) with {cultureName, imageType:"hero", contentType}, PUTs file directly to signed S3 URL, then POSTs /api/admin/image/confirm; stores CloudFront publicUrl in edit-hero-image (not data URL). btn-add-family now opens a modal (Family Name + Culture Reference + Description), slugifies familyId, and POSTs a seed celebration to /api/celebrations then reloads via loadCelebrations().'
                 },
                 {
                     id: 'cs-profile-password-stub', severity: 'done', brand: 'culturesherpa', area: 'CultureSherpa',
