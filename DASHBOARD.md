@@ -55,9 +55,12 @@ npm run cache-bust
 ### 🔧 Gaps / To-Do
 
 - [ ] Set `SENTRY_DSN` secret via `wrangler secret put SENTRY_DSN` to enable client error tracking (worker code already live)
+- [ ] Set Sentry DSN env vars in AIAimate (Vercel) and CitizenApproved (CF Pages) to activate scaffolded tracking
 - [ ] Branch protection on `main` — CI check bypass warning still shows on push (rule exists but `required_pull_request_reviews` not enforced for owner)
 - [ ] Contact form end-to-end verification — submit a real test message
-- [ ] Store a Pages-scoped Cloudflare API token in `weave0/CitizenApproved` and `weave0/good-flippin-vibes` GitHub repo secrets so their deploy workflows stop failing; sites are live today via direct Wrangler production deploys
+- [ ] Store social OAuth platform API secrets (IG/TikTok/Pinterest/LinkedIn/X) as Cloudflare Worker secrets
+- [ ] Set `OPENAI_API_KEY` + `AI_PROVIDER=openai` in Vercel for AIAimate
+- [ ] GlobalDeets: add CSP/HSTS headers to password-gate middleware
 
 ---
 
@@ -75,6 +78,9 @@ npm run cache-bust
 ✅ Health Sweep: Live (gfd-health-sweep.weave0.workers.dev, cron 6 AM UTC)
 ✅ Ecosystem Sweep: 9/9 endpoints passing on latest run
 ✅ External Brand Headers: AI Aimate, CitizenApproved, GFV all returning CSP + HSTS + XFO + XCTO
+✅ R2 Media: 1,129 assets synced (850 CS + 279 GFV)
+✅ Sentry: Scaffolded across CS, AIAimate, CitizenApproved (set DSN to activate)
+✅ Admin: 24 panels live
 ```
 
 ---

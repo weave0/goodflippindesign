@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated**: March 11, 2026
+**Last Updated**: March 17, 2026
 **Status**: ✅ Production Live
 **Monthly Cost**: $0 (Cloudflare Pages free tier)
 
@@ -31,13 +31,13 @@
 | Contact form (index)    | ✅            | Formspree `xgvgzjbw`                                          |
 | Standalone inquiry form | ✅            | assets/contact-form.html — Formspree `xgvgzjbw`               |
 | Stripe Worker           | ✅            | Replaced AWS Lambda (Feb 23)                                  |
-| Sentry error tracking   | ⚠️            | Worker gracefully degrades; set `SENTRY_DSN` secret to enable |
+| Sentry error tracking   | ✅ scaffolded | CS: @sentry/browser; AIAimate: @sentry/nextjs; CA: @sentry/browser — set DSN env vars to activate |
 | CI — PR tests           | ✅            | ci.yml — Puppeteer on PRs                                     |
 | CI — deploy gate        | ✅            | deploy.yml — a11y smoke test on push to main                  |
 | CI — force deploy       | ✅            | force-deploy.yml — CF Pages API                               |
 | D1 community database   | ✅ configured | 27 tables deployed; API reads/writes through auth worker      |
-| R2 media bucket         | ✅ configured | `gfv-media` binding in workers/wrangler.toml                  |
-| Admin panel             | ✅            | admin.html — 20+ panels, command palette, blog manager        |
+| R2 media bucket         | ✅ active     | `gfv-media` — 1,129 assets (850 CS + 279 GFV) synced via R2  |
+| Admin panel             | ✅            | admin.html — 24 panels, command palette, blog manager         |
 | Daily Culture Calendar  | ✅            | 2 cultures/day, week + month views (panel 20)                 |
 | Social Gallery          | ✅            | Post Kit cards, platform filter, copy-to-clipboard            |
 | Finance toolkit         | ✅            | scripts/finance/ — GA4/Stripe export, submission packager     |
@@ -65,7 +65,16 @@ npm run test:a11y   # Accessibility only (~5s)
 
 ---
 
-## Recent Work (Mar 11 – ongoing, 2026)
+## Recent Work (Mar 17, 2026)
+
+- **Charter Phase 3 GAP_FLAGS closed**: All 8 open gaps resolved — `cs-coming-soon-tabs` (CultureRenderer empty state improved), `cs-celebrations-stubs` (S3 upload + Add Family modal wired), `cs-invalidation-stub` (CloudFront SDK implemented), `sentry-ecosystem` (CS fixed + AIAimate/CA scaffolded), `social-artwork-r2` (279 GFV files imported to R2, 0 failures), `gfv-stubs` (profanity list 2→27 terms), `aiaimate-stubs` (audit confirmed graceful degradation), `social-platform-oauth` (oauth.js 40KB fully implemented — needs platform API secrets)
+- **CitizenApproved infrastructure**: Added CI workflow (type-check + lint + build), README, .env.example — was the only ecosystem project with zero CI/docs
+- **AIAimate .env.example**: Added Sentry, Resend email, and social env var sections
+- **Community portal**: Badge/level/welcome notifications, D1 role system, thread pagination, edit modal, mobile tabs
+- **Cross-ecosystem Sentry**: CultureSherpa switched from broken @sentry/astro to @sentry/browser; AIAimate gets @sentry/nextjs with withSentryConfig wrapper; CitizenApproved gets @sentry/browser client component
+- **CloudFront invalidation**: CultureSherpa `invalidate.json.ts` replaced 501 stub with real @aws-sdk/client-cloudfront call
+
+## Previous Work (Mar 11, 2026)
 
 - **Stripe webhook** (`workers/auth.js`): Added `verifyStripeSignature()` + `handleStripeWebhook()` at `POST /api/stripe/webhook` (public, pre-Clerk). Web Crypto HMAC-SHA256 verifies `STRIPE_WEBHOOK_SECRET`. Handles `payment_intent.succeeded` → INSERT into `cms_donations`, `payment_intent.payment_failed` → UPDATE status, `charge.refunded` → UPDATE status. `STRIPE_WEBHOOK_SECRET` documented in `wrangler.toml` and `workers/wrangler.toml`. Donations panel subheading corrected.
 - **D1 schema — social & content-studio tables** (`d1-schema-cms-social.sql`): New schema file covering 6 previously undocumented tables used by `workers/cms.js`: `social_accounts`, `brand_workflows`, `discovered_assets`, `cross_post_links`, `cms_prompt_registries`, `cms_generated_assets`. Fixes the "ALTER TABLE social_accounts will fail on fresh D1" blocker. `ADMIN_INFRASTRUCTURE_AUDIT.md` updated accordingly.
@@ -117,10 +126,14 @@ npm run test:a11y   # Accessibility only (~5s)
 - Finance: added root-managed toolkit (GA4 export, Stripe export, submission packager) under `scripts/finance/`
 - CASHMONEY: formalized as local staging area, explicitly gitignored
 
-## Remaining Gap
+## Remaining Gaps
 
-- `weave0/CitizenApproved` and `weave0/good-flippin-vibes` GitHub deploy workflows still fail against Cloudflare Pages because the repo secrets do not yet contain a Pages-scoped API token. Production was updated directly with local Wrangler deploys, so the sites are live, but the GitHub Actions deploy jobs remain red until a proper token is stored.
-- `globaldeets.com` is now reachable by the sweep, but it still does not emit CSP or HSTS headers because the password-gated Pages middleware is serving the site without that header layer.
+- **Branch protection**: Direct pushes to `main` still possible on most repos
+- **GlobalDeets headers**: Reachable by sweep but no CSP/HSTS — password-gate middleware serves without header layer
+- **Sentry activation**: All 3 projects scaffolded but DSN env vars not yet set in production
+- **Social OAuth secrets**: oauth.js is complete but IG/TikTok/Pinterest/LinkedIn/X platform API credentials not yet stored as Cloudflare secrets
+- **AIAimate AI features**: `OPENAI_API_KEY` + `AI_PROVIDER=openai` not yet set in Vercel — Ask AI section uses stub provider
+- **Charter Phase 4**: Live global chat, translation bridge, controllable animation workflows, deeper deployment automation, multi-brand CMS operations — not started
 
 ## Previous Work (Feb 19 – Mar 3, 2026)
 
