@@ -11180,9 +11180,9 @@
                     detail: 'Misnamed variable was already backed by real /api/enrichment/queue Lambda endpoint (route exists at admin_backend.py:3862). Renamed stubWorklist → worklist throughout quality.astro. CS commit 98805a45b.'
                 },
                 {
-                    id: 'cs-invalidation-stub', severity: 'hygiene', brand: 'culturesherpa', area: 'CultureSherpa',
-                    title: 'CS: Automated cache invalidation not implemented',
-                    detail: 'api/invalidate.json.ts:82 — "Automated invalidation not yet implemented. Please use the AWS CLI command builder instead." Users must do this manually.'
+                    id: 'cs-invalidation-stub', severity: 'done', brand: 'culturesherpa', area: 'CultureSherpa',
+                    title: 'CS: CloudFront cache invalidation implemented (2026-03-17)',
+                    detail: 'api/cloudfront/invalidate.json.ts now calls CloudFront API directly via @aws-sdk/client-cloudfront (installed). Uses CS_AWS_ACCESS_KEY_ID + CS_AWS_SECRET_ACCESS_KEY + CS_AWS_REGION env vars. CreateInvalidationCommand with Date.now() CallerReference. Returns invalidationId, status, createTime. 501 stub + commented-out code removed.'
                 },
                 // ── GFV / goodflippinvibes.com ────────────────────────────────
                 {
