@@ -594,7 +594,10 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
-        .tab-bar::-webkit-scrollbar { display: none; }
+
+        .tab-bar::-webkit-scrollbar {
+            display: none;
+        }
 
         .tab-btn {
             flex: 1;
@@ -879,6 +882,7 @@
             cursor: pointer;
             transition: background 0.2s ease, border-color 0.2s ease;
         }
+
         .load-more-btn:hover {
             background: rgba(255, 255, 255, 0.03);
             border-color: var(--accent);
@@ -2347,6 +2351,25 @@
             color: var(--accent-coral);
         }
 
+        .role-badge {
+            font-size: 0.6rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: var(--radius-pill);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .role-badge.role-admin {
+            background: rgba(251, 113, 133, 0.15);
+            color: var(--accent-coral);
+        }
+
+        .role-badge.role-moderator {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-cyan);
+        }
+
         /* ── Profile Edit Button on Profile Card ─────────── */
         .btn-edit-profile {
             padding: 0.5rem 1rem;
@@ -3360,7 +3383,7 @@
                         '<div class="thread-card" data-id="' + post.id + '">' +
                         '<div class="thread-header">' +
                         '<img class="thread-avatar" src="' + (post.user_avatar || '') + '" alt="" loading="lazy">' +
-                        '<span class="thread-author">' + escHtml(post.user_name || 'Member') + '</span>' +
+                        '<span class="thread-author">' + escHtml(post.user_name || 'Member') + roleBadgeHtml(post.author_role) + '</span>' +
                         '<span class="thread-time">' + timeAgo(post.created_at) + '</span>' +
                         (TYPE_BADGES[post.post_type] || '') +
                         pinned +
@@ -3437,7 +3460,7 @@
                     const pinnedBadge = post.is_pinned ? '<span class="pinned-badge">📌 Pinned</span>' : '';
                     const editedBadge = post.is_edited ? '<span class="edited-badge">(edited)</span>' : '';
 
-                    // Post action buttons (owner or admin)
+                    // Post action buttons (owner or admin/mod)
                     let postActions = '';
                     const isOwner = currentUser && post.user_id === currentUser.id;
                     if (isOwner || isAdmin()) {
@@ -3446,10 +3469,15 @@
                             postActions += '<button class="post-action-btn" id="btn-edit-post" data-id="' + postId + '">✏️ Edit</button>';
                             postActions += '<button class="post-action-btn danger" id="btn-delete-post" data-id="' + postId + '">🗑️ Delete</button>';
                         }
-                        if (isAdmin()) {
+                        if (isModerator()) {
                             postActions += '<button class="post-action-btn" id="btn-pin-post" data-id="' + postId + '" data-pinned="' + (post.is_pinned ? '1' : '0') + '">' +
                                 (post.is_pinned ? '📌 Unpin' : '📌 Pin') + '</button>';
                         }
+                        postActions += '</div>';
+                    } else if (isModerator()) {
+                        postActions = '<div class="post-actions">';
+                        postActions += '<button class="post-action-btn" id="btn-pin-post" data-id="' + postId + '" data-pinned="' + (post.is_pinned ? '1' : '0') + '">' +
+                            (post.is_pinned ? '📌 Unpin' : '📌 Pin') + '</button>';
                         postActions += '</div>';
                     }
 
@@ -3458,7 +3486,7 @@
                         (post.title ? '<h2 class="detail-title">' + escHtml(post.title) + '</h2>' : '') +
                         '<div class="detail-meta">' +
                         '<img class="thread-avatar" src="' + (post.user_avatar || '') + '" alt="">' +
-                        '<strong>' + escHtml(post.user_name || 'Member') + '</strong>' +
+                        '<strong>' + escHtml(post.user_name || 'Member') + roleBadgeHtml(post.author_role) + '</strong>' +
                         '<span>' + timeAgo(post.created_at) + '</span>' +
                         (TYPE_BADGES_INLINE[post.post_type] || '') +
                         pinnedBadge + editedBadge +
@@ -3485,7 +3513,7 @@
                             '<div class="reply-item">' +
                             '<img class="reply-avatar" src="' + (reply.user_avatar || '') + '" alt="" loading="lazy">' +
                             '<div class="reply-body">' +
-                            '<span class="reply-author">' + escHtml(reply.user_name || 'Member') + '</span>' +
+                            '<span class="reply-author">' + escHtml(reply.user_name || 'Member') + roleBadgeHtml(reply.author_role) + '</span>' +
                             '<span class="reply-time">' + timeAgo(reply.created_at) + '</span>' +
                             replyEdited +
                             '<div class="reply-text">' + parseMd(reply.content || '') + '</div>' +
@@ -4072,7 +4100,7 @@
                             '<div class="member-card">' +
                             '<img class="member-avatar" src="' + (m.avatar_url || '') + '" alt="" loading="lazy">' +
                             '<div class="member-info">' +
-                            '<div class="member-name">' + escHtml(m.display_name || 'Member') + '</div>' +
+                            '<div class="member-name">' + escHtml(m.display_name || 'Member') + roleBadgeHtml(m.role) + '</div>' +
                             (m.bio ? '<div class="member-bio">' + escHtml(m.bio).slice(0, 80) + '</div>' : '') +
                             '</div>' +
                             '<div class="member-meta">' +
@@ -4105,6 +4133,16 @@
             // ── Admin Helpers ───────────────────────────────
             function isAdmin() {
                 return profileData && profileData.role === 'admin';
+            }
+
+            function isModerator() {
+                return profileData && (profileData.role === 'moderator' || profileData.role === 'admin');
+            }
+
+            function roleBadgeHtml(role) {
+                if (role === 'admin') return ' <span class="role-badge role-admin">Admin</span>';
+                if (role === 'moderator') return ' <span class="role-badge role-moderator">Mod</span>';
+                return '';
             }
 
             async function editPost(postId, currentTitle, currentContent) {

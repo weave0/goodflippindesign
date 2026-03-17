@@ -338,9 +338,8 @@ async function handleDeleteComment(request, user, env) {
 
   // Check permission: own comment OR admin role
   const isOwner = comment.user_id === user.id;
-  const isAdmin = user.publicMetadata?.role === 'admin';
-
-  if (!isOwner && !isAdmin) {
+  const callerRole = await getUserRole(env, user.id);
+  if (!isOwner && !isAdminRole(callerRole)) {
     return new Response('Unauthorized', { status: 403 });
   }
 
@@ -457,7 +456,8 @@ async function handleGetBlogPost(request, env) {
  */
 async function handleCreateBlogPost(request, user, env) {
   // Admin-only check
-  if (user.publicMetadata?.role !== 'admin') {
+  const callerRole = await getUserRole(env, user.id);
+  if (!isAdminRole(callerRole)) {
     return {
       body: 'Forbidden: Admin access required',
       status: 403,
@@ -523,7 +523,8 @@ async function handleCreateBlogPost(request, user, env) {
  */
 async function handleUpdateBlogPost(request, user, env) {
   // Admin-only check
-  if (user.publicMetadata?.role !== 'admin') {
+  const callerRole = await getUserRole(env, user.id);
+  if (!isAdminRole(callerRole)) {
     return {
       body: 'Forbidden: Admin access required',
       status: 403,
@@ -572,7 +573,8 @@ async function handleUpdateBlogPost(request, user, env) {
  */
 async function handleDeleteBlogPost(request, user, env) {
   // Admin-only check
-  if (user.publicMetadata?.role !== 'admin') {
+  const callerRole = await getUserRole(env, user.id);
+  if (!isAdminRole(callerRole)) {
     return {
       body: 'Forbidden: Admin access required',
       status: 403,
@@ -672,6 +674,24 @@ function getLevelForXP(xp) {
 function getNextLevel(currentLevel) {
   const idx = LEVELS.findIndex(l => l.level === currentLevel);
   return idx < LEVELS.length - 1 ? LEVELS[idx + 1] : null;
+}
+
+/**
+ * Check if user has admin or moderator role (D1-based)
+ */
+async function getUserRole(env, userId) {
+  const row = await env.DB.prepare(
+    'SELECT COALESCE(role, \'member\') as role FROM community_profiles WHERE user_id = ?'
+  ).bind(userId).first();
+  return row?.role || 'member';
+}
+
+function isAdminRole(role) {
+  return role === 'admin';
+}
+
+function isModeratorOrAdmin(role) {
+  return role === 'admin' || role === 'moderator';
 }
 
 /**
@@ -924,6 +944,7 @@ async function handleCommunityProfile(user, env) {
     bio: profile.bio || '',
     location: profile.location || '',
     website: profile.website || '',
+    role: profile.role || 'member',
     onboardingComplete: profile.onboarding_complete || 0,
     totalXP: profile.total_xp || 0,
     level,
@@ -990,13 +1011,13 @@ async function handleListCommunityPosts(request, env) {
   // Single post with replies
   if (postId) {
     const post = await env.DB.prepare(
-      'SELECT * FROM community_posts WHERE id = ?'
+      'SELECT p.*, COALESCE(cp.role, \'member\') as author_role FROM community_posts p LEFT JOIN community_profiles cp ON p.user_id = cp.user_id WHERE p.id = ?'
     ).bind(postId).first();
 
     if (!post) return new Response('Not found', { status: 404 });
 
     const { results: replies } = await env.DB.prepare(
-      'SELECT * FROM community_posts WHERE parent_id = ? ORDER BY created_at ASC'
+      'SELECT r.*, COALESCE(cp.role, \'member\') as author_role FROM community_posts r LEFT JOIN community_profiles cp ON r.user_id = cp.user_id WHERE r.parent_id = ? ORDER BY r.created_at ASC'
     ).bind(postId).all();
 
     // Get reactions for this post
@@ -1015,19 +1036,19 @@ async function handleListCommunityPosts(request, env) {
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 50);
   const offset = parseInt(url.searchParams.get('offset') || '0');
 
-  let query = `SELECT * FROM community_posts WHERE parent_id IS NULL`;
+  let query = `SELECT p.*, COALESCE(cp.role, 'member') as author_role FROM community_posts p LEFT JOIN community_profiles cp ON p.user_id = cp.user_id WHERE p.parent_id IS NULL`;
   let countQuery = `SELECT COUNT(*) as total FROM community_posts WHERE parent_id IS NULL`;
   const bindings = [];
   const countBindings = [];
 
   if (type !== 'all') {
-    query += ` AND post_type = ?`;
+    query += ` AND p.post_type = ?`;
     countQuery += ` AND post_type = ?`;
     bindings.push(type);
     countBindings.push(type);
   }
 
-  query += ` ORDER BY is_pinned DESC, created_at DESC LIMIT ? OFFSET ?`;
+  query += ` ORDER BY p.is_pinned DESC, p.created_at DESC LIMIT ? OFFSET ?`;
   bindings.push(limit, offset);
 
   const stmt = bindings.length > 0
@@ -1576,8 +1597,8 @@ async function handleEditPost(request, user, env) {
   if (!post) return new Response('Post not found', { status: 404 });
 
   const isOwner = post.user_id === user.id;
-  const isAdmin = user.publicMetadata?.role === 'admin';
-  if (!isOwner && !isAdmin) return new Response('Unauthorized', { status: 403 });
+  const userRole = await getUserRole(env, user.id);
+  if (!isOwner && !isAdminRole(userRole)) return new Response('Unauthorized', { status: 403 });
 
   const now = new Date().toISOString();
   await env.DB.prepare(`
@@ -1602,8 +1623,8 @@ async function handleDeletePost(request, user, env) {
   if (!post) return new Response('Post not found', { status: 404 });
 
   const isOwner = post.user_id === user.id;
-  const isAdmin = user.publicMetadata?.role === 'admin';
-  if (!isOwner && !isAdmin) return new Response('Unauthorized', { status: 403 });
+  const userRole = await getUserRole(env, user.id);
+  if (!isOwner && !isAdminRole(userRole)) return new Response('Unauthorized', { status: 403 });
 
   // Delete replies first
   await env.DB.prepare('DELETE FROM community_posts WHERE parent_id = ?').bind(postId).run();
@@ -1628,8 +1649,9 @@ async function handleDeletePost(request, user, env) {
  * Pin/unpin a post (admin only)
  */
 async function handlePinPost(request, user, env) {
-  if (user.publicMetadata?.role !== 'admin') {
-    return new Response('Forbidden: Admin only', { status: 403 });
+  const userRole = await getUserRole(env, user.id);
+  if (!isModeratorOrAdmin(userRole)) {
+    return new Response('Forbidden: Moderator or Admin only', { status: 403 });
   }
 
   const { postId, pinned } = await request.json();
@@ -1655,7 +1677,7 @@ async function handleMemberDirectory(request, env) {
   const offset = (page - 1) * limit;
 
   const { results } = await env.DB.prepare(`
-    SELECT user_id, display_name, avatar_url, bio, location, total_xp, level, badges, post_count, reply_count, current_streak, created_at, COALESCE(suspended, 0) as suspended
+    SELECT user_id, display_name, avatar_url, bio, location, total_xp, level, badges, post_count, reply_count, current_streak, created_at, COALESCE(suspended, 0) as suspended, COALESCE(role, 'member') as role
     FROM community_profiles
     ORDER BY total_xp DESC
     LIMIT ? OFFSET ?
@@ -1678,6 +1700,7 @@ async function handleMemberDirectory(request, env) {
     streak: p.current_streak,
     joinedAt: p.created_at,
     suspended: !!p.suspended,
+    role: p.role || 'member',
   }));
 
   return new Response(JSON.stringify({
@@ -1996,22 +2019,25 @@ export default {
         }
         break;
 
-      case '/api/profile':
-        // Return user profile data
+      case '/api/profile': {
+        // Return user profile data (includes D1-based role)
+        const profileRole = await getUserRole(env, user.id);
         return new Response(JSON.stringify({
           id: user.id,
           email: user.emailAddress,
           displayName: user.publicMetadata?.displayName || `User_${user.id.slice(0, 8)}`,
-          role: user.publicMetadata?.role || 'user',
+          role: profileRole,
           createdAt: user.createdAt,
         }), {
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
         });
+      }
 
       case '/api/blog':
         if (request.method === 'GET') {
           // status=all — admin-only full listing
-          if (user.publicMetadata?.role !== 'admin') {
+          const blogRole = await getUserRole(env, user.id);
+          if (!isAdminRole(blogRole)) {
             return new Response('Forbidden', { status: 403, headers: corsHeaders });
           }
           const response = await handleListBlogPosts(request, env);
@@ -2158,7 +2184,8 @@ export default {
       case '/api/comments/all':
         // Admin-only: list ALL comments across all articles
         if (request.method === 'GET') {
-          if (user.publicMetadata?.role !== 'admin') {
+          const commentsRole = await getUserRole(env, user.id);
+          if (!isAdminRole(commentsRole)) {
             return new Response('Forbidden', { status: 403, headers: corsHeaders });
           }
           try {
@@ -2177,7 +2204,11 @@ export default {
 
       default:
         // ── Admin community member actions: /api/community/members/:userId/* ──
-        if (url.pathname.startsWith('/api/community/members/') && user.publicMetadata?.role === 'admin') {
+        if (url.pathname.startsWith('/api/community/members/')) {
+          const callerRole = await getUserRole(env, user.id);
+          if (!isAdminRole(callerRole)) {
+            return new Response('Forbidden: Admin only', { status: 403, headers: corsHeaders });
+          }
           const parts = url.pathname.split('/');
           const targetUserId = parts[4]; // /api/community/members/{userId}/...
           const action = parts[5]; // badges | suspend | role
@@ -2212,13 +2243,14 @@ export default {
             });
           }
 
-          // PUT /api/community/members/:userId/role — grant/revoke role via note field
+          // PUT /api/community/members/:userId/role — set role (member/moderator/admin)
           if (action === 'role' && request.method === 'PUT') {
             const body = await request.json();
-            const role = (body.role || 'user').substring(0, 20);
+            const validRoles = ['member', 'moderator', 'admin'];
+            const role = validRoles.includes(body.role) ? body.role : 'member';
             await env.DB.prepare(
-              'UPDATE community_profiles SET bio = ?, updated_at = ? WHERE user_id = ?'
-            ).bind('[role:' + role + '] ' + ((await env.DB.prepare('SELECT bio FROM community_profiles WHERE user_id = ?').bind(targetUserId).first())?.bio || '').replace(/^\[role:[^\]]*\]\s*/, ''), new Date().toISOString(), targetUserId).run();
+              'UPDATE community_profiles SET role = ?, updated_at = ? WHERE user_id = ?'
+            ).bind(role, new Date().toISOString(), targetUserId).run();
             return new Response(JSON.stringify({ success: true, role }), {
               headers: { 'Content-Type': 'application/json', ...corsHeaders },
             });

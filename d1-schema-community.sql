@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS community_profiles (
   reaction_received_count INTEGER DEFAULT 0,
   badges TEXT DEFAULT '["founding-member"]',  -- JSON array of earned badge keys
   onboarding_complete INTEGER DEFAULT 0,       -- 0 = show welcome, 1 = completed
+  role TEXT DEFAULT 'member',                  -- member | moderator | admin
+  suspended INTEGER DEFAULT 0,                 -- 0 = active, 1 = suspended
   created_at TEXT NOT NULL,
   updated_at TEXT
 );
