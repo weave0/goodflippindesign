@@ -32,7 +32,142 @@
             "recursive": true,
             "brand": "gfv",
             "enabled": false,
-            "note": "488 files across 15 art series. Use catalog-art.js to review before enabling. Category inferred from subfolder name."
+            "note": "488 files across 15 art series. DISABLED — use per-series entries below (art-gfv-* sources) for selective social-ready import. Use catalog-art.js to review before enabling. Category inferred from subfolder name."
+        },
+        {
+            "id": "art-gfv-sheriff",
+            "path": "E:\\art\\GFV\\Sheriff",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "sheriff",
+            "enabled": true,
+            "note": "60 character illustrations — social-ready. art-catalog.json social=true, gallery=true."
+        },
+        {
+            "id": "art-gfv-luminous",
+            "path": "E:\\art\\GFV\\art\\luminous",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "luminous",
+            "enabled": true,
+            "note": "58 neon/glow illustrations — brand signature. social=true, gallery=true."
+        },
+        {
+            "id": "art-gfv-posters",
+            "path": "E:\\art\\GFV\\Posters",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "posters",
+            "enabled": true,
+            "note": "25 movie/show poster art + 1 video. social=true, gallery=true."
+        },
+        {
+            "id": "art-gfv-80s",
+            "path": "E:\\art\\GFV\\80s Ideas That Didn't",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "80s-ideas",
+            "enabled": true,
+            "note": "17 80s retro concept images. recursive=false to skip Posted subfolder. social=true."
+        },
+        {
+            "id": "art-gfv-mascot",
+            "path": "E:\\art\\GFV\\art\\mascot",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "mascot",
+            "enabled": true,
+            "note": "14 brand mascot variations. social=true, gallery=true."
+        },
+        {
+            "id": "art-gfv-street-life",
+            "path": "E:\\art\\GFV\\Street Life",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "street-life",
+            "enabled": true,
+            "note": "14 street culture illustrations. social=true, gallery=true."
+        },
+        {
+            "id": "art-gfv-oscars",
+            "path": "E:\\art\\GFV\\Oscars",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "oscars",
+            "enabled": true,
+            "note": "10 Oscar-themed images — seasonal. social=true."
+        },
+        {
+            "id": "art-gfv-zebra",
+            "path": "E:\\art\\GFV\\Zebra",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "zebra",
+            "enabled": true,
+            "note": "10 Zebra character images. social=true, gallery=true."
+        },
+        {
+            "id": "art-gfv-picklfish",
+            "path": "E:\\art\\GFV\\PIckleFish",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "picklfish",
+            "enabled": true,
+            "note": "9 PickleFish character images + video. social=true."
+        },
+        {
+            "id": "art-gfv-abstract",
+            "path": "E:\\art\\GFV\\art\\abstract",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "abstract",
+            "enabled": true,
+            "note": "8 abstract art images — good for backgrounds. social=true, gallery=true."
+        },
+        {
+            "id": "art-gfv-comedy",
+            "path": "E:\\art\\GFV\\art\\comedy",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "comedy",
+            "enabled": true,
+            "note": "8 comedy-themed images. social=true."
+        },
+        {
+            "id": "art-gfv-chill-bees",
+            "path": "E:\\art\\GFV\\Chill Bee's",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "chill-bees",
+            "enabled": true,
+            "note": "7 chill bee illustrations. social=true."
+        },
+        {
+            "id": "art-gfv-paddy-dill",
+            "path": "E:\\art\\GFV\\Paddy Dill",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "paddy-dill",
+            "enabled": true,
+            "note": "4 root-level Paddy Dill images. recursive=false to skip subdirs (Portrait, Social Content, Stories, etc.). social=true, gallery=true."
+        },
+        {
+            "id": "art-gfv-flippin-rocky",
+            "path": "E:\\art\\GFV\\Flippin Rocky",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "flippin-rocky",
+            "enabled": true,
+            "note": "3 Rocky-themed images + video. social=true."
+        },
+        {
+            "id": "art-gfv-wii-todd",
+            "path": "E:\\art\\GFV\\Wii Todd",
+            "recursive": false,
+            "brand": "gfv",
+            "category": "wii-todd",
+            "enabled": true,
+            "note": "3 Wii Todd character images + audio/video. social=true."
         },
         {
             "id": "art-portfolio",

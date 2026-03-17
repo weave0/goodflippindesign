@@ -11129,9 +11129,9 @@
                     detail: 'Each brand auto-populates its hashtag bank (incl. #art, #love, #goodvibes, #culture, #cultura) when selected.'
                 },
                 {
-                    id: 'social-artwork-r2', severity: 'quality', brand: 'gfv', area: 'Social Media',
-                    title: 'GFV art on E: drive — cataloged, selective import pending',
-                    detail: '✅ CS 1,283 assets in R2 (858 cultural + 425 branded), all approved. ✅ 859 phantom GFV D1 records purged (no R2 file, no thumbnail). ✅ 591 CS bad-category records cleaned. ✅ art-catalog.json generated: 15 GFV series, 250 social-ready images across Sheriff(60), Luminous(58), Posters(25), Mascot(14), Street Life(14), etc. ⏳ Next: review catalog, selectively import social-ready series via sync-to-r2.js. sync-config.json updated with correct E:\\art\\GFV path. Category inference fixed (no more filename-as-category).'
+                    id: 'social-artwork-r2', severity: 'done', brand: 'gfv', area: 'Social Media',
+                    title: 'GFV social art imported to R2 (279 files, 15 series)',
+                    detail: '✅ 279 GFV art files uploaded to R2 bucket gfv-media with 0 failures. ✅ sync-config.json updated with 15 per-series source entries (art-gfv-sheriff through art-gfv-wii-todd), all recursive:false for selective import. ✅ D1 cms_assets registry now has 1,129 total records. Series: Sheriff(60), Luminous(58), Posters(26), 80s Ideas(17), Mascot(14), Street Life(14), Oscars(10), Zebra(10), PIckleFish(16), Abstract(8), Comedy(8), Chill Bee\'s(7), Paddy Dill(13), Flippin Rocky(8), Wii Todd(10). Categories: sheriff/luminous/posters/80s-ideas/mascot/street-life/oscars/zebra/picklfish/abstract/comedy/chill-bees/paddy-dill/flippin-rocky/wii-todd.'
                 },
                 {
                     id: 'social-post-kits', severity: 'done', brand: 'all', area: 'Social Media',
@@ -11140,8 +11140,8 @@
                 },
                 {
                     id: 'social-platform-oauth', severity: 'quality', brand: 'all', area: 'Social Media',
-                    title: 'Only X (Twitter) tokens stored — IG/TikTok/Pinterest never connected',
-                    detail: 'D1 cms_platform_tokens has 3 rows, all platform="x": aiaimate/@CultureSherps (active), culturesherpa/@CultureSherps (active), gfd/@CultureSherps (inactive). All last_used_at=null — tokens present but no posts published via API yet. Instagram, TikTok, Pinterest have zero tokens stored. To connect: use admin portal Connections panel → Add Platform → OAuth flow for each platform.'
+                    title: 'Only X (Twitter) tokens stored — IG/TikTok/Pinterest need credentials + OAuth',
+                    detail: 'OAuth server fully implemented: workers/oauth.js (40KB) handles authorize/callback/status flows for Instagram, Facebook, X, LinkedIn, Pinterest, TikTok, YouTube. Imported via cms.js → handleOAuthRequest. Routes: GET /api/cms/oauth/authorize/:platform, /api/cms/oauth/callback/:platform, /api/cms/oauth/status. Missing: platform API credentials as Cloudflare Worker secrets. To activate Instagram: META_APP_ID + META_APP_SECRET. TikTok: TIKTOK_CLIENT_ID + TIKTOK_CLIENT_SECRET. Pinterest: PINTEREST_APP_ID + PINTEREST_APP_SECRET. LinkedIn: LINKEDIN_CLIENT_ID + LINKEDIN_CLIENT_SECRET. Once secrets set, use admin portal Connections panel → OAuth flow for each brand/platform.'
                 },
                 // ── CultureSherpa ──────────────────────────────────────────────
                 {
