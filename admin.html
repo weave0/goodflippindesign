@@ -11186,15 +11186,15 @@
                 },
                 // ── GFV / goodflippinvibes.com ────────────────────────────────
                 {
-                    id: 'gfv-stubs', severity: 'quality', brand: 'gfv', area: 'GFV',
-                    title: 'goodflippinvibes.com stubs unaudited',
-                    detail: 'E:\\art\\GFV has 488 files (395 images, 24 videos, 15 audio) across 15 series — cataloged in art-catalog.json. Website stubs / incomplete components still need walkthrough audit.'
+                    id: 'gfv-stubs', severity: 'done', brand: 'gfv', area: 'GFV',
+                    title: 'goodflippinvibes.com stubs — audited + profanity list expanded',
+                    detail: 'Audit complete 2026-03-18. Real issue found: workers/auth.js profanity list was only 2 terms ([spam, test-profanity]) — expanded to 27 terms matching GFD (spam signals + slurs). GFV commit 4cbdfbc. science-enhancer.js Progressive Reading Methods are commented-out TODO stubs (not user-visible). All other hits are HTML ::placeholder attrs or Cloudflare DO .get() API calls (not unimplemented features).'
                 },
                 // ── AIAimate ──────────────────────────────────────────────────
                 {
-                    id: 'aiaimate-stubs', severity: 'quality', brand: 'aiaimate', area: 'AIAimate',
-                    title: 'aiaimate.com stubs unaudited',
-                    detail: 'E:\\art\\AIAIMate has 48 files (40 images, 1 video, 84MB). No formal stub inventory. Needs walkthrough.'
+                    id: 'aiaimate-stubs', severity: 'done', brand: 'aiaimate', area: 'AIAimate',
+                    title: 'aiaimate.com stubs — audited, graceful degradation confirmed',
+                    detail: 'Audit complete 2026-03-18. app/api/ask/route.ts generateAnswer() uses provider=stub graceful degradation when OPENAI_API_KEY absent — correct behavior, not broken. AskAISection.tsx shows (Set OPENAI_API_KEY for AI-generated answers) to users when stub. No broken user-visible stubs. Activate: set OPENAI_API_KEY + AI_PROVIDER=openai in Vercel dashboard.'
                 },
                 // ── Admin Portal ───────────────────────────────────────────────
                 {
