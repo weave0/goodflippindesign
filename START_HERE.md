@@ -17,7 +17,7 @@
 | Good Flippin Vibes (GFV)  | weave0/good-flippin-vibes    | goodflippinvibes.com         | ✅ Live      | Music/culture brand                     |
 | CultureSherpa             | weave0/culturesherpa         | culturesherpa.org            | ✅ Live      | Cultural education platform             |
 | AIAimate                  | weave0/ai-animate            | aiaimate.com                 | ✅ Live      | AI animation/media                      |
-| CitizenApproved           | weave0/citizenApproved       | citizenApproved.com          | ✅ Live      | Civic tech                              |
+| CitizenApproved           | weave0/citizenApproved       | citizenApproved.org          | ✅ Live      | Civic tech                              |
 | GlobalDeets               | weave0/globaldeets           | globaldeets.com (subdomains) | ✅ Live      | Portfolio project host (eliassen, etc.) |
 | Jamie Mediation / MNPeace | weave0/jamie-mediation       | mediation.globaldeets.com    | ✅ Live      | Rebranded → MinnesotaPeace              |
 | SummitView                | weave0/summitview (or local) | TBD                          | 🔧 Local dev | AI video pipeline project               |
@@ -91,9 +91,9 @@ Full detail: [STORAGE_AUDIT_2026-03-08.md](STORAGE_AUDIT_2026-03-08.md) → Phas
 | 20  | NFT Studio     | nft-studio     | ✅ Collection + token manager                    |
 | 21  | Brands         | brands         | ✅ Brand switcher + identity                     |
 
-| 22  | Projects       | projects       | ✅ Repo CI status, PRs, branch protection (GitHub API) |
-| 23  | Deployments    | deployments    | ✅ Push-event workflow timeline, 7d KPIs               |
-| 24  | Settings       | settings       | ✅ Integration health, env vars, worker reachability   |
+| 22 | Projects | projects | ✅ Repo CI status, PRs, branch protection (GitHub API) |
+| 23 | Deployments | deployments | ✅ Push-event workflow timeline, 7d KPIs |
+| 24 | Settings | settings | ✅ Integration health, env vars, worker reachability |
 
 **Remaining charter module gap:**
 
@@ -105,17 +105,22 @@ Full detail: [STORAGE_AUDIT_2026-03-08.md](STORAGE_AUDIT_2026-03-08.md) → Phas
 
 ## 4. Third-Party Integrations Status
 
-| Service                                  | Purpose                  | Status                                          |
-| ---------------------------------------- | ------------------------ | ----------------------------------------------- |
-| Clerk                                    | Auth (community + admin) | ✅ Live — Google, LinkedIn, email/password      |
-| Stripe                                   | Donations                | ✅ Live — webhook + D1 persist                  |
-| Formspree xgvgzjbw                       | Contact form             | ✅ Live — brett.l.weaver@gmail.com              |
-| Sentry                                   | Error tracking           | ✅ DSN set 2026-03-09                           |
-| GA4                                      | Analytics                | ⚠️ GFD + GFV + AIAimate — measurement IDs vary  |
-| OpenAI (DALL-E 3)                        | CMS generation           | ⚠️ Key not yet in CF Pages secrets              |
-| Social — LinkedIn                        | Publishing               | ⚠️ Credentials in .env; not pushed to CF worker |
-| Social — Meta/X/Pinterest/TikTok/Threads | Publishing               | ❌ Secrets not yet set                          |
-| TOKEN_ENCRYPTION_KEY                     | Social OAuth encryption  | ⚠️ Not yet set in CF Pages                      |
+| Service                 | Purpose                  | Status                                         |
+| ----------------------- | ------------------------ | ---------------------------------------------- |
+| Clerk                   | Auth (community + admin) | ✅ Live — Google, LinkedIn, email/password     |
+| Stripe                  | Donations                | ✅ Live — webhook + D1 persist                 |
+| Formspree xgvgzjbw      | Contact form             | ✅ Live — brett.l.weaver@gmail.com             |
+| Sentry                  | Error tracking           | ✅ DSN set in CF Pages + auth worker           |
+| GA4                     | Analytics                | ⚠️ GFD + GFV + AIAimate — measurement IDs vary |
+| OpenAI (DALL-E 3)       | CMS generation           | ✅ OPENAI_API_KEY set in CF Pages              |
+| Social — LinkedIn       | Publishing               | ✅ CLIENT_ID + CLIENT_SECRET in CF Pages       |
+| Social — Meta           | Publishing               | ✅ APP_ID + APP_SECRET in CF Pages             |
+| Social — X (Twitter)    | Publishing               | ✅ CLIENT_ID + CLIENT_SECRET in CF Pages       |
+| Social — Threads        | Publishing               | ✅ APP_ID + APP_SECRET in CF Pages             |
+| Social — Google/YouTube | Publishing               | ✅ CLIENT_ID + CLIENT_SECRET in CF Pages       |
+| Social — Pinterest      | Publishing               | ❌ Credentials not yet obtained                |
+| Social — TikTok         | Publishing               | ❌ Credentials not yet obtained                |
+| TOKEN_ENCRYPTION_KEY    | Social OAuth encryption  | ✅ Set in CF Pages                             |
 
 ---
 
@@ -151,34 +156,32 @@ Full detail: [STORAGE_AUDIT_2026-03-08.md](STORAGE_AUDIT_2026-03-08.md) → Phas
 
 ### Immediate (Phase 1 / Phase 2)
 
-| Gap                                             | Severity | Notes                                           |
-| ----------------------------------------------- | -------- | ----------------------------------------------- |
-| Social OAuth secrets not set in CF              | High     | Meta, X, Pinterest, TikTok, Threads all missing |
-| TOKEN_ENCRYPTION_KEY not in CF Pages            | High     | Blocks social publisher OAuth flows             |
-| OPENAI_API_KEY not in CF Pages                  | Medium   | Blocks DALL-E generation in Content Studio      |
-| BrettLeeWeaver.com (Weave) has no remote/domain | Medium   | Local only — intentional for now                |
-| Sentry DSN set but not re-verified              | Low      | Set 2026-03-09                                  |
+| Gap                                             | Severity | Notes                                     |
+| ----------------------------------------------- | -------- | ----------------------------------------- |
+| Pinterest OAuth credentials not obtained        | Low      | No developer app created yet              |
+| TikTok OAuth credentials not obtained           | Low      | No developer app created yet              |
+| STRIPE_WEBHOOK_SECRET not in auth worker        | Medium   | Needed if webhook verification is enabled |
+| BrettLeeWeaver.com (Weave) has no remote/domain | Medium   | Local only — intentional for now          |
 
 ### Resolved This Session (2026-03-16)
 
-| Item | Resolution |
-| --- | --- |
+| Item                                  | Resolution                                                           |
+| ------------------------------------- | -------------------------------------------------------------------- |
 | Branch protection on all public repos | ✅ Applied — CitizenApproved, aiaimate, globaldeets, jamie-mediation |
-| Admin: Projects panel | ✅ Panel 22 — repo CI, PRs, branch protection |
-| Admin: Deployments panel | ✅ Panel 23 — push-event workflow timeline |
-| Admin: Settings/integrations panel | ✅ Panel 24 — integration health, env vars, workers |
-| Sensitive docs in git history | ✅ Full purge via filter-repo + force push |
-| Asset intake SOP | ✅ Added to DEVELOPER_GUIDE.md |
-| Deployment/feature-gating rules | ✅ Added to DEVELOPER_GUIDE.md |
-| CultureSherpa community plan | ✅ CULTURESHERPA_COMMUNITY_PLAN.md |
-| Media pipeline audit | ✅ MEDIA_PIPELINE_AUDIT.md |
-
+| Admin: Projects panel                 | ✅ Panel 22 — repo CI, PRs, branch protection                        |
+| Admin: Deployments panel              | ✅ Panel 23 — push-event workflow timeline                           |
+| Admin: Settings/integrations panel    | ✅ Panel 24 — integration health, env vars, workers                  |
+| Sensitive docs in git history         | ✅ Full purge via filter-repo + force push                           |
+| Asset intake SOP                      | ✅ Added to DEVELOPER_GUIDE.md                                       |
+| Deployment/feature-gating rules       | ✅ Added to DEVELOPER_GUIDE.md                                       |
+| CultureSherpa community plan          | ✅ CULTURESHERPA_COMMUNITY_PLAN.md                                   |
+| Media pipeline audit                  | ✅ MEDIA_PIPELINE_AUDIT.md                                           |
 
 ### Phase 2 (Structural)
 
-| Gap                                | Notes              |
-| ---------------------------------- | ------------------ |
-| GA4 unified tracking across brands | Currently fragmented |
+| Gap                                | Notes                         |
+| ---------------------------------- | ----------------------------- |
+| GA4 unified tracking across brands | Currently fragmented          |
 | CitizenApproved: CI workflow       | Has CI now — needs test suite |
 
 ### Phase 3 (Experience & Capability)

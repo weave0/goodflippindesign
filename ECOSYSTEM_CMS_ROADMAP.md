@@ -74,7 +74,7 @@ This isn't a generic WordPress/Contentful clone. It's purpose-built for our ecos
 │  goodflippinvibes.com  — art, community, vibes                  │
 │  goodflippindesign.com — portfolio, consulting, admin portal    │
 │  aiaimate.com          — AI education, interactive content      │
-│  citizenapproved.com   — immigration education                  │
+│  citizenapproved.org   — immigration education                  │
 │  culturesherpa.org     — cultural learning platform             │
 │  globaldeets.com       — BI project hub                         │
 └──────────────────────────────────────────────────────────────────┘

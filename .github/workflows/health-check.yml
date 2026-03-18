@@ -136,7 +136,7 @@ jobs:
             -L --max-redirs 5 \
             --connect-timeout 15 --max-time 30 \
             -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://citizenapproved.com) || true
+            https://citizenapproved.org) || true
           echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
           echo "CitizenApproved → HTTP ${STATUS:-000}"
           if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then

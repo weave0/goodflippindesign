@@ -21,7 +21,7 @@ const ALLOWED_ORIGINS = [
   'https://goodflippindesign.pages.dev',
   'https://goodflippinvibes.com',
   'https://aiaimate.com',
-  'https://citizenapproved.com',
+  'https://citizenapproved.org',
   'https://culturesherpa.org',
   'http://localhost:3000',
   'http://localhost:8788',

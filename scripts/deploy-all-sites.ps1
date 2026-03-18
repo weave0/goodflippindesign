@@ -80,7 +80,7 @@ if (-not $SkipVercel) {
     # CitizenApproved - Auto-deploy from GitHub
     try {
         Set-Location "Z:\CitizenApproved"
-        Write-Status "`n→ CitizenApproved (citizenapproved.com)" "Info"
+        Write-Status "`n→ CitizenApproved (citizenapproved.org)" "Info"
         
         if ($DryRun) {
             Write-Status "  [DRY RUN] Would trigger auto-deploy via git push" "Warning"

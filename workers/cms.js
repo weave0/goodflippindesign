@@ -1095,7 +1095,7 @@ const BRAND_DEFINITIONS = {
   aiaimate:        { name: 'AI Aimate',            domain: 'aiaimate.com',           color: '#3b82f6', platforms: ['linkedin','x','youtube'] },
   culturesherpa:   { name: 'CultureSherpa',        domain: 'culturesherpa.org',      color: '#f59e0b', platforms: ['instagram','x','facebook','linkedin'] },
   globaldeets:     { name: 'Global Deets',         domain: 'globaldeets.com',        color: '#8b5cf6', platforms: ['linkedin','x'] },
-  citizenapproved: { name: 'CitizenApproved',      domain: 'citizenapproved.com',    color: '#ef4444', platforms: ['instagram','facebook','linkedin','x'] },
+  citizenapproved: { name: 'CitizenApproved',      domain: 'citizenapproved.org',    color: '#ef4444', platforms: ['instagram','facebook','linkedin','x'] },
 };
 
 /**

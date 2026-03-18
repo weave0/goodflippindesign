@@ -11,7 +11,7 @@
 | **GFD** (Good Flippin Design) | `goodflippindesign.com`        | Vanilla HTML/CSS/JS     | `weave0/goodflippindesign`  | `goodflippindesign`  | `z:\GFD\`                                  |
 | **GFV** (Good Flippin Vibes)  | `goodflippinvibes.com`         | Vite + Vanilla JS       | `weave0/good-flippin-vibes` | `good-flippin-vibes` | `z:\GFD\GFD Dev Projects\GFV\website\`     |
 | **CultureSherpa**             | `culturesherpa.com`            | Astro + Python API      | `weave0/CultureSherpa`      | `culturesherpa`      | `z:\GFD\GFD Dev Projects\CultureSherpa\`   |
-| **CitizenApproved**           | `citizenapproved.com`          | Next.js 16 + TypeScript | `weave0/CitizenApproved`    | `citizenapproved`    | `z:\GFD\GFD Dev Projects\CitizenApproved\` |
+| **CitizenApproved**           | `citizenapproved.org`          | Next.js 16 + TypeScript | `weave0/CitizenApproved`    | `citizenapproved`    | `z:\GFD\GFD Dev Projects\CitizenApproved\` |
 | **AIAimate**                  | `aiaimate.com`                 | Next.js (portal)        | `weave0/aiaimate`           | N/A (Vercel)         | `z:\GFD\GFD Dev Projects\AI\`              |
 | **Globaldeets**               | `globaldeets.com`              | Node/static             | `weave0/globaldeets`        | `globaldeets`        | `z:\GFD\GFD Dev Projects\Globaldeets\`     |
 | **Jamie Mediation**           | `jamie-rigling-mediation.html` | Standalone HTML         | `weave0/jamie-mediation`    | —                    | `z:\GFD\jamie-rigling-mediation.html`      |

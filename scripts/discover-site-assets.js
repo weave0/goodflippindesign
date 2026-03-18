@@ -51,8 +51,8 @@ const BRAND_SITES = [
   },
   {
     brand: 'citizenapproved',
-    domain: 'citizenapproved.com',
-    pages: ['https://citizenapproved.com'],
+    domain: 'citizenapproved.org',
+    pages: ['https://citizenapproved.org'],
   },
   {
     brand: 'aiaimate',

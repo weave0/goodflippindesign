@@ -1084,7 +1084,7 @@ export default {
       'https://goodflippindesign.pages.dev',
       'https://goodflippinvibes.com',
       'https://aiaimate.com',
-      'https://citizenapproved.com',
+      'https://citizenapproved.org',
       'https://culturesherpa.org',
       'https://globaldeets.com',
       'http://localhost:3000',

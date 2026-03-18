@@ -98,7 +98,7 @@ Create a centralized multimedia management and publishing platform that allows t
 | Good Flippin Vibes  | goodflippinvibes.com  | Art, community, creative expression   |
 | Good Flippin Design | goodflippindesign.com | Portfolio, consulting, platform admin |
 | AI AIMATE           | aiaimate.com          | AI education, interactive content     |
-| CitizenApproved     | citizenapproved.com   | Immigration education                 |
+| CitizenApproved     | citizenapproved.org   | Immigration education                 |
 | CultureSherpa       | culturesherpa.org     | Cultural learning platform            |
 | GlobalDeets         | globaldeets.com       | BI project hub                        |
 
