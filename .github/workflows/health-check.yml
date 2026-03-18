@@ -23,6 +23,8 @@ jobs:
       #   --max-redirs 5 cap redirect chain
       #   --connect-timeout 15 / --max-time 30  avoid hanging runners
       #   -A "..."       browser UA avoids some Cloudflare bot blocks
+      #   || true        prevent curl exit codes (e.g. 6=DNS fail) from
+      #                  killing the step under bash set -e
       # Failure condition: 000 (connection refused / DNS) or 5xx (server error).
       # 403 from Cloudflare WAF means the edge is running → site is UP.
 
@@ -33,11 +35,11 @@ jobs:
             -L --max-redirs 5 \
             --connect-timeout 15 --max-time 30 \
             -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://goodflippindesign.com)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "Good Flippin Design → HTTP $STATUS"
-          if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
-            echo "::error::Good Flippin Design appears DOWN (HTTP $STATUS)"
+            https://goodflippindesign.com) || true
+          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
+          echo "Good Flippin Design → HTTP ${STATUS:-000}"
+          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
+            echo "::error::Good Flippin Design appears DOWN (HTTP ${STATUS:-000})"
             exit 1
           fi
 
@@ -48,11 +50,11 @@ jobs:
             -L --max-redirs 5 \
             --connect-timeout 15 --max-time 30 \
             -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://aiaimate.com)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "AI Aimate → HTTP $STATUS"
-          if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
-            echo "::error::AI Aimate appears DOWN (HTTP $STATUS)"
+            https://aiaimate.com) || true
+          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
+          echo "AI Aimate → HTTP ${STATUS:-000}"
+          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
+            echo "::error::AI Aimate appears DOWN (HTTP ${STATUS:-000})"
             exit 1
           fi
 
@@ -63,11 +65,11 @@ jobs:
             -L --max-redirs 5 \
             --connect-timeout 15 --max-time 30 \
             -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://globaldeets.com)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "globaldeets → HTTP $STATUS"
-          if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
-            echo "::warning::globaldeets returned $STATUS"
+            https://globaldeets.com) || true
+          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
+          echo "globaldeets → HTTP ${STATUS:-000}"
+          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
+            echo "::warning::globaldeets returned ${STATUS:-000}"
           fi
 
       - name: Check Eliassen subdomain
@@ -77,11 +79,11 @@ jobs:
             -L --max-redirs 5 \
             --connect-timeout 15 --max-time 30 \
             -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://eliassen.globaldeets.com)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "Eliassen → HTTP $STATUS"
-          if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
-            echo "::warning::Eliassen subdomain returned $STATUS"
+            https://eliassen.globaldeets.com) || true
+          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
+          echo "Eliassen → HTTP ${STATUS:-000}"
+          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
+            echo "::warning::Eliassen subdomain returned ${STATUS:-000}"
           fi
 
       - name: Check Good Flippin Vibes
@@ -91,11 +93,11 @@ jobs:
             -L --max-redirs 5 \
             --connect-timeout 15 --max-time 30 \
             -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://goodflippinvibes.com)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "Good Flippin Vibes → HTTP $STATUS"
-          if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
-            echo "::error::Good Flippin Vibes appears DOWN (HTTP $STATUS)"
+            https://goodflippinvibes.com) || true
+          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
+          echo "Good Flippin Vibes → HTTP ${STATUS:-000}"
+          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
+            echo "::error::Good Flippin Vibes appears DOWN (HTTP ${STATUS:-000})"
             exit 1
           fi
 
@@ -106,11 +108,11 @@ jobs:
             -L --max-redirs 5 \
             --connect-timeout 15 --max-time 30 \
             -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://www.culturesherpa.org)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "CultureSherpa → HTTP $STATUS"
-          if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
-            echo "::warning::CultureSherpa returned $STATUS"
+            https://www.culturesherpa.org) || true
+          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
+          echo "CultureSherpa → HTTP ${STATUS:-000}"
+          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
+            echo "::warning::CultureSherpa returned ${STATUS:-000}"
           fi
 
       - name: Check MN Peace (Jamie Rigling Mediation)
@@ -120,11 +122,11 @@ jobs:
             -L --max-redirs 5 \
             --connect-timeout 15 --max-time 30 \
             -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://minnesotapeace.com)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "MN Peace → HTTP $STATUS"
-          if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
-            echo "::warning::minnesotapeace.com returned $STATUS"
+            https://minnesotapeace.com) || true
+          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
+          echo "MN Peace → HTTP ${STATUS:-000}"
+          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
+            echo "::warning::minnesotapeace.com returned ${STATUS:-000}"
           fi
 
       - name: Check CitizenApproved
@@ -134,11 +136,11 @@ jobs:
             -L --max-redirs 5 \
             --connect-timeout 15 --max-time 30 \
             -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://citizenapproved.com)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "CitizenApproved → HTTP $STATUS"
-          if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
-            echo "::warning::CitizenApproved returned $STATUS"
+            https://citizenapproved.com) || true
+          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
+          echo "CitizenApproved → HTTP ${STATUS:-000}"
+          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
+            echo "::warning::CitizenApproved returned ${STATUS:-000}"
           fi
 
       - name: Check Brett Lee Weaver
@@ -148,11 +150,11 @@ jobs:
             -L --max-redirs 5 \
             --connect-timeout 15 --max-time 30 \
             -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://www.brettleeweaver.com)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "Brett Lee Weaver → HTTP $STATUS"
-          if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
-            echo "::warning::brettleeweaver.com returned $STATUS"
+            https://www.brettleeweaver.com) || true
+          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
+          echo "Brett Lee Weaver → HTTP ${STATUS:-000}"
+          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
+            echo "::warning::brettleeweaver.com returned ${STATUS:-000}"
           fi
 
       - name: Create incident issue on failure
@@ -160,29 +162,50 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            // Check for an existing open incident to avoid duplicates
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'incident',
+              state: 'open',
+              per_page: 1
+            });
+            if (existing.length > 0) {
+              const issue = existing[0];
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Health check still failing — [run #${context.runNumber}](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
+              });
+              console.log(`Commented on existing incident #${issue.number}`);
+              return;
+            }
+
             const now = new Date().toISOString();
-            const body = `## Incident Report
-
-            **Time:** ${now}
-            **Triggered by:** Scheduled health check workflow
-
-            ### Failed Checks
-
-            One or more critical sites failed the automated health check.
-
-            ### Action Required
-
-            1. Run local diagnostics: \`.\scripts\check-site-health.ps1 -Verbose\`
-            2. Check platform status pages:
-               - Cloudflare: https://www.cloudflarestatus.com/
-               - Vercel: https://www.vercel-status.com/
-            3. Review deployment logs in respective dashboards
-            4. Investigate and restore service
-
-            ### Workflow Run
-
-            [View failed run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
-            `;
+            const body = [
+              '## Incident Report',
+              '',
+              `**Time:** ${now}`,
+              '**Triggered by:** Scheduled health check workflow',
+              '',
+              '### Failed Checks',
+              '',
+              'One or more critical sites failed the automated health check.',
+              '',
+              '### Action Required',
+              '',
+              '1. Run local diagnostics: `.\\scripts\\check-site-health.ps1 -Verbose`',
+              '2. Check platform status pages:',
+              '   - Cloudflare: https://www.cloudflarestatus.com/',
+              '   - Vercel: https://www.vercel-status.com/',
+              '3. Review deployment logs in respective dashboards',
+              '4. Investigate and restore service',
+              '',
+              '### Workflow Run',
+              '',
+              `[View failed run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
+            ].join('\n');
 
             await github.rest.issues.create({
               owner: context.repo.owner,
