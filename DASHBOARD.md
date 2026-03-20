@@ -54,7 +54,8 @@ npm run cache-bust
 
 ### 🔧 Gaps / To-Do
 
-- [ ] `good-flippin-vibes` branch protection — requires GitHub Pro for private repos; defer or make repo public
+- [x] **GitHub Pro** upgraded (Mar 19) — unlocked branch protection on all private repos
+- [x] Branch protection: `good-flippin-vibes`, `CultureSherpa`, `brettleeweaver`, `SummitView` — force push + delete blocked (Mar 19). `kp` + `ThyOwn` archived (read-only, no action needed)
 - [x] **AIAimate (Vercel)**: `OPENAI_API_KEY`, `AI_PROVIDER=openai`, `SENTRY_DSN` uploaded via Vercel Dashboard + redeployment triggered (Mar 19)
 - [ ] Pinterest + TikTok developer apps — no apps created; defer until platform needed
 - [x] **STRIPE_WEBHOOK_SECRET** pushed to gfd-auth worker (Mar 19) — endpoint: `https://goodflippindesign.com/api/stripe/webhook`
