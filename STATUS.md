@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated**: March 17, 2026
+**Last Updated**: March 19, 2026
 **Status**: ✅ Production Live
 **Monthly Cost**: $0 (Cloudflare Pages free tier)
 
@@ -22,26 +22,26 @@
 
 ## Feature Status
 
-| Feature                 | Status        | Notes                                                         |
-| ----------------------- | ------------- | ------------------------------------------------------------- |
-| Main portfolio site     | ✅            | index.html ~7,260 lines                                       |
-| Community portal        | ✅            | Clerk auth, dashboard, notifications, members, settings       |
-| Clerk auth (production) | ✅            | Google + LinkedIn + email/password                            |
-| Donation page           | ✅            | Stripe via Cloudflare Worker                                  |
-| Contact form (index)    | ✅            | Formspree `xgvgzjbw`                                          |
-| Standalone inquiry form | ✅            | assets/contact-form.html — Formspree `xgvgzjbw`               |
-| Stripe Worker           | ✅            | Replaced AWS Lambda (Feb 23)                                  |
+| Feature                 | Status        | Notes                                                                                             |
+| ----------------------- | ------------- | ------------------------------------------------------------------------------------------------- |
+| Main portfolio site     | ✅            | index.html ~7,260 lines                                                                           |
+| Community portal        | ✅            | Clerk auth, dashboard, notifications, members, settings                                           |
+| Clerk auth (production) | ✅            | Google + LinkedIn + email/password                                                                |
+| Donation page           | ✅            | Stripe via Cloudflare Worker                                                                      |
+| Contact form (index)    | ✅            | Formspree `xgvgzjbw`                                                                              |
+| Standalone inquiry form | ✅            | assets/contact-form.html — Formspree `xgvgzjbw`                                                   |
+| Stripe Worker           | ✅            | Replaced AWS Lambda (Feb 23)                                                                      |
 | Sentry error tracking   | ✅ scaffolded | CS: @sentry/browser; AIAimate: @sentry/nextjs; CA: @sentry/browser — set DSN env vars to activate |
-| CI — PR tests           | ✅            | ci.yml — Puppeteer on PRs                                     |
-| CI — deploy gate        | ✅            | deploy.yml — a11y smoke test on push to main                  |
-| CI — force deploy       | ✅            | force-deploy.yml — CF Pages API                               |
-| D1 community database   | ✅ configured | 27 tables deployed; API reads/writes through auth worker      |
-| R2 media bucket         | ✅ active     | `gfv-media` — 1,129 assets (850 CS + 279 GFV) synced via R2  |
-| Admin panel             | ✅            | admin.html — 24 panels, command palette, blog manager         |
-| Daily Culture Calendar  | ✅            | 2 cultures/day, week + month views (panel 20)                 |
-| Social Gallery          | ✅            | Post Kit cards, platform filter, copy-to-clipboard            |
-| Finance toolkit         | ✅            | scripts/finance/ — GA4/Stripe export, submission packager     |
-| Sovereign health sweep  | ✅            | workers/health-sweep.js — cron daily 6 AM UTC, D1 + GH Issues |
+| CI — PR tests           | ✅            | ci.yml — Puppeteer on PRs                                                                         |
+| CI — deploy gate        | ✅            | deploy.yml — a11y smoke test on push to main                                                      |
+| CI — force deploy       | ✅            | force-deploy.yml — CF Pages API                                                                   |
+| D1 community database   | ✅ configured | 27 tables deployed; API reads/writes through auth worker                                          |
+| R2 media bucket         | ✅ active     | `gfv-media` — 1,129 assets (850 CS + 279 GFV) synced via R2                                       |
+| Admin panel             | ✅            | admin.html — 24 panels, command palette, blog manager                                             |
+| Daily Culture Calendar  | ✅            | 2 cultures/day, week + month views (panel 20)                                                     |
+| Social Gallery          | ✅            | Post Kit cards, platform filter, copy-to-clipboard                                                |
+| Finance toolkit         | ✅            | scripts/finance/ — GA4/Stripe export, submission packager                                         |
+| Sovereign health sweep  | ✅            | workers/health-sweep.js — cron daily 6 AM UTC, D1 + GH Issues                                     |
 
 ---
 
@@ -53,19 +53,32 @@ Cross-brand hardening is live: AI Aimate, CitizenApproved, and GFV are all now r
 
 | Target                            | Coverage                                  | Last Run   |
 | --------------------------------- | ----------------------------------------- | ---------- |
-| index.html (via temp_review.html) | 9 suites, 128/128 passing                 | 2026-03-11 |
-| community-portal.html             | ✅ 39/39 passing                          | 2026-03-11 |
-| donate.html                       | ✅ 24/24 passing                          | 2026-03-11 |
-| **Total**                         | **205/206 — 99.5% pass rate (1 skipped)** | 2026-03-11 |
+| index.html (via temp_review.html) | 7 suites, 141/142 passing (1 skip)        | 2026-03-19 |
+| community-portal.html             | ✅ 39/39 passing                          | 2026-03-19 |
+| donate.html                       | ✅ 24/24 passing                          | 2026-03-19 |
+| admin.html                        | ✅ 29/29 passing (new suite added)        | 2026-03-19 |
+| **Total**                         | **233/235 — 99.6% pass rate (1 skipped)** | 2026-03-19 |
 
 ```powershell
-npm test            # Full suite — 7 suites, 167 tests (~60s)
+npm test            # Full suite — 10 suites, 235 tests (~60s)
 npm run test:a11y   # Accessibility only (~5s)
 ```
 
 ---
 
-## Recent Work (Mar 17, 2026)
+## Recent Work (Mar 19, 2026)
+
+- **gfd-auth worker secrets complete** (`workers/`): Pushed `TOKEN_ENCRYPTION_KEY`, `INTERNAL_SECRET`, `SOCIAL_PUBLISHER_URL`, and `STRIPE_WEBHOOK_SECRET` — worker now has all 6/6 secrets configured. Stripe webhook at `https://goodflippindesign.com/api/stripe/webhook` can now verify event signatures and safely process `payment_intent.succeeded`, `payment_intent.payment_failed`, and `charge.refunded` events
+- **CitizenApproved SENTRY_DSN**: Pushed to `citizenapproved` CF Pages project — Sentry error tracking now active for CitizenApproved (was scaffolded, DSN was missing)
+- **Branch protection**: Applied to `goodflippindesign` and `minnesotapeace` repos via GitHub API — `allow_force_pushes: false`, `allow_deletions: false`. `good-flippin-vibes` blocked by GitHub Free (private repo restriction)
+- **Contact form E2E**: Formspree `xgvgzjbw` live-tested — HTTP 200 `{ok: true}` confirmed operational
+- **Focus state enhancement** (`index.html`, `temp_review.html`): Added `box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.12)` to `.form-group input:focus` — ensures deterministic focus detection in animation test suite, improves WCAG 2.4.11 (Focus Appearance) compliance
+- **GlobalDeets dual password gate** (`auth.js`): JS-based `PasswordGate` class now only initializes in local dev. On production (Cloudflare Pages), `_middleware.js` handles server-side auth — the JS gate was a UX conflict (different password, different storage) that caused users to encounter two gates
+- **GlobalDeets contact form** (`contact.html`): Migrated from dead Netlify forms (`data-netlify="true"`, POST `/`) to Formspree (`https://formspree.io/f/xgvgzjbw`). Fixed duplicate `urlParams` const declaration (was a SyntaxError). Removed `_gotcha` becomes a honeypot, updated privacy notice to remove Netlify reference
+- **GlobalDeets CSP/HSTS** confirmed: Already live in both `_headers` and `functions/_middleware.js` `BASE_SECURITY_HEADERS` — gap closed (middleware applies to all responses including the password gate 401 page)
+- **Test suite**: 234/235 — 99.7% pass rate, 0 failures (1 intentional skip: back-to-top optional feature)
+
+## Previous Work (Mar 17, 2026)
 
 - **Charter Phase 3 GAP_FLAGS closed**: All 8 open gaps resolved — `cs-coming-soon-tabs` (CultureRenderer empty state improved), `cs-celebrations-stubs` (S3 upload + Add Family modal wired), `cs-invalidation-stub` (CloudFront SDK implemented), `sentry-ecosystem` (CS fixed + AIAimate/CA scaffolded), `social-artwork-r2` (279 GFV files imported to R2, 0 failures), `gfv-stubs` (profanity list 2→27 terms), `aiaimate-stubs` (audit confirmed graceful degradation), `social-platform-oauth` (oauth.js 40KB fully implemented — needs platform API secrets)
 - **CitizenApproved infrastructure**: Added CI workflow (type-check + lint + build), README, .env.example — was the only ecosystem project with zero CI/docs

@@ -54,20 +54,26 @@ npm run cache-bust
 
 ### 🔧 Gaps / To-Do
 
-- [ ] Set `SENTRY_DSN` secret via `wrangler secret put SENTRY_DSN` to enable client error tracking (worker code already live)
-- [ ] Set Sentry DSN env vars in AIAimate (Vercel) and CitizenApproved (CF Pages) to activate scaffolded tracking
-- [ ] Branch protection on `main` — CI check bypass warning still shows on push (rule exists but `required_pull_request_reviews` not enforced for owner)
-- [ ] Contact form end-to-end verification — submit a real test message
-- [ ] Store social OAuth platform API secrets (IG/TikTok/Pinterest/LinkedIn/X) as Cloudflare Worker secrets
-- [ ] Set `OPENAI_API_KEY` + `AI_PROVIDER=openai` in Vercel for AIAimate
-- [ ] GlobalDeets: add CSP/HSTS headers to password-gate middleware
+- [ ] **AIAimate (Vercel)**: log into [Vercel Dashboard → aiaimate → Settings → Environment Variables](https://vercel.com/weave0/aiaimate/settings/environment-variables) and add: `OPENAI_API_KEY` (from `.env`), `AI_PROVIDER=openai`, `SENTRY_DSN` (from `.env`) — no CLI path available (no Vercel token stored)
+- [ ] `good-flippin-vibes` branch protection — requires GitHub Pro for private repos; defer or make repo public
+- [ ] Pinterest + TikTok developer apps — no apps created; defer until platform needed
+- [x] **STRIPE_WEBHOOK_SECRET** pushed to gfd-auth worker (Mar 19) — endpoint: `https://goodflippindesign.com/api/stripe/webhook`
+- [x] gfd-auth worker: TOKEN_ENCRYPTION_KEY, INTERNAL_SECRET, SOCIAL_PUBLISHER_URL, STRIPE_WEBHOOK_SECRET pushed — **6/6 secrets complete** (Mar 19)
+- [x] CitizenApproved: SENTRY_DSN pushed to `citizenapproved` CF Pages project (Mar 19)
+- [x] Branch protection: `goodflippindesign` + `minnesotapeace` — `allow_force_pushes: false`, `allow_deletions: false` (Mar 19)
+- [x] Contact form E2E: Formspree `xgvgzjbw` confirmed operational — HTTP 200 `{ok: true}` (Mar 19)
+- [x] SENTRY_DSN on gfd-auth worker ✅ (Mar 19 verified)
+- [x] GlobalDeets: CSP/HSTS confirmed live in `_headers` + `_middleware.js` (Mar 19)
+- [x] GlobalDeets: dual password gate resolved — JS gate disabled on production, CF middleware handles auth (Mar 19)
+- [x] GlobalDeets: contact form migrated from dead Netlify forms to Formspree `xgvgzjbw` (Mar 19)
 
 ---
 
 ## 📈 Performance Metrics
 
 ```
-✅ Test Pass Rate: 100% (205/205 tests) — last run 2026-03-11
+✅ Test Pass Rate: 99.6% (233/235 tests, 1 skip, 0 failures) — last run 2026-03-19
+✅ Admin Panel: 29/29 tests passing (new suite)
 ✅ Community Portal: 39/39 tests passing
 ✅ Donate Page: 24/24 tests passing
 ✅ Responsive: 100% (7 viewports)
