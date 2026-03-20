@@ -68,6 +68,7 @@ npm run test:a11y   # Accessibility only (~5s)
 
 ## Recent Work (Mar 19, 2026)
 
+- **AIAimate Vercel env vars**: `OPENAI_API_KEY`, `AI_PROVIDER=openai`, `SENTRY_DSN` set via Vercel Dashboard + redeployment triggered — Sentry error tracking and OpenAI now active on AIAimate
 - **gfd-auth worker secrets complete** (`workers/`): Pushed `TOKEN_ENCRYPTION_KEY`, `INTERNAL_SECRET`, `SOCIAL_PUBLISHER_URL`, and `STRIPE_WEBHOOK_SECRET` — worker now has all 6/6 secrets configured. Stripe webhook at `https://goodflippindesign.com/api/stripe/webhook` can now verify event signatures and safely process `payment_intent.succeeded`, `payment_intent.payment_failed`, and `charge.refunded` events
 - **CitizenApproved SENTRY_DSN**: Pushed to `citizenapproved` CF Pages project — Sentry error tracking now active for CitizenApproved (was scaffolded, DSN was missing)
 - **Branch protection**: Applied to `goodflippindesign` and `minnesotapeace` repos via GitHub API — `allow_force_pushes: false`, `allow_deletions: false`. `good-flippin-vibes` blocked by GitHub Free (private repo restriction)

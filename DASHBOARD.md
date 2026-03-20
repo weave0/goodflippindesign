@@ -54,8 +54,8 @@ npm run cache-bust
 
 ### 🔧 Gaps / To-Do
 
-- [ ] **AIAimate (Vercel)**: log into [Vercel Dashboard → aiaimate → Settings → Environment Variables](https://vercel.com/weave0/aiaimate/settings/environment-variables) and add: `OPENAI_API_KEY` (from `.env`), `AI_PROVIDER=openai`, `SENTRY_DSN` (from `.env`) — no CLI path available (no Vercel token stored)
 - [ ] `good-flippin-vibes` branch protection — requires GitHub Pro for private repos; defer or make repo public
+- [x] **AIAimate (Vercel)**: `OPENAI_API_KEY`, `AI_PROVIDER=openai`, `SENTRY_DSN` uploaded via Vercel Dashboard + redeployment triggered (Mar 19)
 - [ ] Pinterest + TikTok developer apps — no apps created; defer until platform needed
 - [x] **STRIPE_WEBHOOK_SECRET** pushed to gfd-auth worker (Mar 19) — endpoint: `https://goodflippindesign.com/api/stripe/webhook`
 - [x] gfd-auth worker: TOKEN_ENCRYPTION_KEY, INTERNAL_SECRET, SOCIAL_PUBLISHER_URL, STRIPE_WEBHOOK_SECRET pushed — **6/6 secrets complete** (Mar 19)
