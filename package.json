@@ -31,6 +31,8 @@
     "health-sweep:trigger": "node -e \"const h=process.env.SWEEP_SECRET||''; fetch('https://gfd-health-sweep.weave0.workers.dev/trigger',{method:'GET',headers:{'x-sweep-secret':h}}).then(r=>r.json()).then(console.log)\"",
     "health-sweep:last": "node -e \"fetch('https://gfd-health-sweep.weave0.workers.dev/last').then(r=>r.json()).then(d=>console.table(d))\"",
     "deploy:social": "wrangler deploy --config wrangler-social.toml",
+    "deploy:cron": "wrangler deploy --config wrangler-cron.toml",
+    "cron:apply-schema": "wrangler d1 execute gfd_community --remote --file=d1-schema-studio.sql",
     "social:secret:encrypt": "wrangler secret put TOKEN_ENCRYPTION_KEY --config wrangler-social.toml",
     "social:secret:internal": "wrangler secret put INTERNAL_SECRET --config wrangler-social.toml",
     "watermark": "node scripts/watermark.js",

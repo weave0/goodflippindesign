@@ -103,8 +103,12 @@ assets/logo-vector.png
 assets/GFV/GFV Logo Final Vector.*
 assets/brand/GFV Master Logo Files.png
 
-# Local finance staging and generated submissions
+# Internal commercial and finance workspace
+# Keep the full subtree local until a deliberate redacted split is prepared.
 CASHMONEY/
+
+# Finance tool caches
+scripts/finance/.mypy_cache/
 
 # Local scratch
 assets/VECTOR/

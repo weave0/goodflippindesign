@@ -11,43 +11,6 @@
         <priority>1.0</priority>
     </url>
 
-    <!-- Legal Forms Pages -->
-    <url>
-        <loc>https://goodflippindesign.com/assets/forms/nda-request.html</loc>
-        <lastmod>2026-02-17</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>
-
-    <url>
-        <loc>https://goodflippindesign.com/assets/forms/service-agreement-request.html</loc>
-        <lastmod>2026-02-17</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>
-
-    <url>
-        <loc>https://goodflippindesign.com/assets/forms/sow-request.html</loc>
-        <lastmod>2026-02-17</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>
-
-    <url>
-        <loc>https://goodflippindesign.com/assets/forms/change-order-request.html</loc>
-        <lastmod>2026-02-17</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.6</priority>
-    </url>
-
-    <!-- Contact Form -->
-    <url>
-        <loc>https://goodflippindesign.com/assets/contact-form.html</loc>
-        <lastmod>2026-02-17</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>
-
     <!-- Media Gallery -->
     <url>
         <loc>https://goodflippindesign.com/gallery.html</loc>

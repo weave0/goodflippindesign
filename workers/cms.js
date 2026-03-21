@@ -2547,6 +2547,58 @@ async function handleCharacters(request, user, env, method, charId) {
  * @param {object} env - Cloudflare bindings (DB, MEDIA_BUCKET)
  * @param {object|null} user - Authenticated Clerk user (null for public routes)
  */
+
+// ── Studio HQ kanban persistence ─────────────────────────────────────────────
+async function ensureStudioConfigSchema(db) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS studio_config (
+      key        TEXT PRIMARY KEY,
+      value      TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )
+  `).run();
+}
+
+async function handleStudioKanbanGet(env) {
+  try {
+    await ensureStudioConfigSchema(env.DB);
+    const row = await env.DB.prepare(`SELECT value FROM studio_config WHERE key = 'kanban'`).first();
+    if (!row) return jsonResponse({ items: [] });
+    let items = [];
+    try { items = JSON.parse(row.value); } catch { items = []; }
+    return jsonResponse({ items });
+  } catch (err) {
+    return errorResponse('Failed to load kanban: ' + err.message, 500);
+  }
+}
+
+async function handleStudioKanbanPut(request, env) {
+  try {
+    await ensureStudioConfigSchema(env.DB);
+    const body = await request.json();
+    const items = body.items;
+    if (!Array.isArray(items)) return errorResponse('items must be an array', 400);
+    // Validate each item has required fields; strip unknown keys
+    const sanitised = items.slice(0, 200).map(function (c) {
+      return {
+        id:       String(c.id || '').slice(0, 64),
+        title:    String(c.title || '').slice(0, 300),
+        stage:    ['backlog', 'scoping', 'building', 'review', 'shipped'].includes(c.stage) ? c.stage : 'backlog',
+        priority: ['critical', 'high', 'medium', 'low'].includes(c.priority) ? c.priority : 'medium',
+        brand:    String(c.brand || 'all').slice(0, 32),
+      };
+    });
+    await env.DB.prepare(
+      `INSERT INTO studio_config (key, value, updated_at)
+       VALUES ('kanban', ?, datetime('now'))
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`
+    ).bind(JSON.stringify(sanitised)).run();
+    return jsonResponse({ ok: true, count: sanitised.length });
+  } catch (err) {
+    return errorResponse('Failed to save kanban: ' + err.message, 500);
+  }
+}
+
 export async function handleCMSRequest(request, env, user) {
   const url = new URL(request.url);
   const path = url.pathname.replace('/api/cms', '');
@@ -2950,6 +3002,14 @@ export async function handleCMSRequest(request, env, user) {
     }
     if (path === '/content-studio/schedule' && method === 'POST') {
       return handleCSSchedulePost(request, user, env);
+    }
+
+    // ── Studio HQ — persistent kanban (GET = read board, PUT = replace board) ──
+    if (path === '/studio-kanban' && method === 'GET') {
+      return handleStudioKanbanGet(env);
+    }
+    if (path === '/studio-kanban' && method === 'PUT') {
+      return handleStudioKanbanPut(request, env);
     }
 
     return errorResponse('CMS endpoint not found', 404);

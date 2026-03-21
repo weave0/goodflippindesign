@@ -46,12 +46,12 @@ Write-Host "╚═════════════════════�
 if (-not $SkipVercel) {
     Write-Status "`n[1/4] VERCEL DEPLOYMENTS" "Info"
     Write-Status "────────────────────────────────────────" "Info"
-    
+
     # AI Aimate - Direct deployment
     try {
         Set-Location "Z:\aiaimate\portal"
         Write-Status "→ AI Aimate (portal.aiaimate.com)" "Info"
-        
+
         if ($DryRun) {
             Write-Status "  [DRY RUN] Would deploy via: vercel --prod" "Warning"
             Add-Result "AI Aimate" "Skipped (Dry Run)" "Vercel" "Manual deployment required"
@@ -64,10 +64,10 @@ if (-not $SkipVercel) {
                 git add .
                 git commit -m "chore: GA4 deployment checkpoint"
             }
-            
+
             Write-Status "  Pushing to origin..." "Info"
             git push origin main 2>&1 | Out-Null
-            
+
             Write-Status "  ✅ Pushed to GitHub - Vercel auto-deploy triggered" "Success"
             Add-Result "AI Aimate" "Success" "Vercel (Auto-Deploy)" "GitHub push completed"
         }
@@ -76,12 +76,12 @@ if (-not $SkipVercel) {
         Write-Status "  ❌ Error: $_" "Error"
         Add-Result "AI Aimate" "Failed" "Vercel" $_.Exception.Message
     }
-    
+
     # CitizenApproved - Auto-deploy from GitHub
     try {
         Set-Location "Z:\CitizenApproved"
         Write-Status "`n→ CitizenApproved (citizenapproved.org)" "Info"
-        
+
         if ($DryRun) {
             Write-Status "  [DRY RUN] Would trigger auto-deploy via git push" "Warning"
             Add-Result "CitizenApproved" "Skipped (Dry Run)" "Vercel" "Manual deployment required"
@@ -90,15 +90,15 @@ if (-not $SkipVercel) {
             Write-Status "  Verifying git is up to date..." "Info"
             git fetch origin main 2>&1 | Out-Null
             $behind = git rev-list --count HEAD..origin/main
-            
+
             if ($behind -gt 0) {
                 Write-Status "  Pulling latest changes..." "Info"
                 git pull origin main
             }
-            
+
             Write-Status "  Pushing to GitHub (triggers Vercel auto-deploy)..." "Info"
             git push origin main 2>&1 | Out-Null
-            
+
             Write-Status "  ✅ Auto-deploy triggered via GitHub integration" "Success"
             Add-Result "CitizenApproved" "Success" "Vercel (Auto-Deploy)" "GitHub push completed"
         }
@@ -115,12 +115,12 @@ if (-not $SkipVercel) {
 if (-not $SkipCloudflare) {
     Write-Status "`n[2/4] CLOUDFLARE PAGES DEPLOYMENTS" "Info"
     Write-Status "────────────────────────────────────────" "Info"
-    
+
     # Good Flippin Vibes
     try {
         Set-Location "Z:\good-flippin-vibes"
         Write-Status "`n→ Good Flippin Vibes (goodflippinvibes.com)" "Info"
-        
+
         if ($DryRun) {
             Write-Status "  [DRY RUN] Would deploy via wrangler or git push" "Warning"
             Add-Result "Good Flippin Vibes" "Skipped (Dry Run)" "Cloudflare" "Manual deployment required"
@@ -128,7 +128,7 @@ if (-not $SkipCloudflare) {
         else {
             Write-Status "  Pushing to GitHub (triggers Cloudflare auto-deploy)..." "Info"
             git push origin main 2>&1 | Out-Null
-            
+
             Write-Status "  ✅ Auto-deploy triggered (check Cloudflare dashboard)" "Success"
             Add-Result "Good Flippin Vibes" "Success" "Cloudflare (Auto-Deploy)" "GitHub push completed"
         }
@@ -137,12 +137,12 @@ if (-not $SkipCloudflare) {
         Write-Status "  ❌ Error: $_" "Error"
         Add-Result "Good Flippin Vibes" "Failed" "Cloudflare" $_.Exception.Message
     }
-    
+
     # GlobalDeets
     try {
         Set-Location "Z:\globaldeets"
         Write-Status "`n→ GlobalDeets (globaldeets.com)" "Info"
-        
+
         if ($DryRun) {
             Write-Status "  [DRY RUN] Would deploy via wrangler or git push" "Warning"
             Add-Result "GlobalDeets" "Skipped (Dry Run)" "Cloudflare" "Manual deployment required"
@@ -150,7 +150,7 @@ if (-not $SkipCloudflare) {
         else {
             Write-Status "  Pushing to GitHub (triggers Cloudflare auto-deploy)..." "Info"
             git push origin main 2>&1 | Out-Null
-            
+
             Write-Status "  ✅ Auto-deploy triggered (check Cloudflare dashboard)" "Success"
             Add-Result "GlobalDeets" "Success" "Cloudflare (Auto-Deploy)" "GitHub push completed"
         }
@@ -167,11 +167,11 @@ if (-not $SkipCloudflare) {
 if (-not $SkipS3) {
     Write-Status "`n[3/4] S3/CLOUDFRONT DEPLOYMENT" "Info"
     Write-Status "────────────────────────────────────────" "Info"
-    
+
     try {
         Set-Location "Z:\CultureSherpa\website-astro"
         Write-Status "`n→ CultureSherpa (culturesherpa.org)" "Info"
-        
+
         if ($DryRun) {
             Write-Status "  [DRY RUN] Would run: pnpm build && deploy_to_production.ps1" "Warning"
             Add-Result "CultureSherpa" "Skipped (Dry Run)" "S3/CloudFront" "Manual deployment required"
@@ -179,14 +179,14 @@ if (-not $SkipS3) {
         else {
             Write-Status "  Running production build..." "Info"
             $buildOutput = pnpm build 2>&1
-            
+
             if ($LASTEXITCODE -eq 0) {
                 Write-Status "  ✅ Build completed successfully" "Success"
                 Write-Status "  Deploying to S3..." "Info"
-                
+
                 Set-Location "Z:\CultureSherpa"
                 $deployOutput = & .\deploy_to_production.ps1 -SkipIndexRegen 2>&1
-                
+
                 if ($LASTEXITCODE -eq 0) {
                     Write-Status "  ✅ Deployed to S3 and CloudFront invalidated" "Success"
                     Add-Result "CultureSherpa" "Success" "S3/CloudFront" "Build and deploy completed"
@@ -215,7 +215,7 @@ Write-Status "──────────────────────
 try {
     Set-Location "Z:\GFD"
     Write-Status "`n→ Good Flippin Design (goodflippindesign.com)" "Info"
-    
+
     if ($DryRun) {
         Write-Status "  [DRY RUN] Would push to GitHub (auto-deploys)" "Warning"
         Add-Result "Good Flippin Design" "Skipped (Dry Run)" "GitHub Pages" "Manual deployment required"
@@ -223,7 +223,7 @@ try {
     else {
         Write-Status "  Pushing to GitHub (triggers Pages auto-deploy)..." "Info"
         git push origin main 2>&1 | Out-Null
-        
+
         Write-Status "  ✅ Auto-deploy triggered" "Success"
         Add-Result "Good Flippin Design" "Success" "GitHub Pages" "GitHub push completed"
     }

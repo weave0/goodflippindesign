@@ -1,0 +1,21 @@
+name            = "gfd-cron-agent"
+main            = "workers/cron-agent.js"
+compatibility_date  = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare D1 — same database as the main Pages site
+[[d1_databases]]
+binding       = "DB"
+database_name = "gfd_community"
+database_id   = "a46ec9df-31b8-4285-845b-1fd3a62bd1b5"
+
+# Cron schedules (Cloudflare free tier allows up to 5 triggers)
+#   0 * * * *   → top of every hour  → hourly health sweep
+#   0 9 * * *   → 09:00 UTC daily    → auto-resolver (close stale flags)
+#   0 0 * * MON → midnight Mondays   → weekly studio digest
+[triggers]
+crons = ["0 * * * *", "0 9 * * *", "0 0 * * MON"]
+
+# Secrets (set via: wrangler secret put <NAME> --config wrangler-cron.toml)
+# CRON_TRIGGER_SECRET — random string, used to authorize manual /trigger/* calls
+#                       Generate with: node -e "console.log(crypto.randomUUID())"

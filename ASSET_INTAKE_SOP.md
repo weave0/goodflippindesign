@@ -8,23 +8,23 @@
 
 All original artwork and media lives on the `E:\art` drive, organized by brand:
 
-| Folder | Brand | Files | Notes |
-| ------ | ----- | ----- | ----- |
-| `AIAIMate/` | aiaimate | 48 | Product screenshots, brand assets |
-| `Brand Assets Development/` | mixed | 121 | Cross-brand logo/font/color explorations |
-| `Brett/` | personal | 10 | Headshots, personal brand |
-| `Cats of IG/` | gfv | 39 | Instagram pet content |
-| `CitizenApproved/` | citizenapproved | 18 | App screenshots, brand assets |
-| `CultureSherpa/` | culturesherpa | 980 | Cultural images (hero + card pairs) |
-| `GFD/` | gfd | 31 | Portfolio screenshots, consultancy branding |
-| `GFV/` | gfv | 521 | Art series (Sheriff, Luminous, Posters, etc.) |
-| `Media/` | mixed | 239 | Videos, podcasts, raw footage |
-| `MUSIC/` | gfv | 91 | Audio tracks, sound design |
-| `VECTOR/` | mixed | 39 | SVG/AI source files |
-| `2026 Olympics/` | gfv | 11 | Seasonal Olympic-themed art |
-| `Archive/` | mixed | 47 | Retired/deprecated assets |
-| `Phone Link/` | personal | 29 | Phone camera auto-sync |
-| `wip/` | mixed | 8 | Work in progress — not production-ready |
+| Folder                      | Brand           | Files | Notes                                         |
+| --------------------------- | --------------- | ----- | --------------------------------------------- |
+| `AIAIMate/`                 | aiaimate        | 48    | Product screenshots, brand assets             |
+| `Brand Assets Development/` | mixed           | 121   | Cross-brand logo/font/color explorations      |
+| `Brett/`                    | personal        | 10    | Headshots, personal brand                     |
+| `Cats of IG/`               | gfv             | 39    | Instagram pet content                         |
+| `CitizenApproved/`          | citizenapproved | 18    | App screenshots, brand assets                 |
+| `CultureSherpa/`            | culturesherpa   | 980   | Cultural images (hero + card pairs)           |
+| `GFD/`                      | gfd             | 31    | Portfolio screenshots, consultancy branding   |
+| `GFV/`                      | gfv             | 521   | Art series (Sheriff, Luminous, Posters, etc.) |
+| `Media/`                    | mixed           | 239   | Videos, podcasts, raw footage                 |
+| `MUSIC/`                    | gfv             | 91    | Audio tracks, sound design                    |
+| `VECTOR/`                   | mixed           | 39    | SVG/AI source files                           |
+| `2026 Olympics/`            | gfv             | 11    | Seasonal Olympic-themed art                   |
+| `Archive/`                  | mixed           | 47    | Retired/deprecated assets                     |
+| `Phone Link/`               | personal        | 29    | Phone camera auto-sync                        |
+| `wip/`                      | mixed           | 8     | Work in progress — not production-ready       |
 
 **Total**: ~2,232 files across 15 directories.
 
@@ -63,27 +63,27 @@ aiaimate-brand-logo-dark.svg
 
 The GFV art series map to these categories (16 subdirectories under `E:\art\GFV`):
 
-| Folder | Category Slug | Files | Status |
-| ------ | ------------- | ----- | ------ |
-| `Sheriff/` | sheriff | 60 | synced to R2 |
-| `art/luminous/` | luminous | 58 | synced to R2 |
-| `Posters/` | posters | 25 | synced to R2 |
-| `80s Ideas That Didn't/` | 80s-ideas | 17 | synced to R2 |
-| `art/mascot/` | mascot | 14 | synced to R2 |
-| `Street Life/` | street-life | 14 | synced to R2 |
-| `Oscars/` | oscars | 10 | synced to R2 |
-| `Zebra/` | zebra | 10 | synced to R2 |
-| `PIckleFish/` | picklfish | 9 | synced to R2 |
-| `art/abstract/` | abstract | 8 | synced to R2 |
-| `art/comedy/` | comedy | 8 | synced to R2 |
-| `Chill Bee's/` | chill-bees | 7 | synced to R2 |
-| `Paddy Dill/` | paddy-dill | 4 | synced to R2 |
-| `Flippin Rocky/` | flippin-rocky | 3 | synced to R2 |
-| `Wii Todd/` | wii-todd | 3 | synced to R2 |
-| `Irivine/` | — | — | not in sync config |
-| `Logo/` | — | — | not in sync config |
-| `Right's Dispute/` | — | — | not in sync config |
-| `Toyko Hallwayz/` | — | — | not in sync config |
+| Folder                   | Category Slug | Files | Status             |
+| ------------------------ | ------------- | ----- | ------------------ |
+| `Sheriff/`               | sheriff       | 60    | synced to R2       |
+| `art/luminous/`          | luminous      | 58    | synced to R2       |
+| `Posters/`               | posters       | 25    | synced to R2       |
+| `80s Ideas That Didn't/` | 80s-ideas     | 17    | synced to R2       |
+| `art/mascot/`            | mascot        | 14    | synced to R2       |
+| `Street Life/`           | street-life   | 14    | synced to R2       |
+| `Oscars/`                | oscars        | 10    | synced to R2       |
+| `Zebra/`                 | zebra         | 10    | synced to R2       |
+| `PIckleFish/`            | picklfish     | 9     | synced to R2       |
+| `art/abstract/`          | abstract      | 8     | synced to R2       |
+| `art/comedy/`            | comedy        | 8     | synced to R2       |
+| `Chill Bee's/`           | chill-bees    | 7     | synced to R2       |
+| `Paddy Dill/`            | paddy-dill    | 4     | synced to R2       |
+| `Flippin Rocky/`         | flippin-rocky | 3     | synced to R2       |
+| `Wii Todd/`              | wii-todd      | 3     | synced to R2       |
+| `Irivine/`               | —             | —     | not in sync config |
+| `Logo/`                  | —             | —     | not in sync config |
+| `Right's Dispute/`       | —             | —     | not in sync config |
+| `Toyko Hallwayz/`        | —             | —     | not in sync config |
 
 ---
 
@@ -113,6 +113,7 @@ The pipeline reads from `sync-config.json` in the project root. Each source entr
 ```
 
 Key fields:
+
 - **id**: Unique identifier for the source (used with `--source` flag)
 - **path**: Absolute local path to the directory
 - **recursive**: Whether to scan subdirectories
@@ -154,16 +155,16 @@ gfv-media/
 
 Every uploaded file gets a row in `cms_assets`:
 
-| Column | Source |
-| ------ | ------ |
-| `id` | SHA-256 hash of file content |
-| `brand` | From source config |
-| `category` | From source config |
-| `title` | Filename without extension |
-| `file_path` | R2 key (e.g., `gfv/sheriff/deputy-badge.webp`) |
-| `media_type` | Inferred from extension (image/video/audio) |
-| `mime_type` | Mapped from extension |
-| `file_size` | Bytes |
+| Column          | Source                                         |
+| --------------- | ---------------------------------------------- |
+| `id`            | SHA-256 hash of file content                   |
+| `brand`         | From source config                             |
+| `category`      | From source config                             |
+| `title`         | Filename without extension                     |
+| `file_path`     | R2 key (e.g., `gfv/sheriff/deputy-badge.webp`) |
+| `media_type`    | Inferred from extension (image/video/audio)    |
+| `mime_type`     | Mapped from extension                          |
+| `file_size`     | Bytes                                          |
 | `review_status` | `draft` (default — requires approval in admin) |
 
 ---
@@ -261,18 +262,18 @@ The script maintains `.sync-manifest.json` locally to track which files have bee
 
 These `E:\art` folders are not yet in the sync pipeline:
 
-| Folder | Action Needed |
-| ------ | ------------- |
-| `Archive/` | Audit — some may be worth preserving |
-| `Brand Assets Development/` | Extract final versions → brand folders |
-| `Brett/` | Personal — keep out of ecosystem pipeline |
-| `Cats of IG/` | Add sync config if activating on social platforms |
-| `Media/` | Large (239 files) — needs video/audio triage |
-| `MUSIC/` | Audio pipeline — needs separate handling for streaming |
-| `Phone Link/` | Personal — keep out of pipeline |
-| `VECTOR/` | Source files — sync to R2 as "design" type |
-| `wip/` | Not production — exclude permanently |
-| `GFV/Irivine/` | Needs sync-config entry |
-| `GFV/Logo/` | Brand logos — consider separate source entry |
-| `GFV/Right's Dispute/` | Needs sync-config entry |
-| `GFV/Toyko Hallwayz/` | Needs sync-config entry |
+| Folder                      | Action Needed                                          |
+| --------------------------- | ------------------------------------------------------ |
+| `Archive/`                  | Audit — some may be worth preserving                   |
+| `Brand Assets Development/` | Extract final versions → brand folders                 |
+| `Brett/`                    | Personal — keep out of ecosystem pipeline              |
+| `Cats of IG/`               | Add sync config if activating on social platforms      |
+| `Media/`                    | Large (239 files) — needs video/audio triage           |
+| `MUSIC/`                    | Audio pipeline — needs separate handling for streaming |
+| `Phone Link/`               | Personal — keep out of pipeline                        |
+| `VECTOR/`                   | Source files — sync to R2 as "design" type             |
+| `wip/`                      | Not production — exclude permanently                   |
+| `GFV/Irivine/`              | Needs sync-config entry                                |
+| `GFV/Logo/`                 | Brand logos — consider separate source entry           |
+| `GFV/Right's Dispute/`      | Needs sync-config entry                                |
+| `GFV/Toyko Hallwayz/`       | Needs sync-config entry                                |

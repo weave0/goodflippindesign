@@ -28,6 +28,14 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // Canonical domain redirect: goodflippinvibes.com → goodflippindesign.com
+    // Prevents duplicate-domain indexing; preserves path + query string.
+    if (url.hostname === 'goodflippinvibes.com' || url.hostname === 'www.goodflippinvibes.com') {
+      const canonical = new URL(request.url);
+      canonical.hostname = 'goodflippindesign.com';
+      return Response.redirect(canonical.toString(), 301);
+    }
+
     // Block accidental public access to internal docs, source code, and policy drafts.
     // This repo is a monorepo-style workspace; Cloudflare Pages will serve committed
     // files unless we explicitly deny them.

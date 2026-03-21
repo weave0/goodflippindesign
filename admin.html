@@ -4208,6 +4208,337 @@
             border-left: 2px solid var(--accent-cyan);
         }
 
+        /* ── Studio HQ Panel (26) ─────────────────────────────────────────── */
+        .shq-signal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .shq-signal {
+            padding: 1rem 1.1rem;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shq-signal-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .shq-signal-bar.ok {
+            background: var(--accent-emerald);
+        }
+
+        .shq-signal-bar.warn {
+            background: var(--accent-gold);
+        }
+
+        .shq-signal-bar.crit {
+            background: var(--accent-rose);
+        }
+
+        .shq-signal-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .shq-signal-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1;
+        }
+
+        .shq-signal-sub {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .shq-kanban {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.65rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .shq-col {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.65rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            min-height: 220px;
+        }
+
+        .shq-col-header {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.45rem;
+            margin-bottom: 0.1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .shq-col-count {
+            background: var(--bg);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 0.6rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .shq-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.55rem 0.65rem;
+            cursor: default;
+            position: relative;
+            transition: border-color 0.2s ease, transform 0.15s ease;
+        }
+
+        .shq-card:hover {
+            border-color: rgba(34, 211, 238, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .shq-card-title {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.35;
+            margin-bottom: 0.3rem;
+            padding-right: 1.1rem;
+        }
+
+        .shq-card-footer {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+
+        .shq-card-tag {
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.58rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .shq-card-tag.critical {
+            background: rgba(244, 63, 94, 0.15);
+            color: #f43f5e;
+        }
+
+        .shq-card-tag.high {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+        }
+
+        .shq-card-tag.medium {
+            background: rgba(34, 211, 238, 0.12);
+            color: #22d3ee;
+        }
+
+        .shq-card-tag.low {
+            background: rgba(115, 130, 166, 0.15);
+            color: #7382a6;
+        }
+
+        .shq-card-brand {
+            font-size: 0.58rem;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        .shq-card-del {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.62rem;
+            line-height: 1;
+            opacity: 0;
+            padding: 2px;
+            transition: opacity 0.15s;
+        }
+
+        .shq-card:hover .shq-card-del {
+            opacity: 0.55;
+        }
+
+        .shq-card-del:hover {
+            opacity: 1 !important;
+            color: var(--accent-rose);
+        }
+
+        .shq-card-advance {
+            font-size: 0.58rem;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            background: none;
+            border-radius: 3px;
+            padding: 1px 5px;
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s;
+            margin-left: auto;
+        }
+
+        .shq-card-advance:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .shq-advisor-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .shq-insight {
+            display: flex;
+            gap: 0.7rem;
+            align-items: flex-start;
+            padding: 0.6rem 0.85rem;
+            border: 1px solid var(--border);
+            border-left-width: 3px;
+            border-radius: 8px;
+            background: var(--panel);
+            transition: border-color 0.2s ease;
+        }
+
+        .shq-insight.priority-critical {
+            border-left-color: #f43f5e;
+        }
+
+        .shq-insight.priority-warning {
+            border-left-color: #fbbf24;
+        }
+
+        .shq-insight.priority-ok {
+            border-left-color: #10b981;
+        }
+
+        .shq-insight.priority-info {
+            border-left-color: #22d3ee;
+        }
+
+        .shq-insight-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+            line-height: 1.35;
+        }
+
+        .shq-insight-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .shq-insight-title {
+            font-size: 0.79rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .shq-insight-detail {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.1rem;
+            line-height: 1.4;
+        }
+
+        .shq-insight-action {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.67rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        .shq-insight-action:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .shq-add-form {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .shq-add-form input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .shq-add-form select {
+            min-width: 88px;
+        }
+
+        .shq-arch-wrap {
+            width: 100%;
+            overflow-x: auto;
+            background: var(--bg);
+            border-radius: var(--radius-md);
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .shq-arch-wrap svg {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 1100px) {
+            .shq-kanban {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .shq-kanban {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .shq-signal-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         /* ── Responsive ──────────────────────────────────────────────────── */
         @media (max-width: 1024px) {
             .shell {
@@ -6405,6 +6736,11 @@
                                 <path d="M2 1.5h5a1 1 0 0 1 1 1v12l-3-2-3 2V2.5a1 1 0 0 1 1-1Z" />
                                 <path d="M8 2.5h5a1 1 0 0 1 1 1v12l-3-2-3 2V2.5Z" />
                             </svg></span><span class="nav-label">Documentation</span></button>
+                    <button class="nav-btn" data-view="studio-hq"><span class="nav-num">26</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="1.5" y="2" width="13" height="9" rx="1.5" />
+                                <path d="M5.5 11v2.5M10.5 11v2.5M3 13.5h10" />
+                                <path d="M4 5h3.5M4 7.5h5M9.5 5h2.5" />
+                            </svg></span><span class="nav-label">Studio HQ</span></button>
 
                 </nav>
 
@@ -8390,6 +8726,284 @@
                                 <strong style="font-size:0.82rem">Brand Prompt Pack</strong>
                                 <div class="text-muted" style="font-size:0.72rem;margin-top:0.25rem">AI prompt templates for brand consistency</div>
                             </a>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Studio HQ (panel 26) — Studio Management Platform -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-studio-hq">
+                    <div class="section-head">
+                        <h2 class="section-title">Studio Management Platform</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="shq-refresh-btn">&#8635; Refresh Signals</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Real-time visibility into issues, priorities, and build stages &mdash; with a self-advisor that surfaces what matters most.</p>
+
+                    <!-- Signal Radar ─────────────────────────────────────── -->
+                    <article class="panel mb-085">
+                        <div class="section-head">
+                            <h2 class="section-title">&#128308; Signal Radar</h2>
+                            <span class="text-muted" id="shq-signal-updated" style="font-size:0.75rem"></span>
+                        </div>
+                        <div class="shq-signal-grid" id="shq-signal-grid">
+                            <div class="shq-signal">
+                                <div class="shq-signal-bar"></div>
+                                <div class="shq-signal-label">Scheduled Posts</div>
+                                <div class="shq-signal-value" id="shq-sig-scheduled">&mdash;</div>
+                                <div class="shq-signal-sub" id="shq-sig-scheduled-sub">loading…</div>
+                            </div>
+                            <div class="shq-signal">
+                                <div class="shq-signal-bar"></div>
+                                <div class="shq-signal-label">Failed Variants</div>
+                                <div class="shq-signal-value" id="shq-sig-failed">&mdash;</div>
+                                <div class="shq-signal-sub" id="shq-sig-failed-sub">loading…</div>
+                            </div>
+                            <div class="shq-signal">
+                                <div class="shq-signal-bar"></div>
+                                <div class="shq-signal-label">Connections</div>
+                                <div class="shq-signal-value" id="shq-sig-connections">&mdash;</div>
+                                <div class="shq-signal-sub" id="shq-sig-connections-sub">loading…</div>
+                            </div>
+                            <div class="shq-signal">
+                                <div class="shq-signal-bar"></div>
+                                <div class="shq-signal-label">Assets (draft)</div>
+                                <div class="shq-signal-value" id="shq-sig-assets">&mdash;</div>
+                                <div class="shq-signal-sub" id="shq-sig-assets-sub">loading…</div>
+                            </div>
+                            <div class="shq-signal">
+                                <div class="shq-signal-bar"></div>
+                                <div class="shq-signal-label">Open Ops Flags</div>
+                                <div class="shq-signal-value" id="shq-sig-ops">&mdash;</div>
+                                <div class="shq-signal-sub" id="shq-sig-ops-sub">loading…</div>
+                            </div>
+                            <div class="shq-signal">
+                                <div class="shq-signal-bar"></div>
+                                <div class="shq-signal-label">Ecosystem Health</div>
+                                <div class="shq-signal-value" id="shq-sig-health">&mdash;</div>
+                                <div class="shq-signal-sub" id="shq-sig-health-sub">loading…</div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Self-Advisor ─────────────────────────────────────── -->
+                    <article class="panel mb-085">
+                        <div class="section-head">
+                            <h2 class="section-title">&#129504; Self-Advisor</h2>
+                            <div class="inline-actions">
+                                <span class="text-muted" style="font-size:0.75rem">Rules run client-side &mdash; zero compute cost</span>
+                                <button class="btn btn-micro" id="shq-advisor-refresh-btn">Re-analyze</button>
+                            </div>
+                        </div>
+                        <p class="subheading mb-06" style="font-size:0.76rem">Reads loaded state and surfaces ranked, actionable insights. No AI, no cloud calls &mdash; deterministic rules against real data.</p>
+                        <div class="shq-advisor-list" id="shq-advisor-list">
+                            <div class="text-muted" style="padding:0.5rem;font-size:0.8rem">Analyzing…</div>
+                        </div>
+                    </article>
+
+                    <!-- Build Pipeline ───────────────────────────────────── -->
+                    <article class="panel mb-085">
+                        <div class="section-head">
+                            <h2 class="section-title">&#128736; Build Pipeline</h2>
+                            <div class="inline-actions">
+                                <button class="btn btn-micro" id="shq-kanban-reset-btn" title="Reset to default workitems">Reset Defaults</button>
+                            </div>
+                        </div>
+                        <p class="subheading mb-06" style="font-size:0.76rem">Kanban board for tracking builds, features, and infrastructure work. Stored locally &mdash; click <strong>&rsaquo;</strong> to advance a card, or add new items below.</p>
+                        <div class="shq-kanban" id="shq-kanban"></div>
+                        <form class="shq-add-form" id="shq-add-form">
+                            <input type="text" id="shq-add-title" placeholder="Add a workitem, feature, or issue&hellip;" maxlength="140" required />
+                            <select id="shq-add-priority">
+                                <option value="critical">&#128308; Critical</option>
+                                <option value="high">&#128992; High</option>
+                                <option value="medium" selected>&#128309; Medium</option>
+                                <option value="low">&#9898; Low</option>
+                            </select>
+                            <select id="shq-add-brand">
+                                <option value="all">All Brands</option>
+                                <option value="gfd">GFD</option>
+                                <option value="gfv">GFV</option>
+                                <option value="cs">CultureSherpa</option>
+                                <option value="ca">CitizenApproved</option>
+                                <option value="ai">AIAimate</option>
+                                <option value="gd">GlobalDeets</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </form>
+                    </article>
+
+                    <!-- Ecosystem Architecture ───────────────────────────── -->
+                    <article class="panel mb-085">
+                        <div class="section-head">
+                            <h2 class="section-title">&#127989; Ecosystem Architecture</h2>
+                        </div>
+                        <p class="subheading mb-06" style="font-size:0.76rem">Live topology of the GFD platform. Repos, workers, data stores, auth, and brand sites.</p>
+                        <div class="shq-arch-wrap">
+                            <svg viewBox="0 0 820 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GFD Ecosystem Architecture Diagram">
+                                <!-- Background layers -->
+                                <defs>
+                                    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                        <path d="M0,0 L0,6 L8,3 z" fill="#7382a6" />
+                                    </marker>
+                                </defs>
+
+                                <!-- Row labels -->
+                                <text x="8" y="42" font-family="JetBrains Mono, monospace" font-size="8" fill="#7382a6" letter-spacing="1">EXTERNAL</text>
+                                <text x="8" y="152" font-family="JetBrains Mono, monospace" font-size="8" fill="#7382a6" letter-spacing="1">EDGE</text>
+                                <text x="8" y="262" font-family="JetBrains Mono, monospace" font-size="8" fill="#7382a6" letter-spacing="1">DATA</text>
+                                <text x="8" y="352" font-family="JetBrains Mono, monospace" font-size="8" fill="#7382a6" letter-spacing="1">BRANDS</text>
+
+                                <!-- Row 1: External Services -->
+                                <!-- GitHub -->
+                                <rect x="60" y="20" width="110" height="46" rx="6" fill="#111a30" stroke="#22d3ee" stroke-width="1.2" />
+                                <text x="115" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#f4f6fb" font-weight="600">GitHub</text>
+                                <text x="115" y="53" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">6 repos · CI/CD</text>
+                                <!-- Clerk -->
+                                <rect x="200" y="20" width="110" height="46" rx="6" fill="#111a30" stroke="#a855f7" stroke-width="1.2" />
+                                <text x="255" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#f4f6fb" font-weight="600">Clerk Auth</text>
+                                <text x="255" y="53" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">JWT · Google · Email</text>
+                                <!-- Stripe -->
+                                <rect x="340" y="20" width="110" height="46" rx="6" fill="#111a30" stroke="#fbbf24" stroke-width="1.2" />
+                                <text x="395" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#f4f6fb" font-weight="600">Stripe</text>
+                                <text x="395" y="53" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">Payments · Webhooks</text>
+                                <!-- Formspree -->
+                                <rect x="480" y="20" width="110" height="46" rx="6" fill="#111a30" stroke="#10b981" stroke-width="1.2" />
+                                <text x="535" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#f4f6fb" font-weight="600">Formspree</text>
+                                <text x="535" y="53" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">xgvgzjbw · Contact</text>
+                                <!-- Social APIs -->
+                                <rect x="620" y="20" width="110" height="46" rx="6" fill="#111a30" stroke="#f43f5e" stroke-width="1.2" />
+                                <text x="675" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#f4f6fb" font-weight="600">Social APIs</text>
+                                <text x="675" y="53" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">LI · IG · X · FB</text>
+
+                                <!-- Arrows: External → Edge -->
+                                <line x1="115" y1="66" x2="115" y2="118" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+                                <line x1="255" y1="66" x2="232" y2="118" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+                                <line x1="395" y1="66" x2="395" y2="118" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+                                <line x1="535" y1="66" x2="430" y2="118" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+                                <line x1="675" y1="66" x2="650" y2="118" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+
+                                <!-- Row 2: Cloudflare Edge Workers -->
+                                <!-- CF Pages -->
+                                <rect x="60" y="120" width="118" height="46" rx="6" fill="#111a30" stroke="#22d3ee" stroke-width="1.5" />
+                                <text x="119" y="138" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#22d3ee" font-weight="600">CF Pages</text>
+                                <text x="119" y="153" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">_worker.js · CDN</text>
+                                <!-- gfd-auth -->
+                                <rect x="200" y="120" width="118" height="46" rx="6" fill="#111a30" stroke="#a855f7" stroke-width="1.5" />
+                                <text x="259" y="138" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#a855f7" font-weight="600">gfd-auth</text>
+                                <text x="259" y="153" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">Clerk JWT · D1 ops</text>
+                                <!-- Social Publisher -->
+                                <rect x="340" y="120" width="118" height="46" rx="6" fill="#111a30" stroke="#fbbf24" stroke-width="1.5" />
+                                <text x="399" y="138" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#fbbf24" font-weight="600">Social Publisher</text>
+                                <text x="399" y="153" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">Cron 15 min · Queue</text>
+                                <!-- gfd-stripe -->
+                                <rect x="480" y="120" width="118" height="46" rx="6" fill="#111a30" stroke="#10b981" stroke-width="1.5" />
+                                <text x="539" y="138" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#10b981" font-weight="600">gfd-stripe</text>
+                                <text x="539" y="153" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">Payment Intents</text>
+                                <!-- Health Sweep -->
+                                <rect x="620" y="120" width="118" height="46" rx="6" fill="#111a30" stroke="#f43f5e" stroke-width="1.5" />
+                                <text x="679" y="138" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#f43f5e" font-weight="600">Health Sweep</text>
+                                <text x="679" y="153" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">Cron 6 AM UTC</text>
+
+                                <!-- Arrows: Edge → Data -->
+                                <line x1="119" y1="166" x2="240" y2="228" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+                                <line x1="259" y1="166" x2="268" y2="228" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+                                <line x1="399" y1="166" x2="330" y2="228" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+                                <line x1="539" y1="166" x2="540" y2="228" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+                                <line x1="679" y1="166" x2="580" y2="228" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+
+                                <!-- Row 3: Data Stores -->
+                                <!-- D1 -->
+                                <rect x="185" y="230" width="170" height="46" rx="6" fill="#111a30" stroke="#22d3ee" stroke-width="1.5" />
+                                <text x="270" y="248" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#22d3ee" font-weight="600">D1: gfd_community</text>
+                                <text x="270" y="263" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">SQLite · 25+ tables</text>
+                                <!-- R2 -->
+                                <rect x="385" y="230" width="170" height="46" rx="6" fill="#111a30" stroke="#fbbf24" stroke-width="1.5" />
+                                <text x="470" y="248" text-anchor="middle" font-family="Inter, sans-serif" font-size="9.5" fill="#fbbf24" font-weight="600">R2 Storage</text>
+                                <text x="470" y="263" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#7382a6">1,129 assets · CS + GFV</text>
+
+                                <!-- Arrows: Data → Brands -->
+                                <line x1="270" y1="276" x2="270" y2="328" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+                                <line x1="470" y1="276" x2="470" y2="328" stroke="#7382a6" stroke-width="1" marker-end="url(#arr)" />
+
+                                <!-- Row 4: Brand Ecosystem -->
+                                <rect x="44" y="330" width="95" height="36" rx="5" fill="#111a30" stroke="rgba(251,191,36,0.5)" stroke-width="1.2" />
+                                <text x="91" y="348" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#fbbf24" font-weight="600">GFD</text>
+                                <text x="91" y="360" text-anchor="middle" font-family="Inter, sans-serif" font-size="7.5" fill="#7382a6">Studio</text>
+
+                                <rect x="153" y="330" width="95" height="36" rx="5" fill="#111a30" stroke="rgba(34,211,238,0.5)" stroke-width="1.2" />
+                                <text x="200" y="348" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#22d3ee" font-weight="600">GFV</text>
+                                <text x="200" y="360" text-anchor="middle" font-family="Inter, sans-serif" font-size="7.5" fill="#7382a6">Art &amp; Vibes</text>
+
+                                <rect x="262" y="330" width="95" height="36" rx="5" fill="#111a30" stroke="rgba(168,85,247,0.5)" stroke-width="1.2" />
+                                <text x="309" y="348" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#a855f7" font-weight="600">CultureSherpa</text>
+                                <text x="309" y="360" text-anchor="middle" font-family="Inter, sans-serif" font-size="7.5" fill="#7382a6">Community</text>
+
+                                <rect x="371" y="330" width="95" height="36" rx="5" fill="#111a30" stroke="rgba(16,185,129,0.5)" stroke-width="1.2" />
+                                <text x="418" y="348" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#10b981" font-weight="600">CitizenApproved</text>
+                                <text x="418" y="360" text-anchor="middle" font-family="Inter, sans-serif" font-size="7.5" fill="#7382a6">Civic</text>
+
+                                <rect x="480" y="330" width="95" height="36" rx="5" fill="#111a30" stroke="rgba(244,63,94,0.5)" stroke-width="1.2" />
+                                <text x="527" y="348" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#f43f5e" font-weight="600">AIAimate</text>
+                                <text x="527" y="360" text-anchor="middle" font-family="Inter, sans-serif" font-size="7.5" fill="#7382a6">AI Video</text>
+
+                                <rect x="589" y="330" width="95" height="36" rx="5" fill="#111a30" stroke="rgba(251,191,36,0.4)" stroke-width="1.2" />
+                                <text x="636" y="348" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" fill="#f4f6fb" font-weight="600">GlobalDeets</text>
+                                <text x="636" y="360" text-anchor="middle" font-family="Inter, sans-serif" font-size="7.5" fill="#7382a6">Analytics</text>
+                            </svg>
+                        </div>
+                    </article>
+
+                    <!-- Project Scopes ───────────────────────────────────── -->
+                    <article class="panel">
+                        <div class="section-head">
+                            <h2 class="section-title">&#128196; Project Scopes &amp; Context</h2>
+                        </div>
+                        <p class="subheading mb-06" style="font-size:0.76rem">At-a-glance reference for active workstreams from the Master Charter. Click a doc link to open the source of truth.</p>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0.65rem" id="shq-scopes-grid">
+                            <div class="panel" style="border-color:rgba(34,211,238,0.25)">
+                                <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:#22d3ee;margin-bottom:0.4rem;font-weight:600">A &mdash; Content Engine</div>
+                                <div style="font-size:0.78rem;color:var(--text);margin-bottom:0.3rem">Social publisher, drip builder, composer, campaign planner, post scheduling pipeline.</div>
+                                <div style="font-size:0.7rem;color:var(--text-muted)">Status: <span style="color:#fbbf24">Publishing auth blocked (OAuth)</span></div>
+                                <a href="ECOSYSTEM_CMS_ROADMAP.md" target="_blank" rel="noopener" style="font-size:0.7rem;color:#22d3ee;text-decoration:none;margin-top:0.25rem;display:inline-block">Roadmap &rarr;</a>
+                            </div>
+                            <div class="panel" style="border-color:rgba(168,85,247,0.25)">
+                                <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:#a855f7;margin-bottom:0.4rem;font-weight:600">B &mdash; Community Platform</div>
+                                <div style="font-size:0.78rem;color:var(--text);margin-bottom:0.3rem">Clerk auth, community portal, XP/badges, profiles, notifications, discussion threads.</div>
+                                <div style="font-size:0.7rem;color:var(--text-muted)">Status: <span style="color:#10b981">Portal live · 0% test coverage</span></div>
+                                <a href="CULTURESHERPA_COMMUNITY_PLAN.md" target="_blank" rel="noopener" style="font-size:0.7rem;color:#a855f7;text-decoration:none;margin-top:0.25rem;display:inline-block">Plan &rarr;</a>
+                            </div>
+                            <div class="panel" style="border-color:rgba(251,191,36,0.25)">
+                                <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:#fbbf24;margin-bottom:0.4rem;font-weight:600">C &mdash; Media Platform</div>
+                                <div style="font-size:0.78rem;color:var(--text);margin-bottom:0.3rem">R2 asset store, MediaDrop processor, gallery pages, Netflix rows, review queue.</div>
+                                <div style="font-size:0.7rem;color:var(--text-muted)">Status: <span style="color:#fbbf24">1,129 assets synced · processor WIP</span></div>
+                                <a href="MEDIA_PLATFORM_ARCHITECTURE.md" target="_blank" rel="noopener" style="font-size:0.7rem;color:#fbbf24;text-decoration:none;margin-top:0.25rem;display:inline-block">Architecture &rarr;</a>
+                            </div>
+                            <div class="panel" style="border-color:rgba(16,185,129,0.25)">
+                                <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:#10b981;margin-bottom:0.4rem;font-weight:600">D &mdash; Revenue Layer</div>
+                                <div style="font-size:0.78rem;color:var(--text);margin-bottom:0.3rem">Stripe donations, NFT studio, project inquiry flow, CASHMONEY finance toolkit.</div>
+                                <div style="font-size:0.7rem;color:var(--text-muted)">Status: <span style="color:#fbbf24">Stripe live · NFT pre-mint</span></div>
+                                <a href="PROJECT_INQUIRY_FLOW.md" target="_blank" rel="noopener" style="font-size:0.7rem;color:#10b981;text-decoration:none;margin-top:0.25rem;display:inline-block">Inquiry Flow &rarr;</a>
+                            </div>
+                            <div class="panel" style="border-color:rgba(244,63,94,0.25)">
+                                <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:#f43f5e;margin-bottom:0.4rem;font-weight:600">E &mdash; Ecosystem Infra</div>
+                                <div style="font-size:0.78rem;color:var(--text);margin-bottom:0.3rem">CI/CD pipelines, health sweep cron, security headers, branch protection, Sentry.</div>
+                                <div style="font-size:0.7rem;color:var(--text-muted)">Status: <span style="color:#10b981">6 workflows live · 99.6% passing</span></div>
+                                <a href="ADMIN_INFRASTRUCTURE_AUDIT.md" target="_blank" rel="noopener" style="font-size:0.7rem;color:#f43f5e;text-decoration:none;margin-top:0.25rem;display:inline-block">Audit &rarr;</a>
+                            </div>
+                            <div class="panel" style="border-color:rgba(34,211,238,0.15)">
+                                <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:#22d3ee;margin-bottom:0.4rem;font-weight:600">F &mdash; AI &amp; Automation</div>
+                                <div style="font-size:0.78rem;color:var(--text);margin-bottom:0.3rem">AIAimate video pipeline, content studio (DALL-E 3), prompt registries, culture calendar.</div>
+                                <div style="font-size:0.7rem;color:var(--text-muted)">Status: <span style="color:#fbbf24">Studio live · video pipeline pending</span></div>
+                                <a href="ANIMATION_PIPELINE.md" target="_blank" rel="noopener" style="font-size:0.7rem;color:#22d3ee;text-decoration:none;margin-top:0.25rem;display:inline-block">Pipeline &rarr;</a>
+                            </div>
+                            <div class="panel" style="border-color:rgba(168,85,247,0.2)">
+                                <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:#a855f7;margin-bottom:0.4rem;font-weight:600">G &mdash; Portfolio &amp; Brand</div>
+                                <div style="font-size:0.78rem;color:var(--text);margin-bottom:0.3rem">Main site (goodflippindesign.com), portfolio cards, blog, brand registry, site overrides.</div>
+                                <div style="font-size:0.7rem;color:var(--text-muted)">Status: <span style="color:#10b981">Live · 144 tests passing</span></div>
+                                <a href="BRAND_PROMPT_PACK.md" target="_blank" rel="noopener" style="font-size:0.7rem;color:#a855f7;text-decoration:none;margin-top:0.25rem;display:inline-block">Brand Pack &rarr;</a>
+                            </div>
                         </div>
                     </article>
                 </section>
@@ -12337,6 +12951,7 @@
                         'deployments': { name: 'Deployments', title: 'Deployments', sub: 'Recent deployments across all ecosystem repos \u2014 workflow runs, success rates, and timing.' },
                         'settings': { name: 'Settings', title: 'Settings & Integrations', sub: 'Integration health, environment variable status, and configuration overview.' },
                         'docs': { name: 'Documentation', title: 'Documentation Hub', sub: 'Central index of all project documentation, SOPs, and architecture records.' },
+                        'studio-hq': { name: 'Studio HQ', title: 'Studio Management Platform', sub: 'Priority signals, build pipeline, self-advisor insights, and ecosystem architecture — all zero compute cost.' },
                     };
 
                     function updatePageContext(view) {
@@ -17710,6 +18325,444 @@
 
                         window.__adminPanels = window.__adminPanels || {};
                         window.__adminPanels['settings'] = renderSettings;
+                    })();
+
+                    // =================================================================
+                    // STUDIO HQ PANEL (panel 26) — Studio Management Platform
+                    // Zero-cost: client-side rules engine + localStorage kanban
+                    // =================================================================
+                    (function initStudioHQ() {
+                        'use strict';
+
+                        var KANBAN_LS_KEY = 'shq_kanban_v2';
+
+                        var SHQ_STAGES = [
+                            { key: 'backlog', label: 'Backlog', next: 'scoping' },
+                            { key: 'scoping', label: 'Scoping', next: 'building' },
+                            { key: 'building', label: 'Building', next: 'review' },
+                            { key: 'review', label: 'Review', next: 'shipped' },
+                            { key: 'shipped', label: 'Shipped', next: null },
+                        ];
+
+                        var DEFAULT_KANBAN_ITEMS = [
+                            { id: 'k1', title: 'Social publisher — live API posting to social platforms', stage: 'backlog', priority: 'critical', brand: 'all' },
+                            { id: 'k2', title: 'Stripe donation webhook → D1 persistence', stage: 'backlog', priority: 'high', brand: 'gfd' },
+                            { id: 'k3', title: 'MediaDrop R2 processor pipeline — scan → approve → CDN', stage: 'building', priority: 'high', brand: 'all' },
+                            { id: 'k4', title: 'Gallery enhancements + Netflix rows on GFV', stage: 'review', priority: 'high', brand: 'gfv' },
+                            { id: 'k5', title: 'Community portal automated test suite (0% coverage)', stage: 'backlog', priority: 'high', brand: 'gfd' },
+                            { id: 'k6', title: 'Pinterest + TikTok developer app registration', stage: 'backlog', priority: 'low', brand: 'all' },
+                            { id: 'k7', title: 'CultureSherpa MN Cup application review', stage: 'review', priority: 'critical', brand: 'cs' },
+                            { id: 'k8', title: 'NFT drop v1 — GFV collection pre-mint setup', stage: 'backlog', priority: 'medium', brand: 'gfv' },
+                            { id: 'k9', title: 'CASHMONEY: capital request worksheet + vendor quotes', stage: 'scoping', priority: 'high', brand: 'gfd' },
+                            { id: 'k10', title: 'Admin portal Studio HQ management panel', stage: 'shipped', priority: 'high', brand: 'gfd' },
+                            { id: 'k11', title: 'Contact form E2E — Formspree confirmed operational', stage: 'shipped', priority: 'medium', brand: 'gfd' },
+                            { id: 'k12', title: 'Branch protection rollout across all repos', stage: 'shipped', priority: 'medium', brand: 'all' },
+                            { id: 'k13', title: 'AIAimate: OPENAI_API_KEY + SENTRY_DSN secrets live', stage: 'shipped', priority: 'high', brand: 'ai' },
+                            { id: 'k14', title: 'Finalize OAuth flow for LinkedIn + Instagram publishing', stage: 'scoping', priority: 'critical', brand: 'all' },
+                        ];
+
+                        // ── Self-Advisor Rules ─────────────────────────────────────────
+                        var ADVISOR_RULES = [
+                            {
+                                id: 'no-connections',
+                                priority: 'critical',
+                                icon: '🔌',
+                                test: function () { return state.connections.length === 0; },
+                                title: 'No platform connections active',
+                                detail: 'Publishing will fail — connect at least one social account in Platform Connect.',
+                                actionLabel: 'Fix Now →',
+                                actionView: 'connections',
+                            },
+                            {
+                                id: 'critical-ops-flags',
+                                priority: 'critical',
+                                icon: '🚨',
+                                test: function () { return (_opsTasks || []).filter(function (t) { return t.severity === 'critical'; }).length > 0; },
+                                titleFn: function () {
+                                    var n = (_opsTasks || []).filter(function (t) { return t.severity === 'critical'; }).length;
+                                    return n + ' critical ops flag' + (n === 1 ? '' : 's') + ' open on Operations Board';
+                                },
+                                detail: 'Review and resolve critical flags — they block key workflows.',
+                                actionLabel: 'View Flags →',
+                                actionView: 'overview',
+                            },
+                            {
+                                id: 'ecosystem-failing',
+                                priority: 'warning',
+                                icon: '🌐',
+                                test: function () {
+                                    var entries = Object.values(state.lastHealthMap || {});
+                                    return entries.length > 0 && entries.filter(function (e) { return !e.ok; }).length > 0;
+                                },
+                                titleFn: function () {
+                                    var entries = Object.values(state.lastHealthMap || {});
+                                    var n = entries.filter(function (e) { return !e.ok; }).length;
+                                    return n + ' ecosystem endpoint' + (n === 1 ? '' : 's') + ' failing health check';
+                                },
+                                detail: 'Check Ecosystem Health for details — sites may be down or returning errors.',
+                                actionLabel: 'Check Health →',
+                                actionView: 'ecosystem',
+                            },
+                            {
+                                id: 'failed-variants',
+                                priority: 'warning',
+                                icon: '⚠️',
+                                test: function () { return (state.variants || []).filter(function (v) { return v.status === 'failed'; }).length > 0; },
+                                titleFn: function () {
+                                    var n = (state.variants || []).filter(function (v) { return v.status === 'failed'; }).length;
+                                    return n + ' post variant' + (n === 1 ? '' : 's') + ' failed to publish';
+                                },
+                                detail: 'Use Queue Health to retry or clear failed delivery attempts.',
+                                actionLabel: 'View Queue →',
+                                actionView: 'notifications',
+                            },
+                            {
+                                id: 'empty-queue',
+                                priority: 'warning',
+                                icon: '🗓️',
+                                test: function () {
+                                    return state.connections.length > 0
+                                        && (state.variants || []).filter(function (v) { return v.status === 'scheduled'; }).length === 0;
+                                },
+                                title: 'Connections active but nothing scheduled',
+                                detail: 'You have platform connections but no posts in the queue. Use Composer or Drip Builder to schedule content.',
+                                actionLabel: 'Compose →',
+                                actionView: 'composer',
+                            },
+                            {
+                                id: 'no-campaigns',
+                                priority: 'warning',
+                                icon: '📅',
+                                test: function () { return (state.campaigns || []).length === 0 && state.connections.length > 0; },
+                                title: 'No campaigns created yet',
+                                detail: 'Create at least one campaign in the Planner to organize your scheduled content.',
+                                actionLabel: 'Create →',
+                                actionView: 'planner',
+                            },
+                            {
+                                id: 'draft-backlog',
+                                priority: 'info',
+                                icon: '📦',
+                                test: function () {
+                                    return (state.assets || []).filter(function (a) { return a.review_status === 'draft'; }).length > 15;
+                                },
+                                titleFn: function () {
+                                    var n = (state.assets || []).filter(function (a) { return a.review_status === 'draft'; }).length;
+                                    return n + ' assets sitting in draft — none will be published';
+                                },
+                                detail: 'Approve assets in the Asset Library so they can be retrieved by the scheduler.',
+                                actionLabel: 'Review →',
+                                actionView: 'library',
+                            },
+                            {
+                                id: 'no-drip',
+                                priority: 'info',
+                                icon: '💧',
+                                test: function () {
+                                    return (state.dripEntries || []).length === 0
+                                        && (state.campaigns || []).length > 0;
+                                },
+                                title: 'No drip entries loaded',
+                                detail: 'You have campaigns but no drip content. Build a drip sequence for hands-off scheduling across all platforms.',
+                                actionLabel: 'Build Drip →',
+                                actionView: 'drip',
+                            },
+                            {
+                                id: 'pipeline-healthy',
+                                priority: 'ok',
+                                icon: '✅',
+                                test: function () {
+                                    var scheduled = (state.variants || []).filter(function (v) { return v.status === 'scheduled'; }).length;
+                                    var failed = (state.variants || []).filter(function (v) { return v.status === 'failed'; }).length;
+                                    var allUp = Object.values(state.lastHealthMap || {}).every(function (e) { return e.ok; });
+                                    return state.connections.length > 0 && scheduled > 0 && failed === 0 && allUp;
+                                },
+                                titleFn: function () {
+                                    var n = (state.variants || []).filter(function (v) { return v.status === 'scheduled'; }).length;
+                                    return 'Publishing pipeline healthy — ' + n + ' post' + (n === 1 ? '' : 's') + ' in queue';
+                                },
+                                detail: 'All connections active, variants scheduled, no failures, all ecosystem endpoints passing.',
+                                actionLabel: null,
+                                actionView: null,
+                            },
+                        ];
+
+                        // ── localStorage kanban helpers ────────────────────────────────
+                        function loadKanban() {
+                            try {
+                                var raw = localStorage.getItem(KANBAN_LS_KEY);
+                                if (raw) return JSON.parse(raw);
+                            } catch (e) { /* ignore */ }
+                            return JSON.parse(JSON.stringify(DEFAULT_KANBAN_ITEMS));
+                        }
+
+                        function saveKanban(items) {
+                            try { localStorage.setItem(KANBAN_LS_KEY, JSON.stringify(items)); } catch (e) { /* ignore */ }
+                        }
+
+                        function resetKanban() {
+                            localStorage.removeItem(KANBAN_LS_KEY);
+                            renderKanban(JSON.parse(JSON.stringify(DEFAULT_KANBAN_ITEMS)));
+                        }
+
+                        function advanceCard(id) {
+                            var items = loadKanban();
+                            var card = items.find(function (c) { return c.id === id; });
+                            if (!card) return;
+                            var stage = SHQ_STAGES.find(function (s) { return s.key === card.stage; });
+                            if (stage && stage.next) {
+                                card.stage = stage.next;
+                                saveKanban(items);
+                                renderKanban(items);
+                            }
+                        }
+
+                        function deleteCard(id) {
+                            var items = loadKanban().filter(function (c) { return c.id !== id; });
+                            saveKanban(items);
+                            renderKanban(items);
+                        }
+
+                        function addCard(title, priority, brand) {
+                            var items = loadKanban();
+                            var id = 'ku' + Date.now();
+                            items.push({ id: id, title: title, stage: 'backlog', priority: priority, brand: brand });
+                            saveKanban(items);
+                            renderKanban(items);
+                        }
+
+                        // ── Signal Radar ───────────────────────────────────────────────
+                        function renderSignalBoard() {
+                            var scheduled = (state.variants || []).filter(function (v) { return v.status === 'scheduled'; }).length;
+                            var failed = (state.variants || []).filter(function (v) { return v.status === 'failed'; }).length;
+                            var connections = (state.connections || []).length;
+                            var draftAssets = (state.assets || []).filter(function (a) { return a.review_status === 'draft'; }).length;
+                            var opsCritical = (_opsTasks || []).filter(function (t) { return t.severity === 'critical'; }).length;
+                            var opsWarn = (_opsTasks || []).filter(function (t) { return t.severity === 'warning'; }).length;
+                            var healthMap = Object.values(state.lastHealthMap || {});
+                            var healthPass = healthMap.filter(function (e) { return e.ok; }).length;
+                            var healthTotal = healthMap.length;
+
+                            function setSig(id, value, sub, status) {
+                                var el = $(id);
+                                if (el) el.textContent = value;
+                                var subEl = $(id + '-sub');
+                                if (subEl) subEl.textContent = sub;
+                                var sig = el && el.closest('.shq-signal');
+                                if (sig) {
+                                    var bar = sig.querySelector('.shq-signal-bar');
+                                    if (bar) { bar.className = 'shq-signal-bar ' + status; }
+                                    el.style.color = status === 'crit' ? '#f43f5e' : status === 'warn' ? '#fbbf24' : '#10b981';
+                                }
+                            }
+
+                            setSig('shq-sig-scheduled', scheduled,
+                                scheduled === 0 ? 'nothing queued' : scheduled + ' in queue',
+                                scheduled === 0 ? 'warn' : 'ok');
+
+                            setSig('shq-sig-failed', failed,
+                                failed === 0 ? 'clean' : 'needs retry',
+                                failed > 0 ? 'crit' : 'ok');
+
+                            setSig('shq-sig-connections', connections,
+                                connections === 0 ? 'not connected' : 'platform' + (connections === 1 ? '' : 's') + ' linked',
+                                connections === 0 ? 'crit' : 'ok');
+
+                            setSig('shq-sig-assets', draftAssets,
+                                draftAssets === 0 ? 'all approved' : 'pending approval',
+                                draftAssets > 15 ? 'warn' : 'ok');
+
+                            var opsLabel = opsCritical > 0 ? opsCritical + ' critical' : opsWarn > 0 ? opsWarn + ' warnings' : 'all clear';
+                            setSig('shq-sig-ops', (_opsTasks || []).length,
+                                opsLabel,
+                                opsCritical > 0 ? 'crit' : opsWarn > 0 ? 'warn' : 'ok');
+
+                            setSig('shq-sig-health',
+                                healthTotal === 0 ? '—' : healthPass + '/' + healthTotal,
+                                healthTotal === 0 ? 'no sweep data' : healthPass === healthTotal ? 'all passing' : (healthTotal - healthPass) + ' failing',
+                                healthTotal === 0 ? 'warn' : healthPass < healthTotal ? 'crit' : 'ok');
+
+                            var updated = $('shq-signal-updated');
+                            if (updated) updated.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                        }
+
+                        // ── Self-Advisor ───────────────────────────────────────────────
+                        function runAdvisor() {
+                            var list = $('shq-advisor-list');
+                            if (!list) return;
+
+                            var priorityOrder = { critical: 0, warning: 1, info: 2, ok: 3 };
+                            var insights = ADVISOR_RULES
+                                .filter(function (r) { try { return r.test(); } catch (e) { return false; } })
+                                .sort(function (a, b) { return (priorityOrder[a.priority] || 99) - (priorityOrder[b.priority] || 99); });
+
+                            if (!insights.length) {
+                                list.innerHTML = '<div class="shq-insight priority-ok"><span class="shq-insight-icon">✅</span><div class="shq-insight-body"><div class="shq-insight-title">No issues detected</div><div class="shq-insight-detail">Load some data first by refreshing the main panel, then re-analyze.</div></div></div>';
+                                return;
+                            }
+
+                            list.innerHTML = insights.map(function (r) {
+                                var title = r.titleFn ? r.titleFn() : r.title;
+                                var action = r.actionLabel && r.actionView
+                                    ? '<button class="shq-insight-action" data-nav="' + escapeHtml(r.actionView) + '">' + escapeHtml(r.actionLabel) + '</button>'
+                                    : '';
+                                return '<div class="shq-insight priority-' + r.priority + '">' +
+                                    '<span class="shq-insight-icon">' + r.icon + '</span>' +
+                                    '<div class="shq-insight-body">' +
+                                    '<div class="shq-insight-title">' + escapeHtml(title) + '</div>' +
+                                    '<div class="shq-insight-detail">' + escapeHtml(r.detail) + '</div>' +
+                                    '</div>' +
+                                    action +
+                                    '</div>';
+                            }).join('');
+
+                            list.querySelectorAll('[data-nav]').forEach(function (btn) {
+                                btn.addEventListener('click', function () {
+                                    navigateToView(btn.dataset.nav);
+                                });
+                            });
+                        }
+
+                        // ── Kanban Renderer ────────────────────────────────────────────
+                        function renderKanban(items) {
+                            var board = $('shq-kanban');
+                            if (!board) return;
+                            board.innerHTML = SHQ_STAGES.map(function (stage) {
+                                var cards = items.filter(function (c) { return c.stage === stage.key; });
+                                return '<div class="shq-col" data-stage="' + stage.key + '">' +
+                                    '<div class="shq-col-header">' +
+                                    escapeHtml(stage.label) +
+                                    '<span class="shq-col-count">' + cards.length + '</span>' +
+                                    '</div>' +
+                                    cards.map(function (card) {
+                                        var advBtn = stage.next
+                                            ? '<button class="shq-card-advance" data-advance="' + escapeHtml(card.id) + '" title="Advance to ' + stage.next + '">&rsaquo; ' + escapeHtml(SHQ_STAGES.find(function (s) { return s.key === stage.next; }).label) + '</button>'
+                                            : '';
+                                        var brand = card.brand && card.brand !== 'all' ? card.brand.toUpperCase() : '';
+                                        return '<div class="shq-card" data-id="' + escapeHtml(card.id) + '">' +
+                                            '<button class="shq-card-del" data-del="' + escapeHtml(card.id) + '" title="Remove" aria-label="Remove workitem">&#10005;</button>' +
+                                            '<div class="shq-card-title">' + escapeHtml(card.title) + '</div>' +
+                                            '<div class="shq-card-footer">' +
+                                            '<span class="shq-card-tag ' + escapeHtml(card.priority || 'medium') + '">' + escapeHtml(card.priority || 'medium') + '</span>' +
+                                            (brand ? '<span class="shq-card-brand">' + escapeHtml(brand) + '</span>' : '') +
+                                            advBtn +
+                                            '</div>' +
+                                            '</div>';
+                                    }).join('') +
+                                    '</div>';
+                            }).join('');
+
+                            board.querySelectorAll('[data-advance]').forEach(function (btn) {
+                                btn.addEventListener('click', function (e) { e.stopPropagation(); advanceCard(btn.dataset.advance); });
+                            });
+                            board.querySelectorAll('[data-del]').forEach(function (btn) {
+                                btn.addEventListener('click', function (e) { e.stopPropagation(); deleteCard(btn.dataset.del); });
+                            });
+                        }
+
+                        // ── Server-backed kanban helpers ───────────────────────────────
+                        async function loadKanbanFromServer() {
+                            try {
+                                var resp = await api('/studio-kanban');
+                                if (resp && Array.isArray(resp.items) && resp.items.length) {
+                                    saveKanban(resp.items); // mirror to localStorage as offline backup
+                                    return resp.items;
+                                }
+                            } catch (e) { /* fall through to localStorage */ }
+                            return null;
+                        }
+
+                        function saveKanbanToServer(items) {
+                            // Fire-and-forget — localStorage remains the local source of truth
+                            api('/studio-kanban', { method: 'PUT', body: JSON.stringify({ items: items }) })
+                                .catch(function () { /* silently ignore */ });
+                        }
+
+                        // Patch save/advance/delete to also sync to server
+                        var _origSaveKanban = saveKanban;
+                        saveKanban = function (items) {
+                            _origSaveKanban(items);
+                            saveKanbanToServer(items);
+                        };
+
+                        // ── Master Render ──────────────────────────────────────────────
+                        var _shqFirstLoad = true;
+
+                        async function renderSHQPanel() {
+                            var btn = $('shq-refresh-btn');
+                            // On first open (or if state is empty), pull fresh data silently
+                            var stateIsEmpty = !state.connections || (!state.connections.length
+                                && !state.variants.length && !state.assets.length);
+                            if (_shqFirstLoad || stateIsEmpty) {
+                                _shqFirstLoad = false;
+                                if (btn) { btn.disabled = true; btn.textContent = '\u231b Loading…'; }
+                                try {
+                                    await Promise.all([refreshAll(), loadOpsTasks ? loadOpsTasks() : Promise.resolve()]);
+                                } catch (e) { /* degrade gracefully */ }
+                                if (btn) { btn.disabled = false; btn.innerHTML = '&#8635; Refresh Signals'; }
+                            }
+
+                            renderSignalBoard();
+                            runAdvisor();
+
+                            // Prefer server kanban on first load, fall back to localStorage
+                            var serverItems = await loadKanbanFromServer();
+                            renderKanban(serverItems || loadKanban());
+                        }
+
+                        // ── Event Bindings ─────────────────────────────────────────────
+                        var refreshBtn = $('shq-refresh-btn');
+                        if (refreshBtn) {
+                            refreshBtn.addEventListener('click', async function () {
+                                this.disabled = true;
+                                var orig = this.innerHTML;
+                                this.innerHTML = '&#8635; Refreshing…';
+                                try {
+                                    await Promise.all([refreshAll(), loadOpsTasks ? loadOpsTasks() : Promise.resolve()]);
+                                    renderSignalBoard();
+                                    runAdvisor();
+                                    var serverItems = await loadKanbanFromServer();
+                                    renderKanban(serverItems || loadKanban());
+                                    toast('Studio HQ refreshed', 'success');
+                                } catch (e) {
+                                    toast('Refresh failed: ' + (e.message || 'network error'), 'error');
+                                } finally {
+                                    this.disabled = false;
+                                    this.innerHTML = orig;
+                                }
+                            });
+                        }
+
+                        var advisorRefreshBtn = $('shq-advisor-refresh-btn');
+                        if (advisorRefreshBtn) advisorRefreshBtn.addEventListener('click', runAdvisor);
+
+                        var resetBtn = $('shq-kanban-reset-btn');
+                        if (resetBtn) {
+                            resetBtn.addEventListener('click', function () {
+                                if (window.confirm('Reset all kanban cards to defaults? Your edits will be lost.')) {
+                                    resetKanban();
+                                    saveKanbanToServer(DEFAULT_KANBAN_ITEMS); // sync reset to server too
+                                }
+                            });
+                        }
+
+                        var addForm = $('shq-add-form');
+                        if (addForm) {
+                            addForm.addEventListener('submit', function (e) {
+                                e.preventDefault();
+                                var titleEl = $('shq-add-title');
+                                var priEl = $('shq-add-priority');
+                                var brandEl = $('shq-add-brand');
+                                var titleVal = titleEl ? titleEl.value.trim() : '';
+                                if (!titleVal) return;
+                                addCard(titleVal, priEl ? priEl.value : 'medium', brandEl ? brandEl.value : 'all');
+                                if (titleEl) titleEl.value = '';
+                                toast('Workitem added to Backlog', 'success');
+                            });
+                        }
+
+                        window.__adminPanels = window.__adminPanels || {};
+                        window.__adminPanels['studio-hq'] = renderSHQPanel;
                     })();
 
                     window.__clerkReady
