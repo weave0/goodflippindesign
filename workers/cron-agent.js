@@ -18,6 +18,8 @@ const ENDPOINTS = [
   { brand: 'gd',  name: 'GlobalDeets',            url: 'https://globaldeets.com' },
   { brand: 'gfd', name: 'GFD Stripe Worker',      url: 'https://gfd-stripe.weave0.workers.dev' },
   { brand: 'gfd', name: 'GFD Auth API',           url: 'https://goodflippindesign.com/api/health' },
+  { brand: 'gfv', name: 'GFV Community API',      url: 'https://gfv-community.weave0.workers.dev' },
+  { brand: 'gfv', name: 'GFV Gratitude Wall',     url: 'https://gfv-gratitude-wall.weave0.workers.dev' },
 ];
 
 const TIMEOUT_MS = 8000;
