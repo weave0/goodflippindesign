@@ -11870,6 +11870,11 @@
                             detail: 'PATCH /api/social/variants/:id wired. Asset picker modal in Post Kits panel — search by brand/category/keyword, single-click attaches R2 asset to variant, thumbnail updates in-place. Detach also supported.'
                         },
                         {
+                            id: 'library-search-intelligence', severity: 'done', brand: 'gfd', area: 'Admin',
+                            title: 'Asset Library — server-side search + pagination (2026-03-22)',
+                            detail: 'Library panel upgraded from client-side 120-asset filter to full server-side search across all 1,129 D1 assets. Filters: brand, category, media_type, review_status, q (LIKE on title/description/tags/category). 48-per-page pagination with prev/next controls. Backend handleListAssets count query now mirrors all active filters. Phase 4 charter item: Richer asset intelligence and search. Commit 5880d25.'
+                        },
+                        {
                             id: 'social-platform-oauth', severity: 'quality', brand: 'all', area: 'Social Media',
                             title: 'Only X (Twitter) tokens stored — IG/TikTok/Pinterest need credentials + OAuth',
                             detail: 'OAuth server fully implemented: workers/oauth.js (40KB) handles authorize/callback/status flows for Instagram, Facebook, X, LinkedIn, Pinterest, TikTok, YouTube. Imported via cms.js → handleOAuthRequest. Routes: GET /api/cms/oauth/authorize/:platform, /api/cms/oauth/callback/:platform, /api/cms/oauth/status. Missing: platform API credentials as Cloudflare Worker secrets. To activate Instagram: META_APP_ID + META_APP_SECRET. TikTok: TIKTOK_CLIENT_ID + TIKTOK_CLIENT_SECRET. Pinterest: PINTEREST_APP_ID + PINTEREST_APP_SECRET. LinkedIn: LINKEDIN_CLIENT_ID + LINKEDIN_CLIENT_SECRET. Once secrets set, use admin portal Connections panel → OAuth flow for each brand/platform.'
