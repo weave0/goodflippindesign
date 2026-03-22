@@ -7273,9 +7273,19 @@
                         </div>
 
                         <div class="toolbar">
-                            <input type="text" id="library-search" placeholder="Search title or tags">
-                            <select id="library-type">
-                                <option value="">All media types</option>
+                            <input type="text" id="library-search" placeholder="Search title, tags, category&hellip;" aria-label="Search assets">
+                            <select id="library-brand" aria-label="Filter by brand">
+                                <option value="">All brands</option>
+                                <option value="gfd">GFD</option>
+                                <option value="gfv">GFV</option>
+                                <option value="aiaimate">AI Aimate</option>
+                                <option value="culturesherpa">CultureSherpa</option>
+                                <option value="globaldeets">GlobalDeets</option>
+                                <option value="citizenapproved">CitizenApproved</option>
+                            </select>
+                            <input type="text" id="library-category" placeholder="Category&hellip;" aria-label="Filter by category" style="width:130px">
+                            <select id="library-type" aria-label="Filter by media type">
+                                <option value="">All types</option>
                                 <option value="image">Image</option>
                                 <option value="video">Video</option>
                                 <option value="audio">Audio</option>
@@ -7295,6 +7305,11 @@
                             <button id="bulk-approve-all-btn" class="btn btn-success-soft" type="button" title="Approve all draft assets matching the current brand filter">&#9851; Approve All Drafts</button>
                         </div>
                         <div class="asset-grid asset-grid-full" id="library-grid"></div>
+                        <div class="lib-pagination d-none" id="lib-pagination" style="display:flex;align-items:center;gap:0.75rem;justify-content:center;padding:1rem 0;flex-wrap:wrap">
+                            <button class="btn btn-secondary btn-sm" id="lib-prev-btn" disabled>&#8592; Prev</button>
+                            <span id="lib-page-info" class="text-muted" style="font-size:0.82rem"></span>
+                            <button class="btn btn-secondary btn-sm" id="lib-next-btn" disabled>Next &#8594;</button>
+                        </div>
                     </article>
                 </section>
 
@@ -10612,9 +10627,11 @@
                         $('composer-content').addEventListener('input', () => { updateComposerCounters(); renderPostPreviews(); });
                         $('composer-hashtags').addEventListener('input', () => { updateComposerCounters(); renderPostPreviews(); });
 
-                        $('library-search').addEventListener('input', renderLibrary);
-                        $('library-type').addEventListener('change', renderLibrary);
-                        $('library-status').addEventListener('change', renderLibrary);
+                        $('library-search').addEventListener('input', debounce(reloadLibrary, 350));
+                        $('library-brand').addEventListener('change', reloadLibrary);
+                        $('library-category').addEventListener('input', debounce(reloadLibrary, 350));
+                        $('library-type').addEventListener('change', reloadLibrary);
+                        $('library-status').addEventListener('change', reloadLibrary);
                         $('library-select-all').addEventListener('change', (ev) => {
                             const checked = ev.target.checked;
                             document.querySelectorAll('.asset-check').forEach((cb) => {
@@ -10631,6 +10648,9 @@
                             }
                         });
                         $('batch-approve-btn').addEventListener('click', batchApproveSelected);
+
+                        $('lib-prev-btn')?.addEventListener('click', () => { state.libPage = Math.max(0, (state.libPage || 0) - 1); loadAssets().then(renderLibrary); });
+                        $('lib-next-btn')?.addEventListener('click', () => { state.libPage = (state.libPage || 0) + 1; loadAssets().then(renderLibrary); });
 
                         $('bulk-approve-all-btn').addEventListener('click', async () => {
                             const brand = $('library-status').value !== 'approved' ? currentBrand : null;
@@ -11455,9 +11475,28 @@
                         }
                     }
 
+                    const LIB_PAGE_SIZE = 48;
+
                     async function loadAssets() {
-                        const data = await api('/assets?brand=' + encodeURIComponent(currentBrand) + '&limit=120');
+                        const q = $('library-search')?.value.trim() || '';
+                        const brand = $('library-brand')?.value || currentBrand;
+                        const category = $('library-category')?.value.trim() || '';
+                        const mediaType = $('library-type')?.value || '';
+                        const reviewStatus = $('library-status')?.value || '';
+                        const page = state.libPage || 0;
+
+                        let url = '/assets?limit=' + LIB_PAGE_SIZE + '&offset=' + (page * LIB_PAGE_SIZE);
+                        if (brand) url += '&brand=' + encodeURIComponent(brand);
+                        if (q) url += '&q=' + encodeURIComponent(q);
+                        if (category) url += '&category=' + encodeURIComponent(category);
+                        if (mediaType) url += '&media_type=' + encodeURIComponent(mediaType);
+                        if (reviewStatus) url += '&review_status=' + encodeURIComponent(reviewStatus);
+
+                        const data = await api(url);
                         state.assets = data.assets || [];
+                        state.assetTotal = data.total || 0;
+                        state.assetLimit = data.limit || LIB_PAGE_SIZE;
+                        state.assetOffset = data.offset || 0;
                     }
 
                     async function loadDiscoveredAssets() {
@@ -12668,27 +12707,23 @@
                         renderLibrary();
                     }
 
-                    function renderLibrary() {
-                        const q = $('library-search').value.trim().toLowerCase();
-                        const mediaType = $('library-type').value;
-                        const reviewFilter = $('library-status').value;
+                    function reloadLibrary() {
+                        state.libPage = 0;
+                        loadAssets().then(renderLibrary);
+                    }
 
-                        const list = state.assets.filter((asset) => {
-                            if (mediaType && asset.media_type !== mediaType) return false;
-                            if (reviewFilter && (asset.review_status || 'draft') !== reviewFilter) return false;
-                            if (!q) return true;
-                            const tags = String(asset.tags || '').toLowerCase();
-                            return String(asset.title || '').toLowerCase().includes(q) || tags.includes(q);
-                        });
+                    function renderLibrary() {
+                        const list = state.assets;
 
                         // Reset selection on each re-render (stale IDs no longer in view)
                         state.selectedLibraryIds.clear();
 
                         const grid = $('library-grid');
-                        if (!list.length) {
+                        if (!list || !list.length) {
                             grid.innerHTML = '<p class="text-muted">No assets matched your filter.</p>';
                             const bab = $('batch-approve-btn');
                             if (bab) bab.hidden = true;
+                            renderLibPagination();
                             return;
                         }
 
@@ -12783,6 +12818,34 @@
                                 toast('Asset selected — add a caption and schedule it', 'success');
                             });
                         });
+
+                        renderLibPagination();
+                    }
+
+                    function renderLibPagination() {
+                        const total = state.assetTotal || 0;
+                        const page = state.libPage || 0;
+                        const pageSize = LIB_PAGE_SIZE;
+                        const totalPages = Math.ceil(total / pageSize);
+                        const paginationEl = $('lib-pagination');
+                        const prevBtn = $('lib-prev-btn');
+                        const nextBtn = $('lib-next-btn');
+                        const infoEl = $('lib-page-info');
+
+                        if (!paginationEl) return;
+
+                        if (total <= pageSize) {
+                            paginationEl.classList.add('d-none');
+                            return;
+                        }
+                        paginationEl.classList.remove('d-none');
+                        paginationEl.style.display = 'flex';
+
+                        const from = page * pageSize + 1;
+                        const to = Math.min((page + 1) * pageSize, total);
+                        if (infoEl) infoEl.textContent = `${from}–${to} of ${total}`;
+                        if (prevBtn) prevBtn.disabled = page === 0;
+                        if (nextBtn) nextBtn.disabled = page >= totalPages - 1;
                     }
 
                     function renderCalendar(events, monthStart) {
@@ -12800,7 +12863,7 @@
                         });
 
                         const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                        const cells = labels.map((l) => `<div class="day-label">${l}</div>`);
+                        const cells = labels.map((l) => `< div class="day-label" > ${l}</div > `);
 
                         for (let i = 0; i < firstWeekday; i++) {
                             cells.push('<div class="day-cell empty"></div>');
@@ -12809,15 +12872,15 @@
                         for (let day = 1; day <= daysInMonth; day++) {
                             const rows = (eventMap[day] || []).slice(0, 3);
                             const moreCount = (eventMap[day] || []).length - rows.length;
-                            const itemsHtml = rows.map((row) => `<div class="day-item">${escapeHtml(row.platform)} - ${escapeHtml((row.campaign_name || 'General').slice(0, 22))}</div>`).join('');
-                            const moreHtml = moreCount > 0 ? `<div class="day-item">+${moreCount} more</div>` : '';
+                            const itemsHtml = rows.map((row) => `< div class="day-item" > ${escapeHtml(row.platform)} - ${escapeHtml((row.campaign_name || 'General').slice(0, 22))}</div > `).join('');
+                            const moreHtml = moreCount > 0 ? `< div class="day-item" > +${moreCount} more</div > ` : '';
                             cells.push(`
-                        <div class="day-cell">
+                        < div class="day-cell" >
                             <div class="day-num">${day}</div>
                             ${itemsHtml}
                             ${moreHtml}
-                        </div>
-                    `);
+                        </div >
+                        `);
                         }
 
                         $('calendar-grid').innerHTML = cells.join('');
@@ -12831,7 +12894,7 @@
                             .map((h) => h.trim().replace(/^#/, ''))
                             .filter(Boolean);
 
-                        const fullText = hashtags.length ? `${content}\n\n${hashtags.map((h) => '#' + h).join(' ')}` : content;
+                        const fullText = hashtags.length ? `${content} \n\n${hashtags.map((h) => '#' + h).join(' ')} ` : content;
                         const counters = [];
 
                         for (const platform of state.selectedPlatforms) {
@@ -12839,11 +12902,11 @@
                             const count = fullText.length;
                             const over = count > Number(rules.maxChars || 500) || hashtags.length > Number(rules.maxHashtags || 10);
                             counters.push(`
-                        <div class="counter ${over ? 'over' : ''}">
+                        < div class="counter ${over ? 'over' : ''}" >
                             <span>${escapeHtml(platform)}</span>
                             <span>${count}/${rules.maxChars || 500} chars, ${hashtags.length}/${rules.maxHashtags || 10} hashtags</span>
-                        </div>
-                    `);
+                        </div >
+                        `);
                         }
 
                         $('composer-counters').innerHTML = counters.length
@@ -12857,7 +12920,7 @@
                             : status === 'failed'
                                 ? 'fail'
                                 : 'warn';
-                        return `<span class="tag ${cls}">${escapeHtml(status || 'unknown')}</span>`;
+                        return `< span class="tag ${cls}" > ${escapeHtml(status || 'unknown')}</span > `;
                     }
 
                     function switchView(view) {
@@ -13238,10 +13301,10 @@
                         const reviewPanel = $('asset-edit-review-actions');
                         const rs = asset.review_status || 'draft';
                         if (rs !== 'approved') {
-                            reviewPanel.innerHTML = `<button class="btn btn-success-soft" id="asset-edit-approve-btn">&#10003; Approve for public use</button>`;
+                            reviewPanel.innerHTML = `< button class="btn btn-success-soft" id = "asset-edit-approve-btn" >&#10003; Approve for public use</button > `;
                             $('asset-edit-approve-btn').onclick = () => { reviewAsset(asset.id, 'approve'); closeModal('asset-edit-modal'); };
                         } else {
-                            reviewPanel.innerHTML = `<button class="btn btn-secondary" id="asset-edit-reject-btn">&times; Revoke approval</button>`;
+                            reviewPanel.innerHTML = `< button class="btn btn-secondary" id = "asset-edit-reject-btn" >& times; Revoke approval</button > `;
                             $('asset-edit-reject-btn').onclick = () => { reviewAsset(asset.id, 'reject'); closeModal('asset-edit-modal'); };
                         }
 
@@ -13299,7 +13362,7 @@
                     async function batchApproveSelected() {
                         const ids = [...state.selectedLibraryIds];
                         if (!ids.length) return;
-                        showConfirm(`Approve ${ids.length} selected asset${ids.length === 1 ? '' : 's'} for public use?`, async () => {
+                        showConfirm(`Approve ${ids.length} selected asset${ids.length === 1 ? '' : 's'} for public use ? `, async () => {
                             try {
                                 // Run approvals in parallel — max 6 in-flight at once to avoid rate limits
                                 const batch = 6;
@@ -13363,12 +13426,12 @@
                         const sw = $('brand-switcher');
                         if (!sw) return;
                         sw.innerHTML = Object.entries(BRAND_DEFS).map(([id, def]) => `
-                    <button type="button" class="brand-pill ${id === currentBrand ? 'active' : ''}"
-                        data-brand="${escapeHtml(id)}"
-                        style="--pill-color:${escapeHtml(def.color)}">
+                        < button type = "button" class="brand-pill ${id === currentBrand ? 'active' : ''}"
+                    data - brand="${escapeHtml(id)}"
+                    style = "--pill-color:${escapeHtml(def.color)}" >
                         ${escapeHtml(def.shortName)}
-                    </button>
-                `).join('');
+                    </button >
+                        `).join('');
                         sw.querySelectorAll('[data-brand]').forEach((btn) => {
                             btn.addEventListener('click', () => switchBrand(btn.dataset.brand));
                         });
@@ -13459,11 +13522,11 @@
                             state.dripSelectedPlatforms = new Set(brandPlatforms);
                         }
                         picker.innerHTML = brandPlatforms.map((p) => `
-                    <button type="button" class="platform-pill ${state.dripSelectedPlatforms.has(p) ? 'active' : ''}"
-                        data-drip-platform="${escapeHtml(p)}">
+                        < button type = "button" class="platform-pill ${state.dripSelectedPlatforms.has(p) ? 'active' : ''}"
+                    data - drip - platform="${escapeHtml(p)}" >
                         ${escapeHtml(p)}
-                    </button>
-                `).join('');
+                    </button >
+                        `).join('');
                         picker.querySelectorAll('[data-drip-platform]').forEach((btn) => {
                             btn.addEventListener('click', () => {
                                 const p = btn.dataset.dripPlatform;
@@ -13482,11 +13545,11 @@
                         const row = $('drip-times-row');
                         if (!row) return;
                         row.innerHTML = state.dripTimes.map((t, i) => `
-                    <span class="drip-time-chip">
-                        <input type="time" value="${escapeHtml(t)}" data-time-idx="${i}">
-                        <button type="button" class="remove-time-btn" data-time-idx="${i}" title="Remove">×</button>
-                    </span>
-                `).join('') + '<button type="button" class="btn btn-micro" id="drip-add-time">+ Time</button>';
+                        < span class="drip-time-chip" >
+                            <input type="time" value="${escapeHtml(t)}" data-time-idx="${i}">
+                                <button type="button" class="remove-time-btn" data-time-idx="${i}" title="Remove">×</button>
+                            </span>
+                    `).join('') + '<button type="button" class="btn btn-micro" id="drip-add-time">+ Time</button>';
                         row.querySelectorAll('input[data-time-idx]').forEach((el) => {
                             el.addEventListener('change', () => {
                                 state.dripTimes[Number(el.dataset.timeIdx)] = el.value;
@@ -13517,7 +13580,7 @@
                             : (state.campaigns?.campaigns || []);
                         const prev = sel.value;
                         sel.innerHTML = '<option value="">No campaign</option>' + campaigns.map((c) =>
-                            `<option value="${Number(c.id)}" ${String(c.id) === prev ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
+                            `< option value = "${Number(c.id)}" ${String(c.id) === prev ? 'selected' : ''}> ${escapeHtml(c.name)}</option > `
                         ).join('');
                     }
 
@@ -13533,7 +13596,7 @@
                             return;
                         }
                         list.innerHTML = state.dripEntries.map((entry, i) => `
-                    <div class="drip-entry" data-entry-idx="${i}">
+                        < div class="drip-entry" data - entry - idx="${i}" >
                         <div class="drip-entry-num">${i + 1}</div>
                         <div class="drip-entry-fields">
                             <textarea class="drip-entry-content" data-entry-content="${i}" rows="2"
@@ -13543,8 +13606,8 @@
                                 value="">
                         </div>
                         <button type="button" class="btn btn-micro btn-danger" data-remove-entry="${i}" title="Remove">✕</button>
-                    </div>
-                `).join('');
+                    </div >
+                        `).join('');
                         // Set values directly after render to avoid HTML entity double-encoding
                         list.querySelectorAll('[data-entry-content]').forEach((el) => {
                             el.value = state.dripEntries[Number(el.dataset.entryContent)].content || '';
@@ -13650,15 +13713,15 @@
                         const displaySlots = slots.slice(0, 50);
 
                         table.innerHTML = displaySlots.map((s) => `
-                    <tr>
+                        < tr >
                         <td>${escapeHtml(String(s.idx))}</td>
                         <td>${escapeHtml(formatDateTime(s.scheduled_at))}</td>
                         <td>${escapeHtml(s.platforms)}</td>
                         <td class="content-preview-cell">${escapeHtml(s.content.slice(0, 100))}${s.content.length > 100 ? '…' : ''}</td>
-                    </tr>
-                `).join('');
+                    </tr >
+                        `).join('');
 
-                        if (previewCount) previewCount.textContent = `${slots.length} slots · showing first ${displaySlots.length}`;
+                        if (previewCount) previewCount.textContent = `${slots.length} slots · showing first ${displaySlots.length} `;
                         if (panel) panel.classList.remove('d-none');
 
                         const confirmBtn = $('drip-confirm-btn');
@@ -13774,7 +13837,7 @@
                         }
                         empty?.classList.add('d-none');
                         tbody.innerHTML = state.galleries.map((g) => `
-                    <tr class="${state.selectedGalleryId === g.id ? 'row-selected' : ''}" style="cursor:pointer" data-gallery-row="${g.id}">
+                        < tr class="${state.selectedGalleryId === g.id ? 'row-selected' : ''}" style = "cursor:pointer" data - gallery - row="${g.id}" >
                         <td>${escapeHtml(g.title)}</td>
                         <td class="mono text-muted">${escapeHtml(g.site_domain)}</td>
                         <td>${g.item_count || 0}</td>
@@ -13782,8 +13845,8 @@
                             <button class="btn btn-micro btn-secondary" data-gallery-edit="${g.id}">Edit</button>
                             <button class="btn btn-micro btn-danger" data-gallery-delete="${g.id}">Delete</button>
                         </td>
-                    </tr>
-                `).join('');
+                    </tr >
+                        `).join('');
 
                         tbody.querySelectorAll('[data-gallery-row]').forEach((row) => {
                             row.addEventListener('click', (ev) => {
@@ -13817,7 +13880,7 @@
                         const sel = $('gallery-add-asset');
                         sel.innerHTML = '<option value="">\u2014 add asset \u2014</option>' +
                             state.assets.map((a) =>
-                                `<option value="${escapeHtml(a.id)}">${escapeHtml(a.title || a.id)}</option>`
+                                `< option value = "${escapeHtml(a.id)}" > ${escapeHtml(a.title || a.id)}</option > `
                             ).join('');
 
                         // Load items
@@ -13838,8 +13901,8 @@
                             return;
                         }
                         list.innerHTML = `
-                    <div class="asset-grid asset-grid-full">
-                        ${state.galleryItems.map((item) => `
+                        < div class="asset-grid asset-grid-full" >
+                            ${state.galleryItems.map((item) => `
                             <div class="asset-card">
                                 ${item.thumbnail_path
                                 ? `<img src="${assetUrl(item)}" data-r2="${escapeHtml(assetBase(item))}" alt="${escapeHtml(item.alt_text || item.title || '')}" loading="lazy" class="asset-thumb">`
@@ -13853,9 +13916,10 @@
                                     <button class="btn btn-micro btn-danger" data-gallery-item-delete="${item.item_id}">Remove</button>
                                 </div>
                             </div>
-                        `).join('')}
-                    </div>
-                `;
+                        `).join('')
+                            }
+                    </div >
+                        `;
                         list.querySelectorAll('[data-gallery-item-delete]').forEach((btn) => {
                             btn.addEventListener('click', () =>
                                 removeGalleryItem(state.selectedGalleryId, btn.dataset.galleryItemDelete)
@@ -13877,7 +13941,7 @@
                         sel.innerHTML = '<option value="">\u2014 none \u2014</option>' +
                             state.assets.map((a) => {
                                 const sel2 = gallery?.cover_asset_id === a.id ? ' selected' : '';
-                                return `<option value="${escapeHtml(a.id)}"${sel2}>${escapeHtml(a.title || a.id)}</option>`;
+                                return `< option value = "${escapeHtml(a.id)}"${sel2}> ${escapeHtml(a.title || a.id)}</option > `;
                             }).join('');
 
                         openModal('gallery-modal');
@@ -13985,14 +14049,14 @@
                         }
                         empty?.classList.add('d-none');
                         tbody.innerHTML = state.csRegistries.map((r) => `
-                    <tr>
+                        < tr >
                         <td><strong>${escapeHtml(r.title)}</strong><br><small class="text-muted">${escapeHtml(r.id)}</small></td>
                         <td><span class="badge">${escapeHtml(r.brand)}</span></td>
                         <td>${escapeHtml(r.type)}</td>
                         <td>${Number(r.scene_count) || 0}</td>
                         <td><button class="btn btn-ghost btn-sm" data-cs-open-registry="${escapeHtml(r.id)}">Open</button></td>
-                    </tr>
-                `).join('');
+                    </tr >
+                        `).join('');
                         tbody.querySelectorAll('[data-cs-open-registry]').forEach((btn) => {
                             btn.addEventListener('click', () => openCSRegistry(btn.dataset.csOpenRegistry));
                         });

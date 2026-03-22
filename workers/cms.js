@@ -223,6 +223,7 @@ async function handleListAssets(request, env) {
   const mediaType = url.searchParams.get('media_type');
   const featured = url.searchParams.get('featured');
   const q = url.searchParams.get('q');
+  const reviewStatus = url.searchParams.get('review_status');
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 200);
   const offset = parseInt(url.searchParams.get('offset') || '0', 10);
 
@@ -244,10 +245,14 @@ async function handleListAssets(request, env) {
   if (featured === '1') {
     query += ' AND featured = 1';
   }
+  if (reviewStatus) {
+    query += ' AND review_status = ?';
+    bindings.push(reviewStatus);
+  }
   if (q) {
-    query += ' AND (title LIKE ? OR description LIKE ? OR tags LIKE ?)';
+    query += ' AND (title LIKE ? OR description LIKE ? OR tags LIKE ? OR category LIKE ?)';
     const search = `%${q}%`;
-    bindings.push(search, search, search);
+    bindings.push(search, search, search, search);
   }
 
   query += ' ORDER BY sort_order ASC, created_at DESC LIMIT ? OFFSET ?';
@@ -259,12 +264,18 @@ async function handleListAssets(request, env) {
 
   const { results } = await stmt.all();
 
-  // Also return total count for pagination
+  // Count query mirrors all filters so total reflects the filtered result set
   let countQuery = 'SELECT COUNT(*) as total FROM cms_assets WHERE active = 1';
   const countBindings = [];
   if (brand) { countQuery += ' AND brand = ?'; countBindings.push(brand); }
   if (category) { countQuery += ' AND category = ?'; countBindings.push(category); }
   if (mediaType) { countQuery += ' AND media_type = ?'; countBindings.push(mediaType); }
+  if (reviewStatus) { countQuery += ' AND review_status = ?'; countBindings.push(reviewStatus); }
+  if (q) {
+    countQuery += ' AND (title LIKE ? OR description LIKE ? OR tags LIKE ? OR category LIKE ?)';
+    const search = `%${q}%`;
+    countBindings.push(search, search, search, search);
+  }
 
   const countStmt = countBindings.length > 0
     ? env.DB.prepare(countQuery).bind(...countBindings)
