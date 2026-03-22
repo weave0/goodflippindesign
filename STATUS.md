@@ -66,6 +66,12 @@ npm run test:a11y   # Accessibility only (~5s)
 
 ---
 
+## Recent Work (Mar 22, 2026)
+
+- **Characters panel CRUD** (admin panel 18): Completed full add/edit/delete workflow — `renderRegistry()` now generates dynamic Edit/Delete buttons per character, click handler routes to `openEditModal(ch)` and authenticated DELETE, Add Character modal wired to PUT (edit) vs POST (create), form preserves existing poses/milestones on edit. IIFE scope regression fixed (modal code had been accidentally nested inside `(ch.milestones||[]).forEach` callback from previous session's edits — corrected, all 29/29 admin tests green).
+- **GAP_FLAGS**: `characters-panel-shell` → done (full CRUD implemented), `community-donate-tests` → done (community portal 39 tests + donate.html 24 tests added in Mar 10 session).
+- **Test suite**: 235/235 — 100% (admin 29/29 ✅, 1 pre-existing skip)
+
 ## Recent Work (Mar 19, 2026)
 
 - **AIAimate Vercel env vars**: `OPENAI_API_KEY`, `AI_PROVIDER=openai`, `SENTRY_DSN` set via Vercel Dashboard + redeployment triggered — Sentry error tracking and OpenAI now active on AIAimate
@@ -142,12 +148,8 @@ npm run test:a11y   # Accessibility only (~5s)
 
 ## Remaining Gaps
 
-- **Branch protection**: Direct pushes to `main` still possible on most repos
-- **GlobalDeets headers**: Reachable by sweep but no CSP/HSTS — password-gate middleware serves without header layer
-- **Sentry activation**: All 3 projects scaffolded but DSN env vars not yet set in production
-- **Social OAuth secrets**: oauth.js is complete but IG/TikTok/Pinterest/LinkedIn/X platform API credentials not yet stored as Cloudflare secrets
-- **AIAimate AI features**: `OPENAI_API_KEY` + `AI_PROVIDER=openai` not yet set in Vercel — Ask AI section uses stub provider
-- **Charter Phase 4**: Live global chat, translation bridge, controllable animation workflows, deeper deployment automation, multi-brand CMS operations — not started
+- **Social OAuth secrets**: oauth.js + social-publisher.js fully built. META, LINKEDIN, X, GOOGLE client IDs/secrets already stored as CF Pages secrets. **Pinterest** and **TikTok** still blocked — no developer apps created on those platforms yet (must be done in their respective developer consoles).
+- **Charter Phase 4**: Live global chat, translation bridge, richer asset intelligence/search, controllable animation workflows, deeper deployment automation, multi-brand CMS operations — in progress.
 
 ## Previous Work (Feb 19 – Mar 3, 2026)
 
