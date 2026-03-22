@@ -6,6 +6,7 @@
 - **Community portal**: https://goodflippindesign.com/community-portal.html ✅ LIVE
 - **Donate page**: https://goodflippindesign.com/donate.html ✅ LIVE
 - **Cloudflare Pages**: https://goodflippindesign.pages.dev
+- **BrettLeeWeaver.com**: https://brettleeweaver.com ✅ LIVE (CF Pages, deployed 2026-03-13)
 
 ## 💰 Monthly Costs: **$0**
 
@@ -56,6 +57,7 @@ npm run cache-bust
 
 - [x] **GitHub Pro** upgraded (Mar 19) — unlocked branch protection on all private repos
 - [x] Branch protection: `good-flippin-vibes`, `CultureSherpa`, `brettleeweaver`, `SummitView` — force push + delete blocked (Mar 19). `kp` + `ThyOwn` archived (read-only, no action needed)
+- [x] Branch protection verified live (2026-03-22): all 6 active repos confirmed ✅. `CitizenApproved`, `aiaimate`, `globaldeets` → 1 required review + CI checks. `good-flippin-vibes`, `CultureSherpa`, `brettleeweaver` → force-push/delete blocked only (no required reviews — intentional for solo workflow)
 - [x] **AIAimate (Vercel)**: `OPENAI_API_KEY`, `AI_PROVIDER=openai`, `SENTRY_DSN` uploaded via Vercel Dashboard + redeployment triggered (Mar 19)
 - [ ] Pinterest + TikTok developer apps — no apps created; defer until platform needed
 - [x] **STRIPE_WEBHOOK_SECRET** pushed to gfd-auth worker (Mar 19) — endpoint: `https://goodflippindesign.com/api/stripe/webhook`
