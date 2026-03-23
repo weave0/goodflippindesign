@@ -21,9 +21,9 @@ bucket_name = "gfv-media"
 # Environment variables (build config in Cloudflare dashboard)
 [vars]
 NODE_ENV = "production"
-# SOCIAL_PUBLISHER_URL — set this in Cloudflare Pages dashboard (Settings → Environment Variables)
-# after deploying the social publisher worker with: npm run deploy:social
-# Value will be: https://gfv-social-publisher.<your-account>.workers.dev
+# SOCIAL_PUBLISHER_URL — deployed 2026-03-23, set as Pages secret
+# Value: https://gfv-social-publisher.weave0.workers.dev
+# Worker deployed with: npm run deploy:social
 
 # Secrets (set via: wrangler secret put <NAME>)
 # STRIPE_WEBHOOK_SECRET   — Stripe webhook signing secret (get from Stripe Dashboard → Webhooks → your endpoint → Signing secret)
