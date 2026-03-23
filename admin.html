@@ -859,6 +859,56 @@
             text-overflow: ellipsis;
         }
 
+        /* ── Ecosystem Calendar (Panel 28) ──────────────────────────── */
+        .eco-cal-brand-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .eco-cal-range-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.55rem; }
+        .eco-cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 3px;
+        }
+        .eco-cal-hdr {
+            font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.04em; text-align: center; padding: 0.25rem 0;
+        }
+        .eco-cal-day {
+            min-height: 64px; border: 1px solid var(--border); border-radius: 8px;
+            padding: 0.32rem; background: rgba(255,255,255,0.02);
+            display: flex; flex-direction: column; gap: 0.15rem;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .eco-cal-day:hover { border-color: var(--border-strong); background: rgba(255,255,255,0.04); }
+        .eco-cal-day.eco-cal-today { border-color: rgba(34,211,238,0.5); background: rgba(34,211,238,0.04); }
+        .eco-cal-day.eco-cal-selected { border-color: rgba(34,211,238,0.9); background: rgba(34,211,238,0.08); }
+        .eco-cal-date-num { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
+        .eco-cal-day.eco-cal-today .eco-cal-date-num { color: #22d3ee; font-weight: 700; }
+        .eco-cal-dots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 0.1rem; }
+        .eco-cal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .eco-cal-count { font-size: 0.62rem; color: var(--text-muted); margin-top: auto; align-self: flex-end; }
+        .eco-cal-more { font-size: 0.62rem; color: var(--text-muted); }
+        .eco-cal-detail {
+            border: 1px solid var(--border); border-radius: 12px;
+            padding: 0.9rem 1rem; margin-top: 1rem;
+            background: rgba(255,255,255,0.02);
+        }
+        .eco-cal-detail-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 0.7rem; font-size: 0.9rem; font-weight: 600;
+        }
+        .eco-detail-row {
+            display: flex; align-items: flex-start; gap: 0.65rem;
+            padding: 0.5rem 0; border-bottom: 1px solid var(--border); list-style: none;
+        }
+        .eco-detail-row:last-child { border-bottom: none; }
+        .eco-detail-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 0.25rem; }
+        .eco-detail-body { flex: 1; min-width: 0; }
+        .eco-detail-brand { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+        .eco-detail-time { font-weight: 400; color: var(--text-muted); }
+        .eco-detail-excerpt { font-size: 0.77rem; color: var(--text-muted); margin-top: 0.12rem; line-height: 1.4; }
+        .eco-detail-campaign { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.12rem; }
+        .tag-xs { font-size: 0.65rem !important; padding: 0.1rem 0.45rem !important; }
+
         .toolbar {
             display: flex;
             flex-wrap: wrap;
@@ -6631,6 +6681,13 @@
                                 <rect x="1.5" y="3" width="13" height="11.5" rx="1.5" />
                                 <path d="M1.5 7h13M5 1v4M11 1v4" />
                             </svg></span><span class="nav-label">Campaign Planner</span></button>
+                    <button class="nav-btn" data-view="eco-cal"><span class="nav-num">28</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="1.5" y="3" width="13" height="11.5" rx="1.5" />
+                                <path d="M1.5 7h13M5 1v4M11 1v4" />
+                                <circle cx="5" cy="11" r="1" fill="#6c63ff" stroke="none" />
+                                <circle cx="8" cy="11" r="1" fill="#10b981" stroke="none" />
+                                <circle cx="11" cy="11" r="1" fill="#3b82f6" stroke="none" />
+                            </svg></span><span class="nav-label">Eco Calendar</span></button>
 
                     <div class="nav-group-label">Content</div>
                     <button class="nav-btn" data-view="composer"><span class="nav-num">04</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -7118,6 +7175,30 @@
                             </div>
                         </div>
                         <div class="calendar-grid" id="calendar-grid"></div>
+                    </article>
+                </section>
+
+                <section class="view" id="view-eco-cal">
+                    <article class="panel">
+                        <div class="section-head">
+                            <h2 class="section-title">Ecosystem Content Calendar</h2>
+                            <div class="inline-actions">
+                                <button class="btn btn-secondary" id="eco-cal-prev">&#8592; Prev</button>
+                                <button class="btn btn-secondary" id="eco-cal-today">Today</button>
+                                <button class="btn btn-secondary" id="eco-cal-next">Next &#8594;</button>
+                            </div>
+                        </div>
+                        <p class="subheading mb-04">Scheduled, pending, and published posts across all brands &mdash; 5-week window. Click any day for details.</p>
+                        <div class="eco-cal-brand-row mb-06" id="eco-cal-brand-filter"></div>
+                        <p class="eco-cal-range-label" id="eco-cal-range-label"></p>
+                        <div class="eco-cal-grid" id="eco-cal-grid"></div>
+                        <div class="eco-cal-detail d-none" id="eco-cal-detail">
+                            <div class="eco-cal-detail-header">
+                                <span id="eco-cal-detail-date"></span>
+                                <button class="btn btn-ghost btn-micro" id="eco-cal-detail-close">&times; Close</button>
+                            </div>
+                            <ul id="eco-cal-detail-list" style="padding:0;margin:0"></ul>
+                        </div>
                     </article>
                 </section>
 
@@ -15819,6 +15900,197 @@
 
                         window.__adminPanels = window.__adminPanels || {};
                         window.__adminPanels['asset-intel'] = load;
+                    })();
+
+                    // =================================================================
+                    // ECOSYSTEM CALENDAR PANEL (panel 28)
+                    // =================================================================
+                    (function initEcoCalPanel() {
+                        'use strict';
+
+                        const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                        let activeBrands = new Set(Object.keys(BRAND_DEFS));
+                        let weekOffset = 0; // 0 = window starting this Sunday
+                        let eventsMap = new Map(); // YYYY-MM-DD → [event, …]
+                        let selectedDate = null;
+
+                        function getWindowStart() {
+                            const d = new Date();
+                            d.setHours(0, 0, 0, 0);
+                            d.setDate(d.getDate() - d.getDay()); // rewind to Sunday
+                            d.setDate(d.getDate() + weekOffset * 7);
+                            return new Date(d);
+                        }
+
+                        function toDateStr(d) {
+                            return d.toISOString().slice(0, 10);
+                        }
+
+                        function fmtDate(d) {
+                            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        }
+
+                        async function load() {
+                            const start = getWindowStart();
+                            const end = new Date(start);
+                            end.setDate(end.getDate() + 34); // 5 full weeks
+
+                            const from = toDateStr(start);
+                            const to = toDateStr(end);
+                            const brands = [...activeBrands].join(',');
+
+                            const label = $('eco-cal-range-label');
+                            if (label) label.textContent = fmtDate(start) + ' – ' + fmtDate(end);
+
+                            const grid = $('eco-cal-grid');
+                            if (grid) grid.innerHTML = '<div class="text-muted" style="grid-column:1/-1;padding:1rem">Loading…</div>';
+
+                            try {
+                                const data = await api('/ecosystem-calendar?from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to) + '&brands=' + encodeURIComponent(brands));
+                                eventsMap = new Map();
+                                (data.events || []).forEach(function (ev) {
+                                    const day = (ev.scheduled_at || '').slice(0, 10);
+                                    if (!eventsMap.has(day)) eventsMap.set(day, []);
+                                    eventsMap.get(day).push(ev);
+                                });
+                                renderCalendar(start);
+                                if (selectedDate) renderDetail(selectedDate);
+                            } catch (e) {
+                                toast('Eco Calendar: ' + e.message, 'error');
+                                if (grid) grid.innerHTML = '<div class="text-muted" style="grid-column:1/-1;padding:1rem">Failed to load calendar data.</div>';
+                            }
+                        }
+
+                        function renderCalendar(start) {
+                            const grid = $('eco-cal-grid');
+                            if (!grid) return;
+
+                            const today = toDateStr(new Date());
+                            let html = DAY_NAMES.map(function (d) { return '<div class="eco-cal-hdr">' + d + '</div>'; }).join('');
+
+                            for (let i = 0; i < 35; i++) {
+                                const d = new Date(start);
+                                d.setDate(d.getDate() + i);
+                                const ds = toDateStr(d);
+                                const events = eventsMap.get(ds) || [];
+
+                                // Group by brand for dots (max 5 visible)
+                                const brandCounts = {};
+                                events.forEach(function (ev) { brandCounts[ev.brand] = (brandCounts[ev.brand] || 0) + 1; });
+                                const brandEntries = Object.entries(brandCounts);
+                                const dots = brandEntries.slice(0, 5).map(function (entry) {
+                                    const br = entry[0], cnt = entry[1];
+                                    const color = (BRAND_DEFS[br] && BRAND_DEFS[br].color) || '#888';
+                                    return '<span class="eco-cal-dot" style="background:' + escapeHtml(color) + '" title="' + escapeHtml(br) + ': ' + cnt + '"></span>';
+                                }).join('');
+                                const overflow = brandEntries.length > 5 ? '<span class="eco-cal-more">+' + (brandEntries.length - 5) + '</span>' : '';
+
+                                const classes = ['eco-cal-day',
+                                    ds === today ? 'eco-cal-today' : '',
+                                    ds === selectedDate ? 'eco-cal-selected' : '',
+                                    events.length ? 'eco-cal-has-events' : '',
+                                ].filter(Boolean).join(' ');
+
+                                html += '<div class="' + classes + '" data-eco-date="' + escapeHtml(ds) + '">' +
+                                    '<span class="eco-cal-date-num">' + d.getDate() + '</span>' +
+                                    '<div class="eco-cal-dots">' + dots + overflow + '</div>' +
+                                    (events.length ? '<span class="eco-cal-count">' + events.length + ' post' + (events.length !== 1 ? 's' : '') + '</span>' : '') +
+                                    '</div>';
+                            }
+
+                            grid.innerHTML = html;
+
+                            const capturedStart = new Date(start);
+                            grid.querySelectorAll('[data-eco-date]').forEach(function (cell) {
+                                cell.addEventListener('click', function () {
+                                    selectedDate = cell.dataset.ecoDate;
+                                    renderCalendar(capturedStart);
+                                    renderDetail(selectedDate);
+                                });
+                            });
+                        }
+
+                        function renderDetail(dateStr) {
+                            const detail = $('eco-cal-detail');
+                            const dateLabel = $('eco-cal-detail-date');
+                            const list = $('eco-cal-detail-list');
+                            if (!detail || !list) return;
+
+                            const events = eventsMap.get(dateStr) || [];
+                            if (!events.length) {
+                                detail.classList.add('d-none');
+                                return;
+                            }
+
+                            detail.classList.remove('d-none');
+                            if (dateLabel) {
+                                const d = new Date(dateStr + 'T12:00:00Z');
+                                dateLabel.textContent = fmtDate(d);
+                            }
+
+                            list.innerHTML = events.map(function (ev) {
+                                const brandDef = BRAND_DEFS[ev.brand] || {};
+                                const color = brandDef.color || '#888';
+                                const shortBrand = brandDef.shortName || ev.brand || '';
+                                const time = ev.scheduled_at
+                                    ? new Date(ev.scheduled_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+                                    : 'No time';
+                                const statusClass = ev.status === 'published' ? 'emerald' : ev.status === 'scheduled' ? 'gold' : 'muted';
+                                const excerpt = (ev.content_body || '').slice(0, 120);
+                                return '<li class="eco-detail-row">' +
+                                    '<span class="eco-detail-dot" style="background:' + escapeHtml(color) + '"></span>' +
+                                    '<div class="eco-detail-body">' +
+                                        '<div class="eco-detail-brand">' + escapeHtml(shortBrand) + ' &middot; ' + escapeHtml(ev.platform || '') + ' &middot; <span class="eco-detail-time">' + escapeHtml(time) + '</span></div>' +
+                                        (excerpt ? '<div class="eco-detail-excerpt">' + escapeHtml(excerpt) + (ev.content_body && ev.content_body.length > 120 ? '&hellip;' : '') + '</div>' : '') +
+                                        (ev.campaign_name ? '<div class="eco-detail-campaign">&#128203; ' + escapeHtml(ev.campaign_name) + '</div>' : '') +
+                                    '</div>' +
+                                    '<span class="tag tag-' + statusClass + ' tag-xs">' + escapeHtml(ev.status || '') + '</span>' +
+                                '</li>';
+                            }).join('');
+                        }
+
+                        function renderBrandFilter() {
+                            const row = $('eco-cal-brand-filter');
+                            if (!row) return;
+                            row.innerHTML = Object.entries(BRAND_DEFS).map(function (entry) {
+                                const id = entry[0], def = entry[1];
+                                return '<button type="button" class="crosspost-pill ' + (activeBrands.has(id) ? 'active' : '') +
+                                    '" data-eco-brand="' + escapeHtml(id) +
+                                    '" style="--brand-color:' + escapeHtml(def.color) + '">' +
+                                    escapeHtml(def.shortName || def.name) + '</button>';
+                            }).join('');
+                            row.querySelectorAll('[data-eco-brand]').forEach(function (btn) {
+                                btn.addEventListener('click', function () {
+                                    const b = btn.dataset.ecoBrand;
+                                    if (activeBrands.has(b)) activeBrands.delete(b);
+                                    else activeBrands.add(b);
+                                    renderBrandFilter();
+                                    load();
+                                });
+                            });
+                        }
+
+                        function init() {
+                            renderBrandFilter();
+                            load();
+
+                            const prev = $('eco-cal-prev');
+                            const next = $('eco-cal-next');
+                            const todayBtn = $('eco-cal-today');
+                            const closeBtn = $('eco-cal-detail-close');
+
+                            if (prev) prev.addEventListener('click', function () { weekOffset--; selectedDate = null; load(); });
+                            if (next) next.addEventListener('click', function () { weekOffset++; selectedDate = null; load(); });
+                            if (todayBtn) todayBtn.addEventListener('click', function () { weekOffset = 0; selectedDate = null; load(); });
+                            if (closeBtn) closeBtn.addEventListener('click', function () {
+                                selectedDate = null;
+                                var d = $('eco-cal-detail');
+                                if (d) d.classList.add('d-none');
+                            });
+                        }
+
+                        window.__adminPanels = window.__adminPanels || {};
+                        window.__adminPanels['eco-cal'] = init;
                     })();
 
                     // =================================================================
