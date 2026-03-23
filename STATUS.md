@@ -66,6 +66,10 @@ npm run test:a11y   # Accessibility only (~5s)
 
 ---
 
+## Recent Work (Mar 23, 2026) — Session 3
+
+- **Deployment Health Scoring** (admin panel #23, `admin.html`): Enhanced Deployments panel with per-repo health intelligence. Added per-repo health card grid showing success rate (%), sparkline of last 10 runs (green/red dots), average build duration, consecutive win/loss streak, and total runs sampled. Added 5th KPI "Ecosystem Health" — weighted average success rate across all repos, color-coded emerald/gold/rose. Alert badge on the Deployments nav button lights up (red count) when any repo has 2+ consecutive failures. Increased GitHub Actions API `per_page` from 10 to 30 for more complete health data. Phase 4 charter: Deeper deployment automation. CSS: `.deploy-health-grid`, `.deploy-health-card`, `.deploy-spark`, `.deploy-badge-alert`. GAP_FLAGS: N/A (charter item, not a gap flag).
+
 ## Recent Work (Mar 22, 2026) — Session 2
 
 - **Asset Intelligence panel** (admin panel #27, `workers/cms.js`): Added `GET /api/cms/assets/analytics` endpoint running 6 parallel D1 queries — total asset count, by-review-status, per-brand breakdown (approved/pending/rejected/featured + approval %), by-media-type, top-25 categories, oldest-10 pending (with one-click approve), most-recently-approved-10. New "Asset Intel" nav button in the Intelligence group. KPI strip, media-type + category tag clouds, brand breakdown table, oldest-pending review queue, recently-approved audit trail. Phase 4 charter: Advanced reporting and diagnostics. Commit `af4b04c`.

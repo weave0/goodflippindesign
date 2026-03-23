@@ -860,54 +860,251 @@
         }
 
         /* ── Ecosystem Calendar (Panel 28) ──────────────────────────── */
-        .eco-cal-brand-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-        .eco-cal-range-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.55rem; }
+        .eco-cal-brand-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .eco-cal-range-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.55rem;
+        }
+
         .eco-cal-grid {
             display: grid;
             grid-template-columns: repeat(7, minmax(0, 1fr));
             gap: 3px;
         }
+
         .eco-cal-hdr {
-            font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;
-            letter-spacing: 0.04em; text-align: center; padding: 0.25rem 0;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            text-align: center;
+            padding: 0.25rem 0;
         }
+
         .eco-cal-day {
-            min-height: 64px; border: 1px solid var(--border); border-radius: 8px;
-            padding: 0.32rem; background: rgba(255,255,255,0.02);
-            display: flex; flex-direction: column; gap: 0.15rem;
+            min-height: 64px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.32rem;
+            background: rgba(255, 255, 255, 0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
             cursor: pointer;
             transition: border-color 0.2s ease, background 0.2s ease;
         }
-        .eco-cal-day:hover { border-color: var(--border-strong); background: rgba(255,255,255,0.04); }
-        .eco-cal-day.eco-cal-today { border-color: rgba(34,211,238,0.5); background: rgba(34,211,238,0.04); }
-        .eco-cal-day.eco-cal-selected { border-color: rgba(34,211,238,0.9); background: rgba(34,211,238,0.08); }
-        .eco-cal-date-num { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
-        .eco-cal-day.eco-cal-today .eco-cal-date-num { color: #22d3ee; font-weight: 700; }
-        .eco-cal-dots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 0.1rem; }
-        .eco-cal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .eco-cal-count { font-size: 0.62rem; color: var(--text-muted); margin-top: auto; align-self: flex-end; }
-        .eco-cal-more { font-size: 0.62rem; color: var(--text-muted); }
+
+        .eco-cal-day:hover {
+            border-color: var(--border-strong);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .eco-cal-day.eco-cal-today {
+            border-color: rgba(34, 211, 238, 0.5);
+            background: rgba(34, 211, 238, 0.04);
+        }
+
+        .eco-cal-day.eco-cal-selected {
+            border-color: rgba(34, 211, 238, 0.9);
+            background: rgba(34, 211, 238, 0.08);
+        }
+
+        .eco-cal-date-num {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .eco-cal-day.eco-cal-today .eco-cal-date-num {
+            color: #22d3ee;
+            font-weight: 700;
+        }
+
+        .eco-cal-dots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            margin-top: 0.1rem;
+        }
+
+        .eco-cal-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .eco-cal-count {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            margin-top: auto;
+            align-self: flex-end;
+        }
+
+        .eco-cal-more {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+        }
+
         .eco-cal-detail {
-            border: 1px solid var(--border); border-radius: 12px;
-            padding: 0.9rem 1rem; margin-top: 1rem;
-            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.9rem 1rem;
+            margin-top: 1rem;
+            background: rgba(255, 255, 255, 0.02);
         }
+
         .eco-cal-detail-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 0.7rem; font-size: 0.9rem; font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.7rem;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
+
         .eco-detail-row {
-            display: flex; align-items: flex-start; gap: 0.65rem;
-            padding: 0.5rem 0; border-bottom: 1px solid var(--border); list-style: none;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+            list-style: none;
         }
-        .eco-detail-row:last-child { border-bottom: none; }
-        .eco-detail-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 0.25rem; }
-        .eco-detail-body { flex: 1; min-width: 0; }
-        .eco-detail-brand { font-size: 0.78rem; font-weight: 600; color: var(--text); }
-        .eco-detail-time { font-weight: 400; color: var(--text-muted); }
-        .eco-detail-excerpt { font-size: 0.77rem; color: var(--text-muted); margin-top: 0.12rem; line-height: 1.4; }
-        .eco-detail-campaign { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.12rem; }
-        .tag-xs { font-size: 0.65rem !important; padding: 0.1rem 0.45rem !important; }
+
+        .eco-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .eco-detail-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 0.25rem;
+        }
+
+        .eco-detail-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .eco-detail-brand {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .eco-detail-time {
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        .eco-detail-excerpt {
+            font-size: 0.77rem;
+            color: var(--text-muted);
+            margin-top: 0.12rem;
+            line-height: 1.4;
+        }
+
+        .eco-detail-campaign {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.12rem;
+        }
+
+        .tag-xs {
+            font-size: 0.65rem !important;
+            padding: 0.1rem 0.45rem !important;
+        }
+
+        /* ── Deployment Health Grid ───────────────────────────────── */
+        .deploy-health-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .deploy-health-card {
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            border-left-width: 3px;
+        }
+
+        .deploy-health-card-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .deploy-health-score {
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .deploy-health-meta {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 0.18rem;
+        }
+
+        .deploy-spark-row {
+            display: flex;
+            gap: 3px;
+            margin-top: 0.25rem;
+            flex-wrap: nowrap;
+            overflow: hidden;
+        }
+
+        .deploy-spark {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .deploy-spark.ok   { background: #10b981; }
+        .deploy-spark.fail { background: #ef4444; }
+        .deploy-spark.skip { background: rgba(255,255,255,0.15); }
+
+        .deploy-streak {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .deploy-badge-alert {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.25rem;
+            height: 1.25rem;
+            padding: 0 0.3rem;
+            background: #ef4444;
+            color: #fff;
+            border-radius: 99px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            margin-left: 0.35rem;
+            vertical-align: middle;
+        }
 
         .toolbar {
             display: flex;
@@ -6788,7 +6985,7 @@
                                 <path d="M8 1v10" />
                                 <path d="M4 7l4 4 4-4" />
                                 <path d="M2 13h12" />
-                            </svg></span><span class="nav-label">Deployments</span></button>
+                            </svg></span><span class="nav-label">Deployments <span class="deploy-badge-alert d-none" id="deploy-alert-badge" aria-label="repos with consecutive failures"></span></span></button>
                     <button class="nav-btn" data-view="settings"><span class="nav-num">24</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <circle cx="8" cy="8" r="2.5" />
                                 <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" />
@@ -8787,7 +8984,16 @@
                             <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Last Deploy</div>
                             <div id="deploy-kpi-last" style="font-size:1.5rem;font-weight:600">&mdash;</div>
                         </div>
+                        <div class="panel" style="flex:1;min-width:120px;padding:0.75rem 1rem">
+                            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem">Ecosystem Health</div>
+                            <div id="deploy-kpi-health" style="font-size:1.5rem;font-weight:600">&mdash;</div>
+                        </div>
                     </div>
+                    <h3 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.65rem">Per-Repo Health</h3>
+                    <div id="deploy-health-grid" class="deploy-health-grid">
+                        <div class="text-muted" style="text-align:center;padding:1.5rem;grid-column:1/-1">Loading&hellip;</div>
+                    </div>
+                    <h3 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.65rem">Recent Runs</h3>
                     <div id="deploy-timeline" style="display:flex;flex-direction:column;gap:0.5rem">
                         <div class="text-muted" style="text-align:center;padding:2rem">Loading&hellip;</div>
                     </div>
@@ -16040,12 +16246,12 @@
                                 return '<li class="eco-detail-row">' +
                                     '<span class="eco-detail-dot" style="background:' + escapeHtml(color) + '"></span>' +
                                     '<div class="eco-detail-body">' +
-                                        '<div class="eco-detail-brand">' + escapeHtml(shortBrand) + ' &middot; ' + escapeHtml(ev.platform || '') + ' &middot; <span class="eco-detail-time">' + escapeHtml(time) + '</span></div>' +
-                                        (excerpt ? '<div class="eco-detail-excerpt">' + escapeHtml(excerpt) + (ev.content_body && ev.content_body.length > 120 ? '&hellip;' : '') + '</div>' : '') +
-                                        (ev.campaign_name ? '<div class="eco-detail-campaign">&#128203; ' + escapeHtml(ev.campaign_name) + '</div>' : '') +
+                                    '<div class="eco-detail-brand">' + escapeHtml(shortBrand) + ' &middot; ' + escapeHtml(ev.platform || '') + ' &middot; <span class="eco-detail-time">' + escapeHtml(time) + '</span></div>' +
+                                    (excerpt ? '<div class="eco-detail-excerpt">' + escapeHtml(excerpt) + (ev.content_body && ev.content_body.length > 120 ? '&hellip;' : '') + '</div>' : '') +
+                                    (ev.campaign_name ? '<div class="eco-detail-campaign">&#128203; ' + escapeHtml(ev.campaign_name) + '</div>' : '') +
                                     '</div>' +
                                     '<span class="tag tag-' + statusClass + ' tag-xs">' + escapeHtml(ev.status || '') + '</span>' +
-                                '</li>';
+                                    '</li>';
                             }).join('');
                         }
 
@@ -18771,25 +18977,33 @@
                                 return { owner: parts[0], repo: parts[1], label: s.name, color: s.color };
                             });
 
+                        // per-repo health data keyed by label
+                        var _healthMap = {};
+
                         async function loadDeployments() {
                             var timeline = $('deploy-timeline');
+                            var healthGrid = $('deploy-health-grid');
                             if (!timeline) return;
                             timeline.innerHTML = '<div class="text-muted" style="text-align:center;padding:2rem">Fetching deployments&hellip;</div>';
+                            if (healthGrid) healthGrid.innerHTML = '<div class="text-muted" style="text-align:center;padding:1.5rem;grid-column:1/-1">Fetching&hellip;</div>';
 
                             var allRuns = [];
+                            var repoRuns = {}; // label -> run[]
                             var headers = { 'Accept': 'application/vnd.github+json' };
 
                             await Promise.all(DEPLOY_REPOS.map(async function (r) {
                                 try {
                                     var res = await fetch(
-                                        'https://api.github.com/repos/' + r.owner + '/' + r.repo + '/actions/runs?per_page=10&event=push',
+                                        'https://api.github.com/repos/' + r.owner + '/' + r.repo + '/actions/runs?per_page=30&event=push',
                                         { headers: headers }
                                     );
                                     if (!res.ok) return;
                                     var data = await res.json();
-                                    (data.workflow_runs || []).forEach(function (run) {
-                                        allRuns.push(Object.assign({}, run, { _label: r.label, _color: r.color }));
+                                    var runs = (data.workflow_runs || []).map(function (run) {
+                                        return Object.assign({}, run, { _label: r.label, _color: r.color });
                                     });
+                                    repoRuns[r.label] = runs;
+                                    runs.forEach(function (run) { allRuns.push(run); });
                                 } catch (e) { /* skip */ }
                             }));
 
@@ -18806,6 +19020,111 @@
                             $('deploy-kpi-failed').textContent = failed;
                             $('deploy-kpi-last').textContent = allRuns.length ? ecoRelTime(allRuns[0].created_at) : '—';
 
+                            // ── Per-repo health scoring ────────────────────────────────
+                            _healthMap = {};
+                            var criticalCount = 0;
+
+                            DEPLOY_REPOS.forEach(function (r) {
+                                var runs = (repoRuns[r.label] || []).filter(function (run) {
+                                    return run.conclusion === 'success' || run.conclusion === 'failure';
+                                });
+                                var total = runs.length;
+                                var successes = runs.filter(function (run) { return run.conclusion === 'success'; }).length;
+                                var rate = total ? Math.round(successes / total * 100) : null;
+
+                                // average deploy duration in seconds
+                                var durs = runs.filter(function (run) { return run.updated_at && run.created_at; }).map(function (run) {
+                                    return (new Date(run.updated_at) - new Date(run.created_at)) / 1000;
+                                });
+                                var avgDur = durs.length ? Math.round(durs.reduce(function (a, b) { return a + b; }, 0) / durs.length) : null;
+
+                                // streak: consecutive from top
+                                var streak = 0;
+                                var streakSign = null;
+                                for (var i = 0; i < runs.length; i++) {
+                                    var c = runs[i].conclusion;
+                                    if (streakSign === null) { streakSign = c; streak = 1; }
+                                    else if (c === streakSign) { streak++; }
+                                    else { break; }
+                                }
+
+                                var isCritical = streakSign === 'failure' && streak >= 2;
+                                if (isCritical) criticalCount++;
+
+                                // last 10 spark dots
+                                var sparkRuns = (repoRuns[r.label] || []).filter(function (run) {
+                                    return run.conclusion === 'success' || run.conclusion === 'failure';
+                                }).slice(0, 10);
+
+                                _healthMap[r.label] = {
+                                    color: r.color, label: r.label,
+                                    rate: rate, avgDur: avgDur,
+                                    streak: streak, streakSign: streakSign,
+                                    isCritical: isCritical,
+                                    sparkRuns: sparkRuns, total: total
+                                };
+                            });
+
+                            // ecosystem health KPI = weighted average across repos with data
+                            var ratesWithData = Object.values(_healthMap).filter(function (h) { return h.rate !== null; });
+                            var ecoHealth = ratesWithData.length
+                                ? Math.round(ratesWithData.reduce(function (sum, h) { return sum + h.rate; }, 0) / ratesWithData.length)
+                                : null;
+                            var healthEl = $('deploy-kpi-health');
+                            if (healthEl) {
+                                healthEl.textContent = ecoHealth !== null ? ecoHealth + '%' : '—';
+                                healthEl.style.color = ecoHealth >= 90 ? '#10b981' : ecoHealth >= 70 ? '#f59e0b' : '#ef4444';
+                            }
+
+                            // alert badge on nav button
+                            var alertBadge = $('deploy-alert-badge');
+                            if (alertBadge) {
+                                if (criticalCount > 0) {
+                                    alertBadge.textContent = criticalCount;
+                                    alertBadge.classList.remove('d-none');
+                                } else {
+                                    alertBadge.classList.add('d-none');
+                                }
+                            }
+
+                            // render per-repo health cards
+                            if (healthGrid) {
+                                var cards = Object.values(_healthMap);
+                                if (!cards.length) {
+                                    healthGrid.innerHTML = '<div class="text-muted" style="grid-column:1/-1;text-align:center;padding:1.5rem">No repos found</div>';
+                                } else {
+                                    healthGrid.innerHTML = cards.map(function (h) {
+                                        var rateColor = h.rate === null ? 'var(--text-muted)' : h.rate >= 90 ? '#10b981' : h.rate >= 70 ? '#f59e0b' : '#ef4444';
+                                        var rateText = h.rate !== null ? h.rate + '%' : 'N/A';
+                                        var avgText = h.avgDur !== null ? (h.avgDur >= 60 ? Math.round(h.avgDur / 60) + 'm ' + (h.avgDur % 60) + 's' : h.avgDur + 's') : '—';
+                                        var streakLabel = h.streakSign === 'success'
+                                            ? '✅ ' + h.streak + ' consecutive'
+                                            : h.streakSign === 'failure'
+                                            ? '❌ ' + h.streak + ' consecutive fail' + (h.streak > 1 ? 's' : '')
+                                            : '—';
+                                        var sparks = h.sparkRuns.map(function (run) {
+                                            var cls = run.conclusion === 'success' ? 'ok' : 'fail';
+                                            return '<span class="deploy-spark ' + cls + '" title="' + escapeHtml(run.conclusion) + ' · ' + escapeHtml(ecoRelTime(run.created_at)) + '"></span>';
+                                        }).join('');
+                                        // pad to 10 dots
+                                        for (var i = h.sparkRuns.length; i < 10; i++) {
+                                            sparks += '<span class="deploy-spark skip"></span>';
+                                        }
+                                        return '<div class="deploy-health-card" style="border-left-color:' + escapeHtml(h.color) + '">' +
+                                            '<div class="deploy-health-card-name" title="' + escapeHtml(h.label) + '">' + escapeHtml(h.label) + '</div>' +
+                                            '<div class="deploy-health-score" style="color:' + rateColor + '">' + rateText + '</div>' +
+                                            '<div class="deploy-spark-row" aria-label="Last 10 runs">' + sparks + '</div>' +
+                                            '<div class="deploy-health-meta">' +
+                                            '<span>Avg build: ' + avgText + '</span>' +
+                                            '<span class="deploy-streak">' + streakLabel + '</span>' +
+                                            '<span>Runs sampled: ' + h.total + '</span>' +
+                                            '</div>' +
+                                            '</div>';
+                                    }).join('');
+                                }
+                            }
+
+                            // ── Timeline ──────────────────────────────────────────────
                             var shown = allRuns.slice(0, 30);
                             if (!shown.length) {
                                 timeline.innerHTML = '<div class="text-muted" style="text-align:center;padding:2rem">No deployment runs found</div>';
