@@ -1036,7 +1036,7 @@
             padding: 0.85rem 1rem;
             border-radius: 10px;
             border: 1px solid var(--border);
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
             display: flex;
             flex-direction: column;
             gap: 0.4rem;
@@ -1081,9 +1081,17 @@
             flex-shrink: 0;
         }
 
-        .deploy-spark.ok   { background: #10b981; }
-        .deploy-spark.fail { background: #ef4444; }
-        .deploy-spark.skip { background: rgba(255,255,255,0.15); }
+        .deploy-spark.ok {
+            background: #10b981;
+        }
+
+        .deploy-spark.fail {
+            background: #ef4444;
+        }
+
+        .deploy-spark.skip {
+            background: rgba(255, 255, 255, 0.15);
+        }
 
         .deploy-streak {
             font-size: 0.7rem;
@@ -1104,6 +1112,59 @@
             font-weight: 700;
             margin-left: 0.35rem;
             vertical-align: middle;
+        }
+
+        /* ── Asset Usage Graph (panel 29) ──────────────────────────────── */
+        .au-bar-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            padding: 0.5rem 0;
+        }
+
+        .au-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.78rem;
+        }
+
+        .au-bar-label {
+            width: 90px;
+            flex-shrink: 0;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.75rem;
+        }
+
+        .au-bar-track {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.07);
+            overflow: hidden;
+        }
+
+        .au-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: #06b6d4;
+            transition: width 0.4s ease;
+        }
+
+        .au-bar-fill.emerald { background: #10b981; }
+        .au-bar-fill.gold    { background: #d97706; }
+        .au-bar-fill.rose    { background: #f43f5e; }
+        .au-bar-fill.violet  { background: #8b5cf6; }
+
+        .au-bar-count {
+            width: 36px;
+            text-align: right;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            flex-shrink: 0;
         }
 
         .toolbar {
@@ -6950,6 +7011,16 @@
                                 <circle cx="8" cy="8" r="6.5" />
                                 <path d="M8 5v3l2 2" />
                             </svg></span><span class="nav-label">Asset Intel</span></button>
+                    <button class="nav-btn" data-view="asset-usage"><span class="nav-num">29</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="1.5" y="8.5" width="3" height="5" rx=".5" />
+                                <rect x="6.5" y="5.5" width="3" height="8" rx=".5" />
+                                <rect x="11.5" y="2.5" width="3" height="11" rx=".5" />
+                                <path d="M3 5.5l3.5-2.5 4 2.5L14 2" stroke-dasharray="none" />
+                            </svg></span><span class="nav-label">Asset Usage</span></button>
+                    <button class="nav-btn" data-view="automation"><span class="nav-num">30</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="8" cy="8" r="2" />
+                                <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.42 1.42M11.36 11.36l1.42 1.42M11.36 4.64l1.42-1.42M3.22 12.78l1.42-1.42" />
+                            </svg></span><span class="nav-label">Automation</span></button>
 
                     <div class="nav-group-label">Community</div>
                     <button class="nav-btn" data-view="community"><span class="nav-num">17</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
@@ -8486,6 +8557,174 @@
                             </div>
                         </article>
                     </div>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Asset Usage Graph (panel 29)                      -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-asset-usage">
+                    <div class="section-head">
+                        <h2 class="section-title">Asset Usage Graph</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="au-refresh-btn">Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Cross-reference library assets with post-variant delivery — usage counts, platform breakdown, and monthly trend.</p>
+
+                    <!-- KPI strip -->
+                    <div class="panel-kpis">
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Total Assets</div>
+                            <div class="panel-kpi-value cyan" id="au-total">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Used in Posts</div>
+                            <div class="panel-kpi-value emerald" id="au-used">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Never Used</div>
+                            <div class="panel-kpi-value rose" id="au-never">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Usage Rate</div>
+                            <div class="panel-kpi-value" id="au-rate">—</div>
+                        </div>
+                    </div>
+
+                    <!-- Top rows: platform breakdown + monthly trend side-by-side -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;margin-bottom:0.85rem">
+                        <article class="panel">
+                            <div class="section-head">
+                                <h3 class="panel-subtitle">By Platform</h3>
+                            </div>
+                            <div id="au-by-platform" class="au-bar-list"></div>
+                        </article>
+                        <article class="panel">
+                            <div class="section-head">
+                                <h3 class="panel-subtitle">Monthly Trend (last 6 mo)</h3>
+                            </div>
+                            <div id="au-by-month" class="au-bar-list"></div>
+                        </article>
+                    </div>
+
+                    <!-- Top 20 most-used assets table -->
+                    <article class="panel">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Top 20 Most-Used Assets</h3>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Brand</th>
+                                        <th>Type</th>
+                                        <th>Category</th>
+                                        <th>Uses</th>
+                                        <th>Published</th>
+                                        <th>Pending</th>
+                                        <th>Failed</th>
+                                        <th>Last Used</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="au-top-tbody">
+                                    <tr><td colspan="9" class="text-muted">Loading…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Automation Center (panel 30)                      -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-automation">
+                    <div class="section-head">
+                        <h2 class="section-title">Automation Center</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="auto-refresh-btn">Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Publishing queue snapshot, health sweep history, and one-click retry for failed variants.</p>
+
+                    <!-- KPI strip -->
+                    <div class="panel-kpis">
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Pending</div>
+                            <div class="panel-kpi-value gold" id="auto-pending">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Published</div>
+                            <div class="panel-kpi-value emerald" id="auto-published">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Failed</div>
+                            <div class="panel-kpi-value rose" id="auto-failed">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Last Sweep</div>
+                            <div class="panel-kpi-value cyan" id="auto-last-sweep">—</div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;margin-bottom:0.85rem">
+                        <!-- Health sweep run history -->
+                        <article class="panel">
+                            <div class="section-head">
+                                <h3 class="panel-subtitle">Recent Health Sweep Runs</h3>
+                            </div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Timestamp</th>
+                                            <th>Total</th>
+                                            <th>Passed</th>
+                                            <th>Warned</th>
+                                            <th>Failed</th>
+                                            <th>Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="auto-sweep-tbody">
+                                        <tr><td colspan="6" class="text-muted">Loading…</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+
+                        <!-- Failed by brand -->
+                        <article class="panel">
+                            <div class="section-head">
+                                <h3 class="panel-subtitle">Failed Variants by Brand</h3>
+                            </div>
+                            <div id="auto-failed-brand" class="au-bar-list"></div>
+                        </article>
+                    </div>
+
+                    <!-- Retry candidates -->
+                    <article class="panel">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Retry Candidates <small class="text-muted">(failed, &lt;3 attempts)</small></h3>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Brand</th>
+                                        <th>Platform</th>
+                                        <th>Retries</th>
+                                        <th>Scheduled</th>
+                                        <th>Error</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auto-retry-tbody">
+                                    <tr><td colspan="7" class="text-muted">Loading…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
                 </section>
 
                 <!-- ─────────────────────────────────────────────────────── -->
@@ -13415,6 +13654,7 @@
                         'settings': { name: 'Settings', title: 'Settings & Integrations', sub: 'Integration health, environment variable status, and configuration overview.' },
                         'docs': { name: 'Documentation', title: 'Documentation Hub', sub: 'Central index of all project documentation, SOPs, and architecture records.' },
                         'studio-hq': { name: 'Studio HQ', title: 'Studio Management Platform', sub: 'Priority signals, build pipeline, self-advisor insights, and ecosystem architecture — all zero compute cost.' },
+                        'automation': { name: 'Automation', title: 'Automation Center', sub: 'Publishing queue snapshot, health sweep history, and one-click retry for failed post variants.' },
                     };
 
                     function updatePageContext(view) {
@@ -16109,8 +16349,243 @@
                     })();
 
                     // =================================================================
-                    // ECOSYSTEM CALENDAR PANEL (panel 28)
+                    // ASSET USAGE GRAPH PANEL (panel 29)
                     // =================================================================
+                    (function initAssetUsagePanel() {
+                        'use strict';
+
+                        const PLATFORM_COLORS = {
+                            instagram: 'violet', x: 'cyan', linkedin: 'emerald',
+                            youtube: 'rose', threads: 'gold', pinterest: 'rose', tiktok: 'violet',
+                        };
+
+                        function fmt(d) {
+                            if (!d) return '—';
+                            const dt = new Date(d);
+                            return isNaN(dt) ? d : dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: '2-digit' });
+                        }
+
+                        function renderBarList(containerId, rows, labelKey, valueKey, colorClass) {
+                            const el = document.getElementById(containerId);
+                            if (!el) return;
+                            if (!rows.length) { el.innerHTML = '<p class="text-muted" style="font-size:.8rem">No data</p>'; return; }
+                            const max = Math.max(...rows.map(r => r[valueKey] || 0)) || 1;
+                            el.innerHTML = rows.map(r => {
+                                const pct = Math.round(((r[valueKey] || 0) / max) * 100);
+                                const cls = colorClass || PLATFORM_COLORS[r[labelKey]] || 'cyan';
+                                return `<div class="au-bar-row">
+                                    <span class="au-bar-label" title="${escapeHtml(String(r[labelKey]))}">${escapeHtml(String(r[labelKey]))}</span>
+                                    <div class="au-bar-track"><div class="au-bar-fill ${cls}" style="width:${pct}%"></div></div>
+                                    <span class="au-bar-count">${r[valueKey] || 0}</span>
+                                </div>`;
+                            }).join('');
+                        }
+
+                        function renderTopTable(assets) {
+                            const tbody = document.getElementById('au-top-tbody');
+                            if (!tbody) return;
+                            if (!assets.length) {
+                                tbody.innerHTML = '<tr><td colspan="9" class="text-muted">No assets linked to post variants yet.</td></tr>';
+                                return;
+                            }
+                            tbody.innerHTML = assets.map(a => `
+                                <tr>
+                                    <td>${escapeHtml(a.title || a.id)}</td>
+                                    <td><span class="tag">${escapeHtml(a.brand || '—')}</span></td>
+                                    <td>${escapeHtml(a.media_type || '—')}</td>
+                                    <td style="color:var(--text-muted);font-size:.8rem">${escapeHtml(a.category || '—')}</td>
+                                    <td><strong>${a.use_count || 0}</strong></td>
+                                    <td class="emerald">${a.published || 0}</td>
+                                    <td class="gold">${a.pending || 0}</td>
+                                    <td class="rose">${a.failed || 0}</td>
+                                    <td style="color:var(--text-muted);font-size:.78rem">${fmt(a.last_used)}</td>
+                                </tr>`).join('');
+                        }
+
+                        async function load() {
+                            const [totalRes, usageRes] = await Promise.all([
+                                fetch('/api/cms/assets?limit=1').catch(() => null),
+                                fetch('/api/cms/assets/usage', { headers: { Authorization: `Bearer ${getAdminToken()}` } }).catch(() => null),
+                            ]);
+
+                            // total from list endpoint (we just need the header count or re-use KPI)
+                            let total = '—';
+                            if (totalRes && totalRes.ok) {
+                                const td = await totalRes.json().catch(() => null);
+                                if (td && typeof td.total === 'number') total = td.total;
+                            }
+
+                            if (!usageRes || !usageRes.ok) {
+                                ['au-total','au-used','au-never','au-rate'].forEach(id => {
+                                    const el = document.getElementById(id);
+                                    if (el) el.textContent = 'Error';
+                                });
+                                return;
+                            }
+
+                            const d = await usageRes.json();
+                            const usedCount  = d.used_count  || 0;
+                            const neverUsed  = d.never_used  || 0;
+                            const grandTotal = usedCount + neverUsed;
+                            const rate       = grandTotal ? Math.round((usedCount / grandTotal) * 100) : 0;
+
+                            const auTotal = document.getElementById('au-total');
+                            const auUsed  = document.getElementById('au-used');
+                            const auNever = document.getElementById('au-never');
+                            const auRate  = document.getElementById('au-rate');
+
+                            if (auTotal) auTotal.textContent = grandTotal || total;
+                            if (auUsed)  auUsed.textContent  = usedCount;
+                            if (auNever) auNever.textContent = neverUsed;
+                            if (auRate) {
+                                auRate.textContent = `${rate}%`;
+                                auRate.className = `panel-kpi-value ${rate >= 60 ? 'emerald' : rate >= 30 ? 'gold' : 'rose'}`;
+                            }
+
+                            renderBarList('au-by-platform', d.by_platform || [], 'platform', 'use_count');
+                            renderBarList('au-by-month',    d.by_month    || [], 'month',    'count', 'cyan');
+                            renderTopTable(d.top_assets || []);
+                        }
+
+                        const refBtn = document.getElementById('au-refresh-btn');
+                        if (refBtn) refBtn.addEventListener('click', load);
+
+                        window.__adminPanels = window.__adminPanels || {};
+                        window.__adminPanels['asset-usage'] = load;
+                    })();
+
+                    // =================================================================
+                    // AUTOMATION CENTER PANEL (panel 30)
+                    // =================================================================
+                    (function initAutomationCenterPanel() {
+                        'use strict';
+
+                        function fmt(iso) {
+                            if (!iso) return '—';
+                            const d = new Date(iso);
+                            return isNaN(d) ? iso : d.toLocaleString();
+                        }
+
+                        function renderBarList(containerId, rows, labelKey, valueKey, colorClass) {
+                            const el = document.getElementById(containerId);
+                            if (!el) return;
+                            if (!rows || rows.length === 0) { el.innerHTML = '<span class="text-muted">No data.</span>'; return; }
+                            const max = Math.max(...rows.map(r => r[valueKey] || 0), 1);
+                            el.innerHTML = rows.map(r => {
+                                const pct = Math.round(((r[valueKey] || 0) / max) * 100);
+                                return `<div class="au-bar-row"><span class="au-bar-label">${r[labelKey] || '—'}</span><div class="au-bar-track"><div class="au-bar-fill ${colorClass}" style="width:${pct}%"></div></div><span class="au-bar-val">${r[valueKey] || 0}</span></div>`;
+                            }).join('');
+                        }
+
+                        async function load() {
+                            const token = window.__adminToken;
+                            const pending = document.getElementById('auto-pending');
+                            const published = document.getElementById('auto-published');
+                            const failed = document.getElementById('auto-failed');
+                            const lastSweep = document.getElementById('auto-last-sweep');
+                            const sweepTbody = document.getElementById('auto-sweep-tbody');
+                            const retryTbody = document.getElementById('auto-retry-tbody');
+
+                            if (pending) pending.textContent = '…';
+                            if (published) published.textContent = '…';
+                            if (failed) failed.textContent = '…';
+                            if (lastSweep) lastSweep.textContent = '…';
+
+                            try {
+                                const res = await fetch('/api/cms/automation-center', { headers: { Authorization: `Bearer ${token}` } });
+                                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                                const data = await res.json();
+
+                                // KPI strip — queue snapshot
+                                const qMap = {};
+                                (data.queue || []).forEach(r => { qMap[r.status] = r.count; });
+                                if (pending) pending.textContent = (qMap.pending || qMap.scheduled || 0);
+                                if (published) published.textContent = (qMap.published || 0);
+                                if (failed) failed.textContent = (qMap.failed || 0);
+
+                                // Last sweep timing
+                                if (lastSweep) {
+                                    const mins = data.minutes_since_sweep;
+                                    lastSweep.textContent = mins === null ? '—' : mins < 60 ? `${mins}m ago` : `${Math.round(mins / 60)}h ago`;
+                                }
+
+                                // Sweep run history table
+                                if (sweepTbody) {
+                                    const runs = data.sweep_runs || [];
+                                    if (runs.length === 0) {
+                                        sweepTbody.innerHTML = '<tr><td colspan="6" class="text-muted">No sweep history found.</td></tr>';
+                                    } else {
+                                        sweepTbody.innerHTML = runs.map(r => {
+                                            const allPass = r.failed === 0 && r.warned === 0;
+                                            const badge = allPass ? '<span class="status-badge status-pass">pass</span>'
+                                                : r.failed > 0 ? '<span class="status-badge status-fail">fail</span>'
+                                                : '<span class="status-badge status-warn">warn</span>';
+                                            return `<tr>
+                                                <td style="font-size:0.78rem">${fmt(r.checked_at)}</td>
+                                                <td>${r.total || 0}</td>
+                                                <td class="emerald">${r.passed || 0}</td>
+                                                <td class="gold">${r.warned || 0}</td>
+                                                <td class="rose">${r.failed || 0}</td>
+                                                <td>${badge}</td>
+                                            </tr>`;
+                                        }).join('');
+                                    }
+                                }
+
+                                // Failed by brand bar list
+                                renderBarList('auto-failed-brand', data.failed_by_brand || [], 'brand', 'failed_count', 'rose');
+
+                                // Retry candidates table
+                                if (retryTbody) {
+                                    const cands = data.retry_candidates || [];
+                                    if (cands.length === 0) {
+                                        retryTbody.innerHTML = '<tr><td colspan="7" class="text-muted">No retry candidates — great!</td></tr>';
+                                    } else {
+                                        retryTbody.innerHTML = cands.map(c => `<tr>
+                                            <td style="font-size:0.75rem;font-family:var(--mono)">${c.id ? String(c.id).slice(0, 8) : '—'}</td>
+                                            <td>${c.brand || '—'}</td>
+                                            <td>${c.platform || '—'}</td>
+                                            <td>${c.retry_count ?? 0}</td>
+                                            <td style="font-size:0.75rem">${fmt(c.scheduled_at)}</td>
+                                            <td style="font-size:0.75rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(c.error_message || '').replace(/"/g, '&quot;')}">${c.error_message || '—'}</td>
+                                            <td><button class="btn btn-secondary" style="font-size:0.75rem;padding:0.2rem 0.5rem" onclick="retryVariant('${c.id}',this)">Retry</button></td>
+                                        </tr>`).join('');
+                                    }
+                                }
+
+                            } catch (err) {
+                                if (sweepTbody) sweepTbody.innerHTML = `<tr><td colspan="6" class="text-muted">Error: ${err.message}</td></tr>`;
+                                if (retryTbody) retryTbody.innerHTML = `<tr><td colspan="7" class="text-muted">Error: ${err.message}</td></tr>`;
+                            }
+                        }
+
+                        window.retryVariant = async function(id, btn) {
+                            if (!id) return;
+                            const token = window.__adminToken;
+                            btn.disabled = true;
+                            btn.textContent = '…';
+                            try {
+                                const res = await fetch(`/api/cms/variants/${id}/retry`, {
+                                    method: 'PUT',
+                                    headers: { Authorization: `Bearer ${token}` }
+                                });
+                                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                                btn.textContent = 'Queued';
+                                btn.style.color = 'var(--emerald)';
+                                setTimeout(load, 1500);
+                            } catch (err) {
+                                btn.textContent = 'Error';
+                                btn.style.color = 'var(--rose)';
+                                btn.disabled = false;
+                            }
+                        };
+
+                        const refBtn = document.getElementById('auto-refresh-btn');
+                        if (refBtn) refBtn.addEventListener('click', load);
+
+                        window.__adminPanels = window.__adminPanels || {};
+                        window.__adminPanels['automation'] = load;
+                    })();
                     (function initEcoCalPanel() {
                         'use strict';
 
@@ -19100,8 +19575,8 @@
                                         var streakLabel = h.streakSign === 'success'
                                             ? '✅ ' + h.streak + ' consecutive'
                                             : h.streakSign === 'failure'
-                                            ? '❌ ' + h.streak + ' consecutive fail' + (h.streak > 1 ? 's' : '')
-                                            : '—';
+                                                ? '❌ ' + h.streak + ' consecutive fail' + (h.streak > 1 ? 's' : '')
+                                                : '—';
                                         var sparks = h.sparkRuns.map(function (run) {
                                             var cls = run.conclusion === 'success' ? 'ok' : 'fail';
                                             return '<span class="deploy-spark ' + cls + '" title="' + escapeHtml(run.conclusion) + ' · ' + escapeHtml(ecoRelTime(run.created_at)) + '"></span>';

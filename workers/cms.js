@@ -266,6 +266,157 @@ async function handleAssetAnalytics(env) {
 }
 
 /**
+ * GET /api/cms/automation-center — Queue snapshot + health sweep history aggregate.
+ * Returns variant status counts, retry candidates, and last N health sweep runs.
+ */
+async function handleAutomationCenter(env) {
+  const db = env.DB;
+
+  const [queueRes, sweepRunsRes, retryRes, failedBrandRes] = await Promise.all([
+    // Queue snapshot: counts by status
+    db.prepare(`
+      SELECT status, COUNT(*) AS count
+      FROM cms_post_variants
+      GROUP BY status
+      ORDER BY count DESC
+    `).all(),
+
+    // Last 8 health sweep run timestamps, with pass/warn/fail summary per run
+    db.prepare(`
+      SELECT checked_at,
+             COUNT(*)                                                          AS total,
+             SUM(CASE WHEN overall_status = 'pass' THEN 1 ELSE 0 END)         AS passed,
+             SUM(CASE WHEN overall_status = 'warn' THEN 1 ELSE 0 END)         AS warned,
+             SUM(CASE WHEN overall_status = 'fail' THEN 1 ELSE 0 END)         AS failed
+      FROM health_checks
+      GROUP BY checked_at
+      ORDER BY checked_at DESC
+      LIMIT 8
+    `).all(),
+
+    // Retry candidates: failed variants with retry_count < 3, most recent first
+    db.prepare(`
+      SELECT v.id, v.platform, v.status, v.retry_count, v.error_message,
+             sp.brand, sp.content, v.scheduled_at
+      FROM cms_post_variants v
+      JOIN cms_social_posts sp ON sp.id = v.post_id
+      WHERE v.status = 'failed' AND v.retry_count < 3
+      ORDER BY v.updated_at DESC
+      LIMIT 10
+    `).all(),
+
+    // Failed variants grouped by brand — surface alert if any brand has 5+
+    db.prepare(`
+      SELECT sp.brand, COUNT(*) AS failed_count
+      FROM cms_post_variants v
+      JOIN cms_social_posts sp ON sp.id = v.post_id
+      WHERE v.status = 'failed'
+      GROUP BY sp.brand
+      ORDER BY failed_count DESC
+    `).all(),
+  ]);
+
+  // Build queue summary map
+  const queue = {};
+  for (const row of (queueRes.results || [])) queue[row.status] = row.count;
+
+  // Last sweep timestamp
+  const sweepRuns = sweepRunsRes.results || [];
+  const lastSweep = sweepRuns[0]?.checked_at || null;
+
+  // Time since last sweep (minutes)
+  let minutesSinceLastSweep = null;
+  if (lastSweep) {
+    const diff = Date.now() - new Date(lastSweep).getTime();
+    minutesSinceLastSweep = Math.round(diff / 60000);
+  }
+
+  return jsonResponse({
+    queue,
+    sweep_runs:          sweepRuns,
+    last_sweep:          lastSweep,
+    minutes_since_sweep: minutesSinceLastSweep,
+    retry_candidates:    retryRes.results  || [],
+    failed_by_brand:     failedBrandRes.results || [],
+  });
+}
+
+/**
+ * GET /api/cms/assets/usage — Cross-reference cms_assets with cms_post_variants
+ * Returns top-20 most-used assets, never-used count, by-platform + by-month breakdown.
+ */
+async function handleAssetUsage(env) {
+  const db = env.DB;
+
+  const [topRes, neverRes, usedCountRes, platformRes, monthRes] = await Promise.all([
+    // Top 20 most-used assets
+    db.prepare(`
+      SELECT a.id, a.title, a.brand, a.media_type, a.category, a.thumbnail_path,
+             COUNT(v.id)                                                    AS use_count,
+             SUM(CASE WHEN v.status='published' THEN 1 ELSE 0 END)         AS published,
+             SUM(CASE WHEN v.status='failed'    THEN 1 ELSE 0 END)         AS failed,
+             SUM(CASE WHEN v.status='pending'   THEN 1 ELSE 0 END)         AS pending,
+             MAX(v.scheduled_at)                                            AS last_used
+      FROM cms_assets a
+      JOIN cms_post_variants v ON v.media_asset_id = a.id AND v.media_asset_id != ''
+      WHERE a.active = 1
+      GROUP BY a.id
+      ORDER BY use_count DESC
+      LIMIT 20
+    `).all(),
+
+    // Assets with zero variant usage
+    db.prepare(`
+      SELECT COUNT(*) AS count FROM cms_assets a
+      WHERE a.active = 1
+        AND NOT EXISTS (
+          SELECT 1 FROM cms_post_variants v
+          WHERE v.media_asset_id = a.id AND v.media_asset_id != ''
+        )
+    `).first(),
+
+    // Distinct assets that have been used at least once
+    db.prepare(`
+      SELECT COUNT(DISTINCT a.id) AS count
+      FROM cms_assets a
+      JOIN cms_post_variants v ON v.media_asset_id = a.id AND v.media_asset_id != ''
+      WHERE a.active = 1
+    `).first(),
+
+    // Usage broken down by publishing platform
+    db.prepare(`
+      SELECT v.platform,
+             COUNT(v.id)                                                    AS use_count,
+             SUM(CASE WHEN v.status='published' THEN 1 ELSE 0 END)         AS published
+      FROM cms_post_variants v
+      WHERE v.media_asset_id != '' AND v.media_asset_id IS NOT NULL
+      GROUP BY v.platform
+      ORDER BY use_count DESC
+    `).all(),
+
+    // Usage by month — last 6 months
+    db.prepare(`
+      SELECT strftime('%Y-%m', v.scheduled_at) AS month,
+             COUNT(v.id)                        AS count
+      FROM cms_post_variants v
+      WHERE v.media_asset_id != '' AND v.media_asset_id IS NOT NULL
+        AND v.scheduled_at >= datetime('now', '-6 months')
+      GROUP BY month
+      ORDER BY month DESC
+      LIMIT 6
+    `).all(),
+  ]);
+
+  return jsonResponse({
+    top_assets:   topRes.results   || [],
+    never_used:   (neverRes?.count  ?? 0),
+    used_count:   (usedCountRes?.count ?? 0),
+    by_platform:  platformRes.results || [],
+    by_month:     monthRes.results  || [],
+  });
+}
+
+/**
  * GET /api/cms/assets — List/search assets (public-safe, filtered by active=1)
  * Query params: brand, category, media_type, featured, limit, offset, q
  */
@@ -2722,6 +2873,11 @@ export async function handleCMSRequest(request, env, user) {
       return handleAssetAnalytics(env);
     }
 
+    // Asset usage graph — cross-reference assets with post variants
+    if (path === '/assets/usage' && method === 'GET') {
+      return handleAssetUsage(env);
+    }
+
     // Asset discovery (must come before generic /assets/:id catch-all)
     if (path === '/assets/discover' && method === 'POST') {
       return handleDiscoverAssets(request, env);
@@ -2878,6 +3034,11 @@ export async function handleCMSRequest(request, env, user) {
     }
     if (path === '/ecosystem-calendar' && method === 'GET') {
       return handleEcosystemCalendar(request, env);
+    }
+
+    // Automation Center — queue + cron sweep aggregate
+    if (path === '/automation-center' && method === 'GET') {
+      return handleAutomationCenter(env);
     }
 
     // Platform OAuth/token connections
