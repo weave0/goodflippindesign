@@ -213,6 +213,59 @@ async function encodeConnectionPayloadForStorage(payloadString, encryptionKey) {
 // ────────────────────────────────────────────────────────────────
 
 /**
+ * GET /api/cms/assets/analytics — Aggregate asset library stats for the Admin
+ * Returns: total, by_status, by_brand, by_media_type, by_category (top 25),
+ *          oldest_pending (10), recently_approved (10)
+ */
+async function handleAssetAnalytics(env) {
+  const db = env.DB;
+
+  const [statusRes, brandRes, typeRes, catRes, pendingRes, approvedRes] = await Promise.all([
+    db.prepare(
+      'SELECT review_status, COUNT(*) as count FROM cms_assets WHERE active=1 GROUP BY review_status ORDER BY count DESC'
+    ).all(),
+    db.prepare(
+      `SELECT brand,
+         COUNT(*) as total,
+         SUM(CASE WHEN review_status='approved' THEN 1 ELSE 0 END) as approved,
+         SUM(CASE WHEN review_status IN ('draft','pending') THEN 1 ELSE 0 END) as pending,
+         SUM(CASE WHEN review_status='rejected' THEN 1 ELSE 0 END) as rejected,
+         SUM(CASE WHEN featured=1 THEN 1 ELSE 0 END) as featured
+       FROM cms_assets WHERE active=1
+       GROUP BY brand ORDER BY total DESC`
+    ).all(),
+    db.prepare(
+      'SELECT media_type, COUNT(*) as count FROM cms_assets WHERE active=1 GROUP BY media_type ORDER BY count DESC'
+    ).all(),
+    db.prepare(
+      'SELECT category, COUNT(*) as count FROM cms_assets WHERE active=1 AND category != "" GROUP BY category ORDER BY count DESC LIMIT 25'
+    ).all(),
+    db.prepare(
+      `SELECT id, title, brand, category, media_type, thumbnail_path, created_at
+       FROM cms_assets WHERE active=1 AND review_status IN ('draft','pending')
+       ORDER BY created_at ASC LIMIT 10`
+    ).all(),
+    db.prepare(
+      `SELECT id, title, brand, category, media_type, thumbnail_path, approved_at
+       FROM cms_assets WHERE active=1 AND review_status='approved'
+       ORDER BY approved_at DESC LIMIT 10`
+    ).all(),
+  ]);
+
+  const total = (statusRes.results || []).reduce((s, r) => s + (r.count || 0), 0);
+
+  return jsonResponse({
+    total,
+    by_status: statusRes.results || [],
+    by_brand: brandRes.results || [],
+    by_media_type: typeRes.results || [],
+    by_category: catRes.results || [],
+    oldest_pending: pendingRes.results || [],
+    recently_approved: approvedRes.results || [],
+  });
+}
+
+/**
  * GET /api/cms/assets — List/search assets (public-safe, filtered by active=1)
  * Query params: brand, category, media_type, featured, limit, offset, q
  */
@@ -2662,6 +2715,11 @@ export async function handleCMSRequest(request, env, user) {
     // Asset CRUD (admin)
     if (path === '/assets' && method === 'GET') {
       return handleListAssets(request, env);
+    }
+
+    // Asset analytics report (must come before /assets/:id catch-all)
+    if (path === '/assets/analytics' && method === 'GET') {
+      return handleAssetAnalytics(env);
     }
 
     // Asset discovery (must come before generic /assets/:id catch-all)

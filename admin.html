@@ -6692,6 +6692,10 @@
                                 <path d="M1 13.5h14" />
                                 <path d="M3.5 13.5V9h2M7.5 13.5V6h2M11.5 13.5V3.5h2" />
                             </svg></span><span class="nav-label">Analytics</span></button>
+                    <button class="nav-btn" data-view="asset-intel"><span class="nav-num">27</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="8" cy="8" r="6.5" />
+                                <path d="M8 5v3l2 2" />
+                            </svg></span><span class="nav-label">Asset Intel</span></button>
 
                     <div class="nav-group-label">Community</div>
                     <button class="nav-btn" data-view="community"><span class="nav-num">17</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
@@ -8079,6 +8083,100 @@
                             </table>
                         </div>
                     </article>
+                </section>
+
+                <!-- ─────────────────────────────────────────────────────── -->
+                <!-- VIEW: Asset Intelligence (panel 27)                     -->
+                <!-- ─────────────────────────────────────────────────────── -->
+                <section class="view" id="view-asset-intel">
+                    <div class="section-head">
+                        <h2 class="section-title">Asset Intelligence</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="asset-intel-refresh-btn">Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Live D1 library health — approval queue, brand coverage, category distribution, and recent activity.</p>
+
+                    <div class="panel-kpis">
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Total Assets</div>
+                            <div class="panel-kpi-value cyan" id="ai-total">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Approved</div>
+                            <div class="panel-kpi-value emerald" id="ai-approved">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Pending Review</div>
+                            <div class="panel-kpi-value gold" id="ai-pending">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Rejected</div>
+                            <div class="panel-kpi-value rose" id="ai-rejected">—</div>
+                        </div>
+                        <div class="panel-kpi">
+                            <div class="panel-kpi-label">Approval Rate</div>
+                            <div class="panel-kpi-value" id="ai-approval-rate">—</div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;margin-bottom:0.85rem">
+                        <article class="panel">
+                            <div class="section-head"><h3 class="panel-subtitle">By Media Type</h3></div>
+                            <div id="ai-by-type" style="display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.5rem 0"></div>
+                        </article>
+                        <article class="panel">
+                            <div class="section-head"><h3 class="panel-subtitle">Top Categories</h3></div>
+                            <div id="ai-by-category" style="display:flex;flex-wrap:wrap;gap:0.4rem;padding:0.5rem 0"></div>
+                        </article>
+                    </div>
+
+                    <article class="panel">
+                        <div class="section-head"><h3 class="panel-subtitle">Brand Breakdown</h3></div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Brand</th>
+                                        <th>Total</th>
+                                        <th>Approved</th>
+                                        <th>Pending</th>
+                                        <th>Rejected</th>
+                                        <th>Featured</th>
+                                        <th>Approval %</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ai-brand-tbody">
+                                    <tr><td colspan="7" class="text-muted">Loading…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;margin-top:0.85rem">
+                        <article class="panel">
+                            <div class="section-head"><h3 class="panel-subtitle">Oldest Unreviewed &#9201;</h3></div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead><tr><th>Title</th><th>Brand</th><th>Category</th><th>Added</th><th></th></tr></thead>
+                                    <tbody id="ai-pending-tbody">
+                                        <tr><td colspan="5" class="text-muted">Loading…</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                        <article class="panel">
+                            <div class="section-head"><h3 class="panel-subtitle">Recently Approved &#10003;</h3></div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead><tr><th>Title</th><th>Brand</th><th>Category</th><th>Approved</th></tr></thead>
+                                    <tbody id="ai-approved-tbody">
+                                        <tr><td colspan="4" class="text-muted">Loading…</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </div>
                 </section>
 
                 <!-- ─────────────────────────────────────────────────────── -->
@@ -15552,6 +15650,139 @@
 
                         window.__adminPanels = window.__adminPanels || {};
                         window.__adminPanels.analytics = load;
+                    })();
+
+                    // =================================================================
+                    // ASSET INTELLIGENCE PANEL (panel 27)
+                    // =================================================================
+                    (function initAssetIntelPanel() {
+                        'use strict';
+
+                        function rateClass(num, total) {
+                            if (!total) return '';
+                            var pct = (num / total) * 100;
+                            if (pct >= 80) return 'emerald';
+                            if (pct >= 50) return 'gold';
+                            return 'rose';
+                        }
+
+                        function shortDate(iso) {
+                            if (!iso) return '—';
+                            try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }); }
+                            catch (_) { return iso.slice(0, 10); }
+                        }
+
+                        async function load() {
+                            try {
+                                var data = await api('/assets/analytics');
+
+                                var total = data.total || 0;
+                                var byStatus = data.by_status || [];
+                                var byBrand = data.by_brand || [];
+                                var byType = data.by_media_type || [];
+                                var byCat = data.by_category || [];
+                                var pending = data.oldest_pending || [];
+                                var approved = data.recently_approved || [];
+
+                                var approvedCount = (byStatus.find(function (s) { return s.review_status === 'approved'; }) || {}).count || 0;
+                                var pendingCount = (byStatus.filter(function (s) { return s.review_status === 'draft' || s.review_status === 'pending'; })
+                                    .reduce(function (sum, s) { return sum + (s.count || 0); }, 0));
+                                var rejectedCount = (byStatus.find(function (s) { return s.review_status === 'rejected'; }) || {}).count || 0;
+                                var approvalPct = total ? ((approvedCount / total) * 100).toFixed(1) + '%' : '—';
+
+                                $('ai-total').textContent = total.toLocaleString();
+                                $('ai-approved').textContent = approvedCount.toLocaleString();
+                                $('ai-pending').textContent = pendingCount.toLocaleString();
+                                $('ai-rejected').textContent = rejectedCount.toLocaleString();
+
+                                var rateEl = $('ai-approval-rate');
+                                rateEl.textContent = approvalPct;
+                                rateEl.className = 'panel-kpi-value ' + rateClass(approvedCount, total);
+
+                                // Media type tag cloud
+                                var typeEl = $('ai-by-type');
+                                typeEl.innerHTML = byType.length
+                                    ? byType.map(function (t) {
+                                        return '<span class="tag cyan" style="font-size:0.82rem">' +
+                                            escapeHtml(t.media_type || '?') + ' <strong>' + t.count + '</strong></span>';
+                                    }).join('')
+                                    : '<span class="text-muted">No data</span>';
+
+                                // Category tag cloud
+                                var catEl = $('ai-by-category');
+                                catEl.innerHTML = byCat.length
+                                    ? byCat.map(function (c) {
+                                        return '<span class="tag" style="font-size:0.76rem;background:var(--border)">' +
+                                            escapeHtml(c.category || '?') + ' <strong>' + c.count + '</strong></span>';
+                                    }).join('')
+                                    : '<span class="text-muted">No data</span>';
+
+                                // Brand breakdown table
+                                var brandTbody = $('ai-brand-tbody');
+                                brandTbody.innerHTML = byBrand.length
+                                    ? byBrand.map(function (b) {
+                                        var pct = b.total ? ((b.approved / b.total) * 100).toFixed(0) + '%' : '—';
+                                        var cls = rateClass(b.approved, b.total);
+                                        return '<tr>' +
+                                            '<td><strong>' + escapeHtml(b.brand || '?') + '</strong></td>' +
+                                            '<td>' + (b.total || 0) + '</td>' +
+                                            '<td class="emerald">' + (b.approved || 0) + '</td>' +
+                                            '<td class="gold">' + (b.pending || 0) + '</td>' +
+                                            '<td class="rose">' + (b.rejected || 0) + '</td>' +
+                                            '<td>' + (b.featured || 0) + '</td>' +
+                                            '<td><span class="' + cls + '">' + pct + '</span></td>' +
+                                            '</tr>';
+                                    }).join('')
+                                    : '<tr><td colspan="7" class="text-muted">No brand data.</td></tr>';
+
+                                // Oldest pending — with quick-approve action
+                                var pendTbody = $('ai-pending-tbody');
+                                pendTbody.innerHTML = pending.length
+                                    ? pending.map(function (a) {
+                                        return '<tr>' +
+                                            '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escapeHtml(a.title) + '">' + escapeHtml(a.title) + '</td>' +
+                                            '<td>' + escapeHtml(a.brand || '—') + '</td>' +
+                                            '<td>' + escapeHtml(a.category || '—') + '</td>' +
+                                            '<td style="white-space:nowrap">' + shortDate(a.created_at) + '</td>' +
+                                            '<td><button class="btn btn-micro btn-success-soft" data-quick-approve="' + escapeHtml(String(a.id)) + '" title="Approve">&#10003;</button></td>' +
+                                            '</tr>';
+                                    }).join('')
+                                    : '<tr><td colspan="5" class="emerald">Queue clear — no unreviewed assets!</td></tr>';
+
+                                // Quick-approve handlers
+                                pendTbody.querySelectorAll('[data-quick-approve]').forEach(function (btn) {
+                                    btn.addEventListener('click', async function () {
+                                        btn.disabled = true;
+                                        btn.textContent = '…';
+                                        await reviewAsset(btn.dataset.quickApprove, 'approve');
+                                        load();
+                                    });
+                                });
+
+                                // Recently approved table
+                                var appTbody = $('ai-approved-tbody');
+                                appTbody.innerHTML = approved.length
+                                    ? approved.map(function (a) {
+                                        return '<tr>' +
+                                            '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escapeHtml(a.title) + '">' + escapeHtml(a.title) + '</td>' +
+                                            '<td>' + escapeHtml(a.brand || '—') + '</td>' +
+                                            '<td>' + escapeHtml(a.category || '—') + '</td>' +
+                                            '<td style="white-space:nowrap">' + shortDate(a.approved_at) + '</td>' +
+                                            '</tr>';
+                                    }).join('')
+                                    : '<tr><td colspan="4" class="text-muted">No approved assets yet.</td></tr>';
+
+                            } catch (e) {
+                                console.error('[asset-intel panel]', e);
+                                toast('Asset Intel load failed: ' + e.message, 'error');
+                            }
+                        }
+
+                        var refBtn = $('asset-intel-refresh-btn');
+                        if (refBtn) refBtn.addEventListener('click', load);
+
+                        window.__adminPanels = window.__adminPanels || {};
+                        window.__adminPanels['asset-intel'] = load;
                     })();
 
                     // =================================================================
