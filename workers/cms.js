@@ -1157,6 +1157,27 @@ async function handleListSocialVariants(request, env) {
 }
 
 /**
+ * PUT /api/cms/variants/:id/retry — Reset a failed variant back to pending for re-delivery
+ * Increments retry_count, clears error_message, sets status = 'pending'.
+ * Fails if variant is not in 'failed' status or retry_count >= 3.
+ */
+async function handleRetryVariant(user, env, variantId) {
+  if (!env.DB) return errorResponse('DB not configured', 503);
+  const variant = await env.DB
+    .prepare('SELECT v.id, v.status, v.retry_count, sp.brand FROM cms_post_variants v JOIN cms_social_posts sp ON sp.id = v.post_id WHERE v.id = ?')
+    .bind(variantId).first();
+  if (!variant) return errorResponse('Variant not found', 404);
+  if (variant.status !== 'failed') return errorResponse('Only failed variants can be retried', 409);
+  if ((variant.retry_count || 0) >= 3) return errorResponse('Max retry attempts reached', 409);
+
+  await env.DB.prepare(
+    `UPDATE cms_post_variants SET status = 'pending', retry_count = retry_count + 1, error_message = '', updated_at = datetime('now') WHERE id = ?`
+  ).bind(variantId).run();
+
+  return jsonResponse({ ok: true, id: variantId, retry_count: (variant.retry_count || 0) + 1 });
+}
+
+/**
  * PATCH /api/cms/social/variants/:id — Attach or detach artwork on a variant
  * Body: { media_asset_id: string|null }
  */
@@ -2990,6 +3011,11 @@ export async function handleCMSRequest(request, env, user) {
     const variantPatchMatch = path.match(/^\/social\/variants\/([^/]+)$/);
     if (variantPatchMatch && method === 'PATCH') {
       return handlePatchVariant(request, user, env, variantPatchMatch[1]);
+    }
+    // PUT /variants/:id/retry — reset failed variant to pending
+    const variantRetryMatch = path.match(/^\/variants\/([^/]+)\/retry$/);
+    if (variantRetryMatch && method === 'PUT') {
+      return handleRetryVariant(user, env, variantRetryMatch[1]);
     }
     if (path === '/social/campaign' && method === 'POST') {
       return handleCreateCampaignSocialPost(request, user, env);
