@@ -342,6 +342,105 @@ async function handleAutomationCenter(env) {
 }
 
 /**
+ * POST /api/cms/ai/caption — Generate platform-optimised captions using Cloudflare Workers AI.
+ * Body: { asset_id: string, platforms: string[], tone?: string }
+ * Returns: { captions: { platform: string }, usage_note: string }
+ */
+async function handleAiCaption(request, env) {
+  if (!env.AI) {
+    return errorResponse('Workers AI binding not configured', 503);
+  }
+
+  let body;
+  try { body = await request.json(); } catch { return errorResponse('Invalid JSON body'); }
+
+  const { asset_id, platforms = [], tone = 'professional' } = body;
+  if (!asset_id) return errorResponse('asset_id is required');
+  if (!Array.isArray(platforms) || platforms.length === 0) return errorResponse('platforms array is required');
+
+  // Fetch asset metadata from D1
+  const asset = await env.DB.prepare(
+    'SELECT id, title, description, brand, category, tags, emotions, media_type FROM cms_assets WHERE id = ?'
+  ).bind(asset_id).first();
+  if (!asset) return errorResponse('Asset not found', 404);
+
+  // Platform-specific character limits and style notes
+  const PLATFORM_SPECS = {
+    instagram:  { limit: 2200, note: 'emoji-friendly, hashtag-heavy (up to 30), storytelling style' },
+    facebook:   { limit: 63206, note: 'conversational, question-driven, 1-3 hashtags' },
+    twitter:    { limit: 280,  note: 'punchy, no filler, 1-2 hashtags max, no fluff' },
+    linkedin:   { limit: 3000, note: 'professional, insightful, 3-5 hashtags, hook in first line' },
+    pinterest:  { limit: 500,  note: 'descriptive keywords, DIY/inspiration tone, 2-5 hashtags' },
+    threads:    { limit: 500,  note: 'conversational, engaging question or opinion, 1-2 hashtags' },
+  };
+
+  const requestedPlatforms = platforms.filter(p => PLATFORM_SPECS[p]);
+  if (requestedPlatforms.length === 0) return errorResponse('No recognised platforms in request');
+
+  const platformInstructions = requestedPlatforms.map(p => {
+    const spec = PLATFORM_SPECS[p];
+    return `- ${p}: max ${spec.limit} chars, ${spec.note}`;
+  }).join('\n');
+
+  const prompt = `You are a social media copywriter. Generate captions for the following creative asset.
+
+Asset details:
+- Title: ${asset.title || 'Untitled'}
+- Brand: ${asset.brand || 'Unknown'}
+- Category: ${asset.category || 'General'}
+- Description: ${asset.description || 'No description provided'}
+- Media type: ${asset.media_type || 'image'}
+- Tags: ${asset.tags || 'none'}
+- Emotions: ${asset.emotions || 'none'}
+- Tone requested: ${tone}
+
+Write one caption per platform below. Stay within character limits. Return ONLY valid JSON — no prose, no markdown, no explanation:
+
+Platform requirements:
+${platformInstructions}
+
+Return format (JSON only):
+{
+  "captions": {
+${requestedPlatforms.map(p => `    "${p}": "caption text here"`).join(',\n')}
+  }
+}`;
+
+  let aiResult;
+  try {
+    aiResult = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
+      messages: [
+        { role: 'system', content: 'You are a social media copywriter. Respond only with valid JSON.' },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: 1024,
+    });
+  } catch (err) {
+    console.error('[AI caption]', err);
+    return errorResponse('AI inference failed: ' + err.message, 502);
+  }
+
+  // Extract JSON from the model response
+  const raw = (aiResult.response || aiResult.result || '').trim();
+  let parsed;
+  try {
+    // Strip any markdown code fences before parsing
+    const jsonStr = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
+    parsed = JSON.parse(jsonStr);
+  } catch {
+    // Return raw text per-platform as fallback so the UI still gets something
+    const fallback = {};
+    requestedPlatforms.forEach(p => { fallback[p] = raw; });
+    return jsonResponse({ captions: fallback, raw: true, usage_note: 'AI returned non-JSON — raw text used' });
+  }
+
+  return jsonResponse({
+    captions: parsed.captions || {},
+    usage_note: `Generated via @cf/meta/llama-3-8b-instruct for ${requestedPlatforms.join(', ')}`,
+  });
+}
+
+/**
  * GET /api/cms/assets/usage — Cross-reference cms_assets with cms_post_variants
  * Returns top-20 most-used assets, never-used count, by-platform + by-month breakdown.
  */
@@ -3065,6 +3164,11 @@ export async function handleCMSRequest(request, env, user) {
     // Automation Center — queue + cron sweep aggregate
     if (path === '/automation-center' && method === 'GET') {
       return handleAutomationCenter(env);
+    }
+
+    // AI Utilities — Workers AI caption generation (free tier)
+    if (path === '/ai/caption' && method === 'POST') {
+      return handleAiCaption(request, env);
     }
 
     // Platform OAuth/token connections
