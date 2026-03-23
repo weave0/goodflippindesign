@@ -8122,17 +8122,23 @@
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;margin-bottom:0.85rem">
                         <article class="panel">
-                            <div class="section-head"><h3 class="panel-subtitle">By Media Type</h3></div>
+                            <div class="section-head">
+                                <h3 class="panel-subtitle">By Media Type</h3>
+                            </div>
                             <div id="ai-by-type" style="display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.5rem 0"></div>
                         </article>
                         <article class="panel">
-                            <div class="section-head"><h3 class="panel-subtitle">Top Categories</h3></div>
+                            <div class="section-head">
+                                <h3 class="panel-subtitle">Top Categories</h3>
+                            </div>
                             <div id="ai-by-category" style="display:flex;flex-wrap:wrap;gap:0.4rem;padding:0.5rem 0"></div>
                         </article>
                     </div>
 
                     <article class="panel">
-                        <div class="section-head"><h3 class="panel-subtitle">Brand Breakdown</h3></div>
+                        <div class="section-head">
+                            <h3 class="panel-subtitle">Brand Breakdown</h3>
+                        </div>
                         <div class="table-wrap">
                             <table>
                                 <thead>
@@ -8147,7 +8153,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="ai-brand-tbody">
-                                    <tr><td colspan="7" class="text-muted">Loading…</td></tr>
+                                    <tr>
+                                        <td colspan="7" class="text-muted">Loading…</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -8155,23 +8163,46 @@
 
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.85rem;margin-top:0.85rem">
                         <article class="panel">
-                            <div class="section-head"><h3 class="panel-subtitle">Oldest Unreviewed &#9201;</h3></div>
+                            <div class="section-head">
+                                <h3 class="panel-subtitle">Oldest Unreviewed &#9201;</h3>
+                            </div>
                             <div class="table-wrap">
                                 <table>
-                                    <thead><tr><th>Title</th><th>Brand</th><th>Category</th><th>Added</th><th></th></tr></thead>
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Brand</th>
+                                            <th>Category</th>
+                                            <th>Added</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
                                     <tbody id="ai-pending-tbody">
-                                        <tr><td colspan="5" class="text-muted">Loading…</td></tr>
+                                        <tr>
+                                            <td colspan="5" class="text-muted">Loading…</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </article>
                         <article class="panel">
-                            <div class="section-head"><h3 class="panel-subtitle">Recently Approved &#10003;</h3></div>
+                            <div class="section-head">
+                                <h3 class="panel-subtitle">Recently Approved &#10003;</h3>
+                            </div>
                             <div class="table-wrap">
                                 <table>
-                                    <thead><tr><th>Title</th><th>Brand</th><th>Category</th><th>Approved</th></tr></thead>
+                                    <thead>
+                                        <tr>
+                                            <th>Title</th>
+                                            <th>Brand</th>
+                                            <th>Category</th>
+                                            <th>Approved</th>
+                                        </tr>
+                                    </thead>
                                     <tbody id="ai-approved-tbody">
-                                        <tr><td colspan="4" class="text-muted">Loading…</td></tr>
+                                        <tr>
+                                            <td colspan="4" class="text-muted">Loading…</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -11966,6 +11997,11 @@
                             id: 'social-post-kits', severity: 'done', brand: 'all', area: 'Social Media',
                             title: 'Post Kit asset picker built (2026-03-17)',
                             detail: 'PATCH /api/social/variants/:id wired. Asset picker modal in Post Kits panel — search by brand/category/keyword, single-click attaches R2 asset to variant, thumbnail updates in-place. Detach also supported.'
+                        },
+                        {
+                            id: 'asset-intel-report', severity: 'done', brand: 'gfd', area: 'Admin',
+                            title: 'Asset Intelligence panel — advanced reporting (2026-03-22)',
+                            detail: 'Panel #27 added to Intelligence group. GET /api/cms/assets/analytics runs 6 parallel D1 queries: total/by_status/by_brand (approved+pending+rejected+featured)/by_media_type/by_category(top25)/oldest_pending(10)/recently_approved(10). KPI strip, media-type tag cloud, category cloud, brand breakdown table with approval %, one-click approve on oldest-pending queue, recently-approved audit trail. Phase 4 charter: Advanced reporting and diagnostics. Commit af4b04c.'
                         },
                         {
                             id: 'library-search-intelligence', severity: 'done', brand: 'gfd', area: 'Admin',

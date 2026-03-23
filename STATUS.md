@@ -66,7 +66,15 @@ npm run test:a11y   # Accessibility only (~5s)
 
 ---
 
-## Recent Work (Mar 22, 2026)
+## Recent Work (Mar 22, 2026) — Session 2
+
+- **Asset Intelligence panel** (admin panel #27, `workers/cms.js`): Added `GET /api/cms/assets/analytics` endpoint running 6 parallel D1 queries — total asset count, by-review-status, per-brand breakdown (approved/pending/rejected/featured + approval %), by-media-type, top-25 categories, oldest-10 pending (with one-click approve), most-recently-approved-10. New "Asset Intel" nav button in the Intelligence group. KPI strip, media-type + category tag clouds, brand breakdown table, oldest-pending review queue, recently-approved audit trail. Phase 4 charter: Advanced reporting and diagnostics. Commit `af4b04c`.
+- **Library search + 48/page pagination**: Pagination added to library search panel — previous session, commits `5880d25`, `bb5392d`.
+- **GAP_FLAGS updated**: `asset-intel-report` and `library-search-intelligence` added as `done`.
+- **Social publisher deploy**: Still blocked — `CLOUDFLARE_API_TOKEN` is Pages-scoped, needs Workers:Edit scope or `wrangler login` to deploy `wrangler-social.toml`.
+- **Test suite**: 234/235 — 100% pass rate (1 intentional skip), admin 29/29 ✅. Commit `af4b04c`.
+
+## Previous Work (Mar 22, 2026)
 
 - **Characters panel CRUD** (admin panel 18): Completed full add/edit/delete workflow — `renderRegistry()` now generates dynamic Edit/Delete buttons per character, click handler routes to `openEditModal(ch)` and authenticated DELETE, Add Character modal wired to PUT (edit) vs POST (create), form preserves existing poses/milestones on edit. IIFE scope regression fixed (modal code had been accidentally nested inside `(ch.milestones||[]).forEach` callback from previous session's edits — corrected, all 29/29 admin tests green).
 - **GAP_FLAGS**: `characters-panel-shell` → done (full CRUD implemented), `community-donate-tests` → done (community portal 39 tests + donate.html 24 tests added in Mar 10 session).
