@@ -43,6 +43,10 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   status TEXT DEFAULT 'draft',
   tags TEXT,
   featured_image TEXT,
+  series TEXT,
+  seo_description TEXT,
+  seo_og_image TEXT,
+  reading_time INTEGER,
   published_at TEXT,
   created_at TEXT NOT NULL,
   updated_at TEXT

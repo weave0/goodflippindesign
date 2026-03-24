@@ -395,7 +395,7 @@ async function handleListBlogPosts(request, env) {
   // 'all' is allowed for authenticated admin callers (enforced at routing level)
   try {
     let query = `
-      SELECT id, title, slug, excerpt, tags, status, author_id, published_at, created_at, updated_at
+      SELECT id, title, slug, excerpt, tags, series, status, author_id, published_at, created_at, updated_at, reading_time
       FROM blog_posts
     `;
 
@@ -433,7 +433,7 @@ async function handleGetBlogPost(request, env) {
 
   try {
     const result = await env.DB.prepare(`
-      SELECT id, title, slug, content, excerpt, tags, featured_image, author_id, status, published_at, created_at
+      SELECT id, title, slug, content, excerpt, tags, featured_image, series, seo_description, seo_og_image, reading_time, author_id, status, published_at, created_at
       FROM blog_posts
       WHERE slug = ? AND status = 'published'
     `).bind(slug).first();
@@ -455,18 +455,20 @@ async function handleGetBlogPost(request, env) {
  * Handle creating new blog post (admin only)
  */
 async function handleCreateBlogPost(request, user, env) {
-  // Admin-only check
-  const callerRole = await getUserRole(env, user.id);
-  if (!isAdminRole(callerRole)) {
-    return {
-      body: 'Forbidden: Admin access required',
-      status: 403,
-      headers: { 'Content-Type': 'text/plain' },
-    };
+  // Admin-only check — skipped for machine-to-machine calls (user.id === 'system')
+  if (user.id !== 'system') {
+    const callerRole = await getUserRole(env, user.id);
+    if (!isAdminRole(callerRole)) {
+      return {
+        body: 'Forbidden: Admin access required',
+        status: 403,
+        headers: { 'Content-Type': 'text/plain' },
+      };
+    }
   }
 
   const data = await request.json();
-  const { title, content, excerpt, status, tags, featured_image } = data;
+  const { title, content, excerpt, status, tags, featured_image, series, seo_description, seo_og_image } = data;
 
   if (!title || !content) {
     return {
@@ -484,11 +486,13 @@ async function handleCreateBlogPost(request, user, env) {
   const id = `post_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
   const now = new Date().toISOString();
   const publishedAt = status === 'published' ? now : null;
+  // Estimate reading time: ~200 wpm
+  const readingTime = Math.max(1, Math.round(content.trim().split(/\s+/).length / 200));
 
   try {
     await env.DB.prepare(`
-      INSERT INTO blog_posts (id, title, slug, content, excerpt, author_id, status, tags, featured_image, published_at, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO blog_posts (id, title, slug, content, excerpt, author_id, status, tags, featured_image, series, seo_description, seo_og_image, reading_time, published_at, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       id,
       title,
@@ -499,6 +503,10 @@ async function handleCreateBlogPost(request, user, env) {
       status || 'draft',
       tags || '',
       featured_image || '',
+      series || '',
+      seo_description || '',
+      seo_og_image || '',
+      readingTime,
       publishedAt,
       now
     ).run();
@@ -533,7 +541,7 @@ async function handleUpdateBlogPost(request, user, env) {
   }
 
   const data = await request.json();
-  const { id, title, content, excerpt, status, tags, featured_image } = data;
+  const { id, title, content, excerpt, status, tags, featured_image, series, seo_description, seo_og_image } = data;
 
   if (!id) {
     return {
@@ -545,13 +553,19 @@ async function handleUpdateBlogPost(request, user, env) {
 
   const now = new Date().toISOString();
   const publishedAt = status === 'published' ? now : null;
+  // Re-estimate reading time on update
+  const readingTime = Math.max(1, Math.round((content || '').trim().split(/\s+/).length / 200));
 
   try {
     await env.DB.prepare(`
       UPDATE blog_posts
-      SET title = ?, content = ?, excerpt = ?, status = ?, tags = ?, featured_image = ?, published_at = ?, updated_at = ?
+      SET title = ?, content = ?, excerpt = ?, status = ?, tags = ?, featured_image = ?,
+          series = ?, seo_description = ?, seo_og_image = ?, reading_time = ?,
+          published_at = ?, updated_at = ?
       WHERE id = ?
-    `).bind(title, content, excerpt, status, tags || '', featured_image || '', publishedAt, now, id).run();
+    `).bind(title, content, excerpt, status, tags || '', featured_image || '',
+            series || '', seo_description || '', seo_og_image || '', readingTime,
+            publishedAt, now, id).run();
 
     return {
       body: JSON.stringify({ message: 'Post updated' }),
@@ -1962,6 +1976,20 @@ export default {
             const response = await handleListBlogPosts(request, env);
             return new Response(response.body, {
               ...response,
+              headers: { ...response.headers, ...corsHeaders },
+            });
+          }
+        }
+
+        // Machine-to-machine blog creation (SummitView pipeline, etc.)
+        // Uses X-Internal-Secret header — no Clerk JWT required
+        if (url.pathname === '/api/blog' && request.method === 'POST') {
+          const internalSecret = request.headers.get('X-Internal-Secret');
+          if (internalSecret && env.INTERNAL_SECRET && internalSecret === env.INTERNAL_SECRET) {
+            const syntheticUser = { id: 'system' };
+            const response = await handleCreateBlogPost(request, syntheticUser, env);
+            return new Response(response.body, {
+              status: response.status,
               headers: { ...response.headers, ...corsHeaders },
             });
           }

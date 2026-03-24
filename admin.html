@@ -8246,6 +8246,9 @@
                             <option value="published">Published</option>
                             <option value="draft">Draft</option>
                         </select>
+                        <select id="blog-filter-series" aria-label="Filter by series" title="Filter by series">
+                            <option value="">All series</option>
+                        </select>
                         <select id="blog-filter-sort" aria-label="Sort posts" title="Sort posts">
                             <option value="created_desc">Newest first</option>
                             <option value="created_asc">Oldest first</option>
@@ -8261,6 +8264,7 @@
                                     <tr>
                                         <th data-sort="title" class="sortable">Title / Slug <span class="sort-icon">↕</span></th>
                                         <th data-sort="status" class="sortable">Status <span class="sort-icon">↕</span></th>
+                                        <th data-sort="series" class="sortable">Series <span class="sort-icon">↕</span></th>
                                         <th>Tags</th>
                                         <th data-sort="published_at" class="sortable">Published <span class="sort-icon">↕</span></th>
                                         <th data-sort="created_at" class="sortable">Created <span class="sort-icon">↕</span></th>
@@ -8269,7 +8273,7 @@
                                 </thead>
                                 <tbody id="blog-posts-tbody">
                                     <tr>
-                                        <td colspan="6" class="blog-empty-state">Loading…</td>
+                                        <td colspan="7" class="blog-empty-state">Loading…</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -9970,6 +9974,8 @@
                                     <button type="button" class="blog-ribbon-btn wide" data-md="code" title="Inline code">`code`</button>
                                     <button type="button" class="blog-ribbon-btn wide" data-md="codeblock" title="Code block">```</button>
                                     <button type="button" class="blog-ribbon-btn" data-md="hr" title="Horizontal rule">—</button>
+                                    <button type="button" class="blog-ribbon-btn wide" id="blog-insert-image-btn" title="Insert image from library">🖼 Image</button>
+                                    <button type="button" class="blog-ribbon-btn wide" data-md="video" title="Embed video (@[video](url))">▶ Video</button>
                                 </div>
 
                                 <!-- View group — pushed to the right -->
@@ -10012,6 +10018,39 @@
                                 </select>
                             </div>
                         </div>
+
+                        <div class="form-grid mt-06">
+                            <div>
+                                <label class="form-label" for="blog-post-series">Series / Category <span class="text-muted">(optional — groups posts)</span></label>
+                                <input type="text" id="blog-post-series" placeholder="e.g. Culture Spotlight, Quick Tip, Episode Companion">
+                            </div>
+                            <div>
+                                <label class="form-label">Featured Image</label>
+                                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                                    <input type="hidden" id="blog-featured-image">
+                                    <input type="text" id="blog-featured-image-url" placeholder="R2 URL or paste from library" style="flex:1;min-width:160px">
+                                    <button type="button" class="btn btn-ghost" id="blog-featured-image-pick-btn" style="white-space:nowrap">&#128247; Choose</button>
+                                </div>
+                                <div id="blog-featured-image-preview" style="margin-top:0.4rem;display:none">
+                                    <img id="blog-featured-image-thumb" src="#" alt="Featured image preview" style="max-height:80px;border-radius:var(--radius-sm);border:1px solid var(--border)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <details class="mt-06" id="blog-seo-details">
+                            <summary style="cursor:pointer;font-size:0.85rem;color:var(--text-muted);user-select:none">SEO &amp; Social Metadata <span style="font-size:0.75rem">(optional)</span></summary>
+                            <div class="form-grid mt-04">
+                                <div>
+                                    <label class="form-label" for="blog-seo-description">Meta Description <span class="text-muted">(max 160)</span></label>
+                                    <textarea id="blog-seo-description" rows="2" placeholder="Brief SEO-friendly summary for search engines and social previews…" maxlength="160"></textarea>
+                                    <div class="blog-char-hint"><span id="blog-seo-desc-count">0</span>/160</div>
+                                </div>
+                                <div>
+                                    <label class="form-label" for="blog-seo-og-image">OG Image URL <span class="text-muted">(overrides featured image for social cards)</span></label>
+                                    <input type="url" id="blog-seo-og-image" placeholder="https://…">
+                                </div>
+                            </div>
+                        </details>
 
                     </div><!-- /.modal-body -->
 
@@ -12173,6 +12212,24 @@
                                         item.classList.add('selected');
                                         item.setAttribute('aria-selected', 'true');
                                         _apSelectedAssetId = asset.id;
+
+                                        // ── Blog picker mode ──────────────────────────────
+                                        const modal = $('asset-picker-modal');
+                                        if (modal && modal.dataset.blogPicker) {
+                                            const pubUrl = thumbSrc || '';
+                                            if (_blogImagePickerMode === 'featured') {
+                                                setValue('blog-featured-image-url', pubUrl);
+                                                updateFeaturedImagePreview(pubUrl);
+                                                toast('Featured image set.', 'success');
+                                            } else if (_blogImagePickerMode === 'insert') {
+                                                const ta = $('blog-post-content');
+                                                if (ta) insertMarkdown(ta, 'image', { url: pubUrl, alt: asset.title || 'image' });
+                                                toast('Image inserted into content.', 'success');
+                                            }
+                                            closeBlogImagePicker();
+                                            return;
+                                        }
+                                        // ── Normal post-kit attachment mode ──────────────
                                         await attachAsset(asset.id, asset.title, asset.thumbnail_path || asset.file_path);
                                     });
 
@@ -15830,7 +15887,7 @@
                                 .slice(0, 80);
                         }
 
-                        function insertMarkdown(textarea, type) {
+                        function insertMarkdown(textarea, type, opts) {
                             var start = textarea.selectionStart;
                             var end = textarea.selectionEnd;
                             var sel = textarea.value.slice(start, end) || '';
@@ -15847,6 +15904,17 @@
                                 case 'codeblock': insert = '\n```\n' + (sel || 'code here') + '\n```\n'; break;
                                 case 'ul': insert = '\n- ' + (sel || 'list item'); break;
                                 case 'hr': insert = '\n\n---\n\n'; break;
+                                case 'strikethrough': insert = '~~' + (sel || 'text') + '~~'; break;
+                                case 'blockquote': insert = '\n> ' + (sel || 'quote'); break;
+                                case 'image':
+                                    var imgUrl = (opts && opts.url) ? opts.url : (sel || 'https://example.com/image.jpg');
+                                    var imgAlt = (opts && opts.alt) ? opts.alt : 'image';
+                                    insert = '\n![' + imgAlt + '](' + imgUrl + ')\n';
+                                    break;
+                                case 'video':
+                                    var vidUrl = sel || 'https://youtube.com/watch?v=VIDEO_ID';
+                                    insert = '\n@[video](' + vidUrl + ')\n';
+                                    break;
                             }
                             textarea.value = before + insert + after;
                             var cursor = before.length + insert.length;
@@ -15876,13 +15944,33 @@
                         }
 
                         // ── table render ──────────────────────────────────────────
+                        function populateBlogSeriesFilter() {
+                            var sel = $('blog-filter-series');
+                            if (!sel) return;
+                            var current = sel.value;
+                            while (sel.options.length > 1) sel.remove(1);
+                            var seen = {};
+                            blogPosts.forEach(function (p) {
+                                if (p.series && !seen[p.series]) {
+                                    seen[p.series] = true;
+                                    var opt = document.createElement('option');
+                                    opt.value = p.series;
+                                    opt.textContent = p.series;
+                                    sel.appendChild(opt);
+                                }
+                            });
+                            // restore selection if still valid
+                            if (current && seen[current]) sel.value = current;
+                        }
+
                         function renderBlogTable() {
                             var tbody = $('blog-posts-tbody');
                             var emptyMsg = $('blog-empty-msg');
                             if (!tbody) return;
 
                             var search = ($('blog-search') ? $('blog-search').value : '').toLowerCase().trim();
-                            var statusFilter = $('blog-filter-status') ? $('blog-filter-status').value : 'all';
+                            var statusFilter = $('blog-filter-status') ? $('blog-filter-status').value : '';
+                            var seriesFilter = $('blog-filter-series') ? $('blog-filter-series').value : '';
                             // dropdown sort still works; column-header sort overrides via blogSortCol/Dir
                             var dropdownSort = $('blog-filter-sort') ? $('blog-filter-sort').value : '';
                             if (dropdownSort && dropdownSort !== 'created_desc') {
@@ -15893,9 +15981,10 @@
                             }
 
                             var filtered = blogPosts.filter(function (p) {
-                                if (statusFilter !== 'all' && p.status !== statusFilter) return false;
+                                if (statusFilter && p.status !== statusFilter) return false;
+                                if (seriesFilter && p.series !== seriesFilter) return false;
                                 if (search) {
-                                    var haystack = (p.title + ' ' + (p.excerpt || '') + ' ' + (p.tags || '')).toLowerCase();
+                                    var haystack = (p.title + ' ' + (p.excerpt || '') + ' ' + (p.tags || '') + ' ' + (p.series || '')).toLowerCase();
                                     if (haystack.indexOf(search) === -1) return false;
                                 }
                                 return true;
@@ -15951,6 +16040,7 @@
                                     '<td class="blog-post-title-cell">' + escapeHtml(p.title || 'Untitled') + viewLink +
                                     '<div class="text-muted" style="font-size:0.75rem">' + escapeHtml(p.slug || '') + '</div></td>' +
                                     '<td>' + statusBadge + '</td>' +
+                                    '<td class="text-muted">' + (p.series ? escapeHtml(p.series) : '\u2014') + '</td>' +
                                     '<td class="blog-post-tags-cell">' + tagHtml + '</td>' +
                                     '<td class="text-muted">' + fmtDate(p.published_at) + '</td>' +
                                     '<td class="text-muted">' + fmtDate(p.created_at) + '</td>' +
@@ -15983,11 +16073,12 @@
                                 var data = await blogFetch('/api/blog?status=all');
                                 blogPosts = Array.isArray(data) ? data : (data.posts || []);
                                 updateBlogStats(blogPosts);
+                                populateBlogSeriesFilter();
                                 renderBlogTable();
                             } catch (err) {
                                 console.error('[blog] fetch failed', err);
                                 var tbody = $('blog-posts-tbody');
-                                if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-muted">Failed to load posts. Check auth and worker deployment.</td></tr>';
+                                if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Failed to load posts. Check auth and worker deployment.</td></tr>';
                             } finally {
                                 if (btn) { btn.disabled = false; btn.textContent = 'Refresh'; }
                             }
@@ -16008,6 +16099,16 @@
                             setValue('blog-post-content', post ? post.content : '');
                             setValue('blog-post-tags', post ? (post.tags || '') : '');
                             setValue('blog-post-status', post ? post.status : 'draft');
+                            setValue('blog-post-series', post ? (post.series || '') : '');
+                            // Featured image
+                            var featImgUrl = post ? (post.featured_image || '') : '';
+                            setValue('blog-featured-image', featImgUrl);
+                            setValue('blog-featured-image-url', featImgUrl);
+                            updateFeaturedImagePreview(featImgUrl);
+                            // SEO fields
+                            setValue('blog-seo-description', post ? (post.seo_description || '') : '');
+                            setValue('blog-seo-og-image', post ? (post.seo_og_image || '') : '');
+                            updateCharCount('blog-seo-description', 'blog-seo-desc-count');
 
                             updateSlugPreview(post ? post.slug : '');
                             updateCharCount('blog-post-title', 'blog-title-count');
@@ -16062,6 +16163,46 @@
                             if (input && counter) counter.textContent = input.value.length;
                         }
 
+                        function updateFeaturedImagePreview(url) {
+                            var preview = $('blog-featured-image-preview');
+                            var thumb = $('blog-featured-image-thumb');
+                            if (!preview || !thumb) return;
+                            if (url && url.trim()) {
+                                thumb.src = url.trim();
+                                preview.style.display = 'block';
+                            } else {
+                                thumb.src = '#';
+                                preview.style.display = 'none';
+                            }
+                        }
+
+                        // ── blog image picker (reuses asset-picker-modal) ────────
+                        var _blogImagePickerMode = ''; // 'featured' | 'insert'
+
+                        function openBlogImagePicker(mode) {
+                            _blogImagePickerMode = mode;
+                            var modal = $('asset-picker-modal');
+                            if (!modal) return;
+                            // Reset search
+                            var searchEl = $('asset-picker-search');
+                            if (searchEl) searchEl.value = '';
+                            var brandEl = $('asset-picker-brand');
+                            if (brandEl) brandEl.value = 'gfv';
+                            modal.classList.remove('d-none');
+                            searchAssets();
+                            if (searchEl) searchEl.focus();
+                            // Override click handler on grid items for blog context
+                            modal.dataset.blogPicker = '1';
+                        }
+
+                        function closeBlogImagePicker() {
+                            var modal = $('asset-picker-modal');
+                            if (modal) {
+                                modal.classList.add('d-none');
+                                delete modal.dataset.blogPicker;
+                            }
+                        }
+
                         // ── save (create or update) ───────────────────────────────
                         async function saveBlogPost() {
                             var saveBtn = $('blog-save-btn');
@@ -16071,6 +16212,10 @@
                             var content = ($('blog-post-content') || {}).value || '';
                             var tags = ($('blog-post-tags') || {}).value || '';
                             var status = ($('blog-post-status') || {}).value || 'draft';
+                            var series = ($('blog-post-series') || {}).value || '';
+                            var featuredImage = ($('blog-featured-image-url') || {}).value || '';
+                            var seoDescription = ($('blog-seo-description') || {}).value || '';
+                            var seoOgImage = ($('blog-seo-og-image') || {}).value || '';
 
                             if (!title.trim()) {
                                 toast('Title is required.', 'error');
@@ -16081,7 +16226,7 @@
                             if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving\u2026'; }
 
                             try {
-                                var body = { title: title.trim(), slug: slug.trim(), excerpt: excerpt.trim(), content: content, tags: tags.trim(), status: status };
+                                var body = { title: title.trim(), slug: slug.trim(), excerpt: excerpt.trim(), content: content, tags: tags.trim(), status: status, series: series.trim(), featured_image: featuredImage.trim(), seo_description: seoDescription.trim(), seo_og_image: seoOgImage.trim() };
                                 if (blogEditingId) body.id = blogEditingId;
 
                                 await blogFetch('/api/blog', {
@@ -16158,6 +16303,38 @@
                             var deleteBtn = $('blog-delete-btn');
                             if (deleteBtn) deleteBtn.addEventListener('click', function () { deleteBlogPost(blogEditingId); });
 
+                            // featured image URL input → live preview
+                            var featImgInput = $('blog-featured-image-url');
+                            if (featImgInput) {
+                                featImgInput.addEventListener('input', function () {
+                                    updateFeaturedImagePreview(this.value);
+                                });
+                            }
+
+                            // featured image pick button → open blog image picker
+                            var featPickBtn = $('blog-featured-image-pick-btn');
+                            if (featPickBtn) {
+                                featPickBtn.addEventListener('click', function () {
+                                    openBlogImagePicker('featured');
+                                });
+                            }
+
+                            // insert image ribbon button
+                            var insertImgBtn = $('blog-insert-image-btn');
+                            if (insertImgBtn) {
+                                insertImgBtn.addEventListener('click', function () {
+                                    openBlogImagePicker('insert');
+                                });
+                            }
+
+                            // SEO description char count
+                            var seoDescInput = $('blog-seo-description');
+                            if (seoDescInput) {
+                                seoDescInput.addEventListener('input', function () {
+                                    updateCharCount('blog-seo-description', 'blog-seo-desc-count');
+                                });
+                            }
+
                             // title → auto-slug + char count
                             var titleInput = $('blog-post-title');
                             if (titleInput) {
@@ -16189,7 +16366,7 @@
                             }
 
                             // filter / search → re-render
-                            ['blog-search', 'blog-filter-status', 'blog-filter-sort'].forEach(function (id) {
+                            ['blog-search', 'blog-filter-status', 'blog-filter-series', 'blog-filter-sort'].forEach(function (id) {
                                 var el = $(id);
                                 if (el) el.addEventListener('input', renderBlogTable);
                             });

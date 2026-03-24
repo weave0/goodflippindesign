@@ -2058,6 +2058,52 @@
       color: #ffffff;
     }
 
+    .blog-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .blog-series-select {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.625rem 1rem;
+      min-height: 44px;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+    }
+
+    .blog-series-select:hover,
+    .blog-series-select:focus {
+      border-color: var(--border-hover);
+      outline: none;
+    }
+
+    .blog-series-select option {
+      background: var(--bg-elevated);
+      color: var(--text);
+    }
+
+    .blog-series-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(168, 85, 247, 0.15);
+      color: #a855f7;
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      margin-bottom: 0.5rem;
+    }
+
     .blog-posts-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -2229,6 +2275,25 @@
       border-radius: 16px;
       padding: 3rem;
       box-shadow: var(--glass-shadow);
+    }
+
+    .blog-video-embed {
+      position: relative;
+      padding-bottom: 56.25%;
+      /* 16:9 */
+      height: 0;
+      overflow: hidden;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+    }
+
+    .blog-video-embed iframe,
+    .blog-video-embed video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
     }
 
     .post-header {
@@ -4913,6 +4978,14 @@
           </form>
         </div>
 
+        <!-- Series / Filter bar -->
+        <div id="blog-filter-bar" class="blog-filter-bar" style="display:none;">
+          <label for="blog-series-filter" class="sr-only">Filter by series</label>
+          <select id="blog-series-filter" class="blog-series-select" aria-label="Filter posts by series">
+            <option value="">All series &amp; posts</option>
+          </select>
+        </div>
+
         <!-- Blog Post Listing -->
         <div id="blog-posts-container" class="blog-posts-grid">
           <p class="loading-text">Loading posts...</p>
@@ -7223,6 +7296,68 @@
         }
       }
 
+      // Cached post list for client-side filtering
+      let _allBlogPosts = [];
+
+      // Render post cards from a (optionally filtered) list
+      function renderBlogCards(posts) {
+        const container = document.getElementById('blog-posts-container');
+        if (posts.length === 0) {
+          container.innerHTML = '<p class="loading-text">No posts in this series yet.</p>';
+          return;
+        }
+        container.innerHTML = posts.map(post => {
+          const tags = post.tags ? post.tags.split(',').filter(t => t.trim()) : [];
+          const tagsHtml = tags.length > 0
+            ? `<div class="post-tags">${tags.map(tag => `<span class="post-tag">${escapeHtml(tag.trim())}</span>`).join('')}</div>`
+            : '';
+          const seriesBadge = post.series
+            ? `<span class="blog-series-badge">${escapeHtml(post.series)}</span>`
+            : '';
+          const readingTime = post.reading_time ? `<span>${post.reading_time} min read</span>` : '';
+          return `
+            <div class="blog-post-card" data-post-slug="${escapeHtml(post.slug)}" role="button" tabindex="0">
+              ${seriesBadge}
+              <div class="post-meta">
+                <time>${formatCommentDate(post.published_at)}</time>
+                ${readingTime}
+              </div>
+              <h3>${escapeHtml(post.title)}</h3>
+              ${tagsHtml}
+              <p class="post-excerpt">${escapeHtml(post.excerpt || 'Click to read more...')}</p>
+            </div>
+          `;
+        }).join('');
+
+        container.querySelectorAll('.blog-post-card').forEach(card => {
+          const open = () => loadBlogPost(card.dataset.postSlug);
+          card.addEventListener('click', open);
+          card.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+          });
+        });
+      }
+
+      // Populate the series filter dropdown and show/hide the bar
+      function populateSeriesFilter(posts) {
+        const filterBar = document.getElementById('blog-filter-bar');
+        const select = document.getElementById('blog-series-filter');
+        const seriesValues = [...new Set(posts.map(p => p.series).filter(Boolean))].sort();
+        // Remove stale options (keep the first "All" option)
+        while (select.options.length > 1) select.remove(1);
+        if (seriesValues.length === 0) {
+          filterBar.style.display = 'none';
+          return;
+        }
+        seriesValues.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s;
+          opt.textContent = s;
+          select.appendChild(opt);
+        });
+        filterBar.style.display = 'flex';
+      }
+
       // Load and display blog posts
       async function loadBlogPosts(status = 'published') {
         const container = document.getElementById('blog-posts-container');
@@ -7241,45 +7376,20 @@
 
           const response = await fetch(url, { headers });
           const posts = await response.json();
+          _allBlogPosts = posts;
+
+          // Reset series filter to "All"
+          const select = document.getElementById('blog-series-filter');
+          if (select) select.value = '';
 
           if (posts.length === 0) {
             container.innerHTML = '<p class="loading-text">No posts yet. Check back soon!</p>';
+            document.getElementById('blog-filter-bar').style.display = 'none';
             return;
           }
 
-          container.innerHTML = posts.map(post => {
-            const tags = post.tags ? post.tags.split(',').filter(t => t.trim()) : [];
-            const tagsHtml = tags.length > 0
-              ? `<div class="post-tags">${tags.map(tag => `<span class="post-tag">${escapeHtml(tag.trim())}</span>`).join('')}</div>`
-              : '';
-
-            return `
-                        <div class="blog-post-card" data-post-slug="${escapeHtml(post.slug)}" role="button" tabindex="0">
-                            <div class="post-meta">
-                                <time>${formatCommentDate(post.published_at)}</time>
-                            </div>
-                            <h3>${escapeHtml(post.title)}</h3>
-                            ${tagsHtml}
-                            <p class="post-excerpt">${escapeHtml(post.excerpt || 'Click to read more...')}</p>
-                        </div>
-                    `;
-          }).join('');
-
-          // Add click handlers
-          container.querySelectorAll('.blog-post-card').forEach(card => {
-            card.addEventListener('click', () => {
-              const slug = card.dataset.postSlug;
-              loadBlogPost(slug);
-            });
-
-            card.addEventListener('keypress', (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                const slug = card.dataset.postSlug;
-                loadBlogPost(slug);
-              }
-            });
-          });
+          populateSeriesFilter(posts);
+          renderBlogCards(posts);
 
         } catch (error) {
           console.error('[Blog] Failed to load posts:', error);
@@ -7363,7 +7473,28 @@
       function renderMarkdown(text) {
         let html = escapeHtml(text);
 
-        // Code blocks
+        // Video embeds — @[video](url) — must run before link rendering
+        html = html.replace(/@\[video\]\(([^)]+)\)/g, (_, url) => {
+          const safeUrl = url.trim();
+          // YouTube
+          const ytMatch = safeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+          if (ytMatch) {
+            return `<div class="blog-video-embed"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`;
+          }
+          // Vimeo
+          const vimeoMatch = safeUrl.match(/vimeo\.com\/(\d+)/);
+          if (vimeoMatch) {
+            return `<div class="blog-video-embed"><iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}" title="Vimeo video" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`;
+          }
+          // R2 / direct video file
+          if (/\.(mp4|webm|ogg)(\?|$)/i.test(safeUrl)) {
+            return `<div class="blog-video-embed"><video controls preload="metadata" style="width:100%;max-width:100%;border-radius:8px"><source src="${safeUrl}"><p>Your browser does not support HTML5 video.</p></video></div>`;
+          }
+          // Fallback link
+          return `<a href="${safeUrl}" target="_blank" rel="noopener">▶ Watch video</a>`;
+        });
+
+        // Code blocks (fenced — handle before inline code)
         html = html.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
 
         // Inline code
@@ -7375,12 +7506,24 @@
         // Italic
         html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
 
+        // Strikethrough
+        html = html.replace(/~~([^~]+)~~/g, '<s>$1</s>');
+
+        // Images — must run before links
+        html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:8px;margin:0.5rem 0" loading="lazy">');
+
         // Links
         html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+        // Blockquotes
+        html = html.replace(/^&gt; (.+)$/gm, '<blockquote style="border-left:3px solid var(--border);padding:0.25rem 0.75rem;margin:0.5rem 0;color:var(--text-muted)">$1</blockquote>');
 
         // Headings
         html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
         html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+
+        // Horizontal rule
+        html = html.replace(/^---$/gm, '<hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0">');
 
         // Lists
         html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
@@ -7490,6 +7633,18 @@
             draftsTabBtn.classList.add('active');
             publishedTabBtn.classList.remove('active');
             loadBlogPosts('draft');
+          });
+        }
+
+        // ── Series filter ──
+        const seriesFilter = document.getElementById('blog-series-filter');
+        if (seriesFilter) {
+          seriesFilter.addEventListener('change', function () {
+            const selected = this.value;
+            const filtered = selected
+              ? _allBlogPosts.filter(p => p.series === selected)
+              : _allBlogPosts;
+            renderBlogCards(filtered);
           });
         }
 
