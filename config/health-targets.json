@@ -198,6 +198,7 @@
             "brand": "gfd",
             "name": "GFD Stripe Worker",
             "url": "https://gfd-stripe.weave0.workers.dev/health",
+            "sweepUrl": "https://goodflippindesign.com/api/stripe-health",
             "checkType": "worker",
             "expectedKeyword": "gfd-stripe-payments",
             "critical": false,

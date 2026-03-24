@@ -171,6 +171,25 @@ export default {
     }
 
     // Route API requests to auth worker (gracefully degrade if unavailable)
+    // Exception: /api/stripe-health proxies to Stripe Worker (avoids worker-to-worker *.workers.dev issues)
+    if (url.pathname === '/api/stripe-health' && request.method === 'GET') {
+      try {
+        const resp = await fetch('https://gfd-stripe.weave0.workers.dev/health', {
+          headers: { 'User-Agent': 'GFD-Pages-Proxy/1.0' },
+        });
+        const body = await resp.text();
+        return new Response(body, {
+          status: resp.status,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: false, error: 'Stripe worker unreachable' }), {
+          status: 502,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     if (url.pathname.startsWith('/api/')) {
       const authWorker = await getAuthWorker();
       if (authWorker) {

@@ -156,7 +156,9 @@ async function checkTarget(target) {
   try {
     const extraHeaders = target.cookie ? { Cookie: target.cookie } : {};
 
-    const resp = await fetch(target.url, {
+    const fetchUrl = target.sweepUrl || target.url;
+
+    const resp = await fetch(fetchUrl, {
       method: 'GET',
       redirect: 'follow',
       signal: controller.signal,
