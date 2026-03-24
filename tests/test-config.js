@@ -10,7 +10,8 @@ module.exports = {
         contactForm: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/assets/contact-form.html',
         communityPortal: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/community-portal.html',
         donatePage: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/temp_donate_review.html',
-        adminPanel: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/admin.html'
+        adminPanel: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/admin.html',
+        galleryPage: 'file://' + __dirname.replace(/\\/g, '/').replace('/tests', '') + '/gallery.html'
     },
 
     // Viewport configurations for responsive testing
