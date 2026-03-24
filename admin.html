@@ -1191,9 +1191,23 @@
             user-select: none;
             transition: border-color 0.2s, background 0.2s;
         }
-        .tag-toggle:hover { border-color: rgba(255,255,255,0.2); }
-        .tag-toggle input[type="checkbox"] { accent-color: var(--emerald); width: 13px; height: 13px; margin: 0; cursor: pointer; }
-        .tag-toggle:has(input:checked) { border-color: var(--emerald); background: rgba(16,185,129,0.08); }
+
+        .tag-toggle:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .tag-toggle input[type="checkbox"] {
+            accent-color: var(--emerald);
+            width: 13px;
+            height: 13px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .tag-toggle:has(input:checked) {
+            border-color: var(--emerald);
+            background: rgba(16, 185, 129, 0.08);
+        }
 
         .toolbar {
             display: flex;
@@ -2714,6 +2728,83 @@
             background: rgba(244, 63, 94, 0.08);
             color: rgba(244, 63, 94, 0.55);
             text-decoration: line-through;
+        }
+
+        /* Check type filter tabs */
+        .eco-type-tabs {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .eco-type-tab {
+            font-size: 0.72rem;
+            font-weight: 500;
+            padding: 0.22rem 0.55rem;
+            border-radius: 0.3rem;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .eco-type-tab:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .eco-type-tab.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .eco-type-badge {
+            display: inline-block;
+            font-size: 0.58rem;
+            font-weight: 600;
+            padding: 0.06rem 0.3rem;
+            border-radius: 0.18rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .eco-type-badge.page {
+            color: #60a5fa;
+            background: rgba(96, 165, 250, 0.12);
+        }
+
+        .eco-type-badge.service {
+            color: #a78bfa;
+            background: rgba(167, 139, 250, 0.12);
+        }
+
+        .eco-type-badge.worker {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.12);
+        }
+
+        .eco-content-badge {
+            font-size: 0.62rem;
+            font-weight: 500;
+            padding: 0.06rem 0.3rem;
+            border-radius: 0.18rem;
+        }
+
+        .eco-content-badge.found {
+            color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .eco-content-badge.missing {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .eco-content-badge.na {
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.03);
         }
 
         /* Sweep history mini-table */
@@ -8055,6 +8146,14 @@
                         </div>
                         <p class="subheading mb-08">Real checks via <strong>gfd-health-sweep</strong> Cloudflare Worker — HTTP status, response time, CSP, HSTS, X-Frame, XCTO. Runs automatically at 6 AM UTC daily. Results stored in D1.</p>
 
+                        <!-- Check type filter tabs -->
+                        <div class="eco-type-tabs" id="eco-type-tabs">
+                            <button class="eco-type-tab active" data-type="all">All</button>
+                            <button class="eco-type-tab" data-type="page">Pages</button>
+                            <button class="eco-type-tab" data-type="service">Services</button>
+                            <button class="eco-type-tab" data-type="worker">Workers</button>
+                        </div>
+
                         <!-- KPI strip -->
                         <div class="panel-kpis" id="eco-kpi-strip" style="display:none">
                             <div class="panel-kpi">
@@ -8823,15 +8922,43 @@
                             <h3 class="panel-subtitle" style="margin-bottom:0.6rem">Platform Limits</h3>
                             <table style="font-size:0.8rem;width:100%">
                                 <thead>
-                                    <tr><th>Platform</th><th>Char limit</th><th>Hashtags</th></tr>
+                                    <tr>
+                                        <th>Platform</th>
+                                        <th>Char limit</th>
+                                        <th>Hashtags</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td>Instagram</td><td>2,200</td><td>Up to 30</td></tr>
-                                    <tr><td>Facebook</td><td>63,206</td><td>1–3</td></tr>
-                                    <tr><td>X / Twitter</td><td>280</td><td>1–2</td></tr>
-                                    <tr><td>LinkedIn</td><td>3,000</td><td>3–5</td></tr>
-                                    <tr><td>Pinterest</td><td>500</td><td>2–5</td></tr>
-                                    <tr><td>Threads</td><td>500</td><td>1–2</td></tr>
+                                    <tr>
+                                        <td>Instagram</td>
+                                        <td>2,200</td>
+                                        <td>Up to 30</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Facebook</td>
+                                        <td>63,206</td>
+                                        <td>1–3</td>
+                                    </tr>
+                                    <tr>
+                                        <td>X / Twitter</td>
+                                        <td>280</td>
+                                        <td>1–2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LinkedIn</td>
+                                        <td>3,000</td>
+                                        <td>3–5</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pinterest</td>
+                                        <td>500</td>
+                                        <td>2–5</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Threads</td>
+                                        <td>500</td>
+                                        <td>1–2</td>
+                                    </tr>
                                 </tbody>
                             </table>
                             <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.8rem">Cost: ~500–1,000 neurons per generation · Free tier: 10,000/day · $0</p>
@@ -15467,8 +15594,19 @@
                                 const secCls = secScore >= 4 ? 'ok' : secScore >= 2 ? 'warn' : 'fail';
                                 const headerChip = (label, has, abbrev) =>
                                     `<span class="eco-header-chip${has ? '' : ' missing'}" title="${label}">${abbrev}</span>`;
-                                return `<div class="eco-site-card eco-site-card--${cls}">
+                                // Check type badge
+                                const checkType = c.check_type || 'page';
+                                const typeBadge = `<span class="eco-type-badge ${checkType}">${checkType}</span>`;
+                                // Content validation badge
+                                let contentBadge = '';
+                                if (c.keyword_found === 1) {
+                                    contentBadge = `<span class="eco-content-badge found" title="Expected content found: ${escapeHtml(c.content_keyword || '')}">✓ content</span>`;
+                                } else if (c.keyword_found === 0) {
+                                    contentBadge = `<span class="eco-content-badge missing" title="Missing expected: ${escapeHtml(c.content_keyword || '')}">✗ content</span>`;
+                                }
+                                return `<div class="eco-site-card eco-site-card--${cls}" data-check-type="${checkType}">
                             <div class="eco-site-card-header">
+                                ${typeBadge}
                                 <span class="eco-site-name">${escapeHtml(c.name)}</span>
                                 <span class="tag ${tagCls}">${escapeHtml(responseLabel)}</span>
                             </div>
@@ -15479,6 +15617,7 @@
                                 ${headerChip('Strict-Transport-Security', c.has_hsts, 'HSTS')}
                                 ${headerChip('X-Frame-Options', c.has_x_frame, 'X-Frame')}
                                 ${headerChip('X-Content-Type-Options', c.has_xcto, 'XCTO')}
+                                ${contentBadge}
                             </div>
                         </div>`;
                             }).join('');
@@ -15593,6 +15732,28 @@
                         const kpiCI = $('kpi-ci-failures');
                         if (kpiCI) kpiCI.textContent = String(totalFailures);
                     }
+
+                    // ── Check type filter tabs ──
+                    (function () {
+                        const tabs = $('eco-type-tabs');
+                        if (!tabs) return;
+                        tabs.addEventListener('click', function (e) {
+                            const btn = e.target.closest('.eco-type-tab');
+                            if (!btn) return;
+                            tabs.querySelectorAll('.eco-type-tab').forEach(t => t.classList.remove('active'));
+                            btn.classList.add('active');
+                            const type = btn.getAttribute('data-type');
+                            const grid = $('eco-sites-grid');
+                            if (!grid) return;
+                            grid.querySelectorAll('.eco-site-card').forEach(card => {
+                                if (type === 'all' || card.getAttribute('data-check-type') === type) {
+                                    card.style.display = '';
+                                } else {
+                                    card.style.display = 'none';
+                                }
+                            });
+                        });
+                    })();
 
                     // ── Sweep trigger button ──
                     $('eco-sweep-btn').addEventListener('click', async function () {
@@ -16715,19 +16876,19 @@
 
                         let selectedAsset = null; // { id, title, brand }
 
-                        const searchInput  = document.getElementById('ai-asset-search');
-                        const searchBtn    = document.getElementById('ai-asset-search-btn');
-                        const resultsEl    = document.getElementById('ai-asset-results');
-                        const selectedEl   = document.getElementById('ai-selected-asset');
-                        const selectedLbl  = document.getElementById('ai-selected-label');
-                        const deselectBtn  = document.getElementById('ai-deselect-btn');
-                        const generateBtn  = document.getElementById('ai-generate-btn');
-                        const statusMsg    = document.getElementById('ai-status-msg');
-                        const outputPanel  = document.getElementById('ai-output-panel');
+                        const searchInput = document.getElementById('ai-asset-search');
+                        const searchBtn = document.getElementById('ai-asset-search-btn');
+                        const resultsEl = document.getElementById('ai-asset-results');
+                        const selectedEl = document.getElementById('ai-selected-asset');
+                        const selectedLbl = document.getElementById('ai-selected-label');
+                        const deselectBtn = document.getElementById('ai-deselect-btn');
+                        const generateBtn = document.getElementById('ai-generate-btn');
+                        const statusMsg = document.getElementById('ai-status-msg');
+                        const outputPanel = document.getElementById('ai-output-panel');
                         const captionCards = document.getElementById('ai-caption-cards');
-                        const copyAllBtn   = document.getElementById('ai-copy-all-btn');
-                        const clearBtn     = document.getElementById('ai-clear-btn');
-                        const toneSelect   = document.getElementById('ai-tone-select');
+                        const copyAllBtn = document.getElementById('ai-copy-all-btn');
+                        const clearBtn = document.getElementById('ai-clear-btn');
+                        const toneSelect = document.getElementById('ai-tone-select');
 
                         function setStatus(msg, color) {
                             if (!statusMsg) return;
@@ -16739,7 +16900,7 @@
                             selectedAsset = asset;
                             if (selectedLbl) selectedLbl.textContent = `${asset.title || 'Untitled'} — ${asset.brand || ''}`;
                             if (selectedEl) selectedEl.style.display = '';
-                            if (resultsEl)  resultsEl.style.display = 'none';
+                            if (resultsEl) resultsEl.style.display = 'none';
                             if (generateBtn) generateBtn.disabled = false;
                         }
 
@@ -16769,7 +16930,7 @@
                                     return;
                                 }
                                 resultsEl.innerHTML = items.slice(0, 20).map(a =>
-                                    `<div class="asset-result-row" style="padding:0.4rem 0.6rem;cursor:pointer;font-size:0.82rem;border-bottom:1px solid var(--border)" data-id="${a.id}" data-title="${(a.title||'').replace(/"/g,'&quot;')}" data-brand="${(a.brand||'').replace(/"/g,'&quot;')}">${a.title || 'Untitled'} <span style="color:var(--text-muted)">${a.brand || ''}</span></div>`
+                                    `<div class="asset-result-row" style="padding:0.4rem 0.6rem;cursor:pointer;font-size:0.82rem;border-bottom:1px solid var(--border)" data-id="${a.id}" data-title="${(a.title || '').replace(/"/g, '&quot;')}" data-brand="${(a.brand || '').replace(/"/g, '&quot;')}">${a.title || 'Untitled'} <span style="color:var(--text-muted)">${a.brand || ''}</span></div>`
                                 ).join('');
                                 resultsEl.querySelectorAll('.asset-result-row').forEach(row => {
                                     row.addEventListener('click', () => selectAsset({ id: row.dataset.id, title: row.dataset.title, brand: row.dataset.brand }));
@@ -16841,12 +17002,12 @@
                                             <button class="btn btn-secondary" style="font-size:0.73rem;padding:0.15rem 0.5rem" onclick="navigator.clipboard.writeText(this.closest('[data-caption]')?.dataset.caption||'').then(()=>{this.textContent='Copied!';setTimeout(()=>{this.textContent='Copy'},1500)})">Copy</button>
                                         </span>
                                     </div>
-                                    <div data-caption="${text.replace(/"/g, '&quot;')}" style="font-size:0.82rem;line-height:1.5;white-space:pre-wrap;word-break:break-word;color:var(--text)">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+                                    <div data-caption="${text.replace(/"/g, '&quot;')}" style="font-size:0.82rem;line-height:1.5;white-space:pre-wrap;word-break:break-word;color:var(--text)">${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
                                 </div>`;
                             }).join('');
                             // Fix copy buttons to use sibling div's data
                             captionCards.querySelectorAll('.btn').forEach(btn => {
-                                btn.onclick = function() {
+                                btn.onclick = function () {
                                     const card = btn.closest('.panel');
                                     const txt = card?.querySelector('[data-caption]')?.dataset.caption || '';
                                     navigator.clipboard.writeText(txt).then(() => {
@@ -16870,7 +17031,7 @@
                         });
 
                         window.__adminPanels = window.__adminPanels || {};
-                        window.__adminPanels['ai-utils'] = function() { clearSelection(); };
+                        window.__adminPanels['ai-utils'] = function () { clearSelection(); };
                     })();
                     (function initEcoCalPanel() {
                         'use strict';

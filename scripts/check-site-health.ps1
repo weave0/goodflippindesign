@@ -7,38 +7,40 @@ param(
     [switch]$Verbose
 )
 
-$sites = @{
-    "goodflippindesign" = @{
-        "url"      = "https://goodflippindesign.com"
-        "name"     = "Good Flippin Design"
-        "critical" = $true
-    }
-    "aiaimate"          = @{
-        "url"      = "https://aiaimate.com"
-        "name"     = "AI Aimate"
-        "critical" = $true
-    }
-    "globaldeets"       = @{
-        "url"      = "https://globaldeets.com"
-        "name"     = "globaldeets Main"
-        "critical" = $false
-    }
-    "eliassen"          = @{
-        "url"      = "https://eliassen.globaldeets.com"
-        "name"     = "Eliassen globaldeets"
-        "critical" = $false
+$configPath = Join-Path $PSScriptRoot "..\config\health-targets.json"
+if (-not (Test-Path $configPath)) {
+    Write-Host "Health target config not found: $configPath" -ForegroundColor Red
+    exit 1
+}
+
+$config = Get-Content -Raw -Path $configPath | ConvertFrom-Json
+$sites = [ordered]@{}
+foreach ($target in $config.targets) {
+    if ($target.localScript) {
+        $sites[$target.id] = @{
+            "url"             = $target.url
+            "name"            = $target.name
+            "critical"        = [bool]$target.critical
+            "cookie"          = $target.cookie
+            "checkType"       = if ($target.checkType) { $target.checkType } else { 'page' }
+            "expectedKeyword" = $target.expectedKeyword
+        }
     }
 }
 
 function Test-SiteHealth {
     param(
         [string]$Url,
-        [string]$Name
+        [string]$Name,
+        [string]$Cookie,
+        [string]$CheckType = 'page',
+        [string]$ExpectedKeyword = ''
     )
 
     $result = @{
         "url"             = $Url
         "name"            = $Name
+        "checkType"       = $CheckType
         "timestamp"       = (Get-Date -Format "o")
         "status"          = "unknown"
         "httpCode"        = 0
@@ -46,17 +48,34 @@ function Test-SiteHealth {
         "sslValid"        = $false
         "sslExpiryDays"   = 0
         "securityHeaders" = @{}
+        "contentValid"    = $null
+        "expectedKeyword" = $ExpectedKeyword
         "errors"          = @()
     }
 
     try {
         $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-        $response = Invoke-WebRequest -Uri $Url -Method Head -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $headers = @{}
+        if ($Cookie) {
+            $headers["Cookie"] = $Cookie
+        }
+        $response = Invoke-WebRequest -Uri $Url -Method Get -Headers $headers -UseBasicParsing -TimeoutSec 15 -ErrorAction Stop
         $stopwatch.Stop()
 
         $result.httpCode = $response.StatusCode
         $result.responseTimeMs = $stopwatch.ElapsedMilliseconds
         $result.status = "up"
+
+        # Content keyword validation
+        if ($ExpectedKeyword -and $response.Content) {
+            if ($response.Content.Contains($ExpectedKeyword)) {
+                $result.contentValid = $true
+            }
+            else {
+                $result.contentValid = $false
+                $result.errors += "Expected keyword '$ExpectedKeyword' not found in response"
+            }
+        }
 
         # Check security headers
         $securityHeadersToCheck = @(
@@ -109,24 +128,36 @@ function Test-SiteHealth {
 function Format-HealthReport {
     param($results)
 
-    Write-Host "`n═══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host "`n===========================================================" -ForegroundColor Cyan
     Write-Host "  ECOSYSTEM HEALTH CHECK" -ForegroundColor Cyan
     Write-Host "  $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor Cyan
-    Write-Host "═══════════════════════════════════════════════════════════`n" -ForegroundColor Cyan
+    Write-Host "===========================================================`n" -ForegroundColor Cyan
 
     $allUp = $true
     $criticalDown = $false
 
     foreach ($result in $results) {
         if ($result.status -eq "up") {
-            Write-Host "✓ $($result.name)" -ForegroundColor Green
+            Write-Host "[OK] $($result.name)" -ForegroundColor Green
             Write-Host "  URL: $($result.url)" -ForegroundColor Gray
+            Write-Host "  Type: $($result.checkType)" -ForegroundColor Gray
             Write-Host "  Status: $($result.httpCode) OK" -ForegroundColor Gray
             Write-Host "  Response Time: $($result.responseTimeMs)ms" -ForegroundColor Gray
 
+            # Content validation
+            if ($null -ne $result.contentValid) {
+                if ($result.contentValid) {
+                    Write-Host "  Content: keyword found [OK]" -ForegroundColor Gray
+                }
+                else {
+                    Write-Host "  Content: expected keyword MISSING [!]" -ForegroundColor Yellow
+                    $allUp = $false
+                }
+            }
+
             if ($result.sslValid) {
                 if ($result.sslExpiryDays -lt 30) {
-                    Write-Host "  SSL: Valid (expires in $($result.sslExpiryDays) days) ⚠️" -ForegroundColor Yellow
+                    Write-Host "  SSL: Valid (expires in $($result.sslExpiryDays) days) [!]" -ForegroundColor Yellow
                 }
                 else {
                     Write-Host "  SSL: Valid (expires in $($result.sslExpiryDays) days)" -ForegroundColor Gray
@@ -140,10 +171,10 @@ function Format-HealthReport {
             $headersPresent = ($result.securityHeaders.Values | Where-Object { $_ -eq "present" }).Count
             $headersTotal = $result.securityHeaders.Count
             if ($headersPresent -eq $headersTotal) {
-                Write-Host "  Security Headers: $headersPresent/$headersTotal ✓" -ForegroundColor Gray
+                Write-Host "  Security Headers: $headersPresent/$headersTotal [OK]" -ForegroundColor Gray
             }
             else {
-                Write-Host "  Security Headers: $headersPresent/$headersTotal ⚠️" -ForegroundColor Yellow
+                Write-Host "  Security Headers: $headersPresent/$headersTotal [!]" -ForegroundColor Yellow
             }
 
             if ($Verbose) {
@@ -156,11 +187,11 @@ function Format-HealthReport {
 
         }
         else {
-            Write-Host "✗ $($result.name)" -ForegroundColor Red
+            Write-Host "[FAIL] $($result.name)" -ForegroundColor Red
             Write-Host "  URL: $($result.url)" -ForegroundColor Gray
             Write-Host "  Status: DOWN" -ForegroundColor Red
-            foreach ($error in $result.errors) {
-                Write-Host "  Error: $error" -ForegroundColor Red
+            foreach ($errMsg in $result.errors) {
+                Write-Host "  Error: $errMsg" -ForegroundColor Red
             }
             $allUp = $false
 
@@ -174,21 +205,21 @@ function Format-HealthReport {
         Write-Host ""
     }
 
-    Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host "===========================================================" -ForegroundColor Cyan
 
     if ($allUp) {
-        Write-Host "  ALL SYSTEMS OPERATIONAL ✓" -ForegroundColor Green
-        Write-Host "═══════════════════════════════════════════════════════════`n" -ForegroundColor Cyan
+        Write-Host "  ALL SYSTEMS OPERATIONAL [OK]" -ForegroundColor Green
+        Write-Host "===========================================================`n" -ForegroundColor Cyan
         return 0
     }
     elseif ($criticalDown) {
         Write-Host "  CRITICAL SITES DOWN - IMMEDIATE ACTION REQUIRED" -ForegroundColor Red
-        Write-Host "═══════════════════════════════════════════════════════════`n" -ForegroundColor Cyan
+        Write-Host "===========================================================`n" -ForegroundColor Cyan
         return 2
     }
     else {
         Write-Host "  SOME SITES DEGRADED - INVESTIGATION RECOMMENDED" -ForegroundColor Yellow
-        Write-Host "═══════════════════════════════════════════════════════════`n" -ForegroundColor Cyan
+        Write-Host "===========================================================`n" -ForegroundColor Cyan
         return 1
     }
 }
@@ -200,13 +231,13 @@ if ($Site -eq "all") {
     Write-Host "Checking all sites..." -ForegroundColor Cyan
     foreach ($key in $sites.Keys) {
         $siteInfo = $sites[$key]
-        $result = Test-SiteHealth -Url $siteInfo.url -Name $siteInfo.name
+        $result = Test-SiteHealth -Url $siteInfo.url -Name $siteInfo.name -Cookie $siteInfo.cookie -CheckType $siteInfo.checkType -ExpectedKeyword $siteInfo.expectedKeyword
         $results += $result
     }
 }
-elseif ($sites.ContainsKey($Site)) {
+elseif ($sites.Contains($Site)) {
     Write-Host "Checking $($sites[$Site].name)..." -ForegroundColor Cyan
-    $result = Test-SiteHealth -Url $sites[$Site].url -Name $sites[$Site].name
+    $result = Test-SiteHealth -Url $sites[$Site].url -Name $sites[$Site].name -Cookie $sites[$Site].cookie -CheckType $sites[$Site].checkType -ExpectedKeyword $sites[$Site].expectedKeyword
     $results += $result
 }
 else {

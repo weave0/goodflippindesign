@@ -1917,6 +1917,36 @@ export default {
           return new Response(null, { headers: corsHeaders });
         }
 
+        if (url.pathname === '/api/health' && request.method === 'GET') {
+          let dbOk = false;
+          let dbError = null;
+
+          if (env.DB) {
+            try {
+              await env.DB.prepare('SELECT 1 as ok').first();
+              dbOk = true;
+            } catch (error) {
+              dbError = error.message;
+            }
+          } else {
+            dbError = 'DB binding missing';
+          }
+
+          const status = dbOk ? 200 : 503;
+          return new Response(JSON.stringify({
+            ok: dbOk,
+            service: 'gfd-auth-api',
+            database: dbOk ? 'ok' : 'unavailable',
+            clerkConfigured: Boolean(clerkSecretKey),
+            sentryConfigured: Boolean(env.SENTRY_DSN),
+            error: dbError,
+            timestamp: new Date().toISOString(),
+          }), {
+            status,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders },
+          });
+        }
+
         // Public endpoints (no auth required)
         if (url.pathname === '/api/comments' && request.method === 'GET') {
           const response = await handleGetComments(request, env);

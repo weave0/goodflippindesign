@@ -14,6 +14,28 @@
 
 const STRIPE_API_VERSION = '2023-10-16';
 
+function json(body, status = 200, extraHeaders = {}) {
+    return new Response(JSON.stringify(body), {
+        status,
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            ...extraHeaders,
+        },
+    });
+}
+
+export async function onRequestGet(context) {
+    const stripeConfigured = Boolean(context.env.STRIPE);
+
+    return json({
+        ok: stripeConfigured,
+        service: 'gfd-checkout-function',
+        stripeConfigured,
+        timestamp: new Date().toISOString(),
+    }, stripeConfigured ? 200 : 503);
+}
+
 export async function onRequestPost(context) {
     try {
         // Get Stripe secret key from environment variables
@@ -21,52 +43,34 @@ export async function onRequestPost(context) {
 
         if (!STRIPE_SECRET_KEY) {
             console.error('STRIPE environment variable not set');
-            return new Response(JSON.stringify({
+            return json({
                 error: 'Payment system configuration error',
                 details: 'Missing Stripe credentials'
-            }), {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' }
-            });
+            }, 500);
         }
 
         const { amount, type } = await context.request.json();
 
         // Validate inputs
         if (!amount || amount < 5) {
-            return new Response(JSON.stringify({ error: 'Minimum donation is $5' }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' }
-            });
+            return json({ error: 'Minimum donation is $5' }, 400);
         }
 
         if (!['one-time', 'recurring'].includes(type)) {
-            return new Response(JSON.stringify({ error: 'Invalid donation type' }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' }
-            });
+            return json({ error: 'Invalid donation type' }, 400);
         }
 
         // Create Checkout Session
         const session = await createCheckoutSession(amount, type, STRIPE_SECRET_KEY);
 
-        return new Response(JSON.stringify({ sessionId: session.id, url: session.url }), {
-            status: 200,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            }
-        });
+        return json({ sessionId: session.id, url: session.url }, 200);
 
     } catch (error) {
         console.error('Checkout error:', error);
-        return new Response(JSON.stringify({
+        return json({
             error: 'Failed to create checkout session',
             details: error.message
-        }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
+        }, 500);
     }
 }
 
@@ -160,7 +164,7 @@ export async function onRequestOptions() {
         status: 204,
         headers: {
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type',
             'Access-Control-Max-Age': '86400'
         }

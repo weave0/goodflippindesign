@@ -18,148 +18,89 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # curl flags used throughout:
-      #   -L             follow redirects (Cloudflare often 301→200)
-      #   --max-redirs 5 cap redirect chain
-      #   --connect-timeout 15 / --max-time 30  avoid hanging runners
-      #   -A "..."       browser UA avoids some Cloudflare bot blocks
-      #   || true        prevent curl exit codes (e.g. 6=DNS fail) from
-      #                  killing the step under bash set -e
-      # Failure condition: 000 (connection refused / DNS) or 5xx (server error).
-      # 403 from Cloudflare WAF means the edge is running → site is UP.
-
-      - name: Check Good Flippin Design
-        id: check-gfd
+      - name: Run configured health checks
+        id: run-health
+        shell: bash
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -L --max-redirs 5 \
-            --connect-timeout 15 --max-time 30 \
-            -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://goodflippindesign.com) || true
-          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
-          echo "Good Flippin Design → HTTP ${STATUS:-000}"
-          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
-            echo "::error::Good Flippin Design appears DOWN (HTTP ${STATUS:-000})"
-            exit 1
-          fi
+          node -e "const fs=require('fs'); const cfg=JSON.parse(fs.readFileSync('config/health-targets.json','utf8')); for (const t of cfg.targets.filter((target) => target.githubWorkflow)) { console.log([t.name, t.url, t.critical ? 'critical' : 'warning', t.cookie || '', t.checkType || 'page', t.expectedKeyword || ''].join('\t')); }" > /tmp/health-targets.tsv
 
-      - name: Check AI Aimate
-        id: check-aiaimate
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -L --max-redirs 5 \
-            --connect-timeout 15 --max-time 30 \
-            -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://aiaimate.com) || true
-          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
-          echo "AI Aimate → HTTP ${STATUS:-000}"
-          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
-            echo "::error::AI Aimate appears DOWN (HTTP ${STATUS:-000})"
-            exit 1
-          fi
+          failure_count=0
+          critical_failure=0
+          {
+            echo "| Site | Type | HTTP | Content | Outcome |"
+            echo "|------|------|------|---------|---------|"
+          } > /tmp/health-results.md
 
-      - name: Check globaldeets Main
-        id: check-globaldeets
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -L --max-redirs 5 \
-            --connect-timeout 15 --max-time 30 \
-            -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://globaldeets.com) || true
-          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
-          echo "globaldeets → HTTP ${STATUS:-000}"
-          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
-            echo "::warning::globaldeets returned ${STATUS:-000}"
-          fi
+          while IFS=$'\t' read -r NAME URL SEVERITY COOKIE CHECK_TYPE KEYWORD; do
+            if [[ -z "$NAME" ]]; then
+              continue
+            fi
 
-      - name: Check Eliassen subdomain
-        id: check-eliassen
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -L --max-redirs 5 \
-            --connect-timeout 15 --max-time 30 \
-            -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://eliassen.globaldeets.com) || true
-          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
-          echo "Eliassen → HTTP ${STATUS:-000}"
-          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
-            echo "::warning::Eliassen subdomain returned ${STATUS:-000}"
-          fi
+            TMPFILE=$(mktemp)
+            if [[ -n "$COOKIE" ]]; then
+              STATUS=$(curl -s -o "$TMPFILE" -w "%{http_code}" \
+                -L --max-redirs 5 \
+                --connect-timeout 15 --max-time 30 \
+                --cookie "$COOKIE" \
+                -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
+                "$URL") || true
+            else
+              STATUS=$(curl -s -o "$TMPFILE" -w "%{http_code}" \
+                -L --max-redirs 5 \
+                --connect-timeout 15 --max-time 30 \
+                -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
+                "$URL") || true
+            fi
 
-      - name: Check Good Flippin Vibes
-        id: check-gfv
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -L --max-redirs 5 \
-            --connect-timeout 15 --max-time 30 \
-            -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://goodflippinvibes.com) || true
-          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
-          echo "Good Flippin Vibes → HTTP ${STATUS:-000}"
-          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
-            echo "::error::Good Flippin Vibes appears DOWN (HTTP ${STATUS:-000})"
-            exit 1
-          fi
+            STATUS=${STATUS:-000}
+            content_ok="—"
 
-      - name: Check CultureSherpa
-        id: check-culturesherpa
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -L --max-redirs 5 \
-            --connect-timeout 15 --max-time 30 \
-            -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://www.culturesherpa.org) || true
-          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
-          echo "CultureSherpa → HTTP ${STATUS:-000}"
-          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
-            echo "::warning::CultureSherpa returned ${STATUS:-000}"
-          fi
+            # Content keyword validation (only on successful responses)
+            if [[ -n "$KEYWORD" && "$STATUS" =~ ^2 ]]; then
+              if grep -qF "$KEYWORD" "$TMPFILE" 2>/dev/null; then
+                content_ok="✓"
+              else
+                content_ok="✗"
+              fi
+            fi
+            rm -f "$TMPFILE"
 
-      - name: Check MN Peace (Jamie Rigling Mediation)
-        id: check-jamie
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -L --max-redirs 5 \
-            --connect-timeout 15 --max-time 30 \
-            -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://minnesotapeace.com) || true
-          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
-          echo "MN Peace → HTTP ${STATUS:-000}"
-          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
-            echo "::warning::minnesotapeace.com returned ${STATUS:-000}"
-          fi
+            if [[ "$STATUS" == "000" || "$STATUS" == 5* ]]; then
+              failure_count=$((failure_count + 1))
+              if [[ "$SEVERITY" == "critical" ]]; then
+                critical_failure=1
+                outcome="critical failure"
+                echo "::error::$NAME appears DOWN (HTTP $STATUS)"
+              else
+                outcome="warning"
+                echo "::warning::$NAME returned $STATUS"
+              fi
+            elif [[ "$content_ok" == "✗" ]]; then
+              failure_count=$((failure_count + 1))
+              outcome="content mismatch"
+              echo "::warning::$NAME returned $STATUS but missing expected keyword"
+            else
+              outcome="ok"
+            fi
 
-      - name: Check CitizenApproved
-        id: check-citizenapproved
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -L --max-redirs 5 \
-            --connect-timeout 15 --max-time 30 \
-            -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://citizenapproved.org) || true
-          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
-          echo "CitizenApproved → HTTP ${STATUS:-000}"
-          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
-            echo "::warning::CitizenApproved returned ${STATUS:-000}"
-          fi
+            echo "$NAME ($CHECK_TYPE) -> HTTP $STATUS, content=$content_ok ($outcome)"
+            printf '| %s | %s | %s | %s | %s |\n' "$NAME" "$CHECK_TYPE" "$STATUS" "$content_ok" "$outcome" >> /tmp/health-results.md
+          done < /tmp/health-targets.tsv
 
-      - name: Check Brett Lee Weaver
-        id: check-brettleeweaver
-        run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -L --max-redirs 5 \
-            --connect-timeout 15 --max-time 30 \
-            -A "Mozilla/5.0 (compatible; GFDHealthCheck/1.0)" \
-            https://www.brettleeweaver.com) || true
-          echo "status=${STATUS:-000}" >> $GITHUB_OUTPUT
-          echo "Brett Lee Weaver → HTTP ${STATUS:-000}"
-          if [[ "${STATUS:-000}" == "000" || "${STATUS:-000}" == 5* ]]; then
-            echo "::warning::brettleeweaver.com returned ${STATUS:-000}"
-          fi
+          cat /tmp/health-results.md >> "$GITHUB_STEP_SUMMARY"
+          echo "failure_count=$failure_count" >> "$GITHUB_OUTPUT"
+          echo "critical_failure=$critical_failure" >> "$GITHUB_OUTPUT"
+          {
+            echo "results<<EOF"
+            cat /tmp/health-results.md
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create incident issue on failure
-        if: failure()
+        if: steps.run-health.outputs.critical_failure == '1'
         uses: actions/github-script@v7
+        env:
+          HEALTH_RESULTS: ${{ steps.run-health.outputs.results }}
         with:
           script: |
             // Check for an existing open incident to avoid duplicates
@@ -193,6 +134,8 @@ jobs:
               '',
               'One or more critical sites failed the automated health check.',
               '',
+              process.env.HEALTH_RESULTS,
+              '',
               '### Action Required',
               '',
               '1. Run local diagnostics: `.\\scripts\\check-site-health.ps1 -Verbose`',
@@ -215,16 +158,14 @@ jobs:
               labels: ['monitoring', 'incident', 'urgent']
             });
 
+      - name: Fail workflow on critical outage
+        if: steps.run-health.outputs.critical_failure == '1'
+        run: |
+          echo "Critical health checks failed"
+          exit 1
+
       - name: Report success
-        if: success()
+        if: steps.run-health.outputs.failure_count == '0'
         run: |
           echo "✓ All sites operational"
-          echo "- Good Flippin Design:   ${{ steps.check-gfd.outputs.status }}"
-          echo "- AI Aimate:             ${{ steps.check-aiaimate.outputs.status }}"
-          echo "- globaldeets:           ${{ steps.check-globaldeets.outputs.status }}"
-          echo "- Eliassen:              ${{ steps.check-eliassen.outputs.status }}"
-          echo "- Good Flippin Vibes:    ${{ steps.check-gfv.outputs.status }}"
-          echo "- CultureSherpa:         ${{ steps.check-culturesherpa.outputs.status }}"
-          echo "- MN Peace:              ${{ steps.check-jamie.outputs.status }}"
-          echo "- CitizenApproved:       ${{ steps.check-citizenapproved.outputs.status }}"
-          echo "- Brett Lee Weaver:      ${{ steps.check-brettleeweaver.outputs.status }}"
+          cat /tmp/health-results.md

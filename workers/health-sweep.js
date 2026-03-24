@@ -1,3 +1,5 @@
+import healthTargetsConfig from '../config/health-targets.json';
+
 /**
  * gfd-health-sweep
  * Cloudflare Worker — daily cron sweep across all GFV LLC ecosystem domains.
@@ -10,7 +12,7 @@
  *
  * Cron: 0 6 * * * (6 AM UTC daily)
  * Manual trigger: GET /trigger   — open endpoint, rate-limited to 1 per 5 min via D1
- * Last results:   GET /last      — returns last 50 rows from D1 as JSON
+ * Last results:   GET /last      — returns last 100 rows from D1 as JSON
  *
  * Required secrets (set via wrangler secret put, see wrangler-health-sweep.toml):
  *   GITHUB_TOKEN  — Fine-grained PAT, weave0/goodflippindesign, Issues: Write
@@ -18,32 +20,8 @@
  */
 
 // ── Ecosystem targets ─────────────────────────────────────────────────────────
-// Add/remove entries here as the ecosystem grows. brand must match brands.json.
-const TARGETS = [
-  // ── Good Flippin Design (Cloudflare Pages) ────────────────────────────────
-  { brand: 'gfd', name: 'GFD Home',             url: 'https://goodflippindesign.com' },
-  { brand: 'gfd', name: 'GFD Community Portal', url: 'https://goodflippindesign.com/community-portal.html' },
-  { brand: 'gfd', name: 'GFD Donate',           url: 'https://goodflippindesign.com/donate.html' },
-  { brand: 'gfd', name: 'GFD 404',              url: 'https://goodflippindesign.com/404.html' },
-
-  // ── Good Flippin Vibes ────────────────────────────────────────────────────
-  { brand: 'gfv', name: 'GFV Home',             url: 'https://goodflippinvibes.com' },
-
-  // ── AI Aimate ─────────────────────────────────────────────────────────────
-  { brand: 'aiaimate', name: 'AI Aimate Home',  url: 'https://aiaimate.com' },
-
-  // ── CultureSherpa ─────────────────────────────────────────────────────────
-  { brand: 'culturesherpa', name: 'CultureSherpa Home', url: 'https://culturesherpa.org' },
-
-  // ── CitizenApproved ───────────────────────────────────────────────────────
-  { brand: 'citizenapproved', name: 'CitizenApproved Home', url: 'https://citizenapproved.org' },
-
-  // ── GlobalDeets ───────────────────────────────────────────────────────────
-  { brand: 'globaldeets', name: 'GlobalDeets Home', url: 'https://globaldeets.com' },
-
-  // ── MN Peace (Jamie Rigling Mediation) ────────────────────────────────────
-  { brand: 'minnesotapeace', name: 'MN Peace', url: 'https://minnesotapeace.com' },
-];
+// Shared source of truth with the GitHub workflow and the local PowerShell checker.
+const TARGETS = healthTargetsConfig.targets.filter((target) => target.cloudflareSweep);
 
 // Performance thresholds (milliseconds)
 const WARN_MS   = 2000;   // ⚠️  degraded — slow but functional
@@ -102,7 +80,7 @@ export default {
       // Return recent sweep history from D1
       if (!env.DB) return Response.json({ error: 'DB not configured' }, { status: 503, headers: corsHeaders });
       const { results } = await env.DB
-        .prepare('SELECT * FROM health_checks ORDER BY checked_at DESC LIMIT 50')
+        .prepare('SELECT * FROM health_checks ORDER BY checked_at DESC LIMIT 100')
         .all();
       return Response.json(results || [], { headers: corsHeaders });
     }
@@ -176,11 +154,7 @@ async function checkTarget(target) {
   const timer      = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    // globaldeets.com is intentionally password-gated; send the auth cookie so
-    // the sweep measures actual site health rather than the 401 login wall.
-    const extraHeaders = target.url.includes('globaldeets.com')
-      ? { Cookie: 'globaldeets_auth=verified' }
-      : {};
+    const extraHeaders = target.cookie ? { Cookie: target.cookie } : {};
 
     const resp = await fetch(target.url, {
       method: 'GET',
@@ -196,9 +170,24 @@ async function checkTarget(target) {
     const elapsed = Date.now() - start;
     const h       = resp.headers;
 
+    // Content validation — read a limited slice of the body for keyword matching
+    let keyword_found = null;
+    const keyword = target.expectedKeyword || null;
+    if (keyword && resp.ok) {
+      try {
+        const text = await resp.text();
+        // Only scan first 50KB to avoid memory issues on large pages
+        const slice = text.substring(0, 51200);
+        keyword_found = slice.includes(keyword) ? 1 : 0;
+      } catch { keyword_found = null; }
+    }
+
     let overall_status;
     if (!resp.ok) {
       overall_status = 'fail';
+    } else if (keyword_found === 0) {
+      // 200 but missing expected content — degraded
+      overall_status = 'warn';
     } else if (elapsed >= FAIL_MS) {
       overall_status = 'fail';
     } else if (elapsed >= WARN_MS) {
@@ -212,10 +201,15 @@ async function checkTarget(target) {
       response_time_ms:  elapsed,
       is_https:          target.url.startsWith('https://') ? 1 : 0,
       redirect_to_https: resp.url.startsWith('https://') ? 1 : 0,
+      final_url:         resp.url !== target.url ? resp.url : null,
+      redirect_count:    resp.redirected ? 1 : 0,   // Workers fetch API doesn't expose exact count
+      content_type:      h.get('content-type') || null,
       has_csp:           h.has('content-security-policy') ? 1 : 0,
       has_x_frame:       h.has('x-frame-options') ? 1 : 0,
       has_hsts:          h.has('strict-transport-security') ? 1 : 0,
       has_xcto:          h.has('x-content-type-options') ? 1 : 0,
+      content_keyword:   keyword,
+      keyword_found,
       error:             null,
       overall_status,
     };
@@ -226,10 +220,15 @@ async function checkTarget(target) {
       response_time_ms:  Date.now() - start,
       is_https:          1,
       redirect_to_https: 0,
+      final_url:         null,
+      redirect_count:    0,
+      content_type:      null,
       has_csp:           0,
       has_x_frame:       0,
       has_hsts:          0,
       has_xcto:          0,
+      content_keyword:   target.expectedKeyword || null,
+      keyword_found:     null,
       error:             err.name === 'AbortError' ? `Timeout after ${TIMEOUT_MS}ms` : err.message,
       overall_status:    'fail',
     };
@@ -240,10 +239,11 @@ async function checkTarget(target) {
 async function persistChecks(db, checkedAt, checks) {
   const stmt = db.prepare(`
     INSERT INTO health_checks
-      (checked_at, brand, name, url, status_code, response_time_ms,
-       is_https, redirect_to_https, has_csp, has_x_frame, has_hsts, has_xcto,
-       error, overall_status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (checked_at, brand, name, url, check_type, status_code, response_time_ms,
+       is_https, redirect_to_https, final_url, redirect_count, content_type,
+       has_csp, has_x_frame, has_hsts, has_xcto,
+       content_keyword, keyword_found, error, overall_status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   await db.batch(
@@ -252,14 +252,20 @@ async function persistChecks(db, checkedAt, checks) {
       c.target.brand,
       c.target.name,
       c.target.url,
+      c.target.checkType || 'page',
       c.status_code,
       c.response_time_ms,
       c.is_https,
       c.redirect_to_https,
+      c.final_url,
+      c.redirect_count,
+      c.content_type,
       c.has_csp,
       c.has_x_frame,
       c.has_hsts,
       c.has_xcto,
+      c.content_keyword,
+      c.keyword_found,
       c.error,
       c.overall_status,
     ))
@@ -278,14 +284,16 @@ async function reportToGitHub(checks, checkedAt, env) {
 
   // ── Results table ──────────────────────────────────────────────────────────
   const table = [
-    '| Status | Brand | Page | HTTP | Time | CSP | HSTS | X-Frame | XCTO |',
-    '|--------|-------|------|------|------|-----|------|---------|------|',
+    '| Status | Type | Brand | Page | HTTP | Time | Content | CSP | HSTS | X-Frame | XCTO |',
+    '|--------|------|-------|------|------|------|---------|-----|------|---------|------|',
     ...checks.map(c => {
       const si = c.overall_status === 'pass' ? '✅' : c.overall_status === 'warn' ? '⚠️' : '❌';
       const sc = c.status_code != null ? String(c.status_code) : 'ERR';
       const rt = c.response_time_ms != null ? `${c.response_time_ms}ms` : '—';
       const yn = v => (v ? '✅' : '❌');
-      return `| ${si} | \`${c.target.brand}\` | [${c.target.name}](${c.target.url}) | ${sc} | ${rt} | ${yn(c.has_csp)} | ${yn(c.has_hsts)} | ${yn(c.has_x_frame)} | ${yn(c.has_xcto)} |`;
+      const ct = c.target.checkType || 'page';
+      const kw = c.keyword_found === 1 ? '✅' : c.keyword_found === 0 ? '❌' : '—';
+      return `| ${si} | ${ct} | \`${c.target.brand}\` | [${c.target.name}](${c.target.url}) | ${sc} | ${rt} | ${kw} | ${yn(c.has_csp)} | ${yn(c.has_hsts)} | ${yn(c.has_x_frame)} | ${yn(c.has_xcto)} |`;
     }),
   ].join('\n');
 
@@ -293,15 +301,18 @@ async function reportToGitHub(checks, checkedAt, env) {
   const failDetail = failing.length > 0
     ? '\n\n### ❌ Failing Endpoints\n' +
       failing.map(c =>
-        `- **${c.target.name}** — \`${c.target.url}\`\n  > ${c.error || `HTTP ${c.status_code}`}`
+        `- **${c.target.name}** (${c.target.checkType || 'page'}) — \`${c.target.url}\`\n  > ${c.error || `HTTP ${c.status_code}`}`
       ).join('\n')
     : '';
 
   const warnDetail = warning.length > 0
-    ? '\n\n### ⚠️ Slow Endpoints (>' + WARN_MS + 'ms)\n' +
-      warning.map(c =>
-        `- **${c.target.name}** — ${c.response_time_ms}ms`
-      ).join('\n')
+    ? '\n\n### ⚠️ Degraded Endpoints\n' +
+      warning.map(c => {
+        const reasons = [];
+        if (c.keyword_found === 0) reasons.push(`missing expected keyword "${c.content_keyword}"`);
+        if (c.response_time_ms >= WARN_MS) reasons.push(`slow ${c.response_time_ms}ms`);
+        return `- **${c.target.name}** (${c.target.checkType || 'page'}) — ${reasons.join(', ') || 'degraded'}`;
+      }).join('\n')
     : '';
 
   // ── Issue body ─────────────────────────────────────────────────────────────
