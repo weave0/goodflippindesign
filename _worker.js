@@ -182,6 +182,20 @@ export default {
       });
     }
 
+    // Checkout readiness probe (used by health monitoring)
+    if (url.pathname === '/create-checkout' && request.method === 'GET') {
+      const stripeConfigured = Boolean(env.STRIPE_PUBLISHABLE_KEY);
+      return new Response(JSON.stringify({
+        ok: stripeConfigured,
+        service: 'gfd-checkout',
+        stripeConfigured,
+        timestamp: new Date().toISOString(),
+      }), {
+        status: stripeConfigured ? 200 : 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Get response from static assets (Pages provides env.ASSETS automatically).
     // If this worker is built/deployed outside of Pages advanced mode, env.ASSETS
     // may not exist—fail gracefully instead of throwing.

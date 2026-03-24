@@ -55,11 +55,15 @@ function Test-SiteHealth {
 
     try {
         $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-        $headers = @{}
+        $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
         if ($Cookie) {
-            $headers["Cookie"] = $Cookie
+            $uri = [System.Uri]$Url
+            $parts = $Cookie -split '='
+            $cookieObj = New-Object System.Net.Cookie($parts[0], ($parts[1..($parts.Length-1)] -join '='), '/', $uri.Host)
+            $session.Cookies.Add($cookieObj)
         }
-        $response = Invoke-WebRequest -Uri $Url -Method Get -Headers $headers -UseBasicParsing -TimeoutSec 15 -ErrorAction Stop
+        # MaximumRedirection handles 308 Permanent Redirects (Cloudflare Pages clean-URL redirects)
+        $response = Invoke-WebRequest -Uri $Url -Method Get -WebSession $session -UseBasicParsing -TimeoutSec 15 -MaximumRedirection 5 -ErrorAction Stop
         $stopwatch.Stop()
 
         $result.httpCode = $response.StatusCode
