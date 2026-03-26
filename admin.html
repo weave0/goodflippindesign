@@ -14408,11 +14408,7 @@
                         const sw = $('brand-switcher');
                         if (!sw) return;
                         sw.innerHTML = Object.entries(BRAND_DEFS).map(([id, def]) => `
-                        < button type = "button" class="brand-pill ${id === currentBrand ? 'active' : ''}"
-                    data - brand="${escapeHtml(id)}"
-                    style = "--pill-color:${escapeHtml(def.color)}" >
-                        ${escapeHtml(def.shortName)}
-                    </button >
+                            <button type="button" class="brand-pill ${id === currentBrand ? 'active' : ''}" data-brand="${escapeHtml(id)}" style="--pill-color:${escapeHtml(def.color)}">${escapeHtml(def.shortName)}</button>
                         `).join('');
                         sw.querySelectorAll('[data-brand]').forEach((btn) => {
                             btn.addEventListener('click', () => switchBrand(btn.dataset.brand));
