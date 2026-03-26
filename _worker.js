@@ -245,10 +245,16 @@ export default {
       // Inject ENV object with sensitive keys (never commit to git).
       // Feature flags (ENABLE_BLOG_CMS, ENABLE_COMMUNITY) default to true on
       // production — set the corresponding CF secret to 'false' to disable.
+      // Defensive: strip any accidental "SENTRY_DSN" key-name prefix from the
+      // DSN value (can happen when the secret is set via `echo KEY=value | wrangler …`).
+      // Also reject auth tokens (sntrys_…) — a DSN must start with https://.
+      const rawDsn = env.SENTRY_DSN || null;
+      const strippedDsn = rawDsn ? rawDsn.replace(/^SENTRY_DSN=?/i, '').trim() : null;
+      const sentryDsn = strippedDsn && strippedDsn.startsWith('https://') ? strippedDsn : null;
       const envScript = `<script>window.ENV = ${JSON.stringify({
         STRIPE_PUBLISHABLE_KEY: env.STRIPE_PUBLISHABLE_KEY || null,
         CLERK_PUBLISHABLE_KEY:  env.CLERK_PUBLISHABLE_KEY  || null,
-        SENTRY_DSN:             env.SENTRY_DSN             || null,
+        SENTRY_DSN:             sentryDsn,
         ENABLE_COMMUNITY:       env.ENABLE_COMMUNITY !== 'false',
         ENABLE_BLOG_CMS:        env.ENABLE_BLOG_CMS   !== 'false',
         ENABLE_DONATIONS:       env.ENABLE_DONATIONS  !== 'false',
@@ -256,7 +262,7 @@ export default {
       })}</script>`;
 
       // Inject Sentry client init when DSN is configured
-      const sentryScript = env.SENTRY_DSN ? `<script src="https://browser.sentry-cdn.com/8.0.0/bundle.min.js" crossorigin="anonymous"></script><script>window.Sentry&&Sentry.init({dsn:${JSON.stringify(env.SENTRY_DSN)},release:${JSON.stringify(env.CF_PAGES_COMMIT_SHA||'unknown')},environment:'production',tracesSampleRate:0.05,replaysSessionSampleRate:0,ignoreErrors:['ResizeObserver loop','Non-Error exception','cancelled','NetworkError']})</script>` : '';
+      const sentryScript = sentryDsn ? `<script src="https://browser.sentry-cdn.com/8.0.0/bundle.min.js" crossorigin="anonymous"></script><script>window.Sentry&&Sentry.init({dsn:${JSON.stringify(sentryDsn)},release:${JSON.stringify(env.CF_PAGES_COMMIT_SHA||'unknown')},environment:'production',tracesSampleRate:0.05,replaysSessionSampleRate:0,ignoreErrors:['ResizeObserver loop','Non-Error exception','cancelled','NetworkError']})</script>` : '';
 
       // Compact Web Vitals reporter — PerformanceObserver only, zero CDN deps.
       // Reports CLS, LCP, FCP, TTFB, INP to GA4 (gtag) when available.

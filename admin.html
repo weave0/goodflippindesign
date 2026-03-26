@@ -11107,6 +11107,14 @@
                         return document.getElementById(id);
                     }
 
+                    function debounce(fn, delay) {
+                        let t;
+                        return function (...args) {
+                            clearTimeout(t);
+                            t = setTimeout(() => fn.apply(this, args), delay);
+                        };
+                    }
+
                     function escapeHtml(str) {
                         const div = document.createElement('div');
                         div.textContent = str || '';

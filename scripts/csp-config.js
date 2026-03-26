@@ -30,6 +30,7 @@ const SHARED = {
     'https://static.cloudflareinsights.com',
   ],
   sentry: [
+    'https://browser.sentry-cdn.com',  // source map fetch from SDK
     'https://*.ingest.sentry.io',
     'https://*.ingest.us.sentry.io',
   ],
