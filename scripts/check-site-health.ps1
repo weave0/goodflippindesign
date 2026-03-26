@@ -59,7 +59,7 @@ function Test-SiteHealth {
         if ($Cookie) {
             $uri = [System.Uri]$Url
             $parts = $Cookie -split '='
-            $cookieObj = New-Object System.Net.Cookie($parts[0], ($parts[1..($parts.Length-1)] -join '='), '/', $uri.Host)
+            $cookieObj = New-Object System.Net.Cookie($parts[0], ($parts[1..($parts.Length - 1)] -join '='), '/', $uri.Host)
             $session.Cookies.Add($cookieObj)
         }
         # MaximumRedirection handles 308 Permanent Redirects (Cloudflare Pages clean-URL redirects)

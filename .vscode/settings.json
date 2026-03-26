@@ -4,7 +4,7 @@
   // No extra extensions needed - built-in dark theme
   // ============================================
   "workbench.colorTheme": "GitHub Dark",
-  "workbench.preferredDarkColorTheme": "Default Dark Modern",
+  "workbench.preferredDarkColorTheme": "Dark Modern",
 
   // ============================================
   // COMPREHENSIVE DARK COLOR CUSTOMIZATION
@@ -261,5 +261,6 @@
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "files.autoSave": "afterDelay",
-  "files.autoSaveDelay": 1000
+  "files.autoSaveDelay": 1000,
+  "python-envs.defaultEnvManager": "ms-python.python:system"
 }
