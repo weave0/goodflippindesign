@@ -1,5 +1,5 @@
 name = "goodflippindesign"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 # Cloudflare Pages requires this to treat wrangler.toml as valid configuration.

@@ -1,6 +1,6 @@
 name = "gfd-stripe"
 main = "stripe-payments.js"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-01-01"
 
 # Deployed URL: https://gfd-stripe.weave0.workers.dev
 # Custom route (optional): https://pay.goodflippindesign.com/*

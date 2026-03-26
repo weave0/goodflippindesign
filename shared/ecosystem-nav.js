@@ -42,6 +42,7 @@
             nav.classList.toggle('menu-open', isOpen);
             toggleButton.setAttribute('aria-expanded', isOpen);
             dropdown.setAttribute('aria-hidden', !isOpen);
+            dropdown.inert = !isOpen;
 
             if (isOpen) {
                 // Focus first link when opening

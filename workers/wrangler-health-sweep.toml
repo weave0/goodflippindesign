@@ -1,6 +1,6 @@
 name = "gfd-health-sweep"
 main = "health-sweep.js"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 # D1 — same database as the rest of the ecosystem

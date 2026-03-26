@@ -11,38 +11,21 @@
  */
 
 import { handleCMSRequest } from './cms.js';
-
-// Dynamic Sentry import — gracefully degrades if @sentry/cloudflare isn't available
-let Sentry = null;
-try {
-  // @sentry/cloudflare may fail on some Cloudflare runtime versions (node:async_hooks)
-  Sentry = await import('@sentry/cloudflare');
-} catch {
-  // Sentry unavailable — all tracking will be no-ops
-}
-
-// No-op helpers for when Sentry is unavailable
-const noopSpan = { setStatus() {}, finish() {} };
-const safeSentry = {
-  init: (...a) => Sentry?.init?.(...a),
-  startTransaction: (...a) => Sentry?.startTransaction?.(...a) || noopSpan,
-  startSpan: (...a) => Sentry?.startSpan?.(...a) || noopSpan,
-  captureException: (...a) => Sentry?.captureException?.(...a),
-  captureMessage: (...a) => Sentry?.captureMessage?.(...a),
-};
+import * as Sentry from '@sentry/cloudflare';
 
 /**
  * Initialize Sentry error tracking
  * Cost: $0/month for <50K events (current traffic: ~1K/month)
+ * No-op if SENTRY_DSN is not configured.
  */
 function initSentry(env) {
-  if (!Sentry || !env.SENTRY_DSN) {
-    console.warn('⚠️ Sentry not available or SENTRY_DSN not configured - skipping error tracking');
+  if (!env.SENTRY_DSN) {
+    console.warn('⚠️ SENTRY_DSN not configured - skipping error tracking');
     return;
   }
 
   try {
-    safeSentry.init({
+    Sentry.init({
       dsn: env.SENTRY_DSN,
       environment: env.NODE_ENV || 'production',
       tracesSampleRate: 0.1,
@@ -62,18 +45,13 @@ function initSentry(env) {
  * Wrap handlers with error boundary + performance tracking
  */
 async function withErrorBoundary(handler, context) {
-  const transaction = safeSentry.startTransaction({
-    name: context.name,
-    op: context.op || 'http.server',
-  });
-
   try {
-    const result = await handler();
-    transaction.setStatus('ok');
-    return result;
+    return await Sentry.startSpan(
+      { name: context.name, op: context.op || 'http.server' },
+      async () => handler()
+    );
   } catch (error) {
-    transaction.setStatus('internal_error');
-    safeSentry.captureException(error, {
+    Sentry.captureException(error, {
       tags: {
         endpoint: context.name,
         method: context.method,
@@ -85,8 +63,6 @@ async function withErrorBoundary(handler, context) {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
-  } finally {
-    transaction.finish();
   }
 }
 
@@ -94,33 +70,31 @@ async function withErrorBoundary(handler, context) {
  * Monitor D1 query performance
  */
 async function executeD1Query(db, query, bindings, context) {
-  const span = safeSentry.startSpan({
-    name: context.name || 'db.query',
-    op: 'db.sql.query',
-  });
-
   const startTime = Date.now();
-  try {
-    const result = await db.prepare(query).bind(...bindings).run();
-    const duration = Date.now() - startTime;
+  return await Sentry.startSpan(
+    { name: context.name || 'db.query', op: 'db.sql.query' },
+    async () => {
+      try {
+        const result = await db.prepare(query).bind(...bindings).run();
+        const duration = Date.now() - startTime;
 
-    if (duration > 100) {
-      console.warn(`Slow query (${duration}ms): ${context.name}`);
-      safeSentry.captureMessage(`Slow D1 Query: ${context.name}`, {
-        level: 'warning',
-        extra: { duration, query: context.name },
-      });
+        if (duration > 100) {
+          console.warn(`Slow query (${duration}ms): ${context.name}`);
+          Sentry.captureMessage(`Slow D1 Query: ${context.name}`, {
+            level: 'warning',
+            extra: { duration, query: context.name },
+          });
+        }
+
+        return result;
+      } catch (error) {
+        Sentry.captureException(error, {
+          tags: { query: context.name },
+        });
+        throw error;
+      }
     }
-
-    return result;
-  } catch (error) {
-    safeSentry.captureException(error, {
-      tags: { query: context.name },
-    });
-    throw error;
-  } finally {
-    span?.finish();
-  }
+  );
 }
 
 // Admin email whitelist (sync with .env)
