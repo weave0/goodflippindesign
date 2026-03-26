@@ -104,6 +104,7 @@ const SITES = {
         'https://region1.google-analytics.com',
         'https://plausible.io',
         'https://gfd-auth.weave0.workers.dev',
+        'https://gfd-health-sweep.weave0.workers.dev', // Admin: Ecosystem Health sweep worker (nightly D1 results)
         ...SHARED.clerk.connect,
         'https://www.instagram.com',   // Instagram embed API
         'https://api.github.com',      // Admin: Ecosystem Health panel → GitHub CI status
