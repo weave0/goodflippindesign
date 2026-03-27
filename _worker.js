@@ -51,7 +51,7 @@ export default {
     const normalizedPath = pathLower.endsWith('/') ? pathLower : `${pathLower}/`;
 
     // Allowlist critical public files that may otherwise match broad deny rules.
-    const allowedExact = new Set(['/robots.txt', '/sitemap.xml']);
+    const allowedExact = new Set(['/robots.txt', '/sitemap.xml', '/admin-panels.js']);
 
     const blockedPrefixes = [
       '/legal/',
@@ -112,6 +112,7 @@ export default {
     const isBlockedJson = pathLower.endsWith('.json') && !pathLower.startsWith('/assets/');
 
     // Block root-level .js files (debug/test/utility scripts — all app JS is inline or CDN).
+    // Exception: /admin-panels.js is a static asset served from root (extracted from admin.html).
     const isRootLevelJs = pathLower.endsWith('.js') && !pathLower.slice(1).includes('/');
 
     const isBlocked =
