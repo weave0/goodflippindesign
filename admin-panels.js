@@ -1125,8 +1125,8 @@
                                     '<div class="sf-card-media">' + mediaHTML + '</div>' +
                                     '<div class="sf-card-body"><p class="sf-caption">' + escapeHtml(short || '\u2014') + '</p></div>' +
                                     '<div class="sf-card-actions">' +
-                                    '<button class="btn btn-micro" onclick="sfEditPost(' + Number(post.id) + ')">Edit</button>' +
-                                    '<button class="btn btn-micro btn-danger" onclick="sfDeletePost(' + Number(post.id) + ')">Delete</button>' +
+                                    '<button class="btn btn-micro" data-sf-edit="' + Number(post.id) + '">Edit</button>' +
+                                    '<button class="btn btn-micro btn-danger" data-sf-delete="' + Number(post.id) + '">Delete</button>' +
                                     '</div>';
 
                                 grid.appendChild(card);
@@ -1157,9 +1157,12 @@
                         });
                     }
 
-                    // Make helpers accessible to inline onclick attributes
-                    window.sfEditPost = sfEditPost;
-                    window.sfDeletePost = sfDeletePost;
+                    document.addEventListener('click', function (e) {
+                        var editBtn = e.target.closest('[data-sf-edit]');
+                        if (editBtn) { sfEditPost(Number(editBtn.dataset.sfEdit)); return; }
+                        var deleteBtn = e.target.closest('[data-sf-delete]');
+                        if (deleteBtn) { sfDeletePost(Number(deleteBtn.dataset.sfDelete)); }
+                    });
 
                     function wireSocialFeed() {
                         document.querySelectorAll('.sf-tab').forEach((btn) => {
@@ -6019,32 +6022,36 @@
                                             <td>${c.retry_count ?? 0}</td>
                                             <td style="font-size:0.75rem">${fmt(c.scheduled_at)}</td>
                                             <td style="font-size:0.75rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(c.error_message || '').replace(/"/g, '&quot;')}">${c.error_message || '—'}</td>
-                                            <td><button class="btn btn-secondary" style="font-size:0.75rem;padding:0.2rem 0.5rem" onclick="retryVariant('${c.id}',this)">Retry</button></td>
+                                            <td><button class="btn btn-secondary" style="font-size:0.75rem;padding:0.2rem 0.5rem" data-retry-variant="${c.id}">Retry</button></td>
                                         </tr>`).join('');
                                     }
                                 }
 
                             } catch (err) {
-                                if (sweepTbody) sweepTbody.innerHTML = `<tr><td colspan="6" class="text-muted">Error: ${err.message}</td></tr>`;
-                                if (retryTbody) retryTbody.innerHTML = `<tr><td colspan="7" class="text-muted">Error: ${err.message}</td></tr>`;
+                                if (sweepTbody) sweepTbody.innerHTML = `<tr><td colspan="6" class="text-muted">Error: ${escapeHtml(err.message)}</td></tr>`;
+                                if (retryTbody) retryTbody.innerHTML = `<tr><td colspan="7" class="text-muted">Error: ${escapeHtml(err.message)}</td></tr>`;
                             }
                         }
 
-                        window.retryVariant = async function (id, btn) {
-                            if (!id) return;
+                        document.addEventListener('click', function (e) {
+                            var btn = e.target.closest('[data-retry-variant]');
+                            if (!btn) return;
+                            var id = btn.dataset.retryVariant;
                             btn.disabled = true;
                             btn.textContent = '…';
-                            try {
-                                await api('/variants/' + encodeURIComponent(id) + '/retry', { method: 'PUT' });
-                                btn.textContent = 'Queued';
-                                btn.style.color = 'var(--emerald)';
-                                setTimeout(load, 1500);
-                            } catch (err) {
-                                btn.textContent = 'Error';
-                                btn.style.color = 'var(--rose)';
-                                btn.disabled = false;
-                            }
-                        };
+                            (async function () {
+                                try {
+                                    await api('/variants/' + encodeURIComponent(id) + '/retry', { method: 'PUT' });
+                                    btn.textContent = 'Queued';
+                                    btn.style.color = 'var(--emerald)';
+                                    setTimeout(load, 1500);
+                                } catch (err) {
+                                    btn.textContent = 'Error';
+                                    btn.style.color = 'var(--rose)';
+                                    btn.disabled = false;
+                                }
+                            })();
+                        });
 
                         const refBtn = document.getElementById('auto-refresh-btn');
                         if (refBtn) refBtn.addEventListener('click', load);
@@ -6115,7 +6122,7 @@
                                     row.addEventListener('mouseleave', () => { row.style.background = ''; });
                                 });
                             } catch (err) {
-                                if (resultsEl) resultsEl.innerHTML = `<div style="padding:0.4rem 0.6rem;color:var(--rose);font-size:0.82rem">Error: ${err.message}</div>`;
+                                if (resultsEl) resultsEl.innerHTML = `<div style="padding:0.4rem 0.6rem;color:var(--rose);font-size:0.82rem">Error: ${escapeHtml(err.message)}</div>`;
                             }
                         }
 
@@ -8389,7 +8396,7 @@
                                     '<td style="font-family:var(--font-mono);font-size:0.75rem;color:var(--accent-teal)">' +
                                     (t.ipfs_image_cid ? t.ipfs_image_cid.slice(0, 10) + '\u2026' : '\u2014') + '</td>' +
                                     '<td style="font-size:0.78rem;color:var(--text-muted)">' + (t.minted_at ? formatDateTime(t.minted_at) : '\u2014') + '</td>' +
-                                    '<td><button class="btn btn-secondary btn-sm" onclick="window.__nftEditToken(' + t.id + ')">Edit</button></td>' +
+                                    '<td><button class="btn btn-secondary btn-sm" data-nft-edit-token="' + t.id + '">Edit</button></td>' +
                                     '</tr>';
                             }).join('');
                         }
@@ -8486,10 +8493,13 @@
                         var nftRefreshBtn = $('nft-refresh-btn');
                         if (nftRefreshBtn) nftRefreshBtn.addEventListener('click', load);
 
-                        window.__nftEditToken = function (id) {
+                        document.addEventListener('click', function (e) {
+                            var btn = e.target.closest('[data-nft-edit-token]');
+                            if (!btn) return;
+                            var id = Number(btn.dataset.nftEditToken);
                             var t = nftTokens.find(function (x) { return x.id === id; });
                             if (t) openTokenModal(t);
-                        };
+                        });
 
                         window.__adminPanels = window.__adminPanels || {};
                         window.__adminPanels['nft-studio'] = load;
