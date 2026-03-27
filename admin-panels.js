@@ -2911,7 +2911,7 @@
                         });
 
                         const labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                        const cells = labels.map((l) => `< div class="day-label" > ${l}</div > `);
+                        const cells = labels.map((l) => `<div class="day-label">${l}</div>`);
 
                         for (let i = 0; i < firstWeekday; i++) {
                             cells.push('<div class="day-cell empty"></div>');
@@ -2920,15 +2920,9 @@
                         for (let day = 1; day <= daysInMonth; day++) {
                             const rows = (eventMap[day] || []).slice(0, 3);
                             const moreCount = (eventMap[day] || []).length - rows.length;
-                            const itemsHtml = rows.map((row) => `< div class="day-item" > ${escapeHtml(row.platform)} - ${escapeHtml((row.campaign_name || 'General').slice(0, 22))}</div > `).join('');
-                            const moreHtml = moreCount > 0 ? `< div class="day-item" > +${moreCount} more</div > ` : '';
-                            cells.push(`
-                        < div class="day-cell" >
-                            <div class="day-num">${day}</div>
-                            ${itemsHtml}
-                            ${moreHtml}
-                        </div >
-                        `);
+                            const itemsHtml = rows.map((row) => `<div class="day-item">${escapeHtml(row.platform)} - ${escapeHtml((row.campaign_name || 'General').slice(0, 22))}</div>`).join('');
+                            const moreHtml = moreCount > 0 ? `<div class="day-item">+${moreCount} more</div>` : '';
+                            cells.push(`<div class="day-cell"><div class="day-num">${day}</div>${itemsHtml}${moreHtml}</div>`);
                         }
 
                         $('calendar-grid').innerHTML = cells.join('');
@@ -2949,12 +2943,7 @@
                             const rules = state.platformRules[platform] || { maxChars: 500, maxHashtags: 10 };
                             const count = fullText.length;
                             const over = count > Number(rules.maxChars || 500) || hashtags.length > Number(rules.maxHashtags || 10);
-                            counters.push(`
-                        < div class="counter ${over ? 'over' : ''}" >
-                            <span>${escapeHtml(platform)}</span>
-                            <span>${count}/${rules.maxChars || 500} chars, ${hashtags.length}/${rules.maxHashtags || 10} hashtags</span>
-                        </div >
-                        `);
+                            counters.push(`<div class="counter ${over ? 'over' : ''}"><span>${escapeHtml(platform)}</span><span>${count}/${rules.maxChars || 500} chars, ${hashtags.length}/${rules.maxHashtags || 10} hashtags</span></div>`);
                         }
 
                         $('composer-counters').innerHTML = counters.length
@@ -2968,7 +2957,7 @@
                             : status === 'failed'
                                 ? 'fail'
                                 : 'warn';
-                        return `< span class="tag ${cls}" > ${escapeHtml(status || 'unknown')}</span > `;
+                        return `<span class="tag ${cls}">${escapeHtml(status || 'unknown')}</span>`;
                     }
 
                     function switchView(view) {
@@ -3351,10 +3340,10 @@
                         const reviewPanel = $('asset-edit-review-actions');
                         const rs = asset.review_status || 'draft';
                         if (rs !== 'approved') {
-                            reviewPanel.innerHTML = `< button class="btn btn-success-soft" id = "asset-edit-approve-btn" >&#10003; Approve for public use</button > `;
+                            reviewPanel.innerHTML = `<button class="btn btn-success-soft" id="asset-edit-approve-btn">&#10003; Approve for public use</button>`;
                             $('asset-edit-approve-btn').onclick = () => { reviewAsset(asset.id, 'approve'); closeModal('asset-edit-modal'); };
                         } else {
-                            reviewPanel.innerHTML = `< button class="btn btn-secondary" id = "asset-edit-reject-btn" >& times; Revoke approval</button > `;
+                            reviewPanel.innerHTML = `<button class="btn btn-secondary" id="asset-edit-reject-btn">&times; Revoke approval</button>`;
                             $('asset-edit-reject-btn').onclick = () => { reviewAsset(asset.id, 'reject'); closeModal('asset-edit-modal'); };
                         }
 
@@ -3568,10 +3557,7 @@
                             state.dripSelectedPlatforms = new Set(brandPlatforms);
                         }
                         picker.innerHTML = brandPlatforms.map((p) => `
-                        < button type = "button" class="platform-pill ${state.dripSelectedPlatforms.has(p) ? 'active' : ''}"
-                    data - drip - platform="${escapeHtml(p)}" >
-                        ${escapeHtml(p)}
-                    </button >
+                        <button type="button" class="platform-pill ${state.dripSelectedPlatforms.has(p) ? 'active' : ''}" data-drip-platform="${escapeHtml(p)}">${escapeHtml(p)}</button>
                         `).join('');
                         picker.querySelectorAll('[data-drip-platform]').forEach((btn) => {
                             btn.addEventListener('click', () => {
@@ -3591,11 +3577,8 @@
                         const row = $('drip-times-row');
                         if (!row) return;
                         row.innerHTML = state.dripTimes.map((t, i) => `
-                        < span class="drip-time-chip" >
-                            <input type="time" value="${escapeHtml(t)}" data-time-idx="${i}">
-                                <button type="button" class="remove-time-btn" data-time-idx="${i}" title="Remove">×</button>
-                            </span>
-                    `).join('') + '<button type="button" class="btn btn-micro" id="drip-add-time">+ Time</button>';
+                        <span class="drip-time-chip"><input type="time" value="${escapeHtml(t)}" data-time-idx="${i}"><button type="button" class="remove-time-btn" data-time-idx="${i}" title="Remove">×</button></span>
+                        `).join('') + '<button type="button" class="btn btn-micro" id="drip-add-time">+ Time</button>';
                         row.querySelectorAll('input[data-time-idx]').forEach((el) => {
                             el.addEventListener('change', () => {
                                 state.dripTimes[Number(el.dataset.timeIdx)] = el.value;
@@ -3626,7 +3609,7 @@
                             : (state.campaigns?.campaigns || []);
                         const prev = sel.value;
                         sel.innerHTML = '<option value="">No campaign</option>' + campaigns.map((c) =>
-                            `< option value = "${Number(c.id)}" ${String(c.id) === prev ? 'selected' : ''}> ${escapeHtml(c.name)}</option > `
+                            `<option value="${Number(c.id)}" ${String(c.id) === prev ? 'selected' : ''}>${escapeHtml(c.name)}</option>`
                         ).join('');
                     }
 
@@ -3641,19 +3624,7 @@
                             list.innerHTML = '<div class="drip-empty">No content entries yet. Click <strong>+ Add Entry</strong> to start, or <strong>Import JSON</strong> to bulk-load a content set.</div>';
                             return;
                         }
-                        list.innerHTML = state.dripEntries.map((entry, i) => `
-                        < div class="drip-entry" data - entry - idx="${i}" >
-                        <div class="drip-entry-num">${i + 1}</div>
-                        <div class="drip-entry-fields">
-                            <textarea class="drip-entry-content" data-entry-content="${i}" rows="2"
-                                placeholder="Post content..."></textarea>
-                            <input type="text" class="drip-entry-hashtags" data-entry-hashtags="${i}"
-                                placeholder="#hashtags, comma separated"
-                                value="">
-                        </div>
-                        <button type="button" class="btn btn-micro btn-danger" data-remove-entry="${i}" title="Remove">✕</button>
-                    </div >
-                        `).join('');
+                        list.innerHTML = state.dripEntries.map((entry, i) => `<div class="drip-entry" data-entry-idx="${i}"><div class="drip-entry-num">${i + 1}</div><div class="drip-entry-fields"><textarea class="drip-entry-content" data-entry-content="${i}" rows="2" placeholder="Post content..."></textarea><input type="text" class="drip-entry-hashtags" data-entry-hashtags="${i}" placeholder="#hashtags, comma separated" value=""></div><button type="button" class="btn btn-micro btn-danger" data-remove-entry="${i}" title="Remove">✕</button></div>`).join('');
                         // Set values directly after render to avoid HTML entity double-encoding
                         list.querySelectorAll('[data-entry-content]').forEach((el) => {
                             el.value = state.dripEntries[Number(el.dataset.entryContent)].content || '';
@@ -3758,14 +3729,7 @@
                         const previewCount = $('drip-preview-count');
                         const displaySlots = slots.slice(0, 50);
 
-                        table.innerHTML = displaySlots.map((s) => `
-                        < tr >
-                        <td>${escapeHtml(String(s.idx))}</td>
-                        <td>${escapeHtml(formatDateTime(s.scheduled_at))}</td>
-                        <td>${escapeHtml(s.platforms)}</td>
-                        <td class="content-preview-cell">${escapeHtml(s.content.slice(0, 100))}${s.content.length > 100 ? '…' : ''}</td>
-                    </tr >
-                        `).join('');
+                        table.innerHTML = displaySlots.map((s) => `<tr><td>${escapeHtml(String(s.idx))}</td><td>${escapeHtml(formatDateTime(s.scheduled_at))}</td><td>${escapeHtml(s.platforms)}</td><td class="content-preview-cell">${escapeHtml(s.content.slice(0, 100))}${s.content.length > 100 ? '…' : ''}</td></tr>`).join('');
 
                         if (previewCount) previewCount.textContent = `${slots.length} slots · showing first ${displaySlots.length} `;
                         if (panel) panel.classList.remove('d-none');
@@ -3882,17 +3846,7 @@
                             return;
                         }
                         empty?.classList.add('d-none');
-                        tbody.innerHTML = state.galleries.map((g) => `
-                        < tr class="${state.selectedGalleryId === g.id ? 'row-selected' : ''}" style = "cursor:pointer" data - gallery - row="${g.id}" >
-                        <td>${escapeHtml(g.title)}</td>
-                        <td class="mono text-muted">${escapeHtml(g.site_domain)}</td>
-                        <td>${g.item_count || 0}</td>
-                        <td class="inline-actions">
-                            <button class="btn btn-micro btn-secondary" data-gallery-edit="${g.id}">Edit</button>
-                            <button class="btn btn-micro btn-danger" data-gallery-delete="${g.id}">Delete</button>
-                        </td>
-                    </tr >
-                        `).join('');
+                        tbody.innerHTML = state.galleries.map((g) => `<tr class="${state.selectedGalleryId === g.id ? 'row-selected' : ''}" style="cursor:pointer" data-gallery-row="${g.id}"><td>${escapeHtml(g.title)}</td><td class="mono text-muted">${escapeHtml(g.site_domain)}</td><td>${g.item_count || 0}</td><td class="inline-actions"><button class="btn btn-micro btn-secondary" data-gallery-edit="${g.id}">Edit</button><button class="btn btn-micro btn-danger" data-gallery-delete="${g.id}">Delete</button></td></tr>`).join('');
 
                         tbody.querySelectorAll('[data-gallery-row]').forEach((row) => {
                             row.addEventListener('click', (ev) => {
@@ -3926,7 +3880,7 @@
                         const sel = $('gallery-add-asset');
                         sel.innerHTML = '<option value="">\u2014 add asset \u2014</option>' +
                             state.assets.map((a) =>
-                                `< option value = "${escapeHtml(a.id)}" > ${escapeHtml(a.title || a.id)}</option > `
+                                `<option value="${escapeHtml(a.id)}">${escapeHtml(a.title || a.id)}</option>`
                             ).join('');
 
                         // Load items
@@ -3947,7 +3901,7 @@
                             return;
                         }
                         list.innerHTML = `
-                        < div class="asset-grid asset-grid-full" >
+                        <div class="asset-grid asset-grid-full">
                             ${state.galleryItems.map((item) => `
                             <div class="asset-card">
                                 ${item.thumbnail_path
@@ -3987,7 +3941,7 @@
                         sel.innerHTML = '<option value="">\u2014 none \u2014</option>' +
                             state.assets.map((a) => {
                                 const sel2 = gallery?.cover_asset_id === a.id ? ' selected' : '';
-                                return `< option value = "${escapeHtml(a.id)}"${sel2}> ${escapeHtml(a.title || a.id)}</option > `;
+                                return `<option value="${escapeHtml(a.id)}"${sel2}>${escapeHtml(a.title || a.id)}</option>`;
                             }).join('');
 
                         openModal('gallery-modal');
@@ -4094,15 +4048,7 @@
                             return;
                         }
                         empty?.classList.add('d-none');
-                        tbody.innerHTML = state.csRegistries.map((r) => `
-                        < tr >
-                        <td><strong>${escapeHtml(r.title)}</strong><br><small class="text-muted">${escapeHtml(r.id)}</small></td>
-                        <td><span class="badge">${escapeHtml(r.brand)}</span></td>
-                        <td>${escapeHtml(r.type)}</td>
-                        <td>${Number(r.scene_count) || 0}</td>
-                        <td><button class="btn btn-ghost btn-sm" data-cs-open-registry="${escapeHtml(r.id)}">Open</button></td>
-                    </tr >
-                        `).join('');
+                        tbody.innerHTML = state.csRegistries.map((r) => `<tr><td><strong>${escapeHtml(r.title)}</strong><br><small class="text-muted">${escapeHtml(r.id)}</small></td><td><span class="badge">${escapeHtml(r.brand)}</span></td><td>${escapeHtml(r.type)}</td><td>${Number(r.scene_count) || 0}</td><td><button class="btn btn-ghost btn-sm" data-cs-open-registry="${escapeHtml(r.id)}">Open</button></td></tr>`).join('');
                         tbody.querySelectorAll('[data-cs-open-registry]').forEach((btn) => {
                             btn.addEventListener('click', () => openCSRegistry(btn.dataset.csOpenRegistry));
                         });
