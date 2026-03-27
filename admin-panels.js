@@ -5883,27 +5883,21 @@
                         }
 
                         async function load() {
-                            const [totalRes, usageRes] = await Promise.all([
-                                fetch('/api/cms/assets?limit=1').catch(() => null),
-                                fetch('/api/cms/assets/usage', { headers: { Authorization: `Bearer ${getAdminToken()}` } }).catch(() => null),
-                            ]);
-
-                            // total from list endpoint (we just need the header count or re-use KPI)
                             let total = '—';
-                            if (totalRes && totalRes.ok) {
-                                const td = await totalRes.json().catch(() => null);
+                            let d;
+                            try {
+                                const td = await api('/assets?limit=1');
                                 if (td && typeof td.total === 'number') total = td.total;
-                            }
-
-                            if (!usageRes || !usageRes.ok) {
+                            } catch { /* total stays '—' */ }
+                            try {
+                                d = await api('/assets/usage');
+                            } catch {
                                 ['au-total', 'au-used', 'au-never', 'au-rate'].forEach(id => {
                                     const el = document.getElementById(id);
                                     if (el) el.textContent = 'Error';
                                 });
                                 return;
                             }
-
-                            const d = await usageRes.json();
                             const usedCount = d.used_count || 0;
                             const neverUsed = d.never_used || 0;
                             const grandTotal = usedCount + neverUsed;
@@ -5958,7 +5952,6 @@
                         }
 
                         async function load() {
-                            const token = window.__adminToken;
                             const pending = document.getElementById('auto-pending');
                             const published = document.getElementById('auto-published');
                             const failed = document.getElementById('auto-failed');
@@ -5972,9 +5965,7 @@
                             if (lastSweep) lastSweep.textContent = '…';
 
                             try {
-                                const res = await fetch('/api/cms/automation-center', { headers: { Authorization: `Bearer ${token}` } });
-                                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                                const data = await res.json();
+                                const data = await api('/automation-center');
 
                                 // KPI strip — queue snapshot
                                 const qMap = {};
@@ -6041,15 +6032,10 @@
 
                         window.retryVariant = async function (id, btn) {
                             if (!id) return;
-                            const token = window.__adminToken;
                             btn.disabled = true;
                             btn.textContent = '…';
                             try {
-                                const res = await fetch(`/api/cms/variants/${id}/retry`, {
-                                    method: 'PUT',
-                                    headers: { Authorization: `Bearer ${token}` }
-                                });
-                                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                                await api('/variants/' + encodeURIComponent(id) + '/retry', { method: 'PUT' });
                                 btn.textContent = 'Queued';
                                 btn.style.color = 'var(--emerald)';
                                 setTimeout(load, 1500);
@@ -6114,11 +6100,7 @@
                             if (resultsEl) resultsEl.innerHTML = '<div style="padding:0.4rem 0.6rem;color:var(--text-muted);font-size:0.82rem">Searching…</div>';
                             if (resultsEl) resultsEl.style.display = '';
                             try {
-                                const token = window.__adminToken;
-                                const res = await fetch(`/api/cms/assets?q=${encodeURIComponent(q)}&limit=20`, {
-                                    headers: { Authorization: `Bearer ${token}` }
-                                });
-                                const data = await res.json();
+                                const data = await api('/assets?q=' + encodeURIComponent(q) + '&limit=20');
                                 const items = data.assets || data.results || data || [];
                                 if (!Array.isArray(items) || items.length === 0) {
                                     resultsEl.innerHTML = '<div style="padding:0.4rem 0.6rem;color:var(--text-muted);font-size:0.82rem">No assets found.</div>';
@@ -6159,17 +6141,10 @@
                             if (outputPanel) outputPanel.style.display = 'none';
 
                             try {
-                                const token = window.__adminToken;
-                                const res = await fetch('/api/cms/ai/caption', {
+                                const data = await api('/ai/caption', {
                                     method: 'POST',
-                                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                                    body: JSON.stringify({ asset_id: selectedAsset.id, platforms, tone })
+                                    body: { asset_id: selectedAsset.id, platforms, tone }
                                 });
-                                if (!res.ok) {
-                                    const err = await res.json().catch(() => ({}));
-                                    throw new Error(err.error || `HTTP ${res.status}`);
-                                }
-                                const data = await res.json();
                                 renderCaptions(data.captions || {}, platforms);
                                 setStatus(data.usage_note || 'Done.', 'var(--emerald)');
                             } catch (err) {
@@ -7054,8 +7029,7 @@
                                 try {
                                     saveBtn.disabled = true;
                                     saveBtn.textContent = 'Saving…';
-                                    var res = await apiFetch('/api/cms/donations', { method: 'POST', body: JSON.stringify(payload) });
-                                    if (!res.ok) { var err2 = await res.json().catch(function () { return {}; }); throw new Error(err2.error || 'HTTP ' + res.status); }
+                                    await api('/donations', { method: 'POST', body: payload });
                                     closeDonationModal();
                                     toast('Donation recorded.', 'success');
                                     await loadDonations();
@@ -7073,9 +7047,7 @@
 
                         async function loadDonations() {
                             try {
-                                var res = await apiFetch('/api/cms/donations');
-                                if (!res.ok) throw new Error('HTTP ' + res.status);
-                                var data = await res.json();
+                                var data = await api('/donations');
                                 renderDonationKPIs(data);
                                 renderDonationTable(data.donations || []);
                             } catch (err) {
