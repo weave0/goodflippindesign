@@ -4,10 +4,10 @@
  * Injects environment variables into HTML for secure key management
  * Implements edge caching for global performance
  *
- * NOTE: authWorker is loaded dynamically so that a missing/broken dependency
- * (e.g. @sentry/cloudflare not available in a dev build) does NOT crash the
- * entire worker and cause Cloudflare Pages to fall back to SPA-mode
- * (serving index.html for every URL including /donate, /community-portal, etc.)
+ * NOTE: authWorker is loaded dynamically so that a syntax error or import
+ * failure in workers/auth.js does NOT crash the entire Pages worker and
+ * cause Cloudflare Pages to fall back to SPA-mode (serving index.html for
+ * every URL including /donate, /community-portal, etc.).
  */
 
 let _authWorker = null;

@@ -82,9 +82,9 @@
     "html-validate": "^10.11.2",
     "http-server": "^14.1.1",
     "husky": "^9.0.0",
-    "nodemon": "^3.0.2",
+    "nodemon": "~3.1.0",
     "prettier": "^3.2.0",
-    "puppeteer": "^24.32.0",
+    "puppeteer": "^24.40.0",
     "sharp": "^0.34.5"
   }
 }

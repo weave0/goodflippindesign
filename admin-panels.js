@@ -288,7 +288,9 @@
                             body = JSON.stringify(body);
                         }
 
-                        const res = await fetch(API + path, {
+                        // Accept full paths (e.g. /api/blog) in addition to /api/cms-relative paths
+                        const url = path.startsWith('/api/') ? path : API + path;
+                        const res = await fetch(url, {
                             ...opts,
                             headers,
                             body,
@@ -4874,28 +4876,7 @@
                         var blogSortCol = 'created_at';
                         var blogSortDir = 'desc'; // 'asc' | 'desc'
 
-                        // ── auth-aware fetch for /api/blog (bypasses /api/cms prefix) ──
-                        async function blogFetch(path, opts) {
-                            opts = opts || {};
-                            var headers = Object.assign({}, opts.headers || {});
-                            if (state.clerk && state.clerk.session) {
-                                try {
-                                    var token = await state.clerk.session.getToken();
-                                    if (token) headers['Authorization'] = 'Bearer ' + token;
-                                } catch (e) { /* token unavailable */ }
-                            }
-                            var body = opts.body;
-                            if (body && typeof body === 'object' && !(body instanceof FormData)) {
-                                headers['Content-Type'] = 'application/json';
-                                body = JSON.stringify(body);
-                            }
-                            var res = await fetch(path, Object.assign({}, opts, { headers: headers, body: body }));
-                            var data = await res.json().catch(function () { return {}; });
-                            if (!res.ok) {
-                                throw new Error(data.error || data.message || (res.status + ' ' + res.statusText));
-                            }
-                            return data;
-                        }
+                        // blogFetch removed — api() now accepts full /api/ paths directly
 
                         // ── helpers ───────────────────────────────────────────────
                         function slugify(str) {
@@ -5091,7 +5072,7 @@
                             var btn = $('blog-refresh-btn');
                             if (btn) { btn.disabled = true; btn.textContent = 'Loading\u2026'; }
                             try {
-                                var data = await blogFetch('/api/blog?status=all');
+                                var data = await api('/api/blog?status=all');
                                 blogPosts = Array.isArray(data) ? data : (data.posts || []);
                                 updateBlogStats(blogPosts);
                                 populateBlogSeriesFilter();
@@ -5250,7 +5231,7 @@
                                 var body = { title: title.trim(), slug: slug.trim(), excerpt: excerpt.trim(), content: content, tags: tags.trim(), status: status, series: series.trim(), featured_image: featuredImage.trim(), seo_description: seoDescription.trim(), seo_og_image: seoOgImage.trim() };
                                 if (blogEditingId) body.id = blogEditingId;
 
-                                await blogFetch('/api/blog', {
+                                await api('/api/blog', {
                                     method: blogEditingId ? 'PUT' : 'POST',
                                     body: body
                                 });
@@ -5281,7 +5262,7 @@
                             var title = post ? post.title : 'this post';
                             showConfirm('Permanently delete "' + title + '"? This cannot be undone.', async function () {
                                 try {
-                                    await blogFetch('/api/blog?id=' + encodeURIComponent(id), { method: 'DELETE' });
+                                    await api('/api/blog?id=' + encodeURIComponent(id), { method: 'DELETE' });
                                     closeModal('blog-post-modal');
                                     await fetchBlogPosts();
                                 } catch (err) {
@@ -5515,7 +5496,7 @@
                             var countEl = $('blog-comments-count');
                             if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-muted">Loading…</td></tr>';
                             try {
-                                var data = await blogFetch('/api/comments/all');
+                                var data = await api('/api/comments/all');
                                 var comments = Array.isArray(data) ? data : (data.comments || []);
                                 if (countEl) countEl.textContent = comments.length;
                                 if (!tbody) return;
@@ -5544,7 +5525,7 @@
                         async function deleteComment(commentId) {
                             showConfirm('Delete this comment permanently?', async function () {
                                 try {
-                                    await blogFetch('/api/comments', { method: 'DELETE', body: { commentId: commentId } });
+                                    await api('/api/comments', { method: 'DELETE', body: { commentId: commentId } });
                                     toast('Comment deleted.', 'success');
                                     loadComments();
                                 } catch (e) {
