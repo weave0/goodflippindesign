@@ -57,7 +57,8 @@
     "finance:stripe:export": "node scripts/finance/run-finance-tool.js export_stripe",
     "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf",
     "r2:import": "node scripts/r2-bulk-import.js",
-    "r2:import:dry": "node scripts/r2-bulk-import.js --dry-run"
+    "r2:import:dry": "node scripts/r2-bulk-import.js --dry-run",
+    "test:workers": "vitest run --config vitest.workers.config.mjs"
   },
   "repository": {
     "type": "git",
@@ -79,12 +80,14 @@
     "@sentry/cloudflare": "^10.46.0"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.13.5",
     "html-validate": "^10.11.2",
     "http-server": "^14.1.1",
     "husky": "^9.0.0",
     "nodemon": "~3.1.0",
     "prettier": "^3.2.0",
     "puppeteer": "^24.40.0",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "vitest": "^4.1.2"
   }
 }

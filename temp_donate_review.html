@@ -1668,7 +1668,7 @@
         // Thin PayPal (no SDK): uses PayPal.Me link building
         // Set this to your PayPal.Me handle (the part after https://www.paypal.com/paypalme/)
         // Example: 'BrettWeaver'
-        const PAYPAL_ME_HANDLE = 'goodlippindesign';
+        const PAYPAL_ME_HANDLE = 'goodflippindesign';
 
         function getPayPalMeUrl(amount) {
             const numericAmount = Number(amount);
@@ -1711,9 +1711,31 @@
             paypalOpenBtn.style.cursor = 'pointer';
         }
 
-        // Initialize thin PayPal UI on load
+        // Initialize thin PayPal UI on load; handle Stripe return params
         document.addEventListener('DOMContentLoaded', function () {
             updatePayPalQuickDonateUI();
+
+            // Show success/cancelled banner when returning from Stripe Checkout
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('success')) {
+                const banner = document.createElement('div');
+                banner.setAttribute('role', 'status');
+                banner.setAttribute('aria-live', 'polite');
+                banner.style.cssText = 'position:fixed;top:1rem;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:1rem 1.5rem;border-radius:0.75rem;font-weight:600;z-index:9999;box-shadow:0 4px 24px rgba(16,185,129,0.4);max-width:90vw;text-align:center';
+                banner.textContent = '\u2764\uFE0F Thank you! Your donation is confirmed. You make this possible.';
+                document.body.appendChild(banner);
+                setTimeout(() => banner.remove(), 8000);
+                history.replaceState(null, '', '/donate');
+            } else if (params.has('cancelled')) {
+                const banner = document.createElement('div');
+                banner.setAttribute('role', 'status');
+                banner.setAttribute('aria-live', 'polite');
+                banner.style.cssText = 'position:fixed;top:1rem;left:50%;transform:translateX(-50%);background:#374151;color:#f9fafb;padding:1rem 1.5rem;border-radius:0.75rem;font-weight:500;z-index:9999;box-shadow:0 4px 24px rgba(0,0,0,0.4);max-width:90vw;text-align:center';
+                banner.textContent = 'Checkout cancelled — your card was not charged. Come back anytime.';
+                document.body.appendChild(banner);
+                setTimeout(() => banner.remove(), 6000);
+                history.replaceState(null, '', '/donate');
+            }
 
             const paypalOpenBtn = document.getElementById('paypalOpenBtn');
             if (paypalOpenBtn) {
@@ -1935,11 +1957,9 @@
                 }
 
                 // Redirect to Stripe Checkout
-                console.log(`Redirecting to Stripe Checkout: $${selectedAmount} (${donationType})`);
                 window.location.href = data.url;
 
             } catch (error) {
-                console.error('Checkout error:', error);
                 alert(`Error: ${error.message}\n\nPlease try again or contact getsome@goodflippindesign.com`);
                 this.disabled = false;
                 this.textContent = 'Continue with Card';

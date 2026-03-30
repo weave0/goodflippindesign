@@ -17,11 +17,14 @@ bucket_name = "gfv-media"
 
 [vars]
 NODE_ENV = "production"
-# SOCIAL_PUBLISHER_URL    — set via `wrangler secret put SOCIAL_PUBLISHER_URL`
-# TOKEN_ENCRYPTION_KEY    — set via `wrangler secret put TOKEN_ENCRYPTION_KEY`
-# INTERNAL_SECRET         — set via `wrangler secret put INTERNAL_SECRET`
-# STRIPE_WEBHOOK_SECRET   — Stripe webhook signing secret (same value as in root wrangler.toml)
-#                           Required for POST /api/stripe/webhook to verify Stripe events
-# SENTRY_DSN              — Error tracking DSN (get from sentry.io → Settings → Projects → DSN)
-#                           When set, auth.js sends Worker errors to Sentry automatically
-#                           Run: wrangler secret put SENTRY_DSN --name gfd-auth
+# Declare secret names as empty placeholders so miniflare/vitest can override them for tests.
+# Real values are set (and take precedence) via `wrangler secret put <NAME>`.
+STRIPE_WEBHOOK_SECRET   = ""   # wrangler secret put STRIPE_WEBHOOK_SECRET --name gfd-auth
+INTERNAL_SECRET         = ""   # wrangler secret put INTERNAL_SECRET
+CLERK_SECRET_KEY        = ""   # wrangler secret put CLERK_SECRET_KEY
+CLERK_SECRET_KEY_GFD    = ""   # wrangler secret put CLERK_SECRET_KEY_GFD
+# SOCIAL_PUBLISHER_URL   — set via `wrangler secret put SOCIAL_PUBLISHER_URL`
+# TOKEN_ENCRYPTION_KEY   — set via `wrangler secret put TOKEN_ENCRYPTION_KEY`
+# SENTRY_DSN             — Error tracking DSN (get from sentry.io → Settings → Projects → DSN)
+#                          When set, auth.js sends Worker errors to Sentry automatically
+#                          Run: wrangler secret put SENTRY_DSN --name gfd-auth

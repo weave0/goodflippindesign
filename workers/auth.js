@@ -1972,8 +1972,8 @@ export default {
     if (url.pathname === '/api/blog/post' && request.method === 'GET') {
       const response = await handleGetBlogPost(request, env);
       return new Response(response.body, {
-        ...response,
-        headers: { ...response.headers, ...corsHeaders },
+        status: response.status,
+        headers: { ...Object.fromEntries(response.headers), ...corsHeaders },
       });
     }
 

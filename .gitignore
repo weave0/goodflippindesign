@@ -2,6 +2,7 @@ node_modules/
 .wrangler/
 *.log
 .env
+.dev.vars
 .DS_Store
 
 # Backup files

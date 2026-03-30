@@ -68,9 +68,14 @@ export default {
       return json({ ok: true, service: 'gfd-stripe-payments' });
     }
 
-    // Main endpoint
+    // Payment Intent — for drop-in Element flows
     if (request.method === 'POST' && path === '/api/create-payment-intent') {
       return handleCreatePaymentIntent(request, env);
+    }
+
+    // Checkout Session — donate.html redirect flow
+    if (request.method === 'POST' && path === '/api/create-checkout-session') {
+      return handleCreateCheckoutSession(request, env);
     }
 
     return json({ error: 'Not found' }, 404);
@@ -160,6 +165,90 @@ async function createPaymentIntent(secretKey, { amountCents, projectLabel, isRec
   }
 
   return data.client_secret;
+}
+
+// ─── Checkout Session (donate.html redirect flow) ─────────────────────────────
+
+async function handleCreateCheckoutSession(request, env) {
+  if (!env.STRIPE_SECRET_KEY) {
+    console.error('STRIPE_SECRET_KEY secret not set');
+    return json({ error: 'Payment system not configured' }, 503, request);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'Invalid JSON body' }, 400, request);
+  }
+
+  const { amount, type } = body;
+
+  // amount from donate.html is in dollars (e.g. 25 for $25)
+  const amountDollars = Number(amount);
+  if (!Number.isFinite(amountDollars) || amountDollars < 1 || amountDollars > 5000) {
+    return json({ error: 'Amount must be between $1 and $5,000' }, 400, request);
+  }
+  const amountCents = Math.round(amountDollars * 100);
+  const isMonthly = type === 'monthly';
+
+  // Use Origin header to build return URLs; fallback to production domain
+  const origin = request.headers.get('Origin') || '';
+  const baseUrl = ALLOWED_ORIGINS.includes(origin) ? origin : 'https://goodflippindesign.com';
+
+  try {
+    const session = await createCheckoutSession(env.STRIPE_SECRET_KEY, {
+      amountCents,
+      isMonthly,
+      successUrl: `${baseUrl}/donate?success=1&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${baseUrl}/donate?cancelled=1`,
+    });
+    return json({ url: session.url }, 200, request);
+  } catch (err) {
+    console.error('Stripe Checkout Session error:', err.message);
+    return json({ error: 'Unable to create checkout session' }, 502, request);
+  }
+}
+
+async function createCheckoutSession(secretKey, { amountCents, isMonthly, successUrl, cancelUrl }) {
+  const productName = isMonthly
+    ? 'Monthly Donation – Good Flippin Design'
+    : 'One-Time Donation – Good Flippin Design';
+
+  const params = new URLSearchParams({
+    mode: isMonthly ? 'subscription' : 'payment',
+    'line_items[0][quantity]': '1',
+    'line_items[0][price_data][currency]': 'usd',
+    'line_items[0][price_data][unit_amount]': String(amountCents),
+    'line_items[0][price_data][product_data][name]': productName,
+    'line_items[0][price_data][product_data][description]': 'Supporting AI education, cultural preservation, and civic tech',
+    success_url: successUrl,
+    cancel_url: cancelUrl,
+    'metadata[source]': 'gfd-donate-page',
+    'metadata[type]': isMonthly ? 'monthly' : 'one-time',
+    'metadata[amountCents]': String(amountCents),
+  });
+
+  // recurring is only valid in subscription mode
+  if (isMonthly) {
+    params.set('line_items[0][price_data][recurring][interval]', 'month');
+  }
+
+  const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${secretKey}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Stripe-Version': '2023-10-16',
+    },
+    body: params.toString(),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || `Stripe API error ${response.status}`);
+  }
+  return data; // { id, url, ... }
 }
 
 // ─── Helper ───────────────────────────────────────────────────────────────────

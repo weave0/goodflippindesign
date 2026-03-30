@@ -216,6 +216,33 @@ export default {
       });
     }
 
+    // Donate page: create Stripe Checkout Session — proxy to stripe-payments worker.
+    // donate.html POSTs { amount (dollars), type ('one-time'|'monthly') }
+    // and expects { url } to redirect the user to Stripe-hosted checkout.
+    if (url.pathname === '/create-checkout' && request.method === 'POST') {
+      try {
+        const stripeWorkerUrl = 'https://gfd-stripe.weave0.workers.dev/api/create-checkout-session';
+        const proxied = await fetch(stripeWorkerUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Origin': url.origin,
+          },
+          body: request.body,
+        });
+        const data = await proxied.text();
+        return new Response(data, {
+          status: proxied.status,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: 'Checkout unavailable — please try again' }), {
+          status: 502,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     // Get response from static assets (Pages provides env.ASSETS automatically).
     // If this worker is built/deployed outside of Pages advanced mode, env.ASSETS
     // may not exist—fail gracefully instead of throwing.
