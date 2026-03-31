@@ -58,7 +58,8 @@
     "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf",
     "r2:import": "node scripts/r2-bulk-import.js",
     "r2:import:dry": "node scripts/r2-bulk-import.js --dry-run",
-    "test:workers": "vitest run --config vitest.workers.config.mjs"
+    "test:workers": "vitest run --config vitest.workers.config.mjs",
+    "test:all": "npm test && npm run test:workers"
   },
   "repository": {
     "type": "git",
