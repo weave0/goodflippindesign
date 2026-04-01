@@ -27,6 +27,9 @@ jobs:
       - name: Security audit
         run: npm audit --audit-level=moderate
 
+      - name: Lint
+        run: npm run lint
+
       - name: Sync index.html → temp_review.html
         run: cp index.html temp_review.html
 

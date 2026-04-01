@@ -31,6 +31,9 @@ jobs:
       - name: Security audit
         run: npm audit --audit-level=moderate
 
+      - name: Lint
+        run: npm run lint
+
       - name: Build and sync
         run: npm run build # cache-bust + sync index → temp_review
 
