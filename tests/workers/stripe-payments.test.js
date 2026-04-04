@@ -132,6 +132,28 @@ describe('stripe-payments — CORS preflight', () => {
     });
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://goodflippindesign.com');
   });
+
+  it('POST response reflects alternate allowed origin via preflight', async () => {
+    const res = await SELF.fetch(`${BASE}/api/create-payment-intent`, {
+      method: 'OPTIONS',
+      headers: { Origin: 'https://culturesherpa.org' },
+    });
+    expect(res.status).toBe(204);
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://culturesherpa.org');
+  });
+
+  it('error responses include ACAO header so browsers surface errors', async () => {
+    const res = await SELF.fetch(`${BASE}/api/create-payment-intent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: 'https://goodflippindesign.com',
+      },
+      body: JSON.stringify({ amount: 50 }),
+    });
+    expect(res.status).toBe(400);
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('https://goodflippindesign.com');
+  });
 });
 
 // ─── POST /api/create-payment-intent — input validation ──────────────────────

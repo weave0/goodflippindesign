@@ -18,6 +18,6 @@ compatibility_date = "2025-01-01"
 NODE_ENV = "production"
 # Placeholder so miniflare/vitest can see a truthy STRIPE_SECRET_KEY in tests.
 # Real value is set via `wrangler secret put STRIPE_SECRET_KEY` and takes precedence.
-STRIPE_SECRET_KEY = "sk_test_placeholder"
+STRIPE_SECRET_KEY = "placeholder_for_miniflare"
 
 # No D1/KV bindings needed — stateless Stripe proxy
