@@ -1160,9 +1160,9 @@
                     }
 
                     document.addEventListener('click', function (e) {
-                        var editBtn = e.target.closest('[data-sf-edit]');
+                        const editBtn = e.target.closest('[data-sf-edit]');
                         if (editBtn) { sfEditPost(Number(editBtn.dataset.sfEdit)); return; }
-                        var deleteBtn = e.target.closest('[data-sf-delete]');
+                        const deleteBtn = e.target.closest('[data-sf-delete]');
                         if (deleteBtn) { sfDeletePost(Number(deleteBtn.dataset.sfDelete)); }
                     });
 
@@ -3315,7 +3315,7 @@
                         $('asset-edit-tags').value = tags.join(', ');
 
                         // Fetch brands that already have a copy of this asset
-                        let sharedBrands = new Set();
+                        const sharedBrands = new Set();
                         try {
                             const sharesData = await api('/assets/' + encodeURIComponent(asset.id) + '/shares');
                             if (sharesData?.brands) sharesData.brands.forEach(b => sharedBrands.add(b));
@@ -4746,19 +4746,19 @@
                                     trendDetails.style.display = '';
                                     trendGrid.innerHTML = multiSites.map(site => {
                                         // Sort chronologically, take last 7
-                                        var pts = site.points.sort((a, b) => a.ts.localeCompare(b.ts)).slice(-7);
-                                        var maxMs = Math.max.apply(null, pts.map(p => p.ms)) || 1;
-                                        var bars = pts.map(p => {
-                                            var h = Math.max(6, Math.round((p.ms / maxMs) * 48));
-                                            var color = p.status === 'pass' ? '#22c55e' : p.status === 'warn' ? '#f59e0b' : '#f43f5e';
-                                            var dt = new Date(p.ts);
-                                            var label = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                        const pts = site.points.sort((a, b) => a.ts.localeCompare(b.ts)).slice(-7);
+                                        const maxMs = Math.max.apply(null, pts.map(p => p.ms)) || 1;
+                                        const bars = pts.map(p => {
+                                            const h = Math.max(6, Math.round((p.ms / maxMs) * 48));
+                                            const color = p.status === 'pass' ? '#22c55e' : p.status === 'warn' ? '#f59e0b' : '#f43f5e';
+                                            const dt = new Date(p.ts);
+                                            const label = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                                             return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px" title="' + escapeHtml(label) + ': ' + p.ms + 'ms">' +
                                                 '<div style="width:14px;height:' + h + 'px;background:' + color + ';border-radius:3px"></div>' +
                                                 '<span style="font-size:0.6rem;color:#666">' + p.ms + '</span></div>';
                                         }).join('');
-                                        var latest = pts[pts.length - 1];
-                                        var arrow = pts.length >= 2 ? (latest.ms > pts[pts.length - 2].ms ? '↑' : latest.ms < pts[pts.length - 2].ms ? '↓' : '→') : '';
+                                        const latest = pts[pts.length - 1];
+                                        const arrow = pts.length >= 2 ? (latest.ms > pts[pts.length - 2].ms ? '↑' : latest.ms < pts[pts.length - 2].ms ? '↓' : '→') : '';
                                         return '<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px">' +
                                             '<div style="font-weight:500;font-size:0.82rem;margin-bottom:6px">' + escapeHtml(site.name) + ' ' + arrow + '</div>' +
                                             '<div style="display:flex;align-items:flex-end;gap:4px;height:56px">' + bars + '</div>' +
@@ -4870,11 +4870,11 @@
                     (function initBlogManager() {
                         'use strict';
 
-                        var blogPosts = [];
-                        var blogEditingId = null;
-                        var blogSlugManuallyEdited = false;
-                        var blogSortCol = 'created_at';
-                        var blogSortDir = 'desc'; // 'asc' | 'desc'
+                        let blogPosts = [];
+                        let blogEditingId = null;
+                        let blogSlugManuallyEdited = false;
+                        let blogSortCol = 'created_at';
+                        let blogSortDir = 'desc'; // 'asc' | 'desc'
 
                         // blogFetch removed — api() now accepts full /api/ paths directly
 
@@ -4890,12 +4890,12 @@
                         }
 
                         function insertMarkdown(textarea, type, opts) {
-                            var start = textarea.selectionStart;
-                            var end = textarea.selectionEnd;
-                            var sel = textarea.value.slice(start, end) || '';
-                            var before = textarea.value.slice(0, start);
-                            var after = textarea.value.slice(end);
-                            var insert = '';
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const sel = textarea.value.slice(start, end) || '';
+                            const before = textarea.value.slice(0, start);
+                            const after = textarea.value.slice(end);
+                            let insert = '';
                             switch (type) {
                                 case 'bold': insert = '**' + (sel || 'bold text') + '**'; break;
                                 case 'italic': insert = '*' + (sel || 'italic text') + '*'; break;
@@ -4908,18 +4908,20 @@
                                 case 'hr': insert = '\n\n---\n\n'; break;
                                 case 'strikethrough': insert = '~~' + (sel || 'text') + '~~'; break;
                                 case 'blockquote': insert = '\n> ' + (sel || 'quote'); break;
-                                case 'image':
-                                    var imgUrl = (opts && opts.url) ? opts.url : (sel || 'https://example.com/image.jpg');
-                                    var imgAlt = (opts && opts.alt) ? opts.alt : 'image';
+                                case 'image': {
+                                    const imgUrl = (opts && opts.url) ? opts.url : (sel || 'https://example.com/image.jpg');
+                                    const imgAlt = (opts && opts.alt) ? opts.alt : 'image';
                                     insert = '\n![' + imgAlt + '](' + imgUrl + ')\n';
                                     break;
-                                case 'video':
-                                    var vidUrl = sel || 'https://youtube.com/watch?v=VIDEO_ID';
+                                }
+                                case 'video': {
+                                    const vidUrl = sel || 'https://youtube.com/watch?v=VIDEO_ID';
                                     insert = '\n@[video](' + vidUrl + ')\n';
                                     break;
+                                }
                             }
                             textarea.value = before + insert + after;
-                            var cursor = before.length + insert.length;
+                            const cursor = before.length + insert.length;
                             textarea.setSelectionRange(cursor, cursor);
                             textarea.focus();
                             textarea.dispatchEvent(new Event('input'));
@@ -4927,14 +4929,14 @@
 
                         // ── stats chip update ─────────────────────────────────────
                         function updateBlogStats(posts) {
-                            var total = posts.length;
-                            var published = posts.filter(function (p) { return p.status === 'published'; }).length;
-                            var draft = total - published;
+                            const total = posts.length;
+                            const published = posts.filter(function (p) { return p.status === 'published'; }).length;
+                            const draft = total - published;
 
-                            var elTotal = $('blog-stat-total');
-                            var elPub = $('blog-stat-published');
-                            var elDraft = $('blog-stat-draft');
-                            var elBadge = $('blog-draft-badge');
+                            const elTotal = $('blog-stat-total');
+                            const elPub = $('blog-stat-published');
+                            const elDraft = $('blog-stat-draft');
+                            const elBadge = $('blog-draft-badge');
 
                             if (elTotal) elTotal.textContent = total;
                             if (elPub) elPub.textContent = published;
@@ -4947,15 +4949,15 @@
 
                         // ── table render ──────────────────────────────────────────
                         function populateBlogSeriesFilter() {
-                            var sel = $('blog-filter-series');
+                            const sel = $('blog-filter-series');
                             if (!sel) return;
-                            var current = sel.value;
+                            const current = sel.value;
                             while (sel.options.length > 1) sel.remove(1);
-                            var seen = {};
+                            const seen = {};
                             blogPosts.forEach(function (p) {
                                 if (p.series && !seen[p.series]) {
                                     seen[p.series] = true;
-                                    var opt = document.createElement('option');
+                                    const opt = document.createElement('option');
                                     opt.value = p.series;
                                     opt.textContent = p.series;
                                     sel.appendChild(opt);
@@ -4966,15 +4968,15 @@
                         }
 
                         function renderBlogTable() {
-                            var tbody = $('blog-posts-tbody');
-                            var emptyMsg = $('blog-empty-msg');
+                            const tbody = $('blog-posts-tbody');
+                            const emptyMsg = $('blog-empty-msg');
                             if (!tbody) return;
 
-                            var search = ($('blog-search') ? $('blog-search').value : '').toLowerCase().trim();
-                            var statusFilter = $('blog-filter-status') ? $('blog-filter-status').value : '';
-                            var seriesFilter = $('blog-filter-series') ? $('blog-filter-series').value : '';
+                            const search = ($('blog-search') ? $('blog-search').value : '').toLowerCase().trim();
+                            const statusFilter = $('blog-filter-status') ? $('blog-filter-status').value : '';
+                            const seriesFilter = $('blog-filter-series') ? $('blog-filter-series').value : '';
                             // dropdown sort still works; column-header sort overrides via blogSortCol/Dir
-                            var dropdownSort = $('blog-filter-sort') ? $('blog-filter-sort').value : '';
+                            const dropdownSort = $('blog-filter-sort') ? $('blog-filter-sort').value : '';
                             if (dropdownSort && dropdownSort !== 'created_desc') {
                                 if (dropdownSort === 'created_asc') { blogSortCol = 'created_at'; blogSortDir = 'asc'; }
                                 if (dropdownSort === 'title_asc') { blogSortCol = 'title'; blogSortDir = 'asc'; }
@@ -4982,22 +4984,22 @@
                                 if (dropdownSort === 'status') { blogSortCol = 'status'; blogSortDir = 'asc'; }
                             }
 
-                            var filtered = blogPosts.filter(function (p) {
+                            const filtered = blogPosts.filter(function (p) {
                                 if (statusFilter && p.status !== statusFilter) return false;
                                 if (seriesFilter && p.series !== seriesFilter) return false;
                                 if (search) {
-                                    var haystack = (p.title + ' ' + (p.excerpt || '') + ' ' + (p.tags || '') + ' ' + (p.series || '')).toLowerCase();
+                                    const haystack = (p.title + ' ' + (p.excerpt || '') + ' ' + (p.tags || '') + ' ' + (p.series || '')).toLowerCase();
                                     if (haystack.indexOf(search) === -1) return false;
                                 }
                                 return true;
                             });
 
-                            var col = blogSortCol;
-                            var dir = blogSortDir;
+                            const col = blogSortCol;
+                            const dir = blogSortDir;
                             filtered.sort(function (a, b) {
-                                var av = (a[col] || '');
-                                var bv = (b[col] || '');
-                                var cmp = typeof av === 'string' ? av.localeCompare(bv) : (av < bv ? -1 : av > bv ? 1 : 0);
+                                const av = (a[col] || '');
+                                const bv = (b[col] || '');
+                                const cmp = typeof av === 'string' ? av.localeCompare(bv) : (av < bv ? -1 : av > bv ? 1 : 0);
                                 return dir === 'asc' ? cmp : -cmp;
                             });
 
@@ -5019,17 +5021,17 @@
                             if (emptyMsg) emptyMsg.classList.add('d-none');
 
                             tbody.innerHTML = filtered.map(function (p) {
-                                var statusBadge = p.status === 'published'
+                                const statusBadge = p.status === 'published'
                                     ? '<span class="tag ok">published</span>'
                                     : '<span class="tag warn">draft</span>';
 
-                                var tagHtml = p.tags
+                                const tagHtml = p.tags
                                     ? p.tags.split(',').filter(Boolean).slice(0, 4).map(function (t) {
                                         return '<span class="blog-post-tag">' + escapeHtml(t.trim()) + '</span>';
                                     }).join('')
                                     : '<span class="text-muted">—</span>';
 
-                                var viewLink = p.status === 'published' && p.slug
+                                const viewLink = p.status === 'published' && p.slug
                                     ? ' <a href="https://goodflippinvibes.com/blog/' + encodeURIComponent(p.slug) + '" target="_blank" rel="noopener" class="link-muted" aria-label="View post on site">\u2197</a>'
                                     : '';
 
@@ -5056,7 +5058,7 @@
                             // bind row action buttons
                             tbody.querySelectorAll('.blog-edit-btn').forEach(function (btn) {
                                 btn.addEventListener('click', function () {
-                                    var post = blogPosts.find(function (p) { return p.id === btn.dataset.id; });
+                                    const post = blogPosts.find(function (p) { return p.id === btn.dataset.id; });
                                     if (post) openBlogModal(post);
                                 });
                             });
@@ -5069,17 +5071,17 @@
 
                         // ── fetch all posts ───────────────────────────────────────
                         async function fetchBlogPosts() {
-                            var btn = $('blog-refresh-btn');
+                            const btn = $('blog-refresh-btn');
                             if (btn) { btn.disabled = true; btn.textContent = 'Loading\u2026'; }
                             try {
-                                var data = await api('/api/blog?status=all');
+                                const data = await api('/api/blog?status=all');
                                 blogPosts = Array.isArray(data) ? data : (data.posts || []);
                                 updateBlogStats(blogPosts);
                                 populateBlogSeriesFilter();
                                 renderBlogTable();
                             } catch (err) {
                                 console.error('[blog] fetch failed', err);
-                                var tbody = $('blog-posts-tbody');
+                                const tbody = $('blog-posts-tbody');
                                 if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Failed to load posts. Check auth and worker deployment.</td></tr>';
                             } finally {
                                 if (btn) { btn.disabled = false; btn.textContent = 'Refresh'; }
@@ -5091,7 +5093,7 @@
                             blogEditingId = post ? post.id : null;
                             blogSlugManuallyEdited = !!post;
 
-                            var titleEl = $('blog-modal-title');
+                            const titleEl = $('blog-modal-title');
                             if (titleEl) titleEl.textContent = post ? 'Edit Post' : 'New Blog Post';
 
                             setValue('blog-post-id', post ? post.id : '');
@@ -5103,7 +5105,7 @@
                             setValue('blog-post-status', post ? post.status : 'draft');
                             setValue('blog-post-series', post ? (post.series || '') : '');
                             // Featured image
-                            var featImgUrl = post ? (post.featured_image || '') : '';
+                            const featImgUrl = post ? (post.featured_image || '') : '';
                             setValue('blog-featured-image', featImgUrl);
                             setValue('blog-featured-image-url', featImgUrl);
                             updateFeaturedImagePreview(featImgUrl);
@@ -5117,57 +5119,57 @@
                             updateCharCount('blog-post-excerpt', 'blog-excerpt-count');
 
                             // reset autosave dots to "saved" when opening existing or clean "not saved" for new
-                            var savedState = !!post;
+                            const savedState = !!post;
                             [$('blog-autosave-dot'), $('blog-autosave-dot-header')].forEach(function (dot) {
                                 if (!dot) return;
                                 dot.classList.toggle('saved', savedState);
                                 dot.classList.toggle('unsaved', !savedState);
                             });
-                            var lbl = $('blog-autosave-label');
+                            const lbl = $('blog-autosave-label');
                             if (lbl) lbl.textContent = savedState ? 'Saved' : 'Not saved';
-                            var hLbl = $('blog-autosave-header-label');
+                            const hLbl = $('blog-autosave-header-label');
                             if (hLbl) hLbl.textContent = savedState ? '' : 'New';
 
                             // initialise statusbar counters
-                            var ta = $('blog-post-content');
+                            const ta = $('blog-post-content');
                             if (ta) {
-                                var text = ta.value;
-                                var wc = $('blog-word-count');
-                                var cc = $('blog-char-count');
-                                var lc = $('blog-line-count');
+                                const text = ta.value;
+                                const wc = $('blog-word-count');
+                                const cc = $('blog-char-count');
+                                const lc = $('blog-line-count');
                                 if (wc) wc.textContent = text.trim() ? text.trim().split(/\s+/).length : 0;
                                 if (cc) cc.textContent = text.length;
                                 if (lc) lc.textContent = text.split('\n').length;
                             }
 
-                            var deleteBtn = $('blog-delete-btn');
+                            const deleteBtn = $('blog-delete-btn');
                             if (deleteBtn) deleteBtn.classList.toggle('d-none', !post);
 
-                            var saveBtn = $('blog-save-btn');
+                            const saveBtn = $('blog-save-btn');
                             if (saveBtn) saveBtn.textContent = post ? 'Save Changes' : 'Create Post';
 
                             openModal('blog-post-modal');
                         }
 
                         function setValue(id, val) {
-                            var el = $(id);
+                            const el = $(id);
                             if (el) el.value = val || '';
                         }
 
                         function updateSlugPreview(slug) {
-                            var preview = $('blog-slug-preview');
+                            const preview = $('blog-slug-preview');
                             if (preview) preview.textContent = slug || 'auto-generated';
                         }
 
                         function updateCharCount(inputId, countId) {
-                            var input = $(inputId);
-                            var counter = $(countId);
+                            const input = $(inputId);
+                            const counter = $(countId);
                             if (input && counter) counter.textContent = input.value.length;
                         }
 
                         function updateFeaturedImagePreview(url) {
-                            var preview = $('blog-featured-image-preview');
-                            var thumb = $('blog-featured-image-thumb');
+                            const preview = $('blog-featured-image-preview');
+                            const thumb = $('blog-featured-image-thumb');
                             if (!preview || !thumb) return;
                             if (url && url.trim()) {
                                 thumb.src = url.trim();
@@ -5179,16 +5181,16 @@
                         }
 
                         // ── blog image picker (reuses asset-picker-modal) ────────
-                        var _blogImagePickerMode = ''; // 'featured' | 'insert'
+                        let _blogImagePickerMode = ''; // 'featured' | 'insert'
 
                         function openBlogImagePicker(mode) {
                             _blogImagePickerMode = mode;
-                            var modal = $('asset-picker-modal');
+                            const modal = $('asset-picker-modal');
                             if (!modal) return;
                             // Reset search
-                            var searchEl = $('asset-picker-search');
+                            const searchEl = $('asset-picker-search');
                             if (searchEl) searchEl.value = '';
-                            var brandEl = $('asset-picker-brand');
+                            const brandEl = $('asset-picker-brand');
                             if (brandEl) brandEl.value = 'gfv';
                             modal.classList.remove('d-none');
                             searchAssets();
@@ -5198,7 +5200,7 @@
                         }
 
                         function closeBlogImagePicker() {
-                            var modal = $('asset-picker-modal');
+                            const modal = $('asset-picker-modal');
                             if (modal) {
                                 modal.classList.add('d-none');
                                 delete modal.dataset.blogPicker;
@@ -5207,17 +5209,17 @@
 
                         // ── save (create or update) ───────────────────────────────
                         async function saveBlogPost() {
-                            var saveBtn = $('blog-save-btn');
-                            var title = ($('blog-post-title') || {}).value || '';
-                            var slug = ($('blog-post-slug') || {}).value || '';
-                            var excerpt = ($('blog-post-excerpt') || {}).value || '';
-                            var content = ($('blog-post-content') || {}).value || '';
-                            var tags = ($('blog-post-tags') || {}).value || '';
-                            var status = ($('blog-post-status') || {}).value || 'draft';
-                            var series = ($('blog-post-series') || {}).value || '';
-                            var featuredImage = ($('blog-featured-image-url') || {}).value || '';
-                            var seoDescription = ($('blog-seo-description') || {}).value || '';
-                            var seoOgImage = ($('blog-seo-og-image') || {}).value || '';
+                            const saveBtn = $('blog-save-btn');
+                            const title = ($('blog-post-title') || {}).value || '';
+                            let slug = ($('blog-post-slug') || {}).value || '';
+                            const excerpt = ($('blog-post-excerpt') || {}).value || '';
+                            const content = ($('blog-post-content') || {}).value || '';
+                            const tags = ($('blog-post-tags') || {}).value || '';
+                            const status = ($('blog-post-status') || {}).value || 'draft';
+                            const series = ($('blog-post-series') || {}).value || '';
+                            const featuredImage = ($('blog-featured-image-url') || {}).value || '';
+                            const seoDescription = ($('blog-seo-description') || {}).value || '';
+                            const seoOgImage = ($('blog-seo-og-image') || {}).value || '';
 
                             if (!title.trim()) {
                                 toast('Title is required.', 'error');
@@ -5228,7 +5230,7 @@
                             if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving\u2026'; }
 
                             try {
-                                var body = { title: title.trim(), slug: slug.trim(), excerpt: excerpt.trim(), content: content, tags: tags.trim(), status: status, series: series.trim(), featured_image: featuredImage.trim(), seo_description: seoDescription.trim(), seo_og_image: seoOgImage.trim() };
+                                const body = { title: title.trim(), slug: slug.trim(), excerpt: excerpt.trim(), content: content, tags: tags.trim(), status: status, series: series.trim(), featured_image: featuredImage.trim(), seo_description: seoDescription.trim(), seo_og_image: seoOgImage.trim() };
                                 if (blogEditingId) body.id = blogEditingId;
 
                                 await api('/api/blog', {
@@ -5240,9 +5242,9 @@
                                 [$('blog-autosave-dot'), $('blog-autosave-dot-header')].forEach(function (dot) {
                                     if (dot) { dot.classList.remove('unsaved'); dot.classList.add('saved'); }
                                 });
-                                var lbl = $('blog-autosave-label');
+                                const lbl = $('blog-autosave-label');
                                 if (lbl) lbl.textContent = 'Saved';
-                                var hLbl = $('blog-autosave-header-label');
+                                const hLbl = $('blog-autosave-header-label');
                                 if (hLbl) hLbl.textContent = 'Saved';
 
                                 closeModal('blog-post-modal');
@@ -5258,8 +5260,8 @@
                         // ── delete ────────────────────────────────────────────────
                         async function deleteBlogPost(id) {
                             if (!id) return;
-                            var post = blogPosts.find(function (p) { return p.id === id; });
-                            var title = post ? post.title : 'this post';
+                            const post = blogPosts.find(function (p) { return p.id === id; });
+                            const title = post ? post.title : 'this post';
                             showConfirm('Permanently delete "' + title + '"? This cannot be undone.', async function () {
                                 try {
                                     await api('/api/blog?id=' + encodeURIComponent(id), { method: 'DELETE' });
@@ -5275,18 +5277,18 @@
                         // ── event wiring ──────────────────────────────────────────
                         function wireBlogEvents() {
                             // nav → new post
-                            var newBtn = $('blog-new-btn');
+                            const newBtn = $('blog-new-btn');
                             if (newBtn) newBtn.addEventListener('click', function () { openBlogModal(null); });
 
                             // refresh
-                            var refreshBtn = $('blog-refresh-btn');
+                            const refreshBtn = $('blog-refresh-btn');
                             if (refreshBtn) refreshBtn.addEventListener('click', fetchBlogPosts);
 
                             // sortable column headers
                             document.querySelectorAll('#blog-posts-table th.sortable[data-sort]').forEach(function (th) {
                                 th.style.cursor = 'pointer';
                                 th.addEventListener('click', function () {
-                                    var col = th.dataset.sort;
+                                    const col = th.dataset.sort;
                                     if (blogSortCol === col) {
                                         blogSortDir = blogSortDir === 'asc' ? 'desc' : 'asc';
                                     } else {
@@ -5298,15 +5300,15 @@
                             });
 
                             // save
-                            var saveBtn = $('blog-save-btn');
+                            const saveBtn = $('blog-save-btn');
                             if (saveBtn) saveBtn.addEventListener('click', saveBlogPost);
 
                             // delete (from modal)
-                            var deleteBtn = $('blog-delete-btn');
+                            const deleteBtn = $('blog-delete-btn');
                             if (deleteBtn) deleteBtn.addEventListener('click', function () { deleteBlogPost(blogEditingId); });
 
                             // featured image URL input → live preview
-                            var featImgInput = $('blog-featured-image-url');
+                            const featImgInput = $('blog-featured-image-url');
                             if (featImgInput) {
                                 featImgInput.addEventListener('input', function () {
                                     updateFeaturedImagePreview(this.value);
@@ -5314,7 +5316,7 @@
                             }
 
                             // featured image pick button → open blog image picker
-                            var featPickBtn = $('blog-featured-image-pick-btn');
+                            const featPickBtn = $('blog-featured-image-pick-btn');
                             if (featPickBtn) {
                                 featPickBtn.addEventListener('click', function () {
                                     openBlogImagePicker('featured');
@@ -5322,7 +5324,7 @@
                             }
 
                             // insert image ribbon button
-                            var insertImgBtn = $('blog-insert-image-btn');
+                            const insertImgBtn = $('blog-insert-image-btn');
                             if (insertImgBtn) {
                                 insertImgBtn.addEventListener('click', function () {
                                     openBlogImagePicker('insert');
@@ -5330,7 +5332,7 @@
                             }
 
                             // SEO description char count
-                            var seoDescInput = $('blog-seo-description');
+                            const seoDescInput = $('blog-seo-description');
                             if (seoDescInput) {
                                 seoDescInput.addEventListener('input', function () {
                                     updateCharCount('blog-seo-description', 'blog-seo-desc-count');
@@ -5338,12 +5340,12 @@
                             }
 
                             // title → auto-slug + char count
-                            var titleInput = $('blog-post-title');
+                            const titleInput = $('blog-post-title');
                             if (titleInput) {
                                 titleInput.addEventListener('input', function () {
                                     updateCharCount('blog-post-title', 'blog-title-count');
                                     if (!blogSlugManuallyEdited) {
-                                        var generated = slugify(titleInput.value);
+                                        const generated = slugify(titleInput.value);
                                         setValue('blog-post-slug', generated);
                                         updateSlugPreview(generated);
                                     }
@@ -5351,7 +5353,7 @@
                             }
 
                             // slug → manual edit detection
-                            var slugInput = $('blog-post-slug');
+                            const slugInput = $('blog-post-slug');
                             if (slugInput) {
                                 slugInput.addEventListener('input', function () {
                                     blogSlugManuallyEdited = true;
@@ -5360,7 +5362,7 @@
                             }
 
                             // excerpt char count
-                            var excerptInput = $('blog-post-excerpt');
+                            const excerptInput = $('blog-post-excerpt');
                             if (excerptInput) {
                                 excerptInput.addEventListener('input', function () {
                                     updateCharCount('blog-post-excerpt', 'blog-excerpt-count');
@@ -5369,26 +5371,26 @@
 
                             // filter / search → re-render
                             ['blog-search', 'blog-filter-status', 'blog-filter-series', 'blog-filter-sort'].forEach(function (id) {
-                                var el = $(id);
+                                const el = $(id);
                                 if (el) el.addEventListener('input', renderBlogTable);
                             });
 
                             // markdown ribbon toolbar
                             document.querySelectorAll('.blog-ribbon-btn[data-md]').forEach(function (btn) {
                                 btn.addEventListener('click', function () {
-                                    var textarea = $('blog-post-content');
+                                    const textarea = $('blog-post-content');
                                     if (textarea) insertMarkdown(textarea, btn.dataset.md);
                                 });
                             });
 
                             // ── live markdown preview ─────────────────────────────
-                            var editorSplit = $('blog-editor-split');
-                            var previewPane = $('blog-preview-pane');
-                            var contentArea = $('blog-post-content');
+                            const editorSplit = $('blog-editor-split');
+                            const previewPane = $('blog-preview-pane');
+                            const contentArea = $('blog-post-content');
 
                             function renderBlogMD(md) {
                                 if (!md) return '<p style="color:var(--text-muted);font-style:italic">Nothing to preview yet.</p>';
-                                var html = md;
+                                let html = md;
                                 // code blocks first (before inline code)
                                 html = html.replace(/```[\w]*\n?([\s\S]*?)```/g, function (_, code) {
                                     return '<pre><code>' + code.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code></pre>';
@@ -5434,11 +5436,11 @@
 
                             // word / char / line counter + autosave dot
                             function updateEditorStats(ta) {
-                                var text = ta.value;
-                                var words = text.trim() ? text.trim().split(/\s+/).length : 0;
-                                var wc = $('blog-word-count');
-                                var cc = $('blog-char-count');
-                                var lc = $('blog-line-count');
+                                const text = ta.value;
+                                const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+                                const wc = $('blog-word-count');
+                                const cc = $('blog-char-count');
+                                const lc = $('blog-line-count');
                                 if (wc) wc.textContent = words;
                                 if (cc) cc.textContent = text.length;
                                 if (lc) lc.textContent = text.split('\n').length;
@@ -5446,9 +5448,9 @@
                                 [$('blog-autosave-dot'), $('blog-autosave-dot-header')].forEach(function (dot) {
                                     if (dot) { dot.classList.remove('saved'); dot.classList.add('unsaved'); }
                                 });
-                                var lbl = $('blog-autosave-label');
+                                const lbl = $('blog-autosave-label');
                                 if (lbl) lbl.textContent = 'Unsaved changes';
-                                var hLbl = $('blog-autosave-header-label');
+                                const hLbl = $('blog-autosave-header-label');
                                 if (hLbl) hLbl.textContent = 'Unsaved';
                             }
 
@@ -5465,7 +5467,7 @@
                                 btn.addEventListener('click', function () {
                                     document.querySelectorAll('.blog-ribbon-view-btn').forEach(function (b) { b.classList.remove('active'); });
                                     btn.classList.add('active');
-                                    var mode = btn.dataset.blogView;
+                                    const mode = btn.dataset.blogView;
                                     if (editorSplit) {
                                         editorSplit.className = 'blog-editor-split mode-' + mode;
                                     }
@@ -5477,8 +5479,8 @@
                         // ── hook into nav switching ───────────────────────────────
                         // Patch the existing nav-click handler to trigger a fetch when
                         // the Blog Manager view becomes active for the first time.
-                        var blogLoaded = false;
-                        var origNavHandler = document.querySelector('[data-view="blog-manager"]');
+                        let blogLoaded = false;
+                        const origNavHandler = document.querySelector('[data-view="blog-manager"]');
                         if (origNavHandler) {
                             origNavHandler.addEventListener('click', function () {
                                 if (!blogLoaded) {
@@ -5492,12 +5494,12 @@
 
                         // ── Comment Moderation ────────────────────────────────────
                         async function loadComments() {
-                            var tbody = $('blog-comments-tbody');
-                            var countEl = $('blog-comments-count');
+                            const tbody = $('blog-comments-tbody');
+                            const countEl = $('blog-comments-count');
                             if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-muted">Loading…</td></tr>';
                             try {
-                                var data = await api('/api/comments/all');
-                                var comments = Array.isArray(data) ? data : (data.comments || []);
+                                const data = await api('/api/comments/all');
+                                const comments = Array.isArray(data) ? data : (data.comments || []);
                                 if (countEl) countEl.textContent = comments.length;
                                 if (!tbody) return;
                                 if (!comments.length) {
@@ -5505,7 +5507,7 @@
                                     return;
                                 }
                                 tbody.innerHTML = comments.map(function (c) {
-                                    var snippet = (c.content || c.body || '').slice(0, 100) + ((c.content || c.body || '').length > 100 ? '…' : '');
+                                    const snippet = (c.content || c.body || '').slice(0, 100) + ((c.content || c.body || '').length > 100 ? '…' : '');
                                     return '<tr>' +
                                         '<td>' + escapeHtml(c.article_title || c.article_id || '—') + '</td>' +
                                         '<td>' + escapeHtml(c.author_name || c.user_id || '—') + '</td>' +
@@ -5534,11 +5536,11 @@
                             });
                         }
 
-                        var cmtRefBtn = $('blog-comments-refresh-btn');
+                        const cmtRefBtn = $('blog-comments-refresh-btn');
                         if (cmtRefBtn) cmtRefBtn.addEventListener('click', loadComments);
 
                         // Auto-load comments when blog panel opens
-                        var origBlogNav = document.querySelector('[data-view="blog-manager"]');
+                        const origBlogNav = document.querySelector('[data-view="blog-manager"]');
                         if (origBlogNav) {
                             origBlogNav.addEventListener('click', function () { loadComments(); });
                         }
@@ -5552,9 +5554,9 @@
                         'use strict';
 
                         function renderTagCloud(elId, mapObj, cssClass) {
-                            var el = $(elId);
+                            const el = $(elId);
                             if (!el) return;
-                            var entries = Object.entries(mapObj).sort(function (a, b) { return b[1] - a[1]; });
+                            const entries = Object.entries(mapObj).sort(function (a, b) { return b[1] - a[1]; });
                             el.innerHTML = entries.length
                                 ? entries.map(function (e) {
                                     return '<span class="tag ' + cssClass + '" style="font-size:0.8rem">' +
@@ -5571,7 +5573,7 @@
 
                         function rateClass(pub, fail) {
                             if ((pub + fail) === 0) return '';
-                            var r = pub / (pub + fail) * 100;
+                            const r = pub / (pub + fail) * 100;
                             if (r >= 90) return 'emerald';
                             if (r >= 70) return 'gold';
                             return 'rose';
@@ -5579,18 +5581,18 @@
 
                         async function load() {
                             try {
-                                var variants = state.variants || [];
-                                var publishedV = variants.filter(function (v) { return v.status === 'published'; });
-                                var failedV = variants.filter(function (v) { return v.status === 'failed'; });
-                                var scheduledV = variants.filter(function (v) { return v.status === 'scheduled'; });
-                                var campaignCount = (state.campaigns || []).length;
+                                const variants = state.variants || [];
+                                const publishedV = variants.filter(function (v) { return v.status === 'published'; });
+                                const failedV = variants.filter(function (v) { return v.status === 'failed'; });
+                                const scheduledV = variants.filter(function (v) { return v.status === 'scheduled'; });
+                                const campaignCount = (state.campaigns || []).length;
 
-                                var pub = publishedV.length;
-                                var fail = failedV.length;
-                                var sched = scheduledV.length;
+                                const pub = publishedV.length;
+                                const fail = failedV.length;
+                                const sched = scheduledV.length;
 
-                                var delivKlass = rateClass(pub, fail);
-                                var delivEl = $('an-delivery-rate');
+                                const delivKlass = rateClass(pub, fail);
+                                const delivEl = $('an-delivery-rate');
 
                                 $('an-published').textContent = pub;
                                 $('an-failed').textContent = fail;
@@ -5602,39 +5604,39 @@
                                 }
 
                                 // Published by platform tag cloud
-                                var byPlatform = {};
+                                const byPlatform = {};
                                 publishedV.forEach(function (v) {
-                                    var p = v.platform || 'unknown';
+                                    const p = v.platform || 'unknown';
                                     byPlatform[p] = (byPlatform[p] || 0) + 1;
                                 });
                                 renderTagCloud('analytics-by-platform', byPlatform, 'ok');
 
                                 // Published by brand tag cloud
-                                var byBrandPub = {};
+                                const byBrandPub = {};
                                 publishedV.forEach(function (v) {
-                                    var b = v.brand || 'unknown';
+                                    const b = v.brand || 'unknown';
                                     byBrandPub[b] = (byBrandPub[b] || 0) + 1;
                                 });
                                 renderTagCloud('analytics-by-brand', byBrandPub, 'cyan');
 
                                 // Brand performance breakdown table
-                                var brandMap = {};
+                                const brandMap = {};
                                 variants.forEach(function (v) {
-                                    var b = v.brand || 'unknown';
+                                    const b = v.brand || 'unknown';
                                     if (!brandMap[b]) brandMap[b] = { pub: 0, fail: 0, sched: 0, campaigns: new Set() };
                                     if (v.status === 'published') brandMap[b].pub++;
                                     else if (v.status === 'failed') brandMap[b].fail++;
                                     else if (v.status === 'scheduled') brandMap[b].sched++;
                                     if (v.campaign_id) brandMap[b].campaigns.add(v.campaign_id);
                                 });
-                                var brandTbody = $('analytics-brand-tbody');
+                                const brandTbody = $('analytics-brand-tbody');
                                 if (brandTbody) {
-                                    var rows = Object.entries(brandMap).sort(function (a, b) { return b[1].pub - a[1].pub; });
+                                    const rows = Object.entries(brandMap).sort(function (a, b) { return b[1].pub - a[1].pub; });
                                     brandTbody.innerHTML = rows.length
                                         ? rows.map(function (entry) {
-                                            var b = entry[0], s = entry[1];
-                                            var r = rate(s.pub, s.fail);
-                                            var rc = rateClass(s.pub, s.fail);
+                                            const b = entry[0], s = entry[1];
+                                            const r = rate(s.pub, s.fail);
+                                            const rc = rateClass(s.pub, s.fail);
                                             return '<tr>' +
                                                 '<td>' + escapeHtml(b) + '</td>' +
                                                 '<td>' + s.pub + '</td>' +
@@ -5648,15 +5650,15 @@
                                 }
 
                                 // Recent published variants table (last 50, sorted newest first)
-                                var recent = publishedV
+                                const recent = publishedV
                                     .sort(function (a, b) { return new Date(b.scheduled_at || 0) - new Date(a.scheduled_at || 0); })
                                     .slice(0, 50);
-                                var tbody = $('analytics-variants-tbody');
+                                const tbody = $('analytics-variants-tbody');
                                 if (tbody) {
                                     tbody.innerHTML = recent.length
                                         ? recent.map(function (v) {
-                                            var raw = v.content || v.caption || '';
-                                            var caption = raw.slice(0, 70) + (raw.length > 70 ? '…' : '');
+                                            const raw = v.content || v.caption || '';
+                                            const caption = raw.slice(0, 70) + (raw.length > 70 ? '…' : '');
                                             return '<tr>' +
                                                 '<td>' + escapeHtml(caption || '—') + '</td>' +
                                                 '<td><span class="tag ok">' + escapeHtml(v.platform || '—') + '</span></td>' +
@@ -5672,7 +5674,7 @@
                             }
                         }
 
-                        var refBtn = $('analytics-refresh-btn');
+                        const refBtn = $('analytics-refresh-btn');
                         if (refBtn) refBtn.addEventListener('click', load);
 
                         window.__adminPanels = window.__adminPanels || {};
@@ -5687,7 +5689,7 @@
 
                         function rateClass(num, total) {
                             if (!total) return '';
-                            var pct = (num / total) * 100;
+                            const pct = (num / total) * 100;
                             if (pct >= 80) return 'emerald';
                             if (pct >= 50) return 'gold';
                             return 'rose';
@@ -5701,33 +5703,33 @@
 
                         async function load() {
                             try {
-                                var data = await api('/assets/analytics');
+                                const data = await api('/assets/analytics');
 
-                                var total = data.total || 0;
-                                var byStatus = data.by_status || [];
-                                var byBrand = data.by_brand || [];
-                                var byType = data.by_media_type || [];
-                                var byCat = data.by_category || [];
-                                var pending = data.oldest_pending || [];
-                                var approved = data.recently_approved || [];
+                                const total = data.total || 0;
+                                const byStatus = data.by_status || [];
+                                const byBrand = data.by_brand || [];
+                                const byType = data.by_media_type || [];
+                                const byCat = data.by_category || [];
+                                const pending = data.oldest_pending || [];
+                                const approved = data.recently_approved || [];
 
-                                var approvedCount = (byStatus.find(function (s) { return s.review_status === 'approved'; }) || {}).count || 0;
-                                var pendingCount = (byStatus.filter(function (s) { return s.review_status === 'draft' || s.review_status === 'pending'; })
+                                const approvedCount = (byStatus.find(function (s) { return s.review_status === 'approved'; }) || {}).count || 0;
+                                const pendingCount = (byStatus.filter(function (s) { return s.review_status === 'draft' || s.review_status === 'pending'; })
                                     .reduce(function (sum, s) { return sum + (s.count || 0); }, 0));
-                                var rejectedCount = (byStatus.find(function (s) { return s.review_status === 'rejected'; }) || {}).count || 0;
-                                var approvalPct = total ? ((approvedCount / total) * 100).toFixed(1) + '%' : '—';
+                                const rejectedCount = (byStatus.find(function (s) { return s.review_status === 'rejected'; }) || {}).count || 0;
+                                const approvalPct = total ? ((approvedCount / total) * 100).toFixed(1) + '%' : '—';
 
                                 $('ai-total').textContent = total.toLocaleString();
                                 $('ai-approved').textContent = approvedCount.toLocaleString();
                                 $('ai-pending').textContent = pendingCount.toLocaleString();
                                 $('ai-rejected').textContent = rejectedCount.toLocaleString();
 
-                                var rateEl = $('ai-approval-rate');
+                                const rateEl = $('ai-approval-rate');
                                 rateEl.textContent = approvalPct;
                                 rateEl.className = 'panel-kpi-value ' + rateClass(approvedCount, total);
 
                                 // Media type tag cloud
-                                var typeEl = $('ai-by-type');
+                                const typeEl = $('ai-by-type');
                                 typeEl.innerHTML = byType.length
                                     ? byType.map(function (t) {
                                         return '<span class="tag cyan" style="font-size:0.82rem">' +
@@ -5736,7 +5738,7 @@
                                     : '<span class="text-muted">No data</span>';
 
                                 // Category tag cloud
-                                var catEl = $('ai-by-category');
+                                const catEl = $('ai-by-category');
                                 catEl.innerHTML = byCat.length
                                     ? byCat.map(function (c) {
                                         return '<span class="tag" style="font-size:0.76rem;background:var(--border)">' +
@@ -5745,11 +5747,11 @@
                                     : '<span class="text-muted">No data</span>';
 
                                 // Brand breakdown table
-                                var brandTbody = $('ai-brand-tbody');
+                                const brandTbody = $('ai-brand-tbody');
                                 brandTbody.innerHTML = byBrand.length
                                     ? byBrand.map(function (b) {
-                                        var pct = b.total ? ((b.approved / b.total) * 100).toFixed(0) + '%' : '—';
-                                        var cls = rateClass(b.approved, b.total);
+                                        const pct = b.total ? ((b.approved / b.total) * 100).toFixed(0) + '%' : '—';
+                                        const cls = rateClass(b.approved, b.total);
                                         return '<tr>' +
                                             '<td><strong>' + escapeHtml(b.brand || '?') + '</strong></td>' +
                                             '<td>' + (b.total || 0) + '</td>' +
@@ -5763,7 +5765,7 @@
                                     : '<tr><td colspan="7" class="text-muted">No brand data.</td></tr>';
 
                                 // Oldest pending — with quick-approve action
-                                var pendTbody = $('ai-pending-tbody');
+                                const pendTbody = $('ai-pending-tbody');
                                 pendTbody.innerHTML = pending.length
                                     ? pending.map(function (a) {
                                         return '<tr>' +
@@ -5787,7 +5789,7 @@
                                 });
 
                                 // Recently approved table
-                                var appTbody = $('ai-approved-tbody');
+                                const appTbody = $('ai-approved-tbody');
                                 appTbody.innerHTML = approved.length
                                     ? approved.map(function (a) {
                                         return '<tr>' +
@@ -5805,7 +5807,7 @@
                             }
                         }
 
-                        var refBtn = $('asset-intel-refresh-btn');
+                        const refBtn = $('asset-intel-refresh-btn');
                         if (refBtn) refBtn.addEventListener('click', load);
 
                         window.__adminPanels = window.__adminPanels || {};
@@ -6015,9 +6017,9 @@
                         }
 
                         document.addEventListener('click', function (e) {
-                            var btn = e.target.closest('[data-retry-variant]');
+                            const btn = e.target.closest('[data-retry-variant]');
                             if (!btn) return;
-                            var id = btn.dataset.retryVariant;
+                            const id = btn.dataset.retryVariant;
                             btn.disabled = true;
                             btn.textContent = '…';
                             (async function () {
@@ -6195,7 +6197,7 @@
                         'use strict';
 
                         const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                        let activeBrands = new Set(Object.keys(BRAND_DEFS));
+                        const activeBrands = new Set(Object.keys(BRAND_DEFS));
                         let weekOffset = 0; // 0 = window starting this Sunday
                         let eventsMap = new Map(); // YYYY-MM-DD → [event, …]
                         let selectedDate = null;
@@ -6370,7 +6372,7 @@
                             if (todayBtn) todayBtn.addEventListener('click', function () { weekOffset = 0; selectedDate = null; load(); });
                             if (closeBtn) closeBtn.addEventListener('click', function () {
                                 selectedDate = null;
-                                var d = $('eco-cal-detail');
+                                const d = $('eco-cal-detail');
                                 if (d) d.classList.add('d-none');
                             });
                         }
@@ -6384,17 +6386,17 @@
                     // =================================================================
                     (function initCommunityPanel() {
                         'use strict';
-                        var allMembers = [];
+                        let allMembers = [];
 
                         async function load() {
-                            var tbody = $('community-members-tbody');
+                            const tbody = $('community-members-tbody');
                             if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="text-muted">Loading…</td></tr>';
                             try {
-                                var token = await (state.clerk && state.clerk.session ? state.clerk.session.getToken() : Promise.resolve(null));
+                                const token = await (state.clerk && state.clerk.session ? state.clerk.session.getToken() : Promise.resolve(null));
                                 if (!token) throw new Error('Not signed in');
-                                var resp = await fetch('/api/community/members', { headers: { Authorization: 'Bearer ' + token } });
+                                const resp = await fetch('/api/community/members', { headers: { Authorization: 'Bearer ' + token } });
                                 if (!resp.ok) throw new Error(resp.status + ' ' + resp.statusText);
-                                var data = await resp.json();
+                                const data = await resp.json();
                                 allMembers = Array.isArray(data.members) ? data.members : (Array.isArray(data) ? data : []);
                                 renderTable(allMembers);
                                 updateKPIs(allMembers);
@@ -6405,49 +6407,49 @@
 
                         function updateKPIs(members) {
                             $('cm-total').textContent = members.length;
-                            var now = Date.now();
-                            var active = members.filter(function (m) {
-                                var t = m.last_active || m.updated_at || m.created_at;
+                            const now = Date.now();
+                            const active = members.filter(function (m) {
+                                const t = m.last_active || m.updated_at || m.created_at;
                                 return t && (now - new Date(t).getTime()) < 30 * 86400 * 1000;
                             }).length;
                             $('cm-active').textContent = active;
-                            var totalXP = members.reduce(function (s, m) { return s + Number(m.xp || m.total_xp || 0); }, 0);
+                            const totalXP = members.reduce(function (s, m) { return s + Number(m.xp || m.total_xp || 0); }, 0);
                             $('cm-xp').textContent = totalXP.toLocaleString();
 
                             // New KPIs
-                            var totalBadges = members.reduce(function (s, m) { return s + (Array.isArray(m.badges) ? m.badges.length : Number(m.badge_count || 0)); }, 0);
-                            var suspendedCount = members.filter(function (m) { return m.suspended; }).length;
+                            const totalBadges = members.reduce(function (s, m) { return s + (Array.isArray(m.badges) ? m.badges.length : Number(m.badge_count || 0)); }, 0);
+                            const suspendedCount = members.filter(function (m) { return m.suspended; }).length;
                             if ($('cm-badges')) $('cm-badges').textContent = totalBadges;
                             if ($('cm-suspended')) $('cm-suspended').textContent = suspendedCount;
                         }
 
                         function renderTable(members) {
-                            var search = ($('community-search') || {}).value || '';
-                            var filtered = members;
+                            const search = ($('community-search') || {}).value || '';
+                            let filtered = members;
                             if (search) {
-                                var q = search.toLowerCase();
+                                const q = search.toLowerCase();
                                 filtered = members.filter(function (m) {
                                     return (m.email || '').toLowerCase().includes(q) ||
                                         (m.username || '').toLowerCase().includes(q) ||
                                         (m.full_name || '').toLowerCase().includes(q);
                                 });
                             }
-                            var tbody = $('community-members-tbody');
+                            const tbody = $('community-members-tbody');
                             if (!tbody) return;
                             if (!filtered.length) {
                                 tbody.innerHTML = '<tr><td colspan="9" class="text-muted">No members found.</td></tr>';
                                 return;
                             }
                             tbody.innerHTML = filtered.map(function (m) {
-                                var xp = Number(m.xp || m.total_xp || 0);
-                                var level = m.level || (Math.floor(xp / 100) + 1);
-                                var badgeCount = Array.isArray(m.badges) ? m.badges.length : Number(m.badge_count || 0);
-                                var streak = Number(m.current_streak || 0);
-                                var isSuspended = !!m.suspended;
-                                var statusClass = isSuspended ? 'fail' : 'pass';
-                                var statusLabel = isSuspended ? 'Suspended' : 'Active';
-                                var suspendLabel = isSuspended ? 'Unsuspend' : 'Suspend';
-                                var uid = encodeURIComponent(m.user_id || m.id || '');
+                                const xp = Number(m.xp || m.total_xp || 0);
+                                const level = m.level || (Math.floor(xp / 100) + 1);
+                                const badgeCount = Array.isArray(m.badges) ? m.badges.length : Number(m.badge_count || 0);
+                                const streak = Number(m.current_streak || 0);
+                                const isSuspended = !!m.suspended;
+                                const statusClass = isSuspended ? 'fail' : 'pass';
+                                const statusLabel = isSuspended ? 'Suspended' : 'Active';
+                                const suspendLabel = isSuspended ? 'Unsuspend' : 'Suspend';
+                                const uid = encodeURIComponent(m.user_id || m.id || '');
                                 return '<tr>' +
                                     '<td>' + escapeHtml(m.full_name || m.username || m.email || '—') + '</td>' +
                                     '<td>Lv ' + level + '</td>' +
@@ -6466,15 +6468,15 @@
 
                         // Suspend / unsuspend action
                         document.addEventListener('click', function (e) {
-                            var btn = e.target.closest('.cm-suspend-btn');
+                            const btn = e.target.closest('.cm-suspend-btn');
                             if (!btn) return;
-                            var uid = btn.getAttribute('data-uid');
-                            var wasSuspended = btn.getAttribute('data-suspended') === 'true';
+                            const uid = btn.getAttribute('data-uid');
+                            const wasSuspended = btn.getAttribute('data-suspended') === 'true';
                             (async function () {
                                 try {
-                                    var token = await (state.clerk && state.clerk.session ? state.clerk.session.getToken() : Promise.resolve(null));
+                                    const token = await (state.clerk && state.clerk.session ? state.clerk.session.getToken() : Promise.resolve(null));
                                     if (!token) throw new Error('Not signed in');
-                                    var resp = await fetch('/api/community/members/' + uid + '/suspend', {
+                                    const resp = await fetch('/api/community/members/' + uid + '/suspend', {
                                         method: 'PUT',
                                         headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
                                         body: JSON.stringify({ suspended: !wasSuspended })
@@ -6488,15 +6490,15 @@
                             })();
                         });
 
-                        var searchTimer;
-                        var searchEl = $('community-search');
+                        let searchTimer;
+                        const searchEl = $('community-search');
                         if (searchEl) {
                             searchEl.addEventListener('input', function () {
                                 clearTimeout(searchTimer);
                                 searchTimer = setTimeout(function () { renderTable(allMembers); }, 200);
                             });
                         }
-                        var refBtn = $('community-refresh-btn');
+                        const refBtn = $('community-refresh-btn');
                         if (refBtn) refBtn.addEventListener('click', load);
 
                         window.__adminPanels = window.__adminPanels || {};
@@ -6508,12 +6510,12 @@
                     // =================================================================
                     (function initQueueHealthPanel() {
                         'use strict';
-                        var activePlatform = 'all';
+                        let activePlatform = 'all';
 
                         // Classify error messages into categories
                         function classifyError(err) {
                             if (!err) return 'unknown';
-                            var e = err.toLowerCase();
+                            const e = err.toLowerCase();
                             if (e.includes('401') || e.includes('403') || e.includes('unauthorized') || e.includes('token') || e.includes('auth') || e.includes('expired')) return 'auth';
                             if (e.includes('429') || e.includes('rate') || e.includes('throttl') || e.includes('too many')) return 'rate-limit';
                             if (e.includes('timeout') || e.includes('timed out') || e.includes('econnrefused') || e.includes('network') || e.includes('dns') || e.includes('502') || e.includes('503') || e.includes('504')) return 'api-down';
@@ -6522,15 +6524,15 @@
                             return 'other';
                         }
 
-                        var errLabels = { 'auth': '🔑 Auth', 'rate-limit': '⏱ Rate Limit', 'api-down': '🔌 API Down', 'format': '📝 Format', 'duplicate': '♻ Duplicate', 'other': '❓ Other', 'unknown': '—' };
-                        var errColors = { 'auth': 'rose', 'rate-limit': 'gold', 'api-down': 'rose', 'format': 'cyan', 'duplicate': 'violet', 'other': '', 'unknown': '' };
+                        const errLabels = { 'auth': '🔑 Auth', 'rate-limit': '⏱ Rate Limit', 'api-down': '🔌 API Down', 'format': '📝 Format', 'duplicate': '♻ Duplicate', 'other': '❓ Other', 'unknown': '—' };
+                        const errColors = { 'auth': 'rose', 'rate-limit': 'gold', 'api-down': 'rose', 'format': 'cyan', 'duplicate': 'violet', 'other': '', 'unknown': '' };
 
                         function load() {
-                            var variants = state.variants || [];
-                            var failed = variants.filter(function (v) { return v.status === 'failed'; });
-                            var pending = variants.filter(function (v) { return v.status === 'scheduled' || v.status === 'pending'; });
-                            var published = variants.filter(function (v) { return v.status === 'published'; });
-                            var highRetry = failed.filter(function (v) { return Number(v.retry_count || 0) >= 3; });
+                            const variants = state.variants || [];
+                            const failed = variants.filter(function (v) { return v.status === 'failed'; });
+                            const pending = variants.filter(function (v) { return v.status === 'scheduled' || v.status === 'pending'; });
+                            const published = variants.filter(function (v) { return v.status === 'published'; });
+                            const highRetry = failed.filter(function (v) { return Number(v.retry_count || 0) >= 3; });
 
                             $('qh-failed').textContent = failed.length;
                             $('qh-pending').textContent = pending.length;
@@ -6538,18 +6540,18 @@
                             $('qh-high-retry').textContent = highRetry.length;
 
                             // Success rate
-                            var total = published.length + failed.length;
-                            var rate = total > 0 ? Math.round((published.length / total) * 100) : 0;
-                            var rateEl = $('qh-success-rate');
+                            const total = published.length + failed.length;
+                            const rate = total > 0 ? Math.round((published.length / total) * 100) : 0;
+                            const rateEl = $('qh-success-rate');
                             if (rateEl) {
                                 rateEl.textContent = total > 0 ? rate + '%' : '—';
                                 rateEl.className = 'panel-kpi-value ' + (rate >= 90 ? 'emerald' : rate >= 70 ? 'gold' : 'rose');
                             }
 
                             // Error breakdown
-                            var errCounts = {};
-                            failed.forEach(function (v) { var t = classifyError(v.last_error); errCounts[t] = (errCounts[t] || 0) + 1; });
-                            var breakdownEl = $('qh-error-breakdown');
+                            const errCounts = {};
+                            failed.forEach(function (v) { const t = classifyError(v.last_error); errCounts[t] = (errCounts[t] || 0) + 1; });
+                            const breakdownEl = $('qh-error-breakdown');
                             if (breakdownEl) {
                                 if (!failed.length) {
                                     breakdownEl.innerHTML = '<div class="panel-kpi"><div class="panel-kpi-value emerald">0</div><div class="panel-kpi-label">No errors</div></div>';
@@ -6561,11 +6563,11 @@
                             }
 
                             // Platform filter tabs — build dynamically
-                            var platforms = {};
+                            const platforms = {};
                             variants.forEach(function (v) { if (v.platform) platforms[v.platform] = true; });
-                            var filterEl = $('qh-platform-filter');
+                            const filterEl = $('qh-platform-filter');
                             if (filterEl) {
-                                var btns = '<button class="dcc-view-btn' + (activePlatform === 'all' ? ' active' : '') + '" data-qh-platform="all">All</button>';
+                                let btns = '<button class="dcc-view-btn' + (activePlatform === 'all' ? ' active' : '') + '" data-qh-platform="all">All</button>';
                                 Object.keys(platforms).sort().forEach(function (p) {
                                     btns += '<button class="dcc-view-btn' + (activePlatform === p ? ' active' : '') + '" data-qh-platform="' + escapeHtml(p) + '">' + escapeHtml(p) + '</button>';
                                 });
@@ -6573,16 +6575,16 @@
                             }
 
                             // Apply platform filter
-                            var filteredFailed = activePlatform === 'all' ? failed : failed.filter(function (v) { return v.platform === activePlatform; });
+                            const filteredFailed = activePlatform === 'all' ? failed : failed.filter(function (v) { return v.platform === activePlatform; });
 
                             // Failed variants table with error type column
-                            var failedTbody = $('qh-failed-tbody');
+                            const failedTbody = $('qh-failed-tbody');
                             if (failedTbody) {
                                 failedTbody.innerHTML = filteredFailed.length
                                     ? filteredFailed.map(function (v) {
-                                        var caption = (v.content || v.caption || '').slice(0, 55) + ((v.content || v.caption || '').length > 55 ? '…' : '');
-                                        var errType = classifyError(v.last_error);
-                                        var retryWarn = Number(v.retry_count || 0) >= 3 ? ' style="color:var(--accent-rose);font-weight:600"' : '';
+                                        const caption = (v.content || v.caption || '').slice(0, 55) + ((v.content || v.caption || '').length > 55 ? '…' : '');
+                                        const errType = classifyError(v.last_error);
+                                        const retryWarn = Number(v.retry_count || 0) >= 3 ? ' style="color:var(--accent-rose);font-weight:600"' : '';
                                         return '<tr>' +
                                             '<td>' + escapeHtml(caption || '—') + '</td>' +
                                             '<td><span class="tag fail">' + escapeHtml(v.platform || '—') + '</span></td>' +
@@ -6597,13 +6599,13 @@
                             }
 
                             // All variants table (recent 50)
-                            var filteredAll = activePlatform === 'all' ? variants : variants.filter(function (v) { return v.platform === activePlatform; });
-                            var allTbody = $('qh-all-tbody');
+                            const filteredAll = activePlatform === 'all' ? variants : variants.filter(function (v) { return v.platform === activePlatform; });
+                            const allTbody = $('qh-all-tbody');
                             if (allTbody) {
-                                var recent = [...filteredAll].sort(function (a, b) { return new Date(b.scheduled_at || 0) - new Date(a.scheduled_at || 0); }).slice(0, 50);
+                                const recent = [...filteredAll].sort(function (a, b) { return new Date(b.scheduled_at || 0) - new Date(a.scheduled_at || 0); }).slice(0, 50);
                                 allTbody.innerHTML = recent.length
                                     ? recent.map(function (v) {
-                                        var caption = (v.content || v.caption || '').slice(0, 55) + ((v.content || v.caption || '').length > 55 ? '…' : '');
+                                        const caption = (v.content || v.caption || '').slice(0, 55) + ((v.content || v.caption || '').length > 55 ? '…' : '');
                                         return '<tr>' +
                                             '<td>' + escapeHtml(caption || '—') + '</td>' +
                                             '<td>' + escapeHtml(v.platform || '—') + '</td>' +
@@ -6617,28 +6619,28 @@
                         }
 
                         // Platform filter delegation
-                        var filterEl = $('qh-platform-filter');
+                        const filterEl = $('qh-platform-filter');
                         if (filterEl) filterEl.addEventListener('click', function (e) {
-                            var btn = e.target.closest('[data-qh-platform]');
+                            const btn = e.target.closest('[data-qh-platform]');
                             if (!btn) return;
                             activePlatform = btn.getAttribute('data-qh-platform');
                             load();
                         });
 
-                        var refBtn = $('qh-refresh-btn');
+                        const refBtn = $('qh-refresh-btn');
                         if (refBtn) refBtn.addEventListener('click', load);
 
-                        var runBtn = $('run-queue-btn-qh');
+                        const runBtn = $('run-queue-btn-qh');
                         if (runBtn) runBtn.addEventListener('click', function () { runQueueNow().then(load); });
 
                         // Retry all failed: re-schedule each to now
-                        var retryAllBtn = $('retry-all-failed-btn');
+                        const retryAllBtn = $('retry-all-failed-btn');
                         if (retryAllBtn) {
                             retryAllBtn.addEventListener('click', async function () {
-                                var failed = (state.variants || []).filter(function (v) { return v.status === 'failed'; });
+                                const failed = (state.variants || []).filter(function (v) { return v.status === 'failed'; });
                                 if (!failed.length) { toast('No failed variants to retry.', 'info'); return; }
                                 try {
-                                    var now = new Date().toISOString();
+                                    const now = new Date().toISOString();
                                     await Promise.all(failed.map(function (v) {
                                         return api('/social/' + v.id, { method: 'PUT', body: { status: 'scheduled', scheduled_at: now, retry_count: 0, last_error: null } });
                                     }));
@@ -6661,8 +6663,8 @@
                     (function initCharactersPanel() {
                         'use strict';
 
-                        var STORAGE_KEY = 'gfd_character_registry';
-                        var defaultRegistry = [
+                        const STORAGE_KEY = 'gfd_character_registry';
+                        const defaultRegistry = [
                             {
                                 id: 'sheriff', name: 'The Sheriff', brand: 'gfv', emoji: '🤠',
                                 description: 'Friendly cowboy mascot. Target: 2D vector production asset in Rive (web) + Spine2D (video).',
@@ -6688,13 +6690,13 @@
                         ];
 
                         // ─── Data layer ────────────────────────────────────────────
-                        var registryCache = null; // in-memory cache for the session
+                        let registryCache = null; // in-memory cache for the session
 
                         async function loadRegistry() {
                             // 1. Try D1 via API
                             try {
-                                var data = await api('/characters');
-                                var reg = (data.characters && data.characters.length) ? data.characters : defaultRegistry;
+                                const data = await api('/characters');
+                                const reg = (data.characters && data.characters.length) ? data.characters : defaultRegistry;
                                 localStorage.setItem(STORAGE_KEY, JSON.stringify(reg)); // write-through cache
                                 registryCache = reg;
                                 return reg;
@@ -6703,7 +6705,7 @@
                             }
                             // 2. Fall back to localStorage
                             try {
-                                var stored = localStorage.getItem(STORAGE_KEY);
+                                const stored = localStorage.getItem(STORAGE_KEY);
                                 if (stored) { registryCache = JSON.parse(stored); return registryCache; }
                             } catch (e2) { /* ignore */ }
                             // 3. Fall back to defaults
@@ -6727,34 +6729,34 @@
 
                         // ─── Render ────────────────────────────────────────────────
                         function renderRegistry(registry) {
-                            var container = $('char-cards-container');
+                            const container = $('char-cards-container');
                             if (!container) return;
                             // Remove all rendered char-cards, keep the empty-state sentinel
                             container.querySelectorAll('.char-card').forEach(function (el) { el.remove(); });
-                            var emptyState = container.querySelector('.char-empty-state');
+                            const emptyState = container.querySelector('.char-empty-state');
                             if (emptyState) emptyState.style.display = registry.length ? 'none' : '';
 
                             registry.forEach(function (ch) {
-                                var card = document.createElement('div');
+                                const card = document.createElement('div');
                                 card.className = 'char-card dynamic';
                                 card.id = 'char-' + ch.id;
 
-                                var poseHTML = (ch.poses || []).map(function (p) {
+                                const poseHTML = (ch.poses || []).map(function (p) {
                                     return '<span class="char-pose-tag ' + p.status + '" title="' + escapeHtml(p.note || p.status) + '"'
                                         + ' data-char="' + ch.id + '" data-pose="' + p.id + '" style="cursor:pointer">'
                                         + (p.status === 'blocked' ? '⚡ ' : p.status === 'done' ? '✓ ' : '')
                                         + escapeHtml(p.label) + '</span>';
                                 }).join('');
 
-                                var msHTML = (ch.milestones || []).map(function (m) {
-                                    var icon = m.status === 'done' ? '✅' : m.status === 'in-progress' ? '🔄' : '⬜';
+                                const msHTML = (ch.milestones || []).map(function (m) {
+                                    const icon = m.status === 'done' ? '✅' : m.status === 'in-progress' ? '🔄' : '⬜';
                                     return '<span class="char-pose-tag ' + m.status + '" title="Click to cycle status"'
                                         + ' data-char="' + ch.id + '" data-milestone="' + escapeHtml(m.phase) + '"'
                                         + ' style="cursor:pointer;font-size:0.72rem">'
                                         + icon + ' ' + escapeHtml(m.phase) + '</span>';
                                 }).join('');
 
-                                var toolsArr = Array.isArray(ch.tools) ? ch.tools
+                                const toolsArr = Array.isArray(ch.tools) ? ch.tools
                                     : (typeof ch.tools === 'string' ? ch.tools.split(',').map(function (t) { return t.trim(); }) : []);
 
                                 card.innerHTML = '<div class="char-avatar">' + escapeHtml(ch.emoji || '🎭') + '</div>'
@@ -6786,26 +6788,26 @@
                         }
 
                         // ─── Click handler: edit / delete / cycle pose / milestone ─
-                        var container = $('char-cards-container');
+                        const container = $('char-cards-container');
                         if (container) {
                             container.addEventListener('click', async function (e) {
                                 // ── Edit button ─────────────────────────────────────
-                                var editEl = e.target.closest('[data-char-edit]');
+                                const editEl = e.target.closest('[data-char-edit]');
                                 if (editEl) {
-                                    var editId = editEl.dataset.charEdit;
-                                    var reg0 = registryCache ? registryCache : await loadRegistry();
-                                    var ch0 = reg0.find(function (c) { return c.id === editId; });
+                                    const editId = editEl.dataset.charEdit;
+                                    const reg0 = registryCache ? registryCache : await loadRegistry();
+                                    const ch0 = reg0.find(function (c) { return c.id === editId; });
                                     if (ch0) openEditModal(ch0);
                                     return;
                                 }
 
                                 // ── Delete button ────────────────────────────────────
-                                var delEl = e.target.closest('[data-char-delete]');
+                                const delEl = e.target.closest('[data-char-delete]');
                                 if (delEl) {
-                                    var delId = delEl.dataset.charDelete;
-                                    var reg1 = registryCache ? registryCache : await loadRegistry();
-                                    var ch1 = reg1.find(function (c) { return c.id === delId; });
-                                    var charName = ch1 ? ch1.name : delId;
+                                    const delId = delEl.dataset.charDelete;
+                                    const reg1 = registryCache ? registryCache : await loadRegistry();
+                                    const ch1 = reg1.find(function (c) { return c.id === delId; });
+                                    const charName = ch1 ? ch1.name : delId;
                                     if (!confirm('Delete "' + charName + '"? This cannot be undone.')) return;
                                     try {
                                         await api('/characters/' + delId, { method: 'DELETE' });
@@ -6819,22 +6821,22 @@
                                 }
 
                                 // ── Pose / milestone cycle ────────────────────────────
-                                var poseEl = e.target.closest('[data-pose]');
-                                var msEl = e.target.closest('[data-milestone]');
+                                const poseEl = e.target.closest('[data-pose]');
+                                const msEl = e.target.closest('[data-milestone]');
                                 if (!poseEl && !msEl) return;
 
-                                var reg = registryCache ? registryCache.slice() : await loadRegistry();
-                                var updated = null;
+                                const reg = registryCache ? registryCache.slice() : await loadRegistry();
+                                let updated = null;
 
                                 if (poseEl) {
-                                    var charId = poseEl.dataset.char;
-                                    var poseId = poseEl.dataset.pose;
-                                    var poseOrder = ['planned', 'in-progress', 'done', 'blocked'];
+                                    const charId = poseEl.dataset.char;
+                                    const poseId = poseEl.dataset.pose;
+                                    const poseOrder = ['planned', 'in-progress', 'done', 'blocked'];
                                     reg.forEach(function (ch) {
                                         if (ch.id !== charId) return;
                                         (ch.poses || []).forEach(function (p) {
                                             if (p.id !== poseId) return;
-                                            var idx = poseOrder.indexOf(p.status);
+                                            const idx = poseOrder.indexOf(p.status);
                                             p.status = poseOrder[(idx + 1) % poseOrder.length];
                                             p.note = p.status === 'blocked' ? 'Blocked' : '';
                                         });
@@ -6842,14 +6844,14 @@
                                     });
                                 }
                                 if (msEl) {
-                                    var charId2 = msEl.dataset.char;
-                                    var phase = msEl.dataset.milestone;
-                                    var msOrder = ['not-started', 'in-progress', 'done'];
+                                    const charId2 = msEl.dataset.char;
+                                    const phase = msEl.dataset.milestone;
+                                    const msOrder = ['not-started', 'in-progress', 'done'];
                                     reg.forEach(function (ch) {
                                         if (ch.id !== charId2) return;
                                         (ch.milestones || []).forEach(function (m) {
                                             if (m.phase !== phase) return;
-                                            var idx2 = msOrder.indexOf(m.status);
+                                            const idx2 = msOrder.indexOf(m.status);
                                             m.status = msOrder[(idx2 + 1) % msOrder.length];
                                         });
                                         updated = ch;
@@ -6863,7 +6865,7 @@
                         }
 
                         // ─── Add / Edit Character modal ───────────────────────────────
-                        var charModal = $('char-modal');
+                        const charModal = $('char-modal');
 
                         function openCharModal() {
                             if (!charModal) return;
@@ -6882,7 +6884,7 @@
 
                         function openEditModal(ch) {
                             if (!charModal) return;
-                            var toolsArr = Array.isArray(ch.tools) ? ch.tools
+                            const toolsArr = Array.isArray(ch.tools) ? ch.tools
                                 : (typeof ch.tools === 'string' ? ch.tools.split(',').map(function (t) { return t.trim(); }) : []);
                             $('char-modal-id').value = ch.id || '';
                             $('char-modal-name').value = ch.name || '';
@@ -6899,24 +6901,24 @@
 
                         function closeCharModal() { if (charModal) charModal.classList.add('d-none'); }
 
-                        var addBtn = $('char-add-btn');
-                        var closeBtn2 = $('char-modal-close');
-                        var cancelBtn2 = $('char-modal-cancel');
+                        const addBtn = $('char-add-btn');
+                        const closeBtn2 = $('char-modal-close');
+                        const cancelBtn2 = $('char-modal-cancel');
                         if (addBtn) addBtn.addEventListener('click', openCharModal);
                         if (closeBtn2) closeBtn2.addEventListener('click', closeCharModal);
                         if (cancelBtn2) cancelBtn2.addEventListener('click', closeCharModal);
                         if (charModal) charModal.addEventListener('click', function (e) { if (e.target === charModal) closeCharModal(); });
 
-                        var saveCharBtn = $('char-modal-save');
+                        const saveCharBtn = $('char-modal-save');
                         if (saveCharBtn) {
                             saveCharBtn.addEventListener('click', async function () {
-                                var name = ($('char-modal-name').value || '').trim();
+                                const name = ($('char-modal-name').value || '').trim();
                                 if (!name) { toast('Character name is required.', 'error'); return; }
-                                var toolsRaw = ($('char-modal-tools').value || '').trim();
-                                var existingId = ($('char-modal-id').value || '').trim();
-                                var existingCh = existingId && registryCache
+                                const toolsRaw = ($('char-modal-tools').value || '').trim();
+                                const existingId = ($('char-modal-id').value || '').trim();
+                                const existingCh = existingId && registryCache
                                     ? registryCache.find(function (c) { return c.id === existingId; }) : null;
-                                var payload = {
+                                const payload = {
                                     name: name,
                                     emoji: ($('char-modal-emoji').value || '').trim() || '🎭',
                                     brand: $('char-modal-brand').value || 'gfv',
@@ -6953,11 +6955,11 @@
 
                         // ─── Load + render ─────────────────────────────────────────
                         async function loadAndRender() {
-                            var reg = await loadRegistry();
+                            const reg = await loadRegistry();
                             renderRegistry(reg);
                         }
 
-                        var refBtn3 = $('char-refresh-btn');
+                        const refBtn3 = $('char-refresh-btn');
                         if (refBtn3) {
                             refBtn3.addEventListener('click', async function () {
                                 registryCache = null;
@@ -6975,13 +6977,13 @@
                     // =================================================================
                     (function initDonationsPanel() {
                         'use strict';
-                        var refBtn = $('donations-refresh-btn');
-                        var recordBtn = $('donations-record-btn');
+                        const refBtn = $('donations-refresh-btn');
+                        const recordBtn = $('donations-record-btn');
                         if (refBtn) refBtn.addEventListener('click', loadDonations);
                         if (recordBtn) recordBtn.addEventListener('click', openDonationModal);
 
                         // Modal wiring
-                        var modal = $('don-modal');
+                        const modal = $('don-modal');
                         function openDonationModal() {
                             if (!modal) return;
                             $('don-amount').value = '';
@@ -6995,18 +6997,18 @@
                         }
                         function closeDonationModal() { if (modal) modal.classList.add('d-none'); }
 
-                        var closeBtn = $('don-modal-close');
-                        var cancelBtn = $('don-modal-cancel');
+                        const closeBtn = $('don-modal-close');
+                        const cancelBtn = $('don-modal-cancel');
                         if (closeBtn) closeBtn.addEventListener('click', closeDonationModal);
                         if (cancelBtn) cancelBtn.addEventListener('click', closeDonationModal);
                         if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) closeDonationModal(); });
 
-                        var saveBtn = $('don-modal-save');
+                        const saveBtn = $('don-modal-save');
                         if (saveBtn) {
                             saveBtn.addEventListener('click', async function () {
-                                var amtRaw = parseFloat($('don-amount').value);
+                                const amtRaw = parseFloat($('don-amount').value);
                                 if (!amtRaw || amtRaw <= 0) { toast('Enter a valid amount.', 'error'); return; }
-                                var payload = {
+                                const payload = {
                                     amount_cents: Math.round(amtRaw * 100),
                                     project: ($('don-project').value || '').trim() || null,
                                     donor_name: ($('don-donor').value || '').trim() || null,
@@ -7035,7 +7037,7 @@
 
                         async function loadDonations() {
                             try {
-                                var data = await api('/donations');
+                                const data = await api('/donations');
                                 renderDonationKPIs(data);
                                 renderDonationTable(data.donations || []);
                             } catch (err) {
@@ -7048,10 +7050,10 @@
                         }
 
                         function renderDonationKPIs(data) {
-                            var totalEl = $('don-total');
-                            var monthEl = $('don-month');
-                            var countEl = $('don-count');
-                            var avgEl = $('don-avg');
+                            const totalEl = $('don-total');
+                            const monthEl = $('don-month');
+                            const countEl = $('don-count');
+                            const avgEl = $('don-avg');
                             if (totalEl) totalEl.textContent = fmtUSD(data.totalRaised || 0);
                             if (monthEl) monthEl.textContent = fmtUSD(data.thisMonth || 0);
                             if (countEl) countEl.textContent = String(data.count || 0);
@@ -7059,7 +7061,7 @@
                         }
 
                         function renderDonationTable(donations) {
-                            var tbody = $('donations-tbody');
+                            const tbody = $('donations-tbody');
                             if (!tbody) return;
                             if (!donations.length) {
                                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted)">'
@@ -7070,8 +7072,8 @@
                                 return;
                             }
                             tbody.innerHTML = donations.map(function (d) {
-                                var dt = d.created_at ? new Date(d.created_at + (d.created_at.includes('T') ? '' : 'T00:00:00Z')).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-                                var statusClass = d.status === 'succeeded' ? 'emerald' : d.status === 'failed' ? 'rose' : d.status === 'refunded' ? 'warn' : '';
+                                const dt = d.created_at ? new Date(d.created_at + (d.created_at.includes('T') ? '' : 'T00:00:00Z')).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                                const statusClass = d.status === 'succeeded' ? 'emerald' : d.status === 'failed' ? 'rose' : d.status === 'refunded' ? 'warn' : '';
                                 return '<tr>'
                                     + '<td>' + dt + '</td>'
                                     + '<td class="mono">' + fmtUSD(d.amount_cents) + (d.recurring ? ' <span style="color:var(--accent-cyan);font-size:0.75rem">↻</span>' : '') + '</td>'
@@ -7091,7 +7093,7 @@
                     // Data is stored in localStorage so it persists across sessions.
                     // ─────────────────────────────────────────────────────────────────
                     (function () {
-                        var STORAGE_KEY = 'gfd_storage_snapshot';
+                        const STORAGE_KEY = 'gfd_storage_snapshot';
 
                         function escHtml(s) {
                             return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -7109,11 +7111,11 @@
                         }
 
                         function renderSnapshot(snap) {
-                            var empty = $('storage-empty-state');
+                            const empty = $('storage-empty-state');
                             if (empty) empty.style.display = 'none';
 
                             // Meta row
-                            var metaRow = $('storage-meta-row');
+                            const metaRow = $('storage-meta-row');
                             if (metaRow && snap.meta) {
                                 $('storage-meta-machine').textContent = snap.meta.machine || '—';
                                 $('storage-meta-time').textContent = fmtTime(snap.meta.timestamp);
@@ -7121,15 +7123,15 @@
                             }
 
                             // Drive cards
-                            var drivesPanel = $('storage-drives-panel');
-                            var drivesGrid = $('storage-drives-grid');
+                            const drivesPanel = $('storage-drives-panel');
+                            const drivesGrid = $('storage-drives-grid');
                             if (drivesPanel && drivesGrid && snap.drives && snap.drives.length) {
                                 drivesPanel.style.display = 'block';
 
                                 // Growth summary from comparison
-                                var growthEl = $('storage-growth-summary');
+                                const growthEl = $('storage-growth-summary');
                                 if (growthEl && snap.comparison && snap.comparison.driveGrowth) {
-                                    var flagged = snap.comparison.driveGrowth.filter(function (g) { return g.flag; });
+                                    const flagged = snap.comparison.driveGrowth.filter(function (g) { return g.flag; });
                                     if (flagged.length) {
                                         growthEl.innerHTML = '<span class="storage-growth-flag">⚠ ' +
                                             flagged.map(function (g) { return g.drive + ' +' + g.growthGB + ' GB'; }).join(' · ') +
@@ -7140,7 +7142,7 @@
                                 }
 
                                 drivesGrid.innerHTML = snap.drives.map(function (d) {
-                                    var cls = barClass(d.pctUsed);
+                                    const cls = barClass(d.pctUsed);
                                     return '<div class="storage-drive-card">' +
                                         '<div class="storage-drive-header">' +
                                         '<span class="storage-drive-letter">' + escHtml(d.drive) + '</span>' +
@@ -7154,14 +7156,14 @@
                             }
 
                             // Hot-spots table
-                            var hsPanel = $('storage-hotspots-panel');
-                            var hsTbody = $('storage-hotspots-tbody');
+                            const hsPanel = $('storage-hotspots-panel');
+                            const hsTbody = $('storage-hotspots-tbody');
                             if (hsPanel && hsTbody && snap.hotspots && snap.hotspots.length) {
                                 hsPanel.style.display = 'block';
-                                var sorted = snap.hotspots.slice().sort(function (a, b) { return (b.sizeGB || 0) - (a.sizeGB || 0); });
+                                const sorted = snap.hotspots.slice().sort(function (a, b) { return (b.sizeGB || 0) - (a.sizeGB || 0); });
 
                                 // Build growth lookup if available
-                                var growthLookup = {};
+                                const growthLookup = {};
                                 if (snap.comparison && snap.comparison.driveGrowth) {
                                     snap.comparison.driveGrowth.forEach(function (g) { growthLookup[g.drive] = g; });
                                 }
@@ -7174,19 +7176,19 @@
                             }
 
                             // Action items
-                            var actPanel = $('storage-actions-panel');
-                            var actGrid = $('storage-actions-grid');
+                            const actPanel = $('storage-actions-panel');
+                            const actGrid = $('storage-actions-grid');
                             if (actPanel && actGrid && snap.actionItems && snap.actionItems.length) {
                                 actPanel.style.display = 'block';
-                                var pending = snap.actionItems.filter(function (a) { return a.status !== 'done'; });
-                                var totalGB = pending.reduce(function (sum, a) { return sum + (a.potentialGB || 0); }, 0);
-                                var pendSumEl = $('storage-pending-summary');
+                                const pending = snap.actionItems.filter(function (a) { return a.status !== 'done'; });
+                                const totalGB = pending.reduce(function (sum, a) { return sum + (a.potentialGB || 0); }, 0);
+                                const pendSumEl = $('storage-pending-summary');
                                 if (pendSumEl) pendSumEl.textContent = pending.length + ' items · ~' + totalGB + ' GB recoverable';
 
                                 actGrid.innerHTML = snap.actionItems.map(function (a) {
-                                    var isDone = a.status === 'done';
-                                    var badgeCls = isDone ? 'badge-done' : (a.potentialGB > 50 ? 'badge-warn' : 'badge-pending');
-                                    var badgeLabel = isDone ? '✓ done' : 'pending';
+                                    const isDone = a.status === 'done';
+                                    const badgeCls = isDone ? 'badge-done' : (a.potentialGB > 50 ? 'badge-warn' : 'badge-pending');
+                                    const badgeLabel = isDone ? '✓ done' : 'pending';
                                     return '<div class="storage-action-item ' + (isDone ? 'done' : '') + '">' +
                                         '<span class="storage-action-badge ' + badgeCls + '">' + badgeLabel + '</span>' +
                                         '<div>' +
@@ -7199,8 +7201,8 @@
                             }
 
                             // node_modules
-                            var nmPanel = $('storage-nm-panel');
-                            var nmTbody = $('storage-nm-tbody');
+                            const nmPanel = $('storage-nm-panel');
+                            const nmTbody = $('storage-nm-tbody');
                             if (nmPanel && nmTbody && snap.nodeModules && snap.nodeModules.length) {
                                 nmPanel.style.display = 'block';
                                 nmTbody.innerHTML = snap.nodeModules.map(function (nm) {
@@ -7211,7 +7213,7 @@
                         }
 
                         function loadFromStorage() {
-                            var raw = localStorage.getItem(STORAGE_KEY);
+                            const raw = localStorage.getItem(STORAGE_KEY);
                             if (raw) {
                                 try {
                                     renderSnapshot(JSON.parse(raw));
@@ -7222,21 +7224,21 @@
                         }
 
                         // Load button → file picker
-                        var loadBtn = $('storage-load-btn');
-                        var fileInput = $('storage-file-input');
+                        const loadBtn = $('storage-load-btn');
+                        const fileInput = $('storage-file-input');
                         if (loadBtn && fileInput) {
                             loadBtn.addEventListener('click', function () { fileInput.click(); });
                             fileInput.addEventListener('change', function (e) {
-                                var file = e.target.files[0];
+                                const file = e.target.files[0];
                                 if (!file) return;
-                                var reader = new FileReader();
+                                const reader = new FileReader();
                                 reader.onload = function (ev) {
                                     try {
-                                        var snap = JSON.parse(ev.target.result);
+                                        const snap = JSON.parse(ev.target.result);
                                         localStorage.setItem(STORAGE_KEY, JSON.stringify(snap));
                                         // Reset panels
                                         ['storage-drives-panel', 'storage-hotspots-panel', 'storage-actions-panel', 'storage-nm-panel'].forEach(function (id) {
-                                            var el = $(id); if (el) el.style.display = 'none';
+                                            const el = $(id); if (el) el.style.display = 'none';
                                         });
                                         renderSnapshot(snap);
                                         toast('Snapshot loaded — ' + (snap.meta && snap.meta.machine ? snap.meta.machine : 'unknown'), 'success');
@@ -7250,21 +7252,21 @@
                         }
 
                         // Clear button
-                        var clearBtn = $('storage-clear-btn');
+                        const clearBtn = $('storage-clear-btn');
                         if (clearBtn) {
                             clearBtn.addEventListener('click', function () {
                                 localStorage.removeItem(STORAGE_KEY);
                                 ['storage-drives-panel', 'storage-hotspots-panel', 'storage-actions-panel', 'storage-nm-panel', 'storage-meta-row'].forEach(function (id) {
-                                    var el = $(id); if (el) el.style.display = 'none';
+                                    const el = $(id); if (el) el.style.display = 'none';
                                 });
-                                var empty = $('storage-empty-state'); if (empty) empty.style.display = 'block';
+                                const empty = $('storage-empty-state'); if (empty) empty.style.display = 'block';
                                 toast('Snapshot cleared.', 'success');
                             });
                         }
 
                         // Copy command button
-                        var copyCmdBtn = $('storage-copy-cmd-btn');
-                        var cmdText = $('storage-cmd-text');
+                        const copyCmdBtn = $('storage-copy-cmd-btn');
+                        const cmdText = $('storage-cmd-text');
                         if (copyCmdBtn && cmdText) {
                             copyCmdBtn.addEventListener('click', function () {
                                 navigator.clipboard.writeText(cmdText.textContent).then(function () {
@@ -7275,29 +7277,29 @@
                             });
                         }
 
-                        var storageLoaded = false;
+                        let storageLoaded = false;
                         async function ensureStorageLoaded() {
                             if (!storageLoaded) {
                                 storageLoaded = true;
                                 // Auto-load cloud asset stats from /api/cms/stats
-                                var cloudKpi = $('storage-cloud-kpi');
+                                const cloudKpi = $('storage-cloud-kpi');
                                 if (cloudKpi) {
                                     cloudKpi.innerHTML = '<span style="color:var(--text-muted);font-size:0.78rem">Loading cloud stats…</span>';
                                     try {
-                                        var stats = await api('/stats');
-                                        var totalBytes = stats.storage ? stats.storage.totalBytes : 0;
-                                        var fileCount = stats.storage ? stats.storage.fileCount : 0;
-                                        var pendRev = stats.pendingReview || 0;
-                                        var usedMB = (totalBytes / (1024 * 1024)).toFixed(1);
-                                        var usedPct = Math.min((totalBytes / (10 * 1024 * 1024 * 1024)) * 100, 100).toFixed(1);
-                                        var barCls = parseFloat(usedPct) >= 80 ? 'danger' : parseFloat(usedPct) >= 50 ? 'warn' : 'ok';
+                                        const stats = await api('/stats');
+                                        const totalBytes = stats.storage ? stats.storage.totalBytes : 0;
+                                        const fileCount = stats.storage ? stats.storage.fileCount : 0;
+                                        const pendRev = stats.pendingReview || 0;
+                                        const usedMB = (totalBytes / (1024 * 1024)).toFixed(1);
+                                        const usedPct = Math.min((totalBytes / (10 * 1024 * 1024 * 1024)) * 100, 100).toFixed(1);
+                                        const barCls = parseFloat(usedPct) >= 80 ? 'danger' : parseFloat(usedPct) >= 50 ? 'warn' : 'ok';
                                         // D1 data from enriched stats
-                                        var chars = stats.characters || 0;
-                                        var donCount = stats.donations ? (stats.donations.total || 0) : 0;
-                                        var donCents = stats.donations ? (stats.donations.totalCents || 0) : 0;
-                                        var openOps = stats.openOps || 0;
-                                        var auditTotal = stats.auditTotal || 0;
-                                        var donDollars = (donCents / 100).toFixed(0);
+                                        const chars = stats.characters || 0;
+                                        const donCount = stats.donations ? (stats.donations.total || 0) : 0;
+                                        const donCents = stats.donations ? (stats.donations.totalCents || 0) : 0;
+                                        const openOps = stats.openOps || 0;
+                                        const auditTotal = stats.auditTotal || 0;
+                                        const donDollars = (donCents / 100).toFixed(0);
                                         cloudKpi.innerHTML =
                                             '<div class="panel-kpis" style="margin:0">' +
                                             '<div class="panel-kpi"><div class="panel-kpi-label">R2 Assets</div><div class="panel-kpi-value">' + fileCount + '</div></div>' +
@@ -7331,62 +7333,62 @@
 
                     // ─── Daily Culture Calendar (Panel 20) ─────────────────────────
                     (function () {
-                        var DCC_SCHEDULE_URL = '/assets/data/featured-cultures.json';
-                        var DCC_CULTURES_URL = '/assets/data/cultures_index.json';
-                        var dccSchedule = [];
-                        var dccCultures = [];
-                        var dccMonthOffset = 0;
-                        var dccCurrentView = 'today';
-                        var dccLoaded = false;
+                        const DCC_SCHEDULE_URL = '/assets/data/featured-cultures.json';
+                        const DCC_CULTURES_URL = '/assets/data/cultures_index.json';
+                        let dccSchedule = [];
+                        let dccCultures = [];
+                        let dccMonthOffset = 0;
+                        let dccCurrentView = 'today';
+                        let dccLoaded = false;
 
                         // ── Helpers ──
                         function isoDate(d) {
-                            var y = d.getFullYear();
-                            var m = String(d.getMonth() + 1).padStart(2, '0');
-                            var day = String(d.getDate()).padStart(2, '0');
+                            const y = d.getFullYear();
+                            const m = String(d.getMonth() + 1).padStart(2, '0');
+                            const day = String(d.getDate()).padStart(2, '0');
                             return y + '-' + m + '-' + day;
                         }
                         function dayName(d) {
                             return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
                         }
-                        var MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
+                        const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
                             'July', 'August', 'September', 'October', 'November', 'December'];
 
                         // Get 2 cultures for a given date — deterministic from schedule
                         function getCulturesForDate(date) {
-                            var iso = isoDate(date);
-                            var dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
+                            const iso = isoDate(date);
+                            const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
 
                             // Find all entries for this date; entries without a slot field are treated as 'am'
-                            var all = dccSchedule.filter(function (e) { return e.date === iso; });
-                            var schedAm = null, schedPm = null;
-                            for (var i = 0; i < all.length; i++) {
+                            const all = dccSchedule.filter(function (e) { return e.date === iso; });
+                            let schedAm = null, schedPm = null;
+                            for (let i = 0; i < all.length; i++) {
                                 if (all[i].slot === 'pm') { if (!schedPm) schedPm = all[i]; }
                                 else { if (!schedAm) schedAm = all[i]; }
                             }
                             if (schedAm && schedPm) return { am: schedAm, pm: schedPm };
 
                             // Fallback pool uses only AM entries to avoid duplicates in deterministic mode
-                            var pool = dccSchedule.filter(function (e) { return e.slot !== 'pm'; });
+                            const pool = dccSchedule.filter(function (e) { return e.slot !== 'pm'; });
                             if (pool.length === 0) return { am: null, pm: null };
 
                             if (schedAm && !schedPm) {
                                 // AM scheduled, derive PM deterministically
-                                var pmIdx = ((dayOfYear * 7) + 3) % pool.length;
-                                var amIdx = pool.indexOf(schedAm);
+                                let pmIdx = ((dayOfYear * 7) + 3) % pool.length;
+                                const amIdx = pool.indexOf(schedAm);
                                 if (pmIdx === amIdx) pmIdx = (pmIdx + 1) % pool.length;
                                 return { am: schedAm, pm: pool[pmIdx] };
                             }
 
                             // Both deterministic (no explicit schedule for this date)
-                            var amIdx2 = (dayOfYear * 2) % pool.length;
-                            var pmIdx2 = (dayOfYear * 2 + 1) % pool.length;
+                            const amIdx2 = (dayOfYear * 2) % pool.length;
+                            const pmIdx2 = (dayOfYear * 2 + 1) % pool.length;
                             return { am: pool[amIdx2], pm: pool[pmIdx2] };
                         }
 
                         function getCultureMeta(slug) {
                             if (!slug || dccCultures.length === 0) return null;
-                            for (var i = 0; i < dccCultures.length; i++) {
+                            for (let i = 0; i < dccCultures.length; i++) {
                                 if (dccCultures[i].slug === slug) return dccCultures[i];
                             }
                             return null;
@@ -7399,13 +7401,13 @@
 
                         // ── Loading ──
                         function loadDccData() {
-                            var statusEl = $('dcc-data-status');
+                            const statusEl = $('dcc-data-status');
                             if (statusEl) { statusEl.textContent = 'Loading culture data\u2026'; statusEl.className = 'dcc-data-status loading'; }
 
-                            var scheduleReq = fetch(DCC_SCHEDULE_URL)
+                            const scheduleReq = fetch(DCC_SCHEDULE_URL)
                                 .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
                                 .catch(function (e) { console.warn('[DCC] Schedule fetch failed:', e.message); return []; });
-                            var culturesReq = fetch(DCC_CULTURES_URL)
+                            const culturesReq = fetch(DCC_CULTURES_URL)
                                 .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
                                 .catch(function (e) { console.warn('[DCC] Cultures fetch failed:', e.message); return []; });
 
@@ -7418,10 +7420,10 @@
                                         statusEl.textContent = '\u26a0 Could not load culture data \u2014 check /assets/data/ files are deployed.';
                                         statusEl.className = 'dcc-data-status error';
                                     } else {
-                                        var lastEntry = dccSchedule.length > 0 ? dccSchedule[dccSchedule.length - 1] : null;
-                                        var lastDate = lastEntry ? lastEntry.date : null;
-                                        var today = isoDate(new Date());
-                                        var isStale = lastDate && lastDate < today;
+                                        const lastEntry = dccSchedule.length > 0 ? dccSchedule[dccSchedule.length - 1] : null;
+                                        const lastDate = lastEntry ? lastEntry.date : null;
+                                        const today = isoDate(new Date());
+                                        const isStale = lastDate && lastDate < today;
                                         if (isStale) {
                                             statusEl.textContent = '\u26a0 Schedule covers through ' + lastDate + ' \u2014 showing rotation fallback for today. Update featured-cultures.json to extend.';
                                             statusEl.className = 'dcc-data-status warn';
@@ -7441,19 +7443,19 @@
 
                         // ── Render Overview hero ──
                         function renderOvCultures() {
-                            var today = new Date();
-                            var pair = getCulturesForDate(today);
+                            const today = new Date();
+                            const pair = getCulturesForDate(today);
 
-                            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                            var dateEl = $('ov-cultures-date');
+                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            const dateEl = $('ov-cultures-date');
                             if (dateEl) dateEl.textContent = months[today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
 
                             function fillOvSlot(slot, entry) {
-                                var nameEl = $('ov-' + slot + '-name');
-                                var regionEl = $('ov-' + slot + '-region');
+                                const nameEl = $('ov-' + slot + '-name');
+                                const regionEl = $('ov-' + slot + '-region');
                                 if (!nameEl) return;
                                 if (!entry) { nameEl.textContent = 'No culture scheduled'; return; }
-                                var meta = getCultureMeta(entry.slug);
+                                const meta = getCultureMeta(entry.slug);
                                 nameEl.textContent = meta ? meta.culture_name : prettifySlug(entry.slug);
                                 if (regionEl) regionEl.textContent = (meta && meta.region) ? meta.region : (entry.reason || '');
                             }
@@ -7461,20 +7463,20 @@
                             fillOvSlot('pm', pair.pm);
 
                             // Update the sidebar nav label under the Daily Calendar button
-                            var navToday = $('nav-cs-today');
+                            const navToday = $('nav-cs-today');
                             if (navToday && pair.am && pair.pm) {
-                                var amMeta = getCultureMeta(pair.am.slug);
-                                var pmMeta = getCultureMeta(pair.pm.slug);
-                                var amName = amMeta ? amMeta.culture_name : prettifySlug(pair.am.slug);
-                                var pmName = pmMeta ? pmMeta.culture_name : prettifySlug(pair.pm.slug);
+                                const amMeta = getCultureMeta(pair.am.slug);
+                                const pmMeta = getCultureMeta(pair.pm.slug);
+                                const amName = amMeta ? amMeta.culture_name : prettifySlug(pair.am.slug);
+                                const pmName = pmMeta ? pmMeta.culture_name : prettifySlug(pair.pm.slug);
                                 navToday.textContent = amName + ' · ' + pmName;
                             }
                         }
 
                         // ── Render today ──
                         function renderDccToday() {
-                            var today = new Date();
-                            var pair = getCulturesForDate(today);
+                            const today = new Date();
+                            const pair = getCulturesForDate(today);
 
                             fillCard('am', pair.am);
                             fillCard('pm', pair.pm);
@@ -7482,10 +7484,10 @@
                         }
 
                         function fillCard(slot, entry) {
-                            var name = $('dcc-' + slot + '-name');
-                            var region = $('dcc-' + slot + '-region');
-                            var reason = $('dcc-' + slot + '-reason');
-                            var fact = $('dcc-' + slot + '-fact');
+                            const name = $('dcc-' + slot + '-name');
+                            const region = $('dcc-' + slot + '-region');
+                            const reason = $('dcc-' + slot + '-reason');
+                            const fact = $('dcc-' + slot + '-fact');
                             if (!name) return;
 
                             if (!entry) {
@@ -7496,17 +7498,17 @@
                                 return;
                             }
 
-                            var meta = getCultureMeta(entry.slug);
+                            const meta = getCultureMeta(entry.slug);
                             name.textContent = meta ? meta.culture_name : prettifySlug(entry.slug);
                             if (region) region.textContent = meta && meta.region ? meta.region : '';
                             if (reason) reason.textContent = entry.reason || '';
                             if (fact) {
-                                var factText = entry.featured_fact || '';
+                                let factText = entry.featured_fact || '';
                                 // Fall back to index summary when schedule entry is a stub
                                 if (!factText || factText.includes('Initial stub') || factText.includes('requires enrichment')) {
-                                    var metaSummary = meta && meta.summary && !meta.summary.includes('Initial stub') ? meta.summary : '';
+                                    const metaSummary = meta && meta.summary && !meta.summary.includes('Initial stub') ? meta.summary : '';
                                     if (metaSummary) {
-                                        var dot = metaSummary.indexOf('. ');
+                                        const dot = metaSummary.indexOf('. ');
                                         factText = dot >= 0 ? metaSummary.substring(0, dot + 1) : metaSummary;
                                     } else {
                                         factText = 'Explore the rich traditions of the ' + (meta ? meta.culture_name : prettifySlug(entry.slug)) + ' people.';
@@ -7516,9 +7518,9 @@
                             }
 
                             // Show culture artwork
-                            var imgEl = $('dcc-' + slot + '-img');
+                            const imgEl = $('dcc-' + slot + '-img');
                             if (imgEl) {
-                                var imgPath = meta && meta.image ? meta.image : null;
+                                const imgPath = meta && meta.image ? meta.image : null;
                                 if (imgPath) {
                                     imgEl.src = 'https://www.culturesherpa.org' + imgPath;
                                     imgEl.alt = (meta ? meta.culture_name : '') + ' cultural art';
@@ -7530,15 +7532,15 @@
                         }
 
                         function renderUpcoming() {
-                            var container = $('dcc-upcoming-list');
+                            const container = $('dcc-upcoming-list');
                             if (!container) return;
-                            var html = '';
-                            for (var i = 1; i <= 7; i++) {
-                                var d = new Date();
+                            let html = '';
+                            for (let i = 1; i <= 7; i++) {
+                                const d = new Date();
                                 d.setDate(d.getDate() + i);
-                                var pair = getCulturesForDate(d);
-                                var amLabel = pair.am ? prettifySlug(pair.am.slug) : '—';
-                                var pmLabel = pair.pm ? prettifySlug(pair.pm.slug) : '—';
+                                const pair = getCulturesForDate(d);
+                                const amLabel = pair.am ? prettifySlug(pair.am.slug) : '—';
+                                const pmLabel = pair.pm ? prettifySlug(pair.pm.slug) : '—';
                                 html += '<div class="dcc-schedule-row">';
                                 html += '<span class="dcc-sched-date">' + dayName(d) + ' ' + d.getDate() + '</span>';
                                 html += '<span class="dcc-sched-slug"><span class="dot am" style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--accent-amber)"></span> ' + escapeHtml(amLabel) + '</span>';
@@ -7551,22 +7553,22 @@
 
                         // ── Render week ──
                         function renderDccWeek() {
-                            var grid = $('dcc-week-grid');
-                            var sched = $('dcc-week-schedule');
+                            const grid = $('dcc-week-grid');
+                            const sched = $('dcc-week-schedule');
                             if (!grid) return;
 
-                            var today = new Date();
-                            var dayOfWeek = today.getDay();
-                            var startOfWeek = new Date(today);
+                            const today = new Date();
+                            const dayOfWeek = today.getDay();
+                            const startOfWeek = new Date(today);
                             startOfWeek.setDate(today.getDate() - dayOfWeek);
 
-                            var gridHtml = '';
-                            var schedHtml = '';
-                            for (var i = 0; i < 7; i++) {
-                                var d = new Date(startOfWeek);
+                            let gridHtml = '';
+                            let schedHtml = '';
+                            for (let i = 0; i < 7; i++) {
+                                const d = new Date(startOfWeek);
                                 d.setDate(startOfWeek.getDate() + i);
-                                var isToday = isoDate(d) === isoDate(today);
-                                var pair = getCulturesForDate(d);
+                                const isToday = isoDate(d) === isoDate(today);
+                                const pair = getCulturesForDate(d);
 
                                 gridHtml += '<div class="dcc-day' + (isToday ? ' today' : '') + '">';
                                 gridHtml += '<div class="dcc-day-label">' + dayName(d) + '</div>';
@@ -7576,8 +7578,8 @@
                                 if (pair.pm) gridHtml += '<span class="dcc-slug pm">' + escapeHtml(prettifySlug(pair.pm.slug)) + '</span>';
                                 gridHtml += '</div></div>';
 
-                                var amL = pair.am ? prettifySlug(pair.am.slug) : '—';
-                                var pmL = pair.pm ? prettifySlug(pair.pm.slug) : '—';
+                                const amL = pair.am ? prettifySlug(pair.am.slug) : '—';
+                                const pmL = pair.pm ? prettifySlug(pair.pm.slug) : '—';
                                 schedHtml += '<div class="dcc-schedule-row">';
                                 schedHtml += '<span class="dcc-sched-date">' + dayName(d) + ' ' + d.getDate() + '</span>';
                                 schedHtml += '<span class="dcc-sched-slug"><span class="dot am" style="width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--accent-amber)"></span> ' + escapeHtml(amL) + '</span>';
@@ -7591,32 +7593,32 @@
 
                         // ── Render month ──
                         function renderDccMonth() {
-                            var grid = $('dcc-month-grid');
-                            var label = $('dcc-month-label');
+                            const grid = $('dcc-month-grid');
+                            const label = $('dcc-month-label');
                             if (!grid) return;
 
-                            var now = new Date();
-                            var viewMonth = new Date(now.getFullYear(), now.getMonth() + dccMonthOffset, 1);
+                            const now = new Date();
+                            const viewMonth = new Date(now.getFullYear(), now.getMonth() + dccMonthOffset, 1);
                             if (label) label.textContent = MONTH_NAMES[viewMonth.getMonth()] + ' ' + viewMonth.getFullYear();
 
-                            var todayISO = isoDate(now);
-                            var firstDay = viewMonth.getDay();
-                            var daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate();
+                            const todayISO = isoDate(now);
+                            const firstDay = viewMonth.getDay();
+                            const daysInMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0).getDate();
 
-                            var html = '';
-                            var dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                            for (var h = 0; h < 7; h++) {
+                            let html = '';
+                            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                            for (let h = 0; h < 7; h++) {
                                 html += '<div class="dcc-month-header">' + dayHeaders[h] + '</div>';
                             }
                             // Empty cells before 1st
-                            for (var e = 0; e < firstDay; e++) {
+                            for (let e = 0; e < firstDay; e++) {
                                 html += '<div class="dcc-month-cell empty"></div>';
                             }
-                            for (var d = 1; d <= daysInMonth; d++) {
-                                var dt = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), d);
-                                var iso = isoDate(dt);
-                                var isToday = iso === todayISO;
-                                var pair = getCulturesForDate(dt);
+                            for (let d = 1; d <= daysInMonth; d++) {
+                                const dt = new Date(viewMonth.getFullYear(), viewMonth.getMonth(), d);
+                                const iso = isoDate(dt);
+                                const isToday = iso === todayISO;
+                                const pair = getCulturesForDate(dt);
                                 html += '<div class="dcc-month-cell' + (isToday ? ' today' : '') + '">';
                                 html += '<div class="dcc-cell-num">' + d + '</div>';
                                 if (pair.am) html += '<span class="dcc-slug am" style="font-size:0.58rem;display:block;margin-bottom:1px">' + escapeHtml(prettifySlug(pair.am.slug)) + '</span>';
@@ -7628,37 +7630,37 @@
 
                         // ── Post Kit modal ──
                         function showShareKit(slot, entry, meta, focusPlatform) {
-                            var name = meta ? meta.culture_name : prettifySlug(entry.slug);
-                            var slug = entry.slug;
-                            var region = (meta && meta.region) ? meta.region : '';
-                            var summary = (meta && meta.summary) ? meta.summary : '';
+                            const name = meta ? meta.culture_name : prettifySlug(entry.slug);
+                            const slug = entry.slug;
+                            const region = (meta && meta.region) ? meta.region : '';
+                            const summary = (meta && meta.summary) ? meta.summary : '';
                             // First sentence of summary as fallback for missing featured_fact
-                            var summaryFirst = summary
+                            const summaryFirst = summary
                                 ? (summary.indexOf('. ') > -1 ? summary.substring(0, summary.indexOf('. ') + 1) : summary)
                                 : '';
-                            var fact = entry.featured_fact || summaryFirst;
+                            let fact = entry.featured_fact || summaryFirst;
                             // Filter stubs: fall back to index summary or generic text
                             if (!fact || fact.includes('Initial stub') || fact.includes('requires enrichment')) {
                                 fact = summaryFirst || ('Explore the rich traditions of the ' + name + ' people.');
                             }
-                            var url = 'https://www.culturesherpa.org/explore/culture/' + slug;
-                            var slotLabel = slot === 'am' ? 'Morning' : 'Evening';
-                            var imgPath = meta && meta.image ? 'https://www.culturesherpa.org' + meta.image.replace(/(\.[^.\/]+)$/, '_branded$1') : null;
-                            var imgPathPlain = meta && meta.image ? 'https://www.culturesherpa.org' + meta.image : null;
+                            const url = 'https://www.culturesherpa.org/explore/culture/' + slug;
+                            const slotLabel = slot === 'am' ? 'Morning' : 'Evening';
+                            const imgPath = meta && meta.image ? 'https://www.culturesherpa.org' + meta.image.replace(/(\.[^.\/]+)$/, '_branded$1') : null;
+                            const imgPathPlain = meta && meta.image ? 'https://www.culturesherpa.org' + meta.image : null;
 
                             // ── Per-platform caption generators ──
-                            var igTags = '#culture #art #travel #love #history #beautiful #photography #explore #world #people #diversity #heritage #indigenous #traditions #multicultural #globalcitizen #worldcultures #culturesherpa #culturalheritage #anthropology #folklore #humanstories #cultureiseverywhere #culturaleducation #educate #goodvibes #culturaldiversity #exploreculture #ethnicculture #cultureislife';
+                            const igTags = '#culture #art #travel #love #history #beautiful #photography #explore #world #people #diversity #heritage #indigenous #traditions #multicultural #globalcitizen #worldcultures #culturesherpa #culturalheritage #anthropology #folklore #humanstories #cultureiseverywhere #culturaleducation #educate #goodvibes #culturaldiversity #exploreculture #ethnicculture #cultureislife';
 
                             function igCaption() {
-                                var t = '🌍 ' + name + (region ? ' | ' + region : '') + '\n\n';
+                                let t = '🌍 ' + name + (region ? ' | ' + region : '') + '\n\n';
                                 if (fact) t += fact + '\n\n';
                                 t += 'Discover hundreds of world cultures at CultureSherpa.org 🔗\n\n' + url + '\n\n' + igTags;
                                 return t;
                             }
 
                             function liCaption() {
-                                var tags = '#CultureSherpa #CulturalIntelligence #DEI #GlobalMindset #CrossCulturalCommunication #Anthropology #WorldCultures #CulturalHeritage';
-                                var t = '🌍 ' + slotLabel + ' Culture Spotlight: ' + name;
+                                const tags = '#CultureSherpa #CulturalIntelligence #DEI #GlobalMindset #CrossCulturalCommunication #Anthropology #WorldCultures #CulturalHeritage';
+                                let t = '🌍 ' + slotLabel + ' Culture Spotlight: ' + name;
                                 if (region) t += ' (' + region + ')';
                                 t += '\n\n';
                                 if (fact) t += fact + '\n\n';
@@ -7672,22 +7674,22 @@
                             }
 
                             function xCaption() {
-                                var tags = '#CultureSherpa #WorldCultures #History';
-                                var head = '\uD83C\uDF0D ' + name + (region ? ' | ' + region : '');
-                                var suffix = '\n\n\u21DD ' + url + '\n\n' + tags;
-                                var full = head + (fact ? '\n\n' + fact : '') + suffix;
+                                const tags = '#CultureSherpa #WorldCultures #History';
+                                const head = '\uD83C\uDF0D ' + name + (region ? ' | ' + region : '');
+                                const suffix = '\n\n\u21DD ' + url + '\n\n' + tags;
+                                let full = head + (fact ? '\n\n' + fact : '') + suffix;
                                 if (twitterLength(full) > 280 && fact) {
-                                    var over = twitterLength(full) - 280;
-                                    var trimLen = Math.max(0, fact.length - over - 1);
-                                    var trimmedFact = trimLen > 0 ? fact.substring(0, trimLen) + '\u2026' : '';
+                                    const over = twitterLength(full) - 280;
+                                    const trimLen = Math.max(0, fact.length - over - 1);
+                                    const trimmedFact = trimLen > 0 ? fact.substring(0, trimLen) + '\u2026' : '';
                                     full = head + (trimmedFact ? '\n\n' + trimmedFact : '') + suffix;
                                 }
                                 return full;
                             }
 
                             function fbCaption() {
-                                var tags = '#CultureSherpa #WorldCultures #Diversity #Heritage #Culture';
-                                var t = '🌍 ' + slotLabel + ' Culture: ' + name;
+                                const tags = '#CultureSherpa #WorldCultures #Diversity #Heritage #Culture';
+                                let t = '🌍 ' + slotLabel + ' Culture: ' + name;
                                 if (region) t += ' (' + region + ')';
                                 t += '\n\n';
                                 if (fact) t += fact + '\n\n';
@@ -7695,20 +7697,20 @@
                                 return t;
                             }
 
-                            var VARIANTS = [
+                            const VARIANTS = [
                                 { id: 'instagram', label: '📷 Instagram', cls: 'p-instagram', caption: igCaption(), charLimit: 2200, actionLabel: '📷 Open Instagram', actionUrl: 'https://www.instagram.com/', tip: '<strong>Instagram steps:</strong> 1. Click <em>Copy Image</em> (saves art). 2. Click <em>Open Instagram</em> and create a new post, then paste the caption.<br><em>Desktop?</em> Try <a href="https://creator.instagram.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">creator.instagram.com</a> to upload directly from a browser.' },
                                 { id: 'linkedin', label: 'in LinkedIn', cls: 'p-linkedin', caption: liCaption(), charLimit: 3000, actionLabel: 'in Share on LinkedIn', actionUrl: 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), tip: '<strong>LinkedIn:</strong> Caption is auto-copied when you click the button. In the share dialog, click the poster dropdown → switch to <strong>CultureSherpa</strong> page, then paste the caption into the post body.' },
                                 { id: 'x', label: '𝕏 X / Twitter', cls: 'p-x', caption: xCaption(), charLimit: 280, actionLabel: '𝕏 Post to X', actionUrl: 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(xCaption()), tip: '<strong>X / Twitter:</strong> The intent URL pre-fills this caption. Caption also auto-copied for manual compose.' },
                                 { id: 'facebook', label: 'f Facebook', cls: 'p-facebook', caption: fbCaption(), charLimit: 63206, actionLabel: 'f Share on Facebook', actionUrl: 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), tip: '<strong>Facebook tip:</strong> The sharer dialog includes the link preview. Paste the copied caption into the post box for full narrative.' },
                             ];
 
-                            var activePlatformIdx = 0;
+                            let activePlatformIdx = 0;
                             if (focusPlatform) {
-                                var fi = VARIANTS.findIndex(function (v) { return v.id === focusPlatform; });
+                                const fi = VARIANTS.findIndex(function (v) { return v.id === focusPlatform; });
                                 if (fi > -1) activePlatformIdx = fi;
                             }
 
-                            var artSection = imgPath
+                            const artSection = imgPath
                                 ? '<div class="dcc-kit-art-wrap">'
                                 + '<a href="' + escapeHtml(imgPath) + '" id="dcc-kit-art-link" download target="_blank" rel="noopener" title="Click to save art">'
                                 + '<img class="dcc-kit-art" src="' + escapeHtml(imgPath) + '" alt="' + escapeHtml(name) + ' cultural art" id="dcc-kit-img">'
@@ -7717,27 +7719,27 @@
                                 + '</div>'
                                 : '<div class="dcc-kit-art-placeholder"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 14l5-5 4 4 3-3 5 5"/><circle cx="15" cy="8" r="2"/></svg><span>No art found \u2014 add an <em>image</em> field in cultures_index.json.</span></div>';
 
-                            var copyImgBtn = imgPath
+                            const copyImgBtn = imgPath
                                 ? '<button class="btn btn-secondary btn-micro" id="dcc-kit-copy-img">&#x1F5BC; Copy Image</button>'
                                 : '';
 
                             // Build tab HTML
-                            var tabsHtml = '<div class="dcc-kit-platabs" id="dcc-kit-platabs">'
+                            const tabsHtml = '<div class="dcc-kit-platabs" id="dcc-kit-platabs">'
                                 + VARIANTS.map(function (v, i) {
                                     return '<button class="dcc-kit-platab ' + v.cls + (i === activePlatformIdx ? ' active' : '') + '" data-platab="' + v.id + '">' + v.label + '</button>';
                                 }).join('')
                                 + '</div>';
 
-                            var activeVar = VARIANTS[activePlatformIdx];
-                            var capLen = activeVar.caption.length;
-                            var cntPct = capLen / activeVar.charLimit;
-                            var cntCls = cntPct > 1 ? 'over' : cntPct > 0.85 ? 'warn' : 'ok';
+                            const activeVar = VARIANTS[activePlatformIdx];
+                            const capLen = activeVar.caption.length;
+                            const cntPct = capLen / activeVar.charLimit;
+                            const cntCls = cntPct > 1 ? 'over' : cntPct > 0.85 ? 'warn' : 'ok';
 
-                            var xInitLen = activeVar.id === 'x' ? twitterLength(activeVar.caption) : capLen;
-                            var xInitCls = (xInitLen / activeVar.charLimit) > 1 ? 'over' : (xInitLen / activeVar.charLimit) > 0.85 ? 'warn' : 'ok';
-                            var displayCntCls = activeVar.id === 'x' ? xInitCls : cntCls;
-                            var displayCapLen = activeVar.id === 'x' ? xInitLen : capLen;
-                            var capAreaHtml = '<div class="dcc-kit-cap-header">'
+                            const xInitLen = activeVar.id === 'x' ? twitterLength(activeVar.caption) : capLen;
+                            const xInitCls = (xInitLen / activeVar.charLimit) > 1 ? 'over' : (xInitLen / activeVar.charLimit) > 0.85 ? 'warn' : 'ok';
+                            const displayCntCls = activeVar.id === 'x' ? xInitCls : cntCls;
+                            const displayCapLen = activeVar.id === 'x' ? xInitLen : capLen;
+                            const capAreaHtml = '<div class="dcc-kit-cap-header">'
                                 + '<span class="dcc-kit-section-label" style="margin:0">Caption</span>'
                                 + '<button class="dcc-kit-reset-btn" id="dcc-kit-reset-btn" title="Restore original caption" aria-label="Reset caption">&#x21ba; Reset</button>'
                                 + '</div>'
@@ -7746,16 +7748,16 @@
                                 + '<div class="dcc-kit-char-counter ' + displayCntCls + '" id="dcc-kit-char-counter">' + displayCapLen + ' / ' + activeVar.charLimit + (activeVar.id === 'x' ? ' tw' : '') + '</div>'
                                 + '</div>';
 
-                            var actionsHtml = '<div class="dcc-kit-actions" id="dcc-kit-actions-row">'
+                            const actionsHtml = '<div class="dcc-kit-actions" id="dcc-kit-actions-row">'
                                 + '<button class="btn btn-primary btn-micro" id="dcc-kit-copy-text">Copy Caption</button>'
                                 + copyImgBtn
                                 + '<button class="btn btn-secondary btn-micro" id="dcc-kit-save-draft" title="Save as CMS draft">&#128190; Save Draft</button>'
                                 + '<a class="btn-platform ' + activeVar.cls + '" href="' + escapeHtml(activeVar.actionUrl) + '" target="_blank" rel="noopener" id="dcc-kit-post-btn">' + activeVar.actionLabel + '</a>'
                                 + '</div>';
 
-                            var tipHtml = '<p class="dcc-kit-note" id="dcc-kit-platform-note">' + activeVar.tip + '</p>';
+                            const tipHtml = '<p class="dcc-kit-note" id="dcc-kit-platform-note">' + activeVar.tip + '</p>';
 
-                            var overlay = document.createElement('div');
+                            const overlay = document.createElement('div');
                             overlay.className = 'dcc-kit-overlay';
                             overlay.setAttribute('role', 'dialog');
                             overlay.setAttribute('aria-modal', 'true');
@@ -7791,19 +7793,19 @@
                                 }
                             });
 
-                            var kitKeyHandler = function (e) {
+                            const kitKeyHandler = function (e) {
                                 if (e.key === 'Escape') {
                                     closeKit();
                                     return;
                                 }
                                 // ── Focus trap ──
                                 if (e.key === 'Tab') {
-                                    var focusable = Array.from(overlay.querySelectorAll(
+                                    const focusable = Array.from(overlay.querySelectorAll(
                                         'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
                                     )).filter(function (el) { return !el.closest('[hidden]') && el.offsetParent !== null; });
                                     if (!focusable.length) return;
-                                    var first = focusable[0];
-                                    var last = focusable[focusable.length - 1];
+                                    const first = focusable[0];
+                                    const last = focusable[focusable.length - 1];
                                     if (e.shiftKey) {
                                         if (document.activeElement === first) { e.preventDefault(); last.focus(); }
                                     } else {
@@ -7815,20 +7817,20 @@
 
                             // ── Shared counter update helper ──
                             function updateKitCounter(rawLen, charLimit) {
-                                var counterEl = overlay.querySelector('#dcc-kit-char-counter');
+                                const counterEl = overlay.querySelector('#dcc-kit-char-counter');
                                 if (!counterEl) return;
-                                var v = VARIANTS[activePlatformIdx];
-                                var displayLen = rawLen;
+                                const v = VARIANTS[activePlatformIdx];
+                                let displayLen = rawLen;
                                 if (v.id === 'x') {
-                                    var capEl2 = overlay.querySelector('#dcc-kit-caption-text');
+                                    const capEl2 = overlay.querySelector('#dcc-kit-caption-text');
                                     if (capEl2) displayLen = twitterLength(capEl2.value);
                                 }
-                                var pct = displayLen / charLimit;
+                                const pct = displayLen / charLimit;
                                 counterEl.className = 'dcc-kit-char-counter ' + (pct > 1 ? 'over' : pct > 0.85 ? 'warn' : 'ok');
                                 counterEl.textContent = displayLen + ' / ' + charLimit + (v.id === 'x' ? ' tw' : '');
                                 // Disable X post button if over 280 Twitter chars
                                 if (v.id === 'x') {
-                                    var postBtn2 = overlay.querySelector('#dcc-kit-post-btn');
+                                    const postBtn2 = overlay.querySelector('#dcc-kit-post-btn');
                                     if (postBtn2) {
                                         if (pct > 1) {
                                             postBtn2.setAttribute('aria-disabled', 'true');
@@ -7845,18 +7847,18 @@
 
                             // ── Switch platform tab ──
                             function switchPlatformTab(idx) {
-                                var v = VARIANTS[idx];
+                                const v = VARIANTS[idx];
                                 // Update tab button states
                                 overlay.querySelectorAll('.dcc-kit-platab').forEach(function (btn, i) {
                                     btn.classList.toggle('active', i === idx);
                                 });
                                 // Update caption textarea
-                                var capEl = overlay.querySelector('#dcc-kit-caption-text');
+                                const capEl = overlay.querySelector('#dcc-kit-caption-text');
                                 if (capEl) capEl.value = v.caption;
                                 // Update char counter
                                 updateKitCounter(v.caption.length, v.charLimit);
                                 // Update action button
-                                var postBtn = overlay.querySelector('#dcc-kit-post-btn');
+                                const postBtn = overlay.querySelector('#dcc-kit-post-btn');
                                 if (postBtn) {
                                     postBtn.textContent = v.actionLabel;
                                     postBtn.className = 'btn-platform ' + v.cls;
@@ -7873,10 +7875,10 @@
                                     }
                                 }
                                 // Reset copy button label
-                                var copyBtn = overlay.querySelector('#dcc-kit-copy-text');
+                                const copyBtn = overlay.querySelector('#dcc-kit-copy-text');
                                 if (copyBtn) copyBtn.textContent = 'Copy Caption';
                                 // Update tip
-                                var noteEl = overlay.querySelector('#dcc-kit-platform-note');
+                                const noteEl = overlay.querySelector('#dcc-kit-platform-note');
                                 if (noteEl) noteEl.innerHTML = v.tip;
                             }
 
@@ -7888,13 +7890,13 @@
                             });
 
                             // ── Live char counter on textarea input ──
-                            var capTextarea = overlay.querySelector('#dcc-kit-caption-text');
+                            const capTextarea = overlay.querySelector('#dcc-kit-caption-text');
                             if (capTextarea) {
                                 capTextarea.addEventListener('input', function () {
                                     updateKitCounter(this.value.length, VARIANTS[activePlatformIdx].charLimit);
                                     // Keep X intent URL in sync with live edits
                                     if (VARIANTS[activePlatformIdx].id === 'x') {
-                                        var pBtn = overlay.querySelector('#dcc-kit-post-btn');
+                                        const pBtn = overlay.querySelector('#dcc-kit-post-btn');
                                         if (pBtn) pBtn.setAttribute('href', 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(this.value));
                                     }
                                 });
@@ -7902,13 +7904,13 @@
 
                             // ── Branded image onerror → fall back to plain image ──
                             if (imgPathPlain && imgPath && imgPath !== imgPathPlain) {
-                                var kitImg = overlay.querySelector('#dcc-kit-img');
+                                const kitImg = overlay.querySelector('#dcc-kit-img');
                                 if (kitImg) {
                                     kitImg.addEventListener('error', function () {
                                         if (!this._brandedFallback) {
                                             this._brandedFallback = true;
                                             this.src = imgPathPlain;
-                                            var artLink = overlay.querySelector('#dcc-kit-art-link');
+                                            const artLink = overlay.querySelector('#dcc-kit-art-link');
                                             if (artLink) artLink.href = imgPathPlain;
                                         }
                                     });
@@ -7916,11 +7918,11 @@
                             }
 
                             // ── Copy caption ──
-                            var copyBtn = overlay.querySelector('#dcc-kit-copy-text');
+                            const copyBtn = overlay.querySelector('#dcc-kit-copy-text');
                             if (copyBtn) {
                                 copyBtn.addEventListener('click', function () {
-                                    var capEl = overlay.querySelector('#dcc-kit-caption-text');
-                                    var caption = capEl ? capEl.value : VARIANTS[activePlatformIdx].caption;
+                                    const capEl = overlay.querySelector('#dcc-kit-caption-text');
+                                    const caption = capEl ? capEl.value : VARIANTS[activePlatformIdx].caption;
                                     navigator.clipboard.writeText(caption).then(function () {
                                         copyBtn.textContent = '\u2713 Copied!';
                                         setTimeout(function () { copyBtn.textContent = 'Copy Caption'; }, 2000);
@@ -7929,13 +7931,13 @@
                             }
 
                             // ── Save Draft to CMS ──
-                            var saveDraftBtn = overlay.querySelector('#dcc-kit-save-draft');
+                            const saveDraftBtn = overlay.querySelector('#dcc-kit-save-draft');
                             if (saveDraftBtn) {
                                 saveDraftBtn.addEventListener('click', function () {
-                                    var v = VARIANTS[activePlatformIdx];
-                                    var capEl = overlay.querySelector('#dcc-kit-caption-text');
-                                    var draftContent = capEl ? capEl.value : v.caption;
-                                    var currentSrc = (overlay.querySelector('#dcc-kit-img') || {}).src || imgPath;
+                                    const v = VARIANTS[activePlatformIdx];
+                                    const capEl = overlay.querySelector('#dcc-kit-caption-text');
+                                    const draftContent = capEl ? capEl.value : v.caption;
+                                    const currentSrc = (overlay.querySelector('#dcc-kit-img') || {}).src || imgPath;
                                     saveDraftBtn.textContent = 'Saving\u2026';
                                     saveDraftBtn.disabled = true;
                                     fetch('/api/cms/social', {
@@ -7965,29 +7967,29 @@
                             }
 
                             // ── Post action button ──
-                            var postBtnEl = overlay.querySelector('#dcc-kit-post-btn');
+                            const postBtnEl = overlay.querySelector('#dcc-kit-post-btn');
                             if (postBtnEl) {
                                 postBtnEl.addEventListener('click', function (e) {
-                                    var v = VARIANTS[activePlatformIdx];
-                                    var capEl = overlay.querySelector('#dcc-kit-caption-text');
-                                    var caption = capEl ? capEl.value : v.caption;
+                                    const v = VARIANTS[activePlatformIdx];
+                                    const capEl = overlay.querySelector('#dcc-kit-caption-text');
+                                    const caption = capEl ? capEl.value : v.caption;
                                     // Auto-copy caption before opening platform
                                     navigator.clipboard && navigator.clipboard.writeText(caption).catch(function () { });
                                     if (v.id === 'instagram') {
                                         e.preventDefault();
-                                        var igUrl = window.innerWidth >= 768
+                                        const igUrl = window.innerWidth >= 768
                                             ? 'https://creator.instagram.com'
                                             : 'https://www.instagram.com/';
-                                        var noteEl = overlay.querySelector('#dcc-kit-platform-note');
+                                        const noteEl = overlay.querySelector('#dcc-kit-platform-note');
                                         if (noteEl) noteEl.innerHTML = '<strong>Instagram steps:</strong> Caption copied! 1. Save the art (click image above or <em>Copy Image</em>). 2. Compose a new post, attach the art, then paste the caption.';
                                         setTimeout(function () { window.open(igUrl, '_blank', 'noopener'); }, 200);
                                     } else if (v.id === 'facebook') {
-                                        var fbNote = overlay.querySelector('#dcc-kit-platform-note');
+                                        const fbNote = overlay.querySelector('#dcc-kit-platform-note');
                                         if (fbNote) fbNote.innerHTML = '<strong>Facebook:</strong> Caption copied \u2014 paste it into the Facebook post text box after the link preview loads.';
                                         toast('Caption copied \u2014 paste it into the Facebook post.', 'info');
                                     } else if (v.id === 'linkedin') {
                                         // Update the share URL to use current caption if user edited it
-                                        var liNote = overlay.querySelector('#dcc-kit-platform-note');
+                                        const liNote = overlay.querySelector('#dcc-kit-platform-note');
                                         if (liNote) liNote.innerHTML = '<strong>LinkedIn:</strong> Caption copied \u2014 paste it in the share dialog. Switch posting as <strong>CultureSherpa</strong> page.';
                                         toast('Caption copied \u2014 paste it in LinkedIn. Switch to CultureSherpa page in the share dialog!', 'info');
                                     }
@@ -7995,16 +7997,16 @@
                             }
 
                             // ── Copy image (try clipboard API; fall back to download) ──
-                            var copyImgBtnEl = overlay.querySelector('#dcc-kit-copy-img');
+                            const copyImgBtnEl = overlay.querySelector('#dcc-kit-copy-img');
                             if (copyImgBtnEl && imgPath) {
                                 copyImgBtnEl.addEventListener('click', function () {
                                     copyImgBtnEl.textContent = 'Copying\u2026';
                                     copyImgBtnEl.disabled = true;
-                                    var currentImg = overlay.querySelector('#dcc-kit-img');
-                                    var effectiveImgPath = (currentImg && currentImg.src) || imgPath || imgPathPlain;
-                                    var dlExt = effectiveImgPath ? effectiveImgPath.split('.').pop().split('?')[0] || 'webp' : 'webp';
+                                    const currentImg = overlay.querySelector('#dcc-kit-img');
+                                    const effectiveImgPath = (currentImg && currentImg.src) || imgPath || imgPathPlain;
+                                    const dlExt = effectiveImgPath ? effectiveImgPath.split('.').pop().split('?')[0] || 'webp' : 'webp';
                                     function fallbackDownload() {
-                                        var a = document.createElement('a');
+                                        const a = document.createElement('a');
                                         a.href = effectiveImgPath;
                                         a.download = (slug || 'culture-art') + '_branded.' + dlExt;
                                         a.rel = 'noopener';
@@ -8019,10 +8021,10 @@
                                         fetch(effectiveImgPath, { mode: 'cors' })
                                             .then(function (r) { return r.blob(); })
                                             .then(function (blob) {
-                                                var img2 = new Image();
-                                                var objUrl = URL.createObjectURL(blob);
+                                                const img2 = new Image();
+                                                const objUrl = URL.createObjectURL(blob);
                                                 img2.onload = function () {
-                                                    var cv = document.createElement('canvas');
+                                                    const cv = document.createElement('canvas');
                                                     cv.width = img2.naturalWidth; cv.height = img2.naturalHeight;
                                                     cv.getContext('2d').drawImage(img2, 0, 0);
                                                     URL.revokeObjectURL(objUrl);
@@ -8048,16 +8050,16 @@
                             }
 
                             // ── Reset caption ──
-                            var resetBtn = overlay.querySelector('#dcc-kit-reset-btn');
+                            const resetBtn = overlay.querySelector('#dcc-kit-reset-btn');
                             if (resetBtn) {
                                 resetBtn.addEventListener('click', function () {
-                                    var v = VARIANTS[activePlatformIdx];
-                                    var capEl = overlay.querySelector('#dcc-kit-caption-text');
+                                    const v = VARIANTS[activePlatformIdx];
+                                    const capEl = overlay.querySelector('#dcc-kit-caption-text');
                                     if (capEl) {
                                         capEl.value = v.caption;
                                         updateKitCounter(v.caption.length, v.charLimit);
                                         if (v.id === 'x') {
-                                            var pBtn = overlay.querySelector('#dcc-kit-post-btn');
+                                            const pBtn = overlay.querySelector('#dcc-kit-post-btn');
                                             if (pBtn) pBtn.setAttribute('href', 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(v.caption));
                                         }
                                         capEl.focus();
@@ -8067,7 +8069,7 @@
                             }
 
                             // Focus close button for accessibility
-                            var closeBtn = overlay.querySelector('.dcc-kit-close');
+                            const closeBtn = overlay.querySelector('.dcc-kit-close');
                             if (closeBtn) closeBtn.focus();
                         }
 
@@ -8075,12 +8077,12 @@
                         // All platforms open the Post Kit modal pre-focused on the right tab.
                         // 'copy' is the only non-kit action (copies the page URL directly).
                         function shareCulture(slot, platform) {
-                            var pair = getCulturesForDate(new Date());
-                            var entry = slot === 'am' ? pair.am : pair.pm;
+                            const pair = getCulturesForDate(new Date());
+                            const entry = slot === 'am' ? pair.am : pair.pm;
                             if (!entry) { toast('No culture to share.', 'error'); return; }
 
                             if (platform === 'copy') {
-                                var copyUrl = 'https://www.culturesherpa.org/explore/culture/' + entry.slug;
+                                const copyUrl = 'https://www.culturesherpa.org/explore/culture/' + entry.slug;
                                 if (navigator.clipboard) {
                                     navigator.clipboard.writeText(copyUrl).then(function () {
                                         toast('Link copied!', 'success');
@@ -8093,9 +8095,9 @@
                                 return;
                             }
 
-                            var meta = getCultureMeta(entry.slug);
+                            const meta = getCultureMeta(entry.slug);
                             // 'kit' with no focusPlatform defaults to Instagram (first tab)
-                            var focusPlatform = platform === 'kit' ? null : platform;
+                            const focusPlatform = platform === 'kit' ? null : platform;
                             showShareKit(slot, entry, meta, focusPlatform);
                         }
 
@@ -8103,7 +8105,7 @@
                         function switchDccView(view) {
                             dccCurrentView = view;
                             ['today', 'week', 'month'].forEach(function (v) {
-                                var el = $('dcc-view-' + v);
+                                const el = $('dcc-view-' + v);
                                 if (el) el.style.display = v === view ? '' : 'none';
                             });
                             document.querySelectorAll('.dcc-view-btn').forEach(function (btn) {
@@ -8124,26 +8126,26 @@
                             });
                         });
 
-                        var prevBtn = $('dcc-month-prev');
-                        var nextBtn = $('dcc-month-next');
+                        const prevBtn = $('dcc-month-prev');
+                        const nextBtn = $('dcc-month-next');
                         if (prevBtn) prevBtn.addEventListener('click', function () { dccMonthOffset--; renderDccMonth(); });
                         if (nextBtn) nextBtn.addEventListener('click', function () { dccMonthOffset++; renderDccMonth(); });
 
-                        var refreshBtn = $('dcc-refresh-btn');
+                        const refreshBtn = $('dcc-refresh-btn');
                         if (refreshBtn) refreshBtn.addEventListener('click', function () { loadDccData(); toast('Refreshed culture calendar.', 'success'); });
 
                         // Export full featured-cultures.json with any in-session swaps applied
-                        var exportBtn = $('dcc-export-btn');
+                        const exportBtn = $('dcc-export-btn');
                         if (exportBtn) exportBtn.addEventListener('click', function () {
                             if (dccSchedule.length === 0) {
                                 toast('No schedule loaded yet — click Refresh first.', 'info');
                                 return;
                             }
-                            var json = JSON.stringify(dccSchedule, null, 2);
-                            var blob = new Blob([json], { type: 'application/json' });
-                            var url = URL.createObjectURL(blob);
-                            var a = document.createElement('a');
-                            var today = isoDate(new Date());
+                            const json = JSON.stringify(dccSchedule, null, 2);
+                            const blob = new Blob([json], { type: 'application/json' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            const today = isoDate(new Date());
                             a.href = url;
                             a.download = 'featured-cultures-' + today + '.json';
                             document.body.appendChild(a);
@@ -8154,23 +8156,23 @@
                         });
 
                         // Swap button handler (delegated) — opens culture picker modal
-                        var swapTargetDate = null;
-                        var swapTargetSlot = 'am';
+                        let swapTargetDate = null;
+                        let swapTargetSlot = 'am';
                         document.addEventListener('click', function (e) {
-                            var swapBtn = e.target.closest('.dcc-swap-btn');
+                            const swapBtn = e.target.closest('.dcc-swap-btn');
                             if (!swapBtn) return;
                             swapTargetDate = swapBtn.dataset.dccSwapDate;
                             swapTargetSlot = 'am';
-                            var modal = document.getElementById('dcc-swap-modal');
-                            var titleEl = document.getElementById('dcc-swap-title');
-                            var dateLabel = document.getElementById('dcc-swap-date-label');
-                            var searchInput = document.getElementById('dcc-swap-search');
+                            const modal = document.getElementById('dcc-swap-modal');
+                            const titleEl = document.getElementById('dcc-swap-title');
+                            const dateLabel = document.getElementById('dcc-swap-date-label');
+                            const searchInput = document.getElementById('dcc-swap-search');
                             if (!modal) return;
                             if (titleEl) titleEl.textContent = 'Swap Culture \u2014 ' + swapTargetDate;
                             if (dateLabel) {
-                                var pair = getCulturesForDate(new Date(swapTargetDate + 'T12:00:00'));
-                                var amName = pair.am ? prettifySlug(pair.am.slug) : '\u2014';
-                                var pmName = pair.pm ? prettifySlug(pair.pm.slug) : '\u2014';
+                                const pair = getCulturesForDate(new Date(swapTargetDate + 'T12:00:00'));
+                                const amName = pair.am ? prettifySlug(pair.am.slug) : '\u2014';
+                                const pmName = pair.pm ? prettifySlug(pair.pm.slug) : '\u2014';
                                 dateLabel.textContent = 'Current: AM = ' + amName + ' \u00b7 PM = ' + pmName;
                             }
                             // Reset slot buttons
@@ -8185,24 +8187,24 @@
 
                         // Slot toggle
                         document.addEventListener('click', function (e) {
-                            var slotBtn = e.target.closest('[data-swap-slot]');
+                            const slotBtn = e.target.closest('[data-swap-slot]');
                             if (!slotBtn) return;
                             swapTargetSlot = slotBtn.dataset.swapSlot;
-                            var modal = document.getElementById('dcc-swap-modal');
+                            const modal = document.getElementById('dcc-swap-modal');
                             if (modal) modal.querySelectorAll('[data-swap-slot]').forEach(function (b) {
                                 b.classList.toggle('active', b.dataset.swapSlot === swapTargetSlot);
                             });
                         });
 
                         // Search filter
-                        var swapSearchEl = document.getElementById('dcc-swap-search');
+                        const swapSearchEl = document.getElementById('dcc-swap-search');
                         if (swapSearchEl) swapSearchEl.addEventListener('input', function () { renderSwapList(this.value); });
 
                         function renderSwapList(query) {
-                            var listEl = document.getElementById('dcc-swap-list');
+                            const listEl = document.getElementById('dcc-swap-list');
                             if (!listEl) return;
-                            var q = (query || '').toLowerCase().trim();
-                            var filtered = dccCultures.filter(function (c) {
+                            const q = (query || '').toLowerCase().trim();
+                            const filtered = dccCultures.filter(function (c) {
                                 if (!q) return true;
                                 return (c.culture_name || '').toLowerCase().indexOf(q) !== -1 ||
                                     (c.slug || '').toLowerCase().indexOf(q) !== -1 ||
@@ -8212,9 +8214,9 @@
                                 listEl.innerHTML = '<div style="padding:1rem;color:var(--text-muted);text-align:center">No cultures match \u201c' + escapeHtml(q) + '\u201d</div>';
                                 return;
                             }
-                            var html = '';
-                            for (var i = 0; i < filtered.length; i++) {
-                                var c = filtered[i];
+                            let html = '';
+                            for (let i = 0; i < filtered.length; i++) {
+                                const c = filtered[i];
                                 html += '<div class="dcc-swap-item" data-swap-slug="' + escapeHtml(c.slug) + '">';
                                 html += '<div><div class="swap-name">' + escapeHtml(c.culture_name) + '</div>';
                                 html += '<div class="swap-region">' + escapeHtml(c.region || '') + '</div></div></div>';
@@ -8224,21 +8226,21 @@
 
                         // Culture selection — apply swap
                         document.addEventListener('click', function (e) {
-                            var item = e.target.closest('.dcc-swap-item');
+                            const item = e.target.closest('.dcc-swap-item');
                             if (!item || !swapTargetDate) return;
-                            var slug = item.dataset.swapSlug;
-                            var meta = getCultureMeta(slug);
-                            var name = meta ? meta.culture_name : prettifySlug(slug);
+                            const slug = item.dataset.swapSlug;
+                            const meta = getCultureMeta(slug);
+                            const name = meta ? meta.culture_name : prettifySlug(slug);
 
                             // Remove existing entry for this date+slot
                             dccSchedule = dccSchedule.filter(function (entry) {
                                 if (entry.date !== swapTargetDate) return true;
-                                var entrySlot = entry.slot || 'am';
+                                const entrySlot = entry.slot || 'am';
                                 return entrySlot !== swapTargetSlot;
                             });
 
                             // Add new entry
-                            var newEntry = { date: swapTargetDate, slug: slug, reason: 'Admin swap', featured_fact: (meta && meta.summary) ? meta.summary : '' };
+                            const newEntry = { date: swapTargetDate, slug: slug, reason: 'Admin swap', featured_fact: (meta && meta.summary) ? meta.summary : '' };
                             if (swapTargetSlot === 'pm') newEntry.slot = 'pm';
                             dccSchedule.push(newEntry);
                             dccSchedule.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
@@ -8251,18 +8253,18 @@
                             renderOvCultures();
 
                             // Close modal
-                            var modal = document.getElementById('dcc-swap-modal');
+                            const modal = document.getElementById('dcc-swap-modal');
                             if (modal) modal.classList.remove('active');
                             toast('Swapped ' + swapTargetSlot.toUpperCase() + ' slot on ' + swapTargetDate + ' \u2192 ' + name, 'success');
                         });
 
                         // Copy JSON for the swapped date
-                        var copyBtn = document.getElementById('dcc-swap-copy-btn');
+                        const copyBtn = document.getElementById('dcc-swap-copy-btn');
                         if (copyBtn) copyBtn.addEventListener('click', function () {
                             if (!swapTargetDate) return;
-                            var entries = dccSchedule.filter(function (e) { return e.date === swapTargetDate; });
+                            const entries = dccSchedule.filter(function (e) { return e.date === swapTargetDate; });
                             if (entries.length === 0) { toast('No entries for ' + swapTargetDate, 'info'); return; }
-                            var json = JSON.stringify(entries, null, 2);
+                            const json = JSON.stringify(entries, null, 2);
                             navigator.clipboard.writeText(json).then(function () {
                                 toast('Copied ' + entries.length + ' entry JSON to clipboard', 'success');
                             });
@@ -8287,18 +8289,18 @@
                     (function initNftStudioPanel() {
                         'use strict';
 
-                        var nftCollections = [];
-                        var nftTokens = [];
-                        var activeCollId = null;
+                        let nftCollections = [];
+                        let nftTokens = [];
+                        let activeCollId = null;
 
-                        var RARITY_COLORS = {
+                        const RARITY_COLORS = {
                             Common: 'background:rgba(107,114,128,0.2);color:#9ca3af',
                             Uncommon: 'background:rgba(34,197,94,0.2);color:#4ade80',
                             Rare: 'background:rgba(59,130,246,0.2);color:#60a5fa',
                             Epic: 'background:rgba(168,85,247,0.2);color:#c084fc',
                             Legendary: 'background:rgba(234,179,8,0.2);color:#facc15',
                         };
-                        var STATUS_COLORS = {
+                        const STATUS_COLORS = {
                             draft: 'background:rgba(107,114,128,0.2);color:#9ca3af',
                             watermarked: 'background:rgba(20,184,166,0.2);color:#2dd4bf',
                             ready: 'background:rgba(59,130,246,0.2);color:#60a5fa',
@@ -8312,7 +8314,7 @@
 
                         async function load() {
                             try {
-                                var [collRes, tokRes] = await Promise.all([
+                                const [collRes, tokRes] = await Promise.all([
                                     api('/nft/collections'),
                                     api('/nft/tokens?limit=500' + (activeCollId ? '&collection_id=' + activeCollId : '')),
                                 ]);
@@ -8327,9 +8329,9 @@
                         }
 
                         function renderKPIs() {
-                            var byStatus = {};
+                            const byStatus = {};
                             nftTokens.forEach(function (t) { byStatus[t.status] = (byStatus[t.status] || 0) + 1; });
-                            var el = function (id, v) { var e = $(id); if (e) e.textContent = v; };
+                            const el = function (id, v) { const e = $(id); if (e) e.textContent = v; };
                             el('nft-kpi-total', nftTokens.length);
                             el('nft-kpi-minted', byStatus.minted || 0);
                             el('nft-kpi-ready', byStatus.ready || 0);
@@ -8337,12 +8339,12 @@
                         }
 
                         function renderCollections() {
-                            var list = $('nft-collections-list');
+                            const list = $('nft-collections-list');
                             if (!list) return;
-                            var allBtn = '<button class="btn btn-secondary" style="font-size:0.8rem;padding:0.3rem 0.6rem;text-align:left' +
+                            const allBtn = '<button class="btn btn-secondary" style="font-size:0.8rem;padding:0.3rem 0.6rem;text-align:left' +
                                 (activeCollId === null ? ';background:var(--accent-bg)' : '') +
                                 '" data-coll-id="">All Collections</button>';
-                            var collBtns = nftCollections.map(function (c) {
+                            const collBtns = nftCollections.map(function (c) {
                                 return '<button class="btn btn-secondary" style="font-size:0.8rem;padding:0.3rem 0.6rem;text-align:left' +
                                     (activeCollId === c.id ? ';background:var(--accent-bg)' : '') +
                                     '" data-coll-id="' + c.id + '">' + escapeHtml(c.name) + '</button>';
@@ -8357,17 +8359,17 @@
                         }
 
                         function renderTokens() {
-                            var tbody = $('nft-tokens-tbody');
+                            const tbody = $('nft-tokens-tbody');
                             if (!tbody) return;
-                            var collMap = {};
+                            const collMap = {};
                             nftCollections.forEach(function (c) { collMap[c.id] = c.name; });
                             if (!nftTokens.length) {
                                 tbody.innerHTML = '<tr><td colspan="8" class="text-muted" style="text-align:center;padding:2rem">No tokens yet. Create a collection and add tokens to get started.</td></tr>';
                                 return;
                             }
                             tbody.innerHTML = nftTokens.map(function (t) {
-                                var rarityStyle = RARITY_COLORS[t.rarity] || RARITY_COLORS.Common;
-                                var statusStyle = STATUS_COLORS[t.status] || STATUS_COLORS.draft;
+                                const rarityStyle = RARITY_COLORS[t.rarity] || RARITY_COLORS.Common;
+                                const statusStyle = STATUS_COLORS[t.status] || STATUS_COLORS.draft;
                                 return '<tr>' +
                                     '<td style="font-variant-numeric:tabular-nums;color:var(--text-muted)">' + (t.edition_number || '\u2014') + '</td>' +
                                     '<td><strong>' + escapeHtml(t.name) + '</strong></td>' +
@@ -8395,12 +8397,12 @@
                             openModal('nft-collection-modal');
                         }
 
-                        var saveCollBtn = $('nft-coll-save-btn');
+                        const saveCollBtn = $('nft-coll-save-btn');
                         if (saveCollBtn) saveCollBtn.addEventListener('click', async function () {
-                            var id = $('nft-coll-id').value;
-                            var name = $('nft-coll-name').value.trim();
+                            const id = $('nft-coll-id').value;
+                            const name = $('nft-coll-name').value.trim();
                             if (!name) { toast('Collection name is required', 'error'); return; }
-                            var payload = {
+                            const payload = {
                                 id: id ? Number(id) : undefined,
                                 name: name,
                                 slug: $('nft-coll-slug').value.trim() || autoSlug(name),
@@ -8418,7 +8420,7 @@
                             } catch (err) { toast(err.message, 'error'); }
                         });
 
-                        var newCollBtn = $('nft-new-collection-btn');
+                        const newCollBtn = $('nft-new-collection-btn');
                         if (newCollBtn) newCollBtn.addEventListener('click', function () { openCollectionModal(null); });
 
                         function openTokenModal(token) {
@@ -8431,7 +8433,7 @@
                             $('nft-token-ipfs-img').value = token ? (token.ipfs_image_cid || '') : '';
                             $('nft-token-ipfs-meta').value = token ? (token.ipfs_metadata_cid || '') : '';
                             $('nft-token-external-url').value = token ? (token.external_url || '') : '';
-                            var sel = $('nft-token-collection');
+                            const sel = $('nft-token-collection');
                             sel.innerHTML = '<option value="">\u2014 select \u2014</option>' +
                                 nftCollections.map(function (c) {
                                     return '<option value="' + c.id + '"' +
@@ -8442,14 +8444,14 @@
                             openModal('nft-token-modal');
                         }
 
-                        var saveTokenBtn = $('nft-token-save-btn');
+                        const saveTokenBtn = $('nft-token-save-btn');
                         if (saveTokenBtn) saveTokenBtn.addEventListener('click', async function () {
-                            var id = $('nft-token-id').value;
-                            var name = $('nft-token-name').value.trim();
-                            var collId = Number($('nft-token-collection').value);
+                            const id = $('nft-token-id').value;
+                            const name = $('nft-token-name').value.trim();
+                            const collId = Number($('nft-token-collection').value);
                             if (!name) { toast('Token name is required', 'error'); return; }
                             if (!collId) { toast('Collection is required', 'error'); return; }
-                            var payload = {
+                            const payload = {
                                 id: id ? Number(id) : undefined,
                                 name: name,
                                 collection_id: collId,
@@ -8468,17 +8470,17 @@
                             } catch (err) { toast(err.message, 'error'); }
                         });
 
-                        var newTokenBtn = $('nft-new-token-btn');
+                        const newTokenBtn = $('nft-new-token-btn');
                         if (newTokenBtn) newTokenBtn.addEventListener('click', function () { openTokenModal(null); });
 
-                        var nftRefreshBtn = $('nft-refresh-btn');
+                        const nftRefreshBtn = $('nft-refresh-btn');
                         if (nftRefreshBtn) nftRefreshBtn.addEventListener('click', load);
 
                         document.addEventListener('click', function (e) {
-                            var btn = e.target.closest('[data-nft-edit-token]');
+                            const btn = e.target.closest('[data-nft-edit-token]');
                             if (!btn) return;
-                            var id = Number(btn.dataset.nftEditToken);
-                            var t = nftTokens.find(function (x) { return x.id === id; });
+                            const id = Number(btn.dataset.nftEditToken);
+                            const t = nftTokens.find(function (x) { return x.id === id; });
                             if (t) openTokenModal(t);
                         });
 
@@ -8490,7 +8492,7 @@
                     (function initBrandsPanel() {
                         'use strict';
 
-                        var BRAND_DEFS = [
+                        const BRAND_DEFS = [
                             { id: 'gfd', name: 'Good Flippin Design', slug: 'gfd', color: '#6366f1', emoji: '\ud83c\udfa8', url: 'https://goodflippindesign.com' },
                             { id: 'gfv', name: 'Good Flippin Vibes', slug: 'gfv', color: '#8b5cf6', emoji: '\u2728', url: 'https://goodflippinvibes.com' },
                             { id: 'culturesherpa', name: 'CultureSherpa', slug: 'culturesherpa', color: '#10b981', emoji: '\ud83e\uddad', url: 'https://culturesherpa.org' },
@@ -8500,23 +8502,23 @@
                         ];
 
                         async function load() {
-                            var grid = $('brands-grid');
+                            const grid = $('brands-grid');
                             if (!grid) return;
-                            var accountsMap = {};
-                            var workflowMap = {};
-                            var assetsByBrand = {};
+                            const accountsMap = {};
+                            const workflowMap = {};
+                            let assetsByBrand = {};
                             try {
-                                var [socRes, wfRes, statsRes] = await Promise.all([
+                                const [socRes, wfRes, statsRes] = await Promise.all([
                                     api('/social-accounts?limit=200'),
                                     api('/workflows?limit=200'),
                                     api('/stats'),
                                 ]);
-                                var accounts = socRes.accounts || socRes || [];
+                                const accounts = socRes.accounts || socRes || [];
                                 accounts.forEach(function (a) {
                                     if (!accountsMap[a.brand]) accountsMap[a.brand] = [];
                                     accountsMap[a.brand].push(a);
                                 });
-                                var workflows = wfRes.workflows || wfRes || [];
+                                const workflows = wfRes.workflows || wfRes || [];
                                 workflows.forEach(function (w) {
                                     workflowMap[w.brand] = (workflowMap[w.brand] || 0) + 1;
                                 });
@@ -8524,31 +8526,31 @@
                             } catch (err) {
                                 console.warn('[brands panel] Could not load live data:', err.message);
                             }
-                            var totalAccounts = Object.values(accountsMap).reduce(function (s, v) { return s + v.length; }, 0);
-                            var totalWorkflows = Object.values(workflowMap).reduce(function (s, v) { return s + v; }, 0);
-                            var totalLinked = Object.values(accountsMap).reduce(function (s, v) {
+                            const totalAccounts = Object.values(accountsMap).reduce(function (s, v) { return s + v.length; }, 0);
+                            const totalWorkflows = Object.values(workflowMap).reduce(function (s, v) { return s + v; }, 0);
+                            const totalLinked = Object.values(accountsMap).reduce(function (s, v) {
                                 return s + v.filter(function (a) { return a.link_status === 'linked'; }).length;
                             }, 0);
-                            var kpi = function (id, v) { var e = $(id); if (e) e.textContent = v; };
+                            const kpi = function (id, v) { const e = $(id); if (e) e.textContent = v; };
                             kpi('br-kpi-total', BRAND_DEFS.length);
                             kpi('br-kpi-workflows', totalWorkflows);
                             kpi('br-kpi-accounts', totalAccounts);
                             kpi('br-kpi-linked', totalLinked);
                             grid.innerHTML = BRAND_DEFS.map(function (b) {
-                                var accts = accountsMap[b.id] || [];
-                                var wfCount = workflowMap[b.id] || 0;
-                                var assetCount = assetsByBrand[b.id] || 0;
-                                var acctTags = accts.slice(0, 6).map(function (a) {
-                                    var isLinked = a.link_status === 'linked';
-                                    var dot = '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:' +
+                                const accts = accountsMap[b.id] || [];
+                                const wfCount = workflowMap[b.id] || 0;
+                                const assetCount = assetsByBrand[b.id] || 0;
+                                const acctTags = accts.slice(0, 6).map(function (a) {
+                                    const isLinked = a.link_status === 'linked';
+                                    const dot = '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:' +
                                         (isLinked ? '#10b981' : 'var(--text-muted)') +
                                         ';margin-right:4px;vertical-align:middle" title="' +
                                         (isLinked ? 'Linked \u2022 ref: ' + (a.token_fingerprint || 'n/a') : 'Unlinked') + '"></span>';
                                     return '<span class="tag" style="font-size:0.72rem;background:rgba(255,255,255,0.06);display:inline-flex;align-items:center">' +
                                         dot + escapeHtml(a.platform) + (a.handle ? ' @' + escapeHtml(a.handle) : '') + '</span>';
                                 }).join('');
-                                var linkedCount = accts.filter(function (a) { return a.link_status === 'linked'; }).length;
-                                var linkBadge = accts.length
+                                const linkedCount = accts.filter(function (a) { return a.link_status === 'linked'; }).length;
+                                const linkBadge = accts.length
                                     ? '<span class="tag" style="font-size:0.72rem;background:rgba(16,185,129,0.12);color:#10b981">' +
                                     linkedCount + '/' + accts.length + ' linked</span>'
                                     : '';
@@ -8580,7 +8582,7 @@
 
                         async function populateForBrand(brand) {
                             try {
-                                var res = await api('/social-accounts/populate', {
+                                const res = await api('/social-accounts/populate', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify(brand ? { brand: brand } : {}),
@@ -8592,10 +8594,10 @@
                             }
                         }
 
-                        var brandsRefreshBtn = $('brands-refresh-btn');
+                        const brandsRefreshBtn = $('brands-refresh-btn');
                         if (brandsRefreshBtn) brandsRefreshBtn.addEventListener('click', load);
 
-                        var brandsPopulateBtn = $('brands-populate-btn');
+                        const brandsPopulateBtn = $('brands-populate-btn');
                         if (brandsPopulateBtn) brandsPopulateBtn.addEventListener('click', function () { populateForBrand(null); });
 
                         window.__adminPanels = window.__adminPanels || {};
@@ -8610,7 +8612,7 @@
                         if (!grid) return;
 
                         // Fetch latest health sweep results (best-effort, no auth required)
-                        let healthMap = {};
+                        const healthMap = {};
                         try {
                             const resp = await fetch('https://gfd-health-sweep.weave0.workers.dev/last');
                             if (resp.ok) {
@@ -8949,27 +8951,27 @@
 
                     // ─── Projects Panel (Charter §10) ─────────────────────────────
                     (function initProjectsPanel() {
-                        var PROJ_REPOS = SITE_REGISTRY
+                        const PROJ_REPOS = SITE_REGISTRY
                             .filter(function (s) { return s.repo; })
                             .map(function (s) {
-                                var parts = s.repo.split('/');
+                                const parts = s.repo.split('/');
                                 return { owner: parts[0], repo: parts[1], label: s.name, color: s.color, domain: s.domain };
                             });
 
                         async function fetchRepoData(owner, repo) {
-                            var headers = { 'Accept': 'application/vnd.github+json' };
+                            const headers = { 'Accept': 'application/vnd.github+json' };
                             try {
-                                var repoRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo, { headers: headers });
-                                var repoData = repoRes.ok ? await repoRes.json() : null;
+                                const repoRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo, { headers: headers });
+                                const repoData = repoRes.ok ? await repoRes.json() : null;
 
-                                var runsRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/actions/runs?per_page=1', { headers: headers });
-                                var runsData = runsRes.ok ? await runsRes.json() : { workflow_runs: [] };
+                                const runsRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/actions/runs?per_page=1', { headers: headers });
+                                const runsData = runsRes.ok ? await runsRes.json() : { workflow_runs: [] };
 
-                                var prsRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/pulls?state=open&per_page=100', { headers: headers });
-                                var prs = prsRes.ok ? await prsRes.json() : [];
+                                const prsRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/pulls?state=open&per_page=100', { headers: headers });
+                                const prs = prsRes.ok ? await prsRes.json() : [];
 
-                                var protRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/branches/main/protection', { headers: headers });
-                                var hasProt = protRes.ok;
+                                const protRes = await fetch('https://api.github.com/repos/' + owner + '/' + repo + '/branches/main/protection', { headers: headers });
+                                const hasProt = protRes.ok;
 
                                 return {
                                     repo: repoData,
@@ -8983,17 +8985,17 @@
                         }
 
                         async function loadProjects() {
-                            var grid = $('proj-grid');
+                            const grid = $('proj-grid');
                             if (!grid) return;
                             grid.innerHTML = '<div class="text-muted" style="text-align:center;padding:2rem">Fetching from GitHub&hellip;</div>';
 
-                            var results = await Promise.all(PROJ_REPOS.map(function (r) {
+                            const results = await Promise.all(PROJ_REPOS.map(function (r) {
                                 return fetchRepoData(r.owner, r.repo).then(function (data) {
                                     return Object.assign({}, r, data);
                                 });
                             }));
 
-                            var passing = 0, failing = 0, totalPRs = 0;
+                            let passing = 0, failing = 0, totalPRs = 0;
                             results.forEach(function (r) {
                                 if (r.lastRun) {
                                     if (r.lastRun.conclusion === 'success') passing++;
@@ -9008,20 +9010,20 @@
                             $('proj-kpi-prs').textContent = totalPRs;
 
                             grid.innerHTML = results.map(function (r) {
-                                var ciStatus = 'none';
-                                var ciLabel = 'No CI';
-                                var ciCls = 'tag';
+                                let ciStatus = 'none';
+                                let ciLabel = 'No CI';
+                                let ciCls = 'tag';
                                 if (r.lastRun) {
                                     ciStatus = r.lastRun.conclusion || r.lastRun.status || 'unknown';
                                     ciLabel = ciStatus;
                                     ciCls = ciStatus === 'success' ? 'tag ok' : ciStatus === 'failure' ? 'tag fail' : 'tag warn';
                                 }
 
-                                var protLabel = r.branchProtection ? '🔒 Protected' : '⚠️ Unprotected';
-                                var protCls = r.branchProtection ? 'color:#10b981' : 'color:#ef4444';
+                                const protLabel = r.branchProtection ? '🔒 Protected' : '⚠️ Unprotected';
+                                const protCls = r.branchProtection ? 'color:#10b981' : 'color:#ef4444';
 
-                                var lastCommit = r.repo && r.repo.pushed_at ? ecoRelTime(r.repo.pushed_at) : '—';
-                                var desc = r.repo && r.repo.description ? escapeHtml(r.repo.description) : r.domain || '';
+                                const lastCommit = r.repo && r.repo.pushed_at ? ecoRelTime(r.repo.pushed_at) : '—';
+                                const desc = r.repo && r.repo.description ? escapeHtml(r.repo.description) : r.domain || '';
 
                                 return '<div class="panel" style="padding:1rem;border-left:3px solid ' + r.color + '">' +
                                     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">' +
@@ -9040,7 +9042,7 @@
                             }).join('');
                         }
 
-                        var projRefresh = $('proj-refresh-btn');
+                        const projRefresh = $('proj-refresh-btn');
                         if (projRefresh) projRefresh.addEventListener('click', loadProjects);
                         window.__adminPanels = window.__adminPanels || {};
                         window.__adminPanels['projects'] = loadProjects;
@@ -9048,36 +9050,36 @@
 
                     // ─── Deployments Panel (Charter §10) ──────────────────────────
                     (function initDeploymentsPanel() {
-                        var DEPLOY_REPOS = SITE_REGISTRY
+                        const DEPLOY_REPOS = SITE_REGISTRY
                             .filter(function (s) { return s.repo; })
                             .map(function (s) {
-                                var parts = s.repo.split('/');
+                                const parts = s.repo.split('/');
                                 return { owner: parts[0], repo: parts[1], label: s.name, color: s.color };
                             });
 
                         // per-repo health data keyed by label
-                        var _healthMap = {};
+                        let _healthMap = {};
 
                         async function loadDeployments() {
-                            var timeline = $('deploy-timeline');
-                            var healthGrid = $('deploy-health-grid');
+                            const timeline = $('deploy-timeline');
+                            const healthGrid = $('deploy-health-grid');
                             if (!timeline) return;
                             timeline.innerHTML = '<div class="text-muted" style="text-align:center;padding:2rem">Fetching deployments&hellip;</div>';
                             if (healthGrid) healthGrid.innerHTML = '<div class="text-muted" style="text-align:center;padding:1.5rem;grid-column:1/-1">Fetching&hellip;</div>';
 
-                            var allRuns = [];
-                            var repoRuns = {}; // label -> run[]
-                            var headers = { 'Accept': 'application/vnd.github+json' };
+                            const allRuns = [];
+                            const repoRuns = {}; // label -> run[]
+                            const headers = { 'Accept': 'application/vnd.github+json' };
 
                             await Promise.all(DEPLOY_REPOS.map(async function (r) {
                                 try {
-                                    var res = await fetch(
+                                    const res = await fetch(
                                         'https://api.github.com/repos/' + r.owner + '/' + r.repo + '/actions/runs?per_page=30&event=push',
                                         { headers: headers }
                                     );
                                     if (!res.ok) return;
-                                    var data = await res.json();
-                                    var runs = (data.workflow_runs || []).map(function (run) {
+                                    const data = await res.json();
+                                    const runs = (data.workflow_runs || []).map(function (run) {
                                         return Object.assign({}, run, { _label: r.label, _color: r.color });
                                     });
                                     repoRuns[r.label] = runs;
@@ -9087,11 +9089,11 @@
 
                             allRuns.sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
 
-                            var sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-                            var recent = allRuns.filter(function (r) { return new Date(r.created_at).getTime() > sevenDaysAgo; });
+                            const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                            const recent = allRuns.filter(function (r) { return new Date(r.created_at).getTime() > sevenDaysAgo; });
 
-                            var success = recent.filter(function (r) { return r.conclusion === 'success'; }).length;
-                            var failed = recent.filter(function (r) { return r.conclusion === 'failure'; }).length;
+                            const success = recent.filter(function (r) { return r.conclusion === 'success'; }).length;
+                            const failed = recent.filter(function (r) { return r.conclusion === 'failure'; }).length;
 
                             $('deploy-kpi-total').textContent = recent.length;
                             $('deploy-kpi-success').textContent = success;
@@ -9100,37 +9102,37 @@
 
                             // ── Per-repo health scoring ────────────────────────────────
                             _healthMap = {};
-                            var criticalCount = 0;
+                            let criticalCount = 0;
 
                             DEPLOY_REPOS.forEach(function (r) {
-                                var runs = (repoRuns[r.label] || []).filter(function (run) {
+                                const runs = (repoRuns[r.label] || []).filter(function (run) {
                                     return run.conclusion === 'success' || run.conclusion === 'failure';
                                 });
-                                var total = runs.length;
-                                var successes = runs.filter(function (run) { return run.conclusion === 'success'; }).length;
-                                var rate = total ? Math.round(successes / total * 100) : null;
+                                const total = runs.length;
+                                const successes = runs.filter(function (run) { return run.conclusion === 'success'; }).length;
+                                const rate = total ? Math.round(successes / total * 100) : null;
 
                                 // average deploy duration in seconds
-                                var durs = runs.filter(function (run) { return run.updated_at && run.created_at; }).map(function (run) {
+                                const durs = runs.filter(function (run) { return run.updated_at && run.created_at; }).map(function (run) {
                                     return (new Date(run.updated_at) - new Date(run.created_at)) / 1000;
                                 });
-                                var avgDur = durs.length ? Math.round(durs.reduce(function (a, b) { return a + b; }, 0) / durs.length) : null;
+                                const avgDur = durs.length ? Math.round(durs.reduce(function (a, b) { return a + b; }, 0) / durs.length) : null;
 
                                 // streak: consecutive from top
-                                var streak = 0;
-                                var streakSign = null;
-                                for (var i = 0; i < runs.length; i++) {
-                                    var c = runs[i].conclusion;
+                                let streak = 0;
+                                let streakSign = null;
+                                for (let i = 0; i < runs.length; i++) {
+                                    const c = runs[i].conclusion;
                                     if (streakSign === null) { streakSign = c; streak = 1; }
                                     else if (c === streakSign) { streak++; }
                                     else { break; }
                                 }
 
-                                var isCritical = streakSign === 'failure' && streak >= 2;
+                                const isCritical = streakSign === 'failure' && streak >= 2;
                                 if (isCritical) criticalCount++;
 
                                 // last 10 spark dots
-                                var sparkRuns = (repoRuns[r.label] || []).filter(function (run) {
+                                const sparkRuns = (repoRuns[r.label] || []).filter(function (run) {
                                     return run.conclusion === 'success' || run.conclusion === 'failure';
                                 }).slice(0, 10);
 
@@ -9144,18 +9146,18 @@
                             });
 
                             // ecosystem health KPI = weighted average across repos with data
-                            var ratesWithData = Object.values(_healthMap).filter(function (h) { return h.rate !== null; });
-                            var ecoHealth = ratesWithData.length
+                            const ratesWithData = Object.values(_healthMap).filter(function (h) { return h.rate !== null; });
+                            const ecoHealth = ratesWithData.length
                                 ? Math.round(ratesWithData.reduce(function (sum, h) { return sum + h.rate; }, 0) / ratesWithData.length)
                                 : null;
-                            var healthEl = $('deploy-kpi-health');
+                            const healthEl = $('deploy-kpi-health');
                             if (healthEl) {
                                 healthEl.textContent = ecoHealth !== null ? ecoHealth + '%' : '—';
                                 healthEl.style.color = ecoHealth >= 90 ? '#10b981' : ecoHealth >= 70 ? '#f59e0b' : '#ef4444';
                             }
 
                             // alert badge on nav button
-                            var alertBadge = $('deploy-alert-badge');
+                            const alertBadge = $('deploy-alert-badge');
                             if (alertBadge) {
                                 if (criticalCount > 0) {
                                     alertBadge.textContent = criticalCount;
@@ -9167,25 +9169,25 @@
 
                             // render per-repo health cards
                             if (healthGrid) {
-                                var cards = Object.values(_healthMap);
+                                const cards = Object.values(_healthMap);
                                 if (!cards.length) {
                                     healthGrid.innerHTML = '<div class="text-muted" style="grid-column:1/-1;text-align:center;padding:1.5rem">No repos found</div>';
                                 } else {
                                     healthGrid.innerHTML = cards.map(function (h) {
-                                        var rateColor = h.rate === null ? 'var(--text-muted)' : h.rate >= 90 ? '#10b981' : h.rate >= 70 ? '#f59e0b' : '#ef4444';
-                                        var rateText = h.rate !== null ? h.rate + '%' : 'N/A';
-                                        var avgText = h.avgDur !== null ? (h.avgDur >= 60 ? Math.round(h.avgDur / 60) + 'm ' + (h.avgDur % 60) + 's' : h.avgDur + 's') : '—';
-                                        var streakLabel = h.streakSign === 'success'
+                                        const rateColor = h.rate === null ? 'var(--text-muted)' : h.rate >= 90 ? '#10b981' : h.rate >= 70 ? '#f59e0b' : '#ef4444';
+                                        const rateText = h.rate !== null ? h.rate + '%' : 'N/A';
+                                        const avgText = h.avgDur !== null ? (h.avgDur >= 60 ? Math.round(h.avgDur / 60) + 'm ' + (h.avgDur % 60) + 's' : h.avgDur + 's') : '—';
+                                        const streakLabel = h.streakSign === 'success'
                                             ? '✅ ' + h.streak + ' consecutive'
                                             : h.streakSign === 'failure'
                                                 ? '❌ ' + h.streak + ' consecutive fail' + (h.streak > 1 ? 's' : '')
                                                 : '—';
-                                        var sparks = h.sparkRuns.map(function (run) {
-                                            var cls = run.conclusion === 'success' ? 'ok' : 'fail';
+                                        let sparks = h.sparkRuns.map(function (run) {
+                                            const cls = run.conclusion === 'success' ? 'ok' : 'fail';
                                             return '<span class="deploy-spark ' + cls + '" title="' + escapeHtml(run.conclusion) + ' · ' + escapeHtml(ecoRelTime(run.created_at)) + '"></span>';
                                         }).join('');
                                         // pad to 10 dots
-                                        for (var i = h.sparkRuns.length; i < 10; i++) {
+                                        for (let i = h.sparkRuns.length; i < 10; i++) {
                                             sparks += '<span class="deploy-spark skip"></span>';
                                         }
                                         return '<div class="deploy-health-card" style="border-left-color:' + escapeHtml(h.color) + '">' +
@@ -9203,18 +9205,18 @@
                             }
 
                             // ── Timeline ──────────────────────────────────────────────
-                            var shown = allRuns.slice(0, 30);
+                            const shown = allRuns.slice(0, 30);
                             if (!shown.length) {
                                 timeline.innerHTML = '<div class="text-muted" style="text-align:center;padding:2rem">No deployment runs found</div>';
                                 return;
                             }
 
                             timeline.innerHTML = shown.map(function (run) {
-                                var cls = run.conclusion === 'success' ? 'ok' : run.conclusion === 'failure' ? 'fail' : 'warn';
-                                var icon = run.conclusion === 'success' ? '✅' : run.conclusion === 'failure' ? '❌' : '🔄';
-                                var dur = '';
+                                const cls = run.conclusion === 'success' ? 'ok' : run.conclusion === 'failure' ? 'fail' : 'warn';
+                                const icon = run.conclusion === 'success' ? '✅' : run.conclusion === 'failure' ? '❌' : '🔄';
+                                let dur = '';
                                 if (run.updated_at && run.created_at) {
-                                    var ms = new Date(run.updated_at) - new Date(run.created_at);
+                                    const ms = new Date(run.updated_at) - new Date(run.created_at);
                                     dur = Math.round(ms / 1000) + 's';
                                 }
                                 return '<div class="panel" style="padding:0.75rem 1rem;border-left:3px solid ' + run._color + ';display:flex;align-items:center;gap:1rem;flex-wrap:wrap">' +
@@ -9233,7 +9235,7 @@
                             }).join('');
                         }
 
-                        var deployRefresh = $('deploy-refresh-btn');
+                        const deployRefresh = $('deploy-refresh-btn');
                         if (deployRefresh) deployRefresh.addEventListener('click', loadDeployments);
                         window.__adminPanels = window.__adminPanels || {};
                         window.__adminPanels['deployments'] = loadDeployments;
@@ -9241,7 +9243,7 @@
 
                     // ─── Settings Panel (Charter §10) ─────────────────────────────
                     (function initSettingsPanel() {
-                        var INTEGRATIONS = [
+                        const INTEGRATIONS = [
                             { name: 'Clerk', desc: 'Auth for community + admin', icon: '🔐', checkFn: function () { return !!window.Clerk; } },
                             { name: 'Stripe', desc: 'Donation payments', icon: '💳', checkFn: function () { return !!(window.ENV && window.ENV.STRIPE_PUBLISHABLE_KEY); } },
                             { name: 'Formspree', desc: 'Contact form processing', icon: '📬', checkFn: function () { return true; } },
@@ -9250,7 +9252,7 @@
                             { name: 'OpenAI', desc: 'DALL-E image generation', icon: '🤖', checkFn: function () { return !!(window.ENV && window.ENV.OPENAI_API_KEY); } },
                         ];
 
-                        var ENV_VARS = [
+                        const ENV_VARS = [
                             { key: 'CLERK_PUBLISHABLE_KEY', scope: 'Pages', required: true },
                             { key: 'CLERK_SECRET_KEY', scope: 'Pages + Auth Worker', required: true },
                             { key: 'STRIPE_PUBLISHABLE_KEY', scope: 'Pages', required: true },
@@ -9267,7 +9269,7 @@
                             { key: 'GOOGLE_CLIENT_ID', scope: 'Pages', required: false },
                         ];
 
-                        var WORKERS = [
+                        const WORKERS = [
                             { name: 'gfd-stripe', url: 'https://gfd-stripe.weave0.workers.dev', purpose: 'Stripe payment intents' },
                             { name: 'gfd-health-sweep', url: 'https://gfd-health-sweep.weave0.workers.dev', purpose: 'Nightly ecosystem health checks' },
                             { name: 'gfv-social-publisher', url: 'https://gfv-social-publisher.weave0.workers.dev', purpose: 'Social scheduling & publishing' },
@@ -9276,12 +9278,12 @@
 
                         function renderSettings() {
                             // Integrations
-                            var intGrid = $('settings-integrations');
+                            const intGrid = $('settings-integrations');
                             if (intGrid) {
                                 intGrid.innerHTML = INTEGRATIONS.map(function (i) {
-                                    var ok = false;
+                                    let ok = false;
                                     try { ok = i.checkFn(); } catch (e) { /* */ }
-                                    var cls = ok ? 'border-left:3px solid #10b981' : 'border-left:3px solid #ef4444';
+                                    const cls = ok ? 'border-left:3px solid #10b981' : 'border-left:3px solid #ef4444';
                                     return '<div class="panel" style="padding:0.75rem 1rem;' + cls + '">' +
                                         '<div style="display:flex;justify-content:space-between;align-items:center">' +
                                         '<span>' + i.icon + ' <strong>' + escapeHtml(i.name) + '</strong></span>' +
@@ -9293,13 +9295,13 @@
                             }
 
                             // Env vars — we can only check what's injected via window.ENV
-                            var envGrid = $('settings-env-grid');
+                            const envGrid = $('settings-env-grid');
                             if (envGrid) {
                                 envGrid.innerHTML = ENV_VARS.map(function (v) {
-                                    var present = window.ENV && window.ENV[v.key] != null && window.ENV[v.key] !== '';
-                                    var scopeOnly = v.scope !== 'Pages';
-                                    var label = present ? '✅ Set' : scopeOnly ? '🔒 Worker-only' : (v.required ? '❌ Missing' : '⚪ Optional');
-                                    var cls = present ? 'ok' : scopeOnly ? 'warn' : (v.required ? 'fail' : '');
+                                    const present = window.ENV && window.ENV[v.key] != null && window.ENV[v.key] !== '';
+                                    const scopeOnly = v.scope !== 'Pages';
+                                    const label = present ? '✅ Set' : scopeOnly ? '🔒 Worker-only' : (v.required ? '❌ Missing' : '⚪ Optional');
+                                    const cls = present ? 'ok' : scopeOnly ? 'warn' : (v.required ? 'fail' : '');
                                     return '<div class="panel" style="padding:0.5rem 0.75rem">' +
                                         '<div style="display:flex;justify-content:space-between;align-items:center">' +
                                         '<code style="font-size:0.78rem">' + escapeHtml(v.key) + '</code>' +
@@ -9311,7 +9313,7 @@
                             }
 
                             // Workers — ping each
-                            var wGrid = $('settings-workers');
+                            const wGrid = $('settings-workers');
                             if (wGrid) {
                                 wGrid.innerHTML = WORKERS.map(function (w) {
                                     return '<div class="panel" style="padding:0.75rem 1rem" id="settings-worker-' + w.name.replace(/[^a-z0-9]/g, '') + '">' +
@@ -9324,21 +9326,21 @@
                                 }).join('');
 
                                 WORKERS.forEach(function (w) {
-                                    var cardId = 'settings-worker-' + w.name.replace(/[^a-z0-9]/g, '');
+                                    const cardId = 'settings-worker-' + w.name.replace(/[^a-z0-9]/g, '');
                                     fetch(w.url, { method: 'GET', mode: 'cors' })
                                         .then(function (res) {
-                                            var card = $(cardId);
+                                            const card = $(cardId);
                                             if (!card) return;
-                                            var badge = card.querySelector('[data-worker-status]');
+                                            const badge = card.querySelector('[data-worker-status]');
                                             if (badge) {
                                                 badge.className = 'tag ' + (res.ok || res.status === 405 || res.status === 401 ? 'ok' : 'fail');
                                                 badge.textContent = res.ok || res.status === 405 || res.status === 401 ? '✅ Reachable' : 'HTTP ' + res.status;
                                             }
                                         })
                                         .catch(function () {
-                                            var card = $(cardId);
+                                            const card = $(cardId);
                                             if (!card) return;
-                                            var badge = card.querySelector('[data-worker-status]');
+                                            const badge = card.querySelector('[data-worker-status]');
                                             if (badge) { badge.className = 'tag fail'; badge.textContent = '❌ Unreachable'; }
                                         });
                                 });
@@ -9356,9 +9358,9 @@
                     (function initStudioHQ() {
                         'use strict';
 
-                        var KANBAN_LS_KEY = 'shq_kanban_v2';
+                        const KANBAN_LS_KEY = 'shq_kanban_v2';
 
-                        var SHQ_STAGES = [
+                        const SHQ_STAGES = [
                             { key: 'backlog', label: 'Backlog', next: 'scoping' },
                             { key: 'scoping', label: 'Scoping', next: 'building' },
                             { key: 'building', label: 'Building', next: 'review' },
@@ -9366,7 +9368,7 @@
                             { key: 'shipped', label: 'Shipped', next: null },
                         ];
 
-                        var DEFAULT_KANBAN_ITEMS = [
+                        const DEFAULT_KANBAN_ITEMS = [
                             { id: 'k1', title: 'Social publisher — live API posting to social platforms', stage: 'shipped', priority: 'critical', brand: 'all' },
                             { id: 'k2', title: 'Stripe donation webhook → D1 persistence', stage: 'shipped', priority: 'high', brand: 'gfd' },
                             { id: 'k3', title: 'MediaDrop R2 processor pipeline — scan → approve → CDN', stage: 'building', priority: 'high', brand: 'all' },
@@ -9384,7 +9386,7 @@
                         ];
 
                         // ── Self-Advisor Rules ─────────────────────────────────────────
-                        var ADVISOR_RULES = [
+                        const ADVISOR_RULES = [
                             {
                                 id: 'no-connections',
                                 priority: 'critical',
@@ -9401,7 +9403,7 @@
                                 icon: '🚨',
                                 test: function () { return (_opsTasks || []).filter(function (t) { return t.severity === 'critical'; }).length > 0; },
                                 titleFn: function () {
-                                    var n = (_opsTasks || []).filter(function (t) { return t.severity === 'critical'; }).length;
+                                    const n = (_opsTasks || []).filter(function (t) { return t.severity === 'critical'; }).length;
                                     return n + ' critical ops flag' + (n === 1 ? '' : 's') + ' open on Operations Board';
                                 },
                                 detail: 'Review and resolve critical flags — they block key workflows.',
@@ -9413,12 +9415,12 @@
                                 priority: 'warning',
                                 icon: '🌐',
                                 test: function () {
-                                    var entries = Object.values(state.lastHealthMap || {});
+                                    const entries = Object.values(state.lastHealthMap || {});
                                     return entries.length > 0 && entries.filter(function (e) { return !e.ok; }).length > 0;
                                 },
                                 titleFn: function () {
-                                    var entries = Object.values(state.lastHealthMap || {});
-                                    var n = entries.filter(function (e) { return !e.ok; }).length;
+                                    const entries = Object.values(state.lastHealthMap || {});
+                                    const n = entries.filter(function (e) { return !e.ok; }).length;
                                     return n + ' ecosystem endpoint' + (n === 1 ? '' : 's') + ' failing health check';
                                 },
                                 detail: 'Check Ecosystem Health for details — sites may be down or returning errors.',
@@ -9431,7 +9433,7 @@
                                 icon: '⚠️',
                                 test: function () { return (state.variants || []).filter(function (v) { return v.status === 'failed'; }).length > 0; },
                                 titleFn: function () {
-                                    var n = (state.variants || []).filter(function (v) { return v.status === 'failed'; }).length;
+                                    const n = (state.variants || []).filter(function (v) { return v.status === 'failed'; }).length;
                                     return n + ' post variant' + (n === 1 ? '' : 's') + ' failed to publish';
                                 },
                                 detail: 'Use Queue Health to retry or clear failed delivery attempts.',
@@ -9469,7 +9471,7 @@
                                     return (state.assets || []).filter(function (a) { return a.review_status === 'draft'; }).length > 15;
                                 },
                                 titleFn: function () {
-                                    var n = (state.assets || []).filter(function (a) { return a.review_status === 'draft'; }).length;
+                                    const n = (state.assets || []).filter(function (a) { return a.review_status === 'draft'; }).length;
                                     return n + ' assets sitting in draft — none will be published';
                                 },
                                 detail: 'Approve assets in the Asset Library so they can be retrieved by the scheduler.',
@@ -9494,13 +9496,13 @@
                                 priority: 'ok',
                                 icon: '✅',
                                 test: function () {
-                                    var scheduled = (state.variants || []).filter(function (v) { return v.status === 'scheduled'; }).length;
-                                    var failed = (state.variants || []).filter(function (v) { return v.status === 'failed'; }).length;
-                                    var allUp = Object.values(state.lastHealthMap || {}).every(function (e) { return e.ok; });
+                                    const scheduled = (state.variants || []).filter(function (v) { return v.status === 'scheduled'; }).length;
+                                    const failed = (state.variants || []).filter(function (v) { return v.status === 'failed'; }).length;
+                                    const allUp = Object.values(state.lastHealthMap || {}).every(function (e) { return e.ok; });
                                     return state.connections.length > 0 && scheduled > 0 && failed === 0 && allUp;
                                 },
                                 titleFn: function () {
-                                    var n = (state.variants || []).filter(function (v) { return v.status === 'scheduled'; }).length;
+                                    const n = (state.variants || []).filter(function (v) { return v.status === 'scheduled'; }).length;
                                     return 'Publishing pipeline healthy — ' + n + ' post' + (n === 1 ? '' : 's') + ' in queue';
                                 },
                                 detail: 'All connections active, variants scheduled, no failures, all ecosystem endpoints passing.',
@@ -9512,7 +9514,7 @@
                         // ── localStorage kanban helpers ────────────────────────────────
                         function loadKanban() {
                             try {
-                                var raw = localStorage.getItem(KANBAN_LS_KEY);
+                                const raw = localStorage.getItem(KANBAN_LS_KEY);
                                 if (raw) return JSON.parse(raw);
                             } catch (e) { /* ignore */ }
                             return JSON.parse(JSON.stringify(DEFAULT_KANBAN_ITEMS));
@@ -9528,10 +9530,10 @@
                         }
 
                         function advanceCard(id) {
-                            var items = loadKanban();
-                            var card = items.find(function (c) { return c.id === id; });
+                            const items = loadKanban();
+                            const card = items.find(function (c) { return c.id === id; });
                             if (!card) return;
-                            var stage = SHQ_STAGES.find(function (s) { return s.key === card.stage; });
+                            const stage = SHQ_STAGES.find(function (s) { return s.key === card.stage; });
                             if (stage && stage.next) {
                                 card.stage = stage.next;
                                 saveKanban(items);
@@ -9540,14 +9542,14 @@
                         }
 
                         function deleteCard(id) {
-                            var items = loadKanban().filter(function (c) { return c.id !== id; });
+                            const items = loadKanban().filter(function (c) { return c.id !== id; });
                             saveKanban(items);
                             renderKanban(items);
                         }
 
                         function addCard(title, priority, brand) {
-                            var items = loadKanban();
-                            var id = 'ku' + Date.now();
+                            const items = loadKanban();
+                            const id = 'ku' + Date.now();
                             items.push({ id: id, title: title, stage: 'backlog', priority: priority, brand: brand });
                             saveKanban(items);
                             renderKanban(items);
@@ -9555,24 +9557,24 @@
 
                         // ── Signal Radar ───────────────────────────────────────────────
                         function renderSignalBoard() {
-                            var scheduled = (state.variants || []).filter(function (v) { return v.status === 'scheduled'; }).length;
-                            var failed = (state.variants || []).filter(function (v) { return v.status === 'failed'; }).length;
-                            var connections = (state.connections || []).length;
-                            var draftAssets = (state.assets || []).filter(function (a) { return a.review_status === 'draft'; }).length;
-                            var opsCritical = (_opsTasks || []).filter(function (t) { return t.severity === 'critical'; }).length;
-                            var opsWarn = (_opsTasks || []).filter(function (t) { return t.severity === 'warning'; }).length;
-                            var healthMap = Object.values(state.lastHealthMap || {});
-                            var healthPass = healthMap.filter(function (e) { return e.ok; }).length;
-                            var healthTotal = healthMap.length;
+                            const scheduled = (state.variants || []).filter(function (v) { return v.status === 'scheduled'; }).length;
+                            const failed = (state.variants || []).filter(function (v) { return v.status === 'failed'; }).length;
+                            const connections = (state.connections || []).length;
+                            const draftAssets = (state.assets || []).filter(function (a) { return a.review_status === 'draft'; }).length;
+                            const opsCritical = (_opsTasks || []).filter(function (t) { return t.severity === 'critical'; }).length;
+                            const opsWarn = (_opsTasks || []).filter(function (t) { return t.severity === 'warning'; }).length;
+                            const healthMap = Object.values(state.lastHealthMap || {});
+                            const healthPass = healthMap.filter(function (e) { return e.ok; }).length;
+                            const healthTotal = healthMap.length;
 
                             function setSig(id, value, sub, status) {
-                                var el = $(id);
+                                const el = $(id);
                                 if (el) el.textContent = value;
-                                var subEl = $(id + '-sub');
+                                const subEl = $(id + '-sub');
                                 if (subEl) subEl.textContent = sub;
-                                var sig = el && el.closest('.shq-signal');
+                                const sig = el && el.closest('.shq-signal');
                                 if (sig) {
-                                    var bar = sig.querySelector('.shq-signal-bar');
+                                    const bar = sig.querySelector('.shq-signal-bar');
                                     if (bar) { bar.className = 'shq-signal-bar ' + status; }
                                     el.style.color = status === 'crit' ? '#f43f5e' : status === 'warn' ? '#fbbf24' : '#10b981';
                                 }
@@ -9594,7 +9596,7 @@
                                 draftAssets === 0 ? 'all approved' : 'pending approval',
                                 draftAssets > 15 ? 'warn' : 'ok');
 
-                            var opsLabel = opsCritical > 0 ? opsCritical + ' critical' : opsWarn > 0 ? opsWarn + ' warnings' : 'all clear';
+                            const opsLabel = opsCritical > 0 ? opsCritical + ' critical' : opsWarn > 0 ? opsWarn + ' warnings' : 'all clear';
                             setSig('shq-sig-ops', (_opsTasks || []).length,
                                 opsLabel,
                                 opsCritical > 0 ? 'crit' : opsWarn > 0 ? 'warn' : 'ok');
@@ -9604,17 +9606,17 @@
                                 healthTotal === 0 ? 'no sweep data' : healthPass === healthTotal ? 'all passing' : (healthTotal - healthPass) + ' failing',
                                 healthTotal === 0 ? 'warn' : healthPass < healthTotal ? 'crit' : 'ok');
 
-                            var updated = $('shq-signal-updated');
+                            const updated = $('shq-signal-updated');
                             if (updated) updated.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
                         }
 
                         // ── Self-Advisor ───────────────────────────────────────────────
                         function runAdvisor() {
-                            var list = $('shq-advisor-list');
+                            const list = $('shq-advisor-list');
                             if (!list) return;
 
-                            var priorityOrder = { critical: 0, warning: 1, info: 2, ok: 3 };
-                            var insights = ADVISOR_RULES
+                            const priorityOrder = { critical: 0, warning: 1, info: 2, ok: 3 };
+                            const insights = ADVISOR_RULES
                                 .filter(function (r) { try { return r.test(); } catch (e) { return false; } })
                                 .sort(function (a, b) { return (priorityOrder[a.priority] || 99) - (priorityOrder[b.priority] || 99); });
 
@@ -9624,8 +9626,8 @@
                             }
 
                             list.innerHTML = insights.map(function (r) {
-                                var title = r.titleFn ? r.titleFn() : r.title;
-                                var action = r.actionLabel && r.actionView
+                                const title = r.titleFn ? r.titleFn() : r.title;
+                                const action = r.actionLabel && r.actionView
                                     ? '<button class="shq-insight-action" data-nav="' + escapeHtml(r.actionView) + '">' + escapeHtml(r.actionLabel) + '</button>'
                                     : '';
                                 return '<div class="shq-insight priority-' + r.priority + '">' +
@@ -9647,20 +9649,20 @@
 
                         // ── Kanban Renderer ────────────────────────────────────────────
                         function renderKanban(items) {
-                            var board = $('shq-kanban');
+                            const board = $('shq-kanban');
                             if (!board) return;
                             board.innerHTML = SHQ_STAGES.map(function (stage) {
-                                var cards = items.filter(function (c) { return c.stage === stage.key; });
+                                const cards = items.filter(function (c) { return c.stage === stage.key; });
                                 return '<div class="shq-col" data-stage="' + stage.key + '">' +
                                     '<div class="shq-col-header">' +
                                     escapeHtml(stage.label) +
                                     '<span class="shq-col-count">' + cards.length + '</span>' +
                                     '</div>' +
                                     cards.map(function (card) {
-                                        var advBtn = stage.next
+                                        const advBtn = stage.next
                                             ? '<button class="shq-card-advance" data-advance="' + escapeHtml(card.id) + '" title="Advance to ' + stage.next + '">&rsaquo; ' + escapeHtml(SHQ_STAGES.find(function (s) { return s.key === stage.next; }).label) + '</button>'
                                             : '';
-                                        var brand = card.brand && card.brand !== 'all' ? card.brand.toUpperCase() : '';
+                                        const brand = card.brand && card.brand !== 'all' ? card.brand.toUpperCase() : '';
                                         return '<div class="shq-card" data-id="' + escapeHtml(card.id) + '">' +
                                             '<button class="shq-card-del" data-del="' + escapeHtml(card.id) + '" title="Remove" aria-label="Remove workitem">&#10005;</button>' +
                                             '<div class="shq-card-title">' + escapeHtml(card.title) + '</div>' +
@@ -9685,7 +9687,7 @@
                         // ── Server-backed kanban helpers ───────────────────────────────
                         async function loadKanbanFromServer() {
                             try {
-                                var resp = await api('/studio-kanban');
+                                const resp = await api('/studio-kanban');
                                 if (resp && Array.isArray(resp.items) && resp.items.length) {
                                     saveKanban(resp.items); // mirror to localStorage as offline backup
                                     return resp.items;
@@ -9701,19 +9703,19 @@
                         }
 
                         // Patch save/advance/delete to also sync to server
-                        var _origSaveKanban = saveKanban;
+                        const _origSaveKanban = saveKanban;
                         saveKanban = function (items) {
                             _origSaveKanban(items);
                             saveKanbanToServer(items);
                         };
 
                         // ── Master Render ──────────────────────────────────────────────
-                        var _shqFirstLoad = true;
+                        let _shqFirstLoad = true;
 
                         async function renderSHQPanel() {
-                            var btn = $('shq-refresh-btn');
+                            const btn = $('shq-refresh-btn');
                             // On first open (or if state is empty), pull fresh data silently
-                            var stateIsEmpty = !state.connections || (!state.connections.length
+                            const stateIsEmpty = !state.connections || (!state.connections.length
                                 && !state.variants.length && !state.assets.length);
                             if (_shqFirstLoad || stateIsEmpty) {
                                 _shqFirstLoad = false;
@@ -9728,22 +9730,22 @@
                             runAdvisor();
 
                             // Prefer server kanban on first load, fall back to localStorage
-                            var serverItems = await loadKanbanFromServer();
+                            const serverItems = await loadKanbanFromServer();
                             renderKanban(serverItems || loadKanban());
                         }
 
                         // ── Event Bindings ─────────────────────────────────────────────
-                        var refreshBtn = $('shq-refresh-btn');
+                        const refreshBtn = $('shq-refresh-btn');
                         if (refreshBtn) {
                             refreshBtn.addEventListener('click', async function () {
                                 this.disabled = true;
-                                var orig = this.innerHTML;
+                                const orig = this.innerHTML;
                                 this.innerHTML = '&#8635; Refreshing…';
                                 try {
                                     await Promise.all([refreshAll(), loadOpsTasks ? loadOpsTasks() : Promise.resolve()]);
                                     renderSignalBoard();
                                     runAdvisor();
-                                    var serverItems = await loadKanbanFromServer();
+                                    const serverItems = await loadKanbanFromServer();
                                     renderKanban(serverItems || loadKanban());
                                     toast('Studio HQ refreshed', 'success');
                                 } catch (e) {
@@ -9755,10 +9757,10 @@
                             });
                         }
 
-                        var advisorRefreshBtn = $('shq-advisor-refresh-btn');
+                        const advisorRefreshBtn = $('shq-advisor-refresh-btn');
                         if (advisorRefreshBtn) advisorRefreshBtn.addEventListener('click', runAdvisor);
 
-                        var resetBtn = $('shq-kanban-reset-btn');
+                        const resetBtn = $('shq-kanban-reset-btn');
                         if (resetBtn) {
                             resetBtn.addEventListener('click', function () {
                                 if (window.confirm('Reset all kanban cards to defaults? Your edits will be lost.')) {
@@ -9768,14 +9770,14 @@
                             });
                         }
 
-                        var addForm = $('shq-add-form');
+                        const addForm = $('shq-add-form');
                         if (addForm) {
                             addForm.addEventListener('submit', function (e) {
                                 e.preventDefault();
-                                var titleEl = $('shq-add-title');
-                                var priEl = $('shq-add-priority');
-                                var brandEl = $('shq-add-brand');
-                                var titleVal = titleEl ? titleEl.value.trim() : '';
+                                const titleEl = $('shq-add-title');
+                                const priEl = $('shq-add-priority');
+                                const brandEl = $('shq-add-brand');
+                                const titleVal = titleEl ? titleEl.value.trim() : '';
                                 if (!titleVal) return;
                                 addCard(titleVal, priEl ? priEl.value : 'medium', brandEl ? brandEl.value : 'all');
                                 if (titleEl) titleEl.value = '';

@@ -22,10 +22,15 @@ jobs:
           cache: "npm"
 
       - name: Install
-        run: npm ci
+        run: npm install --no-audit --ignore-scripts && npx puppeteer browsers install chrome
+        # npm ci fails cross-platform: Windows lockfile omits Linux-only
+        # @emnapi/core + @emnapi/runtime (optional deps of @napi-rs/canvas)
 
       - name: Security audit
         run: npm audit --audit-level=moderate
+
+      - name: Lint
+        run: npm run lint
 
       - name: Sync index.html → temp_review.html
         run: cp index.html temp_review.html

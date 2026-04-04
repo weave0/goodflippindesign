@@ -10,5 +10,8 @@ export default defineConfig({
   ],
   test: {
     include: ['tests/workers/**/*.test.js'],
+    // stripe-payments.test.js targets a different worker (gfd-stripe); it runs
+    // under its own config: vitest.stripe-payments.config.mjs
+    exclude: ['tests/workers/stripe-payments.test.js'],
   },
 });

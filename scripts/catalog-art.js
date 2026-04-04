@@ -135,7 +135,6 @@ function catalogSource(source) {
     if (!subscan) continue;
 
     // Include nested subdirs (e.g., art/luminous)
-    let allFiles = [...subscan.files];
     for (const nested of subscan.subdirs) {
       const nestedScan = scanDirectory(nested.path, 2);
       if (nestedScan) {
