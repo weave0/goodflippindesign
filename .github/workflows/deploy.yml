@@ -26,7 +26,8 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-audit --ignore-scripts && npx puppeteer browsers install chrome
+        # npm ci fails cross-platform: Windows lockfile omits Linux-only @emnapi deps
 
       - name: Security audit
         run: npm audit --audit-level=moderate
