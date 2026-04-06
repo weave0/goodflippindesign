@@ -84,7 +84,7 @@
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.13.5",
-    "@eslint/js": "^9.39.4",
+    "@eslint/js": "^10.0.1",
     "eslint": "^9.39.4",
     "html-validate": "^10.11.2",
     "http-server": "^14.1.1",
