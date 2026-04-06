@@ -80,7 +80,7 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "@sentry/cloudflare": "^10.46.0"
+    "@sentry/cloudflare": "^10.47.0"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.13.5",
