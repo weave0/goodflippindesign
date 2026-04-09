@@ -47,6 +47,9 @@ __pycache__/
 PORTFOLIO_ANALYSIS.json
 *.json.bak
 
+# Large video files (served from R2, not committed to repo)
+assets/videos/
+
 # Large image files
 assets/portfolio/*-hero.png
 Brand Assets Development/**/*.png
