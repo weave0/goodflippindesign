@@ -19,6 +19,14 @@
         <priority>0.6</priority>
     </url>
 
+    <!-- Music / Album -->
+    <url>
+        <loc>https://goodflippindesign.com/music.html</loc>
+        <lastmod>2026-04-09</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
     <!-- Site Policies -->
     <url>
         <loc>https://goodflippindesign.com/terms.html</loc>

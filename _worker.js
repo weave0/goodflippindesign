@@ -152,6 +152,32 @@ export default {
       }
     }
 
+    // Serve public media assets (videos, audio) directly from R2 (no auth required).
+    // URL shape: /api/media/{path...}
+    // R2 key shape: media/{path...}
+    if (url.pathname.startsWith('/api/media/') && request.method === 'GET') {
+      if (!env.MEDIA_BUCKET) {
+        return new Response('Media storage unavailable', { status: 503 });
+      }
+      const r2Key = url.pathname.replace(/^\/api\//, ''); // strip leading /api/ → media/...
+      const object = await env.MEDIA_BUCKET.get(r2Key);
+      if (!object) {
+        return new Response('Not found', { status: 404 });
+      }
+      const headers = new Headers();
+      const ext = r2Key.split('.').pop().toLowerCase();
+      const mimeMap = { mp4: 'video/mp4', webm: 'video/webm', mp3: 'audio/mpeg', wav: 'audio/wav', jpg: 'image/jpeg', png: 'image/png' };
+      headers.set('Content-Type', object.httpMetadata?.contentType || mimeMap[ext] || 'application/octet-stream');
+      headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+      headers.set('ETag', object.httpEtag);
+      if (object.size) headers.set('Content-Length', String(object.size));
+      const rangeHeader = request.headers.get('Range');
+      if (rangeHeader) {
+        return new Response(object.body, { status: 206, headers });
+      }
+      return new Response(object.body, { headers });
+    }
+
     // Serve branded media assets directly from R2 (no auth required).
     // URL shape: /api/cms/media/{assetId}-{format}.jpg
     // R2 key shape: cms/media/{assetId}-{format}.jpg
