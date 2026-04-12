@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "run_in_terminal",
+        "hooks": [
+          {
+            "type": "command",
+            "windows": "pwsh -File .github/hooks/scripts/production-guard.ps1",
+            "command": "bash .github/hooks/scripts/production-guard.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

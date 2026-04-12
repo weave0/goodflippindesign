@@ -79,6 +79,21 @@ assets/voice/out/
 # Test & debug artifacts
 test-results.txt
 latest-test.json
+verified-contrast.json
+PRODUCTION_VERIFICATION_REPORT.json
+
+# Build/sync artifacts
+.sync-manifest.json
+
+# Storage audit snapshots
+storage-baseline.json
+storage-snapshot.json
+
+# Media files that belong in R2, not git
+*.wav
+*.mp4
+*.mov
+latest-test.json
 contrast-test.json
 final-contrast.json
 verified-contrast.json

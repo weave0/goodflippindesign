@@ -7,20 +7,26 @@
 GFD Dev Projects/
 Brand Assets Development/
 Business Registration/
+CASHMONEY/
 Legal/
 Official Documents/
 Organization Docs/
+mediation-site/
+nft_gfv_drop/
+deploy-to-gfv/
 portfolio-manager/
 
 # Large video assets (host externally if needed)
 
-*.mp4
-*.mov
-*.avi
+_.mp4
+_.mov
+_.avi
+_.wav
 
 # Archives and documentation
 
 archives/
+db/
 docs/
 tests/
 
