@@ -5,8 +5,8 @@
 $ErrorActionPreference = "Stop"
 
 $sourceDir = "GFD Dev Projects\SummitView\output\youtube_packages\djzebra_album_1"
-$r2Prefix  = "gfv-album-2"
-$bucket    = "gfv-media"
+$r2Prefix = "gfv-album-2"
+$bucket = "gfv-media"
 
 $tracks = @(
     "01 - Lace Up.mp4",
@@ -23,11 +23,11 @@ $tracks = @(
 Write-Host "`nUploading DJ Z 'Wheels Up' videos to R2 ($bucket/$r2Prefix)`n" -ForegroundColor Cyan
 
 $uploaded = 0
-$failed   = 0
+$failed = 0
 
 foreach ($track in $tracks) {
     $localPath = Join-Path $sourceDir $track
-    $r2Key     = "$r2Prefix/$track"
+    $r2Key = "$r2Prefix/$track"
 
     if (-not (Test-Path $localPath)) {
         Write-Host "  SKIP  $track (file not found)" -ForegroundColor Yellow

@@ -1,5 +1,9 @@
 # Good Flippin Design - AI Coding Agent Instructions
 
+## ⚠️ Domain Rule — Read This First
+
+The **public-facing domain** is **goodflippinvibes.com**. Always use `goodflippinvibes.com` when referencing the live site, generating URLs, writing canonical tags, or talking to the user. The GitHub repo name (`goodflippindesign`) and the Cloudflare Pages internal hostname (`goodflippindesign.com`) are infrastructure details — **never** present `goodflippindesign.com` as the site URL.
+
 ## Project Overview
 
 This is the production website and community platform for Brett Weaver's web development consultancy (GFV LLC DBA Good Flippin Vibes). The site is **multi-page vanilla HTML/CSS/JavaScript** — no build tools, no frameworks. It pairs a portfolio/marketing site with a community portal (Clerk auth), a donation page (Stripe via Cloudflare Worker), and a contact form (Formspree).
@@ -12,24 +16,24 @@ This is the production website and community platform for Brett Weaver's web dev
 
 ### Pages
 
-| File | Purpose | Lines |
-| ---- | ------- | ----- |
-| [index.html](../index.html) | Main portfolio + contact + blog | ~7,260 |
-| [community-portal.html](../community-portal.html) | Community platform (Clerk auth, dashboard, notifications, members) | ~4,045 |
-| [donate.html](../donate.html) | Donations via Stripe + Cloudflare Worker | ~1,000 |
-| [temp_review.html](../temp_review.html) | Test target — must mirror index.html changes | mirrors index |
-| [assets/contact-form.html](../assets/contact-form.html) | Standalone project inquiry form (Formspree) | ~400 |
-| [404.html](../404.html) | Custom 404 | small |
+| File                                                    | Purpose                                                            | Lines         |
+| ------------------------------------------------------- | ------------------------------------------------------------------ | ------------- |
+| [index.html](../index.html)                             | Main portfolio + contact + blog                                    | ~7,260        |
+| [community-portal.html](../community-portal.html)       | Community platform (Clerk auth, dashboard, notifications, members) | ~4,045        |
+| [donate.html](../donate.html)                           | Donations via Stripe + Cloudflare Worker                           | ~1,000        |
+| [temp_review.html](../temp_review.html)                 | Test target — must mirror index.html changes                       | mirrors index |
+| [assets/contact-form.html](../assets/contact-form.html) | Standalone project inquiry form (Formspree)                        | ~400          |
+| [404.html](../404.html)                                 | Custom 404                                                         | small         |
 
 ### Edge Layer (Cloudflare)
 
-| File | Purpose |
-| ---- | ------- |
-| [_worker.js](../_worker.js) | Pages advanced-mode worker: routes `/api/*`, injects `window.ENV`, serves static assets |
-| [workers/auth.js](../workers/auth.js) | Auth worker: Clerk JWT verification, D1 profile ops, signed-in API |
-| [workers/stripe-payments.js](../workers/stripe-payments.js) | Stripe payment intents (deployed as `gfd-stripe.weave0.workers.dev`) |
-| [_headers](../_headers) | Cloudflare security headers (CSP, HSTS, X-Frame-Options) |
-| [wrangler.toml](../wrangler.toml) | Pages config — `nodejs_compat`, D1 binding `gfd_community` |
+| File                                                        | Purpose                                                                                 |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [\_worker.js](../_worker.js)                                | Pages advanced-mode worker: routes `/api/*`, injects `window.ENV`, serves static assets |
+| [workers/auth.js](../workers/auth.js)                       | Auth worker: Clerk JWT verification, D1 profile ops, signed-in API                      |
+| [workers/stripe-payments.js](../workers/stripe-payments.js) | Stripe payment intents (deployed as `gfd-stripe.weave0.workers.dev`)                    |
+| [\_headers](../_headers)                                    | Cloudflare security headers (CSP, HSTS, X-Frame-Options)                                |
+| [wrangler.toml](../wrangler.toml)                           | Pages config — `nodejs_compat`, D1 binding `gfd_community`                              |
 
 ### Environment Variables
 
@@ -38,11 +42,12 @@ This is the production website and community platform for Brett Weaver's web dev
 ```javascript
 window.ENV = {
   STRIPE_PUBLISHABLE_KEY: env.STRIPE_PUBLISHABLE_KEY || null,
-  CLERK_PUBLISHABLE_KEY:  env.CLERK_PUBLISHABLE_KEY  || null
-}
+  CLERK_PUBLISHABLE_KEY: env.CLERK_PUBLISHABLE_KEY || null,
+};
 ```
 
 Cloudflare secrets (set via Cloudflare dashboard or `wrangler secret put`):
+
 - `STRIPE_PUBLISHABLE_KEY` — Stripe pub key (Pages worker)
 - `STRIPE_SECRET_KEY` — Stripe secret (stripe-payments worker only)
 - `CLERK_SECRET_KEY` — Clerk backend secret (auth worker)
@@ -160,6 +165,7 @@ git add . && git commit -m "feat: description"
 ### 2. Editing community-portal.html or donate.html
 
 No automated test suite for these pages — test manually via:
+
 ```powershell
 npm run dev    # starts http-server at localhost:3000
 ```
@@ -269,18 +275,18 @@ emailInput.addEventListener(
 
 ## Key Files Reference
 
-| File | Purpose | Critical Details |
-| ---- | ------- | ---------------- |
-| [index.html](../index.html) | Production site | ~7,260 lines — CSS ~1-2000, HTML ~2000-5200, JS ~5200-7100 |
-| [community-portal.html](../community-portal.html) | Community platform | ~4,045 lines — Clerk auth, dashboard, notifications, members |
-| [donate.html](../donate.html) | Donations | Stripe + Cloudflare Worker |
-| [temp_review.html](../temp_review.html) | Test target | Must mirror index.html |
-| [_worker.js](../_worker.js) | Cloudflare edge worker | Routes /api/*, injects window.ENV |
-| [workers/auth.js](../workers/auth.js) | Auth worker | Clerk JWT, D1 ops |
-| [workers/stripe-payments.js](../workers/stripe-payments.js) | Payments worker | Stripe payment intents |
-| [scripts/csp-config.js](../scripts/csp-config.js) | CSP source of truth | Edit here, run `npm run gen:csp` |
-| [tests/test-config.js](../tests/test-config.js) | Test standards | WCAG thresholds, viewport configs |
-| [tests/accessibility.test.js](../tests/accessibility.test.js) | a11y suite | 14 tests: landmarks, ARIA, contrast, keyboard nav |
+| File                                                          | Purpose                | Critical Details                                             |
+| ------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------ |
+| [index.html](../index.html)                                   | Production site        | ~7,260 lines — CSS ~1-2000, HTML ~2000-5200, JS ~5200-7100   |
+| [community-portal.html](../community-portal.html)             | Community platform     | ~4,045 lines — Clerk auth, dashboard, notifications, members |
+| [donate.html](../donate.html)                                 | Donations              | Stripe + Cloudflare Worker                                   |
+| [temp_review.html](../temp_review.html)                       | Test target            | Must mirror index.html                                       |
+| [\_worker.js](../_worker.js)                                  | Cloudflare edge worker | Routes /api/\*, injects window.ENV                           |
+| [workers/auth.js](../workers/auth.js)                         | Auth worker            | Clerk JWT, D1 ops                                            |
+| [workers/stripe-payments.js](../workers/stripe-payments.js)   | Payments worker        | Stripe payment intents                                       |
+| [scripts/csp-config.js](../scripts/csp-config.js)             | CSP source of truth    | Edit here, run `npm run gen:csp`                             |
+| [tests/test-config.js](../tests/test-config.js)               | Test standards         | WCAG thresholds, viewport configs                            |
+| [tests/accessibility.test.js](../tests/accessibility.test.js) | a11y suite             | 14 tests: landmarks, ARIA, contrast, keyboard nav            |
 
 ---
 
@@ -310,20 +316,19 @@ emailInput.addEventListener(
 
 ## Infrastructure Status (as of 2026-03-03)
 
-| Component | Status | Files |
-| --------- | ------ | ----- |
-| CI/CD Pipeline | ✅ 6 workflows | `ci.yml`, `deploy.yml`, `lighthouse.yml`, `force-deploy.yml`, `health-check.yml`, `connect-github-cf.yml` |
-| Pre-commit hooks | ✅ Husky | `.husky/pre-commit` — syncs temp_review.html, updates cache bust |
-| Cache bust automation | ✅ | `scripts/update-cache-bust.js` |
-| Security headers | ✅ | `_headers` + CSP generated from `scripts/csp-config.js` |
-| Clerk auth | ✅ Live | Google + LinkedIn + email/password |
-| Stripe Worker | ✅ Live | `gfd-stripe.weave0.workers.dev` |
-| Sentry | ⚠️ | Worker gracefully degrades; set `SENTRY_DSN` secret to enable |
-| D1 database | ✅ configured | `gfd_community` binding in wrangler.toml |
-| Test coverage (index) | ✅ 98.6% | 141/144 passing (as of 2026-01-28 — re-run needed) |
-| Test coverage (community/donate) | ❌ 0% | No tests written yet |
-| Branch protection | ⚠️ | Direct pushes to `main` still possible |
-
+| Component                        | Status         | Files                                                                                                     |
+| -------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------- |
+| CI/CD Pipeline                   | ✅ 6 workflows | `ci.yml`, `deploy.yml`, `lighthouse.yml`, `force-deploy.yml`, `health-check.yml`, `connect-github-cf.yml` |
+| Pre-commit hooks                 | ✅ Husky       | `.husky/pre-commit` — syncs temp_review.html, updates cache bust                                          |
+| Cache bust automation            | ✅             | `scripts/update-cache-bust.js`                                                                            |
+| Security headers                 | ✅             | `_headers` + CSP generated from `scripts/csp-config.js`                                                   |
+| Clerk auth                       | ✅ Live        | Google + LinkedIn + email/password                                                                        |
+| Stripe Worker                    | ✅ Live        | `gfd-stripe.weave0.workers.dev`                                                                           |
+| Sentry                           | ⚠️             | Worker gracefully degrades; set `SENTRY_DSN` secret to enable                                             |
+| D1 database                      | ✅ configured  | `gfd_community` binding in wrangler.toml                                                                  |
+| Test coverage (index)            | ✅ 98.6%       | 141/144 passing (as of 2026-01-28 — re-run needed)                                                        |
+| Test coverage (community/donate) | ❌ 0%          | No tests written yet                                                                                      |
+| Branch protection                | ⚠️             | Direct pushes to `main` still possible                                                                    |
 
 ```css
 :root {
