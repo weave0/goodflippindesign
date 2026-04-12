@@ -18,13 +18,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Good Flippin Vibes — Album | DJ Shariff</title>
-    <meta name="description" content="Eight tracks. No filler. One arc. The debut album from DJ Shariff — where hip-hop, jazz, and EDM are dialects of the same sentence." />
-    <link rel="canonical" href="https://goodflippindesign.com/music.html">
+    <title>Good Flippin Vibes — WHEELS UP | DJ Z</title>
+    <meta name="description" content="Nine tracks. No filler. One continuous Saturday. The debut album from DJ Z — 80s hip-hop built around one premise: movement is medicine, joy is a practice, and the roller rink is the most honest wellness facility ever built." />
+    <link rel="canonical" href="https://goodflippindesign.com/music-djz.html">
 
-    <meta property="og:title" content="Good Flippin Vibes — Album | DJ Shariff">
-    <meta property="og:description" content="Eight tracks. No filler. One arc.">
-    <meta property="og:image" content="https://goodflippindesign.com/assets/GFV/album-1/covers/01%20-%20The%20Introduction.png">
+    <meta property="og:title" content="Good Flippin Vibes — WHEELS UP | DJ Z">
+    <meta property="og:description" content="Nine tracks. No filler. One continuous Saturday.">
     <meta property="og:type" content="music.album">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,12 +44,11 @@
             --text-secondary: #b0b0b0;
             --border: rgba(255, 255, 255, 0.06);
             --border-hover: rgba(255, 255, 255, 0.12);
-            --accent: #4CAF50;
-            --accent-gold: #f0b429;
+            --accent: #f0b429;
             --accent-warm: #e8854a;
-            --accent-cool: #5b9bd5;
-            --glow-green: 0 0 18px rgba(76, 175, 80, 0.35);
-            --glow-gold: 0 0 18px rgba(240, 180, 41, 0.35);
+            --accent-cool: #7060C0;
+            --glow-accent: 0 0 18px rgba(240, 180, 41, 0.35);
+            --glow-warm: 0 0 18px rgba(232, 133, 74, 0.35);
         }
 
         * {
@@ -115,7 +113,6 @@
         nav {
             position: fixed;
             top: 60px;
-            /* below ecosystem nav */
             left: 0;
             right: 0;
             z-index: 900;
@@ -298,7 +295,6 @@
         /* ─── Page wrapper (below fixed nav) ─── */
         .page-wrapper {
             padding-top: calc(60px + 72px);
-            /* ecosystem nav + main nav */
         }
 
         /* ─── Album Selector ─── */
@@ -352,12 +348,12 @@
         .album-pill.active {
             color: var(--accent);
             border-color: var(--accent);
-            background: rgba(76, 175, 80, 0.08);
+            background: rgba(240, 180, 41, 0.08);
         }
 
         /* ─── Album Hero ─── */
         .album-hero {
-            background: linear-gradient(180deg, rgba(76, 175, 80, 0.06) 0%, transparent 100%);
+            background: linear-gradient(180deg, rgba(240, 180, 41, 0.06) 0%, transparent 100%);
             border-bottom: 1px solid var(--border);
             padding: 5rem 0 4rem;
         }
@@ -387,7 +383,7 @@
         .album-cover-placeholder {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #1a2a1a 0%, #0d1f0d 100%);
+            background: linear-gradient(135deg, #2a1f0d 0%, #1a1206 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -435,6 +431,25 @@
             margin-top: 0.5rem;
         }
 
+        .album-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .album-stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .album-stat-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
         .album-ctas {
             display: flex;
             gap: 1rem;
@@ -446,8 +461,8 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: #ff0000;
-            color: #fff;
+            background: var(--accent);
+            color: #000;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
             text-decoration: none;
@@ -469,7 +484,31 @@
             transform: translateY(0);
         }
 
-        /* Tracklist header YouTube link */
+        .btn-album-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            color: var(--text);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            min-height: 44px;
+            transition:
+                border-color 0.3s ease,
+                background-color 0.3s ease;
+        }
+
+        .btn-album-secondary:hover,
+        .btn-album-secondary:focus-visible {
+            border-color: var(--border-hover);
+            background-color: rgba(255, 255, 255, 0.04);
+        }
+
+        /* Tracklist header link */
         .section-yt-link {
             display: inline-flex;
             align-items: center;
@@ -486,25 +525,6 @@
         .section-yt-link:hover,
         .section-yt-link:focus-visible {
             color: #ff4444;
-        }
-
-        .album-stat {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .album-stat-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-        }
-
-        .album-stat-value {
-            font-size: 1.1rem;
-            font-weight: 600;
         }
 
         @media (max-width: 900px) {
@@ -590,7 +610,7 @@
             align-items: center;
             justify-content: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: var(--glow-green);
+            box-shadow: var(--glow-accent);
         }
 
         .play-btn-large:hover {
@@ -627,6 +647,11 @@
             border-radius: 8px;
             overflow: hidden;
             border: 1px solid var(--border);
+            background: linear-gradient(135deg, #2a1f0d 0%, #1a1206 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
         }
 
         .now-playing-cover img {
@@ -662,7 +687,7 @@
         }
 
         .meta-chip.accent {
-            border-color: rgba(76, 175, 80, 0.35);
+            border-color: rgba(240, 180, 41, 0.35);
             color: var(--accent);
         }
 
@@ -671,6 +696,17 @@
             color: var(--text-muted);
             font-style: italic;
             line-height: 1.5;
+        }
+
+        .now-playing-hook {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-style: italic;
+            padding: 0.75rem;
+            background: rgba(240, 180, 41, 0.04);
+            border-left: 2px solid var(--accent);
+            border-radius: 0 6px 6px 0;
         }
 
         @media (max-width: 900px) {
@@ -744,7 +780,7 @@
         }
 
         .track-card.active {
-            background: rgba(76, 175, 80, 0.06);
+            background: rgba(240, 180, 41, 0.06);
         }
 
         .track-card.active::after {
@@ -762,6 +798,10 @@
             aspect-ratio: 1;
             overflow: hidden;
             flex-shrink: 0;
+            background: linear-gradient(135deg, #2a1f0d 0%, #1a1206 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .track-thumb img {
@@ -774,6 +814,13 @@
 
         .track-card:hover .track-thumb img {
             transform: scale(1.04);
+        }
+
+        .track-thumb-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-muted);
         }
 
         .track-thumb-overlay {
@@ -804,10 +851,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .track-card.active .play-icon {
-            background: var(--accent);
         }
 
         .track-body {
@@ -858,6 +901,55 @@
         @media (max-width: 600px) {
             .tracks-grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── Featured Track Callout ─── */
+        .featured-callout {
+            padding: 3rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .featured-callout-inner {
+            background: linear-gradient(135deg, rgba(112, 96, 192, 0.08) 0%, rgba(240, 180, 41, 0.06) 100%);
+            border: 1px solid rgba(112, 96, 192, 0.2);
+            border-radius: 12px;
+            padding: 2.5rem;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .featured-callout-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent-cool);
+            background: rgba(112, 96, 192, 0.12);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .featured-callout-text h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .featured-callout-text p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .featured-callout-inner {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1.5rem;
             }
         }
 
@@ -969,10 +1061,10 @@
                 <div class="album-selector-inner">
                     <span class="album-selector-label">Albums</span>
                     <div class="album-selector-links" role="list">
-                        <a href="music.html" class="album-pill active" role="listitem" aria-current="page">
+                        <a href="music.html" class="album-pill" role="listitem">
                             DJ Shariff &mdash; Good Flippin Vibes
                         </a>
-                        <a href="music-djz.html" class="album-pill" role="listitem">
+                        <a href="music-djz.html" class="album-pill active" role="listitem" aria-current="page">
                             DJ Z &mdash; Wheels Up
                         </a>
                     </div>
@@ -985,52 +1077,48 @@
             <div class="container">
                 <div class="album-hero-inner">
                     <div class="album-cover-wrap">
-                        <img
-                            src="assets/GFV/album-1/covers/01 - The Introduction.png"
-                            alt="Good Flippin Vibes album cover — DJ Shariff at the booth in a jazz club, warm amber and neon green lighting"
-                            width="340" height="340"
-                            loading="eager"
-                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <div class="album-cover-placeholder" style="display:none" aria-hidden="true">&#127911;</div>
+                        <div class="album-cover-placeholder" aria-label="Wheels Up album art — coming soon">&#127934;</div>
                     </div>
                     <div class="album-meta">
                         <span class="album-eyebrow">Debut Album &bull; 2026</span>
-                        <h1 class="album-title">Good Flippin Vibes</h1>
-                        <p class="album-artist">DJ Shariff</p>
+                        <h1 class="album-title">WHEELS UP</h1>
+                        <p class="album-artist">DJ Z</p>
                         <p class="album-description">
-                            Hip-hop holds the rhythm and the truth. Jazz holds the harmony and the memory. EDM holds the electricity that turns a crowd into one organism.
-                            DJ Shariff was not built from the premise that these are three different genres — he was built from the conviction that they are dialects of the same sentence.
-                            Eight tracks. No filler. One arc.
+                            Nine tracks of pure 80s hip-hop built around one premise: movement is medicine,
+                            joy is a practice, and the roller rink is the most honest wellness facility ever built.
+                            <em>Wheels Up</em> is a Saturday afternoon set &mdash; the kind that starts with
+                            the ritual of lacing your skates and ends with the glow of having given your body
+                            exactly what it needed.
                         </p>
                         <div class="album-stats" role="list" aria-label="Album details">
                             <div class="album-stat" role="listitem">
                                 <span class="album-stat-label">Tracks</span>
-                                <span class="album-stat-value">8</span>
+                                <span class="album-stat-value">9</span>
                             </div>
                             <div class="album-stat" role="listitem">
                                 <span class="album-stat-label">Home Key</span>
-                                <span class="album-stat-value">Gm</span>
+                                <span class="album-stat-value">C</span>
                             </div>
                             <div class="album-stat" role="listitem">
-                                <span class="album-stat-label">Genre</span>
-                                <span class="album-stat-value">Hip-Hop / Jazz / EDM</span>
+                                <span class="album-stat-label">Era</span>
+                                <span class="album-stat-value">80s Hip-Hop / Electro-Funk</span>
                             </div>
                             <div class="album-stat" role="listitem">
                                 <span class="album-stat-label">Total Runtime</span>
-                                <span class="album-stat-value">~34 min</span>
+                                <span class="album-stat-value">~36 min</span>
                             </div>
                         </div>
                         <div class="album-ctas">
-                            <a
-                                href="https://www.youtube.com/playlist?list=PLveg0fPWx8QGrKodpXxtCGMQeMzxOFJ71"
-                                class="btn-album-primary"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label="Stream Good Flippin Vibes on YouTube (opens in new tab)">
+                            <a href="#track-9" class="btn-album-primary"
+                                aria-label="Play The Slow One — featured track"
+                                id="play-featured-btn">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                                    <polygon points="5,3 19,12 5,21"></polygon>
                                 </svg>
-                                Stream on YouTube
+                                Play Featured Track
+                            </a>
+                            <a href="music.html" class="btn-album-secondary">
+                                &larr; DJ Shariff Album
                             </a>
                         </div>
                     </div>
@@ -1044,16 +1132,9 @@
                 <div class="player-inner">
                     <!-- Video display -->
                     <div class="featured-video-wrap" id="featured-player">
-                        <!-- Populated by JS when a track is selected -->
                         <div class="video-placeholder" id="video-placeholder">
-                            <img
-                                class="video-placeholder-cover"
-                                src="assets/GFV/album-1/covers/01 - The Introduction.png"
-                                alt=""
-                                aria-hidden="true"
-                                onerror="this.style.display='none'">
                             <button class="play-btn-large" id="placeholder-play-btn"
-                                aria-label="Play Track 1 — The Introduction">
+                                aria-label="Play Track 9 — The Slow One (You Know What It Is)">
                                 <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <polygon points="5,3 19,12 5,21"></polygon>
                                 </svg>
@@ -1066,23 +1147,38 @@
                     <aside class="now-playing-info" aria-label="Now playing" aria-live="polite">
                         <span class="now-playing-label">Now Playing</span>
                         <div id="now-playing-cover" class="now-playing-cover">
-                            <img
-                                src="assets/GFV/album-1/covers/01 - The Introduction.png"
-                                alt="Track cover art"
-                                id="np-cover-img"
-                                onerror="this.style.display='none'">
+                            <span aria-hidden="true">&#127934;</span>
                         </div>
                         <div class="now-playing-details">
-                            <p class="now-playing-title" id="np-title">The Introduction</p>
+                            <p class="now-playing-title" id="np-title">The Slow One (You Know What It Is)</p>
                             <div class="now-playing-meta" id="np-meta">
-                                <span class="meta-chip accent">Track 1</span>
-                                <span class="meta-chip">90 BPM</span>
-                                <span class="meta-chip">Gm</span>
-                                <span class="meta-chip">3:28</span>
+                                <span class="meta-chip accent">Track 9</span>
+                                <span class="meta-chip">68 BPM</span>
+                                <span class="meta-chip">Eb</span>
+                                <span class="meta-chip">4:45</span>
                             </div>
-                            <p class="now-playing-role" id="np-role">album opener — the declaration</p>
+                            <p class="now-playing-role" id="np-role">the couples' skate &mdash; hair-band ballad crossover</p>
+                            <p class="now-playing-hook" id="np-hook">&ldquo;The slow one's on / You know what it is / Take your time with this / This one's yours&rdquo;</p>
                         </div>
                     </aside>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Featured Track Callout ── -->
+        <section class="featured-callout" aria-label="Featured track">
+            <div class="container">
+                <div class="featured-callout-inner">
+                    <span class="featured-callout-badge">&#9733; Featured</span>
+                    <div class="featured-callout-text">
+                        <h3>Track 9 &mdash; The Slow One (You Know What It Is)</h3>
+                        <p>
+                            The couples' skate. Oberheim power chords, 808 half-time, ARP guitar solo.
+                            DJ Z's one impossible move that turns out to be completely correct.
+                            Eight seconds of near-silence after Roll Home &mdash; then the Oberheim rises
+                            out of the quiet, and everyone on the floor is already slowing down.
+                        </p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1092,33 +1188,24 @@
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title">Tracks</h2>
-                    <a
-                        href="https://www.youtube.com/playlist?list=PLveg0fPWx8QGrKodpXxtCGMQeMzxOFJ71"
-                        class="section-yt-link"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Open full playlist on YouTube (opens in new tab)">&#9654; Full Playlist on YouTube</a>
+                    <span class="section-count">9 tracks &bull; ~36 min</span>
                 </div>
 
                 <div class="tracks-grid" role="list" aria-label="Album tracks">
 
-                    <!-- Track data:
-               data-video  = path to compressed MP4 (relative, or swap for R2 URL)
-               data-youtube = YouTube video ID (leave empty until uploaded)
-          -->
-                    <article class="track-card active" role="listitem" tabindex="0"
+                    <article class="track-card" role="listitem" tabindex="0"
                         data-track="1"
-                        data-video="/api/media/gfv-album-1/01 - The Introduction.mp4"
+                        data-video="/api/media/gfv-album-2/01 - Lace Up.mp4"
                         data-youtube=""
-                        data-cover="assets/GFV/album-1/covers/01 - The Introduction.png"
-                        data-title="The Introduction"
+                        data-title="Lace Up"
                         data-duration="3:28"
-                        data-bpm="90"
-                        data-key="Gm"
-                        data-role="album opener — the declaration"
-                        aria-label="Track 1 — The Introduction. 3:28. 90 BPM. Key of Gm.">
+                        data-bpm="82"
+                        data-key="C"
+                        data-role="album opener — the ritual before the first roll"
+                        data-hook="Lace 'em tight / It's about to be right"
+                        aria-label="Track 1 — Lace Up. 3:28. 82 BPM. Key of C.">
                         <div class="track-thumb">
-                            <img src="assets/GFV/album-1/covers/01 - The Introduction.png" alt="Track 1 cover art" loading="lazy">
+                            <span class="track-thumb-number">01</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
                                 <span class="play-icon">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -1129,28 +1216,28 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">01</span>
-                            <span class="track-name">The Introduction</span>
+                            <span class="track-name">Lace Up</span>
                             <div class="track-chips">
                                 <span class="track-chip">3:28</span>
-                                <span class="track-chip">90 BPM</span>
-                                <span class="track-chip">Gm</span>
+                                <span class="track-chip">82 BPM</span>
+                                <span class="track-chip">C</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="2"
-                        data-video="/api/media/gfv-album-1/02 - Frictionless.mp4"
+                        data-video="/api/media/gfv-album-2/02 - First Wheels.mp4"
                         data-youtube=""
-                        data-cover="assets/GFV/album-1/covers/02 - Frictionless.png"
-                        data-title="Frictionless"
-                        data-duration="4:12"
-                        data-bpm="120"
-                        data-key="Fm"
-                        data-role="the peak-time club track — convergence point"
-                        aria-label="Track 2 — Frictionless. 4:12. 120 BPM. Key of Fm.">
+                        data-title="First Wheels"
+                        data-duration="3:45"
+                        data-bpm="94"
+                        data-key="F"
+                        data-role="pure kinetic joy — the body remembering it knows how to do this"
+                        data-hook="First roll of the day / Already forgot all the weight"
+                        aria-label="Track 2 — First Wheels. 3:45. 94 BPM. Key of F.">
                         <div class="track-thumb">
-                            <img src="assets/GFV/album-1/covers/02 - Frictionless.png" alt="Track 2 cover art" loading="lazy">
+                            <span class="track-thumb-number">02</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
                                 <span class="play-icon">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -1161,28 +1248,28 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">02</span>
-                            <span class="track-name">Frictionless</span>
+                            <span class="track-name">First Wheels</span>
                             <div class="track-chips">
-                                <span class="track-chip">4:12</span>
-                                <span class="track-chip">120 BPM</span>
-                                <span class="track-chip">Fm</span>
+                                <span class="track-chip">3:45</span>
+                                <span class="track-chip">94 BPM</span>
+                                <span class="track-chip">F</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="3"
-                        data-video="/api/media/gfv-album-1/03 - Third Floor.mp4"
+                        data-video="/api/media/gfv-album-2/03 - Coast Mode.mp4"
                         data-youtube=""
-                        data-cover="assets/GFV/album-1/covers/03 - Third Floor.png"
-                        data-title="Third Floor"
-                        data-duration="4:45"
-                        data-bpm="86"
-                        data-key="Bbm"
-                        data-role="the late-night depth track — where jazz and hip-hop are the same conversation"
-                        aria-label="Track 3 — Third Floor. 4:45. 86 BPM. Key of Bbm.">
+                        data-title="Coast Mode"
+                        data-duration="4:10"
+                        data-bpm="78"
+                        data-key="Bb"
+                        data-role="movement as meditation — when you stop trying and the skates take over"
+                        data-hook="Stop pushing / Let the wheels decide"
+                        aria-label="Track 3 — Coast Mode. 4:10. 78 BPM. Key of Bb.">
                         <div class="track-thumb">
-                            <img src="assets/GFV/album-1/covers/03 - Third Floor.png" alt="Track 3 cover art" loading="lazy">
+                            <span class="track-thumb-number">03</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
                                 <span class="play-icon">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -1193,28 +1280,28 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">03</span>
-                            <span class="track-name">Third Floor</span>
+                            <span class="track-name">Coast Mode</span>
                             <div class="track-chips">
-                                <span class="track-chip">4:45</span>
-                                <span class="track-chip">86 BPM</span>
-                                <span class="track-chip">Bbm</span>
+                                <span class="track-chip">4:10</span>
+                                <span class="track-chip">78 BPM</span>
+                                <span class="track-chip">Bb</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="4"
-                        data-video="/api/media/gfv-album-1/04 - All The Brass.mp4"
+                        data-video="/api/media/gfv-album-2/04 - Everybody's Good.mp4"
                         data-youtube=""
-                        data-cover="assets/GFV/album-1/covers/04 - All The Brass.png"
-                        data-title="All The Brass"
-                        data-duration="3:55"
-                        data-bpm="95"
-                        data-key="Cm"
-                        data-role="the jubilation track — the big band meets the booth"
-                        aria-label="Track 4 — All The Brass. 3:55. 95 BPM. Key of Cm.">
+                        data-title="Everybody's Good"
+                        data-duration="4:05"
+                        data-bpm="88"
+                        data-key="G"
+                        data-role="the GFV wellness thesis — joy is medicine, community is medicine"
+                        data-hook="Everybody here is good / Good flippin vibes / Understood"
+                        aria-label="Track 4 — Everybody's Good. 4:05. 88 BPM. Key of G.">
                         <div class="track-thumb">
-                            <img src="assets/GFV/album-1/covers/04 - All The Brass.png" alt="Track 4 cover art" loading="lazy">
+                            <span class="track-thumb-number">04</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
                                 <span class="play-icon">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -1225,28 +1312,28 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">04</span>
-                            <span class="track-name">All The Brass</span>
+                            <span class="track-name">Everybody's Good</span>
                             <div class="track-chips">
-                                <span class="track-chip">3:55</span>
-                                <span class="track-chip">95 BPM</span>
-                                <span class="track-chip">Cm</span>
+                                <span class="track-chip">4:05</span>
+                                <span class="track-chip">88 BPM</span>
+                                <span class="track-chip">G</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="5"
-                        data-video="/api/media/gfv-album-1/05 - Real Time.mp4"
+                        data-video="/api/media/gfv-album-2/05 - Purple Wheels.mp4"
                         data-youtube=""
-                        data-cover="assets/GFV/album-1/covers/05 - Real Time.png"
-                        data-title="Real Time"
-                        data-duration="4:33"
-                        data-bpm="118"
-                        data-key="Gbmaj7"
-                        data-role="the electronic tension track — jazz harmony in the machine"
-                        aria-label="Track 5 — Real Time. 4:33. 118 BPM. Key of Gbmaj7.">
+                        data-title="Purple Wheels"
+                        data-duration="3:55"
+                        data-bpm="96"
+                        data-key="E"
+                        data-role="DJ Z's signature color, peak personal flow — the Zebra in full command"
+                        data-hook="Purple wheels on the floor / That's DJ Z, hear the roar"
+                        aria-label="Track 5 — Purple Wheels. 3:55. 96 BPM. Key of E.">
                         <div class="track-thumb">
-                            <img src="assets/GFV/album-1/covers/05 - Real Time.png" alt="Track 5 cover art" loading="lazy">
+                            <span class="track-thumb-number">05</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
                                 <span class="play-icon">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -1257,28 +1344,28 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">05</span>
-                            <span class="track-name">Real Time</span>
+                            <span class="track-name">Purple Wheels</span>
                             <div class="track-chips">
-                                <span class="track-chip">4:33</span>
-                                <span class="track-chip">118 BPM</span>
-                                <span class="track-chip">Gbmaj7</span>
+                                <span class="track-chip">3:55</span>
+                                <span class="track-chip">96 BPM</span>
+                                <span class="track-chip">E</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="6"
-                        data-video="/api/media/gfv-album-1/06 - Stand Still.mp4"
+                        data-video="/api/media/gfv-album-2/06 - DJ Z in the Mix.mp4"
                         data-youtube=""
-                        data-cover="assets/GFV/album-1/covers/06 - Stand Still.png"
-                        data-title="Stand Still"
-                        data-duration="4:02"
-                        data-bpm="78"
-                        data-key="Ebm"
-                        data-role="the emotional center — stillness inside the storm"
-                        aria-label="Track 6 — Stand Still. 4:02. 78 BPM. Key of Ebm.">
+                        data-title="DJ Z in the Mix"
+                        data-duration="4:35"
+                        data-bpm="104"
+                        data-key="Dm"
+                        data-role="turntable showcase — the album's serious center, call and response"
+                        data-hook="DJ Z! / (In the mix!) / Say it loud! / (In the mix!)"
+                        aria-label="Track 6 — DJ Z in the Mix. 4:35. 104 BPM. Key of Dm.">
                         <div class="track-thumb">
-                            <img src="assets/GFV/album-1/covers/06 - Stand Still.png" alt="Track 6 cover art" loading="lazy">
+                            <span class="track-thumb-number">06</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
                                 <span class="play-icon">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -1289,28 +1376,28 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">06</span>
-                            <span class="track-name">Stand Still</span>
+                            <span class="track-name">DJ Z in the Mix</span>
                             <div class="track-chips">
-                                <span class="track-chip">4:02</span>
-                                <span class="track-chip">78 BPM</span>
-                                <span class="track-chip">Ebm</span>
+                                <span class="track-chip">4:35</span>
+                                <span class="track-chip">104 BPM</span>
+                                <span class="track-chip">Dm</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="7"
-                        data-video="/api/media/gfv-album-1/07 - Block Party Science.mp4"
+                        data-video="/api/media/gfv-album-2/07 - Last Lap.mp4"
                         data-youtube=""
-                        data-cover="assets/GFV/album-1/covers/07 - Block Party Science.png"
-                        data-title="Block Party Science"
-                        data-duration="4:18"
+                        data-title="Last Lap"
+                        data-duration="3:42"
                         data-bpm="100"
-                        data-key="Dm"
-                        data-role="the groove track — the science of bringing people together"
-                        aria-label="Track 7 — Block Party Science. 4:18. 100 BPM. Key of Dm.">
+                        data-key="C"
+                        data-role="the final run — speed round, euphoric, everyone's a master now"
+                        data-hook="Last lap / Hold nothing back / Last lap / This is what we came for"
+                        aria-label="Track 7 — Last Lap. 3:42. 100 BPM. Key of C.">
                         <div class="track-thumb">
-                            <img src="assets/GFV/album-1/covers/07 - Block Party Science.png" alt="Track 7 cover art" loading="lazy">
+                            <span class="track-thumb-number">07</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
                                 <span class="play-icon">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -1321,28 +1408,28 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">07</span>
-                            <span class="track-name">Block Party Science</span>
+                            <span class="track-name">Last Lap</span>
                             <div class="track-chips">
-                                <span class="track-chip">4:18</span>
+                                <span class="track-chip">3:42</span>
                                 <span class="track-chip">100 BPM</span>
-                                <span class="track-chip">Dm</span>
+                                <span class="track-chip">C</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="8"
-                        data-video="/api/media/gfv-album-1/08 - Still Warm.mp4"
+                        data-video="/api/media/gfv-album-2/08 - Roll Home.mp4"
                         data-youtube=""
-                        data-cover="assets/GFV/album-1/covers/08 - Still Warm.png"
-                        data-title="Still Warm"
-                        data-duration="5:05"
-                        data-bpm="88"
-                        data-key="Gm"
-                        data-role="the album closer — after the show, still inside it"
-                        aria-label="Track 8 — Still Warm. 5:05. 88 BPM. Key of Gm.">
+                        data-title="Roll Home"
+                        data-duration="3:55"
+                        data-bpm="72"
+                        data-key="Ab"
+                        data-role="cooldown — skates off, the specific glow of having moved your body"
+                        data-hook="Skates off / Heart still rolling / Best kind of tired / Body knowing"
+                        aria-label="Track 8 — Roll Home. 3:55. 72 BPM. Key of Ab.">
                         <div class="track-thumb">
-                            <img src="assets/GFV/album-1/covers/08 - Still Warm.png" alt="Track 8 cover art" loading="lazy">
+                            <span class="track-thumb-number">08</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
                                 <span class="play-icon">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -1353,17 +1440,49 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">08</span>
-                            <span class="track-name">Still Warm</span>
+                            <span class="track-name">Roll Home</span>
                             <div class="track-chips">
-                                <span class="track-chip">5:05</span>
-                                <span class="track-chip">88 BPM</span>
-                                <span class="track-chip">Gm</span>
+                                <span class="track-chip">3:55</span>
+                                <span class="track-chip">72 BPM</span>
+                                <span class="track-chip">Ab</span>
                             </div>
                         </div>
                     </article>
 
-                </div><!-- /.tracks-grid -->
-            </div><!-- /.container -->
+                    <article class="track-card active" role="listitem" tabindex="0" id="track-9"
+                        data-track="9"
+                        data-video="/api/media/gfv-album-2/09 - The Slow One (You Know What It Is).mp4"
+                        data-youtube=""
+                        data-title="The Slow One (You Know What It Is)"
+                        data-duration="4:45"
+                        data-bpm="68"
+                        data-key="Eb"
+                        data-role="the couples' skate — hair-band ballad crossover; Oberheim power chords, 808 half-time"
+                        data-hook="The slow one's on / You know what it is / Take your time with this / This one's yours"
+                        aria-label="Track 9 — The Slow One (You Know What It Is). 4:45. 68 BPM. Key of Eb. Featured track.">
+                        <div class="track-thumb">
+                            <span class="track-thumb-number">09</span>
+                            <div class="track-thumb-overlay" aria-hidden="true">
+                                <span class="play-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                        <polygon points="5,3 19,12 5,21"></polygon>
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="track-body">
+                            <span class="track-number">09 &bull; FEATURED</span>
+                            <span class="track-name">The Slow One (You Know What It Is)</span>
+                            <div class="track-chips">
+                                <span class="track-chip">4:45</span>
+                                <span class="track-chip">68 BPM</span>
+                                <span class="track-chip">Eb</span>
+                            </div>
+                        </div>
+                    </article>
+
+                </div>
+            </div>
         </section>
 
     </main>
@@ -1376,8 +1495,8 @@
                 <nav class="footer-links" aria-label="Footer navigation">
                     <a href="index.html">Home</a>
                     <a href="gallery.html">Gallery</a>
-                    <a href="music.html" aria-current="page">Music &mdash; DJ Shariff</a>
-                    <a href="music-djz.html">Music &mdash; DJ Z</a>
+                    <a href="music.html">Music &mdash; DJ Shariff</a>
+                    <a href="music-djz.html" aria-current="page">Music &mdash; DJ Z</a>
                     <a href="community-portal.html">Community</a>
                     <a href="donate.html">Donate</a>
                     <a href="privacy.html">Privacy</a>
@@ -1391,12 +1510,8 @@
         (function () {
             'use strict';
 
-            // ── Track data (mirrors data attributes on .track-card elements) ──
-            // Used to pre-load track 1 and handle JS-driven playback.
+            var currentTrack = 9;
 
-            var currentTrack = 1;
-
-            // ── Utility: build video element ──
             function buildVideoEl(src) {
                 var v = document.createElement('video');
                 v.src = src;
@@ -1407,7 +1522,6 @@
                 return v;
             }
 
-            // ── Utility: build YouTube iframe ──
             function buildYouTubeEl(ytId) {
                 var f = document.createElement('iframe');
                 f.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(ytId) + '?autoplay=1&rel=0';
@@ -1418,29 +1532,26 @@
                 return f;
             }
 
-            // ── Load a track into the featured player ──
             function loadTrack(card) {
                 var ytId = card.dataset.youtube || '';
                 var videoSrc = card.dataset.video || '';
-                var cover = card.dataset.cover || '';
                 var title = card.dataset.title || '';
                 var trackNo = card.dataset.track || '';
                 var duration = card.dataset.duration || '';
                 var bpm = card.dataset.bpm || '';
                 var key = card.dataset.key || '';
                 var role = card.dataset.role || '';
+                var hook = card.dataset.hook || '';
 
-                // Update now-playing sidebar
                 var npTitle = document.getElementById('np-title');
                 var npMeta = document.getElementById('np-meta');
                 var npRole = document.getElementById('np-role');
-                var npCoverImg = document.getElementById('np-cover-img');
+                var npHook = document.getElementById('np-hook');
                 if (npTitle) npTitle.textContent = title;
                 if (npRole) npRole.textContent = role;
-                if (npCoverImg && cover) {
-                    npCoverImg.src = cover;
-                    npCoverImg.alt = title + ' cover art';
-                    npCoverImg.style.display = '';
+                if (npHook) {
+                    npHook.innerHTML = hook ? '&ldquo;' + hook.replace(/\//g, ' / ') + '&rdquo;' : '';
+                    npHook.style.display = hook ? '' : 'none';
                 }
                 if (npMeta) {
                     npMeta.innerHTML =
@@ -1450,11 +1561,9 @@
                         '<span class="meta-chip">' + duration + '</span>';
                 }
 
-                // Update player
                 var playerWrap = document.getElementById('featured-player');
                 if (!playerWrap) return;
 
-                // Remove existing video/iframe/placeholder
                 while (playerWrap.firstChild) playerWrap.removeChild(playerWrap.firstChild);
 
                 if (ytId) {
@@ -1462,18 +1571,9 @@
                 } else if (videoSrc) {
                     playerWrap.appendChild(buildVideoEl(videoSrc));
                 } else {
-                    // No video source — show cover art in placeholder
                     var placeholder = document.createElement('div');
                     placeholder.className = 'video-placeholder';
                     placeholder.setAttribute('aria-label', 'Video not yet available for ' + title);
-                    if (cover) {
-                        var img = document.createElement('img');
-                        img.src = cover;
-                        img.alt = '';
-                        img.className = 'video-placeholder-cover';
-                        img.setAttribute('aria-hidden', 'true');
-                        placeholder.appendChild(img);
-                    }
                     var msg = document.createElement('p');
                     msg.style.cssText = 'position:relative;z-index:1;color:var(--text-muted);font-size:0.9rem;';
                     msg.textContent = 'Video coming soon';
@@ -1481,23 +1581,19 @@
                     playerWrap.appendChild(placeholder);
                 }
 
-                // Scroll player into view on mobile
                 if (window.innerWidth <= 900) {
                     playerWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
 
-            // ── Track card click/keyboard handler ──
             function handleTrackSelect(card) {
                 if (!card) return;
 
-                // Deactivate all cards
                 document.querySelectorAll('.track-card').forEach(function (c) {
                     c.classList.remove('active');
                     c.removeAttribute('aria-current');
                 });
 
-                // Activate selected
                 card.classList.add('active');
                 card.setAttribute('aria-current', 'true');
                 currentTrack = parseInt(card.dataset.track, 10) || 1;
@@ -1507,13 +1603,12 @@
                 if (window.gtag) {
                     gtag('event', 'track_play', {
                         event_category: 'music',
-                        event_label: card.dataset.title,
+                        event_label: 'DJ Z - ' + card.dataset.title,
                         value: currentTrack
                     });
                 }
             }
 
-            // ── Bind track cards ──
             document.querySelectorAll('.track-card').forEach(function (card) {
                 card.addEventListener('click', function () {
                     handleTrackSelect(card);
@@ -1526,12 +1621,23 @@
                 });
             });
 
-            // ── Placeholder play button → load track 1 ──
+            // Placeholder play button → load featured track (Track 9)
             var placeholderBtn = document.getElementById('placeholder-play-btn');
             if (placeholderBtn) {
                 placeholderBtn.addEventListener('click', function () {
-                    var firstCard = document.querySelector('.track-card[data-track="1"]');
-                    if (firstCard) handleTrackSelect(firstCard);
+                    var featuredCard = document.querySelector('.track-card[data-track="9"]');
+                    if (featuredCard) handleTrackSelect(featuredCard);
+                });
+            }
+
+            // Hero "Play Featured Track" button → load Track 9
+            var playFeaturedBtn = document.getElementById('play-featured-btn');
+            if (playFeaturedBtn) {
+                playFeaturedBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var featuredCard = document.querySelector('.track-card[data-track="9"]');
+                    if (featuredCard) handleTrackSelect(featuredCard);
+                    document.getElementById('featured-player').scrollIntoView({ behavior: 'smooth', block: 'start' });
                 });
             }
 

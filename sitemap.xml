@@ -19,10 +19,18 @@
         <priority>0.6</priority>
     </url>
 
-    <!-- Music / Album -->
+    <!-- Music / Album — DJ Shariff -->
     <url>
         <loc>https://goodflippindesign.com/music.html</loc>
-        <lastmod>2026-04-09</lastmod>
+        <lastmod>2026-04-12</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Music / Album — DJ Z: Wheels Up -->
+    <url>
+        <loc>https://goodflippindesign.com/music-djz.html</loc>
+        <lastmod>2026-04-12</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
