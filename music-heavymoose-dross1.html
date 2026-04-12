@@ -18,12 +18,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Good Flippin Vibes — WHEELS UP | DJ Z</title>
-    <meta name="description" content="Nine tracks. No filler. One continuous Saturday. The debut album from DJ Z — 80s hip-hop built around one premise: movement is medicine, joy is a practice, and the roller rink is the most honest wellness facility ever built." />
-    <link rel="canonical" href="https://goodflippinvibes.com/music-djz.html">
+    <title>Good Flippin Vibes — DROSS | Heavy Moose</title>
+    <meta name="description" content="Ten tracks from the darker side of healing. Industrial soundscapes, ember-lit factory floors, and a figure in a wool overcoat. DROSS — the debut album from Heavy Moose." />
+    <link rel="canonical" href="https://goodflippinvibes.com/music-heavymoose-dross1.html">
 
-    <meta property="og:title" content="Good Flippin Vibes — WHEELS UP | DJ Z">
-    <meta property="og:description" content="Nine tracks. No filler. One continuous Saturday.">
+    <meta property="og:title" content="Good Flippin Vibes — DROSS | Heavy Moose">
+    <meta property="og:description" content="Ten tracks. Grief has a sound. This is it.">
     <meta property="og:type" content="music.album">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -44,11 +44,11 @@
             --text-secondary: #b0b0b0;
             --border: rgba(255, 255, 255, 0.06);
             --border-hover: rgba(255, 255, 255, 0.12);
-            --accent: #f0b429;
-            --accent-warm: #e8854a;
-            --accent-cool: #7060C0;
-            --glow-accent: 0 0 18px rgba(240, 180, 41, 0.35);
-            --glow-warm: 0 0 18px rgba(232, 133, 74, 0.35);
+            --accent: #8B0000;
+            --accent-warm: #b34700;
+            --accent-cool: #4a4a5a;
+            --glow-accent: 0 0 18px rgba(139, 0, 0, 0.3);
+            --glow-warm: 0 0 18px rgba(179, 71, 0, 0.25);
         }
 
         * {
@@ -82,7 +82,6 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-
             *,
             *::before,
             *::after {
@@ -98,9 +97,10 @@
             left: 0;
             padding: 0.75rem 1.25rem;
             background: var(--accent);
-            color: #000;
+            color: var(--text);
             font-weight: 600;
-            z-index: 10000;
+            font-size: 0.875rem;
+            z-index: 9999;
             transform: translateY(-100%);
             transition: transform 0.2s ease;
         }
@@ -111,14 +111,12 @@
 
         /* ─── Nav ─── */
         nav {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            right: 0;
-            z-index: 900;
-            background: rgba(13, 13, 13, 0.95);
-            -webkit-backdrop-filter: blur(12px);
-            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            background: rgba(13, 13, 13, 0.85);
             border-bottom: 1px solid var(--border);
         }
 
@@ -126,162 +124,87 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem;
-            height: 72px;
+            height: 64px;
             display: flex;
             align-items: center;
-            gap: 2rem;
+            justify-content: space-between;
         }
 
         .nav-logo {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            font-weight: 600;
-            font-size: 1rem;
-            flex-shrink: 0;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
             min-height: 44px;
         }
 
         .nav-logo img {
-            height: 36px;
+            border-radius: 50%;
         }
 
         .nav-links {
-            list-style: none;
             display: flex;
-            align-items: center;
+            list-style: none;
             gap: 0.25rem;
-            margin-left: auto;
         }
 
         .nav-links a {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+            min-height: 44px;
             display: inline-flex;
             align-items: center;
-            padding: 0.5rem 0.875rem;
-            min-height: 44px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            border-radius: 6px;
-            transition: color 0.3s ease, background-color 0.3s ease;
         }
 
         .nav-links a:hover,
         .nav-links a[aria-current="page"] {
             color: var(--text);
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .nav-links a[aria-current="page"] {
-            color: var(--accent);
         }
 
         .nav-donate-cta {
+            font-size: 0.8rem;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            transition: color 0.3s ease, border-color 0.3s ease;
+            min-height: 44px;
             display: inline-flex;
             align-items: center;
-            height: 44px;
-            padding: 0 1.25rem;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
-            white-space: nowrap;
         }
 
         .nav-donate-cta:hover {
             color: var(--text);
-            border-color: rgba(255, 255, 255, 0.3);
-            background-color: rgba(255, 255, 255, 0.04);
+            border-color: var(--border-hover);
         }
 
-        /* Mobile nav */
         .mobile-menu-toggle {
             display: none;
+            flex-direction: column;
+            gap: 5px;
             background: none;
             border: none;
             cursor: pointer;
             padding: 0.5rem;
-            min-height: 44px;
             min-width: 44px;
-            color: var(--text);
-            flex-direction: column;
+            min-height: 44px;
             justify-content: center;
-            gap: 5px;
-            margin-left: auto;
+            align-items: center;
         }
 
         .hamburger-line {
-            display: block;
-            width: 24px;
+            width: 22px;
             height: 2px;
-            background: currentColor;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        .mobile-nav-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 850;
-            background: rgba(13, 13, 13, 0.98);
-            -webkit-backdrop-filter: blur(12px);
-            backdrop-filter: blur(12px);
-            flex-direction: column;
-            padding: 5rem 2rem 2rem;
-        }
-
-        .mobile-nav-overlay.open {
-            display: flex;
-        }
-
-        .mobile-nav-close {
-            position: absolute;
-            top: 1.25rem;
-            right: 1.5rem;
-            background: none;
-            border: none;
-            color: var(--text);
-            cursor: pointer;
-            padding: 0.5rem;
-            min-height: 44px;
-            min-width: 44px;
-        }
-
-        .mobile-nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .mobile-nav-link {
-            display: flex;
-            align-items: center;
-            min-height: 52px;
-            padding: 0 1rem;
-            font-size: 1.1rem;
-            font-weight: 500;
-            border-radius: 8px;
-            color: var(--text-muted);
-            transition: color 0.3s ease, background-color 0.3s ease;
-        }
-
-        .mobile-nav-link:hover,
-        .mobile-nav-link.active {
-            color: var(--text);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .mobile-nav-cta {
-            margin-top: 1rem;
-            background: var(--accent);
-            color: #000 !important;
-            font-weight: 600;
+            background: var(--text);
+            border-radius: 1px;
         }
 
         @media (max-width: 900px) {
-
             .nav-links,
             .nav-donate-cta {
                 display: none;
@@ -292,23 +215,85 @@
             }
         }
 
-        /* ─── Page wrapper (below fixed nav) ─── */
-        .page-wrapper {
-            padding-top: calc(60px + 72px);
+        /* ─── Mobile Nav Overlay ─── */
+        .mobile-nav-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(13, 13, 13, 0.97);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
         }
 
-        /* ─── Album Selector ─── */
+        .mobile-nav-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-nav-close {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            padding: 0.5rem;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mobile-nav-link {
+            font-size: 1.25rem;
+            padding: 0.75rem 2rem;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .mobile-nav-link:hover,
+        .mobile-nav-link.active {
+            color: var(--text);
+        }
+
+        .mobile-nav-cta {
+            margin-top: 1rem;
+            padding: 0.75rem 2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        /* ─── Album Selector (pills) ─── */
         .album-selector {
-            background: var(--bg-elevated);
+            padding: 1.25rem 0;
             border-bottom: 1px solid var(--border);
-            padding: 1rem 0;
+            background: var(--bg-elevated);
         }
 
         .album-selector-inner {
             display: flex;
             align-items: center;
             gap: 1rem;
-            flex-wrap: wrap;
+            overflow-x: auto;
         }
 
         .album-selector-label {
@@ -317,60 +302,58 @@
             letter-spacing: 0.12em;
             text-transform: uppercase;
             color: var(--text-muted);
+            white-space: nowrap;
         }
 
         .album-selector-links {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: nowrap;
         }
 
         .album-pill {
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            white-space: nowrap;
+            color: var(--text-muted);
+            transition: color 0.3s ease, border-color 0.3s ease;
+            min-height: 44px;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            height: 36px;
-            padding: 0 1rem;
-            border-radius: 20px;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
-            min-height: 44px;
         }
 
         .album-pill:hover {
             color: var(--text);
             border-color: var(--border-hover);
-            background: rgba(255, 255, 255, 0.03);
         }
 
         .album-pill.active {
-            color: var(--accent);
+            color: var(--text);
             border-color: var(--accent);
-            background: rgba(240, 180, 41, 0.08);
+            background: rgba(139, 0, 0, 0.08);
         }
 
         /* ─── Album Hero ─── */
         .album-hero {
-            background: linear-gradient(180deg, rgba(240, 180, 41, 0.06) 0%, transparent 100%);
+            padding: 4rem 0 3rem;
             border-bottom: 1px solid var(--border);
-            padding: 5rem 0 4rem;
         }
 
         .album-hero-inner {
             display: grid;
             grid-template-columns: 340px 1fr;
-            gap: 3.5rem;
-            align-items: center;
+            gap: 3rem;
+            align-items: start;
         }
 
         .album-cover-wrap {
-            position: relative;
             aspect-ratio: 1;
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
         }
 
         .album-cover-wrap img {
@@ -383,148 +366,70 @@
         .album-cover-placeholder {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #2a1f0d 0%, #1a1206 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 5rem;
-        }
-
-        .album-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a0a0a 50%, #2a1a0a 100%);
         }
 
         .album-eyebrow {
+            display: block;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.75rem;
             letter-spacing: 0.15em;
             text-transform: uppercase;
-            color: var(--accent);
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
         }
 
         .album-title {
-            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-size: clamp(2rem, 5vw, 3.5rem);
             font-weight: 700;
-            line-height: 1.1;
             letter-spacing: -0.02em;
+            line-height: 1.1;
+            margin-bottom: 0.25rem;
         }
 
         .album-artist {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
+            color: var(--accent);
             font-weight: 500;
-            color: var(--text-muted);
+            margin-bottom: 1rem;
         }
 
         .album-description {
-            font-size: 1.05rem;
             color: var(--text-secondary);
+            font-size: 0.95rem;
             line-height: 1.7;
             max-width: 540px;
+            margin-bottom: 1.5rem;
         }
 
         .album-stats {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
             flex-wrap: wrap;
-            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .album-stat {
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
+            gap: 0.15rem;
         }
 
         .album-stat-label {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             letter-spacing: 0.12em;
             text-transform: uppercase;
             color: var(--text-muted);
         }
 
         .album-stat-value {
-            font-size: 1.1rem;
             font-weight: 600;
-        }
-
-        .album-ctas {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.75rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-album-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--accent);
-            color: #000;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9375rem;
-            min-height: 44px;
-            transition:
-                transform 0.2s ease,
-                opacity 0.2s ease;
-        }
-
-        .btn-album-primary:hover,
-        .btn-album-primary:focus-visible {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
-
-        .btn-album-primary:active {
-            transform: translateY(0);
-        }
-
-        .btn-album-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: transparent;
-            color: var(--text);
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9375rem;
-            min-height: 44px;
-            transition:
-                border-color 0.3s ease,
-                background-color 0.3s ease;
-        }
-
-        .btn-album-secondary:hover,
-        .btn-album-secondary:focus-visible {
-            border-color: var(--border-hover);
-            background-color: rgba(255, 255, 255, 0.04);
-        }
-
-        /* Tracklist header link */
-        .section-yt-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-decoration: none;
-            padding: 0.5rem 0;
-            min-height: 44px;
-            transition: color 0.2s ease;
-        }
-
-        .section-yt-link:hover,
-        .section-yt-link:focus-visible {
-            color: #ff4444;
+            font-size: 0.95rem;
         }
 
         @media (max-width: 900px) {
@@ -534,17 +439,7 @@
             }
 
             .album-cover-wrap {
-                max-width: 300px;
-                margin: 0 auto;
-            }
-
-            .album-meta {
-                text-align: center;
-                align-items: center;
-            }
-
-            .album-description {
-                text-align: left;
+                max-width: 280px;
             }
         }
 
@@ -552,30 +447,22 @@
         .player-section {
             padding: 3rem 0;
             border-bottom: 1px solid var(--border);
-            background: var(--bg-elevated);
         }
 
         .player-inner {
             display: grid;
-            grid-template-columns: 1fr 340px;
-            gap: 2.5rem;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
             align-items: start;
         }
 
         .featured-video-wrap {
-            position: relative;
-            aspect-ratio: 16/9;
-            background: #000;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-        }
-
-        .featured-video-wrap video,
-        .featured-video-wrap iframe {
-            width: 100%;
-            height: 100%;
-            display: block;
+            aspect-ratio: 16 / 9;
+            position: relative;
         }
 
         .video-placeholder {
@@ -586,13 +473,13 @@
             align-items: center;
             justify-content: center;
             gap: 1rem;
-            background: var(--bg-card);
-            cursor: pointer;
         }
 
         .video-placeholder-cover {
             position: absolute;
             inset: 0;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             opacity: 0.3;
         }
@@ -600,205 +487,142 @@
         .play-btn-large {
             position: relative;
             z-index: 1;
-            width: 72px;
-            height: 72px;
-            background: var(--accent);
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
-            border: none;
+            background: rgba(139, 0, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: var(--text);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: var(--glow-accent);
+            transition: transform 0.3s ease, background-color 0.3s ease;
         }
 
         .play-btn-large:hover {
             transform: scale(1.08);
-        }
-
-        .play-btn-large svg {
-            color: #000;
+            background: rgba(139, 0, 0, 0.8);
         }
 
         .video-placeholder-text {
             position: relative;
             z-index: 1;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
         }
 
+        /* ── Now-playing sidebar ── */
         .now-playing-info {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
         }
 
         .now-playing-label {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 0.12em;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
             text-transform: uppercase;
-            color: var(--accent);
-        }
-
-        .now-playing-cover {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            background: linear-gradient(135deg, #2a1f0d 0%, #1a1206 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-        }
-
-        .now-playing-cover img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            color: var(--text-muted);
             display: block;
+            margin-bottom: 1rem;
         }
 
         .now-playing-title {
-            font-size: 1.4rem;
+            font-size: 1.15rem;
             font-weight: 700;
-            line-height: 1.2;
+            margin-bottom: 0.75rem;
         }
 
         .now-playing-meta {
             display: flex;
+            gap: 0.4rem;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .meta-chip {
-            display: inline-flex;
-            align-items: center;
-            height: 28px;
-            padding: 0 0.75rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            padding: 0.25rem 0.5rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 4px;
             color: var(--text-muted);
         }
 
         .meta-chip.accent {
-            border-color: rgba(240, 180, 41, 0.35);
             color: var(--accent);
+            border-color: rgba(139, 0, 0, 0.3);
         }
 
         .now-playing-role {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            font-style: italic;
-            line-height: 1.5;
-        }
-
-        .now-playing-hook {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
-            line-height: 1.6;
             font-style: italic;
-            padding: 0.75rem;
-            background: rgba(240, 180, 41, 0.04);
-            border-left: 2px solid var(--accent);
-            border-radius: 0 6px 6px 0;
         }
 
         @media (max-width: 900px) {
             .player-inner {
                 grid-template-columns: 1fr;
             }
-
-            .now-playing-info {
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 1.5rem;
-            }
-
-            .now-playing-cover {
-                width: 100px;
-                flex-shrink: 0;
-            }
-
-            .now-playing-details {
-                flex: 1;
-                min-width: 200px;
-            }
         }
 
         /* ─── Track List ─── */
         .tracklist-section {
-            padding: 4rem 0 5rem;
+            padding: 3rem 0;
         }
 
         .section-header {
             display: flex;
             align-items: baseline;
-            gap: 1rem;
-            margin-bottom: 2.5rem;
+            justify-content: space-between;
+            margin-bottom: 2rem;
         }
 
         .section-title {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .section-count {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            color: var(--text-muted);
         }
 
         .tracks-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 1px;
-            background: var(--border);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
+            gap: 0.75rem;
         }
 
         .track-card {
-            background: var(--bg-card);
             display: grid;
             grid-template-columns: 80px 1fr;
-            gap: 0;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid transparent;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            position: relative;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
         }
 
         .track-card:hover {
-            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            background: var(--bg-card);
         }
 
         .track-card.active {
-            background: rgba(240, 180, 41, 0.06);
-        }
-
-        .track-card.active::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: var(--accent);
+            border-color: var(--accent);
+            background: rgba(139, 0, 0, 0.06);
         }
 
         .track-thumb {
-            position: relative;
-            aspect-ratio: 1;
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
             overflow: hidden;
-            flex-shrink: 0;
-            background: linear-gradient(135deg, #2a1f0d 0%, #1a1206 100%);
+            background: var(--bg-card);
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -808,19 +632,14 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: block;
-            transition: transform 0.3s ease;
-        }
-
-        .track-card:hover .track-thumb img {
-            transform: scale(1.04);
         }
 
         .track-thumb-number {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 1.5rem;
+            font-weight: 700;
             color: var(--text-muted);
+            opacity: 0.4;
         }
 
         .track-thumb-overlay {
@@ -834,62 +653,44 @@
             transition: opacity 0.3s ease;
         }
 
-        .track-card:hover .track-thumb-overlay {
-            opacity: 1;
-        }
-
+        .track-card:hover .track-thumb-overlay,
         .track-card.active .track-thumb-overlay {
             opacity: 1;
-            background: rgba(0, 0, 0, 0.3);
         }
 
         .play-icon {
-            width: 32px;
-            height: 32px;
-            background: var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: var(--text);
         }
 
         .track-body {
-            padding: 0.875rem 1rem;
             display: flex;
             flex-direction: column;
-            gap: 0.3rem;
-            justify-content: center;
-            min-width: 0;
+            gap: 0.25rem;
         }
 
         .track-number {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             color: var(--text-muted);
-            letter-spacing: 0.06em;
+            letter-spacing: 0.05em;
         }
 
         .track-name {
-            font-size: 0.95rem;
             font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .track-card.active .track-name {
-            color: var(--accent);
+            font-size: 0.95rem;
         }
 
         .track-chips {
             display: flex;
-            gap: 0.375rem;
+            gap: 0.4rem;
             flex-wrap: wrap;
+            margin-top: 0.15rem;
         }
 
         .track-chip {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.65rem;
+            letter-spacing: 0.05em;
             padding: 2px 6px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border);
@@ -901,55 +702,6 @@
         @media (max-width: 600px) {
             .tracks-grid {
                 grid-template-columns: 1fr;
-            }
-        }
-
-        /* ─── Featured Track Callout ─── */
-        .featured-callout {
-            padding: 3rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .featured-callout-inner {
-            background: linear-gradient(135deg, rgba(112, 96, 192, 0.08) 0%, rgba(240, 180, 41, 0.06) 100%);
-            border: 1px solid rgba(112, 96, 192, 0.2);
-            border-radius: 12px;
-            padding: 2.5rem;
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .featured-callout-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--accent-cool);
-            background: rgba(112, 96, 192, 0.12);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            white-space: nowrap;
-        }
-
-        .featured-callout-text h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .featured-callout-text p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 600px) {
-            .featured-callout-inner {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-                padding: 1.5rem;
             }
         }
 
@@ -1064,10 +816,10 @@
                         <a href="music-shariff.html" class="album-pill" role="listitem">
                             DJ Shariff &mdash; Good Flippin Vibes
                         </a>
-                        <a href="music-djz.html" class="album-pill active" role="listitem" aria-current="page">
+                        <a href="music-djz.html" class="album-pill" role="listitem">
                             DJ Z &mdash; Wheels Up
                         </a>
-                        <a href="music-heavymoose-dross1.html" class="album-pill" role="listitem">
+                        <a href="music-heavymoose-dross1.html" class="album-pill active" role="listitem" aria-current="page">
                             Heavy Moose &mdash; DROSS
                         </a>
                         <a href="music-heavymoose-dross2.html" class="album-pill" role="listitem">
@@ -1083,49 +835,35 @@
             <div class="container">
                 <div class="album-hero-inner">
                     <div class="album-cover-wrap">
-                        <div class="album-cover-placeholder" aria-label="Wheels Up album art — coming soon">&#127934;</div>
+                        <div class="album-cover-placeholder" aria-label="DROSS album art — coming soon">&#129420;</div>
                     </div>
                     <div class="album-meta">
-                        <span class="album-eyebrow">Debut Album &bull; 2026</span>
-                        <h1 class="album-title">WHEELS UP</h1>
-                        <p class="album-artist">DJ Z</p>
+                        <span class="album-eyebrow">Volume I &bull; 2026</span>
+                        <h1 class="album-title">DROSS</h1>
+                        <p class="album-artist">Heavy Moose</p>
                         <p class="album-description">
-                            Nine tracks of pure 80s hip-hop built around one premise: movement is medicine,
-                            joy is a practice, and the roller rink is the most honest wellness facility ever built.
-                            <em>Wheels Up</em> is a Saturday afternoon set &mdash; the kind that starts with
-                            the ritual of lacing your skates and ends with the glow of having given your body
-                            exactly what it needed.
+                            Ten tracks from the darker side of healing. Industrial soundscapes built
+                            on ember-lit factory floors, oxidized iron, and the slow patience that comes
+                            only after you've stopped running. Heavy Moose carries the weight so you
+                            can set it down. Grief has a sound. This is it.
                         </p>
                         <div class="album-stats" role="list" aria-label="Album details">
                             <div class="album-stat" role="listitem">
                                 <span class="album-stat-label">Tracks</span>
-                                <span class="album-stat-value">9</span>
+                                <span class="album-stat-value">10</span>
                             </div>
                             <div class="album-stat" role="listitem">
                                 <span class="album-stat-label">Home Key</span>
-                                <span class="album-stat-value">C</span>
+                                <span class="album-stat-value">Dm</span>
                             </div>
                             <div class="album-stat" role="listitem">
-                                <span class="album-stat-label">Era</span>
-                                <span class="album-stat-value">80s Hip-Hop / Electro-Funk</span>
+                                <span class="album-stat-label">Genre</span>
+                                <span class="album-stat-value">Industrial / Ambient / Cinematic</span>
                             </div>
                             <div class="album-stat" role="listitem">
                                 <span class="album-stat-label">Total Runtime</span>
-                                <span class="album-stat-value">~36 min</span>
+                                <span class="album-stat-value">~35 min</span>
                             </div>
-                        </div>
-                        <div class="album-ctas">
-                            <a href="#track-9" class="btn-album-primary"
-                                aria-label="Play The Slow One — featured track"
-                                id="play-featured-btn">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <polygon points="5,3 19,12 5,21"></polygon>
-                                </svg>
-                                Play Featured Track
-                            </a>
-                            <a href="music.html" class="btn-album-secondary">
-                                &larr; DJ Shariff Album
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -1136,11 +874,10 @@
         <section class="player-section" aria-label="Music video player">
             <div class="container">
                 <div class="player-inner">
-                    <!-- Video display -->
                     <div class="featured-video-wrap" id="featured-player">
                         <div class="video-placeholder" id="video-placeholder">
                             <button class="play-btn-large" id="placeholder-play-btn"
-                                aria-label="Play Track 9 — The Slow One (You Know What It Is)">
+                                aria-label="Play Track 1 — Prelude to Glass">
                                 <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <polygon points="5,3 19,12 5,21"></polygon>
                                 </svg>
@@ -1149,42 +886,19 @@
                         </div>
                     </div>
 
-                    <!-- Now Playing sidebar -->
                     <aside class="now-playing-info" aria-label="Now playing" aria-live="polite">
                         <span class="now-playing-label">Now Playing</span>
-                        <div id="now-playing-cover" class="now-playing-cover">
-                            <span aria-hidden="true">&#127934;</span>
-                        </div>
                         <div class="now-playing-details">
-                            <p class="now-playing-title" id="np-title">The Slow One (You Know What It Is)</p>
+                            <p class="now-playing-title" id="np-title">Prelude to Glass</p>
                             <div class="now-playing-meta" id="np-meta">
-                                <span class="meta-chip accent">Track 9</span>
-                                <span class="meta-chip">68 BPM</span>
-                                <span class="meta-chip">Eb</span>
-                                <span class="meta-chip">4:45</span>
+                                <span class="meta-chip accent">Track 1</span>
+                                <span class="meta-chip">60 BPM</span>
+                                <span class="meta-chip">Dm</span>
+                                <span class="meta-chip">3:17</span>
                             </div>
-                            <p class="now-playing-role" id="np-role">the couples' skate &mdash; hair-band ballad crossover</p>
-                            <p class="now-playing-hook" id="np-hook">&ldquo;The slow one's on / You know what it is / Take your time with this / This one's yours&rdquo;</p>
+                            <p class="now-playing-role" id="np-role">the factory floor opens</p>
                         </div>
                     </aside>
-                </div>
-            </div>
-        </section>
-
-        <!-- ── Featured Track Callout ── -->
-        <section class="featured-callout" aria-label="Featured track">
-            <div class="container">
-                <div class="featured-callout-inner">
-                    <span class="featured-callout-badge">&#9733; Featured</span>
-                    <div class="featured-callout-text">
-                        <h3>Track 9 &mdash; The Slow One (You Know What It Is)</h3>
-                        <p>
-                            The couples' skate. Oberheim power chords, 808 half-time, ARP guitar solo.
-                            DJ Z's one impossible move that turns out to be completely correct.
-                            Eight seconds of near-silence after Roll Home &mdash; then the Oberheim rises
-                            out of the quiet, and everyone on the floor is already slowing down.
-                        </p>
-                    </div>
                 </div>
             </div>
         </section>
@@ -1194,22 +908,19 @@
             <div class="container">
                 <div class="section-header">
                     <h2 class="section-title">Tracks</h2>
-                    <span class="section-count">9 tracks &bull; ~36 min</span>
                 </div>
 
                 <div class="tracks-grid" role="list" aria-label="Album tracks">
 
-                    <article class="track-card" role="listitem" tabindex="0"
+                    <article class="track-card active" role="listitem" tabindex="0"
                         data-track="1"
-                        data-video="/api/media/gfv-album-2/01 - Lace Up.mp4"
-                        data-youtube=""
-                        data-title="Lace Up"
-                        data-duration="3:28"
-                        data-bpm="82"
-                        data-key="C"
-                        data-role="album opener — the ritual before the first roll"
-                        data-hook="Lace 'em tight / It's about to be right"
-                        aria-label="Track 1 — Lace Up. 3:28. 82 BPM. Key of C.">
+                        data-video="/api/media/dross-album-1/01 - PRELUDE TO GLASS.mp4"
+                        data-title="Prelude to Glass"
+                        data-duration="3:17"
+                        data-bpm="60"
+                        data-key="Dm"
+                        data-role="the factory floor opens"
+                        aria-label="Track 1 — Prelude to Glass. 3:17. 60 BPM. Key of Dm.">
                         <div class="track-thumb">
                             <span class="track-thumb-number">01</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
@@ -1222,26 +933,24 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">01</span>
-                            <span class="track-name">Lace Up</span>
+                            <span class="track-name">Prelude to Glass</span>
                             <div class="track-chips">
-                                <span class="track-chip">3:28</span>
-                                <span class="track-chip">82 BPM</span>
-                                <span class="track-chip">C</span>
+                                <span class="track-chip">3:17</span>
+                                <span class="track-chip">60 BPM</span>
+                                <span class="track-chip">Dm</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="2"
-                        data-video="/api/media/gfv-album-2/02 - First Wheels.mp4"
-                        data-youtube=""
-                        data-title="First Wheels"
-                        data-duration="3:45"
-                        data-bpm="94"
-                        data-key="F"
-                        data-role="pure kinetic joy — the body remembering it knows how to do this"
-                        data-hook="First roll of the day / Already forgot all the weight"
-                        aria-label="Track 2 — First Wheels. 3:45. 94 BPM. Key of F.">
+                        data-video="/api/media/dross-album-1/02 - EMBED.mp4"
+                        data-title="Embed"
+                        data-duration="2:57"
+                        data-bpm="80"
+                        data-key="Bm"
+                        data-role="something takes hold"
+                        aria-label="Track 2 — Embed. 2:57. 80 BPM. Key of Bm.">
                         <div class="track-thumb">
                             <span class="track-thumb-number">02</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
@@ -1254,26 +963,24 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">02</span>
-                            <span class="track-name">First Wheels</span>
+                            <span class="track-name">Embed</span>
                             <div class="track-chips">
-                                <span class="track-chip">3:45</span>
-                                <span class="track-chip">94 BPM</span>
-                                <span class="track-chip">F</span>
+                                <span class="track-chip">2:57</span>
+                                <span class="track-chip">80 BPM</span>
+                                <span class="track-chip">Bm</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="3"
-                        data-video="/api/media/gfv-album-2/03 - Coast Mode.mp4"
-                        data-youtube=""
-                        data-title="Coast Mode"
-                        data-duration="4:10"
-                        data-bpm="78"
-                        data-key="Bb"
-                        data-role="movement as meditation — when you stop trying and the skates take over"
-                        data-hook="Stop pushing / Let the wheels decide"
-                        aria-label="Track 3 — Coast Mode. 4:10. 78 BPM. Key of Bb.">
+                        data-video="/api/media/dross-album-1/03 - YEAR-LONG DARK.mp4"
+                        data-title="Year-Long Dark"
+                        data-duration="4:00"
+                        data-bpm="68"
+                        data-key="Em"
+                        data-role="the long middle"
+                        aria-label="Track 3 — Year-Long Dark. 4:00. 68 BPM. Key of Em.">
                         <div class="track-thumb">
                             <span class="track-thumb-number">03</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
@@ -1286,26 +993,24 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">03</span>
-                            <span class="track-name">Coast Mode</span>
+                            <span class="track-name">Year-Long Dark</span>
                             <div class="track-chips">
-                                <span class="track-chip">4:10</span>
-                                <span class="track-chip">78 BPM</span>
-                                <span class="track-chip">Bb</span>
+                                <span class="track-chip">4:00</span>
+                                <span class="track-chip">68 BPM</span>
+                                <span class="track-chip">Em</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="4"
-                        data-video="/api/media/gfv-album-2/04 - Everybody's Good.mp4"
-                        data-youtube=""
-                        data-title="Everybody's Good"
-                        data-duration="4:05"
-                        data-bpm="88"
-                        data-key="G"
-                        data-role="the GFV wellness thesis — joy is medicine, community is medicine"
-                        data-hook="Everybody here is good / Good flippin vibes / Understood"
-                        aria-label="Track 4 — Everybody's Good. 4:05. 88 BPM. Key of G.">
+                        data-video="/api/media/dross-album-1/04 - ALL THE FRIENDS I BURIED (NOT IN GROUND).mp4"
+                        data-title="All the Friends I Buried (Not in Ground)"
+                        data-duration="3:40"
+                        data-bpm="72"
+                        data-key="Am"
+                        data-role="the grief inventory"
+                        aria-label="Track 4 — All the Friends I Buried (Not in Ground). 3:40. 72 BPM. Key of Am.">
                         <div class="track-thumb">
                             <span class="track-thumb-number">04</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
@@ -1318,26 +1023,24 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">04</span>
-                            <span class="track-name">Everybody's Good</span>
+                            <span class="track-name">All the Friends I Buried (Not in Ground)</span>
                             <div class="track-chips">
-                                <span class="track-chip">4:05</span>
-                                <span class="track-chip">88 BPM</span>
-                                <span class="track-chip">G</span>
+                                <span class="track-chip">3:40</span>
+                                <span class="track-chip">72 BPM</span>
+                                <span class="track-chip">Am</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="5"
-                        data-video="/api/media/gfv-album-2/05 - Purple Wheels.mp4"
-                        data-youtube=""
-                        data-title="Purple Wheels"
-                        data-duration="3:55"
-                        data-bpm="96"
-                        data-key="E"
-                        data-role="DJ Z's signature color, peak personal flow — the Zebra in full command"
-                        data-hook="Purple wheels on the floor / That's DJ Z, hear the roar"
-                        aria-label="Track 5 — Purple Wheels. 3:55. 96 BPM. Key of E.">
+                        data-video="/api/media/dross-album-1/05 - PRESSURE - SURFACE.mp4"
+                        data-title="Pressure / Surface"
+                        data-duration="2:23"
+                        data-bpm="95"
+                        data-key="Gm"
+                        data-role="the break point"
+                        aria-label="Track 5 — Pressure / Surface. 2:23. 95 BPM. Key of Gm.">
                         <div class="track-thumb">
                             <span class="track-thumb-number">05</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
@@ -1350,26 +1053,24 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">05</span>
-                            <span class="track-name">Purple Wheels</span>
+                            <span class="track-name">Pressure / Surface</span>
                             <div class="track-chips">
-                                <span class="track-chip">3:55</span>
-                                <span class="track-chip">96 BPM</span>
-                                <span class="track-chip">E</span>
+                                <span class="track-chip">2:23</span>
+                                <span class="track-chip">95 BPM</span>
+                                <span class="track-chip">Gm</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="6"
-                        data-video="/api/media/gfv-album-2/06 - DJ Z in the Mix.mp4"
-                        data-youtube=""
-                        data-title="DJ Z in the Mix"
-                        data-duration="4:35"
-                        data-bpm="104"
-                        data-key="Dm"
-                        data-role="turntable showcase — the album's serious center, call and response"
-                        data-hook="DJ Z! / (In the mix!) / Say it loud! / (In the mix!)"
-                        aria-label="Track 6 — DJ Z in the Mix. 4:35. 104 BPM. Key of Dm.">
+                        data-video="/api/media/dross-album-1/06 - WHAT GRIEF WEIGHS.mp4"
+                        data-title="What Grief Weighs"
+                        data-duration="3:03"
+                        data-bpm="60"
+                        data-key="Cm"
+                        data-role="the heaviest room"
+                        aria-label="Track 6 — What Grief Weighs. 3:03. 60 BPM. Key of Cm.">
                         <div class="track-thumb">
                             <span class="track-thumb-number">06</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
@@ -1382,26 +1083,24 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">06</span>
-                            <span class="track-name">DJ Z in the Mix</span>
+                            <span class="track-name">What Grief Weighs</span>
                             <div class="track-chips">
-                                <span class="track-chip">4:35</span>
-                                <span class="track-chip">104 BPM</span>
-                                <span class="track-chip">Dm</span>
+                                <span class="track-chip">3:03</span>
+                                <span class="track-chip">60 BPM</span>
+                                <span class="track-chip">Cm</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="7"
-                        data-video="/api/media/gfv-album-2/07 - Last Lap.mp4"
-                        data-youtube=""
-                        data-title="Last Lap"
-                        data-duration="3:42"
-                        data-bpm="100"
-                        data-key="C"
-                        data-role="the final run — speed round, euphoric, everyone's a master now"
-                        data-hook="Last lap / Hold nothing back / Last lap / This is what we came for"
-                        aria-label="Track 7 — Last Lap. 3:42. 100 BPM. Key of C.">
+                        data-video="/api/media/dross-album-1/07 - IRON IN BLOOD.mp4"
+                        data-title="Iron in Blood"
+                        data-duration="4:09"
+                        data-bpm="85"
+                        data-key="Fm"
+                        data-role="something still fights"
+                        aria-label="Track 7 — Iron in Blood. 4:09. 85 BPM. Key of Fm.">
                         <div class="track-thumb">
                             <span class="track-thumb-number">07</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
@@ -1414,26 +1113,24 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">07</span>
-                            <span class="track-name">Last Lap</span>
+                            <span class="track-name">Iron in Blood</span>
                             <div class="track-chips">
-                                <span class="track-chip">3:42</span>
-                                <span class="track-chip">100 BPM</span>
-                                <span class="track-chip">C</span>
+                                <span class="track-chip">4:09</span>
+                                <span class="track-chip">85 BPM</span>
+                                <span class="track-chip">Fm</span>
                             </div>
                         </div>
                     </article>
 
                     <article class="track-card" role="listitem" tabindex="0"
                         data-track="8"
-                        data-video="/api/media/gfv-album-2/08 - Roll Home.mp4"
-                        data-youtube=""
-                        data-title="Roll Home"
-                        data-duration="3:55"
-                        data-bpm="72"
-                        data-key="Ab"
-                        data-role="cooldown — skates off, the specific glow of having moved your body"
-                        data-hook="Skates off / Heart still rolling / Best kind of tired / Body knowing"
-                        aria-label="Track 8 — Roll Home. 3:55. 72 BPM. Key of Ab.">
+                        data-video="/api/media/dross-album-1/08 - MERIDIAN DARK.mp4"
+                        data-title="Meridian Dark"
+                        data-duration="4:35"
+                        data-bpm="75"
+                        data-key="D&#9837;m"
+                        data-role="the longest night"
+                        aria-label="Track 8 — Meridian Dark. 4:35. 75 BPM. Key of D flat minor.">
                         <div class="track-thumb">
                             <span class="track-thumb-number">08</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
@@ -1446,26 +1143,24 @@
                         </div>
                         <div class="track-body">
                             <span class="track-number">08</span>
-                            <span class="track-name">Roll Home</span>
+                            <span class="track-name">Meridian Dark</span>
                             <div class="track-chips">
-                                <span class="track-chip">3:55</span>
-                                <span class="track-chip">72 BPM</span>
-                                <span class="track-chip">Ab</span>
+                                <span class="track-chip">4:35</span>
+                                <span class="track-chip">75 BPM</span>
+                                <span class="track-chip">D&#9837;m</span>
                             </div>
                         </div>
                     </article>
 
-                    <article class="track-card active" role="listitem" tabindex="0" id="track-9"
+                    <article class="track-card" role="listitem" tabindex="0"
                         data-track="9"
-                        data-video="/api/media/gfv-album-2/09 - The Slow One (You Know What It Is).mp4"
-                        data-youtube=""
-                        data-title="The Slow One (You Know What It Is)"
-                        data-duration="4:45"
-                        data-bpm="68"
-                        data-key="Eb"
-                        data-role="the couples' skate — hair-band ballad crossover; Oberheim power chords, 808 half-time"
-                        data-hook="The slow one's on / You know what it is / Take your time with this / This one's yours"
-                        aria-label="Track 9 — The Slow One (You Know What It Is). 4:45. 68 BPM. Key of Eb. Featured track.">
+                        data-video="/api/media/dross-album-1/09 - EXTRUDED.mp4"
+                        data-title="Extruded"
+                        data-duration="2:42"
+                        data-bpm="88"
+                        data-key="B&#9837;m"
+                        data-role="shaped by force"
+                        aria-label="Track 9 — Extruded. 2:42. 88 BPM. Key of B flat minor.">
                         <div class="track-thumb">
                             <span class="track-thumb-number">09</span>
                             <div class="track-thumb-overlay" aria-hidden="true">
@@ -1477,12 +1172,42 @@
                             </div>
                         </div>
                         <div class="track-body">
-                            <span class="track-number">09 &bull; FEATURED</span>
-                            <span class="track-name">The Slow One (You Know What It Is)</span>
+                            <span class="track-number">09</span>
+                            <span class="track-name">Extruded</span>
                             <div class="track-chips">
-                                <span class="track-chip">4:45</span>
-                                <span class="track-chip">68 BPM</span>
-                                <span class="track-chip">Eb</span>
+                                <span class="track-chip">2:42</span>
+                                <span class="track-chip">88 BPM</span>
+                                <span class="track-chip">B&#9837;m</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="track-card" role="listitem" tabindex="0"
+                        data-track="10"
+                        data-video="/api/media/dross-album-1/10 - THRESHOLD.mp4"
+                        data-title="Threshold"
+                        data-duration="3:33"
+                        data-bpm="63"
+                        data-key="Dm"
+                        data-role="the door you walk through"
+                        aria-label="Track 10 — Threshold. 3:33. 63 BPM. Key of Dm.">
+                        <div class="track-thumb">
+                            <span class="track-thumb-number">10</span>
+                            <div class="track-thumb-overlay" aria-hidden="true">
+                                <span class="play-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                        <polygon points="5,3 19,12 5,21"></polygon>
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="track-body">
+                            <span class="track-number">10</span>
+                            <span class="track-name">Threshold</span>
+                            <div class="track-chips">
+                                <span class="track-chip">3:33</span>
+                                <span class="track-chip">63 BPM</span>
+                                <span class="track-chip">Dm</span>
                             </div>
                         </div>
                     </article>
@@ -1501,10 +1226,11 @@
                 <nav class="footer-links" aria-label="Footer navigation">
                     <a href="index.html">Home</a>
                     <a href="gallery.html">Gallery</a>
-                    <a href="music-shariff.html">Music &mdash; DJ Shariff</a>
-                    <a href="music-djz.html" aria-current="page">Music &mdash; DJ Z</a>
-                    <a href="music-heavymoose-dross1.html">Music &mdash; Heavy Moose (DROSS)</a>
-                    <a href="music-heavymoose-dross2.html">Music &mdash; Heavy Moose (DROSS II)</a>
+                    <a href="music.html">Music</a>
+                    <a href="music-shariff.html">DJ Shariff</a>
+                    <a href="music-djz.html">DJ Z</a>
+                    <a href="music-heavymoose-dross1.html" aria-current="page">DROSS</a>
+                    <a href="music-heavymoose-dross2.html">DROSS II</a>
                     <a href="community-portal.html">Community</a>
                     <a href="donate.html">Donate</a>
                     <a href="privacy.html">Privacy</a>
@@ -1518,7 +1244,7 @@
         (function () {
             'use strict';
 
-            var currentTrack = 9;
+            var currentTrack = 1;
 
             function buildVideoEl(src) {
                 var v = document.createElement('video');
@@ -1530,18 +1256,7 @@
                 return v;
             }
 
-            function buildYouTubeEl(ytId) {
-                var f = document.createElement('iframe');
-                f.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(ytId) + '?autoplay=1&rel=0';
-                f.allow = 'autoplay; encrypted-media; picture-in-picture';
-                f.allowFullscreen = true;
-                f.setAttribute('title', 'Music video player');
-                f.style.cssText = 'width:100%;height:100%;display:block;border:none;';
-                return f;
-            }
-
             function loadTrack(card) {
-                var ytId = card.dataset.youtube || '';
                 var videoSrc = card.dataset.video || '';
                 var title = card.dataset.title || '';
                 var trackNo = card.dataset.track || '';
@@ -1549,18 +1264,12 @@
                 var bpm = card.dataset.bpm || '';
                 var key = card.dataset.key || '';
                 var role = card.dataset.role || '';
-                var hook = card.dataset.hook || '';
 
                 var npTitle = document.getElementById('np-title');
                 var npMeta = document.getElementById('np-meta');
                 var npRole = document.getElementById('np-role');
-                var npHook = document.getElementById('np-hook');
                 if (npTitle) npTitle.textContent = title;
                 if (npRole) npRole.textContent = role;
-                if (npHook) {
-                    npHook.innerHTML = hook ? '&ldquo;' + hook.replace(/\//g, ' / ') + '&rdquo;' : '';
-                    npHook.style.display = hook ? '' : 'none';
-                }
                 if (npMeta) {
                     npMeta.innerHTML =
                         '<span class="meta-chip accent">Track ' + trackNo + '</span>' +
@@ -1571,19 +1280,15 @@
 
                 var playerWrap = document.getElementById('featured-player');
                 if (!playerWrap) return;
-
                 while (playerWrap.firstChild) playerWrap.removeChild(playerWrap.firstChild);
 
-                if (ytId) {
-                    playerWrap.appendChild(buildYouTubeEl(ytId));
-                } else if (videoSrc) {
+                if (videoSrc) {
                     playerWrap.appendChild(buildVideoEl(videoSrc));
                 } else {
                     var placeholder = document.createElement('div');
                     placeholder.className = 'video-placeholder';
-                    placeholder.setAttribute('aria-label', 'Video not yet available for ' + title);
                     var msg = document.createElement('p');
-                    msg.style.cssText = 'position:relative;z-index:1;color:var(--text-muted);font-size:0.9rem;';
+                    msg.style.cssText = 'color:var(--text-muted);font-size:0.9rem;';
                     msg.textContent = 'Video coming soon';
                     placeholder.appendChild(msg);
                     playerWrap.appendChild(placeholder);
@@ -1596,31 +1301,26 @@
 
             function handleTrackSelect(card) {
                 if (!card) return;
-
                 document.querySelectorAll('.track-card').forEach(function (c) {
                     c.classList.remove('active');
                     c.removeAttribute('aria-current');
                 });
-
                 card.classList.add('active');
                 card.setAttribute('aria-current', 'true');
                 currentTrack = parseInt(card.dataset.track, 10) || 1;
-
                 loadTrack(card);
 
                 if (window.gtag) {
                     gtag('event', 'track_play', {
                         event_category: 'music',
-                        event_label: 'DJ Z - ' + card.dataset.title,
+                        event_label: 'dross1_' + card.dataset.title,
                         value: currentTrack
                     });
                 }
             }
 
             document.querySelectorAll('.track-card').forEach(function (card) {
-                card.addEventListener('click', function () {
-                    handleTrackSelect(card);
-                });
+                card.addEventListener('click', function () { handleTrackSelect(card); });
                 card.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
@@ -1629,23 +1329,11 @@
                 });
             });
 
-            // Placeholder play button → load featured track (Track 9)
             var placeholderBtn = document.getElementById('placeholder-play-btn');
             if (placeholderBtn) {
                 placeholderBtn.addEventListener('click', function () {
-                    var featuredCard = document.querySelector('.track-card[data-track="9"]');
-                    if (featuredCard) handleTrackSelect(featuredCard);
-                });
-            }
-
-            // Hero "Play Featured Track" button → load Track 9
-            var playFeaturedBtn = document.getElementById('play-featured-btn');
-            if (playFeaturedBtn) {
-                playFeaturedBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    var featuredCard = document.querySelector('.track-card[data-track="9"]');
-                    if (featuredCard) handleTrackSelect(featuredCard);
-                    document.getElementById('featured-player').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    var firstCard = document.querySelector('.track-card[data-track="1"]');
+                    if (firstCard) handleTrackSelect(firstCard);
                 });
             }
 
@@ -1669,11 +1357,8 @@
             }
 
             if (mobileToggle) mobileToggle.addEventListener('click', function () {
-                if (mobileOverlay && mobileOverlay.classList.contains('open')) {
-                    closeMobileNav();
-                } else {
-                    openMobileNav();
-                }
+                if (mobileOverlay && mobileOverlay.classList.contains('open')) closeMobileNav();
+                else openMobileNav();
             });
             if (mobileClose) mobileClose.addEventListener('click', closeMobileNav);
             if (mobileOverlay) {

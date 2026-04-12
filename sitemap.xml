@@ -5,7 +5,7 @@
 
     <!-- Homepage -->
     <url>
-        <loc>https://goodflippindesign.com/</loc>
+        <loc>https://goodflippinvibes.com/</loc>
         <lastmod>2026-02-17</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
@@ -13,38 +13,62 @@
 
     <!-- Media Gallery -->
     <url>
-        <loc>https://goodflippindesign.com/gallery.html</loc>
+        <loc>https://goodflippinvibes.com/gallery.html</loc>
         <lastmod>2026-03-05</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
     </url>
 
-    <!-- Music / Album — DJ Shariff -->
+    <!-- Music Hub -->
     <url>
-        <loc>https://goodflippindesign.com/music.html</loc>
-        <lastmod>2026-04-12</lastmod>
+        <loc>https://goodflippinvibes.com/music.html</loc>
+        <lastmod>2026-06-14</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+    </url>
+
+    <!-- Music / Album — DJ Shariff: Good Flippin Vibes -->
+    <url>
+        <loc>https://goodflippinvibes.com/music-shariff.html</loc>
+        <lastmod>2026-06-14</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
     </url>
 
     <!-- Music / Album — DJ Z: Wheels Up -->
     <url>
-        <loc>https://goodflippindesign.com/music-djz.html</loc>
+        <loc>https://goodflippinvibes.com/music-djz.html</loc>
         <lastmod>2026-04-12</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Music / Album — Heavy Moose: DROSS -->
+    <url>
+        <loc>https://goodflippinvibes.com/music-heavymoose-dross1.html</loc>
+        <lastmod>2026-06-14</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Music / Album — Heavy Moose: DROSS II -->
+    <url>
+        <loc>https://goodflippinvibes.com/music-heavymoose-dross2.html</loc>
+        <lastmod>2026-06-14</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
     </url>
 
     <!-- Site Policies -->
     <url>
-        <loc>https://goodflippindesign.com/terms.html</loc>
+        <loc>https://goodflippinvibes.com/terms.html</loc>
         <lastmod>2026-03-05</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.3</priority>
     </url>
 
     <url>
-        <loc>https://goodflippindesign.com/privacy.html</loc>
+        <loc>https://goodflippinvibes.com/privacy.html</loc>
         <lastmod>2026-03-05</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.3</priority>
