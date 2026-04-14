@@ -147,16 +147,26 @@ export default {
     // Serve public media assets (videos, audio) directly from R2 (no auth required).
     // URL shape: /api/media/{path...}
     // R2 key shape: media/{path...}
-    if (url.pathname.startsWith('/api/media/') && request.method === 'GET') {
+    if (url.pathname.startsWith('/api/media/') && (request.method === 'GET' || request.method === 'OPTIONS')) {
+      // CORS: allow cross-origin requests from the GFV site
+      const corsHeaders = {
+        'Access-Control-Allow-Origin': 'https://goodflippinvibes.com',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Range',
+      };
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: corsHeaders });
+      }
       if (!env.MEDIA_BUCKET) {
         return new Response('Media storage unavailable', { status: 503 });
       }
-      const r2Key = url.pathname.replace(/^\/api\//, ''); // strip leading /api/ → media/...
+      // Decode percent-encoded pathname so R2 keys with spaces match
+      const r2Key = decodeURIComponent(url.pathname).replace(/^\/api\//, ''); // strip leading /api/ → media/...
       const object = await env.MEDIA_BUCKET.get(r2Key);
       if (!object) {
         return new Response('Not found', { status: 404 });
       }
-      const headers = new Headers();
+      const headers = new Headers(corsHeaders);
       const ext = r2Key.split('.').pop().toLowerCase();
       const mimeMap = { mp4: 'video/mp4', webm: 'video/webm', mp3: 'audio/mpeg', wav: 'audio/wav', jpg: 'image/jpeg', png: 'image/png' };
       headers.set('Content-Type', object.httpMetadata?.contentType || mimeMap[ext] || 'application/octet-stream');
