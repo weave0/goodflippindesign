@@ -15,10 +15,10 @@ let _authWorker = null;
 async function getAuthWorker() {
   if (_authWorker) return _authWorker;
   try {
-    const mod = await import('./workers/auth.js');
+    const mod = await import("./workers/auth.js");
     _authWorker = mod.default;
   } catch (e) {
-    console.warn('[_worker] Auth worker unavailable:', e.message);
+    console.warn("[_worker] Auth worker unavailable:", e.message);
     _authWorker = null;
   }
   return _authWorker;
@@ -31,7 +31,7 @@ export default {
     // Block accidental public access to internal docs, source code, and policy drafts.
     // This repo is a monorepo-style workspace; Cloudflare Pages will serve committed
     // files unless we explicitly deny them.
-    const rawPath = url.pathname || '/';
+    const rawPath = url.pathname || "/";
     let decodedPath = rawPath;
     try {
       decodedPath = decodeURIComponent(rawPath);
@@ -40,72 +40,80 @@ export default {
     }
 
     const pathLower = String(decodedPath).toLowerCase();
-    const normalizedPath = pathLower.endsWith('/') ? pathLower : `${pathLower}/`;
+    const normalizedPath = pathLower.endsWith("/")
+      ? pathLower
+      : `${pathLower}/`;
 
     // Allowlist critical public files that may otherwise match broad deny rules.
-    const allowedExact = new Set(['/robots.txt', '/sitemap.xml', '/admin-panels.js']);
+    const allowedExact = new Set([
+      "/robots.txt",
+      "/sitemap.xml",
+      "/admin-panels.js",
+    ]);
 
     const blockedPrefixes = [
-      '/legal/',
-      '/brand assets development/',
-      '/business registration/',
-      '/official documents/',
-      '/organization docs/',
-      '/cashmoney/',
-      '/deploy-to-gfv/',
-      '/docs/',
-      '/functions/',
-      '/gfd dev projects/',
-      '/mediation-site/',
-      '/nft_gfv_drop/',
-      '/portfolio-manager/',
-      '/tests/',
-      '/scripts/',
-      '/workers/',
-      '/.github/',
-      '/.husky/',
-      '/.git/',
+      "/legal/",
+      "/brand assets development/",
+      "/business registration/",
+      "/official documents/",
+      "/organization docs/",
+      "/cashmoney/",
+      "/deploy-to-gfv/",
+      "/docs/",
+      "/functions/",
+      "/gfd dev projects/",
+      "/mediation-site/",
+      "/nft_gfv_drop/",
+      "/portfolio-manager/",
+      "/tests/",
+      "/scripts/",
+      "/workers/",
+      "/.github/",
+      "/.husky/",
+      "/.git/",
     ];
 
     const blockedExact = new Set([
-      '/_worker.js',
-      '/package.json',
-      '/package-lock.json',
-      '/wrangler.toml',
-      '/wrangler-social.toml',
-      '/_headers',
-      '/.env',
-      '/.env.example',
+      "/_worker.js",
+      "/package.json",
+      "/package-lock.json",
+      "/wrangler.toml",
+      "/wrangler-social.toml",
+      "/_headers",
+      "/.env",
+      "/.env.example",
       // Test/staging HTML pages — not for public consumption
-      '/temp_donate_review.html',
-      '/temp_review.html',
+      "/temp_donate_review.html",
+      "/temp_review.html",
       // Internal tools — not for public access
-      '/_social-post-generator.html',
+      "/_social-post-generator.html",
     ]);
 
     const blockedExtensions = [
-      '.md',
-      '.sql',
-      '.ps1',
-      '.sh',
-      '.py',
-      '.txt',
-      '.toml',
-      '.yml',
-      '.yaml',
-      '.bak',
-      '.log',
-      '.ssml',
+      ".md",
+      ".sql",
+      ".ps1",
+      ".sh",
+      ".py",
+      ".txt",
+      ".toml",
+      ".yml",
+      ".yaml",
+      ".bak",
+      ".log",
+      ".ssml",
     ];
 
     const isAllowed = allowedExact.has(pathLower);
 
     // Treat JSON as internal unless it lives under /assets/ (used by gallery/media catalog).
-    const isBlockedJson = pathLower.endsWith('.json') && !pathLower.startsWith('/assets/');
+    const isBlockedJson =
+      pathLower.endsWith(".json") && !pathLower.startsWith("/assets/");
 
     // Block root-level .js files (debug/test/utility scripts — all app JS is inline or CDN).
     // Exception: /admin-panels.js is a static asset served from root (extracted from admin.html).
-    const isRootLevelJs = pathLower.endsWith('.js') && !pathLower.slice(1).includes('/');
+    const isRootLevelJs =
+      pathLower.endsWith(".js") && !pathLower.slice(1).includes("/");
 
     const isBlocked =
       !isAllowed &&
@@ -116,12 +124,12 @@ export default {
         isRootLevelJs);
 
     if (isBlocked) {
-      return new Response('Not found', {
+      return new Response("Not found", {
         status: 404,
         headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'Cache-Control': 'no-store',
-          'X-Robots-Tag': 'noindex, nofollow',
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Robots-Tag": "noindex, nofollow",
         },
       });
     }
@@ -131,14 +139,14 @@ export default {
     // We can't fully verify the JWT signature here without the secret, but we
     // check that (a) the cookie is present AND (b) its value starts with 'ey'
     // (base64url-encoded JSON header), which prevents trivial cookie spoofing.
-    if (pathLower === '/admin.html' || pathLower === '/admin') {
-      const cookieHeader = request.headers.get('Cookie') || '';
+    if (pathLower === "/admin.html" || pathLower === "/admin") {
+      const cookieHeader = request.headers.get("Cookie") || "";
       // Extract __session value (format: __session=eyJ...)
       const sessionMatch = cookieHeader.match(/(?:^|;\s*)__session=([^;]+)/);
-      const sessionVal   = sessionMatch ? sessionMatch[1] : '';
+      const sessionVal = sessionMatch ? sessionMatch[1] : "";
       const hasValidSession =
-        (sessionVal.startsWith('ey') && sessionVal.length > 20) ||
-        cookieHeader.includes('__client_uat=1');
+        (sessionVal.startsWith("ey") && sessionVal.length > 20) ||
+        cookieHeader.includes("__client_uat=1");
       if (!hasValidSession) {
         return Response.redirect(`${url.origin}/?auth_required=admin`, 302);
       }
@@ -147,33 +155,36 @@ export default {
     // Serve public media assets (videos, audio) directly from R2 (no auth required).
     // URL shape: /api/media/{path...}
     // R2 key shape: media/{path...}
-    if (url.pathname.startsWith('/api/media/') && (request.method === 'GET' || request.method === 'OPTIONS')) {
-      // CORS: allow cross-origin requests from the GFV site
-      const corsHeaders = {
-        'Access-Control-Allow-Origin': 'https://goodflippinvibes.com',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Range',
-      };
-      if (request.method === 'OPTIONS') {
-        return new Response(null, { status: 204, headers: corsHeaders });
-      }
+    if (url.pathname.startsWith("/api/media/") && request.method === "GET") {
       if (!env.MEDIA_BUCKET) {
-        return new Response('Media storage unavailable', { status: 503 });
+        return new Response("Media storage unavailable", { status: 503 });
       }
       // Decode percent-encoded pathname so R2 keys with spaces match
-      const r2Key = decodeURIComponent(url.pathname).replace(/^\/api\//, ''); // strip leading /api/ → media/...
+      const r2Key = decodeURIComponent(url.pathname).replace(/^\/api\//, ""); // strip leading /api/ → media/...
       const object = await env.MEDIA_BUCKET.get(r2Key);
       if (!object) {
-        return new Response('Not found', { status: 404 });
+        return new Response("Not found", { status: 404 });
       }
-      const headers = new Headers(corsHeaders);
-      const ext = r2Key.split('.').pop().toLowerCase();
-      const mimeMap = { mp4: 'video/mp4', webm: 'video/webm', mp3: 'audio/mpeg', wav: 'audio/wav', jpg: 'image/jpeg', png: 'image/png' };
-      headers.set('Content-Type', object.httpMetadata?.contentType || mimeMap[ext] || 'application/octet-stream');
-      headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-      headers.set('ETag', object.httpEtag);
-      if (object.size) headers.set('Content-Length', String(object.size));
-      const rangeHeader = request.headers.get('Range');
+      const headers = new Headers();
+      const ext = r2Key.split(".").pop().toLowerCase();
+      const mimeMap = {
+        mp4: "video/mp4",
+        webm: "video/webm",
+        mp3: "audio/mpeg",
+        wav: "audio/wav",
+        jpg: "image/jpeg",
+        png: "image/png",
+      };
+      headers.set(
+        "Content-Type",
+        object.httpMetadata?.contentType ||
+          mimeMap[ext] ||
+          "application/octet-stream",
+      );
+      headers.set("Cache-Control", "public, max-age=31536000, immutable");
+      headers.set("ETag", object.httpEtag);
+      if (object.size) headers.set("Content-Length", String(object.size));
+      const rangeHeader = request.headers.get("Range");
       if (rangeHeader) {
         return new Response(object.body, { status: 206, headers });
       }
@@ -183,115 +194,139 @@ export default {
     // Serve branded media assets directly from R2 (no auth required).
     // URL shape: /api/cms/media/{assetId}-{format}.jpg
     // R2 key shape: cms/media/{assetId}-{format}.jpg
-    if (url.pathname.startsWith('/api/cms/media/') && request.method === 'GET') {
+    if (
+      url.pathname.startsWith("/api/cms/media/") &&
+      request.method === "GET"
+    ) {
       if (!env.MEDIA_BUCKET) {
-        return new Response('Media storage unavailable', { status: 503 });
+        return new Response("Media storage unavailable", { status: 503 });
       }
-      const r2Key = url.pathname.replace(/^\/api\//, ''); // strip leading /api/
+      const r2Key = url.pathname.replace(/^\/api\//, ""); // strip leading /api/
       const object = await env.MEDIA_BUCKET.get(r2Key);
       if (!object) {
-        return new Response('Not found', { status: 404 });
+        return new Response("Not found", { status: 404 });
       }
       const headers = new Headers();
-      headers.set('Content-Type', object.httpMetadata?.contentType || 'image/jpeg');
-      headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-      headers.set('ETag', object.httpEtag);
+      headers.set(
+        "Content-Type",
+        object.httpMetadata?.contentType || "image/jpeg",
+      );
+      headers.set("Cache-Control", "public, max-age=31536000, immutable");
+      headers.set("ETag", object.httpEtag);
       return new Response(object.body, { headers });
     }
 
     // Route API requests to auth worker (gracefully degrade if unavailable)
     // Exception: /api/stripe-health proxies to Stripe Worker (avoids worker-to-worker *.workers.dev issues)
-    if (url.pathname === '/api/stripe-health' && request.method === 'GET') {
+    if (url.pathname === "/api/stripe-health" && request.method === "GET") {
       try {
-        const resp = await fetch('https://gfd-stripe.weave0.workers.dev/health', {
-          headers: { 'User-Agent': 'GFD-Pages-Proxy/1.0' },
-        });
+        const resp = await fetch(
+          "https://gfd-stripe.weave0.workers.dev/health",
+          {
+            headers: { "User-Agent": "GFD-Pages-Proxy/1.0" },
+          },
+        );
         const body = await resp.text();
         return new Response(body, {
           status: resp.status,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         });
       } catch (e) {
-        return new Response(JSON.stringify({ ok: false, error: 'Stripe worker unreachable' }), {
-          status: 502,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return new Response(
+          JSON.stringify({ ok: false, error: "Stripe worker unreachable" }),
+          {
+            status: 502,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
       }
     }
 
-    if (url.pathname.startsWith('/api/')) {
+    if (url.pathname.startsWith("/api/")) {
       const authWorker = await getAuthWorker();
       if (authWorker) {
         return authWorker.fetch(request, env, ctx);
       }
-      return new Response(JSON.stringify({ error: 'API temporarily unavailable' }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: "API temporarily unavailable" }),
+        {
+          status: 503,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Checkout readiness probe (used by health monitoring)
-    if (url.pathname === '/create-checkout' && request.method === 'GET') {
+    if (url.pathname === "/create-checkout" && request.method === "GET") {
       const stripeConfigured = Boolean(env.STRIPE_PUBLISHABLE_KEY);
-      return new Response(JSON.stringify({
-        ok: stripeConfigured,
-        service: 'gfd-checkout',
-        stripeConfigured,
-        timestamp: new Date().toISOString(),
-      }), {
-        status: stripeConfigured ? 200 : 503,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({
+          ok: stripeConfigured,
+          service: "gfd-checkout",
+          stripeConfigured,
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: stripeConfigured ? 200 : 503,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Donate page: create Stripe Checkout Session — proxy to stripe-payments worker.
     // donate.html POSTs { amount (dollars), type ('one-time'|'monthly') }
     // and expects { url } to redirect the user to Stripe-hosted checkout.
-    if (url.pathname === '/create-checkout' && request.method === 'POST') {
+    if (url.pathname === "/create-checkout" && request.method === "POST") {
       try {
-        const stripeWorkerUrl = 'https://gfd-stripe.weave0.workers.dev/api/create-checkout-session';
+        const stripeWorkerUrl =
+          "https://gfd-stripe.weave0.workers.dev/api/create-checkout-session";
         const proxied = await fetch(stripeWorkerUrl, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'Origin': url.origin,
+            "Content-Type": "application/json",
+            Origin: url.origin,
           },
           body: request.body,
         });
         const data = await proxied.text();
         return new Response(data, {
           status: proxied.status,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         });
       } catch (e) {
-        return new Response(JSON.stringify({ error: 'Checkout unavailable — please try again' }), {
-          status: 502,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return new Response(
+          JSON.stringify({ error: "Checkout unavailable — please try again" }),
+          {
+            status: 502,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
       }
     }
 
     // Get response from static assets (Pages provides env.ASSETS automatically).
     // If this worker is built/deployed outside of Pages advanced mode, env.ASSETS
     // may not exist—fail gracefully instead of throwing.
-    if (!env.ASSETS || typeof env.ASSETS.fetch !== 'function') {
-      return new Response('Static assets unavailable', {
+    if (!env.ASSETS || typeof env.ASSETS.fetch !== "function") {
+      return new Response("Static assets unavailable", {
         status: 503,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
       });
     }
 
     let response = await env.ASSETS.fetch(request);
 
     // Inject environment variables + apply image overrides for HTML responses
-    if (response.headers.get('content-type')?.includes('text/html')) {
+    if (response.headers.get("content-type")?.includes("text/html")) {
       // Load active image overrides for this domain (if D1 is available)
       let overrides = [];
       if (env.DB) {
         try {
           const result = await env.DB.prepare(
-            'SELECT url_pattern, r2_key FROM asset_overrides WHERE active = 1 AND site_domain = ?'
-          ).bind(url.hostname).all();
+            "SELECT url_pattern, r2_key FROM asset_overrides WHERE active = 1 AND site_domain = ?",
+          )
+            .bind(url.hostname)
+            .all();
           overrides = result.results || [];
         } catch {
           // D1 unavailable — serve page unmodified
@@ -305,20 +340,25 @@ export default {
       // DSN value (can happen when the secret is set via `echo KEY=value | wrangler …`).
       // Also reject auth tokens (sntrys_…) — a DSN must start with https://.
       const rawDsn = env.SENTRY_DSN || null;
-      const strippedDsn = rawDsn ? rawDsn.replace(/^SENTRY_DSN=?/i, '').trim() : null;
-      const sentryDsn = strippedDsn && strippedDsn.startsWith('https://') ? strippedDsn : null;
+      const strippedDsn = rawDsn
+        ? rawDsn.replace(/^SENTRY_DSN=?/i, "").trim()
+        : null;
+      const sentryDsn =
+        strippedDsn && strippedDsn.startsWith("https://") ? strippedDsn : null;
       const envScript = `<script>window.ENV = ${JSON.stringify({
         STRIPE_PUBLISHABLE_KEY: env.STRIPE_PUBLISHABLE_KEY || null,
-        CLERK_PUBLISHABLE_KEY:  env.CLERK_PUBLISHABLE_KEY  || null,
-        SENTRY_DSN:             sentryDsn,
-        ENABLE_COMMUNITY:       env.ENABLE_COMMUNITY !== 'false',
-        ENABLE_BLOG_CMS:        env.ENABLE_BLOG_CMS   !== 'false',
-        ENABLE_DONATIONS:       env.ENABLE_DONATIONS  !== 'false',
-        ENABLE_AI_FEATURES:     env.ENABLE_AI_FEATURES === 'true',
+        CLERK_PUBLISHABLE_KEY: env.CLERK_PUBLISHABLE_KEY || null,
+        SENTRY_DSN: sentryDsn,
+        ENABLE_COMMUNITY: env.ENABLE_COMMUNITY !== "false",
+        ENABLE_BLOG_CMS: env.ENABLE_BLOG_CMS !== "false",
+        ENABLE_DONATIONS: env.ENABLE_DONATIONS !== "false",
+        ENABLE_AI_FEATURES: env.ENABLE_AI_FEATURES === "true",
       })}</script>`;
 
       // Inject Sentry client init when DSN is configured
-      const sentryScript = sentryDsn ? `<script src="https://browser.sentry-cdn.com/8.0.0/bundle.min.js" crossorigin="anonymous"></script><script>window.Sentry&&Sentry.init({dsn:${JSON.stringify(sentryDsn)},release:${JSON.stringify(env.CF_PAGES_COMMIT_SHA||'unknown')},environment:'production',tracesSampleRate:0.05,replaysSessionSampleRate:0,ignoreErrors:['ResizeObserver loop','Non-Error exception','cancelled','NetworkError']})</script>` : '';
+      const sentryScript = sentryDsn
+        ? `<script src="https://browser.sentry-cdn.com/8.0.0/bundle.min.js" crossorigin="anonymous"></script><script>window.Sentry&&Sentry.init({dsn:${JSON.stringify(sentryDsn)},release:${JSON.stringify(env.CF_PAGES_COMMIT_SHA || "unknown")},environment:'production',tracesSampleRate:0.05,replaysSessionSampleRate:0,ignoreErrors:['ResizeObserver loop','Non-Error exception','cancelled','NetworkError']})</script>`
+        : "";
 
       // Compact Web Vitals reporter — PerformanceObserver only, zero CDN deps.
       // Reports CLS, LCP, FCP, TTFB, INP to GA4 (gtag) when available.
@@ -326,43 +366,55 @@ export default {
 
       if (overrides.length > 0) {
         // Use HTMLRewriter to swap img src/srcset without buffering full HTML
-        const overrideMap = new Map(overrides.map(o => [o.url_pattern, o.r2_key]));
+        const overrideMap = new Map(
+          overrides.map((o) => [o.url_pattern, o.r2_key]),
+        );
         // /pub/ only serves assets with review_status = 'approved' in D1
         const cmsBase = `https://${url.hostname}/api/cms/pub/`;
 
         response = new HTMLRewriter()
-          .on('img', {
+          .on("img", {
             element(el) {
-              const src = el.getAttribute('src');
+              const src = el.getAttribute("src");
               if (src && overrideMap.has(src)) {
-                el.setAttribute('src', `${cmsBase}${overrideMap.get(src)}`);
+                el.setAttribute("src", `${cmsBase}${overrideMap.get(src)}`);
               }
               // Also handle srcset
-              const srcset = el.getAttribute('srcset');
+              const srcset = el.getAttribute("srcset");
               if (srcset) {
                 const newSrcset = srcset.replace(/([^\s,]+)/g, (part) =>
-                  overrideMap.has(part) ? `${cmsBase}${overrideMap.get(part)}` : part
+                  overrideMap.has(part)
+                    ? `${cmsBase}${overrideMap.get(part)}`
+                    : part,
                 );
-                if (newSrcset !== srcset) el.setAttribute('srcset', newSrcset);
+                if (newSrcset !== srcset) el.setAttribute("srcset", newSrcset);
               }
             },
           })
-          .on('head', {
+          .on("head", {
             element(el) {
-              el.append(envScript + sentryScript + webVitalsScript, { html: true });
+              el.append(envScript + sentryScript + webVitalsScript, {
+                html: true,
+              });
             },
           })
           .transform(response);
       } else {
         // No overrides — fast path: buffer once + inject ENV
         const html = await response.text();
-        const injectedHtml = html.replace('</head>', `${envScript}${sentryScript}${webVitalsScript}</head>`);
+        const injectedHtml = html.replace(
+          "</head>",
+          `${envScript}${sentryScript}${webVitalsScript}</head>`,
+        );
         response = new Response(injectedHtml, {
           headers: new Headers(response.headers),
         });
       }
 
-      response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
+      response.headers.set(
+        "Cache-Control",
+        "public, max-age=0, must-revalidate",
+      );
     }
 
     return response;
