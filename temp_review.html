@@ -4190,22 +4190,31 @@
     }
 
     /* Admin nav link: hidden until admin auth confirmed */
+    /* Admin nav link — always visible; style upgrades after authentication */
     .nav-admin-link {
-      display: none !important;
-    }
-
-    body.admin-authenticated .nav-admin-link {
-      display: inline-flex !important;
+      display: inline-flex;
       align-items: center;
       text-decoration: none;
-      color: var(--accent-violet);
+      color: var(--text-muted);
       font-size: 0.875rem;
-      font-weight: 600;
+      font-weight: 500;
       padding: 0.5rem 0.875rem;
       border-radius: 8px;
-      border: 1px solid rgba(168, 85, 247, 0.35);
-      transition: background 0.2s, border-color 0.2s;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
       white-space: nowrap;
+    }
+
+    .nav-admin-link:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Authenticated state — violet accent */
+    body.admin-authenticated .nav-admin-link {
+      color: var(--accent-violet);
+      border-color: rgba(168, 85, 247, 0.35);
     }
 
     body.admin-authenticated .nav-admin-link:hover {
@@ -4213,7 +4222,7 @@
       border-color: rgba(168, 85, 247, 0.6);
     }
 
-    /* Mobile admin link inherits mobile-nav-link base; override color */
+    /* Mobile admin link inherits mobile-nav-link base; override color when authenticated */
     body.admin-authenticated #mobile-nav-admin-link {
       color: var(--accent-violet);
       border-color: rgba(168, 85, 247, 0.3);
