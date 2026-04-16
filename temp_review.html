@@ -4247,12 +4247,44 @@
     [data-admin-section] {
       display: none !important;
     }
+
     body.admin-authenticated [data-admin-section] {
       display: block !important;
     }
+
     /* Restore flex/grid layout on sections that need it */
     body.admin-authenticated .social-feed.social-feed {
       display: block !important;
+    }
+
+    /* Admin nav link: hidden until admin auth confirmed */
+    .nav-admin-link {
+      display: none !important;
+    }
+
+    body.admin-authenticated .nav-admin-link {
+      display: inline-flex !important;
+      align-items: center;
+      text-decoration: none;
+      color: var(--accent-violet);
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.5rem 0.875rem;
+      border-radius: 8px;
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      transition: background 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    body.admin-authenticated .nav-admin-link:hover {
+      background: rgba(168, 85, 247, 0.1);
+      border-color: rgba(168, 85, 247, 0.6);
+    }
+
+    /* Mobile admin link inherits mobile-nav-link base; override color */
+    body.admin-authenticated #mobile-nav-admin-link {
+      color: var(--accent-violet);
+      border-color: rgba(168, 85, 247, 0.3);
     }
   </style>
 
@@ -4549,11 +4581,8 @@
         <li><a href="#services">Services</a></li>
         <li><a href="#work">Work</a></li>
         <li><a href="#process">Process</a></li>
-        <li><a href="#blog">Blog</a></li>
-        <li><a href="gallery.html">Gallery</a></li>
-        <li><a href="music.html">Music</a></li>
       </ul>
-      <a href="donate.html" class="nav-donate-cta" onclick="if(window.gtag){gtag('event','donate_click',{event_category:'donation',event_label:'Nav CTA Button',entry_point:'desktop_nav'})}">Donate</a>
+      <a href="admin.html" id="nav-admin-link" class="nav-admin-link" aria-label="Admin Panel">Admin</a>
       <a href="#contact" class="nav-cta">Get in Touch</a>
       <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
         <span class="hamburger-line"></span>
@@ -4576,10 +4605,7 @@
         <a href="#services" class="mobile-nav-link">Services</a>
         <a href="#work" class="mobile-nav-link">Work</a>
         <a href="#process" class="mobile-nav-link">Process</a>
-        <a href="#blog" class="mobile-nav-link">Blog</a>
-        <a href="gallery.html" class="mobile-nav-link">Gallery</a>
-        <a href="music.html" class="mobile-nav-link">Music</a>
-        <a href="donate.html" class="mobile-nav-link" onclick="if(window.gtag){gtag('event','donate_click',{event_category:'donation',event_label:'Mobile Nav Link',entry_point:'mobile_nav'})}">Donate</a>
+        <a href="admin.html" id="mobile-nav-admin-link" class="mobile-nav-link nav-admin-link" aria-label="Admin Panel">Admin</a>
         <a href="#contact" class="mobile-nav-link mobile-nav-cta">Get in Touch</a>
       </nav>
     </div>
@@ -4630,7 +4656,7 @@
     <!-- ===================================================================
          LATEST RELEASE — Science of Joy Vol. II spotlight strip
          =================================================================== -->
-    <section class="media-drop" aria-labelledby="media-drop-title">
+    <section class="media-drop" aria-labelledby="media-drop-title" data-admin-section aria-hidden="true">
       <div class="media-drop-inner">
         <img
           class="media-drop-cover"
@@ -6435,32 +6461,7 @@
     <span>Support Our Work</span>
   </a>
 
-  <!-- EXIT INTENT POPUP (Newsletter Capture) -->
-  <div id="exit-intent-overlay" class="hidden">
-    <div class="exit-intent-modal">
-      <button id="exit-intent-close" class="exit-intent-close-btn" aria-label="Close">
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <div style="text-align:center;margin-bottom:1.5rem;">
-        <div style="font-size:2.5rem;margin-bottom:0.75rem;">⚡</div>
-        <h3 style="font-size:1.375rem;font-weight:700;margin:0 0 0.5rem;color:var(--text);">Before you go...</h3>
-        <p style="font-size:0.875rem;color:var(--text-muted);margin:0;">Get weekly web dev insights, portfolio tips, and project updates</p>
-      </div>
-      <form id="exit-intent-form">
-        <label for="exit-email" class="sr-only">Email address</label>
-        <input type="email" id="exit-email" name="email" placeholder="your@email.com" required class="exit-intent-email" />
-        <button type="submit" class="exit-intent-submit">✨ Send Me Weekly Tips</button>
-        <p style="font-size:0.75rem;color:rgba(245,245,245,0.25);text-align:center;margin:0.75rem 0 0;">Web development insights and portfolio strategies. Unsubscribe anytime.</p>
-      </form>
-      <div id="exit-success" class="hidden" style="text-align:center;">
-        <div style="font-size:2.5rem;margin-bottom:0.75rem;">🎉</div>
-        <h3 style="font-size:1.25rem;font-weight:700;margin:0 0 0.5rem;color:#06b6d4;">You're in!</h3>
-        <p style="font-size:0.875rem;color:var(--text-muted);margin:0;">Check your inbox for our welcome message.</p>
-      </div>
-    </div>
-  </div>
+
 
   <!-- STICKY CTA BAR (Context-Aware Business CTAs) -->
   <div id="sticky-cta-bar">
@@ -6473,28 +6474,13 @@
         </div>
       </div>
       <div class="sticky-cta-actions">
-        <a href="mailto:brett@goodflippinvibes.com" class="sticky-cta-primary">📧 Get in Touch</a>
-        <a href="donate.html" class="sticky-cta-secondary">💖 Support Us</a>
+        <a href="#contact" class="sticky-cta-primary">Get in Touch</a>
         <button id="sticky-cta-close" class="sticky-cta-dismiss" aria-label="Close">✕</button>
       </div>
     </div>
   </div>
 
-  <!-- SOCIAL PROOF ACTIVITY FEED -->
-  <div id="social-proof-feed" class="hidden">
-    <div class="social-proof-card">
-      <span id="social-proof-icon" style="font-size:1.25rem;flex-shrink:0;">💼</span>
-      <div style="flex:1;min-width:0;">
-        <p id="social-proof-text" style="margin:0 0 0.2rem;font-size:0.875rem;color:rgba(245,245,245,0.8);">Someone just viewed the portfolio</p>
-        <p id="social-proof-time" style="margin:0;font-size:0.75rem;color:var(--text-muted);">2m ago</p>
-      </div>
-      <button id="social-proof-close" class="social-proof-dismiss" aria-label="Hide notifications">
-        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-  </div>
+
 
   <style>
     /* ── Conversion widgets: no Tailwind loaded, all vanilla CSS ── */
@@ -7313,14 +7299,14 @@
         const isAdmin = currentUser?.publicMetadata?.role === 'admin'
           || currentUser?.unsafeMetadata?.role === 'admin';
         const panelLink = document.getElementById('footer-admin-panel-link');
-        const panelSep  = document.getElementById('footer-admin-sep');
+        const panelSep = document.getElementById('footer-admin-sep');
         if (isAdmin) {
           document.body.classList.add('admin-authenticated');
           document.querySelectorAll('[data-admin-section]').forEach(el => {
             el.removeAttribute('aria-hidden');
           });
           if (panelLink) panelLink.style.display = '';
-          if (panelSep)  panelSep.style.display  = '';
+          if (panelSep) panelSep.style.display = '';
           // Redirect to admin panel on first sign-in if ?admin param present
           if (new URLSearchParams(window.location.search).has('admin')) {
             window.location.href = 'admin.html';
@@ -7331,8 +7317,10 @@
             el.setAttribute('aria-hidden', 'true');
           });
           if (panelLink) panelLink.style.display = 'none';
-          if (panelSep)  panelSep.style.display  = 'none';
+          if (panelSep) panelSep.style.display = 'none';
         }
+        // Nav admin links (CSS already hides them; JS ensures re-evaluation)
+        // CSS class on body handles visibility — no per-element style needed
       }
 
       // Show blog editor
