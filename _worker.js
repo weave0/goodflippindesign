@@ -134,21 +134,24 @@ export default {
       });
     }
 
-    // Protect /admin.html at the edge — require a Clerk session JWT.
-    // Clerk sets __session (a signed JWT starting with 'ey') on the same domain.
-    // We can't fully verify the JWT signature here without the secret, but we
-    // check that (a) the cookie is present AND (b) its value starts with 'ey'
-    // (base64url-encoded JSON header), which prevents trivial cookie spoofing.
-    if (pathLower === "/admin.html" || pathLower === "/admin") {
+    // admin.html is intentionally public at the edge — Clerk SDK inside
+    // the page handles authentication and hides all admin content unless
+    // the user is signed in as an admin. No edge redirect needed.
+
+    // Protect the gated music catalog from unauthenticated access.
+    // This file contains full album/track metadata and prompt data — never public.
+    if (pathLower === "/assets/data/gfv-music-catalog.json") {
       const cookieHeader = request.headers.get("Cookie") || "";
-      // Extract __session value (format: __session=eyJ...)
       const sessionMatch = cookieHeader.match(/(?:^|;\s*)__session=([^;]+)/);
       const sessionVal = sessionMatch ? sessionMatch[1] : "";
       const hasValidSession =
         (sessionVal.startsWith("ey") && sessionVal.length > 20) ||
         cookieHeader.includes("__client_uat=1");
       if (!hasValidSession) {
-        return Response.redirect(`${url.origin}/?auth_required=admin`, 302);
+        return new Response("Forbidden", {
+          status: 403,
+          headers: { "Content-Type": "text/plain", "Cache-Control": "no-store" },
+        });
       }
     }
 
