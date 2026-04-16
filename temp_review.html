@@ -4242,6 +4242,18 @@
         padding: 1rem;
       }
     }
+
+    /* ── Admin-gated sections: hidden until admin auth confirmed ── */
+    [data-admin-section] {
+      display: none !important;
+    }
+    body.admin-authenticated [data-admin-section] {
+      display: block !important;
+    }
+    /* Restore flex/grid layout on sections that need it */
+    body.admin-authenticated .social-feed.social-feed {
+      display: block !important;
+    }
   </style>
 
   <!-- JSON-LD Structured Data for Google -->
@@ -4645,7 +4657,7 @@
     </section>
 
     <!-- Fundraising Progress Counter -->
-    <section id="fundraising-counter" class="fundraising-section">
+    <section id="fundraising-counter" class="fundraising-section" data-admin-section aria-hidden="true">
       <div class="container">
         <div class="fundraising-card">
           <div class="fundraising-content">
@@ -4921,7 +4933,7 @@
     </section>
 
     <!-- Social Hub (Feed + On-site Updates) -->
-    <section id="social-feed" class="social-feed">
+    <section id="social-feed" class="social-feed" data-admin-section aria-hidden="true">
       <div class="container">
         <div class="section-header">
           <p class="section-label">Social Updates</p>
@@ -5019,7 +5031,7 @@
       </div>
     </section>
 
-    <section id="media" class="media-section">
+    <section id="media" class="media-section" data-admin-section aria-hidden="true">
       <div class="container">
         <div class="section-header">
           <p class="section-label">Media</p>
@@ -5036,7 +5048,7 @@
     </section>
 
     <!-- Blog Section (Phase 4: Content Evolution) -->
-    <section id="blog" class="blog-section">
+    <section id="blog" class="blog-section" data-admin-section aria-hidden="true">
       <div class="container">
         <div class="section-header">
           <p class="section-label">Blog</p>
@@ -5240,7 +5252,7 @@
       </div>
     </section>
 
-    <section id="legal-forms">
+    <section id="legal-forms" data-admin-section aria-hidden="true">
       <div class="container">
         <div class="section-header">
           <p class="section-label">Legal Documents</p>
@@ -5413,8 +5425,8 @@
       <p class="footer-text">© 2026 GFV LLC</p>
       <div class="footer-links">
         <a href="javascript:void(0)" id="footer-email-link">getsome@goodflippinvibes.com</a>
-        <a href="#legal-forms">Documents</a>
-        <a href="#social-feed">Social</a>
+        <a href="#contact">Contact</a>
+        <a href="#work">Portfolio</a>
       </div>
     </div>
     <div class="footer-content" style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem;">
@@ -5433,6 +5445,8 @@
       <div id="footer-admin-user" class="footer-admin-user" style="display: none; gap: 0.5rem; align-items: center; justify-content: center;">
         <span id="footer-user-name" class="footer-admin-name"></span>
         <span aria-hidden="true" class="footer-admin-link" style="cursor: default; padding: 0 0.125rem;">·</span>
+        <a href="admin.html" id="footer-admin-panel-link" class="footer-admin-link" style="display: none;">Admin Panel</a>
+        <span aria-hidden="true" class="footer-admin-link" id="footer-admin-sep" style="cursor: default; padding: 0 0.125rem; display: none;">·</span>
         <button id="footer-sign-out-btn" class="footer-admin-link">Sign out</button>
       </div>
     </div>
@@ -7027,6 +7041,7 @@
             showUserMenu(currentUser);
             enableCommentForms();
             enableBlogAdminFeatures(); // Show blog admin controls if admin
+            enableAdminSections();     // Reveal admin-gated sections
           } else {
             showSignInButtons();
             showLoginCTAs();
@@ -7039,6 +7054,7 @@
               showUserMenu(user);
               enableCommentForms();
               enableBlogAdminFeatures(); // Update blog admin UI on auth change
+              enableAdminSections();     // Reveal admin-gated sections
             } else {
               showSignInButtons();
               showLoginCTAs();
@@ -7289,6 +7305,33 @@
           adminControls.style.display = 'flex';
         } else if (adminControls) {
           adminControls.style.display = 'none';
+        }
+      }
+
+      // Reveal / hide all admin-gated sections based on auth state
+      function enableAdminSections() {
+        const isAdmin = currentUser?.publicMetadata?.role === 'admin'
+          || currentUser?.unsafeMetadata?.role === 'admin';
+        const panelLink = document.getElementById('footer-admin-panel-link');
+        const panelSep  = document.getElementById('footer-admin-sep');
+        if (isAdmin) {
+          document.body.classList.add('admin-authenticated');
+          document.querySelectorAll('[data-admin-section]').forEach(el => {
+            el.removeAttribute('aria-hidden');
+          });
+          if (panelLink) panelLink.style.display = '';
+          if (panelSep)  panelSep.style.display  = '';
+          // Redirect to admin panel on first sign-in if ?admin param present
+          if (new URLSearchParams(window.location.search).has('admin')) {
+            window.location.href = 'admin.html';
+          }
+        } else {
+          document.body.classList.remove('admin-authenticated');
+          document.querySelectorAll('[data-admin-section]').forEach(el => {
+            el.setAttribute('aria-hidden', 'true');
+          });
+          if (panelLink) panelLink.style.display = 'none';
+          if (panelSep)  panelSep.style.display  = 'none';
         }
       }
 
