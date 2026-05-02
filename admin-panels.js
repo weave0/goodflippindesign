@@ -2583,8 +2583,8 @@
 
                         // Populate brand select (same brands as bulk-brand)
                         const brandSel = $('url-import-brand');
-                        if (brandSel && typeof BRANDS !== 'undefined') {
-                            Object.entries(BRANDS).forEach(([id, def]) => {
+                        if (brandSel) {
+                            Object.entries(BRAND_DEFS).forEach(([id, def]) => {
                                 const opt = document.createElement('option');
                                 opt.value = id;
                                 opt.textContent = def.shortName || id;
