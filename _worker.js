@@ -71,6 +71,16 @@ export default {
       "/.github/",
       "/.husky/",
       "/.git/",
+      // WordPress / common CMS scanner paths — this site has no CMS backend.
+      "/wp-admin/",
+      "/wp-content/",
+      "/wp-includes/",
+      "/wp-login/",
+      "/administrator/",
+      "/phpmyadmin/",
+      "/phpmy-admin/",
+      "/pma/",
+      "/adminer/",
     ];
 
     const blockedExact = new Set([
@@ -87,6 +97,24 @@ export default {
       "/temp_review.html",
       // Internal tools — not for public access
       "/_social-post-generator.html",
+      // Common scanner probe targets (WordPress, xmlrpc, config leaks)
+      "/xmlrpc.php",
+      "/wp-login.php",
+      "/wp-cron.php",
+      "/wp-signup.php",
+      "/wp-trackback.php",
+      "/wp-config.php",
+      "/.htaccess",
+      "/.htpasswd",
+      "/config.php",
+      "/config.js",
+      "/config.json",
+      "/credentials",
+      "/.well-known/security.txt",
+      "/setup.php",
+      "/install.php",
+      "/readme.html",
+      "/license.txt",
     ]);
 
     const blockedExtensions = [
@@ -102,6 +130,14 @@ export default {
       ".bak",
       ".log",
       ".ssml",
+      // Block PHP and other server-side script extensions — this is a static site.
+      // Probes from scanners generate log noise and waste edge compute.
+      ".php",
+      ".asp",
+      ".aspx",
+      ".jsp",
+      ".cgi",
+      ".cfm",
     ];
 
     const isAllowed = allowedExact.has(pathLower);
