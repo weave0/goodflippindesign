@@ -98,6 +98,7 @@ export default {
       // Internal tools — not for public access
       "/_social-post-generator.html",
       // Common scanner probe targets (WordPress, xmlrpc, config leaks)
+      "/wp-admin",
       "/xmlrpc.php",
       "/wp-login.php",
       "/wp-cron.php",
@@ -115,6 +116,8 @@ export default {
       "/install.php",
       "/readme.html",
       "/license.txt",
+      // OAuth callback paths this site does not implement
+      "/api/cms/oauth/callback/instagram",
     ]);
 
     const blockedExtensions = [
