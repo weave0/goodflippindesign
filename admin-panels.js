@@ -245,6 +245,74 @@
                         return state.mediaToken ? base + '?t=' + encodeURIComponent(state.mediaToken) : base;
                     }
 
+                    // ── Blog image-picker shared state (outer scope so asset-picker
+                    //    click handler can reach it before initBlogManager runs) ────
+                    let _blogImagePickerMode = ''; // 'featured' | 'insert'
+
+                    function setValue(id, val) {
+                        const el = $(id);
+                        if (el) el.value = val || '';
+                    }
+
+                    function updateFeaturedImagePreview(url) {
+                        const preview = $('blog-featured-image-preview');
+                        const thumb = $('blog-featured-image-thumb');
+                        if (!preview || !thumb) return;
+                        if (url && url.trim()) {
+                            thumb.src = url.trim();
+                            preview.style.display = 'block';
+                        } else {
+                            thumb.src = '#';
+                            preview.style.display = 'none';
+                        }
+                    }
+
+                    function closeBlogImagePicker() {
+                        const modal = $('asset-picker-modal');
+                        if (modal) {
+                            modal.classList.add('d-none');
+                            delete modal.dataset.blogPicker;
+                        }
+                    }
+
+                    function insertMarkdown(textarea, type, opts) {
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const sel = textarea.value.slice(start, end) || '';
+                        const before = textarea.value.slice(0, start);
+                        const after = textarea.value.slice(end);
+                        let insert = '';
+                        switch (type) {
+                            case 'bold': insert = '**' + (sel || 'bold text') + '**'; break;
+                            case 'italic': insert = '*' + (sel || 'italic text') + '*'; break;
+                            case 'h2': insert = '\n## ' + (sel || 'Heading'); break;
+                            case 'h3': insert = '\n### ' + (sel || 'Heading'); break;
+                            case 'link': insert = '[' + (sel || 'link text') + '](url)'; break;
+                            case 'code': insert = '`' + (sel || 'code') + '`'; break;
+                            case 'codeblock': insert = '\n```\n' + (sel || 'code here') + '\n```\n'; break;
+                            case 'ul': insert = '\n- ' + (sel || 'list item'); break;
+                            case 'hr': insert = '\n\n---\n\n'; break;
+                            case 'strikethrough': insert = '~~' + (sel || 'text') + '~~'; break;
+                            case 'blockquote': insert = '\n> ' + (sel || 'quote'); break;
+                            case 'image': {
+                                const imgUrl = (opts && opts.url) ? opts.url : (sel || 'https://example.com/image.jpg');
+                                const imgAlt = (opts && opts.alt) ? opts.alt : 'image';
+                                insert = '\n![' + imgAlt + '](' + imgUrl + ')\n';
+                                break;
+                            }
+                            case 'video': {
+                                const vidUrl = sel || 'https://youtube.com/watch?v=VIDEO_ID';
+                                insert = '\n@[video](' + vidUrl + ')\n';
+                                break;
+                            }
+                        }
+                        textarea.value = before + insert + after;
+                        const cursor = before.length + insert.length;
+                        textarea.setSelectionRange(cursor, cursor);
+                        textarea.focus();
+                        textarea.dispatchEvent(new Event('input'));
+                    }
+
                     async function refreshMediaToken() {
                         try {
                             if (state.clerk?.session) {
@@ -4964,44 +5032,6 @@
                                 .slice(0, 80);
                         }
 
-                        function insertMarkdown(textarea, type, opts) {
-                            const start = textarea.selectionStart;
-                            const end = textarea.selectionEnd;
-                            const sel = textarea.value.slice(start, end) || '';
-                            const before = textarea.value.slice(0, start);
-                            const after = textarea.value.slice(end);
-                            let insert = '';
-                            switch (type) {
-                                case 'bold': insert = '**' + (sel || 'bold text') + '**'; break;
-                                case 'italic': insert = '*' + (sel || 'italic text') + '*'; break;
-                                case 'h2': insert = '\n## ' + (sel || 'Heading'); break;
-                                case 'h3': insert = '\n### ' + (sel || 'Heading'); break;
-                                case 'link': insert = '[' + (sel || 'link text') + '](url)'; break;
-                                case 'code': insert = '`' + (sel || 'code') + '`'; break;
-                                case 'codeblock': insert = '\n```\n' + (sel || 'code here') + '\n```\n'; break;
-                                case 'ul': insert = '\n- ' + (sel || 'list item'); break;
-                                case 'hr': insert = '\n\n---\n\n'; break;
-                                case 'strikethrough': insert = '~~' + (sel || 'text') + '~~'; break;
-                                case 'blockquote': insert = '\n> ' + (sel || 'quote'); break;
-                                case 'image': {
-                                    const imgUrl = (opts && opts.url) ? opts.url : (sel || 'https://example.com/image.jpg');
-                                    const imgAlt = (opts && opts.alt) ? opts.alt : 'image';
-                                    insert = '\n![' + imgAlt + '](' + imgUrl + ')\n';
-                                    break;
-                                }
-                                case 'video': {
-                                    const vidUrl = sel || 'https://youtube.com/watch?v=VIDEO_ID';
-                                    insert = '\n@[video](' + vidUrl + ')\n';
-                                    break;
-                                }
-                            }
-                            textarea.value = before + insert + after;
-                            const cursor = before.length + insert.length;
-                            textarea.setSelectionRange(cursor, cursor);
-                            textarea.focus();
-                            textarea.dispatchEvent(new Event('input'));
-                        }
-
                         // ── stats chip update ─────────────────────────────────────
                         function updateBlogStats(posts) {
                             const total = posts.length;
@@ -5226,11 +5256,6 @@
                             openModal('blog-post-modal');
                         }
 
-                        function setValue(id, val) {
-                            const el = $(id);
-                            if (el) el.value = val || '';
-                        }
-
                         function updateSlugPreview(slug) {
                             const preview = $('blog-slug-preview');
                             if (preview) preview.textContent = slug || 'auto-generated';
@@ -5242,21 +5267,9 @@
                             if (input && counter) counter.textContent = input.value.length;
                         }
 
-                        function updateFeaturedImagePreview(url) {
-                            const preview = $('blog-featured-image-preview');
-                            const thumb = $('blog-featured-image-thumb');
-                            if (!preview || !thumb) return;
-                            if (url && url.trim()) {
-                                thumb.src = url.trim();
-                                preview.style.display = 'block';
-                            } else {
-                                thumb.src = '#';
-                                preview.style.display = 'none';
-                            }
-                        }
-
                         // ── blog image picker (reuses asset-picker-modal) ────────
-                        let _blogImagePickerMode = ''; // 'featured' | 'insert'
+                        // _blogImagePickerMode, updateFeaturedImagePreview, closeBlogImagePicker
+                        // are hoisted to outer IIFE scope for cross-panel access.
 
                         function openBlogImagePicker(mode) {
                             _blogImagePickerMode = mode;
@@ -5272,14 +5285,6 @@
                             if (searchEl) searchEl.focus();
                             // Override click handler on grid items for blog context
                             modal.dataset.blogPicker = '1';
-                        }
-
-                        function closeBlogImagePicker() {
-                            const modal = $('asset-picker-modal');
-                            if (modal) {
-                                modal.classList.add('d-none');
-                                delete modal.dataset.blogPicker;
-                            }
                         }
 
                         // ── save (create or update) ───────────────────────────────
