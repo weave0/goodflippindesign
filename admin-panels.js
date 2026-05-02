@@ -2305,16 +2305,18 @@
                                 );
 
                                 const isConnected = Boolean(conn);
+                                const label = conn?.account_label || 'connected';
+                                const handleText = handle?.handle ? escapeHtml(handle.handle) : '';
 
                                 return `<td>
                             <div class="eco-cell">
                                 <button class="eco-cell-btn ${isConnected ? 'connected' : ''}"
                                     data-matrix-brand="${escapeHtml(brandId)}"
                                     data-matrix-platform="${escapeHtml(platform)}"
-                                    title="${isConnected ? 'Edit connection: ' + (conn.account_label || '') : 'Connect ' + platform + ' for ' + brandDef.name}"
+                                    title="${isConnected ? ('Edit connection: ' + escapeHtml(conn.account_label || '')) : ('Connect ' + escapeHtml(platform) + ' for ' + escapeHtml(brandDef.name))}"
                                     aria-label="${isConnected ? 'Edit' : 'Connect'} ${platform} for ${brandDef.name}">
                                     <span class="eco-status-dot"></span>
-                                    <span>${isConnected ? label : 'connect'}</span>
+                                    <span>${isConnected ? escapeHtml(label) : 'connect'}</span>
                                 </button>
                                 ${handleText ? `<span class="eco-cell-handle">${handleText}</span>` : ''}
                                 ${isConnected && conn && conn.id ? `<button class="eco-cell-test-btn btn btn-micro" data-conn-id="${escapeHtml(String(conn.id))}" data-platform="${escapeHtml(platform)}" style="font-size:0.68rem;padding:1px 5px;margin-top:2px;width:100%" title="Test access token" aria-label="Test ${escapeHtml(platform)} token">&#128268; Test</button>` : ''}
