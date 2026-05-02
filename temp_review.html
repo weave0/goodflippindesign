@@ -4229,198 +4229,134 @@
     }
   </style>
 
-  <!-- JSON-LD Structured Data for Google -->
+  <!-- JSON-LD Structured Data — ecosystem @graph (v2, 2026-05) -->
+  <!-- Studio (goodflippindesign.com) parents Brand (goodflippinvibes.com) parents 7 WebSites -->
   <script type="application/ld+json">
     {
-        "@context": "https://schema.org",
-        "@type": "ProfessionalService",
-        "name": "Good Flippin Design",
-        "alternateName": "GFV LLC DBA Good Flippin Design",
-        "url": "https://goodflippinvibes.com",
-        "logo": "https://goodflippinvibes.com/assets/logos/gfd-circle-mark.png",
-        "image": "https://goodflippinvibes.com/assets/logos/gfd-circle-mark.png",
-        "description": "Strategic web development specializing in data platforms, AI-integrated applications, and business intelligence dashboards. Enterprise-quality code with startup agility.",
-        "telephone": "",
-        "email": "getsome@goodflippinvibes.com",
-        "address": {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "ProfessionalService",
+          "@id": "https://goodflippindesign.com/#studio",
+          "name": "Good Flippin Design",
+          "legalName": "GFV LLC",
+          "alternateName": "GFV LLC DBA Good Flippin Design",
+          "url": "https://goodflippindesign.com",
+          "logo": "https://goodflippindesign.com/assets/logos/gfd-circle-mark.png",
+          "image": "https://goodflippindesign.com/assets/logos/gfd-circle-mark.png",
+          "description": "Strategic web development specializing in data platforms, AI-integrated applications, and business intelligence dashboards. Enterprise-quality code with startup agility.",
+          "email": "getsome@goodflippinvibes.com",
+          "address": {
             "@type": "PostalAddress",
             "addressLocality": "Minneapolis",
             "addressRegion": "MN",
             "addressCountry": "US"
-        },
-        "geo": {
+          },
+          "geo": {
             "@type": "GeoCoordinates",
             "latitude": "44.977753",
             "longitude": "-93.265011"
-        },
-        "areaServed": {
-            "@type": "Place",
-            "name": "Global"
-        },
-        "serviceType": [
+          },
+          "areaServed": { "@type": "Place", "name": "Global" },
+          "priceRange": "$$$",
+          "founder": { "@id": "https://goodflippindesign.com/#person-brett" },
+          "brand": { "@id": "https://goodflippinvibes.com/#brand" },
+          "serviceType": [
             "Web Development",
             "AI Integration",
             "Data Platforms",
             "Business Intelligence Dashboards",
             "Healthcare Analytics",
             "Compliance Platforms"
-        ],
-        "knowsAbout": [
-            "React",
-            "Next.js",
-            "Node.js",
-            "PostgreSQL",
-            "AI Integration",
-            "WCAG 2.1 AA Accessibility",
-            "HIPAA Compliance",
-            "Data Visualization",
-            "Cloud Infrastructure"
-        ],
-        "sameAs": [
-            "https://culturesherpa.org",
-            "https://aiaimate.com",
+          ],
+          "knowsAbout": [
+            "React", "Next.js", "Node.js", "PostgreSQL",
+            "AI Integration", "WCAG 2.1 AA Accessibility", "HIPAA Compliance",
+            "Data Visualization", "Cloud Infrastructure"
+          ],
+          "owns": [
+            { "@id": "https://aiaimate.com/#site" },
+            { "@id": "https://culturesherpa.org/#site" },
+            { "@id": "https://citizenapproved.org/#site" },
+            { "@id": "https://lowertownstpaul.org/#site" },
+            { "@id": "https://heavymoose.com/#site" },
+            { "@id": "https://goodflippinvibes.com/#brand" },
+            { "@id": "https://globaldeets.com/#site" }
+          ],
+          "sameAs": [
             "https://goodflippinvibes.com",
-            "https://globaldeets.com",
-            "https://citizenapproved.org",
+            "https://github.com/weave0",
+            "https://linkedin.com/company/good-flippin-design",
             "https://facebook.com/profile.php?id=61566870218978",
             "https://twitter.com/goodflippinvibes",
-            "https://instagram.com/goodflippindesign",
-            "https://linkedin.com/company/good-flippin-design",
-            "https://github.com/weave0"
-        ],
-        "owns": [
-            {
-                "@type": "WebApplication",
-                "name": "AI Aimate",
-                "url": "https://aiaimate.com",
-                "description": "AI education platform with RAG-powered search and semantic knowledge base",
-                "applicationCategory": "EducationalApplication"
-            },
-            {
-                "@type": "WebApplication",
-                "name": "CultureSherpa",
-                "url": "https://culturesherpa.org",
-                "description": "Interactive atlas mapping 470+ world cultures with AI-synthesized profiles and geographic visualization",
-                "applicationCategory": "ReferenceApplication"
-            },
-            {
-                "@type": "WebSite",
-                "name": "Good Flippin Vibes",
-                "url": "https://goodflippinvibes.com",
-                "description": "Community-driven holistic wellness platform"
-            },
-            {
-                "@type": "WebSite",
-                "name": "GlobalDeets",
-                "url": "https://globaldeets.com",
-                "description": "Portfolio hub with PWA capabilities"
-            },
-            {
-                "@type": "WebSite",
-                "name": "CitizenApproved",
-                "url": "https://citizenapproved.org",
-                "description": "U.S. citizenship pathway guide with interactive resources, legal information, and community support"
-            }
-        ],
-        "priceRange": "$$$"
-    }
-    </script>
-
-  <!-- Enhanced Schema: WebSite with Search Action -->
-  <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Good Flippin Design",
-        "url": "https://goodflippinvibes.com",
-        "description": "Strategic web development specializing in data platforms, AI-integrated applications, and business intelligence dashboards",
-        "publisher": {
-            "@type": "Organization",
-            "name": "GFV LLC DBA Good Flippin Design"
+            "https://instagram.com/goodflippindesign"
+          ]
         },
-        "potentialAction": {
+        {
+          "@type": "Brand",
+          "@id": "https://goodflippinvibes.com/#brand",
+          "name": "Good Flippin Vibes",
+          "url": "https://goodflippinvibes.com",
+          "logo": "https://goodflippinvibes.com/assets/logos/gfv-mark.png",
+          "description": "The consumer-facing brand published by Good Flippin Design — community, wellness, and creative content.",
+          "parentOrganization": { "@id": "https://goodflippindesign.com/#studio" }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://goodflippindesign.com/#site",
+          "name": "Good Flippin Design",
+          "url": "https://goodflippindesign.com",
+          "description": "Studio site — portfolio, services, and contact for Good Flippin Design.",
+          "publisher": { "@id": "https://goodflippindesign.com/#studio" },
+          "potentialAction": {
             "@type": "SearchAction",
             "target": {
-                "@type": "EntryPoint",
-                "urlTemplate": "https://goodflippinvibes.com/#work?search={search_term_string}"
+              "@type": "EntryPoint",
+              "urlTemplate": "https://goodflippindesign.com/#work?search={search_term_string}"
             },
             "query-input": "required name=search_term_string"
-        }
-    }
-    </script>
-
-  <!-- Enhanced Schema: Person (Brett Weaver) -->
-  <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Brett Weaver",
-        "jobTitle": "Full-Stack Developer & AI Integration Specialist",
-        "worksFor": {
-            "@type": "Organization",
-            "name": "GFV LLC DBA Good Flippin Design",
-            "url": "https://goodflippinvibes.com"
+          }
         },
-        "url": "https://goodflippinvibes.com",
-        "sameAs": [
-            "https://globaldeets.com",
-            "https://github.com/weave0"
-        ],
-        "knowsAbout": [
-            "Web Development",
-            "AI Integration",
-            "React",
-            "Next.js",
-            "Node.js",
-            "PostgreSQL",
-            "Business Intelligence",
-            "WCAG Accessibility",
-            "Data Visualization",
-            "Cloud Infrastructure"
-        ],
-        "email": "getsome@goodflippinvibes.com",
-        "address": {
+        {
+          "@type": "Person",
+          "@id": "https://goodflippindesign.com/#person-brett",
+          "name": "Brett Weaver",
+          "jobTitle": "Founder, Good Flippin Design",
+          "url": "https://goodflippindesign.com",
+          "email": "getsome@goodflippinvibes.com",
+          "worksFor": { "@id": "https://goodflippindesign.com/#studio" },
+          "address": {
             "@type": "PostalAddress",
             "addressLocality": "Minneapolis",
             "addressRegion": "MN",
             "addressCountry": "US"
+          },
+          "knowsAbout": [
+            "Web Development", "AI Integration", "React", "Next.js",
+            "Node.js", "PostgreSQL", "Business Intelligence",
+            "WCAG Accessibility", "Data Visualization", "Cloud Infrastructure"
+          ],
+          "sameAs": [ "https://globaldeets.com", "https://github.com/weave0" ]
+        },
+        { "@type": "WebSite", "@id": "https://aiaimate.com/#site",        "name": "AI Aimate",          "url": "https://aiaimate.com",          "publisher": { "@id": "https://goodflippindesign.com/#studio" } },
+        { "@type": "WebSite", "@id": "https://culturesherpa.org/#site",   "name": "CultureSherpa",      "url": "https://culturesherpa.org",     "publisher": { "@id": "https://goodflippindesign.com/#studio" } },
+        { "@type": "WebSite", "@id": "https://citizenapproved.org/#site", "name": "CitizenApproved",    "url": "https://citizenapproved.org",   "publisher": { "@id": "https://goodflippindesign.com/#studio" } },
+        { "@type": "WebSite", "@id": "https://lowertownstpaul.org/#site", "name": "Lowertown St. Paul", "url": "https://lowertownstpaul.org",   "publisher": { "@id": "https://goodflippindesign.com/#studio" } },
+        { "@type": "WebSite", "@id": "https://heavymoose.com/#site",      "name": "Heavy Moose",        "url": "https://heavymoose.com",        "publisher": { "@id": "https://goodflippindesign.com/#studio" } },
+        { "@type": "WebSite", "@id": "https://globaldeets.com/#site",     "name": "GlobalDeets",        "url": "https://globaldeets.com",       "publisher": { "@id": "https://goodflippindesign.com/#studio" } },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://goodflippindesign.com/#breadcrumb",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home",      "item": "https://goodflippindesign.com" },
+            { "@type": "ListItem", "position": 2, "name": "Services",  "item": "https://goodflippindesign.com#services" },
+            { "@type": "ListItem", "position": 3, "name": "Portfolio", "item": "https://goodflippindesign.com#work" },
+            { "@type": "ListItem", "position": 4, "name": "Contact",   "item": "https://goodflippindesign.com#contact" }
+          ]
         }
+      ]
     }
-    </script>
-
-  <!-- Enhanced Schema: BreadcrumbList -->
-  <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "https://goodflippinvibes.com"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Services",
-                "item": "https://goodflippinvibes.com#services"
-            },
-            {
-                "@type": "ListItem",
-                "position": 3,
-                "name": "Portfolio",
-                "item": "https://goodflippinvibes.com#work"
-            },
-            {
-                "@type": "ListItem",
-                "position": 4,
-                "name": "Contact",
-                "item": "https://goodflippinvibes.com#contact"
-            }
-        ]
-    }
-    </script>
+  </script>
 </head>
 
 <body>
@@ -5391,13 +5327,18 @@
       </div>
     </div>
     <div class="footer-content" style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+      <p class="footer-studio-line" style="margin: 0 0 1rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+        <strong style="color: var(--text);">Good Flippin Design</strong> is the studio. We publish under the brand <a href="https://goodflippinvibes.com" target="_blank" rel="noopener" style="color: var(--text);">Good Flippin Vibes</a>.
+      </p>
       <div class="footer-ecosystem">
-        <span class="footer-ecosystem-label">Our Ecosystem:</span>
+        <span class="footer-ecosystem-label">Across the studio:</span>
         <a href="https://aiaimate.com" target="_blank" rel="noopener" title="AI Education Platform">AI Aimate</a>
         <a href="https://culturesherpa.org" target="_blank" rel="noopener" title="Interactive Cultural Atlas">CultureSherpa</a>
-        <a href="https://goodflippinvibes.com" target="_blank" rel="noopener" title="Wellness Platform">Good Flippin Vibes</a>
-        <a href="https://globaldeets.com" target="_blank" rel="noopener" title="Portfolio Hub">GlobalDeets</a>
         <a href="https://citizenapproved.org" target="_blank" rel="noopener" title="U.S. Citizenship Pathways">CitizenApproved</a>
+        <a href="https://lowertownstpaul.org" target="_blank" rel="noopener" title="Lowertown Saint Paul">Lowertown SP</a>
+        <a href="https://heavymoose.com" target="_blank" rel="noopener" title="Heavy Moose music canon">Heavy Moose</a>
+        <a href="https://goodflippinvibes.com" target="_blank" rel="noopener" title="Community + wellness brand">Good Flippin Vibes</a>
+        <a href="https://globaldeets.com" target="_blank" rel="noopener" title="Portfolio Hub">GlobalDeets</a>
       </div>
     </div>
     <!-- Owner admin access (not for public) -->

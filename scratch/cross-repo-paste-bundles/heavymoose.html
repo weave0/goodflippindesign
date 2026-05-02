@@ -1,0 +1,79 @@
+<!--
+============================================================================
+  HEAVY MOOSE — heavymoose.com — ECOSYSTEM PASTE BUNDLE
+  Source: weave0/goodflippindesign · scratch/cross-repo-paste-bundles/
+  Date: 2026-05-01
+============================================================================
+
+PROPERTY ROLE: Music / artist collective surface in the GFD ecosystem.
+Two albums currently catalogued on goodflippinvibes.com/music.html:
+  - DROSS  (10 tracks) — @id https://goodflippinvibes.com/#album-heavymoose-dross1
+  - DROSS II (12 tracks) — @id https://goodflippinvibes.com/#album-heavymoose-dross2
+
+============================================================================
+  STEP 1 — HEAD PASTE
+  Drop into <head> of the site's index/landing page.
+  Place AFTER <link rel="canonical"> and OG meta, BEFORE font preconnects.
+============================================================================
+-->
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://heavymoose.com/#site",
+      "url": "https://heavymoose.com/",
+      "name": "Heavy Moose",
+      "description": "Music and artist collective. Releases include DROSS and DROSS II, distributed via Good Flippin Vibes.",
+      "inLanguage": "en",
+      "publisher": { "@id": "https://goodflippindesign.com/#studio" },
+      "about": { "@id": "https://heavymoose.com/#group" }
+    },
+    {
+      "@type": "MusicGroup",
+      "@id": "https://heavymoose.com/#group",
+      "name": "Heavy Moose",
+      "url": "https://heavymoose.com/",
+      "genre": ["Rock", "Alternative", "Experimental"],
+      "album": [
+        { "@id": "https://goodflippinvibes.com/#album-heavymoose-dross1" },
+        { "@id": "https://goodflippinvibes.com/#album-heavymoose-dross2" }
+      ],
+      "sameAs": ["https://goodflippinvibes.com/music-heavymoose-dross1.html",
+                 "https://goodflippinvibes.com/music-heavymoose-dross2.html"]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://goodflippindesign.com/#studio",
+      "name": "Good Flippin Design",
+      "url": "https://goodflippindesign.com",
+      "sameAs": ["https://goodflippinvibes.com"]
+    }
+  ]
+}
+</script>
+
+<!--
+============================================================================
+  STEP 2 — FOOTER PASTE
+  Replace the existing footer attribution line(s) with the block below.
+  Keep your existing footer container/columns; only swap the attribution.
+============================================================================
+-->
+
+<div class="footer-bottom">
+    <p>
+        Heavy Moose is part of the
+        <a href="https://goodflippindesign.com" target="_blank" rel="noopener">Good Flippin Design</a>
+        studio · published &amp; distributed via
+        <a href="https://goodflippinvibes.com" target="_blank" rel="noopener">Good Flippin Vibes</a>
+        · sister properties:
+        <a href="https://citizenapproved.org" target="_blank" rel="noopener">CitizenApproved.org</a>,
+        <a href="https://culturesherpa.org" target="_blank" rel="noopener">CultureSherpa.org</a>,
+        <a href="https://aiaimate.com" target="_blank" rel="noopener">AI Aimate</a>,
+        <a href="https://lowertownstpaul.org" target="_blank" rel="noopener">Lowertown St. Paul</a>.
+    </p>
+    <p>&copy; 2026 Good Flippin Vibes LLC.</p>
+</div>

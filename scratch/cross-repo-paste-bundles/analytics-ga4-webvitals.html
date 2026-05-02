@@ -1,0 +1,103 @@
+<!--
+============================================================================
+  SHARED GA4 + WEB VITALS — ECOSYSTEM PASTE BUNDLE
+  Source: weave0/goodflippindesign · scratch/cross-repo-paste-bundles/
+  Date: 2026-05-01
+============================================================================
+
+PURPOSE: One snippet, paste into all properties.
+  - GA4 page_view + outbound-link tracking (auto)
+  - Web Vitals (CLS, LCP, INP, FCP, TTFB) → reported as GA4 events
+  - "ecosystem_property" custom dimension so you can pivot by site in GA
+
+PROPERTY MAPPING (set ecosystem_property per paste):
+  goodflippindesign.com    -> "studio"
+  goodflippinvibes.com     -> "brand"
+  aiaimate.com             -> "aiaimate"
+  citizenapproved.org      -> "citizenapproved"
+  culturesherpa.org        -> "culturesherpa"
+  heavymoose.com           -> "heavymoose"
+  lowertownstpaul.org      -> "lowertown"
+  brettleeweaver.com       -> "brett"
+
+GA4 MEASUREMENT ID:
+  Use ONE shared GA4 property (recommended) so cross-property funnels work.
+  Or use per-property GA4 IDs if you want isolated reporting.
+  Replace G-XXXXXXXXXX with your actual ID.
+
+============================================================================
+  STEP 1 — HEAD PASTE
+  Drop into <head> AFTER existing JSON-LD, BEFORE other analytics.
+============================================================================
+-->
+
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX', {
+        // Set per-property identifier — change "studio" to the right value (see mapping above)
+        custom_map: { dimension1: 'ecosystem_property' },
+        ecosystem_property: 'studio'
+    });
+
+    // Auto-track outbound clicks to other ecosystem properties
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var href = a.getAttribute('href') || '';
+        var ecosystem = [
+            'goodflippindesign.com', 'goodflippinvibes.com', 'aiaimate.com',
+            'citizenapproved.org', 'culturesherpa.org', 'heavymoose.com',
+            'lowertownstpaul.org', 'brettleeweaver.com', 'globaldeets.com'
+        ];
+        var hit = ecosystem.find(function (d) { return href.indexOf(d) !== -1; });
+        if (hit && hit !== location.hostname.replace(/^www\./, '')) {
+            gtag('event', 'ecosystem_outbound', {
+                target_property: hit,
+                link_url: href,
+                link_text: (a.textContent || '').trim().slice(0, 64)
+            });
+        }
+    }, { passive: true });
+</script>
+
+<!-- Web Vitals → GA4 events (no dependencies, self-contained) -->
+<script type="module">
+    import { onCLS, onINP, onLCP, onFCP, onTTFB }
+        from 'https://unpkg.com/web-vitals@4?module';
+
+    function send(metric) {
+        if (typeof gtag !== 'function') return;
+        gtag('event', metric.name, {
+            event_category: 'Web Vitals',
+            value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+            metric_id: metric.id,
+            metric_value: metric.value,
+            metric_delta: metric.delta,
+            non_interaction: true
+        });
+    }
+    onCLS(send); onINP(send); onLCP(send); onFCP(send); onTTFB(send);
+</script>
+
+<!--
+============================================================================
+  STEP 2 — REVIEW IN GA4
+  After deploy, in GA4 Admin → Custom definitions:
+    - Create custom dimension: "ecosystem_property" (event scope, dimension1)
+  Then in Reports → Engagement → Events you'll see:
+    - page_view  (auto)
+    - ecosystem_outbound  (cross-property navigation)
+    - CLS / INP / LCP / FCP / TTFB  (Web Vitals)
+  Pivot any of these by ecosystem_property to compare site performance.
+============================================================================
+
+  CSP NOTE — for properties using strict CSP, ensure these directives include:
+    script-src ... https://www.googletagmanager.com https://unpkg.com
+    connect-src ... https://www.google-analytics.com https://*.analytics.google.com
+                    https://*.g.doubleclick.net
+    img-src     ... https://www.google-analytics.com https://*.googletagmanager.com
+-->

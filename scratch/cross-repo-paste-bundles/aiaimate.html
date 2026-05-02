@@ -1,0 +1,113 @@
+<!--
+============================================================================
+  AIAIMATE.COM — ECOSYSTEM PASTE BUNDLE  (Next.js 14)
+  Source: weave0/goodflippindesign · scratch/cross-repo-paste-bundles/
+  Date: 2026-05-01
+============================================================================
+
+PROPERTY ROLE: AI education platform — Next.js 14 + RAG + Vector DB.
+  - Type: WebApplication / EducationalApplication
+  - Cross-links: culturesherpa.org (cultural Q&A pipeline)
+
+============================================================================
+  NEXT.JS NOTE
+  Use the App Router metadata API instead of pasting raw <script> tags.
+  Ideal location: app/layout.tsx (root layout) so every route inherits.
+  Snippet below is the **RAW JSON-LD** to embed via <Script type="application/ld+json">
+  or via metadata.other['ld+json'].
+============================================================================
+-->
+
+<!--
+  Option A — Raw <Head> paste (works in any HTML shell):
+-->
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://aiaimate.com/#site",
+      "url": "https://aiaimate.com/",
+      "name": "AI Aimate",
+      "description": "AI education platform. RAG-driven semantic search and learning tools for AI literacy.",
+      "inLanguage": "en",
+      "publisher": { "@id": "https://goodflippindesign.com/#studio" },
+      "about": { "@id": "https://aiaimate.com/#app" }
+    },
+    {
+      "@type": ["WebApplication", "EducationalOrganization"],
+      "@id": "https://aiaimate.com/#app",
+      "name": "AI Aimate",
+      "url": "https://aiaimate.com/",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "keywords": "AI education, RAG, semantic search, learning platform, AI tools",
+      "publisher": { "@id": "https://goodflippindesign.com/#studio" },
+      "isRelatedTo": { "@id": "https://culturesherpa.org/#site" }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://goodflippindesign.com/#studio",
+      "name": "Good Flippin Design",
+      "url": "https://goodflippindesign.com",
+      "sameAs": ["https://goodflippinvibes.com"]
+    }
+  ]
+}
+</script>
+
+<!--
+============================================================================
+  Option B — Next.js 14 App Router (recommended)
+  In app/layout.tsx, add inside <body> (or use next/script):
+============================================================================
+
+import Script from 'next/script';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const ldJson = {
+    "@context": "https://schema.org",
+    "@graph": [
+      // ...same @graph contents as Option A above...
+    ],
+  };
+  return (
+    <html lang="en">
+      <body>
+        <Script
+          id="ldjson-ecosystem"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
+        />
+        {children}
+      </body>
+    </html>
+  );
+}
+-->
+
+<!--
+============================================================================
+  STEP 2 — FOOTER PASTE
+  Replace the existing footer attribution line(s) with the block below.
+  In Next.js: put in app/components/Footer.tsx as a server component.
+============================================================================
+-->
+
+<div className="footer-bottom">
+    <p>
+        A property of{' '}
+        <a href="https://goodflippindesign.com" target="_blank" rel="noopener noreferrer">Good Flippin Design</a>
+        {' '}· published under{' '}
+        <a href="https://goodflippinvibes.com" target="_blank" rel="noopener noreferrer">Good Flippin Vibes LLC</a>
+        {' '}· sister properties:{' '}
+        <a href="https://citizenapproved.org" target="_blank" rel="noopener noreferrer">CitizenApproved.org</a>,{' '}
+        <a href="https://culturesherpa.org" target="_blank" rel="noopener noreferrer">CultureSherpa.org</a>,{' '}
+        <a href="https://heavymoose.com" target="_blank" rel="noopener noreferrer">Heavy Moose</a>,{' '}
+        <a href="https://lowertownstpaul.org" target="_blank" rel="noopener noreferrer">Lowertown St. Paul</a>.
+    </p>
+    <p>&copy; 2026 Good Flippin Vibes LLC.</p>
+</div>

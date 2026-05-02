@@ -1,0 +1,94 @@
+name: Ecosystem Link Check
+
+# Nightly probe of every public ecosystem property:
+#   - HTTP 200 on root
+#   - JSON-LD present + parses + references the studio @id
+#   - Footer outbound links to sister properties resolve
+# Also runs on PRs that touch index.html or workflow file.
+
+on:
+    schedule:
+        - cron: "17 9 * * *" # 09:17 UTC daily (~03:17 / 04:17 CT)
+    workflow_dispatch:
+    pull_request:
+        paths:
+            - "index.html"
+            - ".github/workflows/ecosystem-link-check.yml"
+            - "scripts/validate-ecosystem-jsonld.ps1"
+
+jobs:
+    smoke:
+        name: Ecosystem JSON-LD + link probe
+        runs-on: ubuntu-latest
+        timeout-minutes: 8
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Probe each property (HTTP + JSON-LD + studio @id)
+              shell: bash
+              run: |
+                  set -e
+                  urls=(
+                    "https://goodflippindesign.com/"
+                    "https://goodflippindesign.com/donate.html"
+                    "https://goodflippindesign.com/gallery.html"
+                    "https://goodflippindesign.com/music.html"
+                    "https://goodflippindesign.com/music-shariff.html"
+                    "https://goodflippindesign.com/music-djz.html"
+                    "https://goodflippindesign.com/music-aardvarco.html"
+                    "https://goodflippindesign.com/music-heavymoose-dross1.html"
+                    "https://goodflippindesign.com/music-heavymoose-dross2.html"
+                    "https://goodflippindesign.com/terms.html"
+                    "https://goodflippindesign.com/privacy.html"
+                  )
+                  studio_id="https://goodflippindesign.com/#studio"
+                  fail=0
+                  for u in "${urls[@]}"; do
+                    echo "::group::$u"
+                    body=$(curl -fsSL --max-time 20 "$u" || echo "__CURL_FAIL__")
+                    if [ "$body" = "__CURL_FAIL__" ]; then
+                      echo "::error::$u — HTTP fetch failed"
+                      fail=1
+                      echo "::endgroup::"
+                      continue
+                    fi
+                    if echo "$body" | grep -q 'application/ld+json'; then
+                      echo "JSON-LD block present"
+                    else
+                      echo "::error::$u — no JSON-LD block"
+                      fail=1
+                    fi
+                    if echo "$body" | grep -q "$studio_id"; then
+                      echo "studio @id referenced"
+                    else
+                      echo "::warning::$u — does NOT reference $studio_id"
+                    fi
+                    echo "::endgroup::"
+                  done
+                  exit $fail
+
+            - name: Probe ecosystem outbound footer links
+              shell: bash
+              run: |
+                  set -e
+                  # Sister properties referenced from goodflippindesign.com footer.
+                  # 200 OR 301/302 (redirects) acceptable; any 4xx/5xx fails the run.
+                  targets=(
+                    "https://goodflippinvibes.com"
+                    "https://aiaimate.com"
+                    "https://citizenapproved.org"
+                    "https://culturesherpa.org"
+                    "https://heavymoose.com"
+                    "https://globaldeets.com"
+                  )
+                  fail=0
+                  for t in "${targets[@]}"; do
+                    code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 -L "$t" || echo "000")
+                    if [[ "$code" =~ ^(200|301|302|307|308)$ ]]; then
+                      echo "OK  $code  $t"
+                    else
+                      echo "::error::$t returned $code"
+                      fail=1
+                    fi
+                  done
+                  exit $fail

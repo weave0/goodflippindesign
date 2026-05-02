@@ -1,0 +1,74 @@
+<!--
+============================================================================
+  CITIZENAPPROVED.ORG — ECOSYSTEM PASTE BUNDLE
+  Source: weave0/goodflippindesign · scratch/cross-repo-paste-bundles/
+  Date: 2026-05-01
+============================================================================
+
+PROPERTY ROLE: Civic / accountability platform in the GFD ecosystem.
+Type: WebApplication (interactive civic-tech tool).
+
+============================================================================
+  STEP 1 — HEAD PASTE
+  Drop into <head> of the site's index/landing page.
+  Place AFTER <link rel="canonical"> and OG meta, BEFORE font preconnects.
+  If using Next.js, add inside the <Head> component or via metadata.other.
+============================================================================
+-->
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://citizenapproved.org/#site",
+      "url": "https://citizenapproved.org/",
+      "name": "CitizenApproved",
+      "description": "Civic accountability and citizen-driven approval platform.",
+      "inLanguage": "en",
+      "publisher": { "@id": "https://goodflippindesign.com/#studio" },
+      "about": { "@id": "https://citizenapproved.org/#app" }
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://citizenapproved.org/#app",
+      "name": "CitizenApproved",
+      "url": "https://citizenapproved.org/",
+      "applicationCategory": "GovernmentApplication",
+      "operatingSystem": "Web",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "publisher": { "@id": "https://goodflippindesign.com/#studio" }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://goodflippindesign.com/#studio",
+      "name": "Good Flippin Design",
+      "url": "https://goodflippindesign.com",
+      "sameAs": ["https://goodflippinvibes.com"]
+    }
+  ]
+}
+</script>
+
+<!--
+============================================================================
+  STEP 2 — FOOTER PASTE
+  Replace the existing footer attribution line(s) with the block below.
+============================================================================
+-->
+
+<div class="footer-bottom">
+    <p>
+        A property of
+        <a href="https://goodflippindesign.com" target="_blank" rel="noopener">Good Flippin Design</a>
+        · published under
+        <a href="https://goodflippinvibes.com" target="_blank" rel="noopener">Good Flippin Vibes LLC</a>
+        · sister properties:
+        <a href="https://culturesherpa.org" target="_blank" rel="noopener">CultureSherpa.org</a>,
+        <a href="https://aiaimate.com" target="_blank" rel="noopener">AI Aimate</a>,
+        <a href="https://heavymoose.com" target="_blank" rel="noopener">Heavy Moose</a>,
+        <a href="https://lowertownstpaul.org" target="_blank" rel="noopener">Lowertown St. Paul</a>.
+    </p>
+    <p>&copy; 2026 Good Flippin Vibes LLC.</p>
+</div>
