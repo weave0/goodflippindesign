@@ -191,8 +191,8 @@ async function verifyState(stateStr, encryptionKey) {
     );
     const payload = JSON.parse(new TextDecoder().decode(decrypted));
 
-    // Reject if state is older than 10 minutes
-    if (Date.now() - payload.ts > 10 * 60 * 1000) {
+    // Reject if state is older than 30 minutes
+    if (Date.now() - payload.ts > 30 * 60 * 1000) {
       console.warn('[oauth] State expired');
       return null;
     }
