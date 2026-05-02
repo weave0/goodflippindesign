@@ -119,7 +119,7 @@ const SITES = {
         'https://eliassen.globaldeets.com',
         ...SHARED.sentry,  // Sentry error ingest
       ],
-      'frame-src': [...SHARED.stripe.frame, ...SHARED.clerk.frame, 'https://www.instagram.com', 'https://www.facebook.com'],
+      'frame-src': [...SHARED.stripe.frame, ...SHARED.clerk.frame, 'https://www.instagram.com', 'https://www.facebook.com', 'https://open.spotify.com'],
       'worker-src': ["'self'", 'blob:'],
     },
 

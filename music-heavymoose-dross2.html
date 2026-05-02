@@ -34,6 +34,7 @@
           "genre": ["Industrial", "Alternative"],
           "description": "Twelve tracks forged in the aftermath. The second album from Heavy Moose.",
           "byArtist": { "@type": "MusicGroup", "name": "Heavy Moose", "url": "https://heavymoose.com" },
+                    "recordLabel": { "@id": "https://goodflippinvibes.com/#label-gfv" },
           "publisher": { "@id": "https://goodflippindesign.com/#studio" },
           "isPartOf": { "@id": "https://goodflippinvibes.com/#site-gfv" }
         },
@@ -45,6 +46,13 @@
           "publisher": { "@id": "https://goodflippindesign.com/#studio" }
         },
         {
+                    "@type": "Organization",
+                    "@id": "https://goodflippinvibes.com/#label-gfv",
+                    "name": "Good Flippin Vibes",
+                    "url": "https://goodflippinvibes.com",
+                    "parentOrganization": { "@id": "https://goodflippindesign.com/#studio" }
+                },
+                {
           "@type": "Organization",
           "@id": "https://goodflippindesign.com/#studio",
           "name": "Good Flippin Design",
@@ -774,6 +782,11 @@
             font-size: 0.8rem;
             color: var(--text-muted);
         }
+
+        .footer-credit {
+            max-width: 48rem;
+            line-height: 1.6;
+        }
     </style>
 </head>
 
@@ -1324,6 +1337,7 @@
                     <a href="donate.html">Donate</a>
                     <a href="privacy.html">Privacy</a>
                 </nav>
+                <p class="footer-copy footer-credit">Artist credit: Heavy Moose. Site direction and release presentation by Brett Weaver. Label credit: Good Flippin Vibes.</p>
                 <p class="footer-copy">&copy; 2026 GFV LLC DBA Good Flippin Vibes. All rights reserved.</p>
             </div>
         </div>

@@ -144,6 +144,7 @@
                         assets: [],
                         campaigns: [],
                         variants: [],
+                        allConnections: [],
                         connections: [],
                         socialAccounts: [],
                         brandWorkflows: {},
@@ -1089,7 +1090,9 @@
                     }
 
                     async function loadConnections() {
-                        state.connections = await api('/connections?brand=' + encodeURIComponent(currentBrand));
+                        const allConnections = await api('/connections');
+                        state.allConnections = Array.isArray(allConnections) ? allConnections : [];
+                        state.connections = state.allConnections.filter((connection) => connection.brand === currentBrand);
                     }
 
                     // ── Social Feed ──────────────────────────────────────────────────
@@ -1816,7 +1819,7 @@
                                 (result.ok ? 'token valid' : (result.error || 'failed')),
                                 result.ok ? 'success' : 'error');
                             if (result.ok) {
-                                const conn = state.connections.find((c) => String(c.id) === String(connId));
+                                const conn = state.allConnections.find((c) => String(c.id) === String(connId));
                                 if (conn) conn.last_used_at = result.checked_at;
                                 renderOverview();
                             }
@@ -1859,19 +1862,29 @@
                         const connectionSummary = $('overview-connections');
 
                         connectionSummary.innerHTML = PLATFORM_ORDER.map((platform) => {
-                            const conn = state.connections.find((c) => c.platform === platform && Number(c.is_active) === 1);
-                            const connected = Boolean(conn);
-                            const lastTested = conn && conn.last_used_at
+                            const activeConnections = state.allConnections.filter((c) => c.platform === platform && Number(c.is_active) === 1);
+                            const conn = activeConnections[0] || null;
+                            const connectedCount = activeConnections.length;
+                            const connected = connectedCount > 0;
+                            const metaText = connectedCount > 1
+                                ? escapeHtml(String(connectedCount) + ' active brands')
+                                : conn
+                                    ? escapeHtml((BRAND_DEFS[conn.brand]?.shortName || conn.brand || '').toUpperCase() + (conn.account_label ? ' · ' + conn.account_label : ''))
+                                    : '';
+                            const meta = metaText
+                                ? '<span style="font-size:0.7rem;color:var(--text-muted);margin-left:4px">' + metaText + '</span>'
+                                : '';
+                            const lastTested = connectedCount === 1 && conn && conn.last_used_at
                                 ? '<span style="font-size:0.7rem;color:var(--text-muted);margin-left:4px" title="' + escapeHtml(conn.last_used_at) + '">tested ' + escapeHtml(relTimeFromIso(conn.last_used_at)) + '</span>'
                                 : '';
-                            const testBtn = connected && conn.id
+                            const testBtn = connectedCount === 1 && conn && conn.id
                                 ? '<button class="btn btn-micro ov-conn-test-btn" data-conn-id="' + conn.id + '" style="padding:1px 5px;font-size:0.68rem;margin-left:4px" title="Test token" aria-label="Test ' + escapeHtml(platform) + ' token">&#128268;</button>'
                                 : '';
                             return `<div class="overview-conn-row">
                         <span class="overview-conn-name">${escapeHtml(platform)}</span>
                         <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap">
                             <span class="tag ${connected ? 'ok' : 'fail'}">${connected ? 'connected' : 'missing'}</span>
-                            ${lastTested}${testBtn}
+                            ${meta}${lastTested}${testBtn}
                         </div>
                     </div>`;
                         }).join('');
@@ -1953,8 +1966,8 @@
                         },
                         {
                             id: 'social-platform-oauth', severity: 'quality', brand: 'all', area: 'Social Media',
-                            title: 'Only X (Twitter) tokens stored — IG/TikTok/Pinterest need credentials + OAuth',
-                            detail: 'OAuth server fully implemented: workers/oauth.js (40KB) handles authorize/callback/status flows for Instagram, Facebook, X, LinkedIn, Pinterest, TikTok, YouTube. Imported via cms.js → handleOAuthRequest. Routes: GET /api/cms/oauth/authorize/:platform, /api/cms/oauth/callback/:platform, /api/cms/oauth/status. Missing: platform API credentials as Cloudflare Worker secrets. To activate Instagram: META_APP_ID + META_APP_SECRET. TikTok: TIKTOK_CLIENT_ID + TIKTOK_CLIENT_SECRET. Pinterest: PINTEREST_APP_ID + PINTEREST_APP_SECRET. LinkedIn: LINKEDIN_CLIENT_ID + LINKEDIN_CLIENT_SECRET. Once secrets set, use admin portal Connections panel → OAuth flow for each brand/platform.'
+                            title: 'OAuth coverage still incomplete — Pinterest is live, other networks still need credentials or token setup',
+                            detail: 'OAuth server is implemented in workers/oauth.js for Instagram, Facebook, X, LinkedIn, Pinterest, TikTok, and YouTube. Pinterest is now configured and connected for GFV. Remaining setup work is platform-specific: Instagram/Facebook need META_APP_ID + META_APP_SECRET, TikTok needs TIKTOK_CLIENT_ID + TIKTOK_CLIENT_SECRET, LinkedIn needs LINKEDIN_CLIENT_ID + LINKEDIN_CLIENT_SECRET. Use the admin portal Connections panel to complete OAuth once each provider secret pair is present.'
                         },
                         // ── CultureSherpa ──────────────────────────────────────────────
                         {
@@ -2251,7 +2264,7 @@
                                 }
 
                                 // Check for an active connection (token)
-                                const conn = state.connections.find(
+                                const conn = state.allConnections.find(
                                     (c) => c.brand === brandId && c.platform === platform && Number(c.is_active) === 1
                                 );
                                 // Check for a registered handle
@@ -2260,8 +2273,6 @@
                                 );
 
                                 const isConnected = Boolean(conn);
-                                const handleText = handle ? escapeHtml(handle.handle) : '';
-                                const label = conn ? escapeHtml(conn.account_label || conn.account_id || 'connected') : (isConnected ? 'connected' : 'connect');
 
                                 return `<td>
                             <div class="eco-cell">
