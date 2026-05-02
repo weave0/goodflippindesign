@@ -6975,3 +6975,136 @@
         .cmd-item--project .cmd-item-num {
             color: var(--accent-emerald);
         }
+
+        /* ── Music Library (panel 32) ──────────────────────────────────── */
+        .ml-stats-strip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 0.25rem;
+        }
+
+        .ml-stats-strip .ml-sep {
+            color: var(--border);
+        }
+
+        .ml-stats-strip strong {
+            color: var(--text);
+        }
+
+        .ml-artist-section {
+            margin-bottom: 2rem;
+        }
+
+        .ml-artist-name {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent-cyan);
+            margin: 0 0 0.75rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ml-albums-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .ml-album-card {
+            padding: 0.9rem 1rem;
+        }
+
+        .ml-album-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .ml-album-title {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 0 0 0.2rem;
+        }
+
+        .ml-album-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .ml-track-details > summary {
+            font-size: 0.77rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+            padding: 0.25rem 0;
+            outline: none;
+        }
+
+        .ml-track-details > summary:focus-visible {
+            outline: 2px solid var(--accent-cyan);
+            border-radius: 3px;
+        }
+
+        .ml-track-details[open] > summary {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .ml-track-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.77rem;
+            margin-top: 0.35rem;
+        }
+
+        .ml-track-table thead th {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 0.2rem 0.4rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .ml-track-table tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        .ml-track-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .ml-track-table td {
+            padding: 0.28rem 0.4rem;
+            color: var(--text);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            vertical-align: middle;
+        }
+
+        .ml-td-num {
+            color: var(--text-muted);
+            width: 28px;
+            text-align: right;
+        }
+
+        .ml-td-mono {
+            font-family: var(--mono);
+            font-size: 0.73rem;
+            color: var(--text-muted);
+        }

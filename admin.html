@@ -110,6 +110,11 @@
                                 <path d="M1 8S3.8 2.5 8 2.5 15 8 15 8 12.2 13.5 8 13.5 1 8 1 8Z" />
                                 <circle cx="8" cy="8" r="2" />
                             </svg></span><span class="nav-label">Review Queue <span class="review-badge d-none" id="review-badge">0</span></span></button>
+                    <button class="nav-btn" data-view="music-library"><span class="nav-num">32</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M6 13V4l7-2v9" />
+                                <circle cx="4" cy="13" r="2" />
+                                <circle cx="11" cy="11" r="2" />
+                            </svg></span><span class="nav-label">Music Library</span></button>
 
                     <div class="nav-group-label">Sites</div>
                     <button class="nav-btn" data-view="overrides"><span class="nav-num">09</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
@@ -1090,6 +1095,7 @@
                         <div class="inline-actions">
                             <button class="btn btn-secondary" data-open-daily-cultures="culturesherpa">Daily Calendar</button>
                             <button class="btn btn-secondary" id="cs-focus-culturesherpa-btn" data-open-brand-studio="culturesherpa">CultureSherpa Portal</button>
+                            <button class="btn btn-secondary" id="cs-open-summitview-hub-btn">SummitView Hub</button>
                             <button class="btn btn-secondary" id="cs-import-btn">Import JSON</button>
                             <button class="btn btn-primary" id="cs-new-registry-btn">New Registry</button>
                         </div>
@@ -2926,6 +2932,30 @@
                             </div>
                         </div>
                     </article>
+                </section>
+
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- PANEL 32 — GFV MUSIC LIBRARY                           -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <section class="view" id="view-music-library">
+                    <div class="section-head">
+                        <h2 class="section-title">GFV Music Library</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="ml-refresh-btn">Refresh Catalog</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">
+                        Catalog sourced from SummitView (local-only). To rebuild after adding albums, run:
+                        <code style="background:rgba(255,255,255,0.05);padding:0.1rem 0.35rem;border-radius:3px;font-size:0.78rem;font-family:var(--mono)">npm run export:music</code>
+                    </p>
+
+                    <!-- Stats strip filled by JS -->
+                    <div class="ml-stats-strip" id="ml-meta"></div>
+
+                    <!-- Catalog render area filled by renderMusicLibrary() -->
+                    <div id="ml-catalog" style="margin-top:1rem">
+                        <p style="color:var(--text-muted)">Click <strong>Refresh Catalog</strong> to load.</p>
+                    </div>
                 </section>
 
             </main>

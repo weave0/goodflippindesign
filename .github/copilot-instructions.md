@@ -2,7 +2,12 @@
 
 ## ⚠️ Domain Rule — Read This First
 
-The **public-facing domain** is **goodflippinvibes.com**. Always use `goodflippinvibes.com` when referencing the live site, generating URLs, writing canonical tags, or talking to the user. The GitHub repo name (`goodflippindesign`) and the Cloudflare Pages internal hostname (`goodflippindesign.com`) are infrastructure details — **never** present `goodflippindesign.com` as the site URL.
+Two domains coexist intentionally; both are first-class:
+
+- **goodflippindesign.com** — the **studio / parent company** surface. The production stack lives here: CF Pages CNAME, Stripe webhook, Clerk app `clerk.goodflippindesign.com`, legal "Site" definition (Terms/Privacy), worker `ALLOWED_ORIGIN`, sitemap, canonicals, health probes. Use this URL when referring to the live deploy, the company, the studio, infrastructure, legal, or production endpoints.
+- **goodflippinvibes.com** — the **consumer-facing brand depicted in the content** (the voice the studio publishes under). Has its own Clerk subdomain `clerk.goodflippinvibes.com`, frame-src in CSP, used for the community-portal user surface. Use this URL when referring to the brand, community, audience-facing experience, or the GFV LLC DBA.
+
+Do **not** do blind find-replace from one to the other — they map to different real DNS records, Clerk apps, and Stripe/legal anchors. The GitHub repo `weave0/goodflippindesign` is named after the studio (correct, not a mismatch).
 
 ## Project Overview
 

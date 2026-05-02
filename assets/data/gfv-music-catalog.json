@@ -1,0 +1,987 @@
+{
+  "_meta": {
+    "exported_at": "2026-04-15T23:09:38.392Z",
+    "source": "GFD Dev Projects/SummitView/data",
+    "total_artists": 6,
+    "total_albums": 11,
+    "total_tracks": 101
+  },
+  "artists": [
+    {
+      "id": "foxyana",
+      "name": "DJ Foxyana",
+      "albums": [
+        {
+          "albumId": "foxyana-album-1",
+          "title": "The Steppe Is Alive",
+          "artistId": "foxyana",
+          "description": "Debut album. Where it all began — Ukrainian identity encoded in electronic music. Nine tracks that map the emotional terrain between old-world memory and new-world bass. Dark comfort. Neon light. The steppe doesn't sleep, it waits. This album is the proof of concept for the Foxyana voice: folk-electronic fusion where cultural DNA is the production palette, not the decoration.",
+          "trackCount": 9,
+          "tracks": [
+            {
+              "n": 1,
+              "title": "Bone Into Current",
+              "bpm": 129,
+              "duration": "2:37",
+              "key": "Dm",
+              "role": "album opener — the transformation begins"
+            },
+            {
+              "n": 2,
+              "title": "Gravity Yields",
+              "bpm": 129,
+              "duration": "2:36",
+              "key": "Dm",
+              "role": "alternate version of Track 1 — gravity surrendering"
+            },
+            {
+              "n": 3,
+              "title": "New Breath Same Blood",
+              "bpm": 162,
+              "duration": "2:28",
+              "key": "Am",
+              "role": "energy peak — the most kinetic track"
+            },
+            {
+              "n": 4,
+              "title": "Red Gold Ghost",
+              "bpm": 118,
+              "duration": "3:02",
+              "key": "Gm",
+              "role": "atmospheric anchor — the longest track, slowest BPM"
+            },
+            {
+              "n": 5,
+              "title": "The Steppe Is Alive",
+              "bpm": 118,
+              "duration": "2:59",
+              "key": "Em",
+              "role": "title track — the album's thesis statement"
+            },
+            {
+              "n": 6,
+              "title": "Three Turns on Wood",
+              "bpm": 136,
+              "duration": "0:56",
+              "key": "Cm",
+              "role": "interlude — rhythmic palate cleanser"
+            },
+            {
+              "n": 7,
+              "title": "Under the Silver Dome",
+              "bpm": 129,
+              "duration": "3:01",
+              "key": "Fm",
+              "role": "architectural counterpart to the title track"
+            },
+            {
+              "n": 8,
+              "title": "White Fire Drift",
+              "bpm": 136,
+              "duration": "3:01",
+              "key": "Bbm",
+              "role": "penultimate — ethereal intensity before the close"
+            },
+            {
+              "n": 9,
+              "title": "Душа вже знала",
+              "bpm": 123,
+              "duration": "2:59",
+              "key": "Cm",
+              "role": "album closer — the arrival"
+            }
+          ],
+          "albumArtPrompt": "Cinematic digital painting: vast Ukrainian steppe at twilight, golden wheat bending in wind under a sky split between deep indigo and warm amber. In the distance, a silhouetted figure of an elegant fox woman walks toward the horizon. Subtle neon teal and magenta light leaks along the ground. Style: atmospheric realism with painterly texture, warm and moody, album cover composition, square format.",
+          "albumArtNegPrompt": "No cartoon, no flat vector, no text, no logos, no generic fantasy, no militaristic imagery",
+          "studioPath": "foxyana-album-1_prompts.html"
+        },
+        {
+          "albumId": "foxyana-album-2",
+          "title": "Земля Пам'ятає",
+          "artistId": "foxyana",
+          "description": "Second album. Deeper production. Bilingual hooks. Bass that rides. Vocals that ache. Ukraine at the center, not as subject but as speaker. The pysanky principle applied to music: protect what is already true — the cultural DNA, the emotional core — then let the electronic production find everywhere else. What the listener hears has been preserved in layers. Foxyana stands in the kobzar lineage: carrying culture through music, making memory danceable.",
+          "trackCount": 8,
+          "tracks": [
+            {
+              "n": 1,
+              "title": "Прокидайся",
+              "bpm": 128,
+              "duration": "3:42",
+              "key": "Cm",
+              "role": "album opener — statement of intent"
+            },
+            {
+              "n": 2,
+              "title": "Carpathian Bass",
+              "bpm": 134,
+              "duration": "4:15",
+              "key": "Fm",
+              "role": "the club track — bass-forward, physical, rhythmic"
+            },
+            {
+              "n": 3,
+              "title": "Вишиванка на шкірі",
+              "bpm": 122,
+              "duration": "3:58",
+              "key": "Am",
+              "role": "the emotional anchor — vulnerability track"
+            },
+            {
+              "n": 4,
+              "title": "Колесо",
+              "bpm": 140,
+              "duration": "4:30",
+              "key": "Dm",
+              "role": "the Kolomyika-driven banger — peak energy"
+            },
+            {
+              "n": 5,
+              "title": "Тіні Львова",
+              "bpm": 118,
+              "duration": "4:05",
+              "key": "Gm",
+              "role": "the city track — night-drive energy, sophisticated"
+            },
+            {
+              "n": 6,
+              "title": "Хліб і Сіль",
+              "bpm": 126,
+              "duration": "3:35",
+              "key": "Eb",
+              "role": "the hospitality anthem — warmth, welcome, community"
+            },
+            {
+              "n": 7,
+              "title": "Залізо і Мед",
+              "bpm": 132,
+              "duration": "3:50",
+              "key": "Bbm",
+              "role": "the resilience track — strength without aggression"
+            },
+            {
+              "n": 8,
+              "title": "Річка Під Містом",
+              "bpm": 120,
+              "duration": "5:10",
+              "key": "Em",
+              "role": "the closer — expansive, reflective, arriving"
+            }
+          ],
+          "albumArtPrompt": "Cinematic painterly illustration: an elegant anthropomorphic red fox woman standing on a Carpathian ridge at blue hour, wind pulling her embroidered shawl behind her, below a sky transitioning from deep cobalt to warm amber at the horizon. She faces away from camera toward a vast Ukrainian steppe lit by the last edge of sunset. Her tail streams in the wind. Style: warm textured brushwork, atmospheric, no text, no logos, aspect 1:1, album cover composition.",
+          "albumArtNegPrompt": "No cartoonish style, no flat vector, no text, no logos, no generic fantasy, no militaristic imagery",
+          "studioPath": "foxyana-album-2_prompts.html"
+        }
+      ]
+    },
+    {
+      "id": "djshariff",
+      "name": "DJ Shariff",
+      "albums": [
+        {
+          "albumId": "djshariff-album-1",
+          "title": "Good Flippin Vibes",
+          "artistId": "djshariff",
+          "description": "Debut album. Hip-hop holds the rhythm and the truth. Jazz holds the harmony and the memory. EDM holds the electricity that turns a crowd into one organism. DJ Shariff was not built from the premise that these are three different genres — he was built from the conviction that they are dialects of the same sentence. 'Good Flippin Vibes' is not a slogan. It is a production standard. The music on this record earns its title through structure, specificity, and emotional precision. You will feel it in your chest before your brain knows what happened. Eight tracks. No filler. One arc.",
+          "trackCount": 9,
+          "tracks": [
+            {
+              "n": 1,
+              "title": "The Introduction",
+              "bpm": 90,
+              "duration": "3:28",
+              "key": "Gm",
+              "role": "album opener — the declaration"
+            },
+            {
+              "n": 2,
+              "title": "Frictionless",
+              "bpm": 120,
+              "duration": "4:12",
+              "key": "Fm",
+              "role": "the peak-time club track — convergence point"
+            },
+            {
+              "n": 3,
+              "title": "Third Floor",
+              "bpm": 86,
+              "duration": "4:45",
+              "key": "Bbm",
+              "role": "the late-night depth track — where jazz and hip-hop are the same conversation"
+            },
+            {
+              "n": 4,
+              "title": "All The Brass",
+              "bpm": 95,
+              "duration": "3:55",
+              "key": "Cm",
+              "role": "the jubilation track — the big band meets the booth"
+            },
+            {
+              "n": 5,
+              "title": "Real Time",
+              "bpm": 118,
+              "duration": "4:33",
+              "key": "Gbmaj7",
+              "role": "the electronic tension track — jazz harmony in the machine"
+            },
+            {
+              "n": 6,
+              "title": "Stand Still",
+              "bpm": 78,
+              "duration": "4:02",
+              "key": "Ebm",
+              "role": "the emotional center — stillness inside the storm"
+            },
+            {
+              "n": 7,
+              "title": "Block Party Science",
+              "bpm": 100,
+              "duration": "4:18",
+              "key": "Dm",
+              "role": "the groove track — the science of bringing people together"
+            },
+            {
+              "n": 8,
+              "title": "Still Warm",
+              "bpm": 88,
+              "duration": "5:05",
+              "key": "Gm",
+              "role": "the album closer — after the show, still inside it"
+            },
+            {
+              "n": 9,
+              "title": "Still Warm (Rumba)",
+              "bpm": 74,
+              "duration": "5:50",
+              "key": "Gm",
+              "role": "bonus closer — the same warmth, the same walk home, a different voice carrying it; the rhythm remembered through Havana instead of Harlem, the words remembered through a woman's breath instead of a man's"
+            }
+          ],
+          "albumArtPrompt": "Modern graphic illustration, warm cinematic depth: DJ Shariff — a round, cream/ivory-furred anthropomorphic cat with a tan leather cowboy hat and gold iris eyes — behind a professional DJ booth in a low-lit jazz club. Studio headphones resting on one ear. Warm amber analog equipment glow from the right; electric neon green (#4CAF50) accent light from the equipment LEDs on the left. Record crates visible in the background. The booth faces outward but the DJ is turned slightly inward — focused, not performing. Above: deep indigo night club ceiling with subtle smoke and scattered amber lights. Mood: the convergence of three traditions made into one night. Style: graphic illustrated realism, not cartoon. Album cover composition, square format. No text. No logos.",
+          "albumArtNegPrompt": "No flat vector, no cartoonish proportions that lose the warmth, no generic DJ stock photo feel, no muddy backgrounds, no text, no logos, no overly aggressive club-noir aesthetic — the warmth must survive the darkness",
+          "studioPath": "djshariff-album-1_prompts.html"
+        },
+        {
+          "albumId": "djshariff-album-2",
+          "title": "Science of Joy",
+          "artistId": "djshariff",
+          "description": "Second album. This record treats joy like real engineering: pressure, timing, resonance, release, and human connection designed with precision until the whole room moves as one body. The harmonic foundation is soulful and jazz-literate. The rhythmic language is club-scale and 2026-forward. The low end is physical enough for festivals, the hooks are clear enough for a global crowd, and the writing never forgets that warmth is as important as impact. Nine tracks. No filler. One thesis: when the groove is built correctly, joy stops being abstract and becomes undeniable.",
+          "trackCount": 9,
+          "tracks": [
+            {
+              "n": 1,
+              "title": "Good Morning, Motion",
+              "bpm": 104,
+              "duration": "3:24",
+              "key": "Am",
+              "role": "album opener - invitation and ignition"
+            },
+            {
+              "n": 2,
+              "title": "Joy Equation",
+              "bpm": 124,
+              "duration": "4:06",
+              "key": "Fm",
+              "role": "first peak - thesis statement for the album"
+            },
+            {
+              "n": 3,
+              "title": "Body Knows First",
+              "bpm": 112,
+              "duration": "3:42",
+              "key": "Dm",
+              "role": "the hips-first crossover groove"
+            },
+            {
+              "n": 4,
+              "title": "Glow Pressure",
+              "bpm": 140,
+              "duration": "3:28",
+              "key": "Gm",
+              "role": "bass-weight release - stress converted into force"
+            },
+            {
+              "n": 5,
+              "title": "Science of Joy",
+              "bpm": 118,
+              "duration": "4:18",
+              "key": "Bbmaj7",
+              "role": "album center - the manifesto in full color"
+            },
+            {
+              "n": 6,
+              "title": "Good For Everybody",
+              "bpm": 100,
+              "duration": "3:51",
+              "key": "Em",
+              "role": "open-air groove - neighborhood scale, global reach"
+            },
+            {
+              "n": 7,
+              "title": "Velvet Voltage",
+              "bpm": 138,
+              "duration": "3:36",
+              "key": "C#m",
+              "role": "late-night bass seduction - softness carrying impact"
+            },
+            {
+              "n": 8,
+              "title": "Open Sky Rhythm",
+              "bpm": 126,
+              "duration": "4:11",
+              "key": "Amaj7",
+              "role": "rooftop summit - the widest and most universal record on the album"
+            },
+            {
+              "n": 9,
+              "title": "Still Lit",
+              "bpm": 96,
+              "duration": "4:44",
+              "key": "Am",
+              "role": "album closer - the walk home with the groove still in the body"
+            }
+          ],
+          "albumArtPrompt": "Graphic illustrated realism, square album cover. DJ Shariff as a cream-and-ivory anthropomorphic cat with a weathered tan cowboy hat, luminous teal-green eyes, and a tailored dark jacket stands behind a hybrid DJ booth and live-band rig: turntables, mixer, upright piano corner, brass microphones, and glowing drum machines all in one frame. The setting is a warm amber-and-gold hall opening into electric teal light, with geometry suggesting both a dancefloor and a laboratory of joy. The mood is future-classic, communal, radiant, and precise. No text. No logos.",
+          "albumArtNegPrompt": "No flat vector look, no generic nightclub stock-photo framing, no cold sci-fi lab, no muddy background, no cartoon exaggeration, no text, no logos, no grim-dark mood",
+          "studioPath": "djshariff-album-2_prompts.html"
+        },
+        {
+          "albumId": "djshariff-album-3",
+          "title": "Lagoon Circuit",
+          "artistId": "djshariff",
+          "description": "Third album. This record is DJ Shariff in instrumental-forward, tropical-urban afterglow mode: warm enough for a coffee shop, fluid enough for a lounge, precise enough for headphones at a laptop, and deep enough to hold a real sound system after midnight. The thesis is simple: paradise is not escapism, it is engineering. Wooden percussion, live bass, jazz harmony, selective orchestral lift, and culturally specific instrument voices move through one modern language without turning any tradition into costume. Lyrics are sparse on purpose. On this album, the instruments do the singing.",
+          "trackCount": 10,
+          "tracks": [
+            {
+              "n": 1,
+              "title": "Browser Sun",
+              "bpm": 96,
+              "duration": "3:48",
+              "key": "Dmaj9",
+              "role": "album opener - sunlight through the workspace"
+            },
+            {
+              "n": 2,
+              "title": "Trade Wind Theory",
+              "bpm": 110,
+              "duration": "4:06",
+              "key": "Bm11",
+              "role": "the first mover - coffee shop body sway with ocean air underneath"
+            },
+            {
+              "n": 3,
+              "title": "Lagoon Circuit",
+              "bpm": 118,
+              "duration": "4:24",
+              "key": "Dmaj9",
+              "role": "title track - the album thesis in full color"
+            },
+            {
+              "n": 4,
+              "title": "Veranda After Rain",
+              "bpm": 88,
+              "duration": "4:12",
+              "key": "Gmaj9",
+              "role": "the reflective room - rainwater, wood, and late conversation"
+            },
+            {
+              "n": 5,
+              "title": "Copper Hibiscus",
+              "bpm": 102,
+              "duration": "3:58",
+              "key": "Amaj7",
+              "role": "the warm-side groove - floral metal, polished wood, and low-end ease"
+            },
+            {
+              "n": 6,
+              "title": "Palm Logic",
+              "bpm": 124,
+              "duration": "4:18",
+              "key": "F#m11",
+              "role": "the glide record - precise enough for the floor, soft enough for the terrace"
+            },
+            {
+              "n": 7,
+              "title": "Lantern Current",
+              "bpm": 98,
+              "duration": "4:09",
+              "key": "C#m11",
+              "role": "the nocturne - late light, deeper water, softer pulse"
+            },
+            {
+              "n": 8,
+              "title": "Blue Hour Mosaic",
+              "bpm": 126,
+              "duration": "4:31",
+              "key": "Emaj9",
+              "role": "the summit - the album's widest and most luminous record"
+            },
+            {
+              "n": 9,
+              "title": "Soft Water, Neon Signs",
+              "bpm": 92,
+              "duration": "4:03",
+              "key": "Bmaj7",
+              "role": "the bar after the peak - smaller room, richer detail"
+            },
+            {
+              "n": 10,
+              "title": "Warm Return",
+              "bpm": 84,
+              "duration": "4:28",
+              "key": "Dmaj9",
+              "role": "album closer - the warmth survives the night"
+            }
+          ],
+          "albumArtPrompt": "Graphic illustrated realism, square album cover. DJ Shariff as a cream-and-ivory anthropomorphic cat with a weathered tan cowboy hat, focused teal-green eyes, and one headphone cup resting off the ear stands behind a hybrid booth built from turntables, Rhodes, string microphones, hand percussion, and warm analog gear. Behind him: a lagoon-adjacent night terrace where amber lantern light meets teal reflections on water. The atmosphere blends tropical air, premium listening-room detail, and subtle electronic geometry. No text. No logos.",
+          "albumArtNegPrompt": "No stock tropical resort image, no postcard beach cliche, no palm-tree overload, no flat vector, no gimmicky neon cyberpunk, no text, no logos, no sunglasses",
+          "studioPath": "djshariff-album-3_prompts.html"
+        }
+      ]
+    },
+    {
+      "id": "djzebra",
+      "name": "DJ Z",
+      "albums": [
+        {
+          "albumId": "djzebra-album-1",
+          "title": "WHEELS UP",
+          "artistId": "goodflippinvibes",
+          "description": "Debut album. Eight tracks of pure 80s hip-hop built around one premise: movement is medicine, joy is a practice, and the roller rink is the most honest wellness facility ever built. 'Wheels Up' is a Saturday afternoon set — the kind that starts with the ritual of lacing your skates and ends with the glow of having given your body exactly what it needed. DJ Z does not theorize about wellness. He drops the needle and demonstrates. The 808 carries the argument. The Moog bass makes the case. The ARP synth stab signs the paperwork. This is 1983-1987 sonic territory — not nostalgia as costume, but as architectural vocabulary. The hip-hop of this period was built from the same conviction that powers this album: the body can be celebrated, community is built on a shared beat, and joy is not frivolous — it is foundational. Eight tracks. No filler. One continuous Saturday. And then — because DJ Z always has one more thing — a ninth track that should not work and works completely: the Oberheim power chord couples' skate ballad that the session earned.",
+          "trackCount": 9,
+          "tracks": [
+            {
+              "n": 1,
+              "title": "Lace Up",
+              "bpm": 82,
+              "duration": "3:28",
+              "key": "C",
+              "role": "album opener — the ritual before the first roll; anticipation as its own form of joy"
+            },
+            {
+              "n": 2,
+              "title": "First Wheels",
+              "bpm": 94,
+              "duration": "3:45",
+              "key": "F",
+              "role": "pure kinetic joy — the body remembering it knows how to do this"
+            },
+            {
+              "n": 3,
+              "title": "Coast Mode",
+              "bpm": 78,
+              "duration": "4:10",
+              "key": "Bb",
+              "role": "movement as meditation — when you stop trying and the skates take over"
+            },
+            {
+              "n": 4,
+              "title": "Everybody's Good",
+              "bpm": 88,
+              "duration": "4:05",
+              "key": "G",
+              "role": "the GFV wellness thesis — joy is medicine, community is medicine, this moment is medicine"
+            },
+            {
+              "n": 5,
+              "title": "Purple Wheels",
+              "bpm": 96,
+              "duration": "3:55",
+              "key": "E",
+              "role": "DJ Z's signature color, peak personal flow — the Zebra in full command of the rink"
+            },
+            {
+              "n": 6,
+              "title": "DJ Z in the Mix",
+              "bpm": 104,
+              "duration": "4:35",
+              "key": "Dm",
+              "role": "turntable showcase — the album's serious center, call and response, peak communal moment"
+            },
+            {
+              "n": 7,
+              "title": "Last Lap",
+              "bpm": 100,
+              "duration": "3:42",
+              "key": "C",
+              "role": "the final run — speed round, euphoric, everyone's a master now"
+            },
+            {
+              "n": 8,
+              "title": "Roll Home",
+              "bpm": 72,
+              "duration": "3:55",
+              "key": "Ab",
+              "role": "cooldown — skates off, the specific glow of having moved your body with your people"
+            },
+            {
+              "n": 9,
+              "title": "The Slow One (You Know What It Is)",
+              "bpm": 68,
+              "duration": "4:45",
+              "key": "Eb",
+              "role": "the couples' skate — hair-band ballad crossover; Oberheim power chords, 808 half-time, ARP guitar solo; DJ Z's one impossible move that turns out to be completely correct"
+            }
+          ],
+          "albumArtPrompt": "Painterly hip-hop illustration, warm golden-hour light: an outdoor roller rink at the peak of a Saturday afternoon, 1985. In the DJ booth at the center: an anthropomorphic zebra in a deep purple track jacket, standing at the turntables with one hand on the crossfader and one raised toward the crowd. The zebra's stripes are near-black with cool blue-navy undertone (NOT flat black), body silver-gray (NOT pure white). Purple track jacket is the primary accent — deep purple, #7060C0 range. Gold chain visible. Tilted Kangol hat. Behind and below: a wide roller rink floor with skaters of all ages, all builds, all in motion — the movement is joyful, not competitive. 808 speaker columns visible at the edges. Late-afternoon sun hitting the rink floor at a low angle, making the wood grain orange-gold. Background: urban park, 1985 — the rink is outdoors, free, community-built. Style: warm editorial hip-hop illustration with painterly texture, visible brushwork, the specific warmth of an era that believed joy was not frivolous. 16:9 landscape format. No text, no logos.",
+          "albumArtNegPrompt": "No cold lighting, no nightclub aesthetic, no generic party imagery, no Halloween-costume-style hip-hop wardrobe — the Zebra is era-authentic, not costumed. No aggressive posture. No flat vector — needs warmth and texture. No modern streetwear anachronisms.",
+          "studioPath": "djzebra-album-1_prompts.html"
+        }
+      ]
+    },
+    {
+      "id": "dross",
+      "name": "Heavy Moose",
+      "albums": [
+        {
+          "albumId": "dross-album-1",
+          "title": "GLASS AND ASH",
+          "artistId": "dross",
+          "description": "Debut album. Ten tracks of Industrial-Hip-Hop, Jazz-Noir, and Dubstep built around one principle: pain released through craft, not volume. Named for the metallurgical byproduct — the impurities expelled from metal under heat before the metal can be true. Not darkness for shock. Not suffering as spectacle. The forging process itself: slow, pressurized, precise. This album does not proclaim hope or announce recovery. It stands at the threshold between the wound and the after and accurately describes the view from that specific position — because that accuracy is what the listener who has been carrying something for a long time finally needs. Industrial-Hip-Hop holds the rhythm of endurance. Jazz-Noir holds the harmony of loss. Dubstep holds the physics of what is embedded migrating toward the surface. These are not three genres spliced together — they are three languages for the same sustained experience. Ten tracks. No catharsis through noise. One arc that faces forward.",
+          "trackCount": 10,
+          "tracks": [
+            {
+              "n": 1,
+              "title": "PRELUDE TO GLASS",
+              "bpm": 60,
+              "duration": "3:15",
+              "key": "Dm",
+              "role": "album opener — weight before the wound; the body in the moment before it knows"
+            },
+            {
+              "n": 2,
+              "title": "EMBED",
+              "bpm": 80,
+              "duration": "4:20",
+              "key": "Bm",
+              "role": "the wound lodging — half-time industrial hip-hop; how something enters and stays"
+            },
+            {
+              "n": 3,
+              "title": "YEAR-LONG DARK",
+              "bpm": 68,
+              "duration": "5:10",
+              "key": "Em",
+              "role": "duration — the longest track; the sound of chronic time that continues after grief is 'supposed to' end"
+            },
+            {
+              "n": 4,
+              "title": "ALL THE FRIENDS I BURIED (NOT IN GROUND)",
+              "bpm": 72,
+              "duration": "4:45",
+              "key": "Am",
+              "role": "jazz-noir — the people lost not to death but to difficulty; loss without a funeral"
+            },
+            {
+              "n": 5,
+              "title": "PRESSURE / SURFACE",
+              "bpm": 95,
+              "duration": "4:30",
+              "key": "Gm",
+              "role": "dubstep peak — the physics of what is embedded migrating toward the surface; the album's apex"
+            },
+            {
+              "n": 6,
+              "title": "WHAT GRIEF WEIGHS",
+              "bpm": 60,
+              "duration": "3:50",
+              "key": "Cm",
+              "role": "the floor after the peak — grief accurately described in structural terms; the most minimal track"
+            },
+            {
+              "n": 7,
+              "title": "IRON IN BLOOD",
+              "bpm": 85,
+              "duration": "4:40",
+              "key": "Fm",
+              "role": "the body's metallurgy — Tool-esque mathematical architecture; biology as relentless mechanism"
+            },
+            {
+              "n": 8,
+              "title": "MERIDIAN DARK",
+              "bpm": 75,
+              "duration": "5:45",
+              "key": "Dbm",
+              "role": "the nadir — absolute floor of the arc; the last dark before the turn; accurate description without drama"
+            },
+            {
+              "n": 9,
+              "title": "EXTRUDED",
+              "bpm": 88,
+              "duration": "4:55",
+              "key": "Bbm",
+              "role": "the release — the body expelling what doesn't belong; relief that is also depletion; not triumph"
+            },
+            {
+              "n": 10,
+              "title": "THRESHOLD",
+              "bpm": 63,
+              "duration": "4:20",
+              "key": "Dm",
+              "role": "the doorway — standing between the wound and what comes after; home key returned, changed"
+            }
+          ],
+          "albumArtPrompt": "Painterly industrial illustration: a dark forge-like space, vast, nearly black. At the center: a standing human-proportioned figure made entirely of cooling slag and dark iron — not monstrous, composed. The posture of something that has been under tremendous weight and is still standing. From below and behind the figure: a single source of deep ember-red light (#8B0000) illuminating the edges of the silhouette, revealing the texture of oxidized iron and ash-grey surface. In the figure's hands: two objects — one a shard of glass (sharp, catching the ember light), one a handful of ash (already cooling). The background is absolute void. No text, no logos. Style: painterly, Kiefer-esque textured surface, atmospheric abstraction. Album cover composition, 1:1 square format. The image should feel like standing at a threshold — neither inside nor outside, in the specific moment between the wound and the after.",
+          "albumArtNegPrompt": "No gore, no horror imagery, no aggressive pose, no spikes or metal-genre clichés, no skulls, no generic dark fantasy, no text, no logos, no flat vector — the darkness must have texture and weight, not emptiness",
+          "studioPath": "dross-album-1_prompts.html"
+        },
+        {
+          "albumId": "dross-album-2",
+          "title": "YIELD",
+          "artistId": "dross",
+          "description": "Second album. Twelve tracks. The sequel to GLASS AND ASH begins where that record ended: at the threshold. Album 1 stood at the door and described the view. Album 2 walks through it — and discovers that the other side is not recovery. It is the beginning of something harder and more important: the choice to build. Surviving was instinct. Building is choice. The sound goes HEAVIER than anything in the catalog — the lowest tempos, the most crushing sub-bass, the densest industrial pressure. But the language goes SIMPLER — every hook is a phrase you could say to someone at 3AM when they need to hear one true thing. No hemoglobin. No biology lectures. 'Still here.' 'Hands.' 'We.' Words that anyone, anywhere, in any condition understands. The innovation: when sonics carry 50 tons, two syllables hit harder than twenty. The palette EXPANDS: industrial-hip-hop, jazz-noir, and dubstep remain the structural pillars, but reggae/dub enters for the first time — roots, patience, the rhythm of things that grow from below. The emotional arc evolves from 'I' (the solitary witness of Album 1) through 'you' (addressing someone for the first time) to 'we' (the discovery that the weight is shared). That pronoun journey is the album's backbone. Named for the metallurgical yield point — the stress beyond which metal permanently deforms — and for what a field produces, and for the act of surrendering what no longer serves. One word. Four meanings. Twelve tracks of the hardest, simplest, most globally relatable music the forge has ever produced.",
+          "trackCount": 12,
+          "tracks": [
+            {
+              "n": 1,
+              "title": "THROUGH",
+              "bpm": 55,
+              "duration": "3:30",
+              "key": "Dm",
+              "role": "album opener — the step through the threshold; Album 1 ended at the door, Album 2 opens on the other side"
+            },
+            {
+              "n": 2,
+              "title": "STILL HERE",
+              "bpm": 100,
+              "duration": "4:20",
+              "key": "Cm",
+              "role": "the statement — the heaviest industrial dubstep hit with the simplest possible lyric; the 2026 anthem for everyone who made it through"
+            },
+            {
+              "n": 3,
+              "title": "HEAVY WATER",
+              "bpm": 75,
+              "duration": "4:45",
+              "key": "Gm",
+              "role": "the first reggae element on a DROSS record — patience, roots, and the metaphor of weight that looks invisible"
+            },
+            {
+              "n": 4,
+              "title": "SMALL THINGS",
+              "bpm": 88,
+              "duration": "4:00",
+              "key": "Am",
+              "role": "the algorithm of recovery — hip-hop meets GFV micro-habit philosophy; the brilliance is in the ordinary"
+            },
+            {
+              "n": 5,
+              "title": "HANDS",
+              "bpm": 65,
+              "duration": "5:00",
+              "key": "Fm",
+              "role": "the breathing space — jazz-noir ballad about the most universal human instrument; what hands do"
+            },
+            {
+              "n": 6,
+              "title": "FURNACE",
+              "bpm": 50,
+              "duration": "5:30",
+              "key": "Bbm",
+              "role": "the heaviest track in the catalog — absolute industrial doom at 50 BPM; but the lyrics are about warmth"
+            },
+            {
+              "n": 7,
+              "title": "THE LONG GAME",
+              "bpm": 92,
+              "duration": "4:15",
+              "key": "Ebm",
+              "role": "the 2026 track — hip-hop/jazz addressing the specific fatigue and stubborn persistence of now"
+            },
+            {
+              "n": 8,
+              "title": "BLOOD AND HONEY",
+              "bpm": 78,
+              "duration": "4:30",
+              "key": "Abm",
+              "role": "the warmth at the deepest harmonic point — drawing from Foxyana's 'iron and honey' philosophy; after the endurance, sweetness"
+            },
+            {
+              "n": 9,
+              "title": "WE",
+              "bpm": 95,
+              "duration": "4:00",
+              "key": "Em",
+              "role": "the shift — from 'I' to 'we'; the discovery that the weight is shared; the first communal DROSS track"
+            },
+            {
+              "n": 10,
+              "title": "THREE AM",
+              "bpm": 58,
+              "duration": "3:45",
+              "key": "Bbm",
+              "role": "the dark pocket — everyone's 3AM; the solitary hour that occurs even after you know you are not alone"
+            },
+            {
+              "n": 11,
+              "title": "WHAT WE BUILD",
+              "bpm": 90,
+              "duration": "4:40",
+              "key": "Gm",
+              "role": "the building track — after all the weight, what do you DO with survival? You build. The first forward-moving DROSS track."
+            },
+            {
+              "n": 12,
+              "title": "YIELD",
+              "bpm": 60,
+              "duration": "5:00",
+              "key": "Dm",
+              "role": "the closer — full circle to Dm and 60 BPM; the same coordinates as Album 1 Track 1, containing the memory of everything between; the word 'yield' as final statement"
+            }
+          ],
+          "albumArtPrompt": "Painterly industrial illustration: the same vast dark forge-space from Album 1's cover, but CHANGED. The standing figure of cooling slag and dark iron is still present, same posture, same scale — but the figure has MOVED. It now faces away from the viewer, toward an opening in the far wall where dawn light enters — not golden, not warm, a grey-blue pre-dawn that is the color of 'almost.' The figure's surface has changed: the oxidized iron and ash-grey texture now shows seams of amber warmth running through it, as if something inside has begun to generate its own heat rather than only absorbing the forge's. In one hand: the glass shard from Album 1, but held differently — open palm rather than gripped. The other hand: not ash, but a small green shoot growing from the palm — the only organic element in the entire DROSS visual catalog. The background transitions from the absolute void of Album 1 to a space with depth and a horizon. Style: painterly, heavy impasto textured surface, atmospheric abstraction. Album cover composition, 1:1 square format. The image should feel like having stepped through a threshold — the weight is still present but the direction has changed.",
+          "albumArtNegPrompt": "No triumphant pose, no dramatic lighting, no sunrise cliché, no sudden warmth — the evolution from Album 1 must be SUBTLE: same figure, same weight, different direction and different light source; no text, no logos, no generic hope imagery",
+          "studioPath": "dross-album-2_prompts.html"
+        }
+      ]
+    },
+    {
+      "id": "aardvarco",
+      "name": "Aardvarco",
+      "albums": [
+        {
+          "albumId": "aardvarco-album-1",
+          "title": "WICKED CLEAN",
+          "artistId": "goodflippinvibes",
+          "description": "Debut album. Twelve tracks built on one impossible premise: deliver the hardest, fastest, most intensely-cadenced rap album of 2026, and make every single syllable technically PG. Not 'clean version' — the ONLY version. There was never an explicit cut. The tension between delivery intensity and lyrical innocence is the entire art form. Aardvarco raps like he's getting away with something because the Boston accent eats consonants, the Twista-speed blurs syllables, and the Busta energy makes everything sound dangerous — but freeze any bar and it's about duck-duck-goose, clam chowder, parallel parking, or the specific joy of a potluck where everybody brought something real. 'WICKED CLEAN' is marketed with a Parental Advisory sticker that says 'PARENTAL ADVISORY: ACTUALLY CLEAN — we checked.' The philosophical core: each day is new, love is a choice you make every moment, unity is not a slogan but a practice, and the toughest thing a person can do in 2026 is choose joy without flinching. Beastie Boys party architecture. Mos Def lyrical consciousness. Twista velocity. Busta Rhymes theatricality. Atmosphere storytelling. Jurassic 5 underground craft. Eminem technical precision. 50 Cent hook magnetism. All of it filtered through a non-rhotic Boston accent so thick it should be classified as its own dialect. Downtown St. Paul spirit. Cambridge vocabulary. Dorchester heart. Twelve tracks. Zero profanity. One hundred percent that energy.",
+          "trackCount": 12,
+          "tracks": [
+            {
+              "n": 1,
+              "title": "Pahk the Mic",
+              "bpm": 98,
+              "duration": "3:24",
+              "key": "Bb",
+              "role": "album opener — character introduction and mission statement"
+            },
+            {
+              "n": 2,
+              "title": "Duck Duck Goose",
+              "bpm": 145,
+              "duration": "2:58",
+              "key": "Eb",
+              "role": "speed showcase — the 'cleaned up' original concept track"
+            },
+            {
+              "n": 3,
+              "title": "Lobstah Roll",
+              "bpm": 108,
+              "duration": "3:42",
+              "key": "G",
+              "role": "comedy centerpiece — food innuendo track"
+            },
+            {
+              "n": 4,
+              "title": "Accent on the Wrong Syllable",
+              "bpm": 85,
+              "duration": "4:18",
+              "key": "Cm",
+              "role": "first introspective turn — storytelling about being misunderstood"
+            },
+            {
+              "n": 5,
+              "title": "Fastah",
+              "bpm": 160,
+              "duration": "2:44",
+              "key": "F",
+              "role": "pure technical showcase — speed as spectacle"
+            },
+            {
+              "n": 6,
+              "title": "Stone Ahch",
+              "bpm": 78,
+              "duration": "4:52",
+              "key": "Ab",
+              "role": "emotional center — love letter to the Twin Cities"
+            },
+            {
+              "n": 7,
+              "title": "Ahm in Ahm",
+              "bpm": 120,
+              "duration": "3:38",
+              "key": "Dm",
+              "role": "unity anthem — the album's philosophical core"
+            },
+            {
+              "n": 8,
+              "title": "Wicked Clean",
+              "bpm": 140,
+              "duration": "3:16",
+              "key": "Bb",
+              "role": "title track — the meta-commentary party anthem"
+            },
+            {
+              "n": 9,
+              "title": "Chowdah",
+              "bpm": 92,
+              "duration": "3:58",
+              "key": "Eb",
+              "role": "dark comedy deep cut — intensity of a diss track about soup"
+            },
+            {
+              "n": 10,
+              "title": "Tongue Speed",
+              "bpm": 170,
+              "duration": "2:32",
+              "key": "Gm",
+              "role": "technical climax — the fastest track on the album"
+            },
+            {
+              "n": 11,
+              "title": "Choose Love (Every Moment)",
+              "bpm": 88,
+              "duration": "4:44",
+              "key": "Cm",
+              "role": "the bridge — philosophical anchor before the close"
+            },
+            {
+              "n": 12,
+              "title": "Potluck",
+              "bpm": 95,
+              "duration": "4:02",
+              "key": "Bb",
+              "role": "album closer — the gathering, the homecoming, the shared table"
+            }
+          ],
+          "albumArtPrompt": "Hip-hop editorial illustration, album cover composition, square format: An anthropomorphic aardvark stands on a downtown St. Paul, MN street corner at dusk — Wabasha Street visible in warm sodium light behind him. He wears a white tank top, oversized gold chain with an aardvark-silhouette pendant, fitted flat-brim Red Sox cap tilted slightly, baggy track pants with one leg rolled up, fresh white sneakers. His long tubular aardvark snout extends toward a vintage microphone held in clawed fingers. Large dish-shaped ears catch the last light. Expression: confident, warm, slightly smirking — like he just said something that sounded wild but was actually about clam chowder. Behind him: the Stone Arch Bridge seen distantly across the Mississippi, warm amber streetlights, the glow of a corner bodega. Slight fog. The sky is deep blue-purple transitioning to warm orange at the horizon. Style: painterly hip-hop illustration with warm street-level lighting, golden-hour glow, visible brushwork. Think classic album cover — Illmatic meets Overcast meets God Loves Ugly meets a nature documentary about aardvarks. Warm, funny, human, undeniably cool.",
+          "albumArtNegPrompt": "No cartoon, no chibi, no flat vector, no text, no logos, no generic city backdrop, no aggressive or threatening poses, no weapons, no explicit imagery, no neon cyberpunk, no anime",
+          "studioPath": "aardvarco-album-1_prompts.html"
+        }
+      ]
+    },
+    {
+      "id": "redleopard",
+      "name": "Red Leopard",
+      "albums": [
+        {
+          "albumId": "redleopard-album-1",
+          "title": "NINE LIVES ON THE STRIP",
+          "artistId": "redleopard",
+          "description": "Debut album. Twelve tracks that answer a question nobody asked but everybody needed: what if the greatest hair-metal band of 1987 formed in St. Paul's Lowertown artist district in 2026, was fronted by a scarlet leopard with impeccable pitch and questionable taste in leather, and had spent just enough time in the modern production landscape to know where the sub-bass lives? NINE LIVES ON THE STRIP is not a hair-metal tribute act. It is a hair-metal record made by someone who genuinely loves the form and has the production chops to elevate it. The guitars are real (or close enough that the Marshall stacks don't know the difference). The vocals soar to the falsetto ceiling and growl in the chest-voice basement, sometimes within the same bar. The choruses are designed to be shouted back by ten thousand people — or one person in traffic. The fusion elements are surgical: three tracks incorporate EDM sub-bass and modern rhythmic texture, never more than 30% of any track's DNA. Two tracks are unmistakably modern in lyrical content — social media, AI, the cost of being authentic in 2026. The rest is pure 80s: power ballads, arena anthems, guitar solos that last exactly long enough to make you believe in something, and cat/kitty double-entendres that stay GFV-brand-safe while making the audience grin like they heard something they shouldn't have. St. Paul runs through the whole record: the seedy history, the warehouse artists, the Mississippi riverfront, the Wabasha Street clubs that have seen everything. Lowertown is not a backdrop — it is a character. The album's philosophical core, borrowed from the GFV playbook: you have nine lives, you are probably on your sixth, and every remaining one is worth turning up the volume for.",
+          "trackCount": 12,
+          "tracks": [
+            {
+              "n": 1,
+              "title": "Nine Lives on the Strip",
+              "bpm": 128,
+              "duration": "3:45",
+              "key": "E",
+              "role": "album opener and title track — the declaration of intent"
+            },
+            {
+              "n": 2,
+              "title": "Catitude",
+              "bpm": 138,
+              "duration": "3:32",
+              "key": "A",
+              "role": "the swagger track — brand personality as a banger"
+            },
+            {
+              "n": 3,
+              "title": "Neon Prowl",
+              "bpm": 118,
+              "duration": "4:10",
+              "key": "C#m",
+              "role": "first fusion track — 80s rock meets modern production"
+            },
+            {
+              "n": 4,
+              "title": "Seventh Life",
+              "bpm": 72,
+              "duration": "5:15",
+              "key": "G",
+              "role": "first power ballad — the album's emotional center"
+            },
+            {
+              "n": 5,
+              "title": "Fur and Fire",
+              "bpm": 144,
+              "duration": "3:28",
+              "key": "D",
+              "role": "energy peak — the most kinetic track on the album"
+            },
+            {
+              "n": 6,
+              "title": "Wabasha After Dark",
+              "bpm": 156,
+              "duration": "3:55",
+              "key": "B",
+              "role": "the heaviest track — the album shows its teeth"
+            },
+            {
+              "n": 7,
+              "title": "Claws Out (Digital Jungle)",
+              "bpm": 108,
+              "duration": "4:22",
+              "key": "F#m",
+              "role": "second fusion track — the modern/topical statement on social media and authenticity"
+            },
+            {
+              "n": 8,
+              "title": "Lowertown Howl",
+              "bpm": 132,
+              "duration": "3:40",
+              "key": "E",
+              "role": "second anthem — the St. Paul love letter"
+            },
+            {
+              "n": 9,
+              "title": "Last Call Lullaby",
+              "bpm": 66,
+              "duration": "5:45",
+              "key": "Bb",
+              "role": "second ballad — the album's emotional climax"
+            },
+            {
+              "n": 10,
+              "title": "Whisker Whiplash",
+              "bpm": 148,
+              "duration": "3:18",
+              "key": "A",
+              "role": "the speed-demon — pure technical showcase"
+            },
+            {
+              "n": 11,
+              "title": "Programmed to Purr",
+              "bpm": 98,
+              "duration": "4:35",
+              "key": "Dm",
+              "role": "third fusion track — the modern/topical statement on AI and what it means to be real"
+            },
+            {
+              "n": 12,
+              "title": "Still Got Claws",
+              "bpm": 120,
+              "duration": "4:05",
+              "key": "E",
+              "role": "album closer — the resolution and the promise"
+            }
+          ],
+          "albumArtPrompt": "Rock editorial illustration, album cover composition, square format: A scarlet-red anthropomorphic leopard stands at center stage in a smoky club venue, shot from slightly below — the hero angle. Deep crimson-red fur with darker rosette spots catching the amber stage light. Enormous 80s teased mane flowing from head down the back, crimson-to-black gradient. Golden-amber eyes with slit pupils catching the spotlight. Wearing tight black leather pants, an open black leather vest over bare white chest fur, fingerless studded leather gloves, a studded belt with leopard-head buckle. A cherry-red Gibson Les Paul Custom hangs low on his hip, one clawed hand on the fretboard, the other wrapped around a vintage chrome microphone on a tilted stand. Behind him: a wall of Marshall stacks with amber indicator lights, stage fog rolling at boot level, the glow of pink and amber stage lights creating a halo through the haze. The venue is recognizably a converted warehouse — exposed brick walls, industrial ceiling beams, the bones of a Lowertown St. Paul building repurposed as a rock club. A neon sign in the background reads 'LIVE TONIGHT' in warm pink. The mood is mid-performance, full intensity: mouth open mid-note, the mane catching the air from a stage fan, tail whipping behind him. Style: painterly rock-magazine illustration with photographic detail on the face and fur, warm dramatic concert lighting, visible energy and motion, the visual equivalent of the moment the guitar solo launches. Think Kerrang! centerfold meets modern album cover art — theatrical, warm, alive.",
+          "albumArtNegPrompt": "No cartoon style, no chibi, no flat vector, no text overlays, no logos, no anime, no cute/kawaii aesthetic, no natural-colored fur (must be red), no generic stage backdrop, no horror imagery, no blood, no weapons, no female groupie imagery",
+          "studioPath": "redleopard-album-1_prompts.html"
+        },
+        {
+          "albumId": "redleopard-album-2",
+          "title": "MELANIE",
+          "artistId": "redleopard",
+          "description": "Single / developing album. The song Red Leopard never planned to write. After an entire debut of bravado, swagger, and controlled vulnerability, 'Melanie' is the thing he had no defense against: a woman in St. Paul who made him stop moving. An 80s power rock anthem that sounds like it was always part of the canon — Cathedral Hill at night, Cabernet on the counter, three cats, family calls, Montana roots, and a style that makes the city look like it dressed up for her. The key change on the final chorus (D to Eb) is the oldest trick in the playbook because it works. The nine-lives motif from the debut gets its deepest use: he'd trade them all for one more night beside her name.",
+          "trackCount": 1,
+          "tracks": [
+            {
+              "n": 1,
+              "title": "Melanie",
+              "bpm": 84,
+              "duration": "5:20",
+              "key": "D",
+              "role": "power anthem — epic 80s rock ballad love letter, the song that stops the wandering"
+            }
+          ],
+          "albumArtPrompt": "Close portrait, square album cover composition: Red Leopard (scarlet-red anthropomorphic leopard) in three-quarter profile against a softly defocused city-at-night backdrop. The wild crimson mane is backlit by warm amber streetlight creating a halo effect. Golden-amber eyes with slit pupils looking slightly past camera with an expression of quiet wonder and devotion, as if seeing someone across a November street. Wearing an open black leather jacket over a faded vintage tee. Warm amber light on one side of the face, cool blue city light on the other — dramatic split lighting. A single autumn leaf caught mid-fall in the soft bokeh background. Style: painterly rock-magazine portrait with near-photographic detail on the face and fur. Dramatic warm-cool split lighting. The visual of someone who just realized they're in love. Intimate, warm, iconic. Professional album cover composition.",
+          "albumArtNegPrompt": "No cartoon, no flat vector, no text overlays, no logos, no horror, no natural-colored fur (must be scarlet-red), no female character visible, no crowd, no stage, no concert setting, no full body shot (portrait framing)",
+          "studioPath": "redleopard-album-2_prompts.html"
+        }
+      ]
+    }
+  ]
+}

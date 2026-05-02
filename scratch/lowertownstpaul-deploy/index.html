@@ -1,0 +1,3306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lowertown St. Paul — The Beating Heart of Minnesota</title>
+  <meta name="description" content="Lowertown, Saint Paul: a National Historic District where 19th-century brick warehouses became artist lofts, where the Mississippi meets neon light, and where a city is writing its next great chapter. Invest. Live. Create." />
+  <meta name="theme-color" content="#050507" />
+  <link rel="canonical" href="https://lowertownstpaul.org/" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Lowertown St. Paul — The Beating Heart of Minnesota" />
+  <meta property="og:description" content="A National Historic District on the rise. $1B+ in riverfront investment. Artist lofts, live music, baseball, and one of America's most beautiful train stations." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://lowertownstpaul.org/" />
+
+  <!-- Schema.org JSON-LD: ties Lowertown site into the Good Flippin Design studio @graph -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://lowertownstpaul.org/#site",
+        "url": "https://lowertownstpaul.org/",
+        "name": "Lowertown St. Paul",
+        "description": "Investor- and resident-facing showcase for Lowertown, Saint Paul — a National Historic District on the rise.",
+        "inLanguage": "en",
+        "publisher": { "@id": "https://goodflippindesign.com/#studio" },
+        "about": { "@id": "https://lowertownstpaul.org/#place" }
+      },
+      {
+        "@type": ["Place", "TouristDestination"],
+        "@id": "https://lowertownstpaul.org/#place",
+        "name": "Lowertown Historic District",
+        "description": "19th-century brick warehouses turned artist lofts, anchored by Union Depot and the Mississippi riverfront. Federally designated historic district (NRHP ref# 83001357, 1983).",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Saint Paul",
+          "addressRegion": "MN",
+          "postalCode": "55101",
+          "addressCountry": "US"
+        },
+        "containedInPlace": {
+          "@type": "City",
+          "name": "Saint Paul, Minnesota"
+        },
+        "touristType": ["Arts", "History", "Architecture", "Live music", "Baseball", "Riverfront"]
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://goodflippindesign.com/#studio",
+        "name": "Good Flippin Design",
+        "url": "https://goodflippindesign.com",
+        "sameAs": ["https://goodflippinvibes.com"]
+      }
+    ]
+  }
+  </script>
+
+  <!-- Fonts: Space Grotesk (display) + Inter (body) + JetBrains Mono (data) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+    ============================================================ */
+    :root {
+      --bg: #050507;
+      --bg-elevated: #0a0a0f;
+      --bg-card: #0f0f1a;
+      --bg-glass: rgba(15, 15, 26, 0.8);
+
+      --neon-purple: #a855f7;
+      --neon-pink: #ec4899;
+      --neon-cyan: #06b6d4;
+      --neon-gold: #f59e0b;
+
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #475569;
+      --crimson: #e11d48;
+      --crimson-dark: #9f1239;
+      --crimson-glow: 0 0 60px rgba(225, 29, 72, 0.4);
+      --border-subtle: rgba(255, 255, 255, 0.06);
+
+      --glow-purple: 0 0 60px rgba(168, 85, 247, 0.35);
+      --glow-pink: 0 0 60px rgba(236, 72, 153, 0.35);
+      --glow-cyan: 0 0 60px rgba(6, 182, 212, 0.35);
+
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --radius: 8px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+
+      --max-width: 1200px;
+      --section-pad: clamp(80px, 10vw, 140px);
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+    }
+
+    /* ============================================================
+       SKIP LINK (a11y)
+    ============================================================ */
+    .skip-link {
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 12px 24px;
+      background: var(--neon-purple);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.875rem;
+      z-index: 9999;
+      transform: translateY(-100%);
+      transition: transform 0.2s ease;
+      border-radius: 0 0 var(--radius) 0;
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    /* ============================================================
+       NOISE TEXTURE (subtle grain)
+    ============================================================ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* Neural grid fixed background layer */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url('assets/images/Neon digital network landscape.png');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.06;
+      pointer-events: none;
+      z-index: 0;
+      mix-blend-mode: screen;
+      animation: grid-breathe 8s ease-in-out infinite;
+    }
+
+    /* Hero background particle layer */
+    .hero-bg-layer {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/images/Neon light river in cosmic night.png');
+      background-size: cover;
+      background-position: center 40%;
+      opacity: 0.14;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      z-index: 0;
+      animation: particle-drift 14s ease-in-out infinite;
+    }
+
+    /* Energy river section divider */
+    .river-divider {
+      width: 100%;
+      height: 140px;
+      background-image: url('assets/images/Cosmic river of light and particles.png');
+      background-size: 200% 100%;
+      background-position: 0% 50%;
+      pointer-events: none;
+      opacity: 0.55;
+      mix-blend-mode: screen;
+      animation: river-flow 22s linear infinite;
+    }
+
+    /* ============================================================
+       NAVIGATION
+    ============================================================ */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 20px clamp(20px, 5vw, 60px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition:
+        background 0.4s ease,
+        border-color 0.4s ease;
+      border-bottom: 1px solid transparent;
+    }
+
+    .nav.scrolled {
+      background: rgba(5, 5, 7, 0.92);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-color: var(--border-subtle);
+    }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .nav-logo em {
+      font-style: normal;
+      color: var(--neon-purple);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+      transition: color 0.2s ease;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-cta {
+      padding: 10px 24px;
+      background: var(--neon-purple);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+      box-shadow: var(--glow-purple);
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-1px);
+      opacity: 0.9;
+    }
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: clamp(120px, 15vh, 180px) clamp(24px, 6vw, 80px) clamp(80px, 12vh, 120px);
+      overflow: hidden;
+    }
+
+    /* Grid lines */
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(168, 85, 247, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(168, 85, 247, 0.07) 1px, transparent 1px);
+      background-size: 64px 64px;
+      -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, black 20%, transparent 75%);
+      mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, black 20%, transparent 75%);
+    }
+
+    /* Neon light orbs — GPU animated, transform only */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.25;
+      will-change: transform;
+      pointer-events: none;
+    }
+
+    .orb-1 {
+      width: 600px;
+      height: 600px;
+      background: var(--neon-purple);
+      top: -150px;
+      left: -120px;
+      animation: orb-drift-1 14s ease-in-out infinite;
+    }
+
+    .orb-2 {
+      width: 450px;
+      height: 450px;
+      background: var(--neon-pink);
+      bottom: -100px;
+      right: -100px;
+      animation: orb-drift-2 11s ease-in-out infinite;
+    }
+
+    .orb-3 {
+      width: 350px;
+      height: 350px;
+      background: var(--neon-cyan);
+      top: 45%;
+      left: 50%;
+      animation: orb-drift-3 16s ease-in-out infinite;
+    }
+
+    @keyframes orb-drift-1 {
+
+      0%,
+      100% {
+        transform: translate(0, 0);
+      }
+
+      33% {
+        transform: translate(40px, 30px);
+      }
+
+      66% {
+        transform: translate(-20px, 40px);
+      }
+    }
+
+    @keyframes orb-drift-2 {
+
+      0%,
+      100% {
+        transform: translate(0, 0);
+      }
+
+      33% {
+        transform: translate(-30px, -20px);
+      }
+
+      66% {
+        transform: translate(25px, -35px);
+      }
+    }
+
+    @keyframes orb-drift-3 {
+
+      0%,
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+    }
+
+    /* Hero content */
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--neon-cyan);
+      margin-bottom: 28px;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: fade-up 0.8s ease 0.1s forwards;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3.25rem, 9vw, 8rem);
+      font-weight: 700;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      margin-bottom: 36px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fade-up 0.9s ease 0.3s forwards;
+    }
+
+    .hero-title .plain {
+      display: block;
+    }
+
+    .hero-title .gradient {
+      display: block;
+      background: linear-gradient(130deg, var(--neon-purple) 0%, var(--neon-pink) 45%, var(--neon-cyan) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 1.8vw, 1.2rem);
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto 52px;
+      line-height: 1.75;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: fade-up 0.8s ease 0.55s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: fade-up 0.8s ease 0.75s forwards;
+    }
+
+    .btn-primary {
+      padding: 16px 40px;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      min-height: 52px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--glow-purple);
+      transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      opacity: 0.88;
+    }
+
+    .btn-secondary {
+      padding: 16px 40px;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      min-height: 52px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      border-color: var(--neon-purple);
+    }
+
+    /* Scroll indicator */
+    .hero-scroll {
+      position: absolute;
+      bottom: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      animation: fade-up 0.8s ease 1.2s forwards;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 52px;
+      background: linear-gradient(to bottom, var(--neon-purple), transparent);
+      animation: scroll-pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes scroll-pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scaleY(1);
+      }
+
+      50% {
+        opacity: 0.35;
+        transform: scaleY(0.75);
+      }
+    }
+
+    .scroll-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    @keyframes fade-up {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ============================================================
+       MARQUEE TICKER
+    ============================================================ */
+    .marquee {
+      overflow: hidden;
+      padding: 28px 0;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      position: relative;
+      z-index: 1;
+    }
+
+    .marquee-track {
+      display: flex;
+      gap: 56px;
+      width: max-content;
+      animation: marquee-scroll 28s linear infinite;
+      will-change: transform;
+    }
+
+    .marquee-track:hover {
+      animation-play-state: paused;
+    }
+
+    @keyframes marquee-scroll {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    .marquee-item {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 56px;
+    }
+
+    .marquee-item::after {
+      content: '✦';
+      color: var(--neon-purple);
+      font-size: 0.6rem;
+    }
+
+    /* ============================================================
+       STATS BAR
+    ============================================================ */
+    .stats-section {
+      position: relative;
+      z-index: 1;
+      padding: clamp(48px, 6vw, 80px) clamp(20px, 5vw, 60px);
+    }
+
+    .stats-grid {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .stat-item {
+      background: var(--bg-card);
+      padding: 44px 36px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: clamp(2.25rem, 4.5vw, 4rem);
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .stat-item:nth-child(1) .stat-value {
+      color: var(--neon-purple);
+    }
+
+    .stat-item:nth-child(2) .stat-value {
+      color: var(--neon-pink);
+    }
+
+    .stat-item:nth-child(3) .stat-value {
+      color: var(--neon-cyan);
+    }
+
+    .stat-item:nth-child(4) .stat-value {
+      color: var(--neon-gold);
+    }
+
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    /* ============================================================
+       SECTIONS — SHARED
+    ============================================================ */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: var(--section-pad) clamp(20px, 5vw, 60px);
+    }
+
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      display: block;
+    }
+
+    .section-label-purple {
+      color: var(--neon-purple);
+    }
+
+    .section-label-pink {
+      color: var(--neon-pink);
+    }
+
+    .section-label-cyan {
+      color: var(--neon-cyan);
+    }
+
+    .section-label-gold {
+      color: var(--neon-gold);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.25rem, 4.5vw, 3.75rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      margin-bottom: 24px;
+    }
+
+    .section-body {
+      font-size: 1.0625rem;
+      color: var(--text-muted);
+      line-height: 1.85;
+      max-width: 680px;
+    }
+
+    .section-body-spaced {
+      margin-top: 20px;
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity 0.75s ease,
+        transform 0.75s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 {
+      transition-delay: 0.1s;
+    }
+
+    .reveal-delay-2 {
+      transition-delay: 0.2s;
+    }
+
+    .reveal-delay-3 {
+      transition-delay: 0.3s;
+    }
+
+    /* ============================================================
+       ABOUT / HISTORY SECTION
+    ============================================================ */
+    .about {
+      background: var(--bg-elevated);
+    }
+
+    .about-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .about-visual {
+      position: relative;
+    }
+
+    .about-card {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      display: flex;
+      align-items: flex-end;
+      padding: 48px;
+    }
+
+    .about-card-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg,
+          rgba(168, 85, 247, 0.12) 0%,
+          rgba(6, 182, 212, 0.06) 50%,
+          rgba(236, 72, 153, 0.1) 100%);
+    }
+
+    .about-card-stripes {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg,
+          transparent,
+          transparent 44px,
+          rgba(168, 85, 247, 0.04) 44px,
+          rgba(168, 85, 247, 0.04) 45px);
+    }
+
+    .about-year {
+      position: relative;
+      z-index: 1;
+    }
+
+    .about-year-number {
+      font-family: var(--font-display);
+      font-size: clamp(4rem, 10vw, 7rem);
+      font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .about-year-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    .about-badge {
+      position: absolute;
+      top: 36px;
+      right: -16px;
+      background: var(--neon-cyan);
+      color: var(--bg);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 18px;
+      border-radius: 4px;
+      box-shadow: var(--glow-cyan);
+    }
+
+    .about-text-block .section-body+.section-body {
+      margin-top: 20px;
+    }
+
+    .nav-link-sound {
+      color: var(--crimson);
+    }
+
+    /* ============================================================
+       ARTS & CULTURE
+    ============================================================ */
+    .arts {
+      background: var(--bg);
+    }
+
+    .arts-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: end;
+      margin-bottom: 72px;
+    }
+
+    .arts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border-subtle);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .art-card {
+      background: var(--bg-card);
+      padding: 40px 32px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .art-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .art-card:nth-child(1)::after {
+      background: var(--neon-purple);
+    }
+
+    .art-card:nth-child(2)::after {
+      background: var(--neon-pink);
+    }
+
+    .art-card:nth-child(3)::after {
+      background: var(--neon-cyan);
+    }
+
+    .art-card:nth-child(4)::after {
+      background: var(--neon-gold);
+    }
+
+    .art-card:nth-child(5)::after {
+      background: var(--neon-pink);
+    }
+
+    .art-card:nth-child(6)::after {
+      background: var(--neon-cyan);
+    }
+
+    .art-card:hover::after {
+      opacity: 1;
+    }
+
+    .art-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .art-icon {
+      width: 44px;
+      height: 44px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--neon-pink);
+    }
+
+    .art-card:nth-child(1) .art-icon {
+      color: var(--neon-purple);
+    }
+
+    .art-card:nth-child(2) .art-icon {
+      color: var(--neon-cyan);
+    }
+
+    .art-card:nth-child(3) .art-icon {
+      color: var(--neon-pink);
+    }
+
+    .art-card:nth-child(4) .art-icon {
+      color: var(--neon-gold);
+    }
+
+    .art-card:nth-child(5) .art-icon {
+      color: var(--neon-pink);
+    }
+
+    .art-card:nth-child(6) .art-icon {
+      color: var(--neon-cyan);
+    }
+
+    .art-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .art-body {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* ============================================================
+       SPRITE ICON SYSTEM
+    ============================================================ */
+    .sprite-icon {
+      display: block;
+      width: 44px;
+      height: 44px;
+      background-image: url('assets/icons/Neon icons in cyberpunk grid design.png');
+      background-size: 400% 400%;
+      background-repeat: no-repeat;
+      border-radius: 4px;
+      transition: transform 0.3s ease, filter 0.3s ease;
+      will-change: transform;
+    }
+
+    .art-card:hover .sprite-icon,
+    .live-feature:hover .sprite-icon,
+    .transport-card:hover .sprite-icon {
+      transform: scale(1.12);
+      filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.9));
+    }
+
+    /* Row 0 — Arts */
+    .icon-s1 {
+      background-position: 0% 0%;
+    }
+
+    /* palette/arts studio */
+    .icon-s2 {
+      background-position: 33.33% 0%;
+    }
+
+    /* urban park */
+    .icon-s3 {
+      background-position: 66.67% 0%;
+    }
+
+    /* jazz trumpet */
+    .icon-s4 {
+      background-position: 100% 0%;
+    }
+
+    /* market stall */
+    /* Row 1 — Living */
+    .icon-s5 {
+      background-position: 0% 33.33%;
+    }
+
+    /* baseball diamond */
+    .icon-s6 {
+      background-position: 33.33% 33.33%;
+    }
+
+    /* grand train station */
+    .icon-s7 {
+      background-position: 66.67% 33.33%;
+    }
+
+    /* tall tower */
+    .icon-s8 {
+      background-position: 100% 33.33%;
+    }
+
+    /* luxury apartment */
+    /* Row 2 — Transit */
+    .icon-s9 {
+      background-position: 0% 66.67%;
+    }
+
+    /* tree / park path */
+    .icon-s10 {
+      background-position: 33.33% 66.67%;
+    }
+
+    /* laurel / trophy */
+    .icon-s11 {
+      background-position: 66.67% 66.67%;
+    }
+
+    /* light rail */
+    .icon-s12 {
+      background-position: 100% 66.67%;
+    }
+
+    /* beaux-arts arch */
+    /* Row 3 — City */
+    .icon-s13 {
+      background-position: 0% 100%;
+    }
+
+    /* bicycle */
+    .icon-s14 {
+      background-position: 33.33% 100%;
+    }
+
+    /* airplane */
+    .icon-s15 {
+      background-position: 66.67% 100%;
+    }
+
+    /* river bridge */
+    .icon-s16 {
+      background-position: 100% 100%;
+    }
+
+    /* leopard head */
+
+    /* ============================================================
+       LIVE HERE
+    ============================================================ */
+    .live {
+      background: var(--bg-elevated);
+    }
+
+    .live-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: start;
+    }
+
+    .live-features {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 44px;
+    }
+
+    .live-feature {
+      display: flex;
+      gap: 18px;
+      padding: 22px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      transition:
+        border-color 0.3s ease,
+        transform 0.3s ease;
+    }
+
+    .live-feature:hover {
+      border-color: rgba(168, 85, 247, 0.35);
+      transform: translateX(5px);
+    }
+
+    .live-feature-icon {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--neon-cyan);
+    }
+
+    .live-feature-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .live-feature-body {
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .live-visual-wrap {
+      position: relative;
+      padding-bottom: 40px;
+    }
+
+    .live-hero-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 48px 44px;
+    }
+
+    .live-hero-badge {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--neon-cyan);
+      margin-bottom: 20px;
+    }
+
+    .live-hero-number {
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 7vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    .live-hero-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .live-mini-card {
+      position: absolute;
+      bottom: 0;
+      right: -16px;
+      background: var(--neon-pink);
+      color: var(--bg);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      min-width: 164px;
+      box-shadow: var(--glow-pink);
+    }
+
+    .live-mini-number {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .live-mini-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+
+    /* ============================================================
+       PLACES (eat, explore, architecture)
+    ============================================================ */
+    .places {
+      background: var(--bg);
+    }
+
+    .places-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-top: 72px;
+    }
+
+    .place-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      transition:
+        transform 0.3s ease,
+        border-color 0.3s ease;
+    }
+
+    .place-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border);
+    }
+
+    .place-glow {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    .place-card:nth-child(1) .place-glow {
+      background: var(--neon-purple);
+    }
+
+    .place-card:nth-child(2) .place-glow {
+      background: var(--neon-pink);
+    }
+
+    .place-card:nth-child(3) .place-glow {
+      background: var(--neon-cyan);
+    }
+
+    .place-card:nth-child(4) .place-glow {
+      background: var(--neon-gold);
+    }
+
+    .place-tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .place-card:nth-child(1) .place-tag {
+      color: var(--neon-purple);
+    }
+
+    .place-card:nth-child(2) .place-tag {
+      color: var(--neon-pink);
+    }
+
+    .place-card:nth-child(3) .place-tag {
+      color: var(--neon-cyan);
+    }
+
+    .place-card:nth-child(4) .place-tag {
+      color: var(--neon-gold);
+    }
+
+    .place-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .place-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+
+    .place-list li {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.5;
+    }
+
+    .place-list li::before {
+      content: '→';
+      color: var(--text-dim);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ============================================================
+       TRANSPORT
+    ============================================================ */
+    .transport {
+      background: var(--bg-elevated);
+    }
+
+    .transport-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-top: 72px;
+    }
+
+    .transport-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      text-align: center;
+      transition:
+        transform 0.3s ease,
+        border-color 0.3s ease;
+    }
+
+    .transport-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border);
+    }
+
+    .transport-icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--neon-purple);
+    }
+
+    .transport-card h4 {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .transport-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* ============================================================
+       INVEST
+    ============================================================ */
+    .invest {
+      background: var(--bg);
+    }
+
+    .invest-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .invest-items {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 44px;
+    }
+
+    .invest-item {
+      display: flex;
+      gap: 18px;
+      padding: 22px 24px;
+      background: var(--bg-card);
+      border-left: 3px solid rgba(168, 85, 247, 0.5);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      transition:
+        border-color 0.3s ease,
+        transform 0.3s ease;
+    }
+
+    .invest-item:hover {
+      border-color: var(--neon-purple);
+      transform: translateX(4px);
+    }
+
+    .invest-num {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--neon-purple);
+      opacity: 0.55;
+      flex-shrink: 0;
+      padding-top: 3px;
+      min-width: 20px;
+    }
+
+    .invest-item h4 {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .invest-item p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* CTA card */
+    .invest-sticky {
+      position: sticky;
+      top: 120px;
+    }
+
+    .invest-cta {
+      background: linear-gradient(145deg,
+          rgba(168, 85, 247, 0.16) 0%,
+          rgba(236, 72, 153, 0.08) 60%,
+          rgba(6, 182, 212, 0.06) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      border-radius: var(--radius-xl);
+      padding: 52px 44px;
+    }
+
+    .invest-cta .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--neon-purple);
+      margin-bottom: 22px;
+      display: block;
+    }
+
+    .invest-cta h3 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+
+    .invest-cta>p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 36px;
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      min-height: 48px;
+      width: 100%;
+      transition: border-color 0.2s ease;
+    }
+
+    .contact-form input::placeholder,
+    .contact-form textarea::placeholder {
+      color: var(--text-dim);
+    }
+
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      outline: none;
+      border-color: var(--neon-purple);
+    }
+
+    .contact-form textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .contact-form .btn-primary {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      padding: clamp(64px, 8vw, 100px) clamp(20px, 5vw, 60px) 44px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 60px;
+      padding-bottom: 56px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 40px;
+    }
+
+    .footer-brand-name {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .footer-brand-name em {
+      font-style: normal;
+      color: var(--neon-purple);
+    }
+
+    .footer-brand-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      max-width: 280px;
+    }
+
+    .footer-col-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-col ul li a {
+      font-size: 0.875rem;
+      color: var(--text-dim);
+      transition: color 0.2s ease;
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .footer-col ul li a:hover {
+      color: var(--text);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-bottom p {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .footer-bottom a {
+      color: var(--neon-purple);
+      transition: opacity 0.2s ease;
+    }
+
+    .footer-bottom a:hover {
+      opacity: 0.8;
+    }
+
+    /* ============================================================
+       REDUCED MOTION
+    ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .hero-title,
+      .hero-eyebrow,
+      .hero-sub,
+      .hero-actions,
+      .hero-scroll {
+        opacity: 1;
+        transform: none;
+        animation: none;
+      }
+
+      .reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+    }
+
+    /* ============================================================
+       RESPONSIVE — TABLET (@max-width: 900px)
+    ============================================================ */
+    @media (max-width: 900px) {
+      .nav-links {
+        display: none;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .about-layout {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+
+      .about-badge {
+        display: none;
+      }
+
+      .arts-header {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .arts-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .live-layout {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+
+      .live-visual-wrap {
+        padding-bottom: 0;
+      }
+
+      .live-mini-card {
+        position: static;
+        margin-top: 20px;
+        display: inline-block;
+      }
+
+      .places-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .transport-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .invest-layout {
+        grid-template-columns: 1fr;
+        gap: 56px;
+      }
+
+      .invest-sticky {
+        position: static;
+      }
+
+      .footer-top {
+        grid-template-columns: 1fr 1fr;
+        gap: 44px;
+      }
+    }
+
+    /* ============================================================
+       RESPONSIVE — MOBILE (@max-width: 600px)
+    ============================================================ */
+    @media (max-width: 600px) {
+      .hero-title {
+        font-size: clamp(2.8rem, 12vw, 4rem);
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .arts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .transport-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .footer-top {
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        width: 100%;
+        max-width: 320px;
+        justify-content: center;
+      }
+
+      .rl-band-name {
+        font-size: clamp(2.5rem, 10vw, 3.5rem);
+      }
+    }
+
+    /* ============================================================
+         RED LEOPARD OF ST. PAUL — FEATURED ARTIST LAUNCH
+      ============================================================ */
+    .red-leopard {
+      background: #030205;
+      position: relative;
+      overflow: hidden;
+      background-image:
+        radial-gradient(ellipse 55px 38px at 7% 18%, rgba(225, 29, 72, 0.1) 0%, transparent 100%),
+        radial-gradient(ellipse 32px 48px at 14% 62%, rgba(225, 29, 72, 0.08) 0%, transparent 100%),
+        radial-gradient(ellipse 62px 42px at 27% 84%, rgba(225, 29, 72, 0.07) 0%, transparent 100%),
+        radial-gradient(ellipse 44px 58px at 43% 9%, rgba(225, 29, 72, 0.09) 0%, transparent 100%),
+        radial-gradient(ellipse 38px 32px at 58% 43%, rgba(225, 29, 72, 0.08) 0%, transparent 100%),
+        radial-gradient(ellipse 58px 38px at 71% 73%, rgba(225, 29, 72, 0.1) 0%, transparent 100%),
+        radial-gradient(ellipse 34px 54px at 84% 14%, rgba(225, 29, 72, 0.07) 0%, transparent 100%),
+        radial-gradient(ellipse 48px 32px at 91% 53%, rgba(225, 29, 72, 0.09) 0%, transparent 100%),
+        radial-gradient(ellipse 40px 45px at 53% 88%, rgba(225, 29, 72, 0.06) 0%, transparent 100%);
+    }
+
+    .rl-launch-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--crimson);
+      border: 1px solid rgba(225, 29, 72, 0.4);
+      border-radius: 4px;
+      padding: 8px 18px;
+      margin-bottom: 56px;
+    }
+
+    .rl-launch-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--crimson);
+      animation: pulse-red 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse-red {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.4;
+        transform: scale(0.7);
+      }
+    }
+
+    .rl-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .rl-cover {
+      aspect-ratio: 1;
+      background: #0a0005;
+      border: 1px solid rgba(225, 29, 72, 0.2);
+      border-radius: var(--radius-xl);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rl-cover-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80px 55px at 25% 30%, rgba(225, 29, 72, 0.35) 0%, transparent 70%),
+        radial-gradient(ellipse 55px 80px at 70% 20%, rgba(225, 29, 72, 0.25) 0%, transparent 70%),
+        radial-gradient(ellipse 90px 60px at 60% 70%, rgba(225, 29, 72, 0.3) 0%, transparent 70%),
+        radial-gradient(ellipse 40px 65px at 15% 75%, rgba(225, 29, 72, 0.2) 0%, transparent 70%),
+        radial-gradient(ellipse 200px 200px at 50% 50%, rgba(60, 0, 10, 0.8) 0%, transparent 100%);
+    }
+
+    .rl-cover-text {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .rl-cover-band {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--crimson);
+      text-shadow: 0 0 40px rgba(225, 29, 72, 0.6);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .rl-cover-album {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.45);
+      display: block;
+      margin: 12px 0 28px;
+    }
+
+    .rl-cover-mark {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+      opacity: 0.6;
+      display: block;
+    }
+
+    .rl-info {
+      padding-top: 8px;
+    }
+
+    .rl-band-name {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 700;
+      line-height: 0.9;
+      letter-spacing: -0.03em;
+      color: var(--crimson);
+      text-shadow: 0 0 80px rgba(225, 29, 72, 0.3);
+      margin-bottom: 8px;
+    }
+
+    .rl-album-title {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 28px;
+      display: block;
+    }
+
+    .rl-bio {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.85;
+      margin-bottom: 44px;
+      max-width: 520px;
+    }
+
+    .rl-tracklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-bottom: 44px;
+    }
+
+    .rl-track {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(225, 29, 72, 0.1);
+      transition: border-color 0.2s ease;
+      cursor: default;
+    }
+
+    .rl-track:hover {
+      border-color: rgba(225, 29, 72, 0.3);
+    }
+
+    .rl-track-num {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: rgba(225, 29, 72, 0.5);
+      min-width: 20px;
+    }
+
+    .rl-track-name {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .rl-track-duration {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    .rl-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-crimson {
+      padding: 14px 32px;
+      background: var(--crimson);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--crimson-glow);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .btn-crimson:hover {
+      transform: translateY(-2px);
+      opacity: 0.88;
+    }
+
+    .btn-ghost-crimson {
+      padding: 14px 32px;
+      background: transparent;
+      color: var(--crimson);
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      border: 1px solid rgba(225, 29, 72, 0.4);
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .btn-ghost-crimson:hover {
+      transform: translateY(-2px);
+      border-color: var(--crimson);
+    }
+
+    /* ── Audio Player ─────────────────────────────────────── */
+    .rl-tracklist li {
+      cursor: pointer;
+    }
+
+    .rl-track-play {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(225, 29, 72, 0.35);
+      background: transparent;
+      color: var(--crimson);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .rl-track-play:hover,
+    .rl-track.is-playing .rl-track-play {
+      background: var(--crimson);
+      color: #fff;
+      border-color: var(--crimson);
+    }
+
+    .rl-track.is-playing .rl-track-play {
+      transform: scale(1.1);
+    }
+
+    .rl-track.is-playing .rl-track-name {
+      color: var(--crimson);
+    }
+
+    .rl-track.is-playing .rl-track-num {
+      color: var(--crimson);
+    }
+
+    .rl-track-bonus .rl-track-num {
+      color: rgba(245, 158, 11, 0.6);
+    }
+
+    .rl-track-bonus.is-playing .rl-track-name,
+    .rl-track-bonus.is-playing .rl-track-num {
+      color: var(--neon-gold, #f59e0b);
+    }
+
+    .rl-track-bonus.is-playing .rl-track-play {
+      background: var(--neon-gold, #f59e0b);
+      border-color: var(--neon-gold, #f59e0b);
+      color: #000;
+    }
+
+    .rl-track-label {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(245, 158, 11, 0.7);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 3px;
+      padding: 2px 6px;
+      flex-shrink: 0;
+    }
+
+    .rl-player {
+      margin-top: 32px;
+      background: rgba(225, 29, 72, 0.04);
+      border: 1px solid rgba(225, 29, 72, 0.15);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+    }
+
+    .rl-player-now {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(225, 29, 72, 0.6);
+      margin-bottom: 6px;
+    }
+
+    .rl-player-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rl-progress-wrap {
+      position: relative;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .rl-progress-bar {
+      height: 100%;
+      background: var(--crimson);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.1s linear;
+      pointer-events: none;
+    }
+
+    .rl-player-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rl-ctrl-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: color 0.2s ease, transform 0.15s ease;
+      min-width: 36px;
+      min-height: 36px;
+    }
+
+    .rl-ctrl-btn:hover {
+      color: var(--text);
+      transform: scale(1.1);
+    }
+
+    .rl-ctrl-btn.rl-play-pause {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--crimson);
+      color: #fff;
+      box-shadow: 0 0 18px rgba(225, 29, 72, 0.4);
+      transition: transform 0.15s ease, opacity 0.2s ease;
+    }
+
+    .rl-ctrl-btn.rl-play-pause:hover {
+      transform: scale(1.08);
+      opacity: 0.9;
+    }
+
+    .rl-player-time {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-dim, rgba(255, 255, 255, 0.3));
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    .rl-track-coming-soon .rl-track-play,
+    .rl-track-coming-soon .rl-track-num,
+    .rl-track-coming-soon .rl-track-duration {
+      opacity: 0.3;
+    }
+
+    .rl-track-coming-soon .rl-track-name {
+      opacity: 0.4;
+    }
+
+    .rl-track-coming-soon {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    #rl-icon-pause {
+      display: none;
+    }
+
+    /* Real album cover image */
+    .rl-cover-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: var(--radius-xl);
+      opacity: 0.85;
+    }
+
+    .rl-cover-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg,
+          transparent 40%,
+          rgba(5, 5, 7, 0.85) 100%);
+      border-radius: var(--radius-xl);
+    }
+
+    .rl-cover-text {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 0 24px 32px;
+      align-self: flex-end;
+      width: 100%;
+    }
+
+    @keyframes leopard-breathe {
+
+      0%,
+      100% {
+        transform: scale(1);
+        filter: brightness(0.85) saturate(1.1);
+      }
+
+      50% {
+        transform: scale(1.018);
+        filter: brightness(1) saturate(1.3);
+      }
+    }
+
+    @keyframes particle-drift {
+
+      0%,
+      100% {
+        transform: translateY(0) translateX(0) scale(1);
+      }
+
+      33% {
+        transform: translateY(-8px) translateX(4px) scale(1.008);
+      }
+
+      66% {
+        transform: translateY(5px) translateX(-3px) scale(0.995);
+      }
+    }
+
+    @keyframes river-flow {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      100% {
+        background-position: 200% 50%;
+      }
+    }
+
+    @keyframes grid-breathe {
+
+      0%,
+      100% {
+        opacity: 0.06;
+      }
+
+      50% {
+        opacity: 0.10;
+      }
+    }
+
+    .rl-cover {
+      animation: leopard-breathe 4s ease-in-out infinite;
+    }
+
+    @media (max-width: 900px) {
+      .rl-layout {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+
+      .rl-cover {
+        max-width: 400px;
+        animation: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- ============================================================
+       NAVIGATION
+  ============================================================ -->
+  <nav class="nav" aria-label="Main navigation" id="nav">
+    <a href="#" class="nav-logo">
+      Lowertown <em>SP</em>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="#about">History</a></li>
+      <li><a href="#arts">Culture</a></li>
+      <li><a href="#live">Live Here</a></li>
+      <li><a href="#explore">Explore</a></li>
+      <li><a href="#sound" class="nav-link-sound">Sound</a></li>
+      <li><a href="#invest">Invest</a></li>
+    </ul>
+    <a href="#invest" class="nav-cta" aria-label="Connect — investment opportunities">
+      Connect
+    </a>
+  </nav>
+
+  <main id="main">
+
+    <!-- ============================================================
+         HERO
+    ============================================================ -->
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero-bg-layer" aria-hidden="true"></div>
+      <div class="hero-grid" aria-hidden="true"></div>
+      <div class="orb orb-1" aria-hidden="true"></div>
+      <div class="orb orb-2" aria-hidden="true"></div>
+      <div class="orb orb-3" aria-hidden="true"></div>
+
+      <div class="hero-content">
+        <p class="hero-eyebrow">Saint Paul, Minnesota — 55101</p>
+
+        <h1 class="hero-title" id="hero-heading">
+          <span class="plain">The Beating</span>
+          <span class="gradient">Heart of Saint Paul</span>
+        </h1>
+
+        <p class="hero-sub">
+          Where 19th-century brick warehouses became artist lofts. Where the Mississippi River meets neon light and live music. Where a city is writing its most ambitious chapter yet — and you can be part of it.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#invest" class="btn-primary">
+            Invest in Lowertown
+            <span aria-hidden="true">→</span>
+          </a>
+          <a href="#about" class="btn-secondary">
+            Discover the Neighborhood
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-scroll" aria-hidden="true">
+        <div class="scroll-line"></div>
+        <span class="scroll-label">Scroll</span>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         MARQUEE TICKER
+    ============================================================ -->
+    <div class="marquee" aria-hidden="true" role="presentation">
+      <div class="marquee-track">
+        <span class="marquee-item">National Historic District</span>
+        <span class="marquee-item">Mississippi Riverfront</span>
+        <span class="marquee-item">Artist Lofts Since the 1980s</span>
+        <span class="marquee-item">Green Line Light Rail</span>
+        <span class="marquee-item">Union Depot — 1926</span>
+        <span class="marquee-item">Lowertown Farmers Market</span>
+        <span class="marquee-item">CHS Field — St. Paul Saints</span>
+        <span class="marquee-item">Mears Park</span>
+        <span class="marquee-item">$1B+ Riverfront Investment</span>
+        <span class="marquee-item">Federal Opportunity Zone</span>
+        <span class="marquee-item">20,000 New Residents — City Goal</span>
+        <!-- duplicate for seamless loop -->
+        <span class="marquee-item">National Historic District</span>
+        <span class="marquee-item">Mississippi Riverfront</span>
+        <span class="marquee-item">Artist Lofts Since the 1980s</span>
+        <span class="marquee-item">Green Line Light Rail</span>
+        <span class="marquee-item">Union Depot — 1926</span>
+        <span class="marquee-item">Lowertown Farmers Market</span>
+        <span class="marquee-item">CHS Field — St. Paul Saints</span>
+        <span class="marquee-item">Mears Park</span>
+        <span class="marquee-item">$1B+ Riverfront Investment</span>
+        <span class="marquee-item">Federal Opportunity Zone</span>
+        <span class="marquee-item">20,000 New Residents — City Goal</span>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         STATS
+    ============================================================ -->
+    <div class="stats-section" aria-label="Downtown Saint Paul at a glance">
+      <div class="stats-grid">
+        <div class="stat-item reveal">
+          <div class="stat-value">10,572</div>
+          <div class="stat-label">Downtown Residents</div>
+        </div>
+        <div class="stat-item reveal reveal-delay-1">
+          <div class="stat-value">$4.2B</div>
+          <div class="stat-label">Property Value</div>
+        </div>
+        <div class="stat-item reveal reveal-delay-2">
+          <div class="stat-value">54K</div>
+          <div class="stat-label">Daily Workers</div>
+        </div>
+        <div class="stat-item reveal reveal-delay-3">
+          <div class="stat-value">$1B+</div>
+          <div class="stat-label">Riverfront Investment</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         ABOUT / HISTORY
+    ============================================================ -->
+    <section class="about" id="about" aria-labelledby="about-heading">
+      <div class="container">
+        <div class="about-layout">
+
+          <div class="about-text-block">
+            <span class="section-label section-label-purple reveal">// 01 — History</span>
+            <h2 class="section-title reveal" id="about-heading">
+              A Warehouse District<br>Reborn as a Canvas
+            </h2>
+            <p class="section-body reveal">
+              Lowertown is where Saint Paul began. In the 1850s, this riverfront neighborhood was the commercial freight capital of the upper Midwest — dense with brick warehouses, rail yards, and the thunder of trade flowing along the Mississippi.
+            </p>
+            <p class="section-body section-body-spaced reveal">
+              When industry moved on, the artists moved in. In the 1980s, Artspace's pioneering live-work lofts transformed Lowertown into one of America's first and most enduring artist colonies — a model replicated in cities worldwide. Today it's a federally designated <strong>National Historic District</strong>: 42 blocks of magnificent 19th-century architecture housing galleries, studios, a spectacular ballpark, and one of Minnesota's oldest open-air markets.
+            </p>
+            <p class="section-body section-body-spaced reveal">
+              The bones were always extraordinary. Now the city is ready to soar.
+            </p>
+          </div>
+
+          <div class="about-visual reveal">
+            <div class="about-card">
+              <div class="about-card-bg" aria-hidden="true"></div>
+              <div class="about-card-stripes" aria-hidden="true"></div>
+              <div class="about-year">
+                <div class="about-year-number">1850</div>
+                <div class="about-year-label">Est. — Commercial Heart of the Midwest</div>
+              </div>
+            </div>
+            <div class="about-badge" aria-label="National Historic District designation">
+              National Historic District
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ARTS & CULTURE
+    ============================================================ -->
+    <section class="arts" id="arts" aria-labelledby="arts-heading">
+      <div class="container">
+
+        <div class="arts-header">
+          <div>
+            <span class="section-label section-label-pink reveal">// 02 — Arts &amp; Culture</span>
+            <h2 class="section-title reveal" id="arts-heading">
+              Where Creativity<br>Lives. Literally.
+            </h2>
+          </div>
+          <p class="section-body reveal">
+            Lowertown didn't just host the arts — it <em>became</em> the arts. From live-work artist lofts to jazz clubs, world-class galleries to a beloved farmers market under the open Minnesota sky, culture is baked into the very brickwork here.
+          </p>
+        </div>
+
+        <div class="arts-grid">
+          <div class="art-card reveal">
+            <span class="art-icon"><span class="sprite-icon icon-s1" aria-hidden="true"></span></span>
+            <h3 class="art-title">Artspace Lowertown Lofts</h3>
+            <p class="art-body">Pioneer live-work artist housing since the 1980s. A national model replicated in cities across America. The blueprint for arts-driven urban revitalization.</p>
+          </div>
+          <div class="art-card reveal reveal-delay-1">
+            <span class="art-icon"><span class="sprite-icon icon-s2" aria-hidden="true"></span></span>
+            <h3 class="art-title">Mears Park</h3>
+            <p class="art-body">The living room of Lowertown. This intimate urban park hosts free summer concerts, food festivals, and spontaneous community all summer long. Lush. Green. Alive.</p>
+          </div>
+          <div class="art-card reveal reveal-delay-2">
+            <span class="art-icon"><span class="sprite-icon icon-s3" aria-hidden="true"></span></span>
+            <h3 class="art-title">Jazz &amp; Live Music</h3>
+            <p class="art-body">Black Dog Coffee &amp; Wine Bar, intimate clubs, and impromptu street performances. Lowertown has always had a soundtrack — funky, soulful, distinctly Midwestern.</p>
+          </div>
+          <div class="art-card reveal">
+            <span class="art-icon"><span class="sprite-icon icon-s4" aria-hidden="true"></span></span>
+            <h3 class="art-title">Lowertown Farmers Market</h3>
+            <p class="art-body">One of Minnesota's oldest and largest outdoor markets. Every weekend May–October, Lowertown transforms into a riot of color, flavor, and community.</p>
+          </div>
+          <div class="art-card reveal reveal-delay-1">
+            <span class="art-icon"><span class="sprite-icon icon-s5" aria-hidden="true"></span></span>
+            <h3 class="art-title">CHS Field</h3>
+            <p class="art-body">Home of the St. Paul Saints. Opened 2015, this award-winning ballpark sits right in the heart of Lowertown — baseball under the open Minnesota sky.</p>
+          </div>
+          <div class="art-card reveal reveal-delay-2">
+            <span class="art-icon"><span class="sprite-icon icon-s6" aria-hidden="true"></span></span>
+            <h3 class="art-title">Union Depot</h3>
+            <p class="art-body">The crown jewel of Lowertown. This 1926 Beaux-Arts masterpiece is now a multi-modal transit hub and world-class events venue — one of America's most beautiful restored train stations.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================
+         LIVE HERE
+    ============================================================ -->
+    <section class="live" id="live" aria-labelledby="live-heading">
+      <div class="container">
+        <div class="live-layout">
+
+          <div>
+            <span class="section-label section-label-cyan reveal">// 03 — Live Here</span>
+            <h2 class="section-title reveal" id="live-heading">
+              Your Loft<br>Is Waiting
+            </h2>
+            <p class="section-body reveal">
+              Saint Paul is in the middle of its most ambitious housing transformation in a generation. Historic office towers are becoming stunning loft apartments. The city has set a bold target: 20,000 new downtown residents. The time to arrive is now.
+            </p>
+
+            <div class="live-features">
+              <div class="live-feature reveal">
+                <div class="live-feature-icon"><span class="sprite-icon icon-s7" aria-hidden="true"></span></div>
+                <div>
+                  <div class="live-feature-title">Landmark Tower Lofts</div>
+                  <p class="live-feature-body">175+ apartments in downtown's most iconic tower. Opened Spring 2025. History you can actually live in.</p>
+                </div>
+              </div>
+              <div class="live-feature reveal reveal-delay-1">
+                <div class="live-feature-icon"><span class="sprite-icon icon-s8" aria-hidden="true"></span></div>
+                <div>
+                  <div class="live-feature-title">The Stella</div>
+                  <p class="live-feature-body">178 apartments in the former Ecolab headquarters. Modern luxury in a storied building — a new chapter for a Saint Paul institution.</p>
+                </div>
+              </div>
+              <div class="live-feature reveal reveal-delay-2">
+                <div class="live-feature-icon"><span class="sprite-icon icon-s9" aria-hidden="true"></span></div>
+                <div>
+                  <div class="live-feature-title">Pedro Park</div>
+                  <p class="live-feature-body">Brand-new neighborhood park opened September 2025: event pavilion, dog run, expansive gardens. A community gathering place 10 years in the making.</p>
+                </div>
+              </div>
+              <div class="live-feature reveal">
+                <div class="live-feature-icon"><span class="sprite-icon icon-s10" aria-hidden="true"></span></div>
+                <div>
+                  <div class="live-feature-title">#2 Park System in the Country</div>
+                  <p class="live-feature-body">From Mears Park to Harriet Island, Saint Paul's parks are legendary. The Mississippi River is never more than a short walk away.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="live-visual-wrap reveal">
+            <div class="live-hero-card">
+              <div class="live-hero-badge">City Housing Target</div>
+              <div class="live-hero-number">20,000</div>
+              <p class="live-hero-desc">New downtown residents. Saint Paul's most ambitious housing goal ever — and conversion projects are already open with a pipeline of 10+ more buildings ready to go.</p>
+            </div>
+            <div class="live-mini-card" aria-label="10 or more additional buildings identified for conversion">
+              <div class="live-mini-number">10+</div>
+              <div class="live-mini-label">Buildings ready to convert</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- River of light divider -->
+    <div class="river-divider" aria-hidden="true" role="presentation"></div>
+
+    <!-- ============================================================
+         PLACES — EAT, EXPLORE, ARCHITECTURE
+    ============================================================ -->
+    <section class="places" id="explore" aria-labelledby="places-heading">
+      <div class="container">
+        <span class="section-label section-label-gold reveal">// 04 — Eat, Drink &amp; Explore</span>
+        <h2 class="section-title reveal" id="places-heading">
+          This Neighborhood Has Flavor
+        </h2>
+
+        <div class="places-grid">
+
+          <div class="place-card reveal">
+            <div class="place-glow" aria-hidden="true"></div>
+            <p class="place-tag">Iconic Eats</p>
+            <h3 class="place-title">The Table</h3>
+            <ul class="place-list" aria-label="Restaurants and dining in Lowertown Saint Paul">
+              <li>Mickey's Diner — the 1939 Art Deco lunch car, open 24/7, on the National Register</li>
+              <li>Meritage — acclaimed French brasserie on St. Peter Street</li>
+              <li>Black Dog Coffee &amp; Wine Bar — art, jazz, vinyl, and community</li>
+              <li>Cossetta Alimentari — legendary Italian deli and bakery, a Saint Paul institution</li>
+              <li>A diverse chef-driven scene: Vietnamese, Ethiopian, Mexican, New American</li>
+            </ul>
+          </div>
+
+          <div class="place-card reveal reveal-delay-1">
+            <div class="place-glow" aria-hidden="true"></div>
+            <p class="place-tag">Green Spaces</p>
+            <h3 class="place-title">Outside</h3>
+            <ul class="place-list" aria-label="Parks and outdoor spaces near Lowertown">
+              <li>Mears Park — concerts, festivals, and afternoon sunshine all summer</li>
+              <li>Harriet Island Regional Park — Mississippi River at its finest</li>
+              <li>Pedro Park — brand new September 2025, dog-friendly</li>
+              <li>Capital City Bikeway — protected cycling across the whole downtown core</li>
+              <li>The Mississippi riverfront — walking, running, watching the big river roll</li>
+            </ul>
+          </div>
+
+          <div class="place-card reveal">
+            <div class="place-glow" aria-hidden="true"></div>
+            <p class="place-tag">Culture &amp; Events</p>
+            <h3 class="place-title">The Calendar</h3>
+            <ul class="place-list" aria-label="Events and cultural activities in Lowertown">
+              <li>St. Paul Saints baseball at CHS Field — May through September</li>
+              <li>Lowertown Farmers Market — every weekend, May through October</li>
+              <li>Lowertown Live — free outdoor summer concert series in Mears Park</li>
+              <li>Saint Paul Winter Carnival — the world's largest winter festival since 1886</li>
+              <li>First Thursday gallery nights — Lowertown studios open to all</li>
+            </ul>
+          </div>
+
+          <div class="place-card reveal reveal-delay-1">
+            <div class="place-glow" aria-hidden="true"></div>
+            <p class="place-tag">Architecture</p>
+            <h3 class="place-title">The Buildings</h3>
+            <ul class="place-list" aria-label="Historic buildings in Lowertown Saint Paul">
+              <li>Union Depot — 1926 Beaux-Arts masterpiece, fully restored and landmarked</li>
+              <li>Hamm Building — 14-story Romanesque-Gothic commercial tower, built 1920</li>
+              <li>Pioneer Building — 1889 Romanesque Revival, Fourth Street landmark</li>
+              <li>Lowertown warehouse lofts — 19th-century brick, exposed timber, soaring ceilings</li>
+              <li>First National Bank Building — Modernist skyscraper anchoring the skyline</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         TRANSPORT
+    ============================================================ -->
+    <section class="transport" aria-labelledby="transport-heading">
+      <div class="container">
+        <span class="section-label section-label-cyan reveal">// 05 — Getting Here</span>
+        <h2 class="section-title reveal" id="transport-heading">Connected to Everything</h2>
+        <p class="section-body reveal">
+          Lowertown sits at the intersection of light rail, Amtrak, the Mississippi, and I-94. You can reach it from anywhere — and once you're in, you rarely need to leave.
+        </p>
+
+        <div class="transport-grid">
+          <div class="transport-card reveal">
+            <span class="transport-icon"><span class="sprite-icon icon-s11" aria-hidden="true"></span></span>
+            <h4>Green Line Light Rail</h4>
+            <p>Direct service to Minneapolis, the U of M, and MSP Airport. Two stops serve Lowertown. No car necessary.</p>
+          </div>
+          <div class="transport-card reveal reveal-delay-1">
+            <span class="transport-icon"><span class="sprite-icon icon-s12" aria-hidden="true"></span></span>
+            <h4>Union Depot Hub</h4>
+            <p>Amtrak, regional express buses, and Metro Transit all converge at this stunning 1926 Beaux-Arts landmark.</p>
+          </div>
+          <div class="transport-card reveal reveal-delay-2">
+            <span class="transport-icon"><span class="sprite-icon icon-s13" aria-hidden="true"></span></span>
+            <h4>Capital City Bikeway</h4>
+            <p>Protected cycling routes lace through downtown and connect to regional trails. Lowertown is genuinely bikeable.</p>
+          </div>
+          <div class="transport-card reveal reveal-delay-3">
+            <span class="transport-icon"><span class="sprite-icon icon-s14" aria-hidden="true"></span></span>
+            <h4>MSP Airport — 20 min</h4>
+            <p>One of the nation's best airports, just 20 minutes by light rail. Nonstop flights to every major U.S. city and internationally.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         INVEST
+    ============================================================ -->
+    <section class="invest" id="invest" aria-labelledby="invest-heading">
+      <div class="container">
+        <div class="invest-layout">
+
+          <div>
+            <span class="section-label section-label-purple reveal">// 06 — Invest Here</span>
+            <h2 class="section-title reveal" id="invest-heading">
+              Buy the Vision.<br>Build the Future.
+            </h2>
+            <p class="section-body reveal">
+              Saint Paul is at a rare inflection point. The infrastructure exists. The talent is here. The city has committed billions. And those magnificent 19th-century bones have been waiting for exactly this moment.
+            </p>
+
+            <div class="invest-items">
+              <div class="invest-item reveal">
+                <span class="invest-num">01</span>
+                <div>
+                  <h4>Federal Opportunity Zone</h4>
+                  <p>The entire City Center and Riverfront area — including Lowertown — is a federally designated Opportunity Zone. Significant capital gains tax advantages for qualifying investments.</p>
+                </div>
+              </div>
+              <div class="invest-item reveal">
+                <span class="invest-num">02</span>
+                <div>
+                  <h4>$1 Billion+ Already Committed to the Riverfront</h4>
+                  <p>Public and private capital totaling over $1 billion is planned for the downtown riverfront. Your investment rises with the tide already coming in.</p>
+                </div>
+              </div>
+              <div class="invest-item reveal">
+                <span class="invest-num">03</span>
+                <div>
+                  <h4>$488M Arena Complex Renovation</h4>
+                  <p>Xcel Energy Center — home of the Minnesota Wild — is getting a transformative upgrade that will bring more events, more visitors, and more economic energy to the district.</p>
+                </div>
+              </div>
+              <div class="invest-item reveal">
+                <span class="invest-num">04</span>
+                <div>
+                  <h4>Downtown Vitality Fund</h4>
+                  <p>City-backed economic development fund supporting new businesses, building conversions, and neighborhood activation. De-risked investment.</p>
+                </div>
+              </div>
+              <div class="invest-item reveal">
+                <span class="invest-num">05</span>
+                <div>
+                  <h4>Cultural STAR Grants</h4>
+                  <p>Arts and culture organizations can access city grant funding to establish or expand here. Art isn't just welcomed in Saint Paul — it's subsidized.</p>
+                </div>
+              </div>
+              <div class="invest-item reveal">
+                <span class="invest-num">06</span>
+                <div>
+                  <h4>Historic Tax Credits + Office-to-Housing Pipeline</h4>
+                  <p>Federal and state historic rehabilitation tax credits (up to 25%) stack on top of 10+ buildings identified as prime conversion candidates. Proven demand. City support. Your entry point.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="invest-sticky">
+            <div class="invest-cta reveal">
+              <span class="eyebrow">// Let's talk</span>
+              <h3>Build Something Here with Us</h3>
+              <p>Whether you're a developer, entrepreneur, artist, institution, or just someone who believes this city's best days are ahead — we want to hear your vision.</p>
+
+              <!-- TODO: Replace Formspree endpoint with your actual form ID at formspree.io -->
+              <form class="contact-form" id="contact-form" action="https://formspree.io/f/lowertownsp" method="POST" novalidate>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Your name"
+                  required
+                  aria-label="Your name"
+                  autocomplete="name" />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email address"
+                  required
+                  aria-label="Email address"
+                  autocomplete="email" />
+                <input
+                  type="text"
+                  name="interest"
+                  placeholder="I'm interested in... (development, housing, arts...)"
+                  aria-label="Area of interest" />
+                <textarea
+                  name="message"
+                  placeholder="Tell us about your vision for Lowertown..."
+                  aria-label="Your message"></textarea>
+                <button type="submit" class="btn-primary">
+                  Send It
+                  <span aria-hidden="true">→</span>
+                </button>
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Red Leopard of St. Paul -->
+  <section class="red-leopard" id="sound" aria-labelledby="rl-heading">
+    <div class="container">
+      <div class="rl-launch-badge" aria-label="Now Playing in Lowertown">Now Playing in Lowertown</div>
+      <div class="rl-layout">
+
+        <!-- Album Cover — real image -->
+        <div class="rl-cover reveal" aria-label="Red Leopard of St. Paul — Nine Lives on the Strip album cover">
+          <img
+            class="rl-cover-img"
+            src="assets/images/Neon leopard in fragmented cyberpunk style.png"
+            alt="Red Leopard of St. Paul — Nine Lives on the Strip"
+            loading="lazy">
+          <div class="rl-cover-overlay" aria-hidden="true"></div>
+          <div class="rl-cover-text">
+            <span class="rl-cover-band">Red</span>
+            <span class="rl-cover-band">Leopard</span>
+            <span class="rl-cover-band">of St. Paul</span>
+            <span class="rl-cover-album">Nine Lives on the Strip</span>
+          </div>
+        </div>
+
+        <!-- Artist Info + Player -->
+        <div class="rl-info">
+          <h2 class="rl-band-name reveal" id="rl-heading">Red Leopard<br>of St. Paul</h2>
+          <span class="rl-album-title reveal">Nine Lives on the Strip — Debut Album · 12 Tracks</span>
+
+          <p class="rl-bio reveal">
+            Born in the basement clubs of Lowertown. Equal parts thunder and mystique. <strong>Red Leopard of St. Paul</strong> channels the raw voltage of hair metal through the lens of Saint Paul's underground — the smoky rooms, the neon-lit alleys, the city that kept its secrets and kept them loud. Their gimmick is the leopard. Their truth is this city.
+          </p>
+
+          <!-- Tracklist — click any row to play -->
+          <ol class="rl-tracklist reveal" id="rl-tracklist" aria-label="Nine Lives on the Strip — track listing">
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Nine Lives on the Strip.mp3" data-title="Nine Lives on the Strip">
+              <button class="rl-track-play" aria-label="Play Nine Lives on the Strip">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">01</span>
+              <span class="rl-track-name">Nine Lives on the Strip</span>
+              <span class="rl-track-duration">3:45</span>
+            </li>
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Catitude.mp3" data-title="Catitude">
+              <button class="rl-track-play" aria-label="Play Catitude">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">02</span>
+              <span class="rl-track-name">Catitude</span>
+              <span class="rl-track-duration">3:32</span>
+            </li>
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Neon Prowl.mp3" data-title="Neon Prowl">
+              <button class="rl-track-play" aria-label="Play Neon Prowl">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">03</span>
+              <span class="rl-track-name">Neon Prowl</span>
+              <span class="rl-track-duration">4:10</span>
+            </li>
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Seventh Life.mp3" data-title="Seventh Life">
+              <button class="rl-track-play" aria-label="Play Seventh Life">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">04</span>
+              <span class="rl-track-name">Seventh Life</span>
+              <span class="rl-track-duration">5:15</span>
+            </li>
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Fur and Fire.mp3" data-title="Fur and Fire">
+              <button class="rl-track-play" aria-label="Play Fur and Fire">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">05</span>
+              <span class="rl-track-name">Fur and Fire</span>
+              <span class="rl-track-duration">3:28</span>
+            </li>
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Wabasha After Dark.mp3" data-title="Wabasha After Dark">
+              <button class="rl-track-play" aria-label="Play Wabasha After Dark">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">06</span>
+              <span class="rl-track-name">Wabasha After Dark</span>
+              <span class="rl-track-duration">3:55</span>
+            </li>
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Claws Out (Digital Jungle).mp3" data-title="Claws Out (Digital Jungle)">
+              <button class="rl-track-play" aria-label="Play Claws Out (Digital Jungle)">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">07</span>
+              <span class="rl-track-name">Claws Out (Digital Jungle)</span>
+              <span class="rl-track-duration">4:22</span>
+            </li>
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Lowertown Howl.mp3" data-title="Lowertown Howl">
+              <button class="rl-track-play" aria-label="Play Lowertown Howl">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">08</span>
+              <span class="rl-track-name">Lowertown Howl</span>
+              <span class="rl-track-duration">3:40</span>
+            </li>
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Last Call Lullaby.mp3" data-title="Last Call Lullaby">
+              <button class="rl-track-play" aria-label="Play Last Call Lullaby">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">09</span>
+              <span class="rl-track-name">Last Call Lullaby</span>
+              <span class="rl-track-duration">5:45</span>
+            </li>
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Whisker Whiplash.mp3" data-title="Whisker Whiplash">
+              <button class="rl-track-play" aria-label="Play Whisker Whiplash">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">10</span>
+              <span class="rl-track-name">Whisker Whiplash</span>
+              <span class="rl-track-duration">3:18</span>
+            </li>
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Programmed to Purr (1).mp3" data-title="Programmed to Purr">
+              <button class="rl-track-play" aria-label="Play Programmed to Purr">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">11</span>
+              <span class="rl-track-name">Programmed to Purr</span>
+              <span class="rl-track-duration">4:35</span>
+            </li>
+            <li class="rl-track" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Still Got Claws c.mp3" data-title="Still Got Claws">
+              <button class="rl-track-play" aria-label="Play Still Got Claws">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">12</span>
+              <span class="rl-track-name">Still Got Claws</span>
+              <span class="rl-track-duration">4:05</span>
+            </li>
+            <!-- Bonus track -->
+            <li class="rl-track rl-track-bonus" data-src="assets/music/Red Leopard - Nine Lives on the Strip/Red Leopard - Melanie e.mp3" data-title="Melanie e (Bonus)">
+              <button class="rl-track-play" aria-label="Play Melanie e (Bonus)">
+                <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+              </button>
+              <span class="rl-track-num">✦</span>
+              <span class="rl-track-name">Melanie e</span>
+              <span class="rl-track-label">Bonus</span>
+              <span class="rl-track-duration">—</span>
+            </li>
+          </ol>
+
+          <!-- Inline audio player -->
+          <div class="rl-player reveal" id="rl-player" aria-label="Audio player">
+            <div class="rl-player-now">Now Playing</div>
+            <div class="rl-player-title" id="rl-player-title">Select a track to play</div>
+            <div class="rl-progress-wrap" id="rl-progress-wrap" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+              <div class="rl-progress-bar" id="rl-progress-bar"></div>
+            </div>
+            <div class="rl-player-controls">
+              <button class="rl-ctrl-btn" id="rl-prev" aria-label="Previous track">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path d="M3 3h1.5v4.4L13 3v10l-8.5-4.4V13H3z" />
+                </svg>
+              </button>
+              <button class="rl-ctrl-btn rl-play-pause" id="rl-play-pause" aria-label="Play">
+                <svg id="rl-icon-play" width="14" height="16" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true">
+                  <path d="M0 0l10 6-10 6z" />
+                </svg>
+                <svg id="rl-icon-pause" width="14" height="16" viewBox="0 0 12 14" fill="currentColor" aria-hidden="true">
+                  <path d="M2 0h3v14H2zM7 0h3v14H7z" />
+                </svg>
+              </button>
+              <button class="rl-ctrl-btn" id="rl-next" aria-label="Next track">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path d="M13 3h-1.5v4.4L3 3v10l8.5-4.4V13H13z" />
+                </svg>
+              </button>
+              <span class="rl-player-time" id="rl-player-time">0:00 / 0:00</span>
+            </div>
+            <audio id="rl-audio" preload="none"></audio>
+          </div>
+
+          <div class="rl-actions reveal">
+            <a href="https://goodflippinvibes.com/music.html" class="btn-crimson" target="_blank" rel="noopener" aria-label="All music on Good Flippin Vibes">More Music <span aria-hidden="true">→</span></a>
+            <a href="https://goodflippinvibes.com/music.html" class="btn-ghost-crimson" target="_blank" rel="noopener" aria-label="All artists on Good Flippin Vibes">All Artists</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+
+        <div>
+          <div class="footer-brand-name">Lowertown <em>St. Paul</em></div>
+          <p class="footer-brand-desc">
+            The arts, history, and soul of Minnesota's capital city. A neighborhood on the rise. A story being written right now — and you're invited in.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <span class="footer-col-label">Discover</span>
+          <ul>
+            <li><a href="#about">History</a></li>
+            <li><a href="#arts">Arts &amp; Culture</a></li>
+            <li><a href="#live">Live Here</a></li>
+            <li><a href="#explore">Eat &amp; Explore</a></li>
+            <li><a href="#sound">Red Leopard of St. Paul</a></li>
+            <li><a href="#invest">Invest</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <span class="footer-col-label">Resources</span>
+          <ul>
+            <li><a href="https://downtownstpaul.com/" target="_blank" rel="noopener">Downtown Alliance</a></li>
+            <li><a href="https://saintpaulriverfront.com/" target="_blank" rel="noopener">Riverfront Projects</a></li>
+            <li><a href="https://www.stpaul.gov/" target="_blank" rel="noopener">City of Saint Paul</a></li>
+            <li><a href="https://www.visitsaintpaul.com/" target="_blank" rel="noopener">Visit Saint Paul</a></li>
+            <li><a href="https://www.saintsbaseball.com/" target="_blank" rel="noopener">St. Paul Saints</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <span class="footer-col-label">Invest</span>
+          <ul>
+            <li><a href="https://www.stpaul.gov/departments/planning-and-economic-development/opportunity-zones/focus-area-city-center-and" target="_blank" rel="noopener">Opportunity Zones</a></li>
+            <li><a href="https://www.stpaul.gov/departments/planning-and-economic-development/economic-development/downtown-vitality-fund" target="_blank" rel="noopener">Downtown Vitality Fund</a></li>
+            <li><a href="https://www.stpaul.gov/departments/planning-and-economic-development/economic-development/development-opportunity-sites" target="_blank" rel="noopener">Dev Opportunity Sites</a></li>
+            <li><a href="https://www.stpaul.gov/departments/planning-and-economic-development/economic-development/cultural-star" target="_blank" rel="noopener">Cultural STAR Grants</a></li>
+            <li><a href="#invest">Get in Touch</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <span class="footer-col-label">Studio &amp; Ecosystem</span>
+          <ul>
+            <li><a href="https://goodflippindesign.com" target="_blank" rel="noopener">Good Flippin Design (studio)</a></li>
+            <li><a href="https://goodflippinvibes.com" target="_blank" rel="noopener">Good Flippin Vibes</a></li>
+            <li><a href="https://heavymoose.com" target="_blank" rel="noopener">Heavy Moose</a></li>
+            <li><a href="https://citizenapproved.org" target="_blank" rel="noopener">CitizenApproved.org</a></li>
+            <li><a href="https://culturesherpa.org" target="_blank" rel="noopener">CultureSherpa.org</a></li>
+            <li><a href="https://aiaimate.com" target="_blank" rel="noopener">AI Aimate</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p>
+          A property of
+          <a href="https://goodflippindesign.com" target="_blank" rel="noopener">Good Flippin Design</a>
+          (parent studio) &middot; published under
+          <a href="https://goodflippinvibes.com" target="_blank" rel="noopener">Good Flippin Vibes LLC</a>
+          &copy; 2026 — Built with love for Lowertown, Saint Paul.
+        </p>
+        <p>Saint Paul, MN 55101 · <a href="mailto:getsome@goodflippinvibes.com">getsome@goodflippinvibes.com</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+  ============================================================ -->
+  <script>
+    (function () {
+      'use strict';
+
+      // ── Nav scroll behavior ───────────────────────────────────
+      var nav = document.getElementById('nav');
+      window.addEventListener('scroll', function () {
+        if (window.pageYOffset > 60) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
+        }
+      }, { passive: true });
+
+      // ── Intersection Observer — scroll reveal ─────────────────
+      var reveals = document.querySelectorAll('.reveal');
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+
+        reveals.forEach(function (el) { observer.observe(el); });
+      } else {
+        reveals.forEach(function (el) { el.classList.add('visible'); });
+      }
+
+      // ── Contact form ──────────────────────────────────────────
+      var form = document.getElementById('contact-form');
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var btn = form.querySelector('button[type="submit"]');
+          var originalHTML = btn.innerHTML;
+          btn.innerHTML = 'Sending…';
+          btn.disabled = true;
+
+          fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
+          })
+            .then(function (res) {
+              if (res.ok) {
+                btn.innerHTML = 'Sent ✓ — We\'ll be in touch';
+                btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                btn.style.boxShadow = 'none';
+                form.reset();
+              } else {
+                btn.innerHTML = 'Error — Please try again';
+                btn.disabled = false;
+                setTimeout(function () {
+                  btn.innerHTML = originalHTML;
+                  btn.style.background = '';
+                }, 3500);
+              }
+            })
+            .catch(function () {
+              btn.innerHTML = 'Error — Please try again';
+              btn.disabled = false;
+              setTimeout(function () {
+                btn.innerHTML = originalHTML;
+                btn.style.background = '';
+              }, 3500);
+            });
+        });
+      }
+
+      // ── Red Leopard of St. Paul Audio Player ──────────────────
+      var audio = document.getElementById('rl-audio');
+      var trackRows = Array.from(document.querySelectorAll('#rl-tracklist .rl-track[data-src]'));
+      var playerTitle = document.getElementById('rl-player-title');
+      var progressBar = document.getElementById('rl-progress-bar');
+      var progressWrap = document.getElementById('rl-progress-wrap');
+      var playPauseBtn = document.getElementById('rl-play-pause');
+      var iconPlay = document.getElementById('rl-icon-play');
+      var iconPause = document.getElementById('rl-icon-pause');
+      var prevBtn = document.getElementById('rl-prev');
+      var nextBtn = document.getElementById('rl-next');
+      var timeDisplay = document.getElementById('rl-player-time');
+      var currentIndex = -1;
+
+      function formatTime(s) {
+        if (isNaN(s) || s < 0) return '0:00';
+        var m = Math.floor(s / 60);
+        var sec = Math.floor(s % 60);
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+      }
+
+      function setPlaying(playing) {
+        iconPlay.style.display = playing ? 'none' : '';
+        iconPause.style.display = playing ? '' : 'none';
+        playPauseBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+      }
+
+      function loadTrack(index) {
+        if (index < 0 || index >= trackRows.length) return;
+        // Clear active state from all
+        trackRows.forEach(function (row) { row.classList.remove('is-playing'); });
+        currentIndex = index;
+        var row = trackRows[index];
+        var src = row.getAttribute('data-src');
+        var title = row.getAttribute('data-title');
+        row.classList.add('is-playing');
+        playerTitle.textContent = title;
+        audio.src = src;
+        audio.load();
+        audio.play();
+        progressWrap.setAttribute('aria-valuenow', '0');
+      }
+
+      // Track row click
+      trackRows.forEach(function (row, idx) {
+        row.addEventListener('click', function () {
+          if (currentIndex === idx && !audio.paused) {
+            audio.pause();
+          } else if (currentIndex === idx && audio.paused) {
+            audio.play();
+          } else {
+            loadTrack(idx);
+          }
+        });
+      });
+
+      // Play/pause button
+      if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', function () {
+          if (audio.src && currentIndex >= 0) {
+            if (audio.paused) { audio.play(); } else { audio.pause(); }
+          } else if (trackRows.length > 0) {
+            loadTrack(0);
+          }
+        });
+      }
+
+      // Prev / Next
+      if (prevBtn) {
+        prevBtn.addEventListener('click', function () {
+          loadTrack(currentIndex > 0 ? currentIndex - 1 : trackRows.length - 1);
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+          loadTrack((currentIndex + 1) % trackRows.length);
+        });
+      }
+
+      // Progress bar scrub
+      if (progressWrap) {
+        progressWrap.addEventListener('click', function (e) {
+          if (!audio.duration) return;
+          var rect = progressWrap.getBoundingClientRect();
+          var pct = (e.clientX - rect.left) / rect.width;
+          audio.currentTime = pct * audio.duration;
+        });
+        progressWrap.addEventListener('keydown', function (e) {
+          if (!audio.duration) return;
+          if (e.key === 'ArrowRight') audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+          if (e.key === 'ArrowLeft') audio.currentTime = Math.max(0, audio.currentTime - 5);
+        });
+      }
+
+      // Audio events
+      if (audio) {
+        audio.addEventListener('play', function () { setPlaying(true); });
+        audio.addEventListener('pause', function () {
+          setPlaying(false);
+          trackRows.forEach(function (r) { r.classList.remove('is-playing'); });
+          if (currentIndex >= 0) trackRows[currentIndex].classList.add('is-playing');
+        });
+        audio.addEventListener('ended', function () {
+          setPlaying(false);
+          loadTrack((currentIndex + 1) % trackRows.length);
+        });
+        audio.addEventListener('timeupdate', function () {
+          if (!audio.duration) return;
+          var pct = (audio.currentTime / audio.duration) * 100;
+          progressBar.style.width = pct + '%';
+          progressWrap.setAttribute('aria-valuenow', Math.round(pct));
+          timeDisplay.textContent = formatTime(audio.currentTime) + ' / ' + formatTime(audio.duration);
+        });
+        audio.addEventListener('error', function () {
+          if (playerTitle && currentIndex >= 0) {
+            playerTitle.textContent = trackRows[currentIndex].getAttribute('data-title') + ' — unavailable';
+          }
+        });
+      }
+
+      // ── Performance check (dev only) ──────────────────────────
+      if (window.performance && location.hostname === 'localhost') {
+        window.addEventListener('load', function () {
+          var timing = window.performance.timing;
+          var ms = timing.loadEventEnd - timing.navigationStart;
+          if (ms > 3000) {
+            console.warn('[perf] Page load exceeded 3000ms:', ms + 'ms');
+          }
+        });
+      }
+
+    }());
+  </script>
+
+</body>
+
+</html>

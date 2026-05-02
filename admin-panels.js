@@ -169,6 +169,7 @@
                         csCurrentScene: 0,
                         csPromptStudioBaseUrl: '',
                         lastHealthMap: {},
+                        mlCatalog: null,
                     };
 
                     function $(id) {
@@ -542,6 +543,7 @@
                             'content-studio', 'ecosystem', 'blog-manager', 'storage',
                             'donations', 'analytics', 'community', 'notifications', 'characters', 'daily-cultures',
                             'nft-studio', 'brands',
+                            'music-library',
                         ];
 
                         document.addEventListener('keydown', (e) => {
@@ -864,6 +866,33 @@
                             openModal('cs-registry-modal');
                         });
                         $('cs-import-btn')?.addEventListener('click', () => openModal('cs-import-modal'));
+                        $('cs-open-summitview-hub-btn')?.addEventListener('click', async () => {
+                            const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                            if (!isLocalHost) {
+                                toast('SummitView hub is local-only (not publicly hosted). Use “Sync Local” to import registries into GFD.', 'info');
+                                openCSSyncModal();
+                                return;
+                            }
+
+                            const localHubPath = '/GFD%20Dev%20Projects/SummitView/output/index.html';
+                            try {
+                                const res = await fetch(localHubPath, { method: 'HEAD' });
+                                if (res.ok) {
+                                    window.open(localHubPath, '_blank', 'noopener');
+                                    return;
+                                }
+                            } catch {
+                                // Fall through to Prompt Studio detection.
+                            }
+
+                            try {
+                                const { baseUrl } = await detectPromptStudio();
+                                window.open(baseUrl, '_blank', 'noopener');
+                                toast('SummitView hub not found. Opened Prompt Studio instead.', 'info');
+                            } catch {
+                                toast('SummitView hub not available. Start SummitView (make prompt-studio) and/or serve SummitView output locally.', 'warn');
+                            }
+                        });
                         $('cs-sync-btn')?.addEventListener('click', openCSSyncModal);
                         $('cs-sync-import-btn')?.addEventListener('click', importFromPromptStudio);
                         $('cs-prev-scene')?.addEventListener('click', () => {
@@ -3033,6 +3062,7 @@
                         'studio-hq': { name: 'Studio HQ', title: 'Studio Management Platform', sub: 'Priority signals, build pipeline, self-advisor insights, and ecosystem architecture — all zero compute cost.' },
                         'automation': { name: 'Automation', title: 'Automation Center', sub: 'Publishing queue snapshot, health sweep history, and one-click retry for failed post variants.' },
                         'ai-utils': { name: 'AI Utils', title: 'AI Utilities', sub: 'Generate platform-optimised captions for any library asset via Cloudflare Workers AI (Llama 3 8B · free tier · $0).' },
+                        'music-library': { name: 'Music Library', title: 'GFV Music Library', sub: 'SummitView music catalog — browse artists, albums, and tracks. Open the per-album prompt studio or pre-fill the Post Composer.' },
                     };
 
                     function updatePageContext(view) {
@@ -9787,6 +9817,167 @@
 
                         window.__adminPanels = window.__adminPanels || {};
                         window.__adminPanels['studio-hq'] = renderSHQPanel;
+                    })();
+
+                    // ── Panel 32: GFV Music Library ───────────────────────────────────
+                    (function initMusicLibraryPanel() {
+
+                        async function loadMusicLibraryCatalog() {
+                            try {
+                                const r = await fetch('/assets/data/gfv-music-catalog.json');
+                                if (!r.ok) throw new Error('HTTP ' + r.status);
+                                state.mlCatalog = await r.json();
+                            } catch (err) {
+                                state.mlCatalog = null;
+                                console.warn('[music-library] fetch failed:', err.message);
+                            }
+                        }
+
+                        function escMl(str) {
+                            return String(str)
+                                .replace(/&/g, '&amp;')
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;')
+                                .replace(/"/g, '&quot;');
+                        }
+
+                        function renderAlbumCard(album, artist) {
+                            const bpmVals = album.tracks.map(t => t.bpm).filter(Boolean);
+                            const bpmRange = bpmVals.length
+                                ? Math.min(...bpmVals) + '\u2013' + Math.max(...bpmVals) + '\u202fBPM'
+                                : '';
+                            const trackRows = album.tracks.map(t => `
+                                <tr>
+                                    <td class="ml-td-num">${t.n}</td>
+                                    <td>${escMl(t.title)}</td>
+                                    <td class="ml-td-mono">${t.key || ''}</td>
+                                    <td class="ml-td-mono">${t.bpm || ''}</td>
+                                    <td class="ml-td-mono">${t.duration || ''}</td>
+                                </tr>`).join('');
+
+                            return `
+                                <article class="panel ml-album-card">
+                                    <div class="ml-album-header">
+                                        <div>
+                                            <h3 class="ml-album-title">${escMl(album.title)}</h3>
+                                            <div class="ml-album-meta">${album.trackCount} tracks${bpmRange ? ' &middot; ' + bpmRange : ''}</div>
+                                        </div>
+                                        <div class="inline-actions">
+                                            <button class="btn btn-secondary btn-sm ml-studio-btn"
+                                                data-studio-path="${escMl(album.studioPath || '')}"
+                                                aria-label="Open prompt studio for ${escMl(album.title)}">Studio</button>
+                                            <button class="btn btn-primary btn-sm ml-post-btn"
+                                                data-album-title="${escMl(album.title)}"
+                                                data-artist-name="${escMl(artist.name)}"
+                                                aria-label="Create post for ${escMl(album.title)}">Post</button>
+                                        </div>
+                                    </div>
+                                    <details class="ml-track-details">
+                                        <summary>View ${album.trackCount} track${album.trackCount !== 1 ? 's' : ''}&hellip;</summary>
+                                        <table class="ml-track-table" aria-label="Tracks for ${escMl(album.title)}">
+                                            <thead>
+                                                <tr>
+                                                    <th class="ml-td-num">#</th>
+                                                    <th>Title</th>
+                                                    <th>Key</th>
+                                                    <th>BPM</th>
+                                                    <th>Time</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>${trackRows}</tbody>
+                                        </table>
+                                    </details>
+                                </article>`;
+                        }
+
+                        function renderMusicLibrary() {
+                            const metaEl = $('ml-meta');
+                            const catalogEl = $('ml-catalog');
+                            if (!catalogEl) return;
+
+                            if (!state.mlCatalog) {
+                                if (metaEl) metaEl.innerHTML = '';
+                                catalogEl.innerHTML = '<p style="color:var(--text-muted)">Catalog unavailable — fetch failed. Ensure you are signed in and the catalog JSON has been exported.</p>';
+                                return;
+                            }
+
+                            const meta = state.mlCatalog._meta || {};
+                            if (metaEl) {
+                                const exportedAt = meta.exported_at
+                                    ? new Date(meta.exported_at).toLocaleString()
+                                    : 'unknown';
+                                metaEl.innerHTML = `
+                                    <strong>${meta.total_artists || 0}</strong> artists
+                                    <span class="ml-sep">&middot;</span>
+                                    <strong>${meta.total_albums || 0}</strong> albums
+                                    <span class="ml-sep">&middot;</span>
+                                    <strong>${meta.total_tracks || 0}</strong> tracks
+                                    <span class="ml-sep">&middot;</span>
+                                    Exported ${exportedAt}`;
+                            }
+
+                            const artists = state.mlCatalog.artists || [];
+                            if (!artists.length) {
+                                catalogEl.innerHTML = '<p style="color:var(--text-muted)">No artists found in catalog.</p>';
+                                return;
+                            }
+
+                            catalogEl.innerHTML = artists.map(artist => `
+                                <div class="ml-artist-section">
+                                    <h2 class="ml-artist-name">${escMl(artist.name)}</h2>
+                                    <div class="ml-albums-grid">
+                                        ${(artist.albums || []).map(album => renderAlbumCard(album, artist)).join('')}
+                                    </div>
+                                </div>`).join('');
+                        }
+
+                        // Single delegated listener on the static view section — survives catalog re-renders
+                        const viewSection = document.getElementById('view-music-library');
+                        if (viewSection) {
+                            viewSection.addEventListener('click', function (e) {
+                                const studioBtn = e.target.closest('.ml-studio-btn');
+                                if (studioBtn) {
+                                    const sp = studioBtn.dataset.studioPath;
+                                    if (sp) {
+                                        const base = 'http://localhost:5000/output/';
+                                        window.open(base + sp, '_blank', 'noopener');
+                                    } else {
+                                        toast('No studio path configured for this album.', 'warn');
+                                    }
+                                    return;
+                                }
+
+                                const postBtn = e.target.closest('.ml-post-btn');
+                                if (postBtn) {
+                                    const albumTitle = postBtn.dataset.albumTitle || '';
+                                    const artistName = postBtn.dataset.artistName || '';
+                                    const draft = '\uD83C\uDFB5 ' + albumTitle + ' by ' + artistName + ' is out now on all platforms! Stream it today.\n\n#GoodFlippinVibes #NewMusic #' + artistName.replace(/\s+/g, '');
+                                    const composerEl = document.getElementById('composer-content');
+                                    if (composerEl) {
+                                        composerEl.value = draft;
+                                        navigateToView('composer');
+                                        toast('Draft loaded in Post Composer.', 'success');
+                                    } else {
+                                        toast('Composer not available.', 'warn');
+                                    }
+                                }
+                            });
+                        }
+
+                        // Refresh button
+                        document.addEventListener('click', function (e) {
+                            if (e.target && e.target.id === 'ml-refresh-btn') {
+                                loadMusicLibraryCatalog().then(renderMusicLibrary);
+                            }
+                        });
+
+                        window.__adminPanels = window.__adminPanels || {};
+                        window.__adminPanels['music-library'] = async function () {
+                            if (!state.mlCatalog) {
+                                await loadMusicLibraryCatalog();
+                            }
+                            renderMusicLibrary();
+                        };
                     })();
 
                     window.__clerkReady

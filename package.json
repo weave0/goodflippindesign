@@ -15,6 +15,7 @@
     "test:community": "node tests/community.test.js",
     "test:donate": "node tests/donate.test.js",
     "cache-bust": "node scripts/update-cache-bust.js",
+    "export:music": "node scripts/export-music-catalog.js",
     "build": "npm run cache-bust && npm run sync",
     "pretest": "npm run sync",
     "prepare": "node -e \"if (!process.env.CI) { require('child_process').execSync('husky install', {stdio: 'inherit'}) }\"",
