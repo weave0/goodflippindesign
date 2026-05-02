@@ -1828,6 +1828,26 @@
                         }
                     }
 
+                    async function testPublishPinterestById(connId) {
+                        if (!confirm('Pinterest does not have a draft mode. This will create a REAL public pin titled "Test pin (delete me)" on your first board. Continue?')) {
+                            return;
+                        }
+                        try {
+                            const result = await api('/connections/' + connId + '/test-publish', { method: 'POST' });
+                            if (result.ok) {
+                                const url = (result.pin && result.pin.url) || '';
+                                const board = (result.board && result.board.name) || '?';
+                                toast('&#10003; Pinned to ' + escapeHtml(board) + '. <a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">Open pin to delete</a>', 'success');
+                                console.log('[test-publish] pinterest result:', result);
+                            } else {
+                                toast('&#10005; Pinterest publish failed: ' + escapeHtml(result.error || JSON.stringify(result.body || {})), 'error');
+                                console.error('[test-publish] pinterest failure:', result);
+                            }
+                        } catch (err) {
+                            toast('Test publish failed: ' + escapeHtml(err.message), 'error');
+                        }
+                    }
+
                     function renderOverview() {
                         const queueBody = $('overview-queue');
                         const now = new Date();
@@ -1880,11 +1900,14 @@
                             const testBtn = connectedCount === 1 && conn && conn.id
                                 ? '<button class="btn btn-micro ov-conn-test-btn" data-conn-id="' + conn.id + '" style="padding:1px 5px;font-size:0.68rem;margin-left:4px" title="Test token" aria-label="Test ' + escapeHtml(platform) + ' token">&#128268;</button>'
                                 : '';
+                            const pinTestBtn = (platform === 'pinterest' && connectedCount >= 1 && conn && conn.id)
+                                ? '<button class="btn btn-micro ov-conn-pinpub-btn" data-conn-id="' + conn.id + '" style="padding:1px 5px;font-size:0.68rem;margin-left:2px" title="Send a real test pin (you delete after)" aria-label="Send test pin">&#128204;</button>'
+                                : '';
                             return `<div class="overview-conn-row">
                         <span class="overview-conn-name">${escapeHtml(platform)}</span>
                         <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap">
                             <span class="tag ${connected ? 'ok' : 'fail'}">${connected ? 'connected' : 'missing'}</span>
-                            ${meta}${lastTested}${testBtn}
+                            ${meta}${lastTested}${testBtn}${pinTestBtn}
                         </div>
                     </div>`;
                         }).join('');
@@ -1896,6 +1919,15 @@
                                 btn.disabled = true;
                                 await testConnectionById(btn.dataset.connId);
                                 btn.textContent = '&#128268;';
+                                btn.disabled = false;
+                            });
+                        });
+                        connectionSummary.querySelectorAll('.ov-conn-pinpub-btn').forEach((btn) => {
+                            btn.addEventListener('click', async () => {
+                                btn.textContent = '&#8987;';
+                                btn.disabled = true;
+                                await testPublishPinterestById(btn.dataset.connId);
+                                btn.textContent = '&#128204;';
                                 btn.disabled = false;
                             });
                         });

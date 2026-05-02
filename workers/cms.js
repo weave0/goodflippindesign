@@ -1974,6 +1974,107 @@ async function handleTestConnection(request, user, env) {
   return jsonResponse({ ok, error: errorMsg, platform: row.platform, account_label: row.account_label, checked_at: now });
 }
 
+// Pinterest-only: fire a real test pin to prove publish path end-to-end.
+// Creates a public pin on the user's first board. Caller is expected to delete it.
+async function handlePinterestTestPublish(request, user, env) {
+  const parts = new URL(request.url).pathname.split('/');
+  // path: /connections/:id/test-publish
+  const id = parts[parts.length - 2];
+  if (!id || isNaN(Number(id))) return errorResponse('Invalid connection ID', 400);
+
+  const row = await env.DB.prepare(
+    'SELECT * FROM cms_platform_tokens WHERE id = ? AND is_active = 1'
+  ).bind(id).first();
+  if (!row) return errorResponse('Connection not found', 404);
+  if ((row.platform || '').toLowerCase() !== 'pinterest') {
+    return errorResponse('test-publish currently supports pinterest only', 400);
+  }
+
+  // Decrypt payload to get access_token
+  let tokenData = {};
+  const raw = row.encrypted_payload || '';
+  let plaintext = raw.startsWith('{') ? raw : null;
+  if (!plaintext && raw && env.TOKEN_ENCRYPTION_KEY) {
+    plaintext = await decryptAesGcm(raw, env.TOKEN_ENCRYPTION_KEY);
+  }
+  if (plaintext) {
+    try { tokenData = JSON.parse(plaintext); } catch (_e) { tokenData = { access_token: plaintext }; }
+  }
+  const accessToken = tokenData.access_token || tokenData.token || '';
+  if (!accessToken) return errorResponse('No access token in stored payload', 400);
+
+  const body = await request.json().catch(() => ({}));
+  const imageUrl = body.image_url || 'https://goodflippindesign.com/assets/logos/gfv-logo.png';
+  const title = (body.title || 'Test pin (delete me)').substring(0, 100);
+  const description = (body.description || 'Pipeline validation pin from Good Flippin Vibes admin. Safe to delete.').substring(0, 500);
+  const link = body.link || 'https://goodflippindesign.com/';
+
+  // 1) List boards
+  let boardsResp, boardsJson;
+  try {
+    boardsResp = await fetch('https://api.pinterest.com/v5/boards?page_size=10', {
+      headers: { Authorization: 'Bearer ' + accessToken },
+      signal: AbortSignal.timeout(10000),
+    });
+    boardsJson = await boardsResp.json();
+  } catch (e) {
+    return jsonResponse({ ok: false, step: 'list-boards', error: e.message || 'fetch failed' }, 502);
+  }
+  if (!boardsResp.ok) {
+    return jsonResponse({ ok: false, step: 'list-boards', status: boardsResp.status, body: boardsJson }, 502);
+  }
+  const boards = boardsJson.items || [];
+  if (!boards.length) {
+    return jsonResponse({ ok: false, step: 'list-boards', error: 'Account has no Pinterest boards. Create one in Pinterest first.' }, 400);
+  }
+  const board = boards.find((b) => b.id === body.board_id) || boards[0];
+
+  // 2) Create pin
+  let pinResp, pinJson;
+  try {
+    pinResp = await fetch('https://api.pinterest.com/v5/pins', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + accessToken,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        board_id: board.id,
+        title,
+        description,
+        link,
+        media_source: { source_type: 'image_url', url: imageUrl },
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+    pinJson = await pinResp.json();
+  } catch (e) {
+    return jsonResponse({ ok: false, step: 'create-pin', board, error: e.message || 'fetch failed' }, 502);
+  }
+  if (!pinResp.ok) {
+    return jsonResponse({ ok: false, step: 'create-pin', status: pinResp.status, board, body: pinJson }, 502);
+  }
+
+  const now = new Date().toISOString();
+  await env.DB.prepare('UPDATE cms_platform_tokens SET last_used_at = ? WHERE id = ?')
+    .bind(now, id).run();
+  await logAudit(env.DB, user.id, 'social.connection.test_publish', 'platform_token', id, {
+    platform: 'pinterest', board_id: board.id, pin_id: pinJson.id,
+  });
+
+  return jsonResponse({
+    ok: true,
+    platform: 'pinterest',
+    board: { id: board.id, name: board.name },
+    pin: {
+      id: pinJson.id,
+      url: pinJson.url || ('https://www.pinterest.com/pin/' + pinJson.id + '/'),
+    },
+    boards_available: boards.map((b) => ({ id: b.id, name: b.name })),
+    checked_at: now,
+  });
+}
+
 async function handleListCampaigns(request, env) {
   await ensureCampaignSchema(env.DB);
 
@@ -3183,6 +3284,9 @@ export async function handleCMSRequest(request, env, user) {
     }
     if (/^\/connections\/\d+\/test$/.test(path) && method === 'POST') {
       return handleTestConnection(request, user, env);
+    }
+    if (/^\/connections\/\d+\/test-publish$/.test(path) && method === 'POST') {
+      return handlePinterestTestPublish(request, user, env);
     }
 
     // Campaigns and calendar
