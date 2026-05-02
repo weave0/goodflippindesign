@@ -23,7 +23,7 @@ PROPERTY MAPPING (set ecosystem_property per paste):
 GA4 MEASUREMENT ID:
   Use ONE shared GA4 property (recommended) so cross-property funnels work.
   Or use per-property GA4 IDs if you want isolated reporting.
-  Replace G-XXXXXXXXXX with your actual ID.
+  GA4 Measurement ID: G-WM6Q66W9W0 (GFD ecosystem cross-property measurement)
 
 ============================================================================
   STEP 1 — HEAD PASTE
@@ -32,12 +32,12 @@ GA4 MEASUREMENT ID:
 -->
 
 <!-- Google Analytics 4 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WM6Q66W9W0"></script>
 <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'G-XXXXXXXXXX', {
+    gtag('config', 'G-WM6Q66W9W0', {
         // Set per-property identifier — change "studio" to the right value (see mapping above)
         custom_map: { dimension1: 'ecosystem_property' },
         ecosystem_property: 'studio'
