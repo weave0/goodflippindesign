@@ -1464,10 +1464,10 @@
                         </p>
 
                         <div class="donation-amounts">
+                            <button type="button" class="donation-amount" data-amount="5">$5</button>
                             <button type="button" class="donation-amount recommended" data-amount="10">$10</button>
                             <button type="button" class="donation-amount" data-amount="25">$25</button>
                             <button type="button" class="donation-amount" data-amount="50">$50</button>
-                            <button type="button" class="donation-amount" data-amount="100">$100</button>
                         </div>
 
                         <div class="custom-amount">
@@ -1895,15 +1895,58 @@
             document.body.appendChild(successOverlay);
         }
 
+        function updateDonationModeUI() {
+            const isMonthly = donationType === 'monthly';
+            // Update CTA button text
+            const btnText = document.getElementById('donateBtnText');
+            if (btnText) {
+                btnText.textContent = isMonthly
+                    ? `Become a Patron · $${selectedAmount}/mo`
+                    : 'Continue with Card';
+            }
+            // Update amount tile labels with /mo suffix
+            document.querySelectorAll('.donation-amount').forEach(btn => {
+                const amt = btn.dataset.amount;
+                btn.textContent = isMonthly ? `$${amt}/mo` : `$${amt}`;
+                // Re-apply recommended badge via data attribute instead of text
+            });
+            // Show/hide patron explainer
+            const patronNote = document.getElementById('patronTierNote');
+            if (patronNote) patronNote.hidden = !isMonthly;
+        }
+
         // Donation type toggle
         document.querySelectorAll('.donation-type-toggle button').forEach(btn => {
             btn.addEventListener('click', function () {
                 document.querySelectorAll('.donation-type-toggle button').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 donationType = this.dataset.type;
-                // Show/hide Patron tier explainer when monthly is selected
-                const patronNote = document.getElementById('patronTierNote');
-                if (patronNote) patronNote.hidden = donationType !== 'monthly';
+                // When switching to monthly, default to $5 (lower commitment friction)
+                if (donationType === 'monthly') {
+                    document.querySelectorAll('.donation-amount').forEach(b => b.classList.remove('active', 'recommended'));
+                    const fiveBtn = document.querySelector('.donation-amount[data-amount="5"]');
+                    if (fiveBtn) {
+                        fiveBtn.classList.add('active', 'recommended');
+                        selectedAmount = 5;
+                    } else {
+                        // fallback: select first amount
+                        const first = document.querySelector('.donation-amount');
+                        if (first) { first.classList.add('active'); selectedAmount = parseInt(first.dataset.amount); }
+                    }
+                    document.getElementById('paypalAmount').value = selectedAmount;
+                    updatePayPalQuickDonateUI();
+                } else {
+                    // Restore one-time recommended state ($10)
+                    document.querySelectorAll('.donation-amount').forEach(b => b.classList.remove('active', 'recommended'));
+                    const tenBtn = document.querySelector('.donation-amount[data-amount="10"]');
+                    if (tenBtn) {
+                        tenBtn.classList.add('active', 'recommended');
+                        selectedAmount = 10;
+                    }
+                    document.getElementById('paypalAmount').value = selectedAmount;
+                    updatePayPalQuickDonateUI();
+                }
+                updateDonationModeUI();
             });
         });
 
@@ -1918,6 +1961,7 @@
                 // Sync with PayPal amount fields
                 document.getElementById('paypalAmount').value = selectedAmount;
                 updatePayPalQuickDonateUI();
+                updateDonationModeUI();
 
                 // Track amount selection
                 if (window.gtag) {
@@ -1939,6 +1983,7 @@
                 // Sync with PayPal amount fields
                 document.getElementById('paypalAmount').value = selectedAmount;
                 updatePayPalQuickDonateUI();
+                updateDonationModeUI();
 
                 // Track custom amount on blur (when user finishes typing)
                 if (selectedAmount >= 5 && window.gtag) {
@@ -1996,7 +2041,8 @@
 
             // CRITICAL: Real Stripe Checkout integration via Cloudflare Function
             this.disabled = true;
-            this.textContent = 'Creating checkout...';
+            const btnText = document.getElementById('donateBtnText');
+            if (btnText) btnText.textContent = 'Creating checkout…';
 
             try {
                 // Call Cloudflare Function to create Stripe Checkout Session
@@ -2023,7 +2069,7 @@
             } catch (error) {
                 alert(`Error: ${error.message}\n\nPlease try again or contact getsome@goodflippinvibes.com`);
                 this.disabled = false;
-                this.textContent = 'Continue with Card';
+                updateDonationModeUI();
             }
 
             // Note: Success tracking happens on return from Stripe (via success_url parameter)
