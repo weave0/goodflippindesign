@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated**: March 19, 2026
+**Last Updated**: May 2, 2026
 **Status**: ✅ Production Live
 **Monthly Cost**: $0 (Cloudflare Pages free tier)
 
@@ -210,3 +210,34 @@ Total: 167  Passed: 156  Warnings: 10  Skipped: 1
 ```
 
 > Last full test run: **2026-03-10**. Run `npm test` to get current results.
+
+---
+
+## Session Summary (May 2, 2026)
+
+### ✅ Completed This Session
+
+- **donate.html patron tier UX** (commit `b36d5c8`, deployed to CF Pages): `$5/$10/$25/$50` grid, `updateDonationModeUI()`, `/mo` labels, dynamic CTA text, error-handler restoration.
+- **AI Aimate CI fix**: `ci.yml` bumped from Node 20 / checkout@v4 / setup-node@v4 → **Node 24 / checkout@v6 / setup-node@v6** (commit `ffcdff3` on `weave0/aiaimate` main). Root cause: Dependabot PR #2 (checkout@v6) and PR #7 (ESLint 10) were failing CI gates — NOT a Vercel build failure. Vercel preview deployments were green throughout.
+- **Dependabot PRs merged** (`weave0/aiaimate`):
+  - PR #4: `eslint-config-next` 16.0.5 → 16.2.4 ✅ (must be first — unblocks ESLint 10)
+  - PR #5: `@huggingface/transformers` 3.8.1 → 4.2.0 ✅
+  - PR #6: `@types/node` 24.x → 25.6.0 ✅
+
+### 🔄 Still Pending (AI Aimate)
+
+- **PR #7** (`eslint` 9 → 10.x): Should now pass after PR #4 merged. Retest CI then merge.
+- **PR #2** (`actions/checkout@v6`): Should now pass after ci.yml push. Retest CI then merge.
+- **PR #3** (`actions/setup-node@v6`): Should now pass. Retest CI then merge.
+
+### ❌ Remaining Open Items (Ecosystem-wide)
+
+| Item                                  | Notes                                                          |
+| ------------------------------------- | -------------------------------------------------------------- |
+| Ecosystem footer                      | Write once, paste to 7 properties                              |
+| `music.html` Heavy Moose canon port   | New music page for main site                                   |
+| TikTok OAuth secrets                  | Must create TikTok developer app first                         |
+| Instagram / Facebook / LinkedIn OAuth | Platforms registered, secrets not yet active                   |
+| Fix 4 test warnings                   | Touch targets (mobile/iPad), nav scroll, border-radius variety |
+| Lowertown site                        | Not yet built                                                  |
+| BrettLeeWeaver.com site               | Not yet built                                                  |
