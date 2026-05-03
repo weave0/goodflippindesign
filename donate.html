@@ -1269,10 +1269,51 @@
                 gap: 1rem;
             }
         }
+
+        /* ── Social Awareness Bar — offsets for sticky header ── */
+        html:not(.social-bar-gone) body {
+            padding-top: 44px;
+        }
+
+        html:not(.social-bar-gone) header {
+            top: 44px;
+        }
     </style>
+    <!-- Social Awareness Bar — FOUC prevention -->
+    <script>try { if (localStorage.getItem('gfd_social_bar_dismissed') === '1') document.documentElement.classList.add('social-bar-gone'); } catch (e) { }</script>
+    <link rel="stylesheet" href="shared/social-bar.css">
 </head>
 
 <body>
+    <!-- Social Awareness Bar -->
+    <aside class="social-bar" id="social-bar" aria-label="Support our independent music">
+        <div class="social-bar-inner">
+            <span class="social-bar-icon" aria-hidden="true">&#9834;</span>
+            <p class="social-bar-message">
+                No label. No funding.
+                <a href="https://goodflippinvibes.com/music.html" target="_blank" rel="noopener">Stream or buy our music</a>
+                on YouTube, iTunes &amp; beyond &#8212; every purchase directly supports our work.
+            </p>
+            <div class="social-bar-links" aria-label="Follow us on social media">
+                <span class="social-bar-follow-label" aria-hidden="true">Follow</span>
+                <a href="https://www.youtube.com/playlist?list=PLveg0fPWx8QGrKodpXxtCGMQeMzxOFJ71"
+                    class="social-bar-link" target="_blank" rel="noopener"
+                    aria-label="Our music on YouTube (opens in new tab)">YT</a>
+                <a href="https://instagram.com/goodflippindesign"
+                    class="social-bar-link" target="_blank" rel="noopener"
+                    aria-label="Follow us on Instagram (opens in new tab)">IG</a>
+                <a href="https://twitter.com/goodflippinvibes"
+                    class="social-bar-link" target="_blank" rel="noopener"
+                    aria-label="Follow us on X / Twitter (opens in new tab)">X</a>
+                <a href="https://facebook.com/profile.php?id=61566870218978"
+                    class="social-bar-link" target="_blank" rel="noopener"
+                    aria-label="Follow us on Facebook (opens in new tab)">FB</a>
+            </div>
+            <button class="social-bar-close" id="social-bar-close" type="button"
+                aria-label="Dismiss this message">&#215;</button>
+        </div>
+    </aside>
+
     <header>
         <div class="container">
             <div class="header-content">
@@ -2106,6 +2147,9 @@
 
     <!-- GFD Ecosystem Navigation JavaScript -->
     <script src="shared/ecosystem-nav.js"></script>
+
+    <!-- Social Awareness Bar JavaScript -->
+    <script src="shared/social-bar.js"></script>
 </body>
 
 </html>

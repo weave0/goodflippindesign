@@ -1,0 +1,248 @@
+/**
+ * GFD Social Awareness Bar — shared component
+ *
+ * Thin fixed bar above all navs; promotes music + social follows.
+ * GPU-accelerated animations only (transform/opacity).
+ * WCAG 2.1 AA compliant. Dismissable via localStorage.
+ * z-index 155 — above ecosystem nav (150), below mobile overlay (160).
+ */
+
+/* ── Bar container ─────────────────────────────────── */
+.social-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 155;
+  height: 44px;
+  background: rgba(6, 8, 14, 0.97);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  /* Subtle cyan accent line at bottom */
+  box-shadow:
+    0 1px 0 rgba(34, 211, 238, 0.18),
+    inset 0 -1px 0 rgba(168, 85, 247, 0.08);
+  display: flex;
+  align-items: center;
+  padding: 0 1.25rem;
+  overflow: hidden;
+}
+
+/* Horizontal scan shimmer — GPU only */
+.social-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0.045) 50%,
+    transparent 100%
+  );
+  animation: social-bar-scan 9s linear infinite;
+  will-change: transform;
+  pointer-events: none;
+}
+
+@keyframes social-bar-scan {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(280%);
+  }
+}
+
+/* ── Inner layout ───────────────────────────────────── */
+.social-bar-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Pulsing music note */
+.social-bar-icon {
+  color: #22d3ee;
+  font-size: 0.875rem;
+  line-height: 1;
+  flex-shrink: 0;
+  animation: social-bar-beat 2.8s ease-in-out infinite;
+  display: inline-block;
+  will-change: opacity, transform;
+}
+
+@keyframes social-bar-beat {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+}
+
+/* Message copy */
+.social-bar-message {
+  flex: 1;
+  font-size: 0.75rem;
+  color: #8a8fa4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  letter-spacing: 0.01em;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+.social-bar-message a {
+  color: #22d3ee;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.social-bar-message a:hover {
+  color: #f0f0f5;
+}
+
+.social-bar-message a:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* "Follow us:" label */
+.social-bar-follow-label {
+  font-size: 0.625rem;
+  color: #4a5070;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  padding-right: 0.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  margin-right: 0.125rem;
+  font-family: "JetBrains Mono", "Consolas", monospace;
+}
+
+/* Social platform links */
+.social-bar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  flex-shrink: 0;
+}
+
+.social-bar-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 0.125rem 0.4375rem;
+  border-radius: 3px;
+  color: #6b7290;
+  text-decoration: none;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  height: 44px;
+  font-family: "JetBrains Mono", "Consolas", monospace;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.social-bar-link:hover {
+  color: #f0f0f5;
+  border-color: rgba(34, 211, 238, 0.2);
+  background: rgba(34, 211, 238, 0.05);
+}
+
+.social-bar-link:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+}
+
+/* Dismiss (×) button */
+.social-bar-close {
+  background: transparent;
+  border: none;
+  color: #4a5070;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 3px;
+  font-size: 1rem;
+  line-height: 1;
+  margin-left: 0.25rem;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.social-bar-close:hover {
+  color: #f0f0f5;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.social-bar-close:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+}
+
+/* ── Dismissed state ────────────────────────────────── */
+.social-bar-gone .social-bar {
+  display: none;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+
+/* Tablet: hide "Follow us:" label */
+@media (max-width: 900px) {
+  .social-bar-follow-label {
+    display: none;
+  }
+  .social-bar-link {
+    padding: 0.125rem 0.375rem;
+  }
+}
+
+/* Mobile: hide message text, keep links + close */
+@media (max-width: 600px) {
+  .social-bar-message {
+    display: none;
+  }
+  .social-bar-icon {
+    display: none;
+  }
+  .social-bar {
+    padding: 0 1rem;
+  }
+}
+
+/* Very small: trim to 3 links max */
+@media (max-width: 380px) {
+  .social-bar-link:nth-child(n + 4) {
+    display: none;
+  }
+}
