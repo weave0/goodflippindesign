@@ -87,12 +87,12 @@
     "@cloudflare/vitest-pool-workers": "^0.14.3",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.2.0",
-    "html-validate": "^10.11.2",
+    "html-validate": "^10.15.0",
     "http-server": "^14.1.1",
     "husky": "^9.0.0",
     "nodemon": "~3.1.0",
-    "prettier": "^3.2.0",
-    "puppeteer": "^24.40.0",
+    "prettier": "^3.8.3",
+    "puppeteer": "^24.42.0",
     "sharp": "^0.34.5",
     "vitest": "^4.1.2"
   }
