@@ -163,6 +163,9 @@ export default {
         isRootLevelJs);
 
     if (isBlocked) {
+      // Log scanner/probe hits for tail-log visibility (wrangler tail or CF dashboard).
+      // Helps quantify noise volume for future edge-rule decisions.
+      console.log(JSON.stringify({ event: "blocked_probe", path: pathLower, method: request.method, ts: Date.now() }));
       return new Response("Not found", {
         status: 404,
         headers: {
