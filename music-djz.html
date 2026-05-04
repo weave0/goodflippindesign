@@ -426,8 +426,10 @@
             height: 100%;
             background: linear-gradient(135deg, #2a1f0d 0%, #1a1206 100%);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 0;
             font-size: 5rem;
         }
 
@@ -667,6 +669,48 @@
             z-index: 1;
             font-size: 0.9rem;
             color: var(--text-muted);
+        }
+
+        /* ── Video "coming soon" rich placeholder ── */
+        .video-cs-wrap {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(160deg, #141414 0%, #0d0d0d 100%);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .video-cs-icon {
+            font-size: 2.5rem;
+            opacity: 0.45;
+            line-height: 1;
+        }
+
+        .video-cs-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: 0.01em;
+        }
+
+        .video-cs-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Album cover placeholder label */
+        .album-cover-label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
 
         .now-playing-info {
@@ -1127,7 +1171,7 @@
             <div class="container">
                 <div class="album-hero-inner">
                     <div class="album-cover-wrap">
-                        <div class="album-cover-placeholder" aria-label="Wheels Up album art — coming soon">&#127934;</div>
+                        <div class="album-cover-placeholder" aria-label="Wheels Up album art — coming soon">&#127934;<span class="album-cover-label">Coming soon</span></div>
                     </div>
                     <div class="album-meta">
                         <span class="album-eyebrow">Debut Album &bull; 2026</span>
@@ -1233,6 +1277,11 @@
             </div>
         </section>
 
+        <!-- CONTENT NEEDED (DJ Z — Wheels Up):
+             - YouTube video IDs: add data-youtube="VIDEO_ID" to each track card below (9 tracks)
+             - Album cover art: assets/GFV/album-2/covers/ (folder currently empty)
+             - Track video files: /api/media/wheels-up/01 - track-name.mp4 (× 9 tracks)
+        -->
         <!-- ── Track List ── -->
         <section class="tracklist-section" aria-label="Track listing">
             <div class="container">
@@ -1572,165 +1621,191 @@
                 v.autoplay = true;
                 v.style.cssText = 'width:100%;height:100%;display:block;';
                 v.setAttribute('playsinline', '');
+                v.addEventListener('error', function () {
+                    var wrap = v.parentNode;
+                    if (!wrap) return;
+                    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+                    wrap.appendChild(buildCSEl('', ''));
+                });
                 return v;
             }
 
+            function buildCSEl(title, cover) {
+                var wrap = document.createElement('div');
+                wrap.className = 'video-cs-wrap';
+                wrap.setAttribute('aria-label', title ? 'Video not yet available for ' + title : 'Video coming soon');
+                if (cover) {
+                    var bgImg = document.createElement('img');
+                    bgImg.src = cover; bgImg.alt = ''; bgImg.className = 'video-placeholder-cover';
+                    bgImg.setAttribute('aria-hidden', 'true');
+                    wrap.appendChild(bgImg);
+                }
+                var icon = document.createElement('span');
+                icon.className = 'video-cs-icon'; icon.setAttribute('aria-hidden', 'true'); icon.textContent = '\uD83C\uDFAC';
+                var t = document.createElement('p'); t.className = 'video-cs-title'; t.textContent = 'Video in production';
+                var s = document.createElement('p'); s.className = 'video-cs-sub';
+                s.textContent = title ? title : 'Check back soon';
+                wrap.appendChild(icon); wrap.appendChild(t); wrap.appendChild(s);
+                return wrap;
+            }
+            var v = document.createElement('video');
+            v.src = src;
+            v.controls = true;
+            v.autoplay = true;
+            v.style.cssText = 'width:100%;height:100%;display:block;';
+            v.setAttribute('playsinline', '');
+            return v;
+        }
+
             function buildYouTubeEl(ytId) {
-                var f = document.createElement('iframe');
-                f.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(ytId) + '?autoplay=1&rel=0';
-                f.allow = 'autoplay; encrypted-media; picture-in-picture';
-                f.allowFullscreen = true;
-                f.setAttribute('title', 'Music video player');
-                f.style.cssText = 'width:100%;height:100%;display:block;border:none;';
-                return f;
+            var f = document.createElement('iframe');
+            f.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(ytId) + '?autoplay=1&rel=0';
+            f.allow = 'autoplay; encrypted-media; picture-in-picture';
+            f.allowFullscreen = true;
+            f.setAttribute('title', 'Music video player');
+            f.style.cssText = 'width:100%;height:100%;display:block;border:none;';
+            return f;
+        }
+
+        function loadTrack(card) {
+            var ytId = card.dataset.youtube || '';
+            var videoSrc = card.dataset.video || '';
+            var title = card.dataset.title || '';
+            var trackNo = card.dataset.track || '';
+            var duration = card.dataset.duration || '';
+            var bpm = card.dataset.bpm || '';
+            var key = card.dataset.key || '';
+            var role = card.dataset.role || '';
+            var hook = card.dataset.hook || '';
+
+            var npTitle = document.getElementById('np-title');
+            var npMeta = document.getElementById('np-meta');
+            var npRole = document.getElementById('np-role');
+            var npHook = document.getElementById('np-hook');
+            if (npTitle) npTitle.textContent = title;
+            if (npRole) npRole.textContent = role;
+            if (npHook) {
+                npHook.innerHTML = hook ? '&ldquo;' + hook.replace(/\//g, ' / ') + '&rdquo;' : '';
+                npHook.style.display = hook ? '' : 'none';
+            }
+            if (npMeta) {
+                npMeta.innerHTML =
+                    '<span class="meta-chip accent">Track ' + trackNo + '</span>' +
+                    '<span class="meta-chip">' + bpm + ' BPM</span>' +
+                    '<span class="meta-chip">' + key + '</span>' +
+                    '<span class="meta-chip">' + duration + '</span>';
             }
 
-            function loadTrack(card) {
-                var ytId = card.dataset.youtube || '';
-                var videoSrc = card.dataset.video || '';
-                var title = card.dataset.title || '';
-                var trackNo = card.dataset.track || '';
-                var duration = card.dataset.duration || '';
-                var bpm = card.dataset.bpm || '';
-                var key = card.dataset.key || '';
-                var role = card.dataset.role || '';
-                var hook = card.dataset.hook || '';
+            var playerWrap = document.getElementById('featured-player');
+            if (!playerWrap) return;
 
-                var npTitle = document.getElementById('np-title');
-                var npMeta = document.getElementById('np-meta');
-                var npRole = document.getElementById('np-role');
-                var npHook = document.getElementById('np-hook');
-                if (npTitle) npTitle.textContent = title;
-                if (npRole) npRole.textContent = role;
-                if (npHook) {
-                    npHook.innerHTML = hook ? '&ldquo;' + hook.replace(/\//g, ' / ') + '&rdquo;' : '';
-                    npHook.style.display = hook ? '' : 'none';
-                }
-                if (npMeta) {
-                    npMeta.innerHTML =
-                        '<span class="meta-chip accent">Track ' + trackNo + '</span>' +
-                        '<span class="meta-chip">' + bpm + ' BPM</span>' +
-                        '<span class="meta-chip">' + key + '</span>' +
-                        '<span class="meta-chip">' + duration + '</span>';
-                }
+            while (playerWrap.firstChild) playerWrap.removeChild(playerWrap.firstChild);
 
-                var playerWrap = document.getElementById('featured-player');
-                if (!playerWrap) return;
-
-                while (playerWrap.firstChild) playerWrap.removeChild(playerWrap.firstChild);
-
-                if (ytId) {
-                    playerWrap.appendChild(buildYouTubeEl(ytId));
-                } else if (videoSrc) {
-                    playerWrap.appendChild(buildVideoEl(videoSrc));
-                } else {
-                    var placeholder = document.createElement('div');
-                    placeholder.className = 'video-placeholder';
-                    placeholder.setAttribute('aria-label', 'Video not yet available for ' + title);
-                    var msg = document.createElement('p');
-                    msg.style.cssText = 'position:relative;z-index:1;color:var(--text-muted);font-size:0.9rem;';
-                    msg.textContent = 'Video coming soon';
-                    placeholder.appendChild(msg);
-                    playerWrap.appendChild(placeholder);
-                }
-
-                if (window.innerWidth <= 900) {
-                    playerWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+            if (ytId) {
+                playerWrap.appendChild(buildYouTubeEl(ytId));
+            } else if (videoSrc) {
+                playerWrap.appendChild(buildVideoEl(videoSrc));
+            } else {
+                playerWrap.appendChild(buildCSEl(title, ''));
             }
 
-            function handleTrackSelect(card) {
-                if (!card) return;
-
-                document.querySelectorAll('.track-card').forEach(function (c) {
-                    c.classList.remove('active');
-                    c.removeAttribute('aria-current');
-                });
-
-                card.classList.add('active');
-                card.setAttribute('aria-current', 'true');
-                currentTrack = parseInt(card.dataset.track, 10) || 1;
-
-                loadTrack(card);
-
-                if (window.gtag) {
-                    gtag('event', 'track_play', {
-                        event_category: 'music',
-                        event_label: 'DJ Z - ' + card.dataset.title,
-                        value: currentTrack
-                    });
-                }
+            if (window.innerWidth <= 900) {
+                playerWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+        }
 
-            document.querySelectorAll('.track-card').forEach(function (card) {
-                card.addEventListener('click', function () {
-                    handleTrackSelect(card);
-                });
-                card.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleTrackSelect(card);
-                    }
-                });
+        function handleTrackSelect(card) {
+            if (!card) return;
+
+            document.querySelectorAll('.track-card').forEach(function (c) {
+                c.classList.remove('active');
+                c.removeAttribute('aria-current');
             });
 
-            // Placeholder play button → load featured track (Track 9)
-            var placeholderBtn = document.getElementById('placeholder-play-btn');
-            if (placeholderBtn) {
-                placeholderBtn.addEventListener('click', function () {
-                    var featuredCard = document.querySelector('.track-card[data-track="9"]');
-                    if (featuredCard) handleTrackSelect(featuredCard);
+            card.classList.add('active');
+            card.setAttribute('aria-current', 'true');
+            currentTrack = parseInt(card.dataset.track, 10) || 1;
+
+            loadTrack(card);
+
+            if (window.gtag) {
+                gtag('event', 'track_play', {
+                    event_category: 'music',
+                    event_label: 'DJ Z - ' + card.dataset.title,
+                    value: currentTrack
                 });
             }
+        }
 
-            // Hero "Play Featured Track" button → load Track 9
-            var playFeaturedBtn = document.getElementById('play-featured-btn');
-            if (playFeaturedBtn) {
-                playFeaturedBtn.addEventListener('click', function (e) {
+        document.querySelectorAll('.track-card').forEach(function (card) {
+            card.addEventListener('click', function () {
+                handleTrackSelect(card);
+            });
+            card.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    var featuredCard = document.querySelector('.track-card[data-track="9"]');
-                    if (featuredCard) handleTrackSelect(featuredCard);
-                    document.getElementById('featured-player').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-            }
-
-            // ── Mobile nav ──
-            var mobileToggle = document.querySelector('.mobile-menu-toggle');
-            var mobileOverlay = document.getElementById('mobile-nav-overlay');
-            var mobileClose = document.querySelector('.mobile-nav-close');
-
-            function openMobileNav() {
-                if (!mobileOverlay) return;
-                mobileOverlay.classList.add('open');
-                mobileOverlay.setAttribute('aria-hidden', 'false');
-                if (mobileToggle) mobileToggle.setAttribute('aria-expanded', 'true');
-                if (mobileClose) mobileClose.focus();
-            }
-            function closeMobileNav() {
-                if (!mobileOverlay) return;
-                mobileOverlay.classList.remove('open');
-                mobileOverlay.setAttribute('aria-hidden', 'true');
-                if (mobileToggle) mobileToggle.setAttribute('aria-expanded', 'false');
-            }
-
-            if (mobileToggle) mobileToggle.addEventListener('click', function () {
-                if (mobileOverlay && mobileOverlay.classList.contains('open')) {
-                    closeMobileNav();
-                } else {
-                    openMobileNav();
+                    handleTrackSelect(card);
                 }
             });
-            if (mobileClose) mobileClose.addEventListener('click', closeMobileNav);
-            if (mobileOverlay) {
-                mobileOverlay.addEventListener('click', function (e) {
-                    if (e.target === mobileOverlay) closeMobileNav();
-                });
-            }
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') closeMobileNav();
-            });
+        });
 
-        })();
+        // Placeholder play button → load featured track (Track 9)
+        var placeholderBtn = document.getElementById('placeholder-play-btn');
+        if (placeholderBtn) {
+            placeholderBtn.addEventListener('click', function () {
+                var featuredCard = document.querySelector('.track-card[data-track="9"]');
+                if (featuredCard) handleTrackSelect(featuredCard);
+            });
+        }
+
+        // Hero "Play Featured Track" button → load Track 9
+        var playFeaturedBtn = document.getElementById('play-featured-btn');
+        if (playFeaturedBtn) {
+            playFeaturedBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var featuredCard = document.querySelector('.track-card[data-track="9"]');
+                if (featuredCard) handleTrackSelect(featuredCard);
+                document.getElementById('featured-player').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+
+        // ── Mobile nav ──
+        var mobileToggle = document.querySelector('.mobile-menu-toggle');
+        var mobileOverlay = document.getElementById('mobile-nav-overlay');
+        var mobileClose = document.querySelector('.mobile-nav-close');
+
+        function openMobileNav() {
+            if (!mobileOverlay) return;
+            mobileOverlay.classList.add('open');
+            mobileOverlay.setAttribute('aria-hidden', 'false');
+            if (mobileToggle) mobileToggle.setAttribute('aria-expanded', 'true');
+            if (mobileClose) mobileClose.focus();
+        }
+        function closeMobileNav() {
+            if (!mobileOverlay) return;
+            mobileOverlay.classList.remove('open');
+            mobileOverlay.setAttribute('aria-hidden', 'true');
+            if (mobileToggle) mobileToggle.setAttribute('aria-expanded', 'false');
+        }
+
+        if (mobileToggle) mobileToggle.addEventListener('click', function () {
+            if (mobileOverlay && mobileOverlay.classList.contains('open')) {
+                closeMobileNav();
+            } else {
+                openMobileNav();
+            }
+        });
+        if (mobileClose) mobileClose.addEventListener('click', closeMobileNav);
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', function (e) {
+                if (e.target === mobileOverlay) closeMobileNav();
+            });
+        }
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeMobileNav();
+        });
+
+        }) ();
     </script>
 
 </body>

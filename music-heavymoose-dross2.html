@@ -410,10 +410,22 @@
             width: 100%;
             height: 100%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 0;
             font-size: 5rem;
             background: linear-gradient(135deg, #0d0d0d 0%, #0d1318 50%, #1a1a2a 100%);
+        }
+
+        /* Album cover placeholder label */
+        .album-cover-label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
 
         .album-eyebrow {
@@ -543,6 +555,35 @@
             position: relative;
             z-index: 1;
             font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Video "coming soon" rich placeholder ── */
+        .video-cs-wrap {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: linear-gradient(160deg, #141414 0%, #0d0d0d 100%);
+            text-align: center;
+            padding: 2rem;
+        }
+        .video-cs-icon {
+            font-size: 2.5rem;
+            opacity: 0.45;
+            line-height: 1;
+        }
+        .video-cs-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: 0.01em;
+        }
+        .video-cs-sub {
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
 
@@ -877,7 +918,7 @@
             <div class="container">
                 <div class="album-hero-inner">
                     <div class="album-cover-wrap">
-                        <div class="album-cover-placeholder" aria-label="DROSS II album art — coming soon">&#129420;</div>
+                        <div class="album-cover-placeholder" aria-label="DROSS II album art — coming soon">&#129420;<span class="album-cover-label">Coming soon</span></div>
                     </div>
                     <div class="album-meta">
                         <span class="album-eyebrow">Volume II &bull; 2026</span>
@@ -945,6 +986,11 @@
             </div>
         </section>
 
+        <!-- CONTENT NEEDED (Heavy Moose — DROSS Vol. II):
+             - Album cover art: assets/GFV/album-hm-dross2/ (folder needs to be created + image added)
+             - YouTube video IDs: no data-youtube attributes on track cards yet (add when uploaded)
+             - Track video files: /api/media/dross-album-2/01 - track-name.mp4 (× 12 tracks)
+        -->
         <!-- ── Track List ── -->
         <section class="tracklist-section" aria-label="Track listing">
             <div class="container">
@@ -1357,7 +1403,32 @@
                 v.autoplay = true;
                 v.style.cssText = 'width:100%;height:100%;display:block;';
                 v.setAttribute('playsinline', '');
+                v.addEventListener('error', function () {
+                    var wrap = v.parentNode;
+                    if (!wrap) return;
+                    while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
+                    wrap.appendChild(buildCSEl('', ''));
+                });
                 return v;
+            }
+
+            function buildCSEl(title, cover) {
+                var wrap = document.createElement('div');
+                wrap.className = 'video-cs-wrap';
+                wrap.setAttribute('aria-label', title ? 'Video not yet available for ' + title : 'Video coming soon');
+                if (cover) {
+                    var bgImg = document.createElement('img');
+                    bgImg.src = cover; bgImg.alt = ''; bgImg.className = 'video-placeholder-cover';
+                    bgImg.setAttribute('aria-hidden', 'true');
+                    wrap.appendChild(bgImg);
+                }
+                var icon = document.createElement('span');
+                icon.className = 'video-cs-icon'; icon.setAttribute('aria-hidden', 'true'); icon.textContent = '\uD83C\uDFAC';
+                var t = document.createElement('p'); t.className = 'video-cs-title'; t.textContent = 'Video in production';
+                var s = document.createElement('p'); s.className = 'video-cs-sub';
+                s.textContent = title ? title : 'Check back soon';
+                wrap.appendChild(icon); wrap.appendChild(t); wrap.appendChild(s);
+                return wrap;
             }
 
             function loadTrack(card) {
@@ -1389,13 +1460,7 @@
                 if (videoSrc) {
                     playerWrap.appendChild(buildVideoEl(videoSrc));
                 } else {
-                    var placeholder = document.createElement('div');
-                    placeholder.className = 'video-placeholder';
-                    var msg = document.createElement('p');
-                    msg.style.cssText = 'color:var(--text-muted);font-size:0.9rem;';
-                    msg.textContent = 'Video coming soon';
-                    placeholder.appendChild(msg);
-                    playerWrap.appendChild(placeholder);
+                    playerWrap.appendChild(buildCSEl(title, ''));
                 }
 
                 if (window.innerWidth <= 900) {
