@@ -3176,6 +3176,7 @@
                         'automation': { name: 'Automation', title: 'Automation Center', sub: 'Publishing queue snapshot, health sweep history, and one-click retry for failed post variants.' },
                         'ai-utils': { name: 'AI Utils', title: 'AI Utilities', sub: 'Generate platform-optimised captions for any library asset via Cloudflare Workers AI (Llama 3 8B · free tier · $0).' },
                         'music-library': { name: 'Music Library', title: 'GFV Music Library', sub: 'SummitView music catalog — browse artists, albums, and tracks. Open the per-album prompt studio or pre-fill the Post Composer.' },
+                        'prompt-studio': { name: 'Prompt Studio', title: 'SummitView Prompt Studio', sub: 'Interactive SummitView hub — 16 albums, 152 tracks, 7 artists. Securely gated to Clerk admin session.' },
                     };
 
                     function updatePageContext(view) {
@@ -10027,6 +10028,43 @@
                                 await loadMusicLibraryCatalog();
                             }
                             renderMusicLibrary();
+                        };
+
+                        // ── Panel 33: SummitView Prompt Studio ────────────────────────────
+                        window.__adminPanels['prompt-studio'] = async function () {
+                            const frameWrap = document.getElementById('ps-frame-wrap');
+                            const notAvail = document.getElementById('ps-not-available');
+                            const statusEl = document.getElementById('ps-status');
+                            const localBtn = document.getElementById('ps-local-btn');
+
+                            // Wire local fallback button once
+                            if (localBtn && !localBtn._wired) {
+                                localBtn._wired = true;
+                                localBtn.addEventListener('click', () => {
+                                    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                                    if (isLocal) {
+                                        window.open('/GFD%20Dev%20Projects/SummitView/output/index.html', '_blank', 'noopener');
+                                    } else {
+                                        toast('Local SummitView is only reachable when running on localhost.', 'info');
+                                    }
+                                });
+                            }
+
+                            // Check if /prompt-studio/ is deployed (same-origin fetch includes Clerk session cookie)
+                            try {
+                                const resp = await fetch('/prompt-studio/', { method: 'HEAD', cache: 'no-store' });
+                                if (resp.ok) {
+                                    if (frameWrap) frameWrap.style.display = '';
+                                    if (notAvail) notAvail.style.display = 'none';
+                                    if (statusEl) statusEl.textContent = '— live';
+                                    return;
+                                }
+                            } catch { /* fall through */ }
+
+                            // Not available: show instructions
+                            if (frameWrap) frameWrap.style.display = 'none';
+                            if (notAvail) notAvail.style.display = '';
+                            if (statusEl) statusEl.textContent = '— not yet deployed';
                         };
                     })();
 

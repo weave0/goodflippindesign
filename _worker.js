@@ -194,6 +194,24 @@ export default {
       }
     }
 
+    // Protect the Prompt Studio from unauthenticated access.
+    // This path contains proprietary music prompt data and SummitView catalog output.
+    // Requires a valid Clerk session — unauthenticated requests are redirected to admin sign-in.
+    if (
+      pathLower === "/prompt-studio" ||
+      pathLower.startsWith("/prompt-studio/")
+    ) {
+      const cookieHeader = request.headers.get("Cookie") || "";
+      const sessionMatch = cookieHeader.match(/(?:^|;\s*)__session=([^;]+)/);
+      const sessionVal = sessionMatch ? sessionMatch[1] : "";
+      const hasValidSession =
+        (sessionVal.startsWith("ey") && sessionVal.length > 20) ||
+        cookieHeader.includes("__client_uat=1");
+      if (!hasValidSession) {
+        return Response.redirect(`${url.origin}/admin.html`, 302);
+      }
+    }
+
     // Serve public media assets (videos, audio) directly from R2 (no auth required).
     // URL shape: /api/media/{path...}
     // R2 key shape: media/{path...}

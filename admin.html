@@ -115,6 +115,9 @@
                                 <circle cx="4" cy="13" r="2" />
                                 <circle cx="11" cy="11" r="2" />
                             </svg></span><span class="nav-label">Music Library</span></button>
+                    <button class="nav-btn" data-view="prompt-studio"><span class="nav-num">33</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M2 8h1.5M3.5 8V5m0 3v3M5.5 8H7M7 8V3m0 5v5M9 8h1.5m1.5 0V6m0 2v3M12.5 8H14m-1.5 0V5m0 3v2" />
+                            </svg></span><span class="nav-label">Prompt Studio</span></button>
 
                     <div class="nav-group-label">Sites</div>
                     <button class="nav-btn" data-view="overrides"><span class="nav-num">09</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
@@ -2955,6 +2958,37 @@
                     <!-- Catalog render area filled by renderMusicLibrary() -->
                     <div id="ml-catalog" style="margin-top:1rem">
                         <p style="color:var(--text-muted)">Click <strong>Refresh Catalog</strong> to load.</p>
+                    </div>
+                </section>
+
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- PANEL 33 — SUMMITVIEW PROMPT STUDIO                    -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <section class="view" id="view-prompt-studio">
+                    <div class="section-head">
+                        <h2 class="section-title">Prompt Studio</h2>
+                        <div class="inline-actions">
+                            <a class="btn btn-secondary" id="ps-open-tab-btn" href="/prompt-studio/" target="_blank" rel="noopener" title="Open in new tab" style="text-decoration:none">&#8599; Full View</a>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">SummitView Music Hub &mdash; 16 albums &middot; 152 tracks &middot; 7 artists. Secured by Clerk admin session. <span id="ps-status" style="color:var(--text-muted)"></span></p>
+
+                    <!-- Deployed: iframe loads /prompt-studio/ -->
+                    <div id="ps-frame-wrap" style="display:none;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg-2);">
+                        <iframe id="ps-iframe"
+                                src="/prompt-studio/"
+                                style="width:100%;height:calc(100vh - 200px);min-height:600px;border:none;display:block;"
+                                title="SummitView Prompt Studio"
+                                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
+                                loading="lazy"></iframe>
+                    </div>
+
+                    <!-- Not yet deployed: instructions + local fallback -->
+                    <div id="ps-not-available" style="padding:2rem;text-align:center;border:1px solid var(--border);border-radius:8px;">
+                        <p style="color:var(--text-muted);margin-bottom:1rem;">Prompt Studio not yet deployed. Run the sync script to populate <code style="background:rgba(255,255,255,0.06);padding:0.1rem 0.35rem;border-radius:3px">prompt-studio/</code> and push to deploy.</p>
+                        <code style="font-size:0.8rem;background:rgba(255,255,255,0.06);padding:0.4rem 0.8rem;border-radius:4px;display:inline-block;margin:0 auto 1rem">scripts/sync-prompt-studio.ps1</code>
+                        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.2rem">Copies SummitView output (HTML/CSS/JS only) into <code style="background:rgba(255,255,255,0.06);padding:0.1rem 0.3rem;border-radius:3px">prompt-studio/</code>, then commit and push to deploy.</p>
+                        <button class="btn btn-secondary" id="ps-local-btn">Open Local SummitView</button>
                     </div>
                 </section>
 
