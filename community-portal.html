@@ -1510,6 +1510,45 @@
             color: var(--text);
         }
 
+        .footer-studio-line {
+            margin: 0 0 0.75rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        .footer-ecosystem {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem 0.875rem;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .footer-ecosystem-label {
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        .footer-ecosystem a {
+            color: var(--text-muted);
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            padding: 0 0.125rem;
+            transition: color 0.2s ease;
+            text-decoration: none;
+        }
+
+        .footer-ecosystem a:hover {
+            color: var(--text);
+        }
+
         /* ── Responsive ──────────────────────────────────── */
         @media (max-width: 768px) {
             .stats-bar {
@@ -2705,7 +2744,22 @@
         <!-- ── Footer ──────────────────────────────────── -->
         <footer class="app-footer">
             <div class="container">
-                <p>&copy; 2026 <a href="/">Good Flippin Vibes</a> &mdash; Built with good energy.</p>
+                <p>&copy; 2026 GFV LLC &mdash; <a href="/">Good Flippin Vibes</a> &mdash; Built with good energy.</p>
+                <div style="margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1.25rem;">
+                    <p class="footer-studio-line">
+                        <strong style="color: var(--text);">Good Flippin Design</strong> is the studio. We publish under the brand <a href="https://goodflippinvibes.com" target="_blank" rel="noopener">Good Flippin Vibes</a>.
+                    </p>
+                    <div class="footer-ecosystem">
+                        <span class="footer-ecosystem-label">Across the studio:</span>
+                        <a href="https://aiaimate.com" target="_blank" rel="noopener" title="AI Education Platform">AI Aimate</a>
+                        <a href="https://culturesherpa.org" target="_blank" rel="noopener" title="Interactive Cultural Atlas">CultureSherpa</a>
+                        <a href="https://citizenapproved.org" target="_blank" rel="noopener" title="U.S. Citizenship Pathways">CitizenApproved</a>
+                        <a href="https://lowertownstpaul.org" target="_blank" rel="noopener" title="Lowertown Saint Paul">Lowertown SP</a>
+                        <a href="https://heavymoose.com" target="_blank" rel="noopener" title="Heavy Moose music canon">Heavy Moose</a>
+                        <a href="https://goodflippindesign.com" target="_blank" rel="noopener" title="Studio website">Good Flippin Design</a>
+                        <a href="https://globaldeets.com" target="_blank" rel="noopener" title="Portfolio Hub">GlobalDeets</a>
+                    </div>
+                </div>
             </div>
         </footer>
     </div>
