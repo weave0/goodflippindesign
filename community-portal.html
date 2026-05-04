@@ -2862,13 +2862,29 @@
                 </form>
             </div>
             <div class="settings-panel" id="settings-preferences">
-                <div class="form-group">
-                    <label><input type="checkbox" id="pref-notif-replies" checked> Notify me on replies</label>
-                </div>
-                <div class="form-group">
-                    <label><input type="checkbox" id="pref-notif-reactions" checked> Notify me on reactions</label>
-                </div>
-                <p class="text-muted" style="font-size:0.8rem; margin-top:1rem;">More preferences coming soon.</p>
+                <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1.25rem;">Preferences are saved locally on this device.</p>
+                <fieldset style="border:none;padding:0;margin:0 0 1.25rem">
+                    <legend style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem">Notifications</legend>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="pref-notif-replies" checked> Notify me on replies to my posts</label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="pref-notif-reactions" checked> Notify me on reactions to my posts</label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="pref-notif-mentions"> Notify me on @mentions</label>
+                    </div>
+                </fieldset>
+                <fieldset style="border:none;padding:0;margin:0 0 1.25rem">
+                    <legend style="font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem">Display</legend>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="pref-show-xp" checked> Show XP &amp; level on my profile</label>
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="pref-compact-feed"> Use compact feed (smaller post cards)</label>
+                    </div>
+                </fieldset>
+                <button class="btn-save-settings" id="btn-save-preferences" type="button">Save Preferences</button>
             </div>
         </div>
     </div>
@@ -4123,19 +4139,51 @@
                         btn.textContent = 'Save Changes';
                     }
                 });
+
+                // Preferences save
+                const prefSaveBtn = $('#btn-save-preferences');
+                if (prefSaveBtn) {
+                    prefSaveBtn.addEventListener('click', () => {
+                        const PREF_IDS = ['pref-notif-replies', 'pref-notif-reactions', 'pref-notif-mentions', 'pref-show-xp', 'pref-compact-feed'];
+                        const prefs = {};
+                        PREF_IDS.forEach((id) => {
+                            const el = $('#' + id);
+                            if (el) prefs[id] = el.checked;
+                        });
+                        localStorage.setItem('gfv_prefs', JSON.stringify(prefs));
+                        // Apply compact feed immediately
+                        document.body.classList.toggle('compact-feed', !!prefs['pref-compact-feed']);
+                        showToast('Preferences saved!', 'xp');
+                        modal.classList.remove('visible');
+                    });
+                }
             }
 
             function openSettings() {
                 const modal = $('#modal-settings');
                 if (!profileData) { showToast('Profile not loaded yet', 'error'); return; }
 
-                // Populate form
+                // Populate profile form
                 $('#settings-avatar').src = profileData.avatarUrl || currentUser?.imageUrl || 'data:,';
                 $('#settings-displayname').value = profileData.displayName || '';
                 $('#settings-bio').value = profileData.bio || '';
                 $('#settings-location').value = profileData.location || '';
                 $('#settings-website').value = profileData.website || '';
                 $('#bio-char-count').textContent = (profileData.bio || '').length + ' / 500';
+
+                // Populate preferences from localStorage
+                const PREF_DEFAULTS = {
+                    'pref-notif-replies': true,
+                    'pref-notif-reactions': true,
+                    'pref-notif-mentions': false,
+                    'pref-show-xp': true,
+                    'pref-compact-feed': false,
+                };
+                const stored = JSON.parse(localStorage.getItem('gfv_prefs') || '{}');
+                Object.entries(PREF_DEFAULTS).forEach(([id, def]) => {
+                    const el = $('#' + id);
+                    if (el) el.checked = id in stored ? stored[id] : def;
+                });
 
                 modal.classList.add('visible');
             }

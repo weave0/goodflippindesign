@@ -118,6 +118,11 @@
                     <button class="nav-btn" data-view="prompt-studio"><span class="nav-num">33</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M2 8h1.5M3.5 8V5m0 3v3M5.5 8H7M7 8V3m0 5v5M9 8h1.5m1.5 0V6m0 2v3M12.5 8H14m-1.5 0V5m0 3v2" />
                             </svg></span><span class="nav-label">Prompt Studio</span></button>
+                    <button class="nav-btn" data-view="eco-overview"><span class="nav-num">34</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="8" cy="8" r="5.5" />
+                                <circle cx="8" cy="8" r="2" />
+                                <path d="M8 2.5V1M8 15v-1.5M2.5 8H1M15 8h-1.5M4.1 4.1l-1-1M12.9 12.9l-1-1M11.9 4.1l1-1M3.1 12.9l1-1" />
+                            </svg></span><span class="nav-label">Ecosystem Overview</span></button>
 
                     <div class="nav-group-label">Sites</div>
                     <button class="nav-btn" data-view="overrides"><span class="nav-num">09</span><span class="nav-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
@@ -2976,11 +2981,11 @@
                     <!-- Deployed: iframe loads /prompt-studio/ -->
                     <div id="ps-frame-wrap" style="display:none;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg-2);">
                         <iframe id="ps-iframe"
-                                src="/prompt-studio/"
-                                style="width:100%;height:calc(100vh - 200px);min-height:600px;border:none;display:block;"
-                                title="SummitView Prompt Studio"
-                                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
-                                loading="lazy"></iframe>
+                            src="/prompt-studio/"
+                            style="width:100%;height:calc(100vh - 200px);min-height:600px;border:none;display:block;"
+                            title="SummitView Prompt Studio"
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
+                            loading="lazy"></iframe>
                     </div>
 
                     <!-- Not yet deployed: instructions + local fallback -->
@@ -2989,6 +2994,22 @@
                         <code style="font-size:0.8rem;background:rgba(255,255,255,0.06);padding:0.4rem 0.8rem;border-radius:4px;display:inline-block;margin:0 auto 1rem">scripts/sync-prompt-studio.ps1</code>
                         <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.2rem">Copies SummitView output (HTML/CSS/JS only) into <code style="background:rgba(255,255,255,0.06);padding:0.1rem 0.3rem;border-radius:3px">prompt-studio/</code>, then commit and push to deploy.</p>
                         <button class="btn btn-secondary" id="ps-local-btn">Open Local SummitView</button>
+                    </div>
+                </section>
+
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- PANEL 34 — ECOSYSTEM OVERVIEW (cross-property command) -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <section class="view" id="view-eco-overview">
+                    <div class="section-head">
+                        <h2 class="section-title">Ecosystem Overview</h2>
+                        <div class="inline-actions">
+                            <button class="btn btn-secondary" id="eco-overview-refresh">&#8635; Refresh</button>
+                        </div>
+                    </div>
+                    <p class="subheading mb-08">Cross-property command surface &mdash; aggregate health, brand breakdown, and quick-jump links across the entire GFD/GFV ecosystem.</p>
+                    <div id="eco-overview-root">
+                        <p style="color:var(--text-muted)">Loading ecosystem overview&hellip;</p>
                     </div>
                 </section>
 

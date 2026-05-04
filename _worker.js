@@ -276,6 +276,68 @@ export default {
       return new Response(object.body, { headers });
     }
 
+    // Public status page — reads most-recent health_checks rows from D1 and
+    // returns a lean JSON summary.  No auth required; safe to expose publicly.
+    // Shape: { ok, updated_at, sites: [{ name, url, brand, status, response_time_ms, checked_at }] }
+    if (url.pathname === "/api/status" && request.method === "GET") {
+      const corsHeaders = {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=60",
+      };
+      if (!env.DB) {
+        return new Response(
+          JSON.stringify({ ok: false, error: "Database unavailable" }),
+          { status: 503, headers: corsHeaders },
+        );
+      }
+      try {
+        // One row per URL — pick the most recent check for each distinct URL.
+        const { results } = await env.DB.prepare(
+          `SELECT name, url, brand, overall_status, response_time_ms, status_code, checked_at
+           FROM health_checks
+           WHERE id IN (
+             SELECT MAX(id) FROM health_checks GROUP BY url
+           )
+           ORDER BY brand, name`
+        ).all();
+
+        const sites = (results || []).map((r) => ({
+          name: r.name,
+          url: r.url,
+          brand: r.brand,
+          status: r.overall_status,        // pass | warn | fail
+          status_code: r.status_code,
+          response_time_ms: r.response_time_ms,
+          checked_at: r.checked_at,
+        }));
+
+        const allOk = sites.length > 0 && sites.every((s) => s.status === "pass");
+        const anyFail = sites.some((s) => s.status === "fail");
+        const overallStatus = anyFail ? "degraded" : allOk ? "operational" : "partial";
+
+        const latestChecked = sites.reduce((acc, s) => {
+          return !acc || s.checked_at > acc ? s.checked_at : acc;
+        }, null);
+
+        return new Response(
+          JSON.stringify({
+            ok: !anyFail,
+            status: overallStatus,
+            updated_at: latestChecked,
+            site_count: sites.length,
+            sites,
+          }),
+          { status: 200, headers: corsHeaders },
+        );
+      } catch (e) {
+        return new Response(
+          JSON.stringify({ ok: false, error: "Status query failed", detail: e.message }),
+          { status: 500, headers: corsHeaders },
+        );
+      }
+    }
+
     // Route API requests to auth worker (gracefully degrade if unavailable)
     // Exception: /api/stripe-health proxies to Stripe Worker (avoids worker-to-worker *.workers.dev issues)
     if (url.pathname === "/api/stripe-health" && request.method === "GET") {

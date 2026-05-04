@@ -650,6 +650,9 @@
                         const ecoRefresh = $('eco-refresh-btn');
                         if (ecoRefresh) ecoRefresh.addEventListener('click', refreshEcosystem);
 
+                        const ecoOvRefresh = $('eco-overview-refresh');
+                        if (ecoOvRefresh) ecoOvRefresh.addEventListener('click', renderEcosystemOverview);
+
                         $('refresh-btn').addEventListener('click', refreshAll);
                         $('manual-run-btn').addEventListener('click', runQueueNow);
                         $('sign-out-btn').addEventListener('click', () => state.clerk.signOut({ redirectUrl: '/' }));
@@ -3124,6 +3127,9 @@
                         if (view === 'ecosystem') {
                             refreshEcosystem();
                         }
+                        if (view === 'eco-overview') {
+                            renderEcosystemOverview();
+                        }
                         if (view === 'social-feed') {
                             if (typeof switchSfViewMode === 'function') {
                                 if (sfViewMode === 'kits') loadPostKits();
@@ -3177,6 +3183,7 @@
                         'ai-utils': { name: 'AI Utils', title: 'AI Utilities', sub: 'Generate platform-optimised captions for any library asset via Cloudflare Workers AI (Llama 3 8B · free tier · $0).' },
                         'music-library': { name: 'Music Library', title: 'GFV Music Library', sub: 'SummitView music catalog — browse artists, albums, and tracks. Open the per-album prompt studio or pre-fill the Post Composer.' },
                         'prompt-studio': { name: 'Prompt Studio', title: 'SummitView Prompt Studio', sub: 'Interactive SummitView hub — 16 albums, 152 tracks, 7 artists. Securely gated to Clerk admin session.' },
+                        'eco-overview': { name: 'Ecosystem Overview', title: 'Ecosystem Overview', sub: 'Cross-property command surface — aggregate health, brand breakdown, and quick-jump links across the entire GFD/GFV ecosystem.' },
                     };
 
                     function updatePageContext(view) {
@@ -10074,4 +10081,104 @@
                             $('auth-loading').textContent = 'Failed to load Clerk auth library.';
                             console.error('[admin auth]', err);
                         });
+
+                    // ── Panel 34: Ecosystem Overview ────────────────────────────────
+                    async function renderEcosystemOverview() {
+                        const root = $('eco-overview-root');
+                        if (!root) return;
+                        root.innerHTML = '<p style="color:var(--text-muted)">Loading&hellip;</p>';
+
+                        // Fetch public /api/status (no auth)
+                        let statusData = null;
+                        try {
+                            const resp = await fetch('/api/status');
+                            if (resp.ok) statusData = await resp.json();
+                        } catch (e) { /* unavailable */ }
+
+                        const sites = statusData?.sites || [];
+                        const total = sites.length;
+                        const passing = sites.filter(function (s) { return s.status === 'pass'; }).length;
+                        const warning = sites.filter(function (s) { return s.status === 'warn'; }).length;
+                        const failing = sites.filter(function (s) { return s.status === 'fail'; }).length;
+                        const overallStatus = statusData?.status || (total === 0 ? 'unknown' : 'unknown');
+                        const overallColor = overallStatus === 'operational' ? '#10b981' : overallStatus === 'degraded' ? '#ef4444' : '#f59e0b';
+                        const updatedAt = statusData?.updated_at ? new Date(statusData.updated_at).toLocaleString() : 'N/A';
+
+                        // Brand breakdown from SITE_REGISTRY
+                        const brandMap = {};
+                        SITE_REGISTRY.forEach(function (s) {
+                            if (s.hosting === 'undeployed') return;
+                            const brand = s.id.startsWith('gf') ? s.id : 'other';
+                            if (!brandMap[s.id]) brandMap[s.id] = { name: s.name, color: s.color, domain: s.domain, liveUrl: s.liveUrl, adminUrl: s.adminUrl, checks: s.checks };
+                        });
+
+                        // Build summary bar
+                        const summaryHtml = '<div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem">' +
+                            '<div class="panel" style="flex:1;min-width:160px;border-left:4px solid ' + overallColor + ';padding:1rem">' +
+                            '<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.25rem">Overall Status</div>' +
+                            '<strong style="font-size:1.1rem;color:' + overallColor + '">' + escapeHtml(overallStatus.charAt(0).toUpperCase() + overallStatus.slice(1)) + '</strong>' +
+                            '</div>' +
+                            '<div class="panel" style="flex:1;min-width:120px;padding:1rem;text-align:center">' +
+                            '<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.25rem">Sites Monitored</div>' +
+                            '<strong style="font-size:1.3rem">' + total + '</strong>' +
+                            '</div>' +
+                            '<div class="panel" style="flex:1;min-width:120px;padding:1rem;text-align:center">' +
+                            '<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.25rem">Passing</div>' +
+                            '<strong style="font-size:1.3rem;color:#10b981">' + passing + '</strong>' +
+                            '</div>' +
+                            '<div class="panel" style="flex:1;min-width:120px;padding:1rem;text-align:center">' +
+                            '<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.25rem">Warnings</div>' +
+                            '<strong style="font-size:1.3rem;color:#f59e0b">' + warning + '</strong>' +
+                            '</div>' +
+                            '<div class="panel" style="flex:1;min-width:120px;padding:1rem;text-align:center">' +
+                            '<div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.25rem">Failing</div>' +
+                            '<strong style="font-size:1.3rem;color:#ef4444">' + failing + '</strong>' +
+                            '</div>' +
+                            '</div>' +
+                            '<p style="font-size:0.72rem;color:var(--text-muted);margin-bottom:1.5rem">Last updated: ' + escapeHtml(updatedAt) + ' &mdash; Data via <code>/api/status</code></p>';
+
+                        // Build site rows
+                        const siteRows = SITE_REGISTRY.filter(function (s) { return s.domain; }).map(function (site) {
+                            const match = sites.find(function (s) { return s.url && s.url.includes(site.domain); });
+                            const st = match ? match.status : 'unknown';
+                            const stColor = st === 'pass' ? '#10b981' : st === 'fail' ? '#ef4444' : st === 'warn' ? '#f59e0b' : '#64748b';
+                            const rt = match ? (match.response_time_ms != null ? match.response_time_ms + 'ms' : '—') : '—';
+                            const checks = site.checks || {};
+                            const checkIcons = [
+                                checks.ga4 ? '<span title="GA4" style="color:#10b981">GA4</span>' : '<span title="GA4 missing" style="color:#64748b">GA4</span>',
+                                checks.sentry ? '<span title="Sentry" style="color:#10b981">Sentry</span>' : '<span title="No Sentry" style="color:#64748b">Sentry</span>',
+                                checks.ci ? '<span title="CI" style="color:#10b981">CI</span>' : '<span title="No CI" style="color:#64748b">CI</span>',
+                                checks.tests ? '<span title="Tests" style="color:#10b981">Tests</span>' : '<span title="No Tests" style="color:#64748b">Tests</span>',
+                            ].join('<span style="color:var(--border)"> | </span>');
+
+                            const links = [];
+                            if (site.liveUrl) links.push('<a href="' + escapeHtml(site.liveUrl) + '" target="_blank" rel="noopener" style="color:var(--text-muted);font-size:0.75rem">&#8599; Live</a>');
+                            if (site.adminUrl) links.push('<a href="' + escapeHtml(site.adminUrl) + '" target="_blank" rel="noopener" style="color:var(--text-muted);font-size:0.75rem">⚙ Dash</a>');
+
+                            return '<div class="panel" style="padding:0.85rem 1rem;border-left:3px solid ' + escapeHtml(site.color) + ';display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem">' +
+                                '<div style="flex:1;min-width:180px">' +
+                                '<strong style="font-size:0.9rem">' + escapeHtml(site.name) + '</strong>' +
+                                '<div style="font-size:0.72rem;color:var(--text-muted)">' + escapeHtml(site.domain) + '</div>' +
+                                '</div>' +
+                                '<div style="font-size:0.72rem;font-weight:600;color:' + stColor + ';min-width:60px">' + escapeHtml(st.toUpperCase()) + '</div>' +
+                                '<div style="font-size:0.72rem;color:var(--text-muted);min-width:55px">' + escapeHtml(rt) + '</div>' +
+                                '<div style="font-size:0.72rem;display:flex;gap:0.35rem;flex-wrap:wrap">' + checkIcons + '</div>' +
+                                '<div style="display:flex;gap:0.5rem;margin-left:auto">' + links.join('') + '</div>' +
+                                '</div>';
+                        }).join('');
+
+                        const noDomainSites = SITE_REGISTRY.filter(function (s) { return !s.domain; }).map(function (s) {
+                            return '<span class="tag" style="background:rgba(100,116,139,0.15);color:#64748b;border:1px solid rgba(100,116,139,0.2)">' + escapeHtml(s.name) + '</span>';
+                        }).join(' ');
+
+                        root.innerHTML = summaryHtml +
+                            '<h3 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.75rem">Deployed Properties</h3>' +
+                            siteRows +
+                            (noDomainSites ? '<h3 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:1.25rem 0 0.5rem">In Development</h3><div style="display:flex;gap:0.5rem;flex-wrap:wrap">' + noDomainSites + '</div>' : '') +
+                            '<div style="text-align:center;margin-top:1.5rem">' +
+                            '<button class="btn btn-secondary" onclick="navigateToView(\'ecosystem\')">&#8594; Full Ecosystem Health (Panel 12)</button>' +
+                            '</div>';
+                    }
+                    window.renderEcosystemOverview = renderEcosystemOverview;
+
                 })();
