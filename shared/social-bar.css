@@ -92,7 +92,7 @@
 /* Message copy */
 .social-bar-message {
   flex: 1;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: #8a8fa4;
   white-space: nowrap;
   overflow: hidden;
@@ -111,6 +111,10 @@
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  vertical-align: middle;
 }
 
 .social-bar-message a:hover {
