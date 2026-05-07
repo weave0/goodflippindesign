@@ -1,0 +1,436 @@
+{
+  "meta": {
+    "timestamp": "2026-05-06T21:31:25.648Z",
+    "version": "1.1",
+    "machine": "WeaverASUS",
+    "duration_ms": 7282
+  },
+  "drives": [
+    {
+      "label": "C:",
+      "name": "OS",
+      "used_gb": 821.3,
+      "free_gb": 103.3,
+      "total_gb": 924.6,
+      "pct_used": 88.8,
+      "baseline_used_gb": 607.79,
+      "delta_gb": 213.5,
+      "alert": "warn"
+    },
+    {
+      "label": "E:",
+      "name": "WEAVER 4TW",
+      "used_gb": 2126.4,
+      "free_gb": 1599.6,
+      "total_gb": 3726,
+      "pct_used": 57.1,
+      "baseline_used_gb": 2017.6,
+      "delta_gb": 108.8,
+      "alert": "ok"
+    },
+    {
+      "label": "S:",
+      "name": "CultureSherpa",
+      "used_gb": 21.1,
+      "free_gb": 42.9,
+      "total_gb": 64,
+      "pct_used": 33,
+      "baseline_used_gb": 18.99,
+      "delta_gb": 2.1,
+      "alert": "ok"
+    },
+    {
+      "label": "Z:",
+      "name": "WeaveO",
+      "used_gb": 438.4,
+      "free_gb": 32329.5,
+      "total_gb": 32767.9,
+      "pct_used": 1.3,
+      "baseline_used_gb": 309.61,
+      "delta_gb": 128.8,
+      "alert": "ok"
+    }
+  ],
+  "toolchain": {
+    "node": "v22.17.1",
+    "npm": "11.12.1",
+    "wrangler": "4.88.0",
+    "git": "2.50.1.windows.1",
+    "code": null,
+    "os": "Windows_NT 10.0.26200"
+  },
+  "repos": [
+    {
+      "name": "goodflippindesign",
+      "path": "Z:\\GFD",
+      "brand": "gfd",
+      "url": "https://goodflippindesign.com",
+      "git": {
+        "branch": "main",
+        "last_commit_hash": "3d252f8",
+        "last_commit_message": "feat: Option A footer copy + scanner probe logging",
+        "last_commit_date": "2026-05-04",
+        "status": "dirty",
+        "modified": 11,
+        "untracked": 30,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": true,
+      "has_wrangler": true
+    },
+    {
+      "name": "ai",
+      "path": "Z:\\GFD\\GFD Dev Projects\\AI",
+      "brand": "aiaimate",
+      "url": "https://aiaimate.com",
+      "git": {
+        "branch": "main",
+        "last_commit_hash": "26263ea",
+        "last_commit_message": "fix(lint): add global ignores to eslint flat config for ESLint 10 compat",
+        "last_commit_date": "2026-05-02",
+        "status": "dirty",
+        "modified": 18,
+        "untracked": 13,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": true,
+      "has_wrangler": false
+    },
+    {
+      "name": "applio",
+      "path": "Z:\\GFD\\GFD Dev Projects\\Applio",
+      "brand": null,
+      "url": null,
+      "git": {
+        "branch": "main",
+        "last_commit_hash": "14b173a",
+        "last_commit_message": "Merge pull request #1230 from semnil/feat/realtime-inference-improvements",
+        "last_commit_date": "2026-04-08",
+        "status": "clean",
+        "modified": 0,
+        "untracked": 0,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": false,
+      "has_wrangler": false
+    },
+    {
+      "name": "citizenapproved",
+      "path": "Z:\\GFD\\GFD Dev Projects\\CitizenApproved",
+      "brand": "citizenapproved",
+      "url": "https://citizenapproved.org",
+      "git": {
+        "branch": "main",
+        "last_commit_hash": "c90b378",
+        "last_commit_message": "chore: add CI workflow, README, and .env.example",
+        "last_commit_date": "2026-03-17",
+        "status": "dirty",
+        "modified": 3,
+        "untracked": 0,
+        "ahead": 2,
+        "behind": 13
+      },
+      "has_package": true,
+      "has_wrangler": false
+    },
+    {
+      "name": "culturesherpa",
+      "path": "Z:\\GFD\\GFD Dev Projects\\CultureSherpa",
+      "brand": "culturesherpa",
+      "url": "https://culturesherpa.org",
+      "git": {
+        "branch": "main",
+        "last_commit_hash": "cfc5f6d93",
+        "last_commit_message": "chore: archive stale completion/deployment docs to _archived/status-docs/",
+        "last_commit_date": "2026-05-02",
+        "status": "dirty",
+        "modified": 12584,
+        "untracked": 7,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": true,
+      "has_wrangler": false
+    },
+    {
+      "name": "foxyana",
+      "path": "Z:\\GFD\\GFD Dev Projects\\Foxyana",
+      "brand": null,
+      "url": null,
+      "git": {
+        "branch": "main",
+        "last_commit_hash": "d2be69f",
+        "last_commit_message": "feat: Album 2 (Земля Пам'ятає) + album selector tabs + audio path migration + GFD footer credit",
+        "last_commit_date": "2026-04-05",
+        "status": "dirty",
+        "modified": 7,
+        "untracked": 2,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": false,
+      "has_wrangler": true
+    },
+    {
+      "name": "gfv",
+      "path": "Z:\\GFD\\GFD Dev Projects\\GFV",
+      "brand": "gfv",
+      "url": "https://goodflippinvibes.com",
+      "git": null,
+      "has_package": false,
+      "has_wrangler": false
+    },
+    {
+      "name": "gfy",
+      "path": "Z:\\GFD\\GFD Dev Projects\\GFY",
+      "brand": "gfy",
+      "url": null,
+      "git": {
+        "branch": "main",
+        "last_commit_hash": "e96e7c7",
+        "last_commit_message": "docs: mark Launch the Project complete, add deployment details",
+        "last_commit_date": "2026-04-17",
+        "status": "dirty",
+        "modified": 3,
+        "untracked": 0,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": true,
+      "has_wrangler": true
+    },
+    {
+      "name": "globaldeets",
+      "path": "Z:\\GFD\\GFD Dev Projects\\Globaldeets",
+      "brand": "globaldeets",
+      "url": "https://globaldeets.com",
+      "git": {
+        "branch": "HEAD",
+        "last_commit_hash": "c3fac68",
+        "last_commit_message": "feat: onerror monitoring, updated CSP, and CI workflow",
+        "last_commit_date": "2026-03-13",
+        "status": "dirty",
+        "modified": 22,
+        "untracked": 0,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": true,
+      "has_wrangler": true
+    },
+    {
+      "name": "mediation",
+      "path": "Z:\\GFD\\GFD Dev Projects\\mediation",
+      "brand": null,
+      "url": null,
+      "git": null,
+      "has_package": false,
+      "has_wrangler": false
+    },
+    {
+      "name": "minnesotapeace",
+      "path": "Z:\\GFD\\GFD Dev Projects\\minnesotapeace",
+      "brand": null,
+      "url": null,
+      "git": {
+        "branch": "main",
+        "last_commit_hash": "e5c77aa",
+        "last_commit_message": "fix: replace banner image with typographic hero headline",
+        "last_commit_date": "2026-03-18",
+        "status": "dirty",
+        "modified": 1,
+        "untracked": 7,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": false,
+      "has_wrangler": false
+    },
+    {
+      "name": "paused projects",
+      "path": "Z:\\GFD\\GFD Dev Projects\\Paused Projects",
+      "brand": null,
+      "url": null,
+      "git": null,
+      "has_package": false,
+      "has_wrangler": false
+    },
+    {
+      "name": "so-vits-svc",
+      "path": "Z:\\GFD\\GFD Dev Projects\\so-vits-svc",
+      "brand": null,
+      "url": null,
+      "git": {
+        "branch": "4.1-Stable",
+        "last_commit_hash": "730930d",
+        "last_commit_message": "updata readme",
+        "last_commit_date": "2023-10-03",
+        "status": "dirty",
+        "modified": 0,
+        "untracked": 2,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": false,
+      "has_wrangler": false
+    },
+    {
+      "name": "summitview",
+      "path": "Z:\\GFD\\GFD Dev Projects\\SummitView",
+      "brand": "summitview",
+      "url": null,
+      "git": {
+        "branch": "main",
+        "last_commit_hash": "c81078f",
+        "last_commit_message": "provenance: add TEMPER (Dross Album 3) — 12-track arc from NO to D major",
+        "last_commit_date": "2026-04-28",
+        "status": "dirty",
+        "modified": 66,
+        "untracked": 291,
+        "ahead": 5,
+        "behind": 0
+      },
+      "has_package": false,
+      "has_wrangler": false
+    },
+    {
+      "name": "thyown",
+      "path": "Z:\\GFD\\GFD Dev Projects\\ThyOwn",
+      "brand": null,
+      "url": null,
+      "git": {
+        "branch": "main",
+        "last_commit_hash": "6b8fee19",
+        "last_commit_message": "feat: CustomTrainer + transformer tests (31 tests, 442 total)",
+        "last_commit_date": "2026-02-23",
+        "status": "dirty",
+        "modified": 52,
+        "untracked": 222,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": false,
+      "has_wrangler": true
+    },
+    {
+      "name": "weave",
+      "path": "Z:\\GFD\\GFD Dev Projects\\Weave",
+      "brand": null,
+      "url": null,
+      "git": {
+        "branch": "main",
+        "last_commit_hash": "ae8f2c0",
+        "last_commit_message": "brettleeweaver.com: hybrid artist/pro homepage + Cloudflare worker",
+        "last_commit_date": "2026-04-30",
+        "status": "dirty",
+        "modified": 53,
+        "untracked": 97,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": true,
+      "has_wrangler": false
+    }
+  ],
+  "media_drop": {
+    "path": "Z:\\MediaDrop",
+    "exists": true,
+    "unprocessed_count": 0,
+    "by_type": {}
+  },
+  "alerts": [
+    {
+      "level": "warn",
+      "category": "storage",
+      "message": "C: is 88.8% full — 103.3 GB remaining"
+    },
+    {
+      "level": "info",
+      "category": "storage",
+      "message": "C: grew +213.5 GB since baseline (607.79 → 821.3 GB)"
+    },
+    {
+      "level": "info",
+      "category": "storage",
+      "message": "E: grew +108.8 GB since baseline (2017.6 → 2126.4 GB)"
+    },
+    {
+      "level": "info",
+      "category": "storage",
+      "message": "Z: grew +128.8 GB since baseline (309.61 → 438.4 GB)"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "goodflippindesign: 11 modified files"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "ai: 18 modified files"
+    },
+    {
+      "level": "warn",
+      "category": "git",
+      "message": "citizenapproved: 2 unpushed commits on main"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "citizenapproved: 13 commits behind upstream"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "citizenapproved: 3 modified files"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "culturesherpa: 12584 modified files"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "foxyana: 7 modified files"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "gfy: 3 modified files"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "globaldeets: 22 modified files"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "minnesotapeace: 1 modified file"
+    },
+    {
+      "level": "warn",
+      "category": "git",
+      "message": "summitview: 5 unpushed commits on main"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "summitview: 66 modified files"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "thyown: 52 modified files"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "weave: 53 modified files"
+    }
+  ]
+}

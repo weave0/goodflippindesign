@@ -3184,6 +3184,7 @@
                         'music-library': { name: 'Music Library', title: 'GFV Music Library', sub: 'SummitView music catalog — browse artists, albums, and tracks. Open the per-album prompt studio or pre-fill the Post Composer.' },
                         'prompt-studio': { name: 'Prompt Studio', title: 'SummitView Prompt Studio', sub: 'Interactive SummitView hub — 16 albums, 152 tracks, 7 artists. Securely gated to Clerk admin session.' },
                         'eco-overview': { name: 'Ecosystem Overview', title: 'Ecosystem Overview', sub: 'Cross-property command surface — aggregate health, brand breakdown, and quick-jump links across the entire GFD/GFV ecosystem.' },
+                        'machine-intel': { name: 'Machine Intel', title: 'Machine Intelligence', sub: 'Live machine state — drive usage, git repo status, toolchain versions, and MediaDrop queue for the WEAVERASUS operator workstation.' },
                     };
 
                     function updatePageContext(view) {
@@ -10180,5 +10181,207 @@
                             '</div>';
                     }
                     window.renderEcosystemOverview = renderEcosystemOverview;
+
+                    // ── Machine Intel Panel ───────────────────────────────────────────
+                    (function initMachineIntelPanel() {
+                        'use strict';
+
+                        const LEVEL_COLOR  = { error: 'var(--rose)', warn: 'var(--amber)', info: 'var(--sky)', ok: 'var(--emerald)' };
+                        const LEVEL_BG     = { error: 'rgba(239,68,68,0.08)', warn: 'rgba(245,158,11,0.08)', info: 'rgba(14,165,233,0.06)', ok: 'rgba(16,185,129,0.06)' };
+                        const LEVEL_ICON   = { error: '🔴', warn: '🟡', info: '🔵', ok: '🟢' };
+                        const SUB_PANELS   = ['machine-intel-drives-panel', 'machine-intel-toolchain-panel', 'machine-intel-repos-panel', 'machine-intel-media-panel'];
+
+                        // Drive gauges
+                        function renderDrives(drives) {
+                            const grid = document.getElementById('machine-intel-drives-grid');
+                            if (!grid) return;
+                            if (!drives || drives.length === 0) {
+                                grid.innerHTML = '<p class="text-muted" style="padding:0.5rem 0">No drive data.</p>';
+                                return;
+                            }
+                            grid.innerHTML = drives.map(function (d) {
+                                const pct   = d.pct_used || 0;
+                                const color = d.alert === 'error' ? 'var(--rose)' : d.alert === 'warn' ? 'var(--amber)' : 'var(--emerald)';
+                                const delta = d.delta_gb !== null ? (d.delta_gb >= 0 ? '+' + d.delta_gb : String(d.delta_gb)) + ' GB vs baseline' : '';
+                                return [
+                                    '<div class="storage-drive-card" style="border-color:' + color + '30">',
+                                    '  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.4rem">',
+                                    '    <span style="font-size:0.9rem;font-weight:600;color:' + color + '">' + escapeHtml(d.label) + '</span>',
+                                    '    <span class="text-muted" style="font-size:0.72rem">' + escapeHtml(d.name || '') + '</span>',
+                                    '  </div>',
+                                    '  <div style="background:rgba(255,255,255,0.08);border-radius:3px;height:6px;margin-bottom:0.4rem;overflow:hidden">',
+                                    '    <div style="width:' + Math.min(pct, 100) + '%;height:100%;background:' + color + ';border-radius:3px;transition:width 0.4s ease"></div>',
+                                    '  </div>',
+                                    '  <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text-muted)">',
+                                    '    <span>' + d.used_gb + ' / ' + d.total_gb + ' GB used</span>',
+                                    '    <span style="color:' + color + '">' + pct + '%</span>',
+                                    '  </div>',
+                                    '  <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.2rem">' + d.free_gb + ' GB free' + (delta ? ' · <span>' + escapeHtml(delta) + '</span>' : '') + '</div>',
+                                    '</div>',
+                                ].join('');
+                            }).join('');
+                        }
+
+                        // Toolchain chips
+                        function renderToolchain(tc) {
+                            const grid = document.getElementById('machine-intel-toolchain-grid');
+                            if (!grid || !tc) return;
+                            const tools = [
+                                { key: 'node',     label: 'Node.js' },
+                                { key: 'npm',      label: 'npm' },
+                                { key: 'wrangler', label: 'Wrangler' },
+                                { key: 'git',      label: 'Git' },
+                                { key: 'code',     label: 'VS Code' },
+                            ];
+                            const chips = tools.map(function (t) {
+                                const val = tc[t.key] || '—';
+                                return '<span style="display:inline-flex;align-items:center;gap:0.35rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:4px;padding:0.25rem 0.65rem;font-size:0.75rem">' +
+                                    '<span class="text-muted">' + escapeHtml(t.label) + '</span>' +
+                                    '<span style="font-family:var(--mono,monospace)">' + escapeHtml(val) + '</span>' +
+                                    '</span>';
+                            });
+                            if (tc.os) {
+                                chips.push('<span style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:4px;padding:0.25rem 0.65rem;font-size:0.72rem;color:var(--text-muted)">' + escapeHtml(tc.os) + '</span>');
+                            }
+                            grid.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.25rem 0">' + chips.join('') + '</div>';
+                        }
+
+                        // Repos table
+                        function renderRepos(repos) {
+                            const grid    = document.getElementById('machine-intel-repos-grid');
+                            const summary = document.getElementById('machine-intel-repos-summary');
+                            if (!grid) return;
+                            const gitRepos = repos.filter(function (r) { return r.git; });
+                            if (summary) {
+                                const dirty = gitRepos.filter(function (r) { return r.git.status === 'dirty'; }).length;
+                                const ahead = gitRepos.filter(function (r) { return r.git.ahead > 0; }).length;
+                                summary.textContent = gitRepos.length + ' git repos · ' + dirty + ' dirty · ' + ahead + ' with unpushed commits';
+                            }
+                            const rows = repos.map(function (r) {
+                                if (!r.git) {
+                                    return '<tr>' +
+                                        '<td style="font-weight:500">' + escapeHtml(r.name) + '</td>' +
+                                        '<td colspan="4"><span class="text-muted">no git repo</span></td>' +
+                                        '<td>' + (r.url ? '<a href="' + escapeHtml(r.url) + '" target="_blank" rel="noopener" style="color:var(--sky);font-size:0.72rem">' + escapeHtml(r.url.replace('https://', '')) + '</a>' : '—') + '</td>' +
+                                        '</tr>';
+                                }
+                                const g          = r.git;
+                                const statusColor = g.status === 'clean' ? 'var(--emerald)' : 'var(--amber)';
+                                const statusLabel = g.status === 'clean' ? 'clean' : g.modified + 'M ' + g.untracked + 'U';
+                                const abStr       = (g.ahead > 0 ? '<span style="color:var(--amber)">↑' + g.ahead + '</span>' : '') +
+                                    (g.ahead > 0 && g.behind > 0 ? ' ' : '') +
+                                    (g.behind > 0 ? '<span style="color:var(--sky)">↓' + g.behind + '</span>' : '') ||
+                                    '<span class="text-muted">—</span>';
+                                const msgTitle = escapeHtml(g.last_commit_message || '').replace(/"/g, '&quot;');
+                                return '<tr>' +
+                                    '<td style="font-weight:500">' + escapeHtml(r.name) + '</td>' +
+                                    '<td><code style="font-size:0.72rem">' + escapeHtml(g.branch) + '</code></td>' +
+                                    '<td><span style="color:' + statusColor + '">' + statusLabel + '</span></td>' +
+                                    '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + msgTitle + '">' +
+                                    '<code style="font-size:0.72rem">' + escapeHtml(g.last_commit_hash || '—') + '</code>' +
+                                    '<span class="text-muted" style="margin-left:0.35rem;font-size:0.72rem">' + escapeHtml(g.last_commit_date || '') + '</span></td>' +
+                                    '<td>' + abStr + '</td>' +
+                                    '<td>' + (r.url ? '<a href="' + escapeHtml(r.url) + '" target="_blank" rel="noopener" style="color:var(--sky);font-size:0.72rem">' + escapeHtml(r.url.replace('https://', '')) + '</a>' : '<span class="text-muted">—</span>') + '</td>' +
+                                    '</tr>';
+                            });
+                            grid.innerHTML = '<table class="data-table" style="width:100%;font-size:0.78rem"><thead><tr>' +
+                                '<th>Repo</th><th>Branch</th><th>Status</th><th>Last Commit</th><th>↑↓</th><th>URL</th>' +
+                                '</tr></thead><tbody>' + rows.join('') + '</tbody></table>';
+                        }
+
+                        // MediaDrop status
+                        function renderMediaDrop(md) {
+                            const el = document.getElementById('machine-intel-media-content');
+                            if (!el || !md) return;
+                            if (!md.exists) {
+                                el.innerHTML = '<p class="text-muted" style="padding:0.5rem 0">MediaDrop not found at <code>' + escapeHtml(md.path || 'Z:\\MediaDrop') + '</code></p>';
+                                return;
+                            }
+                            const color    = md.unprocessed_count > 0 ? 'var(--amber)' : 'var(--emerald)';
+                            const byType   = Object.entries(md.by_type || {}).map(function (kv) {
+                                return '<span style="margin-right:0.75rem"><span class="text-muted">' + escapeHtml(kv[0]) + '</span> ' + kv[1] + '</span>';
+                            }).join('');
+                            el.innerHTML = '<div style="padding:0.5rem 0">' +
+                                '<span style="font-size:1.1rem;font-weight:600;color:' + color + '">' + md.unprocessed_count + '</span>' +
+                                '<span class="text-muted" style="margin-left:0.4rem;font-size:0.82rem">unprocessed asset' + (md.unprocessed_count !== 1 ? 's' : '') + '</span>' +
+                                (byType ? '<div style="margin-top:0.4rem;font-size:0.75rem">' + byType + '</div>' : '') +
+                                '</div>';
+                        }
+
+                        // Alerts bar
+                        function renderAlerts(alerts) {
+                            const el = document.getElementById('machine-intel-alerts');
+                            if (!el) return;
+                            if (!alerts || alerts.length === 0) { el.innerHTML = ''; return; }
+                            el.innerHTML = alerts.map(function (a) {
+                                const color = LEVEL_COLOR[a.level] || 'var(--text-muted)';
+                                const bg    = LEVEL_BG[a.level]    || 'transparent';
+                                const icon  = LEVEL_ICON[a.level]  || '•';
+                                return '<div style="display:flex;align-items:flex-start;gap:0.5rem;padding:0.45rem 0.75rem;border:1px solid ' + color + '30;border-radius:6px;background:' + bg + ';margin-bottom:0.4rem;font-size:0.82rem">' +
+                                    '<span>' + icon + '</span>' +
+                                    '<span style="color:' + color + '">' + escapeHtml(a.message || '') + '</span>' +
+                                    (a.category ? '<span class="text-muted" style="margin-left:auto;font-size:0.7rem;white-space:nowrap">' + escapeHtml(a.category) + '</span>' : '') +
+                                    '</div>';
+                            }).join('');
+                        }
+
+                        // Main load — fetches /local-sweep.json (served statically by http-server)
+                        async function loadMachineIntel() {
+                            const emptyEl = document.getElementById('machine-intel-empty');
+                            try {
+                                const res = await fetch('/local-sweep.json?t=' + Date.now());
+                                if (!res.ok) throw new Error('HTTP ' + res.status);
+                                const data = await res.json();
+
+                                // Age badge
+                                const ageEl = document.getElementById('machine-intel-age');
+                                if (ageEl && data.meta && data.meta.timestamp) {
+                                    const mins = Math.round((Date.now() - new Date(data.meta.timestamp).getTime()) / 60000);
+                                    ageEl.textContent = mins < 1
+                                        ? 'Just swept · ' + (data.meta.machine || '')
+                                        : 'Swept ' + mins + 'm ago · ' + (data.meta.machine || '');
+                                }
+
+                                if (emptyEl) emptyEl.style.display = 'none';
+                                SUB_PANELS.forEach(function (id) {
+                                    const el = document.getElementById(id);
+                                    if (el) el.style.display = '';
+                                });
+
+                                renderAlerts(data.alerts   || []);
+                                renderDrives(data.drives   || []);
+                                renderToolchain(data.toolchain || {});
+                                renderRepos(data.repos     || []);
+                                renderMediaDrop(data.media_drop || {});
+
+                            } catch (err) {
+                                if (emptyEl) emptyEl.style.display = '';
+                                SUB_PANELS.forEach(function (id) {
+                                    const el = document.getElementById(id);
+                                    if (el) el.style.display = 'none';
+                                });
+                                const alertsEl = document.getElementById('machine-intel-alerts');
+                                if (alertsEl) alertsEl.innerHTML = '';
+                            }
+                        }
+
+                        window.__adminPanels = window.__adminPanels || {};
+                        window.__adminPanels['machine-intel'] = loadMachineIntel;
+
+                        const refreshBtn = document.getElementById('machine-intel-refresh-btn');
+                        if (refreshBtn) refreshBtn.addEventListener('click', loadMachineIntel);
+
+                        const copyCmdBtn = document.getElementById('machine-intel-copy-cmd-btn');
+                        const cmdText    = document.getElementById('machine-intel-cmd-text');
+                        if (copyCmdBtn && cmdText) {
+                            copyCmdBtn.addEventListener('click', function () {
+                                navigator.clipboard.writeText(cmdText.textContent).then(function () {
+                                    if (typeof toast === 'function') toast('Command copied!', 'success');
+                                }).catch(function () {
+                                    if (typeof toast === 'function') toast('Copy failed.', 'error');
+                                });
+                            });
+                        }
+                    })();
 
                 })();
