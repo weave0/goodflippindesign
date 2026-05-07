@@ -20,9 +20,9 @@
 #>
 
 $ErrorActionPreference = 'Stop'
-$root    = Split-Path -Parent $PSScriptRoot
-$source  = Join-Path $root 'GFD Dev Projects\SummitView\output'
-$dest    = Join-Path $root 'prompt-studio'
+$root = Split-Path -Parent $PSScriptRoot
+$source = Join-Path $root 'GFD Dev Projects\SummitView\output'
+$dest = Join-Path $root 'prompt-studio'
 
 if (-not (Test-Path $source)) {
     Write-Error "SummitView output not found at: $source`nRun 'make build-hub' or 'python pipeline/build_hub.py' in the SummitView project first."
@@ -82,15 +82,15 @@ if (Test-Path $ytSource) {
     New-Item -ItemType Directory -Force -Path $ytDest | Out-Null
     # Copy only HTML/JSON inside — skip any video files
     Get-ChildItem -Path $ytSource -Recurse -File |
-        Where-Object { $_.Extension -in @('.html', '.json', '.css', '.js') } |
-        ForEach-Object {
-            $rel  = $_.FullName.Substring($ytSource.Length + 1)
-            $tgt  = Join-Path $ytDest $rel
-            $dir  = Split-Path $tgt -Parent
-            if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
-            Copy-Item $_.FullName -Destination $tgt -Force
-            Write-Host "  [yt]    youtube_packages/$rel"
-        }
+    Where-Object { $_.Extension -in @('.html', '.json', '.css', '.js') } |
+    ForEach-Object {
+        $rel = $_.FullName.Substring($ytSource.Length + 1)
+        $tgt = Join-Path $ytDest $rel
+        $dir = Split-Path $tgt -Parent
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
+        Copy-Item $_.FullName -Destination $tgt -Force
+        Write-Host "  [yt]    youtube_packages/$rel"
+    }
 }
 
 Write-Host ""

@@ -1,31 +1,31 @@
 {
   "meta": {
-    "timestamp": "2026-05-06T21:31:25.648Z",
+    "timestamp": "2026-05-07T15:30:05.383Z",
     "version": "1.1",
     "machine": "WeaverASUS",
-    "duration_ms": 7282
+    "duration_ms": 3115
   },
   "drives": [
     {
       "label": "C:",
       "name": "OS",
-      "used_gb": 821.3,
-      "free_gb": 103.3,
+      "used_gb": 854.3,
+      "free_gb": 70.3,
       "total_gb": 924.6,
-      "pct_used": 88.8,
+      "pct_used": 92.4,
       "baseline_used_gb": 607.79,
-      "delta_gb": 213.5,
-      "alert": "warn"
+      "delta_gb": 246.5,
+      "alert": "error"
     },
     {
       "label": "E:",
       "name": "WEAVER 4TW",
-      "used_gb": 2126.4,
-      "free_gb": 1599.6,
-      "total_gb": 3726,
+      "used_gb": 2126.9,
+      "free_gb": 1599,
+      "total_gb": 3725.9,
       "pct_used": 57.1,
       "baseline_used_gb": 2017.6,
-      "delta_gb": 108.8,
+      "delta_gb": 109.3,
       "alert": "ok"
     },
     {
@@ -42,21 +42,21 @@
     {
       "label": "Z:",
       "name": "WeaveO",
-      "used_gb": 438.4,
-      "free_gb": 32329.5,
+      "used_gb": 470.3,
+      "free_gb": 32297.6,
       "total_gb": 32767.9,
-      "pct_used": 1.3,
+      "pct_used": 1.4,
       "baseline_used_gb": 309.61,
-      "delta_gb": 128.8,
+      "delta_gb": 160.7,
       "alert": "ok"
     }
   ],
   "toolchain": {
-    "node": "v22.17.1",
+    "node": "v20.19.6",
     "npm": "11.12.1",
-    "wrangler": "4.88.0",
+    "wrangler": null,
     "git": "2.50.1.windows.1",
-    "code": null,
+    "code": "1.119.0",
     "os": "Windows_NT 10.0.26200"
   },
   "repos": [
@@ -67,11 +67,11 @@
       "url": "https://goodflippindesign.com",
       "git": {
         "branch": "main",
-        "last_commit_hash": "3d252f8",
-        "last_commit_message": "feat: Option A footer copy + scanner probe logging",
-        "last_commit_date": "2026-05-04",
+        "last_commit_hash": "a4cada5",
+        "last_commit_message": "chore: npm audit fix (0 vulns), fix schedule-sweep.ps1 battery params",
+        "last_commit_date": "2026-05-06",
         "status": "dirty",
-        "modified": 11,
+        "modified": 9,
         "untracked": 30,
         "ahead": 0,
         "behind": 0
@@ -90,7 +90,7 @@
         "last_commit_message": "fix(lint): add global ignores to eslint flat config for ESLint 10 compat",
         "last_commit_date": "2026-05-02",
         "status": "dirty",
-        "modified": 18,
+        "modified": 19,
         "untracked": 13,
         "ahead": 0,
         "behind": 0
@@ -124,17 +124,17 @@
       "url": "https://citizenapproved.org",
       "git": {
         "branch": "main",
-        "last_commit_hash": "c90b378",
-        "last_commit_message": "chore: add CI workflow, README, and .env.example",
-        "last_commit_date": "2026-03-17",
+        "last_commit_hash": "9212140",
+        "last_commit_message": "chore: sync local modifications — README, EcosystemNav, ci.yml",
+        "last_commit_date": "2026-05-06",
         "status": "dirty",
         "modified": 3,
         "untracked": 0,
-        "ahead": 2,
-        "behind": 13
+        "ahead": 0,
+        "behind": 0
       },
       "has_package": true,
-      "has_wrangler": false
+      "has_wrangler": true
     },
     {
       "name": "culturesherpa",
@@ -143,12 +143,12 @@
       "url": "https://culturesherpa.org",
       "git": {
         "branch": "main",
-        "last_commit_hash": "cfc5f6d93",
-        "last_commit_message": "chore: archive stale completion/deployment docs to _archived/status-docs/",
-        "last_commit_date": "2026-05-02",
+        "last_commit_hash": "34daf2858",
+        "last_commit_message": "chore: remove tracked lambda package artifacts — lambda_admin_full/package now in .gitignore",
+        "last_commit_date": "2026-05-06",
         "status": "dirty",
-        "modified": 12584,
-        "untracked": 7,
+        "modified": 1,
+        "untracked": 0,
         "ahead": 0,
         "behind": 0
       },
@@ -162,11 +162,11 @@
       "url": null,
       "git": {
         "branch": "main",
-        "last_commit_hash": "d2be69f",
-        "last_commit_message": "feat: Album 2 (Земля Пам'ятає) + album selector tabs + audio path migration + GFD footer credit",
-        "last_commit_date": "2026-04-05",
+        "last_commit_hash": "c5e56e9",
+        "last_commit_message": "Update Fox and Cat video to new official release",
+        "last_commit_date": "2026-05-06",
         "status": "dirty",
-        "modified": 7,
+        "modified": 6,
         "untracked": 2,
         "ahead": 0,
         "behind": 0
@@ -194,7 +194,7 @@
         "last_commit_message": "docs: mark Launch the Project complete, add deployment details",
         "last_commit_date": "2026-04-17",
         "status": "dirty",
-        "modified": 3,
+        "modified": 4,
         "untracked": 0,
         "ahead": 0,
         "behind": 0
@@ -213,7 +213,7 @@
         "last_commit_message": "feat: onerror monitoring, updated CSP, and CI workflow",
         "last_commit_date": "2026-03-13",
         "status": "dirty",
-        "modified": 22,
+        "modified": 26,
         "untracked": 0,
         "ahead": 0,
         "behind": 0
@@ -241,7 +241,7 @@
         "last_commit_message": "fix: replace banner image with typographic hero headline",
         "last_commit_date": "2026-03-18",
         "status": "dirty",
-        "modified": 1,
+        "modified": 2,
         "untracked": 7,
         "ahead": 0,
         "behind": 0
@@ -284,13 +284,13 @@
       "url": null,
       "git": {
         "branch": "main",
-        "last_commit_hash": "c81078f",
-        "last_commit_message": "provenance: add TEMPER (Dross Album 3) — 12-track arc from NO to D major",
-        "last_commit_date": "2026-04-28",
-        "status": "dirty",
-        "modified": 66,
-        "untracked": 291,
-        "ahead": 5,
+        "last_commit_hash": "872cd19",
+        "last_commit_message": "chore: analytics data sync - metrics, provenance, fairness queue, config updates",
+        "last_commit_date": "2026-05-07",
+        "status": "clean",
+        "modified": 0,
+        "untracked": 0,
+        "ahead": 1,
         "behind": 0
       },
       "has_package": false,
@@ -307,8 +307,8 @@
         "last_commit_message": "feat: CustomTrainer + transformer tests (31 tests, 442 total)",
         "last_commit_date": "2026-02-23",
         "status": "dirty",
-        "modified": 52,
-        "untracked": 222,
+        "modified": 53,
+        "untracked": 221,
         "ahead": 0,
         "behind": 0
       },
@@ -326,7 +326,7 @@
         "last_commit_message": "brettleeweaver.com: hybrid artist/pro homepage + Cloudflare worker",
         "last_commit_date": "2026-04-30",
         "status": "dirty",
-        "modified": 53,
+        "modified": 54,
         "untracked": 97,
         "ahead": 0,
         "behind": 0
@@ -343,44 +343,34 @@
   },
   "alerts": [
     {
-      "level": "warn",
+      "level": "error",
       "category": "storage",
-      "message": "C: is 88.8% full — 103.3 GB remaining"
-    },
-    {
-      "level": "info",
-      "category": "storage",
-      "message": "C: grew +213.5 GB since baseline (607.79 → 821.3 GB)"
+      "message": "C: is 92.4% full — only 70.3 GB remaining"
     },
     {
       "level": "info",
       "category": "storage",
-      "message": "E: grew +108.8 GB since baseline (2017.6 → 2126.4 GB)"
+      "message": "C: grew +246.5 GB since baseline (607.79 → 854.3 GB)"
     },
     {
       "level": "info",
       "category": "storage",
-      "message": "Z: grew +128.8 GB since baseline (309.61 → 438.4 GB)"
+      "message": "E: grew +109.3 GB since baseline (2017.6 → 2126.9 GB)"
+    },
+    {
+      "level": "info",
+      "category": "storage",
+      "message": "Z: grew +160.7 GB since baseline (309.61 → 470.3 GB)"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "goodflippindesign: 11 modified files"
+      "message": "goodflippindesign: 9 modified files"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "ai: 18 modified files"
-    },
-    {
-      "level": "warn",
-      "category": "git",
-      "message": "citizenapproved: 2 unpushed commits on main"
-    },
-    {
-      "level": "info",
-      "category": "git",
-      "message": "citizenapproved: 13 commits behind upstream"
+      "message": "ai: 19 modified files"
     },
     {
       "level": "info",
@@ -390,47 +380,42 @@
     {
       "level": "info",
       "category": "git",
-      "message": "culturesherpa: 12584 modified files"
+      "message": "culturesherpa: 1 modified file"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "foxyana: 7 modified files"
+      "message": "foxyana: 6 modified files"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "gfy: 3 modified files"
+      "message": "gfy: 4 modified files"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "globaldeets: 22 modified files"
+      "message": "globaldeets: 26 modified files"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "minnesotapeace: 1 modified file"
+      "message": "minnesotapeace: 2 modified files"
     },
     {
       "level": "warn",
       "category": "git",
-      "message": "summitview: 5 unpushed commits on main"
+      "message": "summitview: 1 unpushed commit on main"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "summitview: 66 modified files"
+      "message": "thyown: 53 modified files"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "thyown: 52 modified files"
-    },
-    {
-      "level": "info",
-      "category": "git",
-      "message": "weave: 53 modified files"
+      "message": "weave: 54 modified files"
     }
   ]
 }
