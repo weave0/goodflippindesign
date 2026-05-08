@@ -76,6 +76,10 @@
     <!-- GFD Ecosystem Navigation -->
     <link rel="stylesheet" href="shared/ecosystem-nav.css">
 
+    <!-- Social Awareness Bar — FOUC prevention -->
+    <script>try { if (localStorage.getItem('gfd_social_bar_dismissed') === '1') document.documentElement.classList.add('social-bar-gone'); } catch (e) { }</script>
+    <link rel="stylesheet" href="shared/social-bar.css">
+
     <style>
         :root {
             --bg: #0d0d0d;
@@ -343,6 +347,25 @@
             /* ecosystem nav + main nav */
         }
 
+        /* ── Social Awareness Bar offsets ── */
+        html:not(.social-bar-gone) .gfd-ecosystem-nav {
+            top: 44px;
+        }
+
+        html:not(.social-bar-gone) nav {
+            top: 104px;
+        }
+
+        html:not(.social-bar-gone) .page-wrapper {
+            padding-top: calc(60px + 72px + 44px);
+        }
+
+        @media (max-width: 600px) {
+            html:not(.social-bar-gone) nav {
+                top: 90px;
+            }
+        }
+
         /* ─── Album Selector ─── */
         .album-selector {
             background: var(--bg-elevated);
@@ -509,6 +532,28 @@
 
         .btn-album-primary:active {
             transform: translateY(0);
+        }
+
+        .btn-album-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            color: var(--text);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            min-height: 44px;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .btn-album-secondary:hover,
+        .btn-album-secondary:focus-visible {
+            border-color: var(--border-hover);
+            background-color: rgba(255, 255, 255, 0.04);
         }
 
         /* Tracklist header YouTube link */
@@ -983,6 +1028,35 @@
 </head>
 
 <body>
+    <!-- Social Awareness Bar -->
+    <aside class="social-bar" id="social-bar" aria-label="Support our independent music">
+        <div class="social-bar-inner">
+            <span class="social-bar-icon" aria-hidden="true">&#9834;</span>
+            <p class="social-bar-message">
+                No label. No funding.
+                <a href="https://goodflippinvibes.com/music.html" target="_blank" rel="noopener">Stream our music</a>
+                on Spotify, Apple Music, YouTube &amp; more &#8212; every stream supports our work.
+            </p>
+            <div class="social-bar-links" aria-label="Follow us on social media">
+                <span class="social-bar-follow-label" aria-hidden="true">Follow</span>
+                <a href="https://www.youtube.com/playlist?list=PLveg0fPWx8QGrKodpXxtCGMQeMzxOFJ71"
+                    class="social-bar-link" target="_blank" rel="noopener"
+                    aria-label="Our music on YouTube (opens in new tab)">YT</a>
+                <a href="https://instagram.com/goodflippindesign"
+                    class="social-bar-link" target="_blank" rel="noopener"
+                    aria-label="Follow us on Instagram (opens in new tab)">IG</a>
+                <a href="https://twitter.com/goodflippinvibes"
+                    class="social-bar-link" target="_blank" rel="noopener"
+                    aria-label="Follow us on X / Twitter (opens in new tab)">X</a>
+                <a href="https://facebook.com/profile.php?id=61566870218978"
+                    class="social-bar-link" target="_blank" rel="noopener"
+                    aria-label="Follow us on Facebook (opens in new tab)">FB</a>
+            </div>
+            <button class="social-bar-close" id="social-bar-close" type="button"
+                aria-label="Dismiss this message">&#215;</button>
+        </div>
+    </aside>
+
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <!-- GFD Ecosystem Navigation (shared component) -->
@@ -1114,6 +1188,20 @@
                                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                                 </svg>
                                 Stream on YouTube
+                            </a>
+                            <a href="https://open.spotify.com/search/DJ%20Shariff"
+                                class="btn-album-secondary"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Stream DJ Shariff on Spotify (opens in new tab)">
+                                Spotify
+                            </a>
+                            <a href="https://music.apple.com/us/search?term=DJ+Shariff"
+                                class="btn-album-secondary"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Stream DJ Shariff on Apple Music (opens in new tab)">
+                                Apple Music
                             </a>
                         </div>
                     </div>
@@ -1673,6 +1761,8 @@
 
         })();
     </script>
+
+    <script src="shared/social-bar.js"></script>
 
 </body>
 
