@@ -91,7 +91,7 @@
     "@cloudflare/vitest-pool-workers": "^0.14.3",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.2.0",
-    "html-validate": "^10.11.2",
+    "html-validate": "^10.16.0",
     "http-server": "^14.1.1",
     "husky": "^9.0.0",
     "nodemon": "~3.1.0",
