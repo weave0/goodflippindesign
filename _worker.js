@@ -48,6 +48,7 @@ export default {
     const allowedExact = new Set([
       "/robots.txt",
       "/sitemap.xml",
+      "/ads.txt",
       "/admin-panels.js",
     ]);
 
@@ -473,6 +474,8 @@ export default {
       const envScript = `<script>window.ENV = ${JSON.stringify({
         STRIPE_PUBLISHABLE_KEY: env.STRIPE_PUBLISHABLE_KEY || null,
         CLERK_PUBLISHABLE_KEY: env.CLERK_PUBLISHABLE_KEY || null,
+        ADSENSE_CLIENT: env.ADSENSE_CLIENT || null,
+        ADSENSE_SLOT_INDEX: env.ADSENSE_SLOT_INDEX || null,
         SENTRY_DSN: sentryDsn,
         ENABLE_COMMUNITY: env.ENABLE_COMMUNITY !== "false",
         ENABLE_BLOG_CMS: env.ENABLE_BLOG_CMS !== "false",
