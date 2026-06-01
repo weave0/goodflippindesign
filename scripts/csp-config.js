@@ -87,6 +87,7 @@ const SITES = {
         'https://www.googletagmanager.com',
         'https://www.google-analytics.com',
         'https://plausible.io',
+        'https://pagead2.googlesyndication.com',
         ...SHARED.stripe.script,
         ...SHARED.clerk.script,
         'https://www.instagram.com',  // Instagram embed.js
@@ -103,6 +104,8 @@ const SITES = {
         'https://analytics.google.com',
         'https://region1.google-analytics.com',
         'https://plausible.io',
+        'https://pagead2.googlesyndication.com',
+        'https://googleads.g.doubleclick.net',
         'https://gfd-auth.weave0.workers.dev',
         'https://gfd-health-sweep.weave0.workers.dev', // Admin: Ecosystem Health sweep worker (nightly D1 results)
         ...SHARED.clerk.connect,
@@ -119,7 +122,7 @@ const SITES = {
         'https://eliassen.globaldeets.com',
         ...SHARED.sentry,  // Sentry error ingest
       ],
-      'frame-src': [...SHARED.stripe.frame, ...SHARED.clerk.frame, 'https://www.instagram.com', 'https://www.facebook.com', 'https://open.spotify.com'],
+      'frame-src': [...SHARED.stripe.frame, ...SHARED.clerk.frame, 'https://www.instagram.com', 'https://www.facebook.com', 'https://open.spotify.com', 'https://googleads.g.doubleclick.net', 'https://tpc.googlesyndication.com'],
       'worker-src': ["'self'", 'blob:'],
     },
 

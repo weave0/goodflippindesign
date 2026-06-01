@@ -3,6 +3,9 @@
 <html lang="en">
 
 <head>
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6209726914457253" crossorigin="anonymous"></script>
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-WM6Q66W9W0"></script>
   <script>
@@ -1330,6 +1333,47 @@
     .portfolio-share-status {
       color: var(--text-muted);
       font-size: 0.75rem;
+    }
+
+    /* Sponsored placement (disabled unless IDs are configured in window.ENV) */
+    .sponsored-slot {
+      margin-top: 1.25rem;
+    }
+
+    .sponsored-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 16px;
+      padding: 1.25rem;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .sponsored-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+    }
+
+    .sponsored-ad-frame {
+      display: block;
+      width: 100%;
+      min-height: 90px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .sponsored-note {
+      margin-top: 0.75rem;
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      line-height: 1.5;
     }
 
     /* Media (Netflix-style rows) */
@@ -4880,6 +4924,16 @@
       </div>
     </section>
 
+    <section id="sponsor" class="sponsored-slot" hidden data-monetization-slot>
+      <div class="container">
+        <div class="sponsored-card" role="complementary" aria-label="Sponsored placement">
+          <p class="sponsored-label">Sponsored</p>
+          <ins class="adsbygoogle sponsored-ad-frame" data-adsense-slot data-ad-client="" data-ad-slot="" data-ad-format="horizontal" data-full-width-responsive="true"></ins>
+          <p class="sponsored-note">This small placement helps fund ongoing platform maintenance without intrusive popups or autoplay ads.</p>
+        </div>
+      </div>
+    </section>
+
     <section id="process">
       <div class="container">
         <div class="section-header">
@@ -7338,6 +7392,39 @@
         return html;
       }
 
+      async function initializeSponsoredPlacement() {
+        const sponsoredSection = document.querySelector('[data-monetization-slot]');
+        const adSlot = document.querySelector('[data-adsense-slot]');
+        if (!sponsoredSection || !adSlot) return;
+
+        const adClient = String(window.ENV?.ADSENSE_CLIENT || '').trim();
+        const adSlotId = String(window.ENV?.ADSENSE_SLOT_INDEX || '').trim();
+        if (!adClient || !adSlotId) return;
+
+        adSlot.setAttribute('data-ad-client', adClient);
+        adSlot.setAttribute('data-ad-slot', adSlotId);
+        sponsoredSection.hidden = false;
+
+        let loader = document.querySelector('script[data-adsense-loader]');
+        if (!loader) {
+          loader = document.createElement('script');
+          loader.setAttribute('data-adsense-loader', 'true');
+          loader.async = true;
+          loader.crossOrigin = 'anonymous';
+          loader.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(adClient)}`;
+
+          const loaderResult = new Promise((resolve, reject) => {
+            loader.addEventListener('load', resolve, { once: true });
+            loader.addEventListener('error', reject, { once: true });
+          });
+
+          document.head.appendChild(loader);
+          await loaderResult;
+        }
+
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
+
       // Event listeners for blog UI
       document.getElementById('new-post-btn')?.addEventListener('click', () => showBlogEditor());
       document.getElementById('close-editor-btn')?.addEventListener('click', hideBlogEditor);
@@ -7531,6 +7618,11 @@
             }
           });
         }
+
+        initializeSponsoredPlacement().catch(() => {
+          const sponsoredSection = document.querySelector('[data-monetization-slot]');
+          if (sponsoredSection) sponsoredSection.hidden = true;
+        });
       });
 
       // ═══════════════════════════════════════════════════════════════
