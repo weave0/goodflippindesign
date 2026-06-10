@@ -95,7 +95,7 @@
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.16.14",
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.2.0",
+    "eslint": "^10.4.1",
     "html-validate": "^10.11.2",
     "http-server": "^14.1.1",
     "husky": "^9.0.0",
