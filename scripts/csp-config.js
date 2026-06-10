@@ -88,6 +88,7 @@ const SITES = {
         'https://www.google-analytics.com',
         'https://plausible.io',
         'https://pagead2.googlesyndication.com',
+        'https://ep2.adtrafficquality.google',
         ...SHARED.stripe.script,
         ...SHARED.clerk.script,
         'https://www.instagram.com',  // Instagram embed.js

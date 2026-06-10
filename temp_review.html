@@ -239,6 +239,7 @@
     }
 
     .logo {
+      min-height: 44px;
       font-size: 1rem;
       font-weight: 600;
       letter-spacing: -0.02em;
@@ -297,9 +298,11 @@
       font-weight: 450;
       transition: color 0.2s;
       padding: 0.625rem 0;
+      min-width: 44px;
       min-height: 44px;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
     }
 
     .nav-links a:hover {
@@ -309,6 +312,10 @@
     .nav-cta {
       background: var(--text);
       color: var(--bg);
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       padding: 0.625rem 1.25rem;
       border-radius: 8px;
       text-decoration: none;
@@ -3078,6 +3085,9 @@
     }
 
     .contact-item a {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
       color: var(--text);
       text-decoration: none;
       cursor: pointer;
@@ -3407,9 +3417,11 @@
       font-size: 0.8125rem;
       transition: color 0.2s;
       padding: 0.5rem 0;
+      min-width: 44px;
       min-height: 44px;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
     }
 
     .footer-links a:hover {
@@ -3438,6 +3450,7 @@
     }
 
     .footer-studio-line a {
+      min-width: 44px;
       display: inline-flex;
       align-items: center;
       min-height: 44px;
@@ -3466,7 +3479,12 @@
       font-size: 0.6875rem;
       opacity: 0.2;
       cursor: pointer;
-      padding: 0.25rem 0.5rem;
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
       font-family: inherit;
       transition: opacity 0.2s;
       text-decoration: none;
@@ -4251,8 +4269,10 @@
     /* Admin nav link: hidden until admin auth confirmed */
     /* Admin nav link — always visible; style upgrades after authentication */
     .nav-admin-link {
+      min-height: 44px;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       text-decoration: none;
       color: var(--text-muted);
       font-size: 0.875rem;
