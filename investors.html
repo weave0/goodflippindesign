@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<!-- Cache bust: 2026-06-10 -->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investor Overview | Good Flippin Design</title>
+    <meta name="description" content="Public investor overview for Good Flippin Design: operating signals, vision, revenue model, and selective ROI context for a multimedia knowledge organization.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://goodflippindesign.com/investors.html">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "@id": "https://goodflippindesign.com/investors.html#webpage",
+          "url": "https://goodflippindesign.com/investors.html",
+          "name": "Investor Overview - Good Flippin Design",
+          "description": "High-level investor and partner overview for Good Flippin Design, including operating signals, public business model, and vision.",
+          "isPartOf": { "@id": "https://goodflippindesign.com/#site" },
+          "about": { "@id": "https://goodflippindesign.com/#studio" }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://goodflippindesign.com/#site",
+          "url": "https://goodflippindesign.com",
+          "name": "Good Flippin Design",
+          "publisher": { "@id": "https://goodflippindesign.com/#studio" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://goodflippindesign.com/#studio",
+          "name": "Good Flippin Design",
+          "url": "https://goodflippindesign.com"
+        }
+      ]
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #081019;
+            --bg-elevated: #0f1825;
+            --bg-card: rgba(16, 24, 37, 0.8);
+            --text: #f3f6fb;
+            --text-secondary: #b3bfd1;
+            --text-muted: #8a94a6;
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #5eead4;
+            --accent-strong: #f59e0b;
+            --accent-soft: rgba(94, 234, 212, 0.12);
+            --hero-glow: radial-gradient(circle at top left, rgba(94, 234, 212, 0.2), transparent 42%),
+                radial-gradient(circle at top right, rgba(245, 158, 11, 0.16), transparent 36%),
+                linear-gradient(180deg, #081019 0%, #0b1320 45%, #081019 100%);
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+            --radius: 22px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 96px;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", system-ui, sans-serif;
+            background: var(--hero-glow);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 999px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text);
+            transform: translateY(-160%);
+            transition: transform 0.2s ease;
+            z-index: 100;
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+            outline: none;
+        }
+
+        .wrap {
+            width: min(1120px, calc(100% - 2rem));
+            margin: 0 auto;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            border-bottom: 1px solid var(--border);
+            background: rgba(8, 16, 25, 0.88);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+
+        .brand img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+        }
+
+        .brand-mark {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-mark strong {
+            font-size: 1rem;
+            letter-spacing: 0.02em;
+        }
+
+        .brand-mark span {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        nav {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        nav a {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.7rem 1rem;
+            border-radius: 999px;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+        }
+
+        nav a:hover,
+        nav a:focus-visible {
+            transform: translateY(-1px);
+            border-color: var(--border);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text);
+            outline: none;
+        }
+
+        main {
+            padding: 2.5rem 0 4rem;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 1.4rem;
+            align-items: stretch;
+            margin-bottom: 1.5rem;
+        }
+
+        .panel {
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-copy {
+            padding: 2rem;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.45rem 0.8rem;
+            margin-bottom: 1rem;
+            border-radius: 999px;
+            border: 1px solid rgba(94, 234, 212, 0.24);
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.12;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2.3rem, 5vw, 4.4rem);
+            max-width: 12ch;
+        }
+
+        .hero-copy p {
+            margin: 1rem 0 0;
+            max-width: 62ch;
+            color: var(--text-secondary);
+            font-size: 1.02rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.85rem;
+            margin-top: 1.5rem;
+        }
+
+        .button,
+        .button-secondary {
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.9rem 1.15rem;
+            border-radius: 999px;
+            font-weight: 700;
+            transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .button {
+            background: var(--accent);
+            color: #06222a;
+        }
+
+        .button-secondary {
+            border: 1px solid var(--border);
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .button:hover,
+        .button-secondary:hover,
+        .button:focus-visible,
+        .button-secondary:focus-visible {
+            transform: translateY(-1px);
+            opacity: 0.96;
+            outline: none;
+        }
+
+        .hero-aside {
+            padding: 1.8rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .note {
+            padding: 1rem 1.1rem;
+            border-radius: 16px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: var(--text-secondary);
+        }
+
+        .note strong {
+            color: var(--text);
+        }
+
+        .stat-grid,
+        .card-grid,
+        .fund-grid,
+        .boundary-grid,
+        .proof-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .stat-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            margin: 1rem 0 1.5rem;
+        }
+
+        .card-grid,
+        .fund-grid,
+        .boundary-grid,
+        .proof-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .stat,
+        .card,
+        .fund-card,
+        .boundary-card,
+        .proof-card,
+        .table-wrap,
+        .closing-card {
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat,
+        .card,
+        .fund-card,
+        .boundary-card,
+        .proof-card,
+        .closing-card {
+            padding: 1.25rem;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 1.8rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .stat span,
+        .card p,
+        .fund-card p,
+        .boundary-card p,
+        .proof-card p,
+        .table-wrap p,
+        .closing-card p,
+        li {
+            color: var(--text-secondary);
+        }
+
+        .section {
+            margin-top: 1.5rem;
+            scroll-margin-top: 96px;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-heading h2 {
+            margin: 0;
+            font-size: clamp(1.5rem, 3vw, 2.4rem);
+        }
+
+        .section-heading p {
+            max-width: 58ch;
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 0.45rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .card h3,
+        .fund-card h3,
+        .boundary-card h3,
+        .proof-card h3,
+        .closing-card h3 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            padding: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 720px;
+        }
+
+        th,
+        td {
+            padding: 0.95rem 0.85rem;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-size: 0.82rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .mono {
+            font-family: "JetBrains Mono", monospace;
+            color: var(--accent-strong);
+            font-size: 0.9rem;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 1.1rem;
+        }
+
+        .intake-form {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        label {
+            display: grid;
+            gap: 0.4rem;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 0.92rem;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            min-height: 48px;
+            padding: 0.85rem 0.95rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            font: inherit;
+        }
+
+        textarea {
+            min-height: 132px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid rgba(94, 234, 212, 0.55);
+            outline-offset: 2px;
+        }
+
+        select option {
+            background: var(--bg-elevated);
+            color: var(--text);
+        }
+
+        .form-note {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.92rem;
+        }
+
+        .capital-note {
+            margin-top: 1rem;
+            border-left: 3px solid var(--accent);
+            padding: 0.95rem 1rem;
+            background: rgba(94, 234, 212, 0.08);
+            color: var(--text-secondary);
+            border-radius: 0 14px 14px 0;
+        }
+
+        footer {
+            padding: 0 0 3rem;
+        }
+
+        .footer-card {
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            color: var(--text-muted);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a:hover,
+        .footer-links a:focus-visible {
+            color: var(--text);
+            outline: none;
+        }
+
+        @media (max-width: 900px) {
+
+            .hero,
+            .card-grid,
+            .fund-grid,
+            .boundary-grid,
+            .proof-grid,
+            .stat-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .section-heading {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            nav {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .hero-copy,
+            .hero-aside,
+            .stat,
+            .card,
+            .fund-card,
+            .boundary-card,
+            .proof-card,
+            .closing-card {
+                padding: 1rem;
+            }
+
+            .card-grid,
+            .fund-grid,
+            .boundary-grid,
+            .proof-grid,
+            .form-row,
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header>
+        <div class="wrap topbar">
+            <a class="brand" href="/">
+                <img src="/assets/logos/gfd-circle-mark.webp" alt="Good Flippin Design logo" loading="eager" decoding="async">
+                <span class="brand-mark">
+                    <strong>Good Flippin Design</strong>
+                    <span>Investor Overview</span>
+                </span>
+            </a>
+            <nav aria-label="Investor overview navigation">
+                <a href="#signals">Signals</a>
+                <a href="#proof">Proof</a>
+                <a href="#model">Model</a>
+                <a href="#funding">Use of Funds</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main" class="wrap">
+        <section class="hero" aria-labelledby="investor-hero-title">
+            <div class="panel hero-copy">
+                <span class="eyebrow">Public Operating Thesis</span>
+                <h1 id="investor-hero-title">A multimedia knowledge company built to make complex information usable.</h1>
+                <p>Good Flippin Design is building a multi-property media and technology organization designed to translate complexity into clarity. The near-term opportunity is straightforward: establish a durable revenue floor through carefully selected sponsorship and advertising surfaces, then expand into higher-margin knowledge products, commissioned intelligence, and monetizable creative work.</p>
+                <p>The long-term vision is intentionally not published in full. Publicly, we are sharing enough for investors and strategic supporters to understand the execution quality, mission alignment, and ROI potential without disclosing every operational play.</p>
+                <div class="hero-actions">
+                    <a class="button" href="#investor-intake">Request a private conversation</a>
+                    <a class="button-secondary" href="#model">View the public model</a>
+                </div>
+            </div>
+
+            <aside class="panel hero-aside" aria-label="Investor summary notes">
+                <div class="note">
+                    <strong>Important:</strong> This page is a high-level operating overview for relationship-building and early diligence. It is not a public securities offering, not legal advice, and not a promise of returns.
+                </div>
+                <div>
+                    <span class="label">What this page is for</span>
+                    <p>To show that the vision is real, the infrastructure is already taking shape, and the monetization path is grounded in execution rather than abstraction.</p>
+                </div>
+                <div>
+                    <span class="label">What remains private</span>
+                    <p>Detailed partner strategy, expansion sequencing, proprietary content pipelines, and the full operating roadmap are shared selectively in private conversations.</p>
+                </div>
+            </aside>
+        </section>
+
+        <section id="signals" class="section" aria-labelledby="signals-title">
+            <div class="section-heading">
+                <div>
+                    <span class="label">Current Performance</span>
+                    <h2 id="signals-title">Execution signals that matter now</h2>
+                </div>
+                <p>We are not asking investors to trust a deck disconnected from delivery. The public surface already shows production systems, content infrastructure, policy maturity, and measurable engineering discipline.</p>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat">
+                    <strong>14/14</strong>
+                    <span>Main accessibility checks passing on the flagship studio surface.</span>
+                </div>
+                <div class="stat">
+                    <strong>97%+</strong>
+                    <span>Documented overall test pass rate across the core site workflow.</span>
+                </div>
+                <div class="stat">
+                    <strong>9</strong>
+                    <span>Recent production commits in one deployment tranche tied to revenue and conversion infrastructure.</span>
+                </div>
+                <div class="stat">
+                    <strong>2.5k+</strong>
+                    <span>Recent lines of production code delivered across three supported stacks.</span>
+                </div>
+            </div>
+
+            <div class="card-grid">
+                <article class="card">
+                    <h3>Live ecosystem, not a mockup</h3>
+                    <p>The studio already operates a live portfolio and multiple public-facing properties across education, culture, civic information, music, and research. That matters because monetization is easier to trust when there are real surfaces, real users, and real technical constraints already being handled.</p>
+                </article>
+                <article class="card">
+                    <h3>Revenue readiness is being built intentionally</h3>
+                    <p>Payments, donation rails, sponsorship-ready inventory, analytics planning, publisher policy, and trust pages are already part of the operating stack. The early goal is not monetization at any cost. The goal is a clean floor that does not damage the brand.</p>
+                </article>
+                <article class="card">
+                    <h3>Knowledge translation is the product edge</h3>
+                    <p>The portfolio consistently focuses on making difficult subjects easier to navigate: AI education, cultural data, civic pathways, market intelligence, and strategic visualization. That capability is the strategic bridge between mission and monetization.</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="proof" class="section" aria-labelledby="proof-title">
+            <div class="section-heading">
+                <div>
+                    <span class="label">Specific Proof Points</span>
+                    <h2 id="proof-title">Signals we can discuss without publishing the full playbook</h2>
+                </div>
+                <p>These proof points are deliberately specific enough to build confidence, while avoiding disclosure of private sequencing, partner strategy, or proprietary operating plans.</p>
+            </div>
+
+            <div class="proof-grid">
+                <article class="proof-card">
+                    <h3>CitizenApproved demand signal</h3>
+                    <p>Internal ecosystem review logged <strong>43,982 requests</strong> and <strong>4,811 page views</strong> for CitizenApproved, showing real demand for accessible civic guidance that can be expanded with tools, resources, and trusted distribution.</p>
+                </article>
+                <article class="proof-card">
+                    <h3>Minnesota Peace / civic surface traction</h3>
+                    <p>Low-effort civic surfaces are already showing measurable early traffic, including <strong>10,706 requests</strong> for Minnesota Peace and <strong>1,130 requests</strong> for Lowertown St. Paul in documented ecosystem telemetry.</p>
+                </article>
+                <article class="proof-card">
+                    <h3>AI Aimate content depth</h3>
+                    <p>AI Aimate is documented with <strong>24 articles</strong>, <strong>6 tracks</strong>, <strong>13 learning paths</strong>, a knowledge graph, RAG-style Ask AI, and XP/levels. Its current issue is traffic activation, not absence of product substance.</p>
+                </article>
+                <article class="proof-card">
+                    <h3>GlobalDeets data credibility</h3>
+                    <p>GlobalDeets has already presented a real data showcase: <strong>433,127 IRS 990 records</strong>, <strong>$110B revenue tracked</strong>, <strong>700+ facilities</strong>, and <strong>$615M+ pipeline insights</strong>.</p>
+                </article>
+                <article class="proof-card">
+                    <h3>Technical and trust infrastructure</h3>
+                    <p>The flagship site now includes legal pages, publisher policy, sitemap alignment, accessibility validation, Cloudflare deployment workflow, payment and inquiry rails, and explicit monetization standards for ads and sponsorship.</p>
+                </article>
+                <article class="proof-card">
+                    <h3>Known gaps are already named</h3>
+                    <p>The current plan is candid about what still needs capital and focus: recurring tiers, analytics depth, sponsor packaging, traffic activation, legal support, and operational hardening before aggressive scale.</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="model" class="section" aria-labelledby="model-title">
+            <div class="section-heading">
+                <div>
+                    <span class="label">Public Business Model</span>
+                    <h2 id="model-title">How revenue begins, and how it can expand</h2>
+                </div>
+                <p>The public model is intentionally simple: start with dependable low-friction monetization, preserve editorial trust, and expand only where the product and audience prove the right to do so.</p>
+            </div>
+
+            <div class="card-grid">
+                <article class="card">
+                    <h3>1. Revenue floor: sponsorships and thoughtful ads</h3>
+                    <p>Select pages can support carefully chosen sponsorship and advertising placements without overwhelming the user experience. This is the first stabilizing layer: modest, brand-safe, and capable of producing a cash-flow floor while the ecosystem matures.</p>
+                </article>
+                <article class="card">
+                    <h3>2. Creative and content revenue</h3>
+                    <p>The organization also owns creative output and educational content that can generate revenue through licensing, distribution, premium assets, sponsorship packages, or other controlled commercial formats. The important point is that the media itself has value, not just the surrounding ad inventory.</p>
+                </article>
+                <article class="card">
+                    <h3>3. Knowledge products and commissioned work</h3>
+                    <p>The same systems used to make complex information accessible can be sold in higher-value forms: commissioned explainers, custom visualizations, educational modules, research-backed briefs, dashboards, and strategic knowledge products.</p>
+                </article>
+            </div>
+
+            <div class="table-wrap" aria-label="Illustrative operating model">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Revenue layer</th>
+                            <th>Current public state</th>
+                            <th>Illustrative planning range</th>
+                            <th>Why it matters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Sponsorship + select ads</strong></td>
+                            <td>Public pages, monetization policy, trust pages, and ad-safe placements are already being aligned.</td>
+                            <td><span class="mono">$500-$800/month</span> early-stage passive plus commissioned blend in current internal planning.</td>
+                            <td>Creates the first stable floor without requiring full platform maturity.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Premium content + creative work</strong></td>
+                            <td>Creative catalog, editorial output, and knowledge-driven content engine are already visible across the ecosystem.</td>
+                            <td>Variable by format; intended as a margin-expanding layer after the initial floor is proven.</td>
+                            <td>Transforms owned media from audience-building only into monetizable intellectual property.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Commissioned knowledge products</strong></td>
+                            <td>Capability is already demonstrated through existing portfolio work in education, civic information, data storytelling, and intelligence surfaces.</td>
+                            <td><span class="mono">$500-$5,000/project</span> in adjacent internal models for premium commissioned work.</td>
+                            <td>Supports higher-value client and partner relationships with clearer ROI narratives.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Optimized ecosystem upside</strong></td>
+                            <td>Cross-site conversion and distribution systems are still early, but internal modeling work is underway.</td>
+                            <td><span class="mono">$17,520-$47,760/year</span> additional annual upside in broader optimization scenarios already documented internally.</td>
+                            <td>Shows why early infrastructure work can compound rather than produce one-off returns.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>All numbers above are directional internal operating assumptions or documented scenario models, not guarantees. They are shared publicly to establish seriousness, not to overstate certainty.</p>
+            </div>
+
+            <div class="table-wrap" aria-label="Capital leverage model">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Capital unlock</th>
+                            <th>What investment accelerates</th>
+                            <th>Public ROI logic</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Infrastructure hardening</strong></td>
+                            <td>Reliability, analytics, page speed, content systems, deployment safety, and repeatable publishing workflows.</td>
+                            <td>Turns a founder-built ecosystem into a stable platform that can support sponsor review, traffic growth, and paid distribution without fragile manual work.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Revenue packaging</strong></td>
+                            <td>Sponsor inventory, rate cards, case studies, premium content bundles, and commissioned knowledge-product offers.</td>
+                            <td>Moves revenue from passive hope to specific products: floor revenue from sponsorship/ads, higher-margin revenue from owned media and custom work.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Legal and business support</strong></td>
+                            <td>Contracting, publishing policy, ad/sponsor boundaries, privacy posture, IP/licensing terms, and diligence materials.</td>
+                            <td>Reduces execution risk and makes larger checks, sponsorships, and strategic partnerships easier to trust.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Selective distribution</strong></td>
+                            <td>SEO content, email capture, nurture sequences, social publishing, partner outreach, and audience development.</td>
+                            <td>Connects existing substance to more of the right audience. This is where the highest upside lives once infrastructure and offer packaging are solid.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="capital-note">The high-end opportunity is not a single ad slot. It is the compounding effect of turning multiple already-started knowledge properties into a coordinated media, education, and intelligence portfolio with sponsor-safe inventory, owned content value, and higher-ticket commissioned products.</p>
+            </div>
+        </section>
+
+        <section id="funding" class="section" aria-labelledby="funding-title">
+            <div class="section-heading">
+                <div>
+                    <span class="label">Initial Investment Priorities</span>
+                    <h2 id="funding-title">Where early capital creates trust and leverage</h2>
+                </div>
+                <p>The first dollars are not meant for vanity. They are aimed at hardening the operating system of the business so that future revenue has a reliable base to stand on.</p>
+            </div>
+
+            <div class="fund-grid">
+                <article class="fund-card">
+                    <h3>Infrastructure and technology</h3>
+                    <p>Core application stability, analytics instrumentation, deployment hardening, performance work, content systems, and monetization surfaces all sit here. This is the layer that makes scale and credibility possible.</p>
+                </article>
+                <article class="fund-card">
+                    <h3>Legal and governance support</h3>
+                    <p>Policies, contracts, business structure, publishing safeguards, and compliance posture are part of building a durable media company. Trust compounds when the legal surface is as intentional as the product surface.</p>
+                </article>
+                <article class="fund-card">
+                    <h3>Business operations and selective distribution</h3>
+                    <p>Support resources for sponsorship packaging, partner conversations, outreach systems, and measured distribution help convert a good idea into a repeatable commercial engine.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section" aria-labelledby="boundary-title">
+            <div class="section-heading">
+                <div>
+                    <span class="label">Strategic Boundary</span>
+                    <h2 id="boundary-title">What we are intentionally not publishing yet</h2>
+                </div>
+                <p>Confidence does not require oversharing. Investors should know there is real upside without being handed every playbook in advance.</p>
+            </div>
+
+            <div class="boundary-grid">
+                <article class="boundary-card">
+                    <h3>Full product sequencing</h3>
+                    <p>The order, timing, and interplay of the broader knowledge ecosystem remain private so execution can stay flexible and competitively defensible.</p>
+                </article>
+                <article class="boundary-card">
+                    <h3>Partnership and distribution strategy</h3>
+                    <p>We are not publicly disclosing all prospective partnership categories, channel experiments, or downstream syndication opportunities at this stage.</p>
+                </article>
+                <article class="boundary-card">
+                    <h3>Detailed financial assumptions</h3>
+                    <p>The page shares directional models, but full assumptions, cost structure, and operating scenarios are reserved for direct diligence conversations.</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="contact" class="section" aria-labelledby="contact-title">
+            <div class="closing-card">
+                <span class="label">Next Step</span>
+                <h3 id="contact-title">If the thesis makes sense, the next conversation should be private and concrete.</h3>
+                <p>We can share a more detailed operating view, assumptions, and current roadmap positioning with aligned investors, strategic sponsors, and business supporters. The public page is meant to establish trust. The private conversation is where diligence begins.</p>
+                <form id="investor-intake" class="intake-form" action="https://formspree.io/f/xgvgzjbw" method="POST">
+                    <input type="hidden" name="_subject" value="Investor / Strategic Support Inquiry - Good Flippin Design">
+                    <input type="hidden" name="source" value="investors.html">
+                    <div class="form-row">
+                        <label for="investor-name">Name
+                            <input id="investor-name" name="name" type="text" autocomplete="name" required>
+                        </label>
+                        <label for="investor-email">Email
+                            <input id="investor-email" name="email" type="email" autocomplete="email" required>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label for="investor-organization">Organization
+                            <input id="investor-organization" name="organization" type="text" autocomplete="organization">
+                        </label>
+                        <label for="investor-type">Interest type
+                            <select id="investor-type" name="interest_type" required>
+                                <option value="">Select one</option>
+                                <option value="investor">Investment conversation</option>
+                                <option value="strategic-sponsor">Strategic sponsorship</option>
+                                <option value="business-support">Business support resources</option>
+                                <option value="partnership">Partnership / distribution</option>
+                                <option value="other">Other aligned support</option>
+                            </select>
+                        </label>
+                    </div>
+                    <label for="investor-range">Approximate check size or support range
+                        <select id="investor-range" name="support_range">
+                            <option value="">Prefer to discuss privately</option>
+                            <option value="under-5k">Under $5,000</option>
+                            <option value="5k-25k">$5,000 - $25,000</option>
+                            <option value="25k-100k">$25,000 - $100,000</option>
+                            <option value="100k-plus">$100,000+</option>
+                            <option value="in-kind">In-kind support / services</option>
+                        </select>
+                    </label>
+                    <label for="investor-message">What would you like to explore?
+                        <textarea id="investor-message" name="message" required placeholder="A few sentences about your interest, timeline, and what would help you evaluate the opportunity."></textarea>
+                    </label>
+                    <p class="form-note">Investor and strategic-support inquiries route separately from general project intake through a distinct subject line. Sensitive diligence details should wait for a direct conversation.</p>
+                    <div class="hero-actions">
+                        <button class="button" type="submit">Send investor inquiry</button>
+                        <a class="button-secondary" href="/">Return to the studio site</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="wrap footer-card">
+            <span>&copy; 2026 GFV LLC DBA Good Flippin Design</span>
+            <div class="footer-links">
+                <a href="/">Home</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+                <a href="publisher-policy.html">Publisher Policy</a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

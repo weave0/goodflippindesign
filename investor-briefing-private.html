@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<!-- Cache bust: 2026-06-10 -->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Investor Briefing | Good Flippin Design</title>
+    <meta name="description" content="Private, noindex investor briefing for Good Flippin Design with deeper financial assumptions and diligence notes.">
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <link rel="canonical" href="https://goodflippindesign.com/investor-briefing-private.html">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #071019;
+            --panel: rgba(17, 24, 39, 0.86);
+            --text: #f4f7fb;
+            --muted: #aeb9c8;
+            --line: rgba(255, 255, 255, 0.1);
+            --accent: #5eead4;
+            --gold: #f59e0b;
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.36);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", system-ui, sans-serif;
+            background: radial-gradient(circle at top left, rgba(94, 234, 212, 0.18), transparent 34%), var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover,
+        a:focus-visible {
+            text-decoration: underline;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            padding: 0.7rem 1rem;
+            border-radius: 999px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            color: var(--text);
+            transform: translateY(-160%);
+            transition: transform 0.2s ease;
+            z-index: 20;
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+            outline: none;
+        }
+
+        .wrap {
+            width: min(1100px, calc(100% - 2rem));
+            margin: 0 auto;
+        }
+
+        header,
+        footer {
+            padding: 1.25rem 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        footer {
+            border-top: 1px solid var(--line);
+            border-bottom: 0;
+            color: var(--muted);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        main {
+            padding: 2rem 0 3rem;
+        }
+
+        .hero,
+        .card,
+        .memo,
+        .table-wrap {
+            border: 1px solid var(--line);
+            background: var(--panel);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+        }
+
+        .hero,
+        .card,
+        .memo {
+            padding: 1.4rem;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.14;
+            margin-top: 0;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4vw, 3.8rem);
+            margin-bottom: 0.8rem;
+        }
+
+        p,
+        li {
+            color: var(--muted);
+        }
+
+        .label {
+            color: var(--accent);
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .memo {
+            margin-top: 1rem;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            min-width: 760px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--line);
+            padding: 0.85rem;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.78rem;
+        }
+
+        .num {
+            font-family: "JetBrains Mono", monospace;
+            color: var(--gold);
+            white-space: nowrap;
+        }
+
+        .button {
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.85rem 1.1rem;
+            border-radius: 999px;
+            background: var(--accent);
+            color: #06222a;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .button:hover,
+        .button:focus-visible {
+            text-decoration: none;
+            outline: 2px solid rgba(94, 234, 212, 0.55);
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 800px) {
+
+            .hero,
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header>
+        <nav class="wrap" aria-label="Private investor memo navigation">
+            <strong>Good Flippin Design - Private Investor Briefing</strong>
+            <a href="investors.html">Public overview</a>
+        </nav>
+    </header>
+
+    <main id="main" class="wrap">
+        <section class="hero" aria-labelledby="private-title">
+            <div>
+                <span class="label">Selective Share - Noindex</span>
+                <h1 id="private-title">Deeper assumptions behind the public investor thesis.</h1>
+                <p>This memo is for aligned diligence conversations. It provides a more explicit view of the revenue architecture while still keeping partner sequencing, proprietary distribution plays, and the full product roadmap private.</p>
+                <a class="button" href="investors.html#investor-intake">Open investor intake</a>
+            </div>
+            <aside class="memo">
+                <h2>Disclosure boundary</h2>
+                <p>This is not a securities offering and does not promise returns. It is an operating memo for conversation, diligence, and scenario planning.</p>
+            </aside>
+        </section>
+
+        <section class="grid" aria-label="Private model highlights">
+            <article class="card">
+                <span class="label">Floor</span>
+                <h2>Sponsorship and ads</h2>
+                <p>Near-term floor model: selective sponsorships and ad placements across qualified pages, with editorial policy controls already documented publicly.</p>
+            </article>
+            <article class="card">
+                <span class="label">Expansion</span>
+                <h2>Owned media value</h2>
+                <p>Creative catalogs, explainers, visual assets, and educational content can become licensed, packaged, sponsored, or sold in premium formats.</p>
+            </article>
+            <article class="card">
+                <span class="label">Upside</span>
+                <h2>Commissioned intelligence</h2>
+                <p>Custom visualizations, research-backed briefs, knowledge products, and dashboards can create higher-ticket revenue once the public trust layer is stronger.</p>
+            </article>
+        </section>
+
+        <section class="memo" aria-labelledby="assumptions-title">
+            <h2 id="assumptions-title">Scenario assumptions for discussion</h2>
+            <p>These ranges are assembled from existing internal planning notes and public-facing readiness work. They are not forecasts. The purpose is to frame what additional capital could unlock and where proof points already exist.</p>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Conservative planning note</th>
+                            <th>Evidence already present</th>
+                            <th>Key dependency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Passive floor</td>
+                            <td><span class="num">$500-$800/month</span> blended passive and early commissioned target in current models.</td>
+                            <td>Donation rails, Formspree intake, publisher policy, trust pages, sponsorship-ready copy, and public portfolio surfaces.</td>
+                            <td>Traffic activation, ad approval, sponsor packaging, and analytics instrumentation.</td>
+                        </tr>
+                        <tr>
+                            <td>Commissioned work</td>
+                            <td><span class="num">$500-$5,000/project</span> for premium briefs, dashboards, visualizations, or custom explainers.</td>
+                            <td>GlobalDeets proof of complex data storytelling, AI Aimate education content, CultureSherpa cultural atlas direction, and civic information surfaces.</td>
+                            <td>Clear packaging, proposal templates, case-study pages, and selective outreach.</td>
+                        </tr>
+                        <tr>
+                            <td>Optimization upside</td>
+                            <td><span class="num">$17,520-$47,760/year</span> documented upside in broader conversion and ecosystem optimization scenarios.</td>
+                            <td>Internal deployment notes cite conversion work, email list growth, recurring support, and multi-site revenue infrastructure.</td>
+                            <td>GA4 events, funnel analytics, recurring tiers, and stronger cross-site distribution.</td>
+                        </tr>
+                        <tr>
+                            <td>Capital use</td>
+                            <td>Initial funds should harden infrastructure, business operations, legal support, and monetization systems before aggressive scaling.</td>
+                            <td>Roadmap already identifies investor readiness, performance, portability, legal review, security, analytics, and scalability planning.</td>
+                            <td>Prioritized sprint sequencing and private diligence review.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="memo" aria-labelledby="upside-title">
+            <h2 id="upside-title">High-end ROI thesis for capital</h2>
+            <p>The highest-value upside comes from capital converting scattered execution into a coordinated portfolio engine. The public model establishes the floor; the private model asks what happens when infrastructure, offer design, and distribution begin reinforcing one another.</p>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Scenario</th>
+                            <th>12-month target behavior</th>
+                            <th>Revenue shape</th>
+                            <th>Capital role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Floor validation</td>
+                            <td>Prove sponsor-safe inventory, basic ad/sponsor yield, and repeatable inbound investor/supporter intake.</td>
+                            <td><span class="num">$6K-$10K/year</span> from early passive floor plus small support activity.</td>
+                            <td>Funds analytics, legal review, page polish, sponsor packaging, and traffic instrumentation.</td>
+                        </tr>
+                        <tr>
+                            <td>Portfolio monetization</td>
+                            <td>Package premium explainers, visualizations, learning modules, and commissioned research across the highest-value properties.</td>
+                            <td><span class="num">Low-to-mid five figures/year</span> from mixed sponsor, premium, and commissioned activity.</td>
+                            <td>Funds productization, case studies, proposal templates, content operations, and selective distribution.</td>
+                        </tr>
+                        <tr>
+                            <td>Upside case</td>
+                            <td>Multiple properties operate as a coordinated media and knowledge portfolio with recurring sponsor relationships and repeat commissioned products.</td>
+                            <td><span class="num">Six-figure annualized potential</span> if traffic activation, sponsor conversion, and premium products compound.</td>
+                            <td>Funds hiring/support resources, legal/business operations, scalable content systems, and a private diligence-ready operating dashboard.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>This upper case is intentionally framed as potential, not forecast. The investable idea is that each dollar spent on infrastructure, legal readiness, and revenue packaging increases the odds that existing assets can become sponsor-safe, measurable, and repeatable.</p>
+        </section>
+
+        <section class="memo" aria-labelledby="diligence-title">
+            <h2 id="diligence-title">Private diligence packet candidates</h2>
+            <ul>
+                <li>Current site and ecosystem traffic snapshots, with source and date.</li>
+                <li>Revenue assumptions by property and monetization layer.</li>
+                <li>Operating cost baseline for infrastructure, tools, legal, and business support.</li>
+                <li>Risk register covering traffic dependence, policy approval, legal readiness, and platform execution.</li>
+                <li>Milestone-based use of funds, including 30, 60, and 90 day proof targets.</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <div class="wrap">Private briefing page. Share selectively. Keep off public navigation and sitemap.</div>
+    </footer>
+</body>
+
+</html>

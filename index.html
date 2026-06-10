@@ -32,7 +32,7 @@
   <meta name="keywords" content="web development, AI integration, data platforms, business intelligence, healthcare analytics, Minneapolis web developer, React development, Next.js, custom dashboards, compliance platforms">
   <meta name="author" content="Good Flippin Design">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://goodflippinvibes.com/">
+  <link rel="canonical" href="https://goodflippindesign.com/">
 
   <!-- Favicons -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -44,10 +44,10 @@
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://goodflippinvibes.com/">
+  <meta property="og:url" content="https://goodflippindesign.com/">
   <meta property="og:title" content="Good Flippin Design | Strategic Web Development &amp; AI Integration">
   <meta property="og:description" content="Strategic web development specializing in data platforms, AI-integrated applications, and business intelligence dashboards. Enterprise-quality code with startup agility.">
-  <meta property="og:image" content="https://goodflippinvibes.com/assets/og-image.png">
+  <meta property="og:image" content="https://goodflippindesign.com/assets/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="en_US">
@@ -55,10 +55,10 @@
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://goodflippinvibes.com/">
+  <meta name="twitter:url" content="https://goodflippindesign.com/">
   <meta name="twitter:title" content="Good Flippin Design | Strategic Web Development &amp; AI Integration">
   <meta name="twitter:description" content="Strategic web development specializing in data platforms, AI-integrated applications, and business intelligence dashboards.">
-  <meta name="twitter:image" content="https://goodflippinvibes.com/assets/twitter-card.png">
+  <meta name="twitter:image" content="https://goodflippindesign.com/assets/twitter-card.png">
   <!-- Geo Tags -->
   <meta name="geo.region" content="US-MN">
   <meta name="geo.placename" content="Minneapolis">
@@ -4305,6 +4305,7 @@
 
     html:not(.social-bar-gone) #services,
     html:not(.social-bar-gone) #blog,
+    html:not(.social-bar-gone) #insights-summary,
     html:not(.social-bar-gone) #contact {
       scroll-margin-top: 184px;
     }
@@ -4583,6 +4584,7 @@
       <ul class="nav-links">
         <li><a href="#services">Services</a></li>
         <li><a href="#work">Work</a></li>
+        <li><a href="#insights-summary">Insights</a></li>
         <li><a href="#process">Process</a></li>
       </ul>
       <a href="admin.html" id="nav-admin-link" class="nav-admin-link" aria-label="Admin Panel">Admin</a>
@@ -4607,6 +4609,7 @@
       <nav class="mobile-nav-links">
         <a href="#services" class="mobile-nav-link">Services</a>
         <a href="#work" class="mobile-nav-link">Work</a>
+        <a href="#insights-summary" class="mobile-nav-link">Insights</a>
         <a href="#process" class="mobile-nav-link">Process</a>
         <a href="admin.html" id="mobile-nav-admin-link" class="mobile-nav-link nav-admin-link" aria-label="Admin Panel">Admin</a>
         <a href="#contact" class="mobile-nav-link mobile-nav-cta">Get in Touch</a>
@@ -4920,6 +4923,49 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="insights-summary">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-label">Editorial Insights</p>
+          <h2 class="section-title">How we share knowledge without walls</h2>
+          <p class="section-subtitle">Two field notes from the studio playbook, plus a quick snapshot of the projects creating the highest practical value.</p>
+        </div>
+
+        <div class="services-grid">
+          <article class="service-card">
+            <h3>Article: Knowledge Without Walls</h3>
+            <p>Our ecosystem runs on shared implementation patterns. When one platform solves a hard problem, that solution becomes reusable guidance for every other build.</p>
+            <ul class="form-features">
+              <li>Cross-project auth patterns reduce identity drift and account friction.</li>
+              <li>Shared publishing workflows cut content turnaround time across platforms.</li>
+              <li>Common accessibility and QA rules keep quality stable as scope grows.</li>
+            </ul>
+          </article>
+
+          <article class="service-card">
+            <h3>Article: Operational Learning Loops</h3>
+            <p>We treat production systems as learning systems. Every launch, incident, and support cycle feeds the next version of architecture, docs, and user experience.</p>
+            <ul class="form-features">
+              <li>Health sweeps and analytics reveal where users hesitate or drop off.</li>
+              <li>Retrospectives convert ad-hoc fixes into repeatable engineering standards.</li>
+              <li>Documentation updates are shipped with code so knowledge stays current.</li>
+            </ul>
+          </article>
+
+          <article class="service-card">
+            <h3>Highest-Value Portfolio Snapshot</h3>
+            <p>These projects consistently demonstrate the strongest value-to-effort profile for partners who need real business and social impact.</p>
+            <ul class="form-features">
+              <li><strong>AI Aimate:</strong> AI education workflows with practical, searchable knowledge delivery.</li>
+              <li><strong>CultureSherpa:</strong> high-density cultural data exploration with map-driven usability.</li>
+              <li><strong>CitizenApproved:</strong> civic guidance platform focused on trust, clarity, and accessibility.</li>
+              <li><strong>GlobalDeets:</strong> market intelligence surfaces that accelerate strategic decisions.</li>
+            </ul>
+          </article>
         </div>
       </div>
     </section>
@@ -5460,6 +5506,11 @@
         <a href="javascript:void(0)" id="footer-email-link">getsome@goodflippinvibes.com</a>
         <a href="#contact">Contact</a>
         <a href="#work">Portfolio</a>
+        <a href="#insights-summary">Insights</a>
+        <a href="investors.html">Investors</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="publisher-policy.html">Publisher Policy</a>
       </div>
     </div>
     <div class="footer-content" style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem;">
@@ -5515,6 +5566,20 @@
       const siteBaseUrl = window.location.href.split('#')[0];
 
       const updates = [
+        {
+          id: 'update-knowledge-without-walls',
+          date: '2026-06-10',
+          title: 'Knowledge Without Walls: one pattern, many platforms',
+          body: 'We now publish implementation patterns across projects so lessons from AI Aimate, CultureSherpa, CitizenApproved, and GlobalDeets improve each other. Shared playbooks cover auth, content workflows, analytics instrumentation, accessibility baselines, and release operations.',
+          tags: ['Architecture', 'Knowledge Sharing']
+        },
+        {
+          id: 'update-high-value-portfolio-snapshot',
+          date: '2026-06-10',
+          title: 'High-value portfolio snapshot: where clients see fastest ROI',
+          body: 'Our highest-value outcomes come from platforms that reduce decision latency and increase trust: AI Aimate (AI learning), CultureSherpa (high-density cultural data), CitizenApproved (civic guidance), and GlobalDeets (market intelligence). Each project demonstrates measurable utility, not just visual polish.',
+          tags: ['Portfolio', 'ROI']
+        },
         {
           id: 'update-science-of-joy',
           date: '2026-04-15',
