@@ -106,6 +106,7 @@ const SITES = {
         'https://plausible.io',
         'https://pagead2.googlesyndication.com',
         'https://googleads.g.doubleclick.net',
+        'https://ep1.adtrafficquality.google',
         'https://gfd-auth.weave0.workers.dev',
         'https://gfd-health-sweep.weave0.workers.dev', // Admin: Ecosystem Health sweep worker (nightly D1 results)
         ...SHARED.clerk.connect,
