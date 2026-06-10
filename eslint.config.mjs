@@ -2,6 +2,18 @@ import js from "@eslint/js";
 
 export default [
   {
+    ignores: [
+      "node_modules/**",
+      ".wrangler/**",
+      "dist/**",
+      "scratch/**",
+      "_quarantine/**",
+      "GFD Dev Projects/**",
+      "tests/**",
+      "*.html", // HTML files need special handling — override below
+    ],
+  },
+  {
     // Only lint the JS source files that matter for var→const/let conversion
     files: ["admin-panels.js", "admin.html", "community-portal.html", "scripts/**/*.js"],
     languageOptions: {
@@ -67,14 +79,5 @@ export default [
       "no-var": "error",
       "prefer-const": "error",
     },
-  },
-  {
-    ignores: [
-      "node_modules/**",
-      ".wrangler/**",
-      "GFD Dev Projects/**",
-      "tests/**",
-      "*.html", // HTML files need special handling — override below
-    ],
   },
 ];

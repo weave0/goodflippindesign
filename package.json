@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Strategic web development portfolio for GFV LLC",
   "scripts": {
-    "dev": "npx http-server . -p 3000 -o",
+    "dev": "npx http-server . -p 3000",
     "sync": "node scripts/sync-review.js",
     "invite:team": "pwsh -File scripts/invite-team.ps1",
     "library:index": "node scripts/generate-library-index.js",
@@ -87,8 +87,13 @@
   "dependencies": {
     "@sentry/cloudflare": "^10.46.0"
   },
+  "overrides": {
+    "brace-expansion": "^5.0.6",
+    "qs": "^6.15.2",
+    "ws": "^8.21.0"
+  },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.14.3",
+    "@cloudflare/vitest-pool-workers": "^0.16.14",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.2.0",
     "html-validate": "^10.11.2",

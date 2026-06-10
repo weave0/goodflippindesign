@@ -84,7 +84,7 @@ function getDrives() {
     if (!parsed) return [];
     const arr = Array.isArray(parsed) ? parsed : [parsed];
 
-    let baseline = {};
+    const baseline = {};
     if (fs.existsSync(BASELINE_PATH)) {
         const b = safeJson(fs.readFileSync(BASELINE_PATH, 'utf8'));
         if (b?.drives) b.drives.forEach(d => { baseline[d.drive] = d.usedGB; });
