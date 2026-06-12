@@ -1,9 +1,10 @@
 {
     "_meta": {
         "description": "Single source of truth for all GFV LLC brands and internal projects. Used by social-post-generator, sync-config, CMS, and brand asset tooling.",
-        "updated": "2026-03-10",
+        "updated": "2026-06-11",
         "notes": "Handles set to null where not yet registered. Known active: GFD X=@CultureSherps (shared), GFV Instagram=@goodflippinvibes, AI Aimate X=@CultureSherps (shared), CultureSherpa X=@CultureSherps (shared).",
-        "entity": "GFV LLC DBA Good Flippin Vibes"
+        "entity": "GFV LLC DBA Good Flippin Vibes",
+        "executionLayer": "Ecosystem operations now treats this file as the canonical registry. Site briefs live under ecosystem/site-briefs and validation scripts live under scripts/."
     },
     "public": {
         "gfd": {
@@ -11,10 +12,14 @@
             "slug": "gfd",
             "type": "consultancy",
             "status": "active",
+            "stage": "monetizing",
             "domain": "goodflippindesign.com",
             "url": "https://goodflippindesign.com",
             "tagline": "Web development & AI integration consultancy",
             "description": "Primary portfolio and consultancy site for Brett Weaver. Showcases BI dashboards, data viz, healthcare analytics, and AI integrations.",
+            "audience": "prospects, sponsors, partners, supporters, and ecosystem operators who need the studio trust hub",
+            "primaryCta": "Start a project inquiry",
+            "secondaryCta": "Support the ecosystem or explore the community portal",
             "colors": {
                 "bg": "#0a0e1a",
                 "accent": "#22d3ee",
@@ -58,17 +63,32 @@
                 "github"
             ],
             "email": "getsome@goodflippinvibes.com",
-            "repo": "weave0/goodflippindesign"
+            "repo": "weave0/goodflippindesign",
+            "dir": ".",
+            "deployment": {
+                "provider": "cloudflare-pages",
+                "project": "goodflippindesign",
+                "status": "live"
+            },
+            "ops": {
+                "priority": 1,
+                "nextAction": "Keep this as the trust hub and control plane; next pass should align supporter CTA, ecosystem overview, and sponsor intake with SKY MONEY.",
+                "lastReviewed": "2026-06-11"
+            }
         },
         "gfv": {
             "name": "Good Flippin Vibes",
             "slug": "gfv",
             "type": "lifestyle",
             "status": "active",
+            "stage": "live",
             "domain": "goodflippinvibes.com",
             "url": "https://goodflippinvibes.com",
             "tagline": "Wellness, art, and community — the origin brand",
             "description": "Origin brand for the GFV LLC entity. Wellness, gallery, and community platform. Art-forward, community-driven.",
+            "audience": "community members, supporters, art/music followers, and people entering through the origin brand",
+            "primaryCta": "Join or support the community",
+            "secondaryCta": "Explore the studio and creative ecosystem",
             "colors": {
                 "bg": "#0d0d0d",
                 "accent": "#fbbf24",
@@ -95,17 +115,32 @@
             "activePlatforms": [
                 "instagram"
             ],
-            "repo": "weave0/good-flippin-vibes"
+            "repo": "weave0/good-flippin-vibes",
+            "dir": "GFD Dev Projects/GFV",
+            "deployment": {
+                "provider": "unknown",
+                "project": null,
+                "status": "live"
+            },
+            "ops": {
+                "priority": 1,
+                "nextAction": "Verify origin-brand support path, gallery/community links, and ecosystem footer are aligned with GFD and SKY MONEY.",
+                "lastReviewed": "2026-06-11"
+            }
         },
         "aiaimate": {
             "name": "AI Aimate",
             "slug": "aiaimate",
             "type": "product",
             "status": "active",
+            "stage": "live",
             "domain": "aiaimate.com",
             "url": "https://aiaimate.com",
             "tagline": "AI education platform — learn AI by doing",
             "description": "RAG-powered AI education platform. Semantic search, learning tracks, AI tools for all skill levels.",
+            "audience": "AI learners, professionals, students, and partners looking for practical AI education",
+            "primaryCta": "Start learning AI by doing",
+            "secondaryCta": "Explore Good Flippin Design and related ecosystem tools",
             "colors": {
                 "bg": "#0d0d0d",
                 "accent": "#22d3ee",
@@ -134,17 +169,32 @@
             "activePlatforms": [
                 "x"
             ],
-            "repo": null
+            "repo": null,
+            "dir": "GFD Dev Projects/AI",
+            "deployment": {
+                "provider": "vercel",
+                "project": "aiaimate",
+                "status": "live"
+            },
+            "ops": {
+                "priority": 1,
+                "nextAction": "Package the clearest learning CTA and analytics events before adding new product surface area.",
+                "lastReviewed": "2026-06-11"
+            }
         },
         "culturesherpa": {
             "name": "CultureSherpa",
             "slug": "culturesherpa",
             "type": "product",
             "status": "active",
+            "stage": "live",
             "domain": "culturesherpa.org",
             "url": "https://culturesherpa.org",
             "tagline": "Interactive cultural atlas — explore the world's cultures",
             "description": "React 18 + MapboxGL cultural atlas. Geographic data visualization, anthropology, travel insights. PWA.",
+            "audience": "learners, educators, travelers, culture-curious visitors, and institutional partners",
+            "primaryCta": "Explore the cultural atlas",
+            "secondaryCta": "Support educational and cultural discovery work",
             "colors": {
                 "bg": "#0d0d0d",
                 "accent": "#10b981",
@@ -171,17 +221,32 @@
             "activePlatforms": [
                 "x"
             ],
-            "repo": null
+            "repo": null,
+            "dir": "GFD Dev Projects/CultureSherpa",
+            "deployment": {
+                "provider": "unknown",
+                "project": null,
+                "status": "live"
+            },
+            "ops": {
+                "priority": 2,
+                "nextAction": "Prioritize grant/institutional framing, learning-pack CTA, and ecosystem footer consistency before large feature work.",
+                "lastReviewed": "2026-06-11"
+            }
         },
         "citizenapproved": {
             "name": "CitizenApproved",
             "slug": "citizenapproved",
             "type": "product",
             "status": "active",
+            "stage": "live",
             "domain": "citizenapproved.org",
             "url": "https://citizenapproved.org",
             "tagline": "Civic data platform — government accountability made accessible",
             "description": "Next.js civic tech product. Government data transparency, ratings, community feedback.",
+            "audience": "residents, civic organizers, journalists, public-interest partners, and accountability-minded sponsors",
+            "primaryCta": "Explore civic accountability tools",
+            "secondaryCta": "Follow updates or support public-interest technology",
             "colors": {
                 "bg": "#0d0d0d",
                 "accent": "#3b82f6",
@@ -206,17 +271,32 @@
                 }
             },
             "activePlatforms": [],
-            "repo": null
+            "repo": null,
+            "dir": "GFD Dev Projects/CitizenApproved",
+            "deployment": {
+                "provider": "cloudflare-pages",
+                "project": "citizenapproved",
+                "status": "live"
+            },
+            "ops": {
+                "priority": 1,
+                "nextAction": "Tighten civic sponsor/grant language, email capture, and public trust framing before expanding product scope.",
+                "lastReviewed": "2026-06-11"
+            }
         },
         "globaldeets": {
             "name": "GlobalDeets",
             "slug": "globaldeets",
             "type": "portfolio",
             "status": "active",
+            "stage": "live",
             "domain": "globaldeets.com",
             "url": "https://globaldeets.com",
             "tagline": "Project portfolio hub — client work showcase",
             "description": "Vanilla JS PWA that serves as the portfolio subdomain ecosystem. Individual client projects live on subdomains (e.g. eliassen.globaldeets.com).",
+            "audience": "prospects, partners, analysts, and visitors evaluating data storytelling and dashboard work",
+            "primaryCta": "Explore portfolio projects and case studies",
+            "secondaryCta": "Start a project through Good Flippin Design",
             "colors": {
                 "bg": "#0d0d0d",
                 "accent": "#fbbf24",
@@ -232,7 +312,116 @@
                 }
             },
             "activePlatforms": [],
-            "repo": null
+            "repo": null,
+            "dir": "GFD Dev Projects/Globaldeets",
+            "deployment": {
+                "provider": "cloudflare-pages",
+                "project": "globaldeets",
+                "status": "live"
+            },
+            "ops": {
+                "priority": 2,
+                "nextAction": "Use this as the proof engine for commissioned intelligence; prioritize case-study clarity and GFD inquiry routing.",
+                "lastReviewed": "2026-06-11"
+            }
+        },
+        "goodflippinnews": {
+            "name": "Good Flippin News",
+            "slug": "goodflippinnews",
+            "type": "media",
+            "status": "incubating",
+            "stage": "seed",
+            "domain": "goodflippinnews.com",
+            "url": "https://goodflippinnews.com",
+            "tagline": "Joy-forward dispatches from the GFV creative and civic ecosystem",
+            "description": "Barely-built publishing/newsroom surface currently prototyped in incubations/goodflippinnews. Intended to become an ecosystem updates, dispatches, and sponsor-safe storytelling channel without turning into a generic doomscrolling news site.",
+            "audience": "supporters, partners, local/civic/creative readers, and people discovering the ecosystem through useful stories",
+            "primaryCta": "Subscribe or follow ecosystem dispatches",
+            "secondaryCta": "Explore Good Flippin Design and Good Flippin Vibes",
+            "colors": {
+                "bg": "#101820",
+                "accent": "#fbbf24",
+                "text": "#f8fafc"
+            },
+            "assetDirs": {
+                "brand": "incubations/goodflippinnews/assets"
+            },
+            "social": {
+                "x": {
+                    "handle": "@CultureSherps",
+                    "url": "https://x.com/CultureSherps",
+                    "note": "Shared ecosystem account until a dedicated channel is justified"
+                },
+                "instagram": {
+                    "handle": null,
+                    "url": null
+                }
+            },
+            "activePlatforms": [
+                "x"
+            ],
+            "repo": "weave0/goodflippindesign",
+            "dir": "incubations/goodflippinnews",
+            "deployment": {
+                "provider": "unknown",
+                "project": null,
+                "status": "not-live"
+            },
+            "ops": {
+                "priority": 2,
+                "nextAction": "Draft the first three dispatch items and choose the initial publishing cadence before deployment wiring.",
+                "lastReviewed": "2026-06-12"
+            }
+        },
+        "goodflippinluck": {
+            "name": "Good Flippin Luck",
+            "slug": "goodflippinluck",
+            "type": "campaign",
+            "status": "incubating",
+            "stage": "mvp",
+            "domain": "goodflippinluck.com",
+            "url": "https://goodflippinluck.com",
+            "tagline": "A playable charm, promo, and creative commerce surface for the GFV universe",
+            "description": "Maze Snake Fortune prototype currently living in incubations/goodflippinluck. Best used as a playful lead-gen, supporter, merch/drop, or campaign surface before it becomes a larger product.",
+            "audience": "supporters, fans, casual visitors, music/art followers, and people who respond to playful interactive experiences",
+            "primaryCta": "Play, share, and join the supporter list",
+            "secondaryCta": "Discover the broader GFV creative ecosystem",
+            "colors": {
+                "bg": "#09090b",
+                "accent": "#22d3ee",
+                "accent2": "#f472b6",
+                "text": "#f8fafc"
+            },
+            "assetDirs": {
+                "brand": "incubations/goodflippinluck/assets"
+            },
+            "social": {
+                "x": {
+                    "handle": "@CultureSherps",
+                    "url": "https://x.com/CultureSherps",
+                    "note": "Shared ecosystem account until a dedicated channel is justified"
+                },
+                "instagram": {
+                    "handle": "@goodflippinvibes",
+                    "url": "https://instagram.com/goodflippinvibes"
+                }
+            },
+            "activePlatforms": [
+                "x",
+                "instagram"
+            ],
+            "repo": "weave0/goodflippindesign",
+            "dir": "incubations/goodflippinluck",
+            "deployment": {
+                "provider": "unknown",
+                "project": null,
+                "status": "not-live"
+            },
+            "ops": {
+                "priority": 2,
+                "nextAction": "Confirm the supporter-list destination, then wire deployment before adding new mechanics.",
+                "lastReviewed": "2026-06-12"
+            }
         }
     },
     "internal": {

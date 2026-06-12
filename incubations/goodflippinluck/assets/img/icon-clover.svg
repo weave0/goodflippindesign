@@ -1,0 +1,15 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none"
+    xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="cloverGrad" x1="12" y1="12" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#A6FFF6"/>
+            <stop offset="1" stop-color="#52E6D5"/>
+        </linearGradient>
+    </defs>
+    <circle cx="32" cy="32" r="29" fill="#102833"/>
+    <circle cx="25" cy="25" r="9" fill="url(#cloverGrad)"/>
+    <circle cx="39" cy="25" r="9" fill="url(#cloverGrad)"/>
+    <circle cx="25" cy="39" r="9" fill="url(#cloverGrad)"/>
+    <circle cx="39" cy="39" r="9" fill="url(#cloverGrad)"/>
+    <path d="M32 34L37 51" stroke="#73F5E7" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,56 @@
+<svg width="920" height="360" viewBox="0 0 920 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="920" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#091423"/>
+      <stop offset="1" stop-color="#150f24"/>
+    </linearGradient>
+    <linearGradient id="trail" x1="126" y1="83" x2="764" y2="287" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#23f5c5"/>
+      <stop offset="1" stop-color="#42a1ff"/>
+    </linearGradient>
+    <filter id="glow" x="0" y="0" width="920" height="360" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="1" y="1" width="918" height="358" rx="24" fill="url(#bg)" stroke="#2A3F56"/>
+
+  <g opacity="0.35">
+    <path d="M88 70H832" stroke="#2A3F56"/>
+    <path d="M88 114H832" stroke="#2A3F56"/>
+    <path d="M88 158H832" stroke="#2A3F56"/>
+    <path d="M88 202H832" stroke="#2A3F56"/>
+    <path d="M88 246H832" stroke="#2A3F56"/>
+    <path d="M88 290H832" stroke="#2A3F56"/>
+    <path d="M176 48V312" stroke="#2A3F56"/>
+    <path d="M264 48V312" stroke="#2A3F56"/>
+    <path d="M352 48V312" stroke="#2A3F56"/>
+    <path d="M440 48V312" stroke="#2A3F56"/>
+    <path d="M528 48V312" stroke="#2A3F56"/>
+    <path d="M616 48V312" stroke="#2A3F56"/>
+    <path d="M704 48V312" stroke="#2A3F56"/>
+  </g>
+
+  <path d="M140 250C184 246 192 198 238 194C284 190 297 239 346 234C395 229 405 182 455 180C505 178 516 224 566 227C616 230 622 188 670 182C718 176 749 204 780 202" stroke="url(#trail)" stroke-width="14" stroke-linecap="round" filter="url(#glow)"/>
+
+  <g transform="translate(516 128)" filter="url(#glow)">
+    <circle r="48" fill="#11263A" stroke="#23F5C5" stroke-width="4"/>
+    <path d="M-16 -22L-4 -48L8 -22" stroke="#23F5C5" stroke-width="4" stroke-linecap="round"/>
+    <path d="M16 -22L28 -48L40 -22" stroke="#23F5C5" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="-8" cy="-2" r="6" fill="#42A1FF"/>
+    <circle cx="26" cy="-2" r="6" fill="#42A1FF"/>
+    <path d="M2 18C9 26 17 26 24 18" stroke="#23F5C5" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(706 232)" filter="url(#glow)">
+    <circle r="22" fill="#151924" stroke="#F9C74F" stroke-width="3"/>
+    <path d="M0 -14L5 -3H17L8 4L11 15L0 9L-11 15L-8 4L-17 -3H-5L0 -14Z" fill="#F9C74F"/>
+  </g>
+
+  <text x="118" y="104" fill="#B9C8DA" font-family="'IBM Plex Mono', monospace" font-size="16" letter-spacing="2">FORTUNE RUN // NEON MAZE</text>
+  <text x="118" y="136" fill="#EAF2FF" font-family="Syne, sans-serif" font-size="42" font-weight="700">WIN FAST. SHARE THE BLESSING.</text>
+</svg>

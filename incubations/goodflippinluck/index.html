@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Good Flippin Luck | Maze Snake Fortune</title>
+    <meta
+        name="description"
+        content="Play Maze Snake Fortune, unlock a shareable blessing, and join the Good Flippin Vibes supporter path." />
+    <link rel="canonical" href="https://goodflippinluck.com/" />
+    <meta property="og:title" content="Good Flippin Luck | Maze Snake Fortune" />
+    <meta
+        property="og:description"
+        content="A playable Good Flippin Vibes campaign surface for quick wins, shareable fortunes, and supporter momentum." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://goodflippinluck.com/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Good Flippin Luck | Maze Snake Fortune" />
+    <meta
+        name="twitter:description"
+        content="Win fast, share the blessing, and follow the Good Flippin creative ecosystem." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css?v=20260612-2" />
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Skip to game</a>
+    <header class="header">
+        <p class="kicker">goodflippinluck.com</p>
+        <h1>Maze Snake Fortune</h1>
+        <p class="subhead">
+            Clear enough stars, dodge traps, and unlock a shareable fortune from the Good Flippin Vibes vault.
+        </p>
+        <div class="cta-row" role="group" aria-label="Good Flippin Luck actions">
+            <a class="button" href="#gameSection">Play Now</a>
+            <a class="button alt" href="https://goodflippindesign.com/donate.html?utm_source=goodflippinluck&utm_medium=incubation&utm_campaign=sky_money_support" rel="noopener">Support The Ecosystem</a>
+            <a class="button ghost" href="https://instagram.com/goodflippinvibes" rel="noopener">Follow GFV</a>
+        </div>
+        <figure class="hero-visual">
+            <img src="assets/img/luck-hero.svg" alt="Futuristic neon mascot and maze banner" />
+        </figure>
+    </header>
+
+    <main id="main" class="layout">
+        <section class="panel game-panel" id="gameSection" aria-label="Maze snake game">
+            <div class="theme-row" role="group" aria-label="Visual style theme">
+                <button class="button mode active" id="themeNeon" type="button">Neon Tech</button>
+                <button class="button mode alt" id="themeSoft" type="button">Soft Futurism</button>
+            </div>
+            <div class="mode-row" role="group" aria-label="Game speed and goal mode">
+                <button class="button mode active" id="modeQuick" type="button">Quick Run</button>
+                <button class="button mode alt" id="modeClassic" type="button">Classic</button>
+            </div>
+            <div class="hud" aria-live="polite">
+                <span>Score: <strong id="score">0</strong></span>
+                <span>Traps: <strong id="traps">0</strong></span>
+                <span>Speed: <strong id="speed">Normal</strong></span>
+                <span>Goal: <strong id="goal">10</strong></span>
+            </div>
+            <p class="run-status" id="runStatus" aria-live="polite">Quick Run active. First fortune at 10 stars.</p>
+            <canvas id="gameCanvas" width="560" height="560" role="img" aria-label="Maze snake game board"></canvas>
+            <div class="command-row" role="group" aria-label="Run controls">
+                <button class="button" id="startRun" type="button">Start Run</button>
+                <button class="button alt" id="resetRun" type="button">Reset</button>
+                <button class="button alt" id="toggleFullscreen" type="button" aria-pressed="false">Full Screen</button>
+            </div>
+            <div class="dpad" role="group" aria-label="Touch direction controls">
+                <button class="dpad-btn" data-dir="up" type="button" aria-label="Move up">↑</button>
+                <button class="dpad-btn" data-dir="left" type="button" aria-label="Move left">←</button>
+                <button class="dpad-btn" data-dir="down" type="button" aria-label="Move down">↓</button>
+                <button class="dpad-btn" data-dir="right" type="button" aria-label="Move right">→</button>
+            </div>
+            <p class="controls">
+                Use arrow keys, WASD, or touch controls. Wall hits are penalties, not game over. Start/Pause lets you breathe.
+            </p>
+        </section>
+
+        <section class="panel reward-panel" id="rewardSection" aria-label="Fortune reward">
+            <h2>Your Fortune Vault</h2>
+            <p class="muted">Win to unlock a rarity-tier blessing. Copy the victory link or share it to bring someone else into the run.</p>
+
+            <div class="fortune-card" id="fortuneCard" hidden>
+                <p class="tier" id="fortuneTier"></p>
+                <blockquote id="fortuneText"></blockquote>
+                <p class="meta" id="fortuneMeta"></p>
+                <div class="actions">
+                    <button class="button" id="copyLink" type="button">Copy Victory Link</button>
+                    <a class="button alt" id="shareX" target="_blank" rel="noopener" href="#">Share to X</a>
+                </div>
+            </div>
+
+            <div class="empty-state" id="emptyState">
+                <p>No fortune yet. Start slithering.</p>
+            </div>
+
+            <div class="support-note">
+                <h3>After The Win</h3>
+                <p>Supporter drops, music/art releases, and future charms will route through the broader Good Flippin ecosystem.</p>
+                <a class="button ghost" href="https://goodflippindesign.com/community-portal.html?utm_source=goodflippinluck&utm_medium=incubation&utm_campaign=supporter_list" rel="noopener">Join The Supporter List</a>
+            </div>
+        </section>
+    </main>
+
+    <canvas id="fanfareCanvas" class="fanfare" aria-hidden="true"></canvas>
+
+    <footer class="ecosystem-footer" aria-label="Good Flippin ecosystem">
+        <p>Good Flippin Luck is a playable campaign surface from the Good Flippin Vibes creative universe, supported by Good Flippin Design.</p>
+        <nav aria-label="Ecosystem links">
+            <a href="https://goodflippindesign.com" rel="noopener">Good Flippin Design</a>
+            <a href="https://goodflippinvibes.com" rel="noopener">Good Flippin Vibes</a>
+            <a href="https://goodflippindesign.com/donate.html?utm_source=goodflippinluck&utm_medium=footer&utm_campaign=sky_money_support" rel="noopener">Support the work</a>
+            <a href="https://goodflippindesign.com/privacy.html" rel="noopener">Privacy</a>
+        </nav>
+    </footer>
+
+    <script src="fortunes.js?v=20260606-1"></script>
+    <script src="luck.js?v=20260612-1"></script>
+</body>
+
+</html>
