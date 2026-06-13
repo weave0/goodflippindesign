@@ -19,8 +19,45 @@
     <meta name="twitter:title" content="Good Flippin News | Ecosystem Dispatches" />
     <meta
         name="twitter:description"
-        content="Useful updates, creative momentum, and ways to support the Good Flippin ecosystem." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
+        content="Useful updates, creative momentum, and ways to support the Good Flippin ecosystem." />    <meta name="robots" content="index, follow" />
+    <meta property="og:image" content="https://goodflippindesign.com/assets/brand/gfd-og-default.png" />
+    <meta property="og:image:alt" content="Good Flippin News — ecosystem dispatches from Good Flippin Design" />
+    <meta property="og:site_name" content="Good Flippin News" />
+    <meta name="twitter:image" content="https://goodflippindesign.com/assets/brand/gfd-og-default.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://goodflippinnews.com/#website",
+          "url": "https://goodflippinnews.com/",
+          "name": "Good Flippin News",
+          "description": "Joy-forward ecosystem dispatches from Good Flippin Design and Good Flippin Vibes: civic progress, creative momentum, and useful ways to help.",
+          "publisher": { "@id": "https://goodflippindesign.com/#organization" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://goodflippindesign.com/#organization",
+          "name": "Good Flippin Design",
+          "url": "https://goodflippindesign.com",
+          "sameAs": [
+            "https://goodflippinvibes.com",
+            "https://x.com/CultureSherps",
+            "https://instagram.com/goodflippinvibes"
+          ]
+        },
+        {
+          "@type": "NewsMediaOrganization",
+          "name": "Good Flippin News",
+          "url": "https://goodflippinnews.com/",
+          "parentOrganization": { "@id": "https://goodflippindesign.com/#organization" },
+          "description": "Dispatches covering civic progress, creative releases, and ecosystem build notes from the Good Flippin network."
+        }
+      ]
+    }
+    </script>    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
@@ -53,15 +90,15 @@
             <div class="lane-grid">
                 <article class="lane-card">
                     <h3>Civic Signals</h3>
-                    <p>Short updates on public-interest tools, local trust work, and useful civic explainers.</p>
+                    <p>Short updates on public-interest tools, local trust work, and useful civic explainers from <a class="lane-link" href="https://citizenapproved.org" rel="noopener">CitizenApproved</a>, <a class="lane-link" href="https://minnesotapeace.com" rel="noopener">MinnesotaPeace</a>, and beyond.</p>
                 </article>
                 <article class="lane-card">
                     <h3>Creative Momentum</h3>
-                    <p>Music, art, gallery, and campaign notes that help supporters discover what is shipping next.</p>
+                    <p>Music, art, and release notes from <a class="lane-link" href="https://goodflippinvibes.com" rel="noopener">Good Flippin Vibes</a>, <a class="lane-link" href="https://heavymoose.com" rel="noopener">Heavy Moose</a>, and the broader creative canon — so supporters always know what shipped next.</p>
                 </article>
                 <article class="lane-card">
                     <h3>Build Notes</h3>
-                    <p>Transparent ecosystem progress across Good Flippin Design, Good Flippin Vibes, and adjacent projects.</p>
+                    <p>Transparent progress across <a class="lane-link" href="https://goodflippindesign.com" rel="noopener">Good Flippin Design</a>, <a class="lane-link" href="https://aiaimate.com" rel="noopener">AIAimate</a>, and <a class="lane-link" href="https://culturesherpa.org" rel="noopener">CultureSherpa</a>. Open by default. No spin.</p>
                 </article>
             </div>
         </section>
@@ -128,10 +165,56 @@
         </section>
 
         <section id="archive" class="archive" aria-labelledby="archive-title">
-            <p class="eyebrow">archive placeholder</p>
+            <p class="eyebrow">Dispatches — Issue 1</p>
             <h2 id="archive-title">Dispatch Archive</h2>
-            <p>First public dispatches will collect ecosystem progress, useful links, and clear next actions here.</p>
-            <a class="text-link" href="https://x.com/CultureSherps" rel="noopener">Follow shared updates on X</a>
+            <p class="archive-lede">Three lanes. Real links. No doomscrolling required.</p>
+
+            <article class="dispatch-item" itemscope itemtype="https://schema.org/NewsArticle">
+                <header class="dispatch-header">
+                    <span class="dispatch-lane civic">Civic Signals</span>
+                    <time class="dispatch-date" datetime="2026-06-12" itemprop="datePublished">June 12, 2026</time>
+                </header>
+                <h3 itemprop="headline"><a class="dispatch-title" href="https://minnesotapeace.com" rel="noopener">MinnesotaPeace Is Now Live — A Digital Home for Mediation and Conflict Resolution</a></h3>
+                <p itemprop="description">Minnesota is home to a strong mediation tradition, and <a href="https://minnesotapeace.com" rel="noopener">MinnesotaPeace.com</a> now gives that tradition a public web presence. The site covers professional mediation services, conflict resolution resources, and community peace work — built by Good Flippin Design as part of the broader civic-tech ecosystem. If you or someone you know is navigating a dispute — family, workplace, neighbor, or organizational — mediation is often faster, cheaper, and more humane than litigation. <a href="https://minnesotapeace.com" rel="noopener">Browse the site</a> and share it with anyone who might need it.</p>
+                <footer class="dispatch-footer">
+                    <span class="dispatch-tag">Civic</span>
+                    <span class="dispatch-tag">Minnesota</span>
+                    <span class="dispatch-tag">Mediation</span>
+                    <a class="dispatch-action" href="https://minnesotapeace.com" rel="noopener">Visit MinnesotaPeace →</a>
+                </footer>
+            </article>
+
+            <article class="dispatch-item" itemscope itemtype="https://schema.org/NewsArticle">
+                <header class="dispatch-header">
+                    <span class="dispatch-lane creative">Creative Momentum</span>
+                    <time class="dispatch-date" datetime="2026-06-12" itemprop="datePublished">June 12, 2026</time>
+                </header>
+                <h3 itemprop="headline"><a class="dispatch-title" href="https://heavymoose.com" rel="noopener">Heavy Moose DROSS I &amp; II Are Streaming — The Full Neon Industrial Canon Is Live</a></h3>
+                <p itemprop="description">Heavy Moose is the industrial/experimental music project from the Good Flippin Vibes creative universe, and both debut albums — DROSS I and DROSS II — are now available to stream. The sound sits at the intersection of neon texture, machine weight, and something that feels like the inside of a very well-lit factory at 2 AM. <a href="https://heavymoose.com" rel="noopener">Visit heavymoose.com</a> to find streaming links, album notes, and the full character canon. If you're the kind of person who plays music while building things, this is your playlist.</p>
+                <footer class="dispatch-footer">
+                    <span class="dispatch-tag">Music</span>
+                    <span class="dispatch-tag">Heavy Moose</span>
+                    <span class="dispatch-tag">Streaming</span>
+                    <a class="dispatch-action" href="https://heavymoose.com" rel="noopener">Listen on HeavyMoose.com →</a>
+                </footer>
+            </article>
+
+            <article class="dispatch-item" itemscope itemtype="https://schema.org/NewsArticle">
+                <header class="dispatch-header">
+                    <span class="dispatch-lane build">Build Notes</span>
+                    <time class="dispatch-date" datetime="2026-06-12" itemprop="datePublished">June 12, 2026</time>
+                </header>
+                <h3 itemprop="headline"><a class="dispatch-title" href="https://goodflippindesign.com" rel="noopener">Good Flippin News and Good Flippin Luck Ship Their MVP Surfaces</a></h3>
+                <p itemprop="description">Two new incubation sites shipped this week under the Good Flippin ecosystem. <strong>Good Flippin News</strong> (this site) is a sponsor-safe dispatch surface covering civic progress, creative releases, and transparent build notes from across the network. <strong><a href="https://goodflippinluck.com" rel="noopener">Good Flippin Luck</a></strong> is a playable Maze Snake Fortune game where clearing enough stars unlocks a shareable blessing from the Good Flippin Vibes vault — a lightweight, shareable lead-gen and creative promo experiment. Both are incubation-stage, which means they're live but still evolving. Neither costs anything to run on Cloudflare Pages. The <a href="https://goodflippindesign.com" rel="noopener">Good Flippin Design</a> studio and <a href="https://goodflippinvibes.com" rel="noopener">Good Flippin Vibes</a> brand continue to grow as the parent infrastructure for everything listed here.</p>
+                <footer class="dispatch-footer">
+                    <span class="dispatch-tag">Ecosystem</span>
+                    <span class="dispatch-tag">Build Notes</span>
+                    <span class="dispatch-tag">Open Progress</span>
+                    <a class="dispatch-action" href="https://goodflippinluck.com" rel="noopener">Try Good Flippin Luck →</a>
+                </footer>
+            </article>
+
+            <p class="archive-follow">Stay in the loop: <a class="text-link" href="https://goodflippindesign.com/community-portal.html?utm_source=goodflippinnews&utm_medium=archive&utm_campaign=dispatch_signup" rel="noopener">join dispatch updates</a> or <a class="text-link" href="https://x.com/CultureSherps" rel="noopener">follow on X</a>.</p>
         </section>
     </main>
 

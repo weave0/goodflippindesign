@@ -414,6 +414,106 @@ blockquote {
   margin: 0 0 0.4rem;
 }
 
+.support-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+}
+
+.ecosystem-links {
+  border-top: 1px solid var(--line);
+  padding-top: 0.8rem;
+  margin-top: 0.6rem;
+}
+
+.ecosystem-label {
+  font-size: 0.8rem;
+  font-family: "IBM Plex Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+}
+
+.ecosystem-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.ecosystem-list a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ecosystem-list a:hover,
+.ecosystem-list a:focus-visible {
+  text-decoration: underline;
+}
+
+/* FAQ section */
+.faq-section {
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid var(--line);
+  padding: 2.5rem 0 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.faq-inner {
+  width: min(1200px, 94vw);
+  margin: 0 auto;
+}
+
+.faq-inner h2 {
+  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  margin: 0 0 1.2rem;
+  color: var(--ink);
+}
+
+.faq-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.faq-item {
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.faq-item dt {
+  font-weight: 700;
+  font-size: 0.97rem;
+  color: var(--ink);
+  margin-bottom: 0.35rem;
+}
+
+.faq-item dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.faq-item dd a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.faq-item dd a:hover,
+.faq-item dd a:focus-visible {
+  text-decoration: underline;
+}
+
 .ecosystem-footer {
   width: min(1200px, 94vw);
   margin: 0 auto;

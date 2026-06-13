@@ -19,8 +19,85 @@
     <meta name="twitter:title" content="Good Flippin Luck | Maze Snake Fortune" />
     <meta
         name="twitter:description"
-        content="Win fast, share the blessing, and follow the Good Flippin creative ecosystem." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
+        content="Win fast, share the blessing, and follow the Good Flippin creative ecosystem." />    <meta name="robots" content="index, follow" />
+    <meta property="og:image" content="https://goodflippindesign.com/assets/brand/gfd-og-default.png" />
+    <meta property="og:image:alt" content="Good Flippin Luck — Maze Snake Fortune game from Good Flippin Vibes" />
+    <meta property="og:site_name" content="Good Flippin Luck" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://goodflippindesign.com/assets/brand/gfd-og-default.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://goodflippinluck.com/#game",
+          "name": "Good Flippin Luck — Maze Snake Fortune",
+          "url": "https://goodflippinluck.com/",
+          "applicationCategory": "Game",
+          "operatingSystem": "Any",
+          "description": "A browser-based maze snake game where clearing enough stars unlocks a shareable fortune from the Good Flippin Vibes creative universe.",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "publisher": { "@id": "https://goodflippindesign.com/#organization" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://goodflippindesign.com/#organization",
+          "name": "Good Flippin Design",
+          "url": "https://goodflippindesign.com",
+          "sameAs": [
+            "https://goodflippinvibes.com",
+            "https://instagram.com/goodflippinvibes"
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is Good Flippin Luck?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Good Flippin Luck is a free browser-based maze snake game. Clear enough stars to unlock a rarity-tier fortune from the Good Flippin Vibes creative universe, then share the victory link with friends."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I win a fortune?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Use arrow keys, WASD, or the on-screen D-pad to guide the snake through the maze. Collect stars to reach the goal score. Wall hits cost you speed but don't end the run. Hit the goal and your fortune unlocks automatically."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is this game free to play?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Good Flippin Luck is completely free and runs in any modern browser. No login, no download, no cost."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is Good Flippin Vibes?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Good Flippin Vibes is a creative community brand focused on music, art, civic optimism, and wellness culture. It is the public-facing creative universe behind Good Flippin Luck and is supported by Good Flippin Design studio."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I support the ecosystem?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "You can support the Good Flippin ecosystem at goodflippindesign.com/donate.html. Supporter contributions fund continued development of public-interest tools, music, creative projects, and civic technology."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
         href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap"
@@ -100,13 +177,58 @@
 
             <div class="support-note">
                 <h3>After The Win</h3>
-                <p>Supporter drops, music/art releases, and future charms will route through the broader Good Flippin ecosystem.</p>
-                <a class="button ghost" href="https://goodflippindesign.com/community-portal.html?utm_source=goodflippinluck&utm_medium=incubation&utm_campaign=supporter_list" rel="noopener">Join The Supporter List</a>
+                <p>Supporter drops, music/art releases, and future charms route through the broader Good Flippin ecosystem. Join the list to be first in line.</p>
+                <div class="support-links">
+                    <a class="button ghost" href="https://goodflippindesign.com/community-portal.html?utm_source=goodflippinluck&utm_medium=incubation&utm_campaign=supporter_list" rel="noopener">Join The Supporter List</a>
+                    <a class="button ghost" href="https://goodflippindesign.com/donate.html?utm_source=goodflippinluck&utm_medium=win_panel&utm_campaign=sky_money_support" rel="noopener">Support The Ecosystem</a>
+                </div>
+                <div class="ecosystem-links">
+                    <p class="ecosystem-label">Explore the ecosystem:</p>
+                    <ul class="ecosystem-list">
+                        <li><a href="https://goodflippinvibes.com" rel="noopener">Good Flippin Vibes</a> — community, music &amp; creative culture</li>
+                        <li><a href="https://heavymoose.com" rel="noopener">Heavy Moose</a> — neon industrial music — DROSS I &amp; II streaming now</li>
+                        <li><a href="https://goodflippinnews.com" rel="noopener">Good Flippin News</a> — ecosystem dispatches, no doomscrolling</li>
+                        <li><a href="https://citizenapproved.org" rel="noopener">CitizenApproved</a> — civic education &amp; consumer rights tools</li>
+                        <li><a href="https://aiaimate.com" rel="noopener">AIAimate</a> — AI literacy, learning paths &amp; practical guides</li>
+                    </ul>
+                </div>
             </div>
         </section>
     </main>
 
     <canvas id="fanfareCanvas" class="fanfare" aria-hidden="true"></canvas>
+
+    <section class="faq-section" aria-labelledby="faq-title">
+        <div class="faq-inner">
+            <h2 id="faq-title">About Good Flippin Luck</h2>
+            <dl class="faq-list">
+                <div class="faq-item">
+                    <dt>What is Good Flippin Luck?</dt>
+                    <dd>Good Flippin Luck is a free browser-based maze snake game from the <a href="https://goodflippinvibes.com" rel="noopener">Good Flippin Vibes</a> creative universe. Clear enough stars, dodge traps, and unlock a rarity-tier fortune you can share with friends.</dd>
+                </div>
+                <div class="faq-item">
+                    <dt>How do I win a fortune?</dt>
+                    <dd>Use arrow keys, WASD, or the on-screen D-pad to guide the snake. Collect stars to hit the goal score (10 in Quick Run, 25 in Classic). Wall hits slow you but don't end the run. Reach the goal and your fortune unlocks automatically.</dd>
+                </div>
+                <div class="faq-item">
+                    <dt>Is this game free?</dt>
+                    <dd>Yes. No login, no download, no cost. Good Flippin Luck runs in any modern browser on desktop or mobile.</dd>
+                </div>
+                <div class="faq-item">
+                    <dt>What is Good Flippin Vibes?</dt>
+                    <dd><a href="https://goodflippinvibes.com" rel="noopener">Good Flippin Vibes</a> is a community brand focused on music, creative culture, civic optimism, and wellness. Good Flippin Luck is one of its playable campaign surfaces, built and maintained by <a href="https://goodflippindesign.com" rel="noopener">Good Flippin Design</a> studio.</dd>
+                </div>
+                <div class="faq-item">
+                    <dt>How do I support the ecosystem?</dt>
+                    <dd>Supporter contributions keep the Good Flippin network growing. You can give once or monthly at <a href="https://goodflippindesign.com/donate.html?utm_source=goodflippinluck&utm_medium=faq&utm_campaign=sky_money_support" rel="noopener">goodflippindesign.com/donate.html</a>. Every bit funds public tools, music releases, and open civic infrastructure.</dd>
+                </div>
+                <div class="faq-item">
+                    <dt>What else is in the ecosystem?</dt>
+                    <dd>The Good Flippin network includes <a href="https://aiaimate.com" rel="noopener">AIAimate</a> (AI literacy &amp; learning paths), <a href="https://citizenapproved.org" rel="noopener">CitizenApproved</a> (civic tools &amp; consumer rights), <a href="https://culturesherpa.org" rel="noopener">CultureSherpa</a> (cultural intelligence atlas), <a href="https://heavymoose.com" rel="noopener">Heavy Moose</a> (neon industrial music), and <a href="https://goodflippinnews.com" rel="noopener">Good Flippin News</a> (no-doomscrolling dispatches).</dd>
+                </div>
+            </dl>
+        </div>
+    </section>
 
     <footer class="ecosystem-footer" aria-label="Good Flippin ecosystem">
         <p>Good Flippin Luck is a playable campaign surface from the Good Flippin Vibes creative universe, supported by Good Flippin Design.</p>
