@@ -88,7 +88,7 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "@sentry/cloudflare": "^10.46.0"
+    "@sentry/cloudflare": "^10.57.0"
   },
   "overrides": {
     "brace-expansion": "^5.0.6",
