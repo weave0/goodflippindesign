@@ -211,6 +211,7 @@
         header {
             padding: 2rem 0;
             border-bottom: 1px solid var(--border);
+            -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
             position: sticky;
             top: 0;
@@ -337,6 +338,7 @@
 
         .mission-statement {
             background: var(--glass-bg);
+            -webkit-backdrop-filter: blur(30px);
             backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
@@ -368,6 +370,207 @@
         .mission-statement strong {
             color: var(--text);
             font-weight: 600;
+        }
+
+        .donation-qr-card {
+            max-width: 720px;
+            margin: 1.75rem auto 0;
+            padding: 1.25rem;
+        }
+
+        .donation-qr-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .donation-qr-image {
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #fff;
+        }
+
+        .donation-qr-copy {
+            max-width: 420px;
+        }
+
+        .donation-qr-title {
+            margin: 0;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .donation-qr-description {
+            margin: 0.35rem 0 0;
+            color: var(--text-muted);
+        }
+
+        .campaign-spotlight {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 3rem 2rem;
+            background: var(--glass-bg);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 16px;
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+        }
+
+        .campaign-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .campaign-live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .campaign-live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .campaign-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .campaign-subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .campaign-stats {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .campaign-stat {
+            text-align: center;
+        }
+
+        .campaign-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .campaign-stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .founder-story {
+            background: rgba(10, 10, 10, 0.5);
+            padding: 2rem;
+            border-radius: 12px;
+            border-left: 4px solid #10b981;
+            margin-bottom: 2rem;
+        }
+
+        .founder-story h3 {
+            color: var(--text);
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .founder-story p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        .founder-story .founder-story-note {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .founder-signature {
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .campaign-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .campaign-primary-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            transition:
+                transform 0.3s ease,
+                box-shadow 0.3s ease;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .campaign-primary-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(16, 185, 129, 0.6);
+        }
+
+        .campaign-secondary-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .campaign-secondary-link {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            text-decoration: underline;
+            transition: color 0.3s ease;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .campaign-secondary-link:hover {
+            color: var(--text-secondary);
+        }
+
+        .campaign-link-separator {
+            color: var(--border);
         }
 
         /* Impact Cards */
@@ -403,12 +606,16 @@
 
         .impact-card {
             background: var(--glass-bg);
+            -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 16px;
             padding: 2rem 1.5rem;
             text-align: center;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition:
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
@@ -490,12 +697,15 @@
 
         .column-card {
             background: var(--glass-bg);
+            -webkit-backdrop-filter: blur(30px);
             backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 2.5rem 2rem;
             box-shadow: 0 8px 40px rgba(139, 92, 246, 0.15);
-            transition: all 0.4s ease;
+            transition:
+                transform 0.4s ease,
+                box-shadow 0.4s ease;
         }
 
         .column-card:hover {
@@ -550,7 +760,11 @@
             padding: 0.875rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition:
+                background-color 0.3s ease,
+                border-color 0.3s ease,
+                color 0.3s ease,
+                box-shadow 0.3s ease;
             font-size: 0.9375rem;
         }
 
@@ -577,7 +791,12 @@
             font-weight: 700;
             font-size: 1.125rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition:
+                transform 0.3s ease,
+                border-color 0.3s ease,
+                background-color 0.3s ease,
+                color 0.3s ease,
+                box-shadow 0.3s ease;
             text-align: center;
             position: relative;
         }
@@ -613,6 +832,21 @@
             font-size: 0.75rem;
             font-weight: 800;
             padding: 0.25rem 0.75rem;
+
+            .patron-tier-note {
+                margin: 0.5rem 0 1rem;
+                padding: 0.6rem 0.85rem;
+                border-left: 3px solid #fbbf24;
+                background: rgba(251, 191, 36, 0.06);
+                color: var(--text-secondary);
+                font-size: 0.875rem;
+                border-radius: 0 6px 6px 0;
+            }
+
+            .patron-tier-note strong {
+                color: var(--text);
+            }
+
             border-radius: 12px;
             box-shadow: 0 2px 15px rgba(16, 185, 129, 0.6);
             white-space: nowrap;
@@ -675,7 +909,9 @@
             color: var(--text);
             font-size: 0.9375rem;
             font-family: inherit;
-            transition: all 0.3s ease;
+            transition:
+                border-color 0.3s ease,
+                box-shadow 0.3s ease;
         }
 
         .form-group input:focus,
@@ -721,7 +957,9 @@
             font-size: 0.9375rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition:
+                background-color 0.3s ease,
+                color 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -832,7 +1070,9 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition:
+                transform 0.3s ease,
+                box-shadow 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -934,7 +1174,9 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition:
+                transform 0.3s ease,
+                box-shadow 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1005,7 +1247,10 @@
             font-size: 1.0625rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition:
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 8px 30px rgba(139, 92, 246, 0.5);
             position: relative;
             overflow: hidden;
@@ -1068,6 +1313,12 @@
             text-align: center;
         }
 
+        .trust-section-title {
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
         .trust-icons {
             display: flex;
             justify-content: center;
@@ -1096,6 +1347,7 @@
             margin: 4rem 0;
             padding: 3rem 2rem;
             background: var(--glass-bg);
+            -webkit-backdrop-filter: blur(30px);
             backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
@@ -1132,7 +1384,9 @@
             border-image: var(--gradient-primary) 1;
             border-radius: 12px;
             padding: 1.5rem;
-            transition: all 0.3s ease;
+            transition:
+                transform 0.3s ease,
+                box-shadow 0.3s ease;
         }
 
         .vision-card:hover {
@@ -1188,6 +1442,16 @@
             font-size: 0.875rem;
         }
 
+        .footer-studio-content {
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+        }
+
+        .footer-studio-name {
+            color: var(--text);
+        }
+
         .footer-ecosystem {
             display: flex;
             flex-wrap: wrap;
@@ -1226,6 +1490,7 @@
             position: fixed;
             inset: 0;
             background: rgba(10, 10, 10, 0.95);
+            -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
             display: none;
             justify-content: center;
@@ -1252,6 +1517,63 @@
             height: 120px;
             margin: 0 auto 1.5rem;
             animation: float 3s ease-in-out infinite, glow-pulse 2s ease-in-out infinite;
+        }
+
+        .success-message[hidden] {
+            display: none;
+        }
+
+        .payment-success-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .payment-success-card {
+            background: var(--bg-card);
+            padding: 3rem;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 500px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .payment-success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .payment-success-title {
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        .payment-success-message {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-success-transaction {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 2rem;
+        }
+
+        .payment-success-home {
+            background: var(--gradient-primary);
+            color: #fff;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
         }
 
         @keyframes glow-pulse {
@@ -1362,7 +1684,7 @@
                     <span class="logo-text">Good Flippin Design</span>
                 </a>
                 <div class="header-actions">
-                    <a href="https://gofund.me/f07ea3faf" target="_blank" rel="noopener" class="back-link">GoFundMe →</a>
+                    <a href="https://gofund.me/f07ea3faf" target="_blank" rel="noopener" class="back-link" data-sky-event="donation_start" data-sky-label="header_gofundme">GoFundMe →</a>
                     <a href="index.html" class="back-link">← Back to Home</a>
                 </div>
             </div>
@@ -1383,12 +1705,12 @@
                     Every night, someone learns AI for free. Every day, cultures are preserved. Every moment, democracy tech gets stronger. <strong>But without funding, this work stops.</strong> Join us as a <em>builder</em>, not just a donor.
                 </p>
 
-                <div class="glass-card" style="max-width: 720px; margin: 1.75rem auto 0; padding: 1.25rem;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                        <img src="/assets/389ecd25-3180-4ca0-916b-a59f5b5806db.png" alt="Donate QR code" width="140" height="140" loading="lazy" decoding="async" style="border-radius: 12px; border: 1px solid var(--border); background: #fff;">
-                        <div style="max-width: 420px;">
-                            <p style="margin: 0; font-weight: 700; color: var(--text);">Scan to donate</p>
-                            <p style="margin: 0.35rem 0 0; color: var(--text-muted);">Open this page on mobile instantly. Great for sharing or printing.</p>
+                <div class="glass-card donation-qr-card">
+                    <div class="donation-qr-content">
+                        <img class="donation-qr-image" src="/assets/389ecd25-3180-4ca0-916b-a59f5b5806db.png" alt="Donate QR code" width="140" height="140" loading="lazy" decoding="async">
+                        <div class="donation-qr-copy">
+                            <p class="donation-qr-title">Scan to donate</p>
+                            <p class="donation-qr-description">Open this page on mobile instantly. Great for sharing or printing.</p>
                         </div>
                     </div>
                 </div>
@@ -1409,44 +1731,44 @@
             </div>
 
             <!-- GoFundMe Campaign Spotlight -->
-            <div class="glass-card" style="max-width: 900px; margin: 3rem auto; padding: 3rem 2rem; background: var(--glass-bg); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; backdrop-filter: blur(20px);">
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 0.5rem 1rem; border-radius: 999px; font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem;">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; animation: pulse 2s ease-in-out infinite;"></span>
+            <div class="glass-card campaign-spotlight">
+                <div class="campaign-header">
+                    <div class="campaign-live-badge">
+                        <span class="campaign-live-dot" aria-hidden="true"></span>
                         Live Fundraising Campaign
                     </div>
-                    <h2 style="font-size: 2rem; font-weight: 800; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem;">Support the GFD Ecosystem</h2>
-                    <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 1.5rem;">LFF: CitizenApproved.org, CultureSherpa.org, GoodFlippinVibes.com</p>
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-secondary);">6 Sites</div>
-                            <div style="font-size: 0.875rem; color: var(--text-muted);">100% Open Source</div>
+                    <h2 class="campaign-title">Support the GFD Ecosystem</h2>
+                    <p class="campaign-subtitle">LFF: CitizenApproved.org, CultureSherpa.org, GoodFlippinVibes.com</p>
+                    <div class="campaign-stats">
+                        <div class="campaign-stat">
+                            <div class="campaign-stat-value">6 Sites</div>
+                            <div class="campaign-stat-label">100% Open Source</div>
                         </div>
                     </div>
                 </div>
 
-                <div style="background: rgba(10, 10, 10, 0.5); padding: 2rem; border-radius: 12px; border-left: 4px solid #10b981; margin-bottom: 2rem;">
-                    <h3 style="color: var(--text); font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">The Founder's Story</h3>
-                    <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem; font-size: 0.9375rem;">
+                <div class="founder-story">
+                    <h3>The Founder's Story</h3>
+                    <p>
                         Having spent 30+ years humbly exploring and researching complex subjects through interpersonal connection, digital exploration, and countless rabbit holes, I've found myself uniquely equipped to share this work openly.
                     </p>
-                    <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem; font-size: 0.9375rem;">
+                    <p>
                         <strong>CultureSherpa, CitizenApproved, AI Aimate, and Good Flippin Vibes are all personally funded projects</strong> — and I'll humbly avoid confessing how much I've contributed financially and emotionally. These are Net Loss projects I intend to keep alive until I'm no longer able to sustain them... because they have enough merit of substance and purpose to warrant such valiant attempts!
                     </p>
-                    <p style="color: var(--text-muted); line-height: 1.8; font-style: italic; font-size: 0.9375rem;">
+                    <p class="founder-story-note">
                         As someone with neurodiversity who hyperfocuses on complex models and systems, I may not be out and about much — but I have "one of those stories that most folks pull up a chair for, and feel inspired by in the end." Your support keeps these resources free and accessible for everyone who needs them.
                     </p>
-                    <p style="color: var(--text-muted); text-align: right; margin-top: 1.5rem; font-size: 0.875rem; font-weight: 600;">— Brett Weaver, Founder & Creator</p>
+                    <p class="founder-signature">— Brett Weaver, Founder & Creator</p>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
-                    <a href="https://gofund.me/f07ea3faf" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.75rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 1rem 2rem; border-radius: 999px; font-weight: 700; font-size: 1rem; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 30px rgba(16, 185, 129, 0.6)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(16, 185, 129, 0.4)';">
+                <div class="campaign-actions">
+                    <a href="https://gofund.me/f07ea3faf" target="_blank" rel="noopener" class="campaign-primary-link" data-sky-event="donation_start" data-sky-label="campaign_gofundme">
                         Support on GoFundMe
                     </a>
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
-                        <a href="#payment-gateway" style="color: var(--text-muted); font-size: 0.875rem; text-decoration: underline; transition: color 0.3s ease; min-height: 44px; display: inline-flex; align-items: center;" onmouseover="this.style.color='var(--text-secondary)';" onmouseout="this.style.color='var(--text-muted)';">Direct Stripe/PayPal Donations</a>
-                        <span style="color: var(--border);">|</span>
-                        <a href="#impact" style="color: var(--text-muted); font-size: 0.875rem; text-decoration: underline; transition: color 0.3s ease; min-height: 44px; display: inline-flex; align-items: center;" onmouseover="this.style.color='var(--text-secondary)';" onmouseout="this.style.color='var(--text-muted)';">See Impact Breakdown</a>
+                    <div class="campaign-secondary-links">
+                        <a href="#payment-gateway" class="campaign-secondary-link" data-sky-event="support_cta_click" data-sky-label="campaign_direct_donation">Direct Stripe/PayPal Donations</a>
+                        <span class="campaign-link-separator" aria-hidden="true">|</span>
+                        <a href="#impact" class="campaign-secondary-link">See Impact Breakdown</a>
                     </div>
                 </div>
             </div>
@@ -1540,8 +1862,8 @@
                             <button class="active" data-type="one-time">One-Time</button>
                             <button data-type="monthly">Monthly · <strong>Patron</strong></button>
                         </div>
-                        <p class="patron-tier-note" id="patronTierNote" hidden style="margin: 0.5rem 0 1rem; padding: 0.6rem 0.85rem; border-left: 3px solid #fbbf24; background: rgba(251, 191, 36, 0.06); color: var(--text-secondary); font-size: 0.875rem; border-radius: 0 6px 6px 0;">
-                            <strong style="color: var(--text);">Patron tier:</strong> recurring monthly support funds the entire studio ecosystem (AI Aimate, CultureSherpa, CitizenApproved, Heavy Moose, Lowertown SP) — not just one site. Cancel anytime from the Stripe receipt email.
+                        <p class="patron-tier-note" id="patronTierNote" hidden>
+                            <strong>Patron tier:</strong> recurring monthly support funds the entire studio ecosystem (AI Aimate, CultureSherpa, CitizenApproved, Heavy Moose, Lowertown SP) — not just one site. Cancel anytime from the Stripe receipt email.
                         </p>
 
                         <div class="donation-amounts">
@@ -1586,7 +1908,7 @@
                             <!-- Stripe Payment -->
                             <div class="payment-option active" id="stripe-payment">
                                 <div id="payment-element" class="payment-element"></div>
-                                <div class="success-message" id="success-message" style="display:none;" role="status" aria-live="polite"></div>
+                                <div class="success-message" id="success-message" role="status" aria-live="polite" hidden></div>
                                 <button class="btn-primary" id="continue-btn">
                                     <span id="donateBtnText">Continue with Card</span>
                                 </button>
@@ -1621,7 +1943,7 @@
                             </div>
                         </div>
 
-                        <p class="note">Secure payment processing. Tax-deductible receipt provided.</p>
+                        <p class="note">Secure payment processing. Payment confirmation is provided by the processor.</p>
                     </div>
 
                     <!-- Vision Column -->
@@ -1667,7 +1989,7 @@
 
             <!-- Trust Indicators -->
             <section class="trust-section">
-                <h3 style="color: var(--text-secondary); font-weight: 600; margin-bottom: 0.5rem;">Trusted By</h3>
+                <h3 class="trust-section-title">Trusted By</h3>
                 <div class="trust-icons">
                     <div class="trust-badge">
                         <svg viewBox="0 0 24 24">
@@ -1685,7 +2007,7 @@
                         <svg viewBox="0 0 24 24">
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>Tax Deductible</span>
+                        <span>Processor Receipts</span>
                     </div>
                 </div>
             </section>
@@ -1716,9 +2038,9 @@
     <footer>
         <div class="container">
             <p>&copy; 2026 GFV LLC &mdash; <a href="mailto:getsome@goodflippinvibes.com">getsome@goodflippinvibes.com</a> &nbsp;|&nbsp; <a href="/privacy.html">Privacy</a> &nbsp;|&nbsp; <a href="/terms.html">Terms</a></p>
-            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+            <div class="footer-studio-content">
                 <p class="footer-studio-line">
-                    <strong style="color: var(--text);">Good Flippin Design</strong> is the studio. We publish under the brand <a href="https://goodflippinvibes.com" target="_blank" rel="noopener">Good Flippin Vibes</a>.
+                    <strong class="footer-studio-name">Good Flippin Design</strong> is the studio. We publish under the brand <a href="https://goodflippinvibes.com" target="_blank" rel="noopener">Good Flippin Vibes</a>.
                 </p>
                 <div class="footer-ecosystem">
                     <span class="footer-ecosystem-label">Across the studio:</span>
@@ -1782,28 +2104,28 @@
                     <!-- Gradient definitions -->
                     <defs>
                         <radialGradient id="successGradient" cx="50%" cy="50%">
-                            <stop offset="0%" style="stop-color:#a78bfa;stop-opacity:1" />
-                            <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:0.9" />
-                            <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0.7" />
+                            <stop offset="0%" stop-color="#a78bfa" stop-opacity="1" />
+                            <stop offset="50%" stop-color="#8b5cf6" stop-opacity="0.9" />
+                            <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.7" />
                         </radialGradient>
                         <linearGradient id="beamGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0" />
+                            <stop offset="0%" stop-color="#8b5cf6" stop-opacity="1" />
+                            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0" />
                         </linearGradient>
                         <linearGradient id="beamGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#10b981;stop-opacity:0" />
+                            <stop offset="0%" stop-color="#10b981" stop-opacity="1" />
+                            <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
                         </linearGradient>
                         <linearGradient id="beamGradient3" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:0" />
+                            <stop offset="0%" stop-color="#fbbf24" stop-opacity="1" />
+                            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0" />
                         </linearGradient>
                     </defs>
                 </svg>
             </div>
             <h2>Welcome to the Movement!</h2>
             <p>Your contribution just powered free AI education for thousands. Your vision shapes our roadmap. Together, we're building the future.</p>
-            <button class="btn-primary" onclick="location.href='index.html'">Return Home</button>
+            <button class="btn-primary" id="success-return-home" type="button">Return Home</button>
         </div>
     </div>
 
@@ -1816,6 +2138,30 @@
         let selectedAmount = 25;
         let donationType = 'one-time';
         let selectedPaymentMethod = 'stripe';
+
+        function trackSkyMoneyEvent(eventName, params) {
+            if (typeof window.gtag !== 'function') return;
+            window.gtag('event', eventName, Object.assign({
+                event_category: 'sky_money',
+                page_path: window.location.pathname
+            }, params || {}));
+        }
+
+        document.addEventListener('click', function (event) {
+            const trackedElement = event.target.closest('[data-sky-event]');
+            if (!trackedElement) return;
+            trackSkyMoneyEvent(trackedElement.dataset.skyEvent, {
+                event_label: trackedElement.dataset.skyLabel || trackedElement.textContent.trim(),
+                link_url: trackedElement.href || null
+            });
+        });
+
+        const successReturnHomeButton = document.getElementById('success-return-home');
+        if (successReturnHomeButton) {
+            successReturnHomeButton.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+        }
 
         // Thin PayPal (no SDK): uses PayPal.Me link building
         // Set this to your PayPal.Me handle (the part after https://www.paypal.com/paypalme/)
@@ -1905,6 +2251,18 @@
                             value: selectedAmount
                         });
                     }
+                    trackSkyMoneyEvent('donation_start', {
+                        event_label: `paypal_${donationType}`,
+                        value: selectedAmount,
+                        currency: 'USD'
+                    });
+                    if (donationType === 'monthly') {
+                        trackSkyMoneyEvent('patron_start', {
+                            event_label: 'paypal_monthly',
+                            value: selectedAmount,
+                            currency: 'USD'
+                        });
+                    }
 
                     window.open(url, '_blank', 'noopener');
                 });
@@ -1947,46 +2305,27 @@
         function showSuccessMessage(paymentMethod, transactionId) {
             // Create success overlay
             const successOverlay = document.createElement('div');
+            successOverlay.className = 'payment-success-overlay';
             successOverlay.innerHTML = `
-                <div style="
-                    position: fixed;
-                    top: 0; left: 0; right: 0; bottom: 0;
-                    background: rgba(0,0,0,0.9);
-                    display: flex; align-items: center; justify-content: center;
-                    z-index: 10000;
-                    animation: fadeIn 0.3s ease;
-                ">
-                    <div style="
-                        background: var(--bg-card);
-                        padding: 3rem;
-                        border-radius: 16px;
-                        text-align: center;
-                        max-width: 500px;
-                        border: 1px solid var(--border);
-                        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-                    ">
-                        <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
-                        <h2 style="color: var(--text); margin-bottom: 1rem;">Thank You!</h2>
-                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                            Your $${selectedAmount} ${donationType} donation via ${paymentMethod} was successful!
-                        </p>
-                        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem;">
-                            Transaction ID: ${transactionId}
-                        </p>
-                        <button onclick="location.href='index.html'" style="
-                            background: var(--gradient-primary);
-                            color: #fff;
-                            border: none;
-                            padding: 0.75rem 2rem;
-                            border-radius: 8px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            font-size: 1rem;
-                        ">Return Home</button>
-                    </div>
+                <div class="payment-success-card">
+                    <div class="payment-success-icon" aria-hidden="true">🎉</div>
+                    <h2 class="payment-success-title">Thank You!</h2>
+                    <p class="payment-success-message">
+                        Your $${selectedAmount} ${donationType} donation via ${paymentMethod} was successful!
+                    </p>
+                    <p class="payment-success-transaction">
+                        Transaction ID: ${transactionId}
+                    </p>
+                    <button type="button" class="payment-success-home">Return Home</button>
                 </div>
             `;
             document.body.appendChild(successOverlay);
+            const returnHomeButton = successOverlay.querySelector('.payment-success-home');
+            if (returnHomeButton) {
+                returnHomeButton.addEventListener('click', () => {
+                    window.location.href = 'index.html';
+                });
+            }
         }
 
         function updateDonationModeUI() {
@@ -2132,6 +2471,18 @@
                     }]
                 });
             }
+            trackSkyMoneyEvent('donation_start', {
+                event_label: `stripe_${donationType}`,
+                value: selectedAmount,
+                currency: 'USD'
+            });
+            if (donationType === 'monthly') {
+                trackSkyMoneyEvent('patron_start', {
+                    event_label: 'stripe_monthly',
+                    value: selectedAmount,
+                    currency: 'USD'
+                });
+            }
 
             // CRITICAL: Real Stripe Checkout integration via Cloudflare Function
             this.disabled = true;
@@ -2179,6 +2530,9 @@
                     value: 0
                 });
             }
+            trackSkyMoneyEvent('partner_inquiry_submit', {
+                event_label: 'vision_form'
+            });
 
             // Formspree will handle the submission
             // Show a quick success message

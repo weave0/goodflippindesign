@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WM6Q66W9W0"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-WM6Q66W9W0', { 'transport_type': 'beacon', page_title: 'Ecosystem Overview', page_path: '/ecosystem-overview.html' });
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://goodflippindesign.com/ecosystem-overview.html">
+    <title>Good Flippin Ecosystem Overview</title>
+    <meta name="description" content="A public overview of the Good Flippin Design and Good Flippin Vibes ecosystem: AI education, civic tools, culture, data, music, and ways to support or sponsor the work.">
+    <meta property="og:title" content="Good Flippin Ecosystem Overview">
+    <meta property="og:description" content="See what the ecosystem includes, what support funds, and how sponsors or partners can help.">
+    <meta property="og:image" content="https://goodflippindesign.com/assets/og-image.png">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "@id": "https://goodflippindesign.com/ecosystem-overview.html#webpage",
+          "url": "https://goodflippindesign.com/ecosystem-overview.html",
+          "name": "Good Flippin Ecosystem Overview",
+          "description": "A public overview of the Good Flippin Design and Good Flippin Vibes ecosystem.",
+          "isPartOf": { "@id": "https://goodflippindesign.com/#site" },
+          "about": { "@id": "https://goodflippindesign.com/#studio" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://goodflippindesign.com/#studio",
+          "name": "Good Flippin Design",
+          "url": "https://goodflippindesign.com",
+          "sameAs": [
+            "https://goodflippinvibes.com",
+            "https://aiaimate.com",
+            "https://citizenapproved.org",
+            "https://culturesherpa.org",
+            "https://globaldeets.com",
+            "https://heavymoose.com",
+            "https://minnesotapeace.com"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://goodflippindesign.com/#site",
+          "url": "https://goodflippindesign.com",
+          "name": "Good Flippin Design"
+        }
+      ]
+    }
+  </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --bg-elevated: #151515;
+            --text: #f5f5f5;
+            --text-secondary: #c8c8c8;
+            --text-muted: #8a8a8a;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-strong: rgba(255, 255, 255, 0.14);
+            --accent: #10b981;
+            --accent-blue: #60a5fa;
+            --accent-gold: #fbbf24;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .skip-link {
+            position: fixed;
+            left: 1rem;
+            top: 1rem;
+            transform: translateY(-180%);
+            background: var(--text);
+            color: var(--bg);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            z-index: 20;
+            transition: transform 0.2s ease;
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+        }
+
+        .site-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            background: rgba(13, 13, 13, 0.82);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-inner,
+        .section-inner,
+        .footer-inner {
+            width: min(1120px, calc(100% - 2rem));
+            margin: 0 auto;
+        }
+
+        .nav-inner {
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+            font-weight: 800;
+            min-height: 44px;
+        }
+
+        .brand img {
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .nav-links a,
+        .button,
+        .button-secondary {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            padding: 0 1rem;
+            text-decoration: none;
+            font-weight: 700;
+            transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover,
+        .nav-links a:focus-visible {
+            color: var(--text);
+        }
+
+        .button {
+            background: var(--text);
+            color: var(--bg);
+            border: 1px solid var(--text);
+        }
+
+        .button-secondary {
+            border: 1px solid var(--border-strong);
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .button:hover,
+        .button-secondary:hover,
+        .button:focus-visible,
+        .button-secondary:focus-visible {
+            transform: translateY(-2px);
+        }
+
+        .hero {
+            min-height: 86vh;
+            display: flex;
+            align-items: flex-end;
+            padding: 8rem 0 5rem;
+            background:
+                linear-gradient(180deg, rgba(13, 13, 13, 0.42), rgba(13, 13, 13, 0.96)),
+                url('/assets/backgrounds/gfd-bg-hero.webp') center / cover no-repeat;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-content {
+            width: min(980px, calc(100% - 2rem));
+            margin: 0 auto;
+        }
+
+        .eyebrow {
+            margin: 0 0 1rem;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 800;
+            font-size: 0.875rem;
+        }
+
+        h1 {
+            margin: 0;
+            max-width: 820px;
+            font-size: clamp(3rem, 8vw, 6.4rem);
+            line-height: 0.95;
+            letter-spacing: 0;
+        }
+
+        .hero-copy {
+            max-width: 720px;
+            margin: 1.5rem 0 0;
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+        }
+
+        .hero-actions {
+            margin-top: 2rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        section {
+            padding: 4.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-heading {
+            display: grid;
+            grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+            gap: 2rem;
+            align-items: start;
+            margin-bottom: 2rem;
+        }
+
+        .section-heading h2 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            line-height: 1.05;
+            letter-spacing: 0;
+        }
+
+        .section-heading p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        .lane-grid,
+        .fund-grid,
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+        }
+
+        .lane,
+        .fund,
+        .action {
+            background: var(--bg-elevated);
+            padding: 1.5rem;
+            min-height: 100%;
+        }
+
+        .lane h3,
+        .fund h3,
+        .action h3 {
+            margin: 0 0 0.75rem;
+            font-size: 1.15rem;
+        }
+
+        .lane p,
+        .fund p,
+        .action p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .lane a,
+        .action a {
+            margin-top: 1rem;
+            color: var(--accent-blue);
+            display: inline-flex;
+            min-height: 44px;
+            align-items: center;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .relationship-band {
+            background: #111;
+        }
+
+        .relationship-copy {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .relationship-copy article {
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        .relationship-copy h3 {
+            margin: 0 0 0.75rem;
+        }
+
+        .relationship-copy p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .cta-strip {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .cta-strip .section-heading p,
+        .cta-strip .eyebrow {
+            color: #374151;
+        }
+
+        .cta-strip .button {
+            background: var(--bg);
+            color: var(--text);
+            border-color: var(--bg);
+        }
+
+        .cta-strip .button-secondary {
+            color: var(--bg);
+            border-color: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        footer {
+            padding: 2.5rem 0;
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        @media (max-width: 900px) {
+            .nav-inner {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 0.85rem 0;
+            }
+
+            .nav-links {
+                justify-content: flex-start;
+            }
+
+            .section-heading,
+            .relationship-copy {
+                grid-template-columns: 1fr;
+            }
+
+            .lane-grid,
+            .fund-grid,
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                min-height: 82vh;
+                padding-top: 10rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .nav-links a {
+                font-size: 0.875rem;
+            }
+
+            .hero-copy {
+                font-size: 1rem;
+            }
+
+            section {
+                padding: 3rem 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-nav">
+        <div class="nav-inner">
+            <a class="brand" href="index.html" aria-label="Good Flippin Design home">
+                <img src="/assets/logos/gfd-circle-mark.webp" alt="Good Flippin Design logo" width="40" height="40" loading="eager" decoding="async">
+                <span>Good Flippin Design</span>
+            </a>
+            <nav class="nav-links" aria-label="Ecosystem overview navigation">
+                <a href="#ecosystem">Ecosystem</a>
+                <a href="#funds">Use of funds</a>
+                <a href="donate.html?utm_source=ecosystem_overview&utm_medium=nav&utm_campaign=sky_money_support" data-sky-event="support_cta_click" data-sky-label="overview_nav_support">Support</a>
+                <a href="investors.html?utm_source=ecosystem_overview&utm_medium=nav&utm_campaign=sky_money_sponsor" data-sky-event="sponsor_inquiry_click" data-sky-label="overview_nav_sponsor">Sponsor</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main">
+        <section id="overview" class="hero" aria-labelledby="overview-title">
+            <div class="hero-content">
+                <p class="eyebrow">Public ecosystem overview</p>
+                <h1 id="overview-title">One studio, one public-interest network, many doors into useful work.</h1>
+                <p class="hero-copy">Good Flippin Design is the studio and infrastructure hub. Good Flippin Vibes is the public creative and community brand. Together they support a growing ecosystem across AI education, civic tools, cultural discovery, data storytelling, local media, and music.</p>
+                <div class="hero-actions">
+                    <a class="button" href="donate.html?utm_source=ecosystem_overview&utm_medium=hero&utm_campaign=sky_money_support" data-sky-event="support_cta_click" data-sky-label="overview_hero_support">Support the ecosystem</a>
+                    <a class="button-secondary" href="investors.html?utm_source=ecosystem_overview&utm_medium=hero&utm_campaign=sky_money_sponsor" data-sky-event="sponsor_inquiry_click" data-sky-label="overview_hero_sponsor">Sponsor this work</a>
+                    <a class="button-secondary" href="investors.html#investor-intake" data-sky-event="sponsor_inquiry_click" data-sky-label="overview_hero_partner">Partner with us</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="relationship" class="relationship-band" aria-labelledby="relationship-title">
+            <div class="section-inner">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">The relationship</p>
+                        <h2 id="relationship-title">What GFD and GFV mean in public.</h2>
+                    </div>
+                    <p>Good Flippin Design is the production, business, and technical studio. Good Flippin Vibes is the audience-facing creative/community voice. The split keeps legal, infrastructure, and brand meaning clear while letting the work meet people where they are.</p>
+                </div>
+                <div class="relationship-copy">
+                    <article>
+                        <h3>Good Flippin Design</h3>
+                        <p>The studio surface for infrastructure, client work, sponsor conversations, investor intake, legal pages, payment rails, and production operations.</p>
+                    </article>
+                    <article>
+                        <h3>Good Flippin Vibes</h3>
+                        <p>The public brand for creative projects, community energy, music, art, wellness-adjacent culture, and supporter identity across the network.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="ecosystem" aria-labelledby="ecosystem-title">
+            <div class="section-inner">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">What exists</p>
+                        <h2 id="ecosystem-title">Six lanes sponsors and supporters can understand quickly.</h2>
+                    </div>
+                    <p>The point is not to fund a random website. The point is to sustain a coordinated set of public tools and media surfaces that translate complex subjects into usable resources.</p>
+                </div>
+                <div class="lane-grid">
+                    <article class="lane">
+                        <h3>AI education</h3>
+                        <p>AI Aimate and related guides help people learn practical AI skills without gatekeeping.</p>
+                        <a href="https://aiaimate.com" target="_blank" rel="noopener" data-sky-event="ecosystem_outbound_click" data-sky-label="overview_aiaimate">Visit AI Aimate</a>
+                    </article>
+                    <article class="lane">
+                        <h3>Civic and peace tools</h3>
+                        <p>CitizenApproved and MinnesotaPeace create clearer pathways for civic participation, trust, mediation, and local problem solving.</p>
+                        <a href="https://citizenapproved.org" target="_blank" rel="noopener" data-sky-event="ecosystem_outbound_click" data-sky-label="overview_citizenapproved">Visit CitizenApproved</a>
+                    </article>
+                    <article class="lane">
+                        <h3>Culture and learning</h3>
+                        <p>CultureSherpa turns dense cultural knowledge into navigable learning surfaces for education and discovery.</p>
+                        <a href="https://culturesherpa.org" target="_blank" rel="noopener" data-sky-event="ecosystem_outbound_click" data-sky-label="overview_culturesherpa">Visit CultureSherpa</a>
+                    </article>
+                    <article class="lane">
+                        <h3>Data and intelligence</h3>
+                        <p>GlobalDeets packages research, dashboards, and explainers into sponsor-safe data storytelling.</p>
+                        <a href="https://globaldeets.com" target="_blank" rel="noopener" data-sky-event="ecosystem_outbound_click" data-sky-label="overview_globaldeets">Visit GlobalDeets</a>
+                    </article>
+                    <article class="lane">
+                        <h3>Local media</h3>
+                        <p>Lowertown and future news surfaces can become useful regional briefings, sponsor inventory, and civic context.</p>
+                        <a href="https://lowertownstpaul.org" target="_blank" rel="noopener" data-sky-event="ecosystem_outbound_click" data-sky-label="overview_lowertown">Visit Lowertown SP</a>
+                    </article>
+                    <article class="lane">
+                        <h3>Creative and music</h3>
+                        <p>Good Flippin Vibes, Heavy Moose, and related artist surfaces create culture people can follow, share, and support.</p>
+                        <a href="https://heavymoose.com" target="_blank" rel="noopener" data-sky-event="ecosystem_outbound_click" data-sky-label="overview_heavymoose">Visit Heavy Moose</a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="funds" aria-labelledby="funds-title">
+            <div class="section-inner">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">What support funds</p>
+                        <h2 id="funds-title">Support turns live work into durable public infrastructure.</h2>
+                    </div>
+                    <p>Contributions and sponsorships help pay for the unglamorous work that keeps useful public systems alive: hosting, maintenance, accessibility, writing, research, design, testing, outreach, and legal/business readiness.</p>
+                </div>
+                <div class="fund-grid">
+                    <article class="fund">
+                        <h3>Keep access open</h3>
+                        <p>Maintain free and low-friction educational, civic, cultural, and creative resources.</p>
+                    </article>
+                    <article class="fund">
+                        <h3>Improve quality</h3>
+                        <p>Fund accessibility, performance, security, analytics, documentation, and publishing operations.</p>
+                    </article>
+                    <article class="fund">
+                        <h3>Package useful work</h3>
+                        <p>Create sponsor-safe guides, briefs, dashboards, learning modules, and local/civic resources.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="actions" class="cta-strip" aria-labelledby="actions-title">
+            <div class="section-inner">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Next action</p>
+                        <h2 id="actions-title">Choose the level of involvement that fits.</h2>
+                    </div>
+                    <p>Individuals can support monthly or once. Organizations can sponsor a lane. Strategic partners can open a private conversation around distribution, data, education, civic trust, or local media.</p>
+                </div>
+                <div class="action-grid">
+                    <article class="action">
+                        <h3>Support the ecosystem</h3>
+                        <p>For individuals who want the tools, writing, music, and public-interest work to keep moving.</p>
+                        <a href="donate.html?utm_source=ecosystem_overview&utm_medium=action_card&utm_campaign=sky_money_support" data-sky-event="support_cta_click" data-sky-label="overview_action_support">Give once or monthly</a>
+                    </article>
+                    <article class="action">
+                        <h3>Sponsor this work</h3>
+                        <p>For organizations that want to fund AI education, civic/data tools, or culture/local media.</p>
+                        <a href="investors.html?utm_source=ecosystem_overview&utm_medium=action_card&utm_campaign=sky_money_sponsor" data-sky-event="sponsor_inquiry_click" data-sky-label="overview_action_sponsor">Open sponsor inquiry</a>
+                    </article>
+                    <article class="action">
+                        <h3>Partner with us</h3>
+                        <p>For aligned institutions, funders, communities, and businesses with a concrete collaboration path.</p>
+                        <a href="investors.html#investor-intake" data-sky-event="sponsor_inquiry_click" data-sky-label="overview_action_partner">Start private conversation</a>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-inner">
+            <span>&copy; 2026 GFV LLC DBA Good Flippin Design</span>
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="donate.html" data-sky-event="support_cta_click" data-sky-label="overview_footer_support">Support</a>
+                <a href="investors.html" data-sky-event="sponsor_inquiry_click" data-sky-label="overview_footer_sponsor">Sponsors</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="terms.html">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            'use strict';
+
+            function trackSkyMoneyEvent(eventName, params) {
+                if (typeof window.gtag !== 'function') return;
+                window.gtag('event', eventName, Object.assign({
+                    event_category: 'sky_money',
+                    page_path: window.location.pathname
+                }, params || {}));
+            }
+
+            document.addEventListener('click', function (event) {
+                const trackedLink = event.target.closest('[data-sky-event]');
+                if (!trackedLink) return;
+                trackSkyMoneyEvent(trackedLink.dataset.skyEvent, {
+                    event_label: trackedLink.dataset.skyLabel || trackedLink.textContent.trim(),
+                    link_url: trackedLink.href || null
+                });
+            });
+        })();
+    </script>
+</body>
+
+</html>

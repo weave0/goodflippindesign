@@ -72,7 +72,6 @@
   <meta name="facebook-domain-verification" content="8n3wnp1gq4a1div6ji4cxflswdl08l" />
 
   <!-- Theme Color -->
-  <meta name="theme-color" content="#0a0e1a">
   <meta name="msapplication-TileColor" content="#0a0e1a">
 
   <!-- Preconnect for Performance -->
@@ -209,6 +208,10 @@
       border-width: 0;
     }
 
+    .is-hidden {
+      display: none;
+    }
+
     /* Layout */
     .container {
       max-width: 1200px;
@@ -225,8 +228,8 @@
       z-index: 100;
       padding: 1.25rem 2rem;
       background: rgba(10, 14, 26, 0.85);
-      backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
 
@@ -586,8 +589,8 @@
 
     .btn-secondary {
       background: var(--glass-bg);
-      backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
       color: var(--text);
       padding: 0.875rem 1.75rem;
       border-radius: 8px;
@@ -643,6 +646,7 @@
 
     .fundraising-card {
       background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(20px);
       backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border);
       border-radius: 16px;
@@ -1009,8 +1013,8 @@
 
     .service-card {
       background: var(--glass-bg);
-      backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
       padding: 2rem;
       transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
       position: relative;
@@ -1155,8 +1159,8 @@
 
     .portfolio-card {
       background: var(--glass-bg);
-      backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border);
       border-radius: 16px;
       overflow: hidden;
@@ -1276,6 +1280,25 @@
       color: #fcd34d;
     }
 
+    .status-badge.acquisition {
+      background: rgba(31, 22, 66, 0.9);
+      color: #c4b5fd;
+      font-weight: 700;
+    }
+
+    .status-badge.cultural {
+      background: rgba(41, 37, 36, 0.9);
+      color: #d6d3d1;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .status-badge.origin {
+      background: rgba(5, 46, 32, 0.9);
+      color: #6ee7b7;
+    }
+
     .portfolio-info h3 {
       font-size: 1.125rem;
       font-weight: 600;
@@ -1353,8 +1376,8 @@
       box-shadow: var(--glass-shadow);
       border-radius: 16px;
       padding: 1.25rem;
-      backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
     }
 
     .sponsored-label {
@@ -1433,7 +1456,6 @@
       overflow-x: auto;
       padding: 0 0 0.5rem 0;
       scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
     }
 
     .media-scroll:focus-visible {
@@ -1445,8 +1467,8 @@
     .media-card {
       scroll-snap-align: start;
       background: var(--glass-bg);
-      backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border);
       border-radius: 16px;
       overflow: hidden;
@@ -1716,10 +1738,14 @@
     }
 
     .instagram-embed-wrapper .instagram-media {
+      background: #ffffff !important;
+      border: 0 !important;
+      border-radius: 4px !important;
       margin: 0 !important;
       min-width: 0 !important;
       max-width: 100% !important;
       width: 100% !important;
+      padding: 0 !important;
       box-shadow: none !important;
     }
 
@@ -1919,6 +1945,7 @@
 
     .blog-editor {
       background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(20px);
       backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border);
       border-radius: 16px;
@@ -2067,6 +2094,10 @@
       width: 100%;
       height: auto;
       display: block;
+    }
+
+    .image-preview-placeholder {
+      opacity: 0;
     }
 
     .image-preview .btn-icon {
@@ -2231,6 +2262,7 @@
 
     .blog-post-card {
       background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(20px);
       backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border);
       border-radius: 16px;
@@ -2389,11 +2421,39 @@
 
     .blog-post-content {
       background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(20px);
       backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border);
       border-radius: 16px;
       padding: 3rem;
       box-shadow: var(--glass-shadow);
+    }
+
+    .blog-video-direct,
+    .blog-inline-image {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+    .blog-video-direct {
+      width: 100%;
+    }
+
+    .blog-inline-image {
+      margin: 0.5rem 0;
+    }
+
+    .blog-blockquote {
+      border-left: 3px solid var(--border);
+      padding: 0.25rem 0.75rem;
+      margin: 0.5rem 0;
+      color: var(--text-muted);
+    }
+
+    .blog-rule {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
     }
 
     .blog-video-embed {
@@ -2628,6 +2688,23 @@
       justify-content: space-between;
       align-items: center;
       margin-top: 1rem;
+    }
+
+    .contact-email-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .contact-email-alt {
+      opacity: 0.8;
+    }
+
+    .contact-status {
+      text-align: center;
+      margin-top: 0.75rem;
+      font-size: 0.875rem;
+      min-height: 1.25rem;
     }
 
     .char-counter {
@@ -3381,6 +3458,12 @@
       align-items: center;
     }
 
+    .footer-content-secondary {
+      margin-top: 2rem;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+    }
+
     .footer-brand {
       display: flex;
       align-items: center;
@@ -3450,11 +3533,19 @@
     }
 
     .footer-studio-line a {
+      color: var(--text);
       min-width: 44px;
       display: inline-flex;
       align-items: center;
       min-height: 44px;
       vertical-align: middle;
+    }
+
+    .footer-studio-line {
+      margin: 0 0 1rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
     }
 
     .footer-ecosystem-label {
@@ -3492,6 +3583,11 @@
 
     .footer-admin-link:hover {
       opacity: 0.65;
+    }
+
+    .footer-admin-separator {
+      cursor: default;
+      padding: 0 0.125rem;
     }
 
     .footer-admin-user {
@@ -4578,13 +4674,19 @@
         </div>
 
         <div class="nav-section nav-cta-section">
-          <a href="donate.html" class="nav-cta-link" role="menuitem">
+          <a href="donate.html?utm_source=main_site&utm_medium=ecosystem_menu&utm_campaign=sky_money_support" class="nav-cta-link" role="menuitem" data-sky-event="support_cta_click" data-sky-label="ecosystem_menu_support">
             <div class="nav-link-content">
-              <strong class="nav-link-title">Support Our Work</strong>
-              <small class="nav-link-subtitle">Help us build more amazing projects</small>
+              <strong class="nav-link-title">Support the ecosystem</strong>
+              <small class="nav-link-subtitle">Help keep public tools and creative work moving</small>
             </div>
           </a>
-          <a href="https://gofund.me/f07ea3faf" class="nav-cta-link" role="menuitem" target="_blank" rel="noopener" aria-label="Donate via GoFundMe (opens in a new tab)">
+          <a href="investors.html?utm_source=main_site&utm_medium=ecosystem_menu&utm_campaign=sky_money_sponsor" class="nav-cta-link" role="menuitem" data-sky-event="sponsor_inquiry_click" data-sky-label="ecosystem_menu_sponsor">
+            <div class="nav-link-content">
+              <strong class="nav-link-title">Sponsor this work</strong>
+              <small class="nav-link-subtitle">Support AI, civic, culture, data, or local media lanes</small>
+            </div>
+          </a>
+          <a href="https://gofund.me/f07ea3faf" class="nav-cta-link" role="menuitem" target="_blank" rel="noopener" aria-label="Donate via GoFundMe (opens in a new tab)" data-sky-event="donation_start" data-sky-label="ecosystem_menu_gofundme">
             <div class="nav-link-content">
               <strong class="nav-link-title">GoFundMe</strong>
               <small class="nav-link-subtitle">Another way to support the ecosystem</small>
@@ -4606,9 +4708,10 @@
         <li><a href="#work">Work</a></li>
         <li><a href="#insights-summary">Insights</a></li>
         <li><a href="#process">Process</a></li>
+        <li><a href="ecosystem-overview.html">Ecosystem</a></li>
       </ul>
       <a href="admin.html" id="nav-admin-link" class="nav-admin-link" aria-label="Admin Panel">Admin</a>
-      <a href="#contact" class="nav-cta">Get in Touch</a>
+      <a href="investors.html?utm_source=main_site&utm_medium=top_nav&utm_campaign=sky_money_partner#investor-intake" class="nav-cta" data-sky-event="sponsor_inquiry_click" data-sky-label="top_nav_partner">Partner with us</a>
       <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
         <span class="hamburger-line"></span>
         <span class="hamburger-line"></span>
@@ -4631,8 +4734,10 @@
         <a href="#work" class="mobile-nav-link">Work</a>
         <a href="#insights-summary" class="mobile-nav-link">Insights</a>
         <a href="#process" class="mobile-nav-link">Process</a>
+        <a href="ecosystem-overview.html" class="mobile-nav-link">Ecosystem</a>
         <a href="admin.html" id="mobile-nav-admin-link" class="mobile-nav-link nav-admin-link" aria-label="Admin Panel">Admin</a>
-        <a href="#contact" class="mobile-nav-link mobile-nav-cta">Get in Touch</a>
+        <a href="donate.html?utm_source=main_site&utm_medium=mobile_nav&utm_campaign=sky_money_support" class="mobile-nav-link" data-sky-event="support_cta_click" data-sky-label="mobile_nav_support">Support the ecosystem</a>
+        <a href="investors.html?utm_source=main_site&utm_medium=mobile_nav&utm_campaign=sky_money_partner#investor-intake" class="mobile-nav-link mobile-nav-cta" data-sky-event="sponsor_inquiry_click" data-sky-label="mobile_nav_partner">Partner with us</a>
       </nav>
     </div>
   </div>
@@ -4656,8 +4761,9 @@
           AI education platforms to cultural data visualization — interfaces built for impact and user engagement.
         </p>
         <div class="hero-ctas">
-          <a href="#contact" class="btn-primary">Start a conversation</a>
-          <a href="#work" class="btn-secondary">View work</a>
+          <a href="ecosystem-overview.html" class="btn-primary" data-sky-event="support_cta_click" data-sky-label="hero_ecosystem_overview">See the ecosystem</a>
+          <a href="donate.html?utm_source=main_site&utm_medium=hero&utm_campaign=sky_money_support" class="btn-secondary" data-sky-event="support_cta_click" data-sky-label="hero_support">Support the ecosystem</a>
+          <a href="investors.html?utm_source=main_site&utm_medium=hero&utm_campaign=sky_money_sponsor#investor-intake" class="btn-secondary" data-sky-event="sponsor_inquiry_click" data-sky-label="hero_sponsor">Sponsor this work</a>
         </div>
 
         <div class="clients-bar">
@@ -4728,8 +4834,8 @@
               </div>
             </div>
             <div class="fundraising-cta">
-              <a href="donate.html" class="btn-donate">Support Our Mission</a>
-              <a class="donate-qr" href="donate.html" aria-label="Scan the QR code to donate">
+              <a href="donate.html?utm_source=main_site&utm_medium=fundraising_counter&utm_campaign=sky_money_support" class="btn-donate" data-sky-event="support_cta_click" data-sky-label="fundraising_counter_support">Support the ecosystem</a>
+              <a class="donate-qr" href="donate.html?utm_source=main_site&utm_medium=fundraising_qr&utm_campaign=sky_money_support" aria-label="Scan the QR code to donate" data-sky-event="support_cta_click" data-sky-label="fundraising_qr_support">
                 <img src="/assets/389ecd25-3180-4ca0-916b-a59f5b5806db.png" alt="Donate QR code" width="120" height="120" loading="lazy" decoding="async">
                 <span class="donate-qr-text">
                   <strong>Scan to donate</strong>
@@ -4794,7 +4900,7 @@
               <p class="portfolio-category">
                 AI Education Platform
                 <span class="status-badge live">LIVE</span>
-                <span class="status-badge" style="background: rgba(31, 22, 66, 0.9); color: #c4b5fd; font-weight: 700;">AVAILABLE FOR ACQUISITION</span>
+                <span class="status-badge acquisition">AVAILABLE FOR ACQUISITION</span>
               </p>
               <h3>AI Aimate</h3>
               <p>Production-ready AI education platform with RAG-powered search, semantic knowledge base, and interactive learning modules. Next.js 14, vector embeddings, and adaptive content delivery serving active user base.</p>
@@ -4818,7 +4924,7 @@
               <p class="portfolio-category">
                 Cultural Data Platform
                 <span class="status-badge live">LIVE</span>
-                <span class="status-badge" style="background: rgba(41, 37, 36, 0.9); color: #d6d3d1; display: inline-flex; align-items: center; gap: 0.25rem;">◆ Cultural Preservation</span>
+                <span class="status-badge cultural">◆ Cultural Preservation</span>
               </p>
               <h3>CultureSherpa</h3>
               <p>Interactive atlas mapping 470+ cultures with AI-synthesized profiles, geographic visualization via MapboxGL, and offline-first PWA architecture. Demonstrates complex data visualization and cultural API integration at scale.</p>
@@ -4842,7 +4948,7 @@
               <p class="portfolio-category">
                 Wellness Platform
                 <span class="status-badge live">LIVE</span>
-                <span class="status-badge" style="background: rgba(5, 46, 32, 0.9); color: #6ee7b7;">Origin Story</span>
+                <span class="status-badge origin">Origin Story</span>
               </p>
               <h3>Good Flippin Vibes</h3>
               <p>Community-driven holistic wellness platform. The original venture that launched our mission to create meaningful digital experiences. Showcases content management, community features, and responsive design.</p>
@@ -5113,8 +5219,7 @@
             <div class="instagram-embed-wrapper">
               <blockquote class="instagram-media" data-instgrm-captioned
                 data-instgrm-permalink="https://www.instagram.com/reel/DVcexauDQIz/?utm_source=ig_embed&amp;utm_campaign=loading"
-                data-instgrm-version="14"
-                style="background:#FFF; border:0; border-radius:4px; box-shadow:none; margin:0; max-width:100%; min-width:0; padding:0; width:100%;">
+                data-instgrm-version="14">
               </blockquote>
             </div>
             <div class="instagram-follow-cta">
@@ -5156,7 +5261,7 @@
         </div>
 
         <!-- Admin Controls (visible only to admins) -->
-        <div id="blog-admin-controls" class="blog-admin-controls" style="display: none;">
+        <div id="blog-admin-controls" class="blog-admin-controls is-hidden">
           <div class="blog-tabs">
             <button id="published-tab" class="blog-tab active" data-tab="published">Published</button>
             <button id="drafts-tab" class="blog-tab" data-tab="drafts">Drafts</button>
@@ -5167,7 +5272,7 @@
         </div>
 
         <!-- Blog Post Editor (hidden until "New Post" clicked) -->
-        <div id="blog-editor" class="blog-editor" style="display: none;">
+        <div id="blog-editor" class="blog-editor is-hidden">
           <div class="editor-header">
             <h3 id="editor-title-text">Create New Post</h3>
             <button id="close-editor-btn" class="btn-icon" aria-label="Close editor">✕</button>
@@ -5197,8 +5302,8 @@
             <div class="form-group">
               <label for="post-image">Featured Image</label>
               <input type="file" id="post-image" accept="image/*" class="file-input">
-              <div id="image-preview" class="image-preview" style="display: none;">
-                <img id="preview-img" src="" alt="Preview">
+              <div id="image-preview" class="image-preview is-hidden">
+                <img id="preview-img" src="/assets/brand/og/og-image-1200x630.png" alt="Preview" class="image-preview-placeholder">
                 <button type="button" id="remove-image-btn" class="btn-icon">✕</button>
               </div>
               <span class="help-text">Optional. Recommended size: 1200x630px (16:9 ratio)</span>
@@ -5236,7 +5341,7 @@
         </div>
 
         <!-- Series / Filter bar -->
-        <div id="blog-filter-bar" class="blog-filter-bar" style="display:none;">
+        <div id="blog-filter-bar" class="blog-filter-bar is-hidden">
           <label for="blog-series-filter" class="sr-only">Filter by series</label>
           <select id="blog-series-filter" class="blog-series-select" aria-label="Filter posts by series">
             <option value="">All series &amp; posts</option>
@@ -5249,7 +5354,7 @@
         </div>
 
         <!-- Blog Post Detail View (hidden until post clicked) -->
-        <div id="blog-post-detail" class="blog-post-detail" style="display: none;">
+        <div id="blog-post-detail" class="blog-post-detail is-hidden">
           <button id="back-to-blog-btn" class="btn-link">← Back to all posts</button>
           <article class="blog-post-content">
             <header class="post-header">
@@ -5298,14 +5403,14 @@
               </div>
             </div>
 
-            <div id="detail-admin-actions" class="post-admin-actions" style="display: none;">
+            <div id="detail-admin-actions" class="post-admin-actions is-hidden">
               <button id="edit-post-btn" class="btn-secondary">Edit</button>
               <button id="delete-post-btn" class="btn-danger">Delete</button>
             </div>
           </article>
 
           <!-- Comments Section -->
-          <div id="blog-comments-section" class="comments-section" style="display: none;">
+          <div id="blog-comments-section" class="comments-section is-hidden">
             <h3 class="comments-heading">
               <span id="comments-count">0</span> Comments
             </h3>
@@ -5319,9 +5424,9 @@
               </div>
 
               <!-- Shown when user IS authenticated -->
-              <form id="comment-form" class="comment-form" style="display: none;">
+              <form id="comment-form" class="comment-form is-hidden">
                 <div class="comment-form-header">
-                  <img id="comment-user-avatar" src="" alt="Your avatar" class="comment-avatar">
+                  <img id="comment-user-avatar" src="/assets/logos/gfd-circle-mark.webp" alt="Your avatar" class="comment-avatar">
                   <div class="comment-user-info">
                     <span id="comment-user-name" class="comment-user-name"></span>
                   </div>
@@ -5337,7 +5442,7 @@
                 <div class="comment-form-footer">
                   <span id="comment-char-count" class="char-counter">0 / 2000</span>
                   <div class="comment-actions">
-                    <button type="button" id="cancel-comment-btn" class="btn-link" style="display: none;">Cancel</button>
+                    <button type="button" id="cancel-comment-btn" class="btn-link is-hidden">Cancel</button>
                     <button type="submit" id="submit-comment-btn" class="btn-primary">Post Comment</button>
                   </div>
                 </div>
@@ -5455,9 +5560,9 @@
           <div class="contact-details">
             <div class="contact-item">
               <span class="icon">→</span>
-              <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+              <div class="contact-email-stack">
                 <a href="javascript:void(0)" id="email-link">getsome@goodflippinvibes.com</a>
-                <a href="javascript:void(0)" id="email-link-alt" style="opacity: 0.8;">getsome@goodflippinvibes.com</a>
+                <a href="javascript:void(0)" id="email-link-alt" class="contact-email-alt">getsome@goodflippinvibes.com</a>
               </div>
             </div>
             <div class="contact-item">
@@ -5506,13 +5611,13 @@
             <textarea id="message" name="message" required placeholder="What are you trying to achieve?"></textarea>
           </div>
           <button type="submit" class="form-submit">Send message</button>
-          <p id="contact-status" style="text-align:center; margin-top:0.75rem; font-size:0.875rem; min-height:1.25rem;"></p>
+          <p id="contact-status" class="contact-status"></p>
         </form>
       </div>
     </section>
 
     <!-- User Profile Section (Auth-gated) -->
-    <section id="user-profile" style="display: none;" aria-hidden="true"></section>
+    <section id="user-profile" class="is-hidden" aria-hidden="true"></section>
   </main>
 
   <footer>
@@ -5527,15 +5632,17 @@
         <a href="#contact">Contact</a>
         <a href="#work">Portfolio</a>
         <a href="#insights-summary">Insights</a>
-        <a href="investors.html">Investors</a>
+        <a href="ecosystem-overview.html">Ecosystem Overview</a>
+        <a href="donate.html?utm_source=main_site&utm_medium=footer&utm_campaign=sky_money_support" data-sky-event="support_cta_click" data-sky-label="footer_support">Support</a>
+        <a href="investors.html?utm_source=main_site&utm_medium=footer&utm_campaign=sky_money_sponsor" data-sky-event="sponsor_inquiry_click" data-sky-label="footer_sponsor">Sponsors</a>
         <a href="privacy.html">Privacy</a>
         <a href="terms.html">Terms</a>
         <a href="publisher-policy.html">Publisher Policy</a>
       </div>
     </div>
-    <div class="footer-content" style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem;">
-      <p class="footer-studio-line" style="margin: 0 0 1rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
-        <a href="https://goodflippinvibes.com" target="_blank" rel="noopener" style="color: var(--text);">Good Flippin Vibes</a> is a brand of <a href="https://goodflippindesign.com" target="_blank" rel="noopener" style="color: var(--text);">Good Flippin Design, LLC</a>.
+    <div class="footer-content footer-content-secondary">
+      <p class="footer-studio-line">
+        <a href="https://goodflippinvibes.com" target="_blank" rel="noopener">Good Flippin Vibes</a> is a brand of <a href="https://goodflippindesign.com" target="_blank" rel="noopener">Good Flippin Design, LLC</a>.
       </p>
       <div class="footer-ecosystem">
         <span class="footer-ecosystem-label">Across the studio:</span>
@@ -5552,12 +5659,12 @@
     </div>
     <!-- Owner admin access (not for public) -->
     <div class="footer-admin-bar">
-      <button id="footer-sign-in-btn" class="footer-admin-link" style="display: none;">Admin</button>
-      <div id="footer-admin-user" class="footer-admin-user" style="display: none; gap: 0.5rem; align-items: center; justify-content: center;">
+      <button id="footer-sign-in-btn" class="footer-admin-link is-hidden">Admin</button>
+      <div id="footer-admin-user" class="footer-admin-user is-hidden">
         <span id="footer-user-name" class="footer-admin-name"></span>
-        <span aria-hidden="true" class="footer-admin-link" style="cursor: default; padding: 0 0.125rem;">·</span>
-        <a href="admin.html" id="footer-admin-panel-link" class="footer-admin-link" style="display: none;">Admin Panel</a>
-        <span aria-hidden="true" class="footer-admin-link" id="footer-admin-sep" style="cursor: default; padding: 0 0.125rem; display: none;">·</span>
+        <span aria-hidden="true" class="footer-admin-link footer-admin-separator">·</span>
+        <a href="admin.html" id="footer-admin-panel-link" class="footer-admin-link is-hidden">Admin Panel</a>
+        <span aria-hidden="true" class="footer-admin-link footer-admin-separator is-hidden" id="footer-admin-sep">·</span>
         <button id="footer-sign-out-btn" class="footer-admin-link">Sign out</button>
       </div>
     </div>
@@ -6130,6 +6237,23 @@
         });
       }
 
+      function trackSkyMoneyEvent(eventName, params) {
+        if (typeof window.gtag !== 'function') return;
+        window.gtag('event', eventName, Object.assign({
+          event_category: 'sky_money',
+          page_path: window.location.pathname
+        }, params || {}));
+      }
+
+      document.addEventListener('click', function (event) {
+        const trackedElement = event.target.closest('[data-sky-event]');
+        if (!trackedElement) return;
+        trackSkyMoneyEvent(trackedElement.dataset.skyEvent, {
+          event_label: trackedElement.dataset.skyLabel || trackedElement.textContent.trim(),
+          link_url: trackedElement.href || null
+        });
+      });
+
       // 9. Contact form submission via Formspree
       if (contactForm) {
         contactForm.addEventListener('submit', async function (e) {
@@ -6154,6 +6278,9 @@
               if (statusEl) statusEl.style.color = 'var(--success, #10b981)';
               this.reset();
               if (window.gtag) gtag('event', 'form_submit', { event_category: 'contact', event_label: 'contact_form' });
+              trackSkyMoneyEvent('partner_inquiry_submit', {
+                event_label: 'main_contact_form'
+              });
               setTimeout(() => {
                 submitBtn.textContent = 'Send message';
                 submitBtn.disabled = false;
@@ -6303,6 +6430,18 @@
               return;
             }
             try {
+              trackSkyMoneyEvent('donation_start', {
+                event_label: `stripe_${donationMode}`,
+                value: selectedAmount,
+                currency: 'USD'
+              });
+              if (donationMode === 'monthly') {
+                trackSkyMoneyEvent('patron_start', {
+                  event_label: 'stripe_monthly',
+                  value: selectedAmount,
+                  currency: 'USD'
+                });
+              }
               const { clientSecret } = await createPaymentIntent(selectedAmount);
               await mountPaymentElement(clientSecret);
               paymentContainer.classList.add('active');
@@ -6563,12 +6702,12 @@
     <div class="sticky-cta-inner">
       <div class="sticky-cta-message">
         <div>
-          <p id="sticky-cta-text" style="margin:0;font-size:0.875rem;font-weight:600;color:var(--text);">Ready to build something amazing?</p>
+          <p id="sticky-cta-text" class="sticky-cta-title">Ready to build something amazing?</p>
           <p class="sticky-cta-subtitle">Professional web development &amp; consulting</p>
         </div>
       </div>
       <div class="sticky-cta-actions">
-        <a href="#contact" class="sticky-cta-primary">Get in Touch</a>
+        <a href="investors.html?utm_source=main_site&utm_medium=sticky_cta&utm_campaign=sky_money_partner#investor-intake" class="sticky-cta-primary" data-sky-event="sponsor_inquiry_click" data-sky-label="sticky_cta_partner">Partner with us</a>
         <button id="sticky-cta-close" class="sticky-cta-dismiss" aria-label="Close">✕</button>
       </div>
     </div>
@@ -6607,6 +6746,13 @@
       gap: 0.75rem;
       flex: 1;
       min-width: 0;
+    }
+
+    .sticky-cta-title {
+      margin: 0;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
     }
 
     .sticky-cta-subtitle {
@@ -7067,8 +7213,14 @@
           document.querySelectorAll('[data-admin-section]').forEach(el => {
             el.removeAttribute('aria-hidden');
           });
-          if (panelLink) panelLink.style.display = '';
-          if (panelSep) panelSep.style.display = '';
+          if (panelLink) {
+            panelLink.classList.remove('is-hidden');
+            panelLink.style.display = 'inline-flex';
+          }
+          if (panelSep) {
+            panelSep.classList.remove('is-hidden');
+            panelSep.style.display = 'inline-flex';
+          }
           // Redirect to admin panel on first sign-in if ?admin param present
           if (new URLSearchParams(window.location.search).has('admin')) {
             window.location.href = 'admin.html';
@@ -7078,8 +7230,14 @@
           document.querySelectorAll('[data-admin-section]').forEach(el => {
             el.setAttribute('aria-hidden', 'true');
           });
-          if (panelLink) panelLink.style.display = 'none';
-          if (panelSep) panelSep.style.display = 'none';
+          if (panelLink) {
+            panelLink.classList.add('is-hidden');
+            panelLink.style.display = 'none';
+          }
+          if (panelSep) {
+            panelSep.classList.add('is-hidden');
+            panelSep.style.display = 'none';
+          }
         }
         // Nav admin links (CSS already hides them; JS ensures re-evaluation)
         // CSS class on body handles visibility — no per-element style needed
@@ -7427,7 +7585,7 @@
           }
           // R2 / direct video file
           if (/\.(mp4|webm|ogg)(\?|$)/i.test(safeUrl)) {
-            return `<div class="blog-video-embed"><video controls preload="metadata" style="width:100%;max-width:100%;border-radius:8px"><source src="${safeUrl}"><p>Your browser does not support HTML5 video.</p></video></div>`;
+            return `<div class="blog-video-embed"><video controls preload="metadata" class="blog-video-direct"><source src="${safeUrl}"><p>Your browser does not support HTML5 video.</p></video></div>`;
           }
           // Fallback link
           return `<a href="${safeUrl}" target="_blank" rel="noopener">▶ Watch video</a>`;
@@ -7449,20 +7607,20 @@
         html = html.replace(/~~([^~]+)~~/g, '<s>$1</s>');
 
         // Images — must run before links
-        html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:8px;margin:0.5rem 0" loading="lazy">');
+        html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="blog-inline-image" loading="lazy">');
 
         // Links
         html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
 
         // Blockquotes
-        html = html.replace(/^&gt; (.+)$/gm, '<blockquote style="border-left:3px solid var(--border);padding:0.25rem 0.75rem;margin:0.5rem 0;color:var(--text-muted)">$1</blockquote>');
+        html = html.replace(/^&gt; (.+)$/gm, '<blockquote class="blog-blockquote">$1</blockquote>');
 
         // Headings
         html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
         html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
 
         // Horizontal rule
-        html = html.replace(/^---$/gm, '<hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0">');
+        html = html.replace(/^---$/gm, '<hr class="blog-rule">');
 
         // Lists
         html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
@@ -7633,6 +7791,7 @@
               const reader = new FileReader();
               reader.onload = function (event) {
                 previewImg.src = event.target.result;
+                previewImg.classList.remove('image-preview-placeholder');
                 imagePreview.style.display = 'block';
               };
               reader.readAsDataURL(file);
@@ -7642,7 +7801,8 @@
           if (removeImageBtn) {
             removeImageBtn.addEventListener('click', function () {
               imageInput.value = '';
-              previewImg.src = '';
+              previewImg.src = '/assets/brand/og/og-image-1200x630.png';
+              previewImg.classList.add('image-preview-placeholder');
               imagePreview.style.display = 'none';
             });
           }

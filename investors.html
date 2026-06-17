@@ -3,6 +3,14 @@
 <html lang="en">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WM6Q66W9W0"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-WM6Q66W9W0', { 'transport_type': 'beacon', page_title: 'Investor Overview', page_path: '/investors.html' });
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Investor Overview | Good Flippin Design</title>
@@ -608,6 +616,8 @@
                 <a href="#proof">Proof</a>
                 <a href="#model">Model</a>
                 <a href="#funding">Use of Funds</a>
+                <a href="ecosystem-overview.html" data-sky-event="ecosystem_outbound_click" data-sky-label="investors_nav_overview">Ecosystem</a>
+                <a href="sponsor.html" data-sky-event="sponsor_nav_click" data-sky-label="investors_nav_sponsor">Sponsor</a>
                 <a href="#contact">Contact</a>
             </nav>
         </div>
@@ -621,7 +631,7 @@
                 <p>Good Flippin Design is building a multi-property media and technology organization designed to translate complexity into clarity. The near-term opportunity is straightforward: establish a durable revenue floor through carefully selected sponsorship and advertising surfaces, then expand into higher-margin knowledge products, commissioned intelligence, and monetizable creative work.</p>
                 <p>The long-term vision is intentionally not published in full. Publicly, we are sharing enough for investors and strategic supporters to understand the execution quality, mission alignment, and ROI potential without disclosing every operational play.</p>
                 <div class="hero-actions">
-                    <a class="button" href="#investor-intake">Request a private conversation</a>
+                    <a class="button" href="#investor-intake" data-sky-event="sponsor_inquiry_click" data-sky-label="investors_hero_private_conversation">Request a private conversation</a>
                     <a class="button-secondary" href="#model">View the public model</a>
                 </div>
             </div>
@@ -746,7 +756,7 @@
                 </article>
             </div>
 
-            <div class="table-wrap" aria-label="Illustrative operating model">
+            <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
@@ -786,7 +796,7 @@
                 <p>All numbers above are directional internal operating assumptions or documented scenario models, not guarantees. They are shared publicly to establish seriousness, not to overstate certainty.</p>
             </div>
 
-            <div class="table-wrap" aria-label="Capital leverage model">
+            <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
@@ -880,19 +890,25 @@
                 <form id="investor-intake" class="intake-form" action="https://formspree.io/f/xgvgzjbw" method="POST">
                     <input type="hidden" name="_subject" value="Investor / Strategic Support Inquiry - Good Flippin Design">
                     <input type="hidden" name="source" value="investors.html">
+                    <input type="hidden" name="page_url" id="investor-page-url" value="">
+                    <input type="hidden" name="referrer" id="investor-referrer" value="">
+                    <input type="hidden" name="utm_source" id="investor-utm-source" value="">
+                    <input type="hidden" name="utm_medium" id="investor-utm-medium" value="">
+                    <input type="hidden" name="utm_campaign" id="investor-utm-campaign" value="">
+                    <input type="hidden" name="utm_content" id="investor-utm-content" value="">
                     <div class="form-row">
-                        <label for="investor-name">Name
+                        <label>Name
                             <input id="investor-name" name="name" type="text" autocomplete="name" required>
                         </label>
-                        <label for="investor-email">Email
+                        <label>Email
                             <input id="investor-email" name="email" type="email" autocomplete="email" required>
                         </label>
                     </div>
                     <div class="form-row">
-                        <label for="investor-organization">Organization
+                        <label>Organization
                             <input id="investor-organization" name="organization" type="text" autocomplete="organization">
                         </label>
-                        <label for="investor-type">Interest type
+                        <label>Interest type
                             <select id="investor-type" name="interest_type" required>
                                 <option value="">Select one</option>
                                 <option value="investor">Investment conversation</option>
@@ -903,7 +919,7 @@
                             </select>
                         </label>
                     </div>
-                    <label for="investor-range">Approximate check size or support range
+                    <label>Approximate check size or support range
                         <select id="investor-range" name="support_range">
                             <option value="">Prefer to discuss privately</option>
                             <option value="under-5k">Under $5,000</option>
@@ -913,7 +929,7 @@
                             <option value="in-kind">In-kind support / services</option>
                         </select>
                     </label>
-                    <label for="investor-message">What would you like to explore?
+                    <label>What would you like to explore?
                         <textarea id="investor-message" name="message" required placeholder="A few sentences about your interest, timeline, and what would help you evaluate the opportunity."></textarea>
                     </label>
                     <p class="form-note">Investor and strategic-support inquiries route separately from general project intake through a distinct subject line. Sensitive diligence details should wait for a direct conversation.</p>
@@ -931,12 +947,64 @@
             <span>&copy; 2026 GFV LLC DBA Good Flippin Design</span>
             <div class="footer-links">
                 <a href="/">Home</a>
+                <a href="ecosystem-overview.html" data-sky-event="ecosystem_outbound_click" data-sky-label="investors_footer_overview">Ecosystem Overview</a>
+                <a href="donate.html?utm_source=investors&utm_medium=footer&utm_campaign=sky_money_support" data-sky-event="support_cta_click" data-sky-label="investors_footer_support">Support</a>
                 <a href="privacy.html">Privacy</a>
                 <a href="terms.html">Terms</a>
                 <a href="publisher-policy.html">Publisher Policy</a>
             </div>
         </div>
     </footer>
+    <script>
+        (function () {
+            'use strict';
+
+            function trackSkyMoneyEvent(eventName, params) {
+                if (typeof window.gtag !== 'function') return;
+                window.gtag('event', eventName, Object.assign({
+                    event_category: 'sky_money',
+                    page_path: window.location.pathname
+                }, params || {}));
+            }
+
+            document.addEventListener('click', function (event) {
+                const trackedElement = event.target.closest('[data-sky-event]');
+                if (!trackedElement) return;
+                trackSkyMoneyEvent(trackedElement.dataset.skyEvent, {
+                    event_label: trackedElement.dataset.skyLabel || trackedElement.textContent.trim(),
+                    link_url: trackedElement.href || null
+                });
+            });
+
+            const investorForm = document.getElementById('investor-intake');
+            if (investorForm) {
+                const params = new URLSearchParams(window.location.search);
+                const attributionFields = {
+                    'investor-page-url': window.location.href,
+                    'investor-referrer': document.referrer || '',
+                    'investor-utm-source': params.get('utm_source') || '',
+                    'investor-utm-medium': params.get('utm_medium') || '',
+                    'investor-utm-campaign': params.get('utm_campaign') || '',
+                    'investor-utm-content': params.get('utm_content') || ''
+                };
+
+                Object.entries(attributionFields).forEach(function ([id, value]) {
+                    const field = document.getElementById(id);
+                    if (field) field.value = value;
+                });
+
+                investorForm.addEventListener('submit', function () {
+                    const interestType = document.getElementById('investor-type');
+                    const supportRange = document.getElementById('investor-range');
+                    trackSkyMoneyEvent('partner_inquiry_submit', {
+                        event_label: 'investor_intake_form',
+                        interest_type: interestType ? interestType.value : '',
+                        support_range: supportRange ? supportRange.value : ''
+                    });
+                });
+            }
+        })();
+    </script>
 </body>
 
 </html>
