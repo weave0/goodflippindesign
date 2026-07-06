@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weave0 Ecosystem Analytics</title>
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --surface: #161616;
+            --surface2: #1e1e1e;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f5f5f5;
+            --text-muted: #8a8a8a;
+            --accent: #4f8ef7;
+            --accent2: #7c3aed;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --red: #ef4444;
+            --orange: #f97316;
+            --font: 'Inter', system-ui, sans-serif;
+            --mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        h2 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .meta {
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-bottom: 32px;
+        }
+
+        .meta strong {
+            color: var(--accent);
+        }
+
+        /* ── Grid layouts ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 32px;
+        }
+
+        .kpi {
+            background: var(--surface);
+            padding: 20px 24px;
+        }
+
+        .kpi-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            font-family: var(--mono);
+            line-height: 1;
+        }
+
+        .kpi-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .kpi-value.green {
+            color: var(--green);
+        }
+
+        .kpi-value.blue {
+            color: var(--accent);
+        }
+
+        .kpi-value.orange {
+            color: var(--orange);
+        }
+
+        .kpi-value.purple {
+            color: #a78bfa;
+        }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .sites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .site-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .site-card:hover {
+            border-color: rgba(79, 142, 247, 0.3);
+        }
+
+        .site-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+            color: var(--accent);
+        }
+
+        .site-period {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+
+        .site-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat {}
+
+        .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: var(--mono);
+        }
+
+        .cache-bar {
+            margin-top: 12px;
+        }
+
+        .cache-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .bar-track {
+            background: var(--surface2);
+            border-radius: 4px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--green);
+            transition: width 0.5s ease;
+        }
+
+        .bar-fill.low {
+            background: var(--yellow);
+        }
+
+        .bar-fill.vlow {
+            background: var(--red);
+        }
+
+        /* ── Sparkline ── */
+        .sparkline-wrap {
+            margin-top: 14px;
+        }
+
+        canvas.spark {
+            display: block;
+            width: 100%;
+            height: 40px;
+        }
+
+        /* ── Workers table ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-family: var(--mono);
+            font-size: 12px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .pill-green {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--green);
+        }
+
+        .pill-red {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--red);
+        }
+
+        .pill-yellow {
+            background: rgba(234, 179, 8, 0.15);
+            color: var(--yellow);
+        }
+
+        /* ── Countries ── */
+        .country-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .country-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .country-name {
+            width: 130px;
+            color: var(--text-muted);
+        }
+
+        .country-bar-wrap {
+            flex: 1;
+            background: var(--surface2);
+            border-radius: 3px;
+            height: 4px;
+        }
+
+        .country-bar {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+
+        .country-count {
+            width: 60px;
+            text-align: right;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* ── Deployments ── */
+        .deploy-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .deploy-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: var(--surface2);
+            border-radius: 6px;
+        }
+
+        .deploy-project {
+            font-weight: 600;
+            width: 180px;
+        }
+
+        .deploy-msg {
+            flex: 1;
+            color: var(--text-muted);
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .deploy-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        /* ── Error ── */
+        .error-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .error-state code {
+            display: block;
+            background: var(--surface2);
+            border-radius: 6px;
+            padding: 16px 20px;
+            margin: 20px auto;
+            max-width: 580px;
+            text-align: left;
+            font-family: var(--mono);
+            font-size: 12px;
+            line-height: 1.8;
+            color: var(--text);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1px;
+            background: var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 24px;
+            width: fit-content;
+        }
+
+        .tab {
+            padding: 8px 18px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--surface);
+            color: var(--text-muted);
+            transition: all 0.15s;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .tab:hover:not(.active) {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .no-data {
+            color: var(--text-muted);
+            font-size: 13px;
+            padding: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🌐 Weave0 Ecosystem Analytics</h1>
+    <p class="meta" id="meta">Loading snapshot...</p>
+
+    <div id="app">
+        <div class="error-state" id="loading">
+            <div style="font-size:32px;margin-bottom:16px;">⏳</div>
+            <div>Loading analytics snapshot...</div>
+        </div>
+    </div>
+
+    <script>
+        // ── Formatters ────────────────────────────────────────────────────────────────
+        const fmt = {
+            num(n) {
+                if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+                if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+                return (n || 0).toLocaleString();
+            },
+            bytes(b) {
+                if (b >= 1e9) return (b / 1e9).toFixed(2) + ' GB';
+                if (b >= 1e6) return (b / 1e6).toFixed(1) + ' MB';
+                if (b >= 1e3) return (b / 1e3).toFixed(0) + ' KB';
+                return b + ' B';
+            },
+            date(iso) {
+                if (!iso) return '—';
+                return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            },
+            relTime(iso) {
+                if (!iso) return '—';
+                const diff = Date.now() - new Date(iso).getTime();
+                const m = Math.floor(diff / 60000);
+                if (m < 60) return m + 'm ago';
+                const h = Math.floor(m / 60);
+                if (h < 24) return h + 'h ago';
+                return Math.floor(h / 24) + 'd ago';
+            },
+        };
+
+        // ── Sparkline ─────────────────────────────────────────────────────────────────
+        function drawSparkline(canvas, data, color = '#4f8ef7') {
+            const ctx = canvas.getContext('2d');
+            const W = canvas.offsetWidth || 300;
+            const H = 40;
+            canvas.width = W;
+            canvas.height = H;
+            ctx.clearRect(0, 0, W, H);
+            if (!data || data.length < 2) return;
+            const max = Math.max(...data, 1);
+            const step = W / (data.length - 1);
+            const points = data.map((v, i) => [i * step, H - (v / max) * (H - 4) - 2]);
+
+            // Fill
+            ctx.beginPath();
+            ctx.moveTo(points[0][0], H);
+            points.forEach(([x, y]) => ctx.lineTo(x, y));
+            ctx.lineTo(points[points.length - 1][0], H);
+            ctx.closePath();
+            const grad = ctx.createLinearGradient(0, 0, 0, H);
+            grad.addColorStop(0, color + '40');
+            grad.addColorStop(1, color + '00');
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Line
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            points.forEach(([x, y], i) => i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y));
+            ctx.stroke();
+        }
+
+        // ── Render Functions ───────────────────────────────────────────────────────────
+        function renderKPIs(data) {
+            const t = data.ecosystemTotals;
+            return `
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Total Requests</div>
+        <div class="kpi-value blue">${fmt.num(t.requests)}</div>
+        <div class="kpi-sub">Last ${data.periodDays} days · all sites</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Page Views</div>
+        <div class="kpi-value green">${fmt.num(t.pageViews)}</div>
+        <div class="kpi-sub">Across ${Object.keys(data.sites).length} zones</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Unique Visitors</div>
+        <div class="kpi-value purple">${fmt.num(t.uniques)}</div>
+        <div class="kpi-sub">Distinct IPs</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Bandwidth</div>
+        <div class="kpi-value orange">${t.bytesGB} GB</div>
+        <div class="kpi-sub">Total served</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Threats Blocked</div>
+        <div class="kpi-value" style="color:var(--red)">${fmt.num(t.threats)}</div>
+        <div class="kpi-sub">CF WAF + rate limits</div>
+      </div>
+    </div>`;
+        }
+
+        function renderSiteCard(name, site) {
+            if (site.error) {
+                return `<div class="site-card">
+      <div class="site-name">${name}</div>
+      <div class="site-period" style="color:var(--red)">Error: ${site.error}</div>
+    </div>`;
+            }
+            const cacheClass = site.cacheHitRate >= 80 ? '' : (site.cacheHitRate >= 50 ? 'low' : 'vlow');
+            const dailyReq = (site.daily || []).map(d => d.requests);
+            const sparkId = 'spark-' + name.replace(/\./g, '-');
+            return `
+    <div class="site-card">
+      <div class="site-name">${name}</div>
+      <div class="site-period">${site.period}</div>
+      <div class="site-stats">
+        <div class="stat">
+          <div class="stat-label">Requests</div>
+          <div class="stat-value">${fmt.num(site.totals?.requests)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Page Views</div>
+          <div class="stat-value">${fmt.num(site.totals?.pageViews)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Uniques</div>
+          <div class="stat-value">${fmt.num(site.totals?.uniques)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Bandwidth</div>
+          <div class="stat-value" style="font-size:14px">${fmt.bytes(site.totals?.bytes)}</div>
+        </div>
+      </div>
+      <div class="cache-bar">
+        <div class="cache-label">Cache hit rate: <strong>${site.cacheHitRate}%</strong></div>
+        <div class="bar-track"><div class="bar-fill ${cacheClass}" style="width:${site.cacheHitRate}%"></div></div>
+      </div>
+      <div class="sparkline-wrap">
+        <canvas class="spark" id="${sparkId}" data-values='${JSON.stringify(dailyReq)}'></canvas>
+      </div>
+    </div>`;
+        }
+
+        function renderWorkers(workers) {
+            if (!workers || workers.length === 0) return '<div class="no-data">No worker data available.</div>';
+            const rows = workers.map(w => {
+                const errClass = w.errorRate === 0 ? 'pill-green' : (w.errorRate < 1 ? 'pill-yellow' : 'pill-red');
+                return `<tr>
+      <td style="color:var(--text);font-family:var(--mono)">${w.name}</td>
+      <td>${fmt.num(w.requests)}</td>
+      <td>${fmt.num(w.errors)} <span class="pill ${errClass}">${w.errorRate}%</span></td>
+      <td>${fmt.num(w.subrequests)}</td>
+      <td>${w.avgCpuMs}ms</td>
+    </tr>`;
+            }).join('');
+            return `<table>
+    <thead><tr><th>Script</th><th>Requests (7d)</th><th>Errors</th><th>Subrequests</th><th>Avg CPU</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+        }
+
+        function renderTopCountries(sites) {
+            // Aggregate across all sites
+            const countryTotals = {};
+            for (const site of Object.values(sites)) {
+                for (const c of (site.topCountries || [])) {
+                    const k = c.clientCountryName;
+                    countryTotals[k] = (countryTotals[k] || 0) + c.requests;
+                }
+            }
+            const sorted = Object.entries(countryTotals).sort((a, b) => b[1] - a[1]).slice(0, 12);
+            if (sorted.length === 0) return '<div class="no-data">No country data in snapshot.</div>';
+            const max = sorted[0][1];
+            return `<div class="country-list">${sorted.map(([name, count]) => `
+    <div class="country-row">
+      <div class="country-name">${name}</div>
+      <div class="country-bar-wrap"><div class="country-bar" style="width:${Math.round(count / max * 100)}%"></div></div>
+      <div class="country-count">${fmt.num(count)}</div>
+    </div>`).join('')}</div>`;
+        }
+
+        function renderDeployments(deployments) {
+            if (!deployments || deployments.length === 0) return '<div class="no-data">No deployment data.</div>';
+            return `<div class="deploy-list">${deployments.map(d => `
+    <div class="deploy-row">
+      <span class="pill pill-green" style="margin-right:4px">✓</span>
+      <div class="deploy-project">${d.project}</div>
+      <div class="deploy-msg">${d.commitMessage || 'No message'}</div>
+      <div class="deploy-time">${fmt.relTime(d.latestDeployment)}</div>
+    </div>`).join('')}</div>`;
+        }
+
+        // ── Main render ────────────────────────────────────────────────────────────────
+        async function loadAndRender() {
+            const app = document.getElementById('app');
+            const meta = document.getElementById('meta');
+
+            let data;
+            try {
+                const res = await fetch('./snapshot.json');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                data = await res.json();
+            } catch (e) {
+                app.innerHTML = renderKnownBaselines() + renderSetupInstructions();
+                return;
+            }
+
+            const generated = new Date(data.generated);
+            meta.innerHTML = `Snapshot from <strong>${generated.toLocaleString()}</strong> &nbsp;·&nbsp; Period: last <strong>${data.periodDays} days</strong> &nbsp;·&nbsp; Account: <strong>Weave0</strong>`;
+
+            // Sort sites by requests desc
+            const sitesSorted = Object.entries(data.sites)
+                .filter(([, s]) => !s.error)
+                .sort(([, a], [, b]) => (b.totals?.requests || 0) - (a.totals?.requests || 0));
+            const sitesError = Object.entries(data.sites).filter(([, s]) => s.error);
+
+            app.innerHTML = `
+    ${renderKPIs(data)}
+
+    <h2>Sites — ${DAYS_BACK} Day Traffic</h2>
+    <div class="sites-grid">
+      ${sitesSorted.map(([name, site]) => renderSiteCard(name, site)).join('')}
+      ${sitesError.map(([name, site]) => renderSiteCard(name, site)).join('')}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+      <div class="section">
+        <h3>🌍 Traffic by Country</h3>
+        ${renderTopCountries(data.sites)}
+      </div>
+      <div class="section">
+        <h3>🚀 Latest Deployments</h3>
+        ${renderDeployments(data.deployments)}
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>⚙️ Workers Analytics (Last 7 Days)</h3>
+      ${renderWorkers(data.workers)}
+    </div>
+
+    <div class="section" style="margin-top:24px">
+      <h3>🎯 Priority Actions</h3>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Ranked by traffic × revenue × effort — updated from ecosystem analysis</div>
+      ${KNOWN_BASELINES.intelligence.map(i => `
+        <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div style="min-width:24px;height:24px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${i.priority}</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500">${i.action}</div>
+            <div style="font-size:11px;color:var(--green);margin-top:2px">→ ${i.impact}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <div style="text-align:center;padding:20px 0;color:var(--text-muted);font-size:11px">
+      Refresh: <code style="background:var(--surface2);padding:2px 8px;border-radius:4px">node scripts/cf-analytics.js</code>
+    </div>`;
+
+            // Draw sparklines after DOM is ready
+            requestAnimationFrame(() => {
+                document.querySelectorAll('canvas.spark').forEach(canvas => {
+                    const values = JSON.parse(canvas.dataset.values || '[]');
+                    drawSparkline(canvas, values);
+                });
+            });
+        }
+
+        // ── Known baselines (sourced from ECOSYSTEM_GAP_ANALYSIS_2026-05.md CF snapshot) ──
+        const KNOWN_BASELINES = {
+            asOf: '2026-05-01',
+            periodDays: 30,
+            sites: [
+                { name: 'goodflippindesign.com', requests: 90799, pageViews: 38494, threats: 3070, note: 'Studio/production surface — dominant traffic property', tier: 'primary' },
+                { name: 'culturesherpa.com', requests: 19755, pageViews: null, threats: null, note: '.com getting traffic; .org is the intended canonical — split hurts SEO', tier: 'high' },
+                { name: 'heavymoose.com', requests: null, pageViews: null, threats: null, note: 'Measurable live traffic — not quantified in snapshot', tier: 'medium' },
+                { name: 'brettleeweaver.com', requests: null, pageViews: null, threats: null, note: '"Significant" traffic with zero content — sleeper asset', tier: 'medium' },
+                { name: 'citizenapproved.org', requests: null, pageViews: null, threats: null, note: 'Real live demand — MVP shipped, content thin', tier: 'medium' },
+                { name: 'culturesherpa.org', requests: 63, pageViews: null, threats: null, note: 'Intended canonical but nearly idle — 301 redirect needed', tier: 'low' },
+                { name: 'aiaimate.com', requests: 0, pageViews: null, threats: null, note: 'On Vercel (not CF) — CF shows 0; Vercel/GA4 has real data', tier: 'unknown' },
+                { name: 'lowertownstpaul.org', requests: null, pageViews: null, threats: null, note: 'Pre-build; domain getting early requests with no site', tier: 'low' },
+                { name: 'goodflippinvibes.com', requests: 29, pageViews: null, threats: null, note: 'Brand surface — community portal lives on GFD stack, not here', tier: 'low' },
+            ],
+            ecosystemTotal: { requests: 115000, pageViews: 40000 },
+            monetization: {
+                adSensePubId: 'pub-6209726914457253',
+                adSenseStatus: 'under review',
+                stripeWired: true,
+                workerInjectsAdVars: true,
+                gasRevenueEstMonthly: '$60–$200 (Carbon/EthicalAds at current GFD volume)',
+                patronEstMonthly: '$500 (100 patrons @ $5/mo)',
+            },
+            intelligence: [
+                { priority: 1, action: 'Set CLOUDFLARE_API_TOKEN in .env and run npm run analytics', impact: 'Unlocks live data in this dashboard' },
+                { priority: 2, action: 'Apply for Carbon Ads (carbonads.net) — 1 placement on index.html', impact: '~$60–$150/mo passive from existing GFD traffic' },
+                { priority: 3, action: '301-redirect culturesherpa — pick .com or .org, redirect the other', impact: 'Consolidates 19K+ monthly requests, restores SEO equity' },
+                { priority: 4, action: 'Build brettleeweaver.com (2 pages)', impact: 'Captures existing organic traffic with zero content today' },
+                { priority: 5, action: 'Add Stripe subscription tier to aiaimate.com', impact: 'Converts one-time buyers to MRR — highest $/hr gap in ecosystem' },
+                { priority: 6, action: 'Pull GA4 data: npm run finance:ga4:export', impact: 'Reveals actual session/bounce/page-time data GA4 has been collecting' },
+                { priority: 7, action: 'Add patron program framing to donate.html ("fund the ecosystem")', impact: 'Positions GFD as infrastructure — broadens donor appeal beyond GFV fans' },
+            ]
+        };
+
+        function renderKnownBaselines() {
+            const b = KNOWN_BASELINES;
+            const tierColor = { primary: 'var(--accent)', high: 'var(--green)', medium: 'var(--yellow)', low: 'var(--text-muted)', unknown: 'var(--orange)' };
+            const maxReq = Math.max(...b.sites.filter(s => s.requests > 0).map(s => s.requests));
+
+            const siteRows = b.sites.map(s => {
+                const pct = s.requests ? Math.round(s.requests / maxReq * 100) : 0;
+                const reqDisplay = s.requests === 0 ? '<span style="color:var(--text-muted)">0 (Vercel)</span>'
+                    : s.requests === null ? '<span style="color:var(--text-muted)">—</span>'
+                        : `<strong style="font-family:var(--mono)">${s.requests.toLocaleString()}</strong>`;
+                return `
+                <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                    <span style="color:${tierColor[s.tier]};font-weight:600;font-size:13px">${s.name}</span>
+                    <span style="flex:1"></span>
+                    ${reqDisplay}
+                    <span style="color:var(--text-muted);font-size:11px;width:70px;text-align:right">/mo req</span>
+                  </div>
+                  ${s.requests ? `<div style="background:var(--surface2);border-radius:3px;height:4px;margin-bottom:6px"><div style="height:100%;background:${tierColor[s.tier]};border-radius:3px;width:${pct}%"></div></div>` : ''}
+                  <div style="font-size:11px;color:var(--text-muted)">${s.note}</div>
+                </div>`;
+            }).join('');
+
+            const actionRows = b.intelligence.map(i => `
+                <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border)">
+                  <div style="min-width:24px;height:24px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${i.priority}</div>
+                  <div style="flex:1">
+                    <div style="font-size:13px;font-weight:500">${i.action}</div>
+                    <div style="font-size:11px;color:var(--green);margin-top:2px">→ ${i.impact}</div>
+                  </div>
+                </div>`).join('');
+
+            return `
+            <div style="background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.25);border-radius:8px;padding:16px 20px;margin-bottom:24px">
+              <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:4px">BASELINE SNAPSHOT — ${b.asOf} (30-day CF data)</div>
+              <div style="font-size:11px;color:var(--text-muted)">Live snapshot pending. Showing last confirmed telemetry from ecosystem gap analysis. Run <code style="background:var(--surface2);padding:1px 6px;border-radius:3px">npm run analytics</code> to load live CF data.</div>
+            </div>
+
+            <div class="kpi-grid" style="margin-bottom:32px">
+              <div class="kpi"><div class="kpi-label">Total Requests (30d est.)</div><div class="kpi-value blue">115K+</div><div class="kpi-sub">All tracked zones</div></div>
+              <div class="kpi"><div class="kpi-label">Page Views (30d est.)</div><div class="kpi-value green">40K+</div><div class="kpi-sub">Confirmed GFD only</div></div>
+              <div class="kpi"><div class="kpi-label">Threats Blocked</div><div class="kpi-value" style="color:var(--red)">3,070+</div><div class="kpi-sub">GFD alone, 30d</div></div>
+              <div class="kpi"><div class="kpi-label">Ad Est. (Carbon/Ethical)</div><div class="kpi-value orange">$60–150</div><div class="kpi-sub">Per month, GFD only</div></div>
+              <div class="kpi"><div class="kpi-label">Patron Target (100@$5)</div><div class="kpi-value purple">$500 MRR</div><div class="kpi-sub">More valuable than all ads</div></div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+              <div class="section">
+                <h3>📡 Known Traffic by Site (2026-05 baseline)</h3>
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Requests/30d — confirmed CF zone snapshot</div>
+                ${siteRows}
+              </div>
+              <div class="section">
+                <h3>🎯 Priority Actions</h3>
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px">Ranked by traffic × revenue × effort</div>
+                ${actionRows}
+              </div>
+            </div>
+
+            <div class="section" style="margin-bottom:24px">
+              <h3>💰 Monetization Status</h3>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:4px">
+                <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">AdSense Publisher ID</div><div style="font-family:var(--mono);font-size:12px">${b.monetization.adSensePubId}</div><div style="font-size:11px;color:var(--yellow);margin-top:2px">⚠ Under review</div></div>
+                <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Stripe Integration</div><div style="color:var(--green);font-size:13px;font-weight:600">✓ Wired &amp; deployed</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">Webhook signature-verified</div></div>
+                <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Worker Ad Vars</div><div style="color:var(--green);font-size:13px;font-weight:600">✓ ADSENSE_CLIENT injected</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">Ready for slot ID</div></div>
+                <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Carbon Ads est. (GFD)</div><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--orange)">$60–150/mo</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">At 38K page views, $1.5–4 CPM</div></div>
+              </div>
+            </div>`;
+        }
+
+        function renderSetupInstructions() {
+            return `
+            <div class="section">
+              <h3>🔌 Connect Live Data</h3>
+              <div style="color:var(--text-muted);font-size:13px;margin-bottom:16px">Create a read-only analytics token at <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" style="color:var(--accent)">dash.cloudflare.com/profile/api-tokens</a> with these permissions:</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+                <div style="background:var(--surface2);padding:12px;border-radius:6px;font-size:12px"><strong>Zone: Zone Analytics</strong> → Read (All zones)</div>
+                <div style="background:var(--surface2);padding:12px;border-radius:6px;font-size:12px"><strong>Account: Account Analytics</strong> → Read</div>
+              </div>
+              <div style="background:var(--surface2);border-radius:6px;padding:16px;font-family:var(--mono);font-size:12px;line-height:1.8;color:var(--text)">
+                <span style="color:var(--text-muted)"># Add to Z:\\GFD\\.env:</span><br>
+                CLOUDFLARE_API_TOKEN=your_token_here<br><br>
+                <span style="color:var(--text-muted)"># Then run:</span><br>
+                npm run analytics
+              </div>
+            </div>`;
+        }
+
+        const DAYS_BACK = 30;
+        loadAndRender();
+    </script>
+</body>
+
+</html>

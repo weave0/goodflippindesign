@@ -67,6 +67,8 @@
     "clean": "pwsh -File scripts/clean-node-modules-corruption.ps1 -WhatIf",
     "r2:import": "node scripts/r2-bulk-import.js",
     "r2:import:dry": "node scripts/r2-bulk-import.js --dry-run",
+    "analytics": "node scripts/cf-analytics.js",
+    "analytics:open": "node scripts/cf-analytics.js && start analytics/dashboard.html",
     "test:workers": "vitest run --config vitest.workers.config.mjs",
     "test:workers:payments": "vitest run --config vitest.stripe-payments.config.mjs",
     "test:all": "npm test && npm run test:workers && npm run test:workers:payments"

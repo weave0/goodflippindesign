@@ -5,6 +5,9 @@ node_modules/
 .dev.vars
 .DS_Store
 
+# Analytics snapshots (live traffic data — local only, re-generate with npm run analytics)
+analytics/snapshot.json
+
 # Backup files
 *.bak
 *.backup
