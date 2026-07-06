@@ -1,0 +1,10 @@
+name = "culturesherpa-redirect"
+main = "workers/culturesherpa-redirect.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+account_id = "3253d907ea85a18eb442283d7308b193"
+
+routes = [
+    { pattern = "culturesherpa.com/*", zone_name = "culturesherpa.com" },
+    { pattern = "www.culturesherpa.com/*", zone_name = "culturesherpa.com" },
+]
