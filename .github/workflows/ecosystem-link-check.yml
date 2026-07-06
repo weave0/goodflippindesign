@@ -52,14 +52,13 @@ jobs:
                       echo "::endgroup::"
                       continue
                     fi
-                    body=$(cat "$page")
-                    if echo "$body" | grep -q 'application/ld+json'; then
+                    if grep -q 'application/ld+json' "$page"; then
                       echo "JSON-LD block present"
                     else
                       echo "::error::$page — no JSON-LD block"
                       fail=1
                     fi
-                    if echo "$body" | grep -q "$studio_id"; then
+                    if grep -qF "$studio_id" "$page"; then
                       echo "studio @id referenced"
                     else
                       echo "::warning::$page — does NOT reference $studio_id"
