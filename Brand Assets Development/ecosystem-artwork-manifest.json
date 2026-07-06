@@ -1,0 +1,253 @@
+{
+    "_meta": {
+        "purpose": "Source of truth for generating one master ecosystem artwork that represents the full Good Flippin Design universe.",
+        "updated": "2026-05-15",
+        "source": [
+            "goodflippindesign.com",
+            "wrangler pages project list",
+            "brands.json",
+            "admin-panels.js",
+            "assets/data/gfv-music-catalog.json",
+            "local-sweep.json"
+        ],
+        "notes": [
+            "This file is intentionally symbolic rather than exhaustive.",
+            "Use motif and mood fields to encode each project into a single artwork without creating a logo collage.",
+            "Externally verified public properties outrank local-only directories when deciding what belongs in the visible canon.",
+            "Unresolved slots such as AETC should remain optional edge references rather than primary visual load unless explicitly promoted."
+        ]
+    },
+    "composition": {
+        "recommendedModel": "constellation-city",
+        "alternateModels": [
+            "mythic-systems-atlas",
+            "living-cathedral-of-work"
+        ],
+        "primaryAspectRatio": "16:9",
+        "secondaryCrops": [
+            "1:1",
+            "4:5"
+        ]
+    },
+    "palette": {
+        "base": [
+            "#0a0e1a",
+            "#0d0d0d",
+            "#f5f5f5"
+        ],
+        "accents": {
+            "gfd": "#22d3ee",
+            "gfdSecondary": "#a855f7",
+            "gfdWarm": "#fbbf24",
+            "gfv": "#fbbf24",
+            "aiaimate": "#22d3ee",
+            "culturesherpa": "#10b981",
+            "citizenapproved": "#3b82f6",
+            "globaldeets": "#8b5cf6",
+            "foxyana": "#c2410c",
+            "minnesotapeace": "#38bdf8",
+            "heavymoose": "#ef4444",
+            "lowertownstpaul": "#f97316",
+            "redleopard": "#dc2626"
+        }
+    },
+    "entities": [
+        {
+            "id": "gfd",
+            "name": "Good Flippin Design",
+            "tier": "core",
+            "weight": "anchor",
+            "role": "studio / maker layer",
+            "motif": "central luminous architecture, code-forged engine, elegant structural grid",
+            "mood": "precise, premium, intelligent, welcoming",
+            "color": "#22d3ee"
+        },
+        {
+            "id": "gfv",
+            "name": "Good Flippin Vibes",
+            "tier": "core",
+            "weight": "major",
+            "role": "origin brand / warmth layer",
+            "motif": "amber communal glow, art-forward spaces, human warmth, gallery energy",
+            "mood": "warm, open, creative, restorative",
+            "color": "#fbbf24"
+        },
+        {
+            "id": "aiaimate",
+            "name": "AI Aimate",
+            "tier": "core",
+            "weight": "major",
+            "role": "AI learning product",
+            "motif": "semantic pathways, observatories, learning lattice, intelligent signal geometry",
+            "mood": "curious, future-literate, lucid",
+            "color": "#22d3ee"
+        },
+        {
+            "id": "culturesherpa",
+            "name": "CultureSherpa",
+            "tier": "core",
+            "weight": "major",
+            "role": "cultural atlas / world exploration",
+            "motif": "map contours, routes, textile logic, heritage artifacts, human silhouettes",
+            "mood": "global, alive, respectful, exploratory",
+            "color": "#10b981"
+        },
+        {
+            "id": "citizenapproved",
+            "name": "CitizenApproved",
+            "tier": "core",
+            "weight": "major",
+            "role": "civic technology",
+            "motif": "transparent chambers, civic pillars, public ledgers, trust beacons",
+            "mood": "clear, accountable, democratic, useful",
+            "color": "#3b82f6"
+        },
+        {
+            "id": "globaldeets",
+            "name": "GlobalDeets",
+            "tier": "core",
+            "weight": "major",
+            "role": "portfolio and analytics ecosystem",
+            "motif": "data skyline, dashboard architecture, chart-like bridges, client portals",
+            "mood": "strategic, analytical, enterprise-grade",
+            "color": "#8b5cf6"
+        },
+        {
+            "id": "foxyana",
+            "name": "DJ Foxyana",
+            "tier": "core",
+            "weight": "major",
+            "role": "mythic music canon",
+            "motif": "ember-red wind, folklore geometry, elegant fox spirit, Ukrainian memory encoded as sound",
+            "mood": "mythic, emotional, rhythmic, culturally rooted",
+            "color": "#c2410c"
+        },
+        {
+            "id": "minnesotapeace",
+            "name": "Minnesota Peace",
+            "tier": "supporting",
+            "weight": "supporting",
+            "role": "mediation / calm resolution",
+            "motif": "still chambers, balanced water, listening spaces, restorative symmetry",
+            "mood": "calm, trustworthy, healing",
+            "color": "#38bdf8"
+        },
+        {
+            "id": "brettleeweaver",
+            "name": "Brett Lee Weaver",
+            "tier": "supporting",
+            "weight": "supporting",
+            "role": "founder authorship",
+            "motif": "unseen connective thread, authorial viewpoint, guiding intelligence",
+            "mood": "integrative, intentional, visionary",
+            "color": "#c084fc"
+        },
+        {
+            "id": "heavymoose",
+            "name": "Heavy Moose",
+            "tier": "supporting",
+            "weight": "supporting",
+            "role": "music-world public surface",
+            "motif": "percussive mass, stage heat, red signal thunder, live-performance architecture",
+            "mood": "loud, kinetic, grounded, public-facing",
+            "color": "#ef4444"
+        },
+        {
+            "id": "redleopard",
+            "name": "Red Leopard of St. Paul",
+            "tier": "supporting",
+            "weight": "supporting",
+            "role": "creative/music public surface",
+            "motif": "predatory elegance, red motion trails, nocturnal creative pulse",
+            "mood": "feral, stylish, urban, rhythmic",
+            "color": "#dc2626"
+        },
+        {
+            "id": "lowertownstpaul",
+            "name": "Lowertown St Paul",
+            "tier": "supporting",
+            "weight": "supporting",
+            "role": "place-based civic/cultural district",
+            "motif": "warehouse brick glow, neighborhood corridors, orange streetlight geometry, local civic gravity",
+            "mood": "local, grounded, communal, historic",
+            "color": "#f97316"
+        },
+        {
+            "id": "summitview",
+            "name": "SummitView",
+            "tier": "infrastructure",
+            "weight": "background",
+            "role": "preview pipeline / analytics backbone",
+            "motif": "hidden signal conduits, throughput channels, asset-processing halls",
+            "mood": "quietly powerful, infrastructural",
+            "color": "#1abc9c"
+        },
+        {
+            "id": "weave",
+            "name": "Weave",
+            "tier": "infrastructure",
+            "weight": "background",
+            "role": "shared tooling fabric",
+            "motif": "woven structural mesh, dev scaffolding, connective framework",
+            "mood": "modular, connective, stable",
+            "color": "#94a3b8"
+        },
+        {
+            "id": "thyown",
+            "name": "ThyOwn",
+            "tier": "infrastructure",
+            "weight": "background",
+            "role": "AI research",
+            "motif": "agent chambers, training spirals, experimental signal gardens",
+            "mood": "speculative, emergent, intelligent",
+            "color": "#64748b"
+        },
+        {
+            "id": "cashmoney",
+            "name": "CASHMONEY",
+            "tier": "infrastructure",
+            "weight": "background",
+            "role": "finance and operational rigor",
+            "motif": "vault geometry, ledgers, disciplined understructure, compliance rails",
+            "mood": "rigorous, exact, invisible backbone",
+            "color": "#16a34a"
+        },
+        {
+            "id": "aetc",
+            "name": "AETC",
+            "tier": "extension",
+            "weight": "edge",
+            "role": "unverified extension slot",
+            "motif": "unopened gate held in reserve at the horizon",
+            "mood": "undefined, withheld, optional",
+            "color": "#f59e0b"
+        },
+        {
+            "id": "goodflippinyikes",
+            "name": "Good Flippin Yikes",
+            "tier": "extension",
+            "weight": "edge",
+            "role": "verified public edge property",
+            "motif": "unstable comic flare, warning marquee at the boundary, playful disruption",
+            "mood": "chaotic, satirical, peripheral",
+            "color": "#fb7185"
+        }
+    ],
+    "generationRules": {
+        "mustDo": [
+            "Keep one governing composition",
+            "Represent brands as motifs, environments, or energy signatures",
+            "Make the image beautiful from far away and meaningful on zoom",
+            "Keep Good Flippin Design central without flattening the rest",
+            "Prioritize externally verified public properties over local-only projects in the visible composition",
+            "Reserve visual room for future projects"
+        ],
+        "mustAvoid": [
+            "logo collage",
+            "floating screenshots",
+            "readable text",
+            "generic cyberpunk HUD clutter",
+            "unrelated mini-scenes with no compositional unity"
+        ]
+    }
+}
