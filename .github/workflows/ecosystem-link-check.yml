@@ -45,7 +45,10 @@ jobs:
                   fail=0
                   for u in "${urls[@]}"; do
                     echo "::group::$u"
-                    body=$(curl -fsSL --max-time 20 "$u" || echo "__CURL_FAIL__")
+                    body=$(curl -fsSL --max-time 20 \
+                      -H "User-Agent: Mozilla/5.0 (compatible; GFD-EcosystemCheck/1.0; +https://github.com/weave0/goodflippindesign)" \
+                      -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" \
+                      "$u" || echo "__CURL_FAIL__")
                     if [ "$body" = "__CURL_FAIL__" ]; then
                       echo "::error::$u — HTTP fetch failed"
                       fail=1
@@ -83,7 +86,9 @@ jobs:
                   )
                   fail=0
                   for t in "${targets[@]}"; do
-                    code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 -L "$t" || echo "000")
+                    code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
+                      -H "User-Agent: Mozilla/5.0 (compatible; GFD-EcosystemCheck/1.0; +https://github.com/weave0/goodflippindesign)" \
+                      -L "$t" || echo "000")
                     if [[ "$code" =~ ^(200|301|302|307|308)$ ]]; then
                       echo "OK  $code  $t"
                     else
