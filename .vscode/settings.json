@@ -262,5 +262,8 @@
   "files.insertFinalNewline": true,
   "files.autoSave": "afterDelay",
   "files.autoSaveDelay": 1000,
-  "python-envs.defaultEnvManager": "ms-python.python:system"
+  "python-envs.defaultEnvManager": "ms-python.python:system",
+  "python.defaultInterpreterPath": "z:\\GFD\\.venv\\Scripts\\python.exe",
+  "ruff.interpreter": ["z:\\GFD\\.venv\\Scripts\\python.exe"],
+  "ruff.path": ["z:\\GFD\\.venv\\Scripts\\ruff.exe"]
 }
