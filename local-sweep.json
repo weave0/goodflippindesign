@@ -1,53 +1,64 @@
 {
   "meta": {
-    "timestamp": "2026-05-07T15:30:05.383Z",
+    "timestamp": "2026-07-06T20:00:06.421Z",
     "version": "1.1",
     "machine": "WeaverASUS",
-    "duration_ms": 3115
+    "duration_ms": 4907
   },
   "drives": [
     {
       "label": "C:",
       "name": "OS",
-      "used_gb": 854.3,
-      "free_gb": 70.3,
+      "used_gb": 562.8,
+      "free_gb": 361.8,
       "total_gb": 924.6,
-      "pct_used": 92.4,
-      "baseline_used_gb": 607.79,
-      "delta_gb": 246.5,
-      "alert": "error"
+      "pct_used": 60.9,
+      "baseline_used_gb": null,
+      "delta_gb": null,
+      "alert": "ok"
+    },
+    {
+      "label": "D:",
+      "name": "D",
+      "used_gb": 747.3,
+      "free_gb": 2978.7,
+      "total_gb": 3726,
+      "pct_used": 20.1,
+      "baseline_used_gb": null,
+      "delta_gb": null,
+      "alert": "ok"
     },
     {
       "label": "E:",
       "name": "WEAVER 4TW",
-      "used_gb": 2126.9,
-      "free_gb": 1599,
-      "total_gb": 3725.9,
-      "pct_used": 57.1,
-      "baseline_used_gb": 2017.6,
-      "delta_gb": 109.3,
+      "used_gb": 2333.3,
+      "free_gb": 1392.7,
+      "total_gb": 3726,
+      "pct_used": 62.6,
+      "baseline_used_gb": null,
+      "delta_gb": null,
       "alert": "ok"
     },
     {
       "label": "S:",
       "name": "CultureSherpa",
-      "used_gb": 21.1,
-      "free_gb": 42.9,
+      "used_gb": 24.9,
+      "free_gb": 39.1,
       "total_gb": 64,
-      "pct_used": 33,
-      "baseline_used_gb": 18.99,
-      "delta_gb": 2.1,
+      "pct_used": 38.9,
+      "baseline_used_gb": null,
+      "delta_gb": null,
       "alert": "ok"
     },
     {
       "label": "Z:",
       "name": "WeaveO",
-      "used_gb": 470.3,
-      "free_gb": 32297.6,
-      "total_gb": 32767.9,
-      "pct_used": 1.4,
-      "baseline_used_gb": 309.61,
-      "delta_gb": 160.7,
+      "used_gb": 387.3,
+      "free_gb": 32380.7,
+      "total_gb": 32768,
+      "pct_used": 1.2,
+      "baseline_used_gb": null,
+      "delta_gb": null,
       "alert": "ok"
     }
   ],
@@ -56,7 +67,7 @@
     "npm": "11.12.1",
     "wrangler": null,
     "git": "2.50.1.windows.1",
-    "code": "1.119.0",
+    "code": "1.127.0",
     "os": "Windows_NT 10.0.26200"
   },
   "repos": [
@@ -67,12 +78,12 @@
       "url": "https://goodflippindesign.com",
       "git": {
         "branch": "main",
-        "last_commit_hash": "a4cada5",
-        "last_commit_message": "chore: npm audit fix (0 vulns), fix schedule-sweep.ps1 battery params",
-        "last_commit_date": "2026-05-06",
+        "last_commit_hash": "cbb4d66",
+        "last_commit_message": "fix(security): npm audit fix — patch js-yaml moderate DoS + vite high CVEs",
+        "last_commit_date": "2026-07-06",
         "status": "dirty",
-        "modified": 9,
-        "untracked": 30,
+        "modified": 184,
+        "untracked": 17,
         "ahead": 0,
         "behind": 0
       },
@@ -86,12 +97,12 @@
       "url": "https://aiaimate.com",
       "git": {
         "branch": "main",
-        "last_commit_hash": "26263ea",
-        "last_commit_message": "fix(lint): add global ignores to eslint flat config for ESLint 10 compat",
-        "last_commit_date": "2026-05-02",
+        "last_commit_hash": "8064f9c",
+        "last_commit_message": "feat: add ads.txt for Google AdSense ownership verification",
+        "last_commit_date": "2026-06-03",
         "status": "dirty",
-        "modified": 19,
-        "untracked": 13,
+        "modified": 0,
+        "untracked": 110,
         "ahead": 0,
         "behind": 0
       },
@@ -112,8 +123,17 @@
         "modified": 0,
         "untracked": 0,
         "ahead": 0,
-        "behind": 0
+        "behind": 35
       },
+      "has_package": false,
+      "has_wrangler": false
+    },
+    {
+      "name": "brettleeweaver",
+      "path": "Z:\\GFD\\GFD Dev Projects\\BrettLeeWeaver",
+      "brand": null,
+      "url": null,
+      "git": null,
       "has_package": false,
       "has_wrangler": false
     },
@@ -124,11 +144,11 @@
       "url": "https://citizenapproved.org",
       "git": {
         "branch": "main",
-        "last_commit_hash": "9212140",
-        "last_commit_message": "chore: sync local modifications — README, EcosystemNav, ci.yml",
-        "last_commit_date": "2026-05-06",
+        "last_commit_hash": "eabdef4",
+        "last_commit_message": "feat: add ads.txt for Google AdSense ownership verification",
+        "last_commit_date": "2026-06-03",
         "status": "dirty",
-        "modified": 3,
+        "modified": 34,
         "untracked": 0,
         "ahead": 0,
         "behind": 0
@@ -146,8 +166,8 @@
         "last_commit_hash": "34daf2858",
         "last_commit_message": "chore: remove tracked lambda package artifacts — lambda_admin_full/package now in .gitignore",
         "last_commit_date": "2026-05-06",
-        "status": "dirty",
-        "modified": 1,
+        "status": "clean",
+        "modified": 0,
         "untracked": 0,
         "ahead": 0,
         "behind": 0
@@ -162,12 +182,12 @@
       "url": null,
       "git": {
         "branch": "main",
-        "last_commit_hash": "c5e56e9",
-        "last_commit_message": "Update Fox and Cat video to new official release",
-        "last_commit_date": "2026-05-06",
+        "last_commit_hash": "262320d",
+        "last_commit_message": "Replace ambient player with floating social/music icon bar",
+        "last_commit_date": "2026-05-12",
         "status": "dirty",
-        "modified": 6,
-        "untracked": 2,
+        "modified": 117,
+        "untracked": 3,
         "ahead": 0,
         "behind": 0
       },
@@ -194,8 +214,8 @@
         "last_commit_message": "docs: mark Launch the Project complete, add deployment details",
         "last_commit_date": "2026-04-17",
         "status": "dirty",
-        "modified": 4,
-        "untracked": 0,
+        "modified": 8,
+        "untracked": 7,
         "ahead": 0,
         "behind": 0
       },
@@ -208,13 +228,13 @@
       "brand": "globaldeets",
       "url": "https://globaldeets.com",
       "git": {
-        "branch": "HEAD",
-        "last_commit_hash": "c3fac68",
-        "last_commit_message": "feat: onerror monitoring, updated CSP, and CI workflow",
-        "last_commit_date": "2026-03-13",
+        "branch": "main",
+        "last_commit_hash": "80905fc",
+        "last_commit_message": "fix: exclude ads.txt from CF Pages Functions routing to fix content-type",
+        "last_commit_date": "2026-06-03",
         "status": "dirty",
-        "modified": 26,
-        "untracked": 0,
+        "modified": 46,
+        "untracked": 15,
         "ahead": 0,
         "behind": 0
       },
@@ -240,9 +260,9 @@
         "last_commit_hash": "e5c77aa",
         "last_commit_message": "fix: replace banner image with typographic hero headline",
         "last_commit_date": "2026-03-18",
-        "status": "dirty",
-        "modified": 2,
-        "untracked": 7,
+        "status": "clean",
+        "modified": 0,
+        "untracked": 0,
         "ahead": 0,
         "behind": 0
       },
@@ -268,9 +288,9 @@
         "last_commit_hash": "730930d",
         "last_commit_message": "updata readme",
         "last_commit_date": "2023-10-03",
-        "status": "dirty",
+        "status": "clean",
         "modified": 0,
-        "untracked": 2,
+        "untracked": 0,
         "ahead": 0,
         "behind": 0
       },
@@ -284,12 +304,12 @@
       "url": null,
       "git": {
         "branch": "main",
-        "last_commit_hash": "872cd19",
-        "last_commit_message": "chore: analytics data sync - metrics, provenance, fairness queue, config updates",
-        "last_commit_date": "2026-05-07",
-        "status": "clean",
-        "modified": 0,
-        "untracked": 0,
+        "last_commit_hash": "8592f41",
+        "last_commit_message": "style: black formatting - auto-format 35 files",
+        "last_commit_date": "2026-05-12",
+        "status": "dirty",
+        "modified": 36,
+        "untracked": 220,
         "ahead": 1,
         "behind": 0
       },
@@ -307,8 +327,8 @@
         "last_commit_message": "feat: CustomTrainer + transformer tests (31 tests, 442 total)",
         "last_commit_date": "2026-02-23",
         "status": "dirty",
-        "modified": 53,
-        "untracked": 221,
+        "modified": 57,
+        "untracked": 226,
         "ahead": 0,
         "behind": 0
       },
@@ -326,8 +346,8 @@
         "last_commit_message": "brettleeweaver.com: hybrid artist/pro homepage + Cloudflare worker",
         "last_commit_date": "2026-04-30",
         "status": "dirty",
-        "modified": 54,
-        "untracked": 97,
+        "modified": 59,
+        "untracked": 99,
         "ahead": 0,
         "behind": 0
       },
@@ -343,64 +363,34 @@
   },
   "alerts": [
     {
-      "level": "error",
-      "category": "storage",
-      "message": "C: is 92.4% full — only 70.3 GB remaining"
-    },
-    {
       "level": "info",
-      "category": "storage",
-      "message": "C: grew +246.5 GB since baseline (607.79 → 854.3 GB)"
-    },
-    {
-      "level": "info",
-      "category": "storage",
-      "message": "E: grew +109.3 GB since baseline (2017.6 → 2126.9 GB)"
-    },
-    {
-      "level": "info",
-      "category": "storage",
-      "message": "Z: grew +160.7 GB since baseline (309.61 → 470.3 GB)"
+      "category": "git",
+      "message": "goodflippindesign: 184 modified files"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "goodflippindesign: 9 modified files"
+      "message": "applio: 35 commits behind upstream"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "ai: 19 modified files"
+      "message": "citizenapproved: 34 modified files"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "citizenapproved: 3 modified files"
+      "message": "foxyana: 117 modified files"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "culturesherpa: 1 modified file"
+      "message": "gfy: 8 modified files"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "foxyana: 6 modified files"
-    },
-    {
-      "level": "info",
-      "category": "git",
-      "message": "gfy: 4 modified files"
-    },
-    {
-      "level": "info",
-      "category": "git",
-      "message": "globaldeets: 26 modified files"
-    },
-    {
-      "level": "info",
-      "category": "git",
-      "message": "minnesotapeace: 2 modified files"
+      "message": "globaldeets: 46 modified files"
     },
     {
       "level": "warn",
@@ -410,12 +400,17 @@
     {
       "level": "info",
       "category": "git",
-      "message": "thyown: 53 modified files"
+      "message": "summitview: 36 modified files"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "weave: 54 modified files"
+      "message": "thyown: 57 modified files"
+    },
+    {
+      "level": "info",
+      "category": "git",
+      "message": "weave: 59 modified files"
     }
   ]
 }
