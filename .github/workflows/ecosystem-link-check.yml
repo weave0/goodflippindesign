@@ -24,49 +24,73 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: Probe each property (HTTP + JSON-LD + studio @id)
+            - name: Validate JSON-LD + studio @id in local HTML files
               shell: bash
               run: |
-                  set -e
-                  urls=(
-                    "https://goodflippindesign.com/"
-                    "https://goodflippindesign.com/donate.html"
-                    "https://goodflippindesign.com/gallery.html"
-                    "https://goodflippindesign.com/music.html"
-                    "https://goodflippindesign.com/music-shariff.html"
-                    "https://goodflippindesign.com/music-djz.html"
-                    "https://goodflippindesign.com/music-aardvarco.html"
-                    "https://goodflippindesign.com/music-heavymoose-dross1.html"
-                    "https://goodflippindesign.com/music-heavymoose-dross2.html"
-                    "https://goodflippindesign.com/terms.html"
-                    "https://goodflippindesign.com/privacy.html"
+                  # Reads checked-out files directly — avoids Cloudflare Bot Fight Mode
+                  # which blocks GitHub Actions (Azure cloud) IPs with 403.
+                  pages=(
+                    "index.html"
+                    "donate.html"
+                    "gallery.html"
+                    "music.html"
+                    "music-shariff.html"
+                    "music-djz.html"
+                    "music-aardvarco.html"
+                    "music-heavymoose-dross1.html"
+                    "music-heavymoose-dross2.html"
+                    "terms.html"
+                    "privacy.html"
                   )
                   studio_id="https://goodflippindesign.com/#studio"
                   fail=0
-                  for u in "${urls[@]}"; do
-                    echo "::group::$u"
-                    body=$(curl -fsSL --max-time 20 \
-                      -H "User-Agent: Mozilla/5.0 (compatible; GFD-EcosystemCheck/1.0; +https://github.com/weave0/goodflippindesign)" \
-                      -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" \
-                      "$u" || echo "__CURL_FAIL__")
-                    if [ "$body" = "__CURL_FAIL__" ]; then
-                      echo "::error::$u — HTTP fetch failed"
+                  for page in "${pages[@]}"; do
+                    echo "::group::$page"
+                    if [ ! -f "$page" ]; then
+                      echo "::error::$page — file not found in repo"
                       fail=1
                       echo "::endgroup::"
                       continue
                     fi
+                    body=$(cat "$page")
                     if echo "$body" | grep -q 'application/ld+json'; then
                       echo "JSON-LD block present"
                     else
-                      echo "::error::$u — no JSON-LD block"
+                      echo "::error::$page — no JSON-LD block"
                       fail=1
                     fi
                     if echo "$body" | grep -q "$studio_id"; then
                       echo "studio @id referenced"
                     else
-                      echo "::warning::$u — does NOT reference $studio_id"
+                      echo "::warning::$page — does NOT reference $studio_id"
                     fi
                     echo "::endgroup::"
+                  done
+                  exit $fail
+
+            - name: Probe main domain HTTP liveness
+              shell: bash
+              run: |
+                  # Cloudflare Bot Fight Mode returns 403 for GitHub Actions IPs.
+                  # Treat 403 as "site is live but CF is blocking the CI bot" (warning).
+                  # Only fail on real errors: 4xx (except 403), 5xx, or timeout.
+                  fail=0
+                  urls=(
+                    "https://goodflippindesign.com/"
+                    "https://goodflippindesign.com/music.html"
+                    "https://goodflippindesign.com/terms.html"
+                    "https://goodflippindesign.com/privacy.html"
+                  )
+                  for u in "${urls[@]}"; do
+                    code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 -L "$u" || echo "000")
+                    if [[ "$code" =~ ^(200|301|302|307|308)$ ]]; then
+                      echo "OK  $code  $u"
+                    elif [[ "$code" == "403" ]]; then
+                      echo "::warning::$u returned 403 (Cloudflare Bot Fight Mode — site is deployed, CI IPs are blocked)"
+                    else
+                      echo "::error::$u returned $code — possible outage"
+                      fail=1
+                    fi
                   done
                   exit $fail
 
@@ -86,9 +110,7 @@ jobs:
                   )
                   fail=0
                   for t in "${targets[@]}"; do
-                    code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 \
-                      -H "User-Agent: Mozilla/5.0 (compatible; GFD-EcosystemCheck/1.0; +https://github.com/weave0/goodflippindesign)" \
-                      -L "$t" || echo "000")
+                    code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 -L "$t" || echo "000")
                     if [[ "$code" =~ ^(200|301|302|307|308)$ ]]; then
                       echo "OK  $code  $t"
                     else
