@@ -1,18 +1,18 @@
 {
   "meta": {
-    "timestamp": "2026-07-06T20:00:06.421Z",
+    "timestamp": "2026-08-04T19:00:05.274Z",
     "version": "1.1",
     "machine": "WeaverASUS",
-    "duration_ms": 4907
+    "duration_ms": 3847
   },
   "drives": [
     {
       "label": "C:",
       "name": "OS",
-      "used_gb": 562.8,
-      "free_gb": 361.8,
+      "used_gb": 579.8,
+      "free_gb": 344.8,
       "total_gb": 924.6,
-      "pct_used": 60.9,
+      "pct_used": 62.7,
       "baseline_used_gb": null,
       "delta_gb": null,
       "alert": "ok"
@@ -20,10 +20,10 @@
     {
       "label": "D:",
       "name": "D",
-      "used_gb": 747.3,
-      "free_gb": 2978.7,
-      "total_gb": 3726,
-      "pct_used": 20.1,
+      "used_gb": 756.6,
+      "free_gb": 2969.3,
+      "total_gb": 3725.9,
+      "pct_used": 20.3,
       "baseline_used_gb": null,
       "delta_gb": null,
       "alert": "ok"
@@ -31,10 +31,10 @@
     {
       "label": "E:",
       "name": "WEAVER 4TW",
-      "used_gb": 2333.3,
-      "free_gb": 1392.7,
-      "total_gb": 3726,
-      "pct_used": 62.6,
+      "used_gb": 2360.2,
+      "free_gb": 1365.7,
+      "total_gb": 3725.9,
+      "pct_used": 63.3,
       "baseline_used_gb": null,
       "delta_gb": null,
       "alert": "ok"
@@ -42,10 +42,10 @@
     {
       "label": "S:",
       "name": "CultureSherpa",
-      "used_gb": 24.9,
-      "free_gb": 39.1,
+      "used_gb": 28.7,
+      "free_gb": 35.3,
       "total_gb": 64,
-      "pct_used": 38.9,
+      "pct_used": 44.8,
       "baseline_used_gb": null,
       "delta_gb": null,
       "alert": "ok"
@@ -53,9 +53,9 @@
     {
       "label": "Z:",
       "name": "WeaveO",
-      "used_gb": 387.3,
-      "free_gb": 32380.7,
-      "total_gb": 32768,
+      "used_gb": 387.6,
+      "free_gb": 32380.3,
+      "total_gb": 32767.9,
       "pct_used": 1.2,
       "baseline_used_gb": null,
       "delta_gb": null,
@@ -67,7 +67,7 @@
     "npm": "11.12.1",
     "wrangler": null,
     "git": "2.50.1.windows.1",
-    "code": "1.127.0",
+    "code": "1.131.0",
     "os": "Windows_NT 10.0.26200"
   },
   "repos": [
@@ -78,12 +78,12 @@
       "url": "https://goodflippindesign.com",
       "git": {
         "branch": "main",
-        "last_commit_hash": "cbb4d66",
-        "last_commit_message": "fix(security): npm audit fix — patch js-yaml moderate DoS + vite high CVEs",
+        "last_commit_hash": "43dbb74",
+        "last_commit_message": "chore: remove migrated brettleeweaver scratch files",
         "last_commit_date": "2026-07-06",
         "status": "dirty",
-        "modified": 184,
-        "untracked": 17,
+        "modified": 6,
+        "untracked": 1,
         "ahead": 0,
         "behind": 0
       },
@@ -106,6 +106,15 @@
         "ahead": 0,
         "behind": 0
       },
+      "has_package": true,
+      "has_wrangler": false
+    },
+    {
+      "name": "air",
+      "path": "Z:\\GFD\\GFD Dev Projects\\air",
+      "brand": null,
+      "url": null,
+      "git": null,
       "has_package": true,
       "has_wrangler": false
     },
@@ -143,12 +152,31 @@
       "brand": "citizenapproved",
       "url": "https://citizenapproved.org",
       "git": {
+        "branch": "feat/learn-ai-nav-cta",
+        "last_commit_hash": "03d3837",
+        "last_commit_message": "feat(nav): add Learn AI CTA linking to aiaimate.com",
+        "last_commit_date": "2026-08-04",
+        "status": "dirty",
+        "modified": 1,
+        "untracked": 0,
+        "ahead": 0,
+        "behind": 0
+      },
+      "has_package": true,
+      "has_wrangler": true
+    },
+    {
+      "name": "citizenapproved-corrupted-quarantine",
+      "path": "Z:\\GFD\\GFD Dev Projects\\CitizenApproved-corrupted-quarantine",
+      "brand": null,
+      "url": null,
+      "git": {
         "branch": "main",
         "last_commit_hash": "eabdef4",
         "last_commit_message": "feat: add ads.txt for Google AdSense ownership verification",
         "last_commit_date": "2026-06-03",
-        "status": "dirty",
-        "modified": 34,
+        "status": "clean",
+        "modified": 0,
         "untracked": 0,
         "ahead": 0,
         "behind": 0
@@ -186,8 +214,8 @@
         "last_commit_message": "Replace ambient player with floating social/music icon bar",
         "last_commit_date": "2026-05-12",
         "status": "dirty",
-        "modified": 117,
-        "untracked": 3,
+        "modified": 103,
+        "untracked": 62,
         "ahead": 0,
         "behind": 0
       },
@@ -240,6 +268,15 @@
       },
       "has_package": true,
       "has_wrangler": true
+    },
+    {
+      "name": "heavymooselive",
+      "path": "Z:\\GFD\\GFD Dev Projects\\HeavyMooseLive",
+      "brand": null,
+      "url": null,
+      "git": null,
+      "has_package": false,
+      "has_wrangler": false
     },
     {
       "name": "mediation",
@@ -308,8 +345,8 @@
         "last_commit_message": "style: black formatting - auto-format 35 files",
         "last_commit_date": "2026-05-12",
         "status": "dirty",
-        "modified": 36,
-        "untracked": 220,
+        "modified": 38,
+        "untracked": 265,
         "ahead": 1,
         "behind": 0
       },
@@ -328,7 +365,7 @@
         "last_commit_date": "2026-02-23",
         "status": "dirty",
         "modified": 57,
-        "untracked": 226,
+        "untracked": 239,
         "ahead": 0,
         "behind": 0
       },
@@ -365,7 +402,7 @@
     {
       "level": "info",
       "category": "git",
-      "message": "goodflippindesign: 184 modified files"
+      "message": "goodflippindesign: 6 modified files"
     },
     {
       "level": "info",
@@ -375,12 +412,12 @@
     {
       "level": "info",
       "category": "git",
-      "message": "citizenapproved: 34 modified files"
+      "message": "citizenapproved: 1 modified file"
     },
     {
       "level": "info",
       "category": "git",
-      "message": "foxyana: 117 modified files"
+      "message": "foxyana: 103 modified files"
     },
     {
       "level": "info",
@@ -400,7 +437,7 @@
     {
       "level": "info",
       "category": "git",
-      "message": "summitview: 36 modified files"
+      "message": "summitview: 38 modified files"
     },
     {
       "level": "info",
