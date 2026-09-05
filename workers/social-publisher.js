@@ -83,7 +83,14 @@ const PLATFORM_SPECS = {
   },
 };
 
-const TERMINAL_VARIANT_STATUSES = new Set(['published', 'failed']);
+// Statuses the scheduler will never revisit on its own. NOTE: this is not
+// the same thing as "resolved with certainty" — 'ambiguous' variants are
+// scheduler-terminal (excluded from the pending query, never auto-reset)
+// but are explicitly NOT settled: they still require operator/reconciliation
+// action before anyone can say whether the publication happened. Do not add
+// 'ambiguous' here; code that wants "this is definitely done" must keep
+// checking for it separately from this set.
+const RESOLVED_VARIANT_STATUSES = new Set(['published', 'failed']);
 
 function isSupportedPlatform(platform) {
   return Object.prototype.hasOwnProperty.call(PLATFORM_SPECS, platform);
@@ -459,6 +466,23 @@ async function refreshLinkedInToken(db, brand, platform, payload, encryptionKey)
   await saveToken(db, brand, platform, payload.account_id, payload.account_label, refreshed, encryptionKey);
   return refreshed;
 }
+
+/**
+ * Preflight token-shape check for LinkedIn, mirroring the exact validation
+ * postLinkedIn() itself performs before its first fetch(). This MUST run
+ * before publishVariant() sets dispatchStarted — otherwise a malformed
+ * token causes postLinkedIn()'s own internal validation error to be treated
+ * as a failure after dispatch, incorrectly marking the variant ambiguous
+ * even though no provider request was ever sent.
+ */
+function validateLinkedInTokenShape(token) {
+  if (!token?.access_token) throw new Error('LinkedIn token missing access_token');
+  if (!token?.person_urn) throw new Error('LinkedIn token missing person_urn');
+}
+
+const PLATFORM_PREFLIGHT_VALIDATORS = {
+  linkedin: validateLinkedInTokenShape,
+};
 
 /**
  * Post to LinkedIn via versioned REST APIs.
@@ -929,6 +953,13 @@ async function publishVariant(variant, db, env) {
     // Format content per platform
     const { text } = formatContent(content, platform);
 
+    // Known preflight/configuration failures (malformed token shape, etc.)
+    // must be classified before the dispatch boundary — they are confirmed
+    // non-commit failures, never ambiguous, regardless of what the
+    // provider-specific post function would also have thrown internally.
+    const preflightValidate = PLATFORM_PREFLIGHT_VALIDATORS[platform];
+    if (preflightValidate) preflightValidate(token);
+
     let result;
     dispatchStarted = true;
     switch (platform) {
@@ -1007,7 +1038,7 @@ async function updateParentPostStatus(db, postId) {
   if (!results || results.length === 0) return;
 
   const statuses = results.map(r => r.status);
-  const allDone = statuses.every(s => TERMINAL_VARIANT_STATUSES.has(s));
+  const allDone = statuses.every(s => RESOLVED_VARIANT_STATUSES.has(s));
   const anyAmbiguous = statuses.some(s => s === 'ambiguous');
   const anyPublished = statuses.some(s => s === 'published');
 

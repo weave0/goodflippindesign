@@ -111,6 +111,36 @@ describe('social publisher ambiguous dispatch semantics', () => {
     expect(variant.error_message).toContain('No active token');
   });
 
+  it('fails a LinkedIn token row with a blank access_token before dispatch and does not become ambiguous', async () => {
+    await addToken('linkedin', { access_token: '' });
+    const { variantId } = await addScheduledVariant('linkedin');
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+
+    await runScheduler(env);
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    const variant = await variantById(variantId);
+    expect(variant.status).toBe('failed');
+    expect(variant.retry_count).toBe(0);
+    expect(variant.error_message).toContain('LinkedIn token missing access_token');
+  });
+
+  it('fails a LinkedIn token row with a blank person_urn before dispatch and does not become ambiguous', async () => {
+    await addToken('linkedin', { person_urn: '' });
+    const { variantId } = await addScheduledVariant('linkedin');
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+
+    await runScheduler(env);
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    const variant = await variantById(variantId);
+    expect(variant.status).toBe('failed');
+    expect(variant.retry_count).toBe(0);
+    expect(variant.error_message).toContain('LinkedIn token missing person_urn');
+  });
+
   it('fails unsupported platforms before dispatch', async () => {
     const { variantId } = await addScheduledVariant('not-a-platform');
     const fetchSpy = vi.fn();
