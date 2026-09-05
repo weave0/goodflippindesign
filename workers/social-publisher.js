@@ -92,13 +92,24 @@ function isSupportedPlatform(platform) {
 // ──────────────────────────────────────────────────────────────
 //  AgentK-governed dispatch bridge (opt-in per platform)
 //
-//  When env.AGENTK_EXECUTOR_URL is configured and a platform is listed in
-//  env.AGENTK_EXECUTOR_PLATFORMS, GFD does not call the provider directly.
-//  Instead it submits the immutable publication intent to the AgentK
-//  executor, which owns effect identity, the dispatch-claim protocol, and
-//  ambiguity/reconciliation. GFD keeps holding the provider credential (see
+//  When a platform is listed in env.AGENTK_EXECUTOR_PLATFORMS, GFD does not
+//  call the provider directly — full stop. Instead it submits the immutable
+//  publication intent to the AgentK executor, which owns effect identity,
+//  the dispatch-claim protocol, and ambiguity/reconciliation. GFD keeps
+//  holding the provider credential (see
 //  docs/social-publishing-agentk-readiness.md — "narrow bridge" authority
 //  model) but the executor is the one deciding whether dispatch may occur.
+//
+//  Two distinct concepts, deliberately not conflated:
+//    - "requested":  the platform appears in AGENTK_EXECUTOR_PLATFORMS.
+//    - "configured": AGENTK_EXECUTOR_URL and AGENTK_EXECUTOR_SECRET are both
+//                     non-blank.
+//  A requested-but-not-configured platform must fail closed as a confirmed
+//  pre-dispatch 'failed' — it must NOT silently fall back to calling the
+//  provider directly (that would defeat the entire point of allowlisting
+//  it), and it must not call the executor with an incomplete/blank secret
+//  either. Direct-provider routing is only ever available to platforms
+//  that were never requested in the first place.
 //
 //  Hard invariant: there is NO fallback from this path to a direct provider
 //  call anywhere below. A network failure talking to the executor is
@@ -107,6 +118,7 @@ function isSupportedPlatform(platform) {
 // ──────────────────────────────────────────────────────────────
 
 class AgentKRetryableRejectionError extends Error {}
+class AgentKConfigurationError extends Error {}
 
 function agentKGovernedPlatforms(env) {
   return new Set(
@@ -117,8 +129,26 @@ function agentKGovernedPlatforms(env) {
   );
 }
 
-function isAgentKGoverned(platform, env) {
-  return Boolean(env.AGENTK_EXECUTOR_URL) && agentKGovernedPlatforms(env).has(platform);
+/** Governance is *requested* for this platform, independent of whether it is configured correctly. */
+function isAgentKRequestedPlatform(platform, env) {
+  return agentKGovernedPlatforms(env).has(platform);
+}
+
+function isBlank(value) {
+  return typeof value !== 'string' || value.trim() === '';
+}
+
+/**
+ * Returns a human-readable configuration error if AgentK governance is
+ * requested for this platform but not fully, validly configured — or null
+ * if configuration is complete. Deliberately checked before getToken() so a
+ * misconfiguration is never masked behind (or discovered only via) a
+ * provider-credential lookup.
+ */
+function agentKConfigError(env) {
+  if (isBlank(env.AGENTK_EXECUTOR_URL)) return 'AgentK executor is not configured: AGENTK_EXECUTOR_URL is missing or blank.';
+  if (isBlank(env.AGENTK_EXECUTOR_SECRET)) return 'AgentK executor is not configured: AGENTK_EXECUTOR_SECRET is missing or blank.';
+  return null;
 }
 
 async function sha256Hex(text) {
@@ -141,6 +171,12 @@ async function computeAgentKScopedKey({ brand, platform, account, variantId, con
 }
 
 async function agentKExecutorRequest(env, path, init) {
+  // Defense in depth: publishVariant() already validates config before
+  // ever reaching this point, but this helper must never itself send a
+  // request with a blank URL/secret if some future caller skips that gate.
+  const configError = agentKConfigError(env);
+  if (configError) throw new AgentKConfigurationError(configError);
+
   const url = `${String(env.AGENTK_EXECUTOR_URL).replace(/\/$/, '')}${path}`;
   const res = await fetch(url, {
     ...init,
@@ -1038,9 +1074,22 @@ async function publishVariant(variant, db, env) {
 
   let dispatchStarted = false;
 
+  const agentKRequested = isAgentKRequestedPlatform(platform, env);
+
   try {
     if (!isSupportedPlatform(platform)) {
       throw new Error(`Unsupported platform: ${platform}`);
+    }
+
+    // AgentK config is validated before getToken() on purpose: a platform
+    // that is allowlisted for AgentK governance must fail closed on bad
+    // configuration without ever touching provider-credential lookup, the
+    // executor, or the provider itself. There is no direct-provider
+    // fallback for a requested-but-misconfigured platform — that would
+    // silently defeat the allowlist.
+    if (agentKRequested) {
+      const configError = agentKConfigError(env);
+      if (configError) throw new AgentKConfigurationError(configError);
     }
 
     // Get token (throws if not configured)
@@ -1057,11 +1106,12 @@ async function publishVariant(variant, db, env) {
     let result;
     dispatchStarted = true;
 
-    if (isAgentKGoverned(platform, env)) {
+    if (agentKRequested) {
       // AgentK owns effect identity and the dispatch-claim/ambiguity state
       // machine for this platform. GFD is a deterministic caller only — see
       // the module header comment above dispatchViaAgentKExecutor for the
-      // no-fallback invariant.
+      // no-fallback invariant. Config was already validated above, before
+      // getToken() — reaching here means it was complete.
       const account = token.person_urn || token.page_id || token.account_id || 'unknown-account';
       result = await dispatchViaAgentKExecutor(
         { brand, platform, account, variantId: id, content: text, mediaUrl },
@@ -1293,8 +1343,10 @@ export {
   publishVariant,
   runScheduler,
   updateParentPostStatus,
-  isAgentKGoverned,
+  isAgentKRequestedPlatform,
+  agentKConfigError,
   computeAgentKScopedKey,
   dispatchViaAgentKExecutor,
   AgentKRetryableRejectionError,
+  AgentKConfigurationError,
 };

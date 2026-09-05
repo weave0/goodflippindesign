@@ -214,4 +214,87 @@ describe('AgentK executor bridge', () => {
     const variant = await variantById(variantId);
     expect(variant.status).not.toBe('ambiguous');
   });
+
+  describe('fail-closed AgentK configuration validation', () => {
+    async function expectNoDispatchAtAll(variantId) {
+      const variant = await variantById(variantId);
+      expect(variant.status).toBe('failed');
+      expect(variant.retry_count).toBe(0);
+      expect(variant.error_message).toContain('AgentK executor is not configured');
+    }
+
+    it('allowlisted LinkedIn + missing secret -> failed, zero executor calls, zero LinkedIn calls', async () => {
+      delete env.AGENTK_EXECUTOR_SECRET;
+      await addToken('linkedin');
+      const { variantId } = await addScheduledVariant('linkedin');
+
+      const allCalls = [];
+      vi.stubGlobal('fetch', fakeFetch([
+        [EXECUTOR_URL, async (url) => { allCalls.push(url); return jsonResponse({}); }],
+        [/api\.linkedin\.com/, async (url) => { allCalls.push(url); return jsonResponse({}); }],
+      ]));
+
+      await runScheduler(env);
+
+      expect(allCalls).toHaveLength(0);
+      await expectNoDispatchAtAll(variantId);
+    });
+
+    it('allowlisted LinkedIn + whitespace-only secret -> failed, zero executor calls, zero LinkedIn calls', async () => {
+      env.AGENTK_EXECUTOR_SECRET = '   ';
+      await addToken('linkedin');
+      const { variantId } = await addScheduledVariant('linkedin');
+
+      const allCalls = [];
+      vi.stubGlobal('fetch', fakeFetch([
+        [EXECUTOR_URL, async (url) => { allCalls.push(url); return jsonResponse({}); }],
+        [/api\.linkedin\.com/, async (url) => { allCalls.push(url); return jsonResponse({}); }],
+      ]));
+
+      await runScheduler(env);
+
+      expect(allCalls).toHaveLength(0);
+      await expectNoDispatchAtAll(variantId);
+    });
+
+    it('allowlisted LinkedIn + missing executor URL -> failed, zero executor calls, zero LinkedIn calls', async () => {
+      delete env.AGENTK_EXECUTOR_URL;
+      await addToken('linkedin');
+      const { variantId } = await addScheduledVariant('linkedin');
+
+      const linkedinDirectCalls = [];
+      vi.stubGlobal('fetch', fakeFetch([
+        [/api\.linkedin\.com/, async (url) => { linkedinDirectCalls.push(url); return jsonResponse({}); }],
+      ]));
+
+      await runScheduler(env);
+
+      expect(linkedinDirectCalls).toHaveLength(0);
+      await expectNoDispatchAtAll(variantId);
+    });
+
+    it('URL/secret present but LinkedIn not allowlisted -> existing direct-provider behavior remains intact', async () => {
+      env.AGENTK_EXECUTOR_PLATFORMS = ''; // nothing allowlisted, despite full AgentK config being present
+      await addToken('linkedin');
+      const { variantId } = await addScheduledVariant('linkedin');
+
+      const executorCalls = [];
+      const linkedinDirectCalls = [];
+      vi.stubGlobal('fetch', fakeFetch([
+        [EXECUTOR_URL, async (url) => { executorCalls.push(url); return jsonResponse({}); }],
+        [/api\.linkedin\.com\/rest\/posts/, async (url, init) => {
+          linkedinDirectCalls.push(url);
+          return new Response('', { status: 201, headers: { 'x-restli-id': 'urn:li:share:direct-1' } });
+        }],
+      ]));
+
+      await runScheduler(env);
+
+      expect(executorCalls).toHaveLength(0);
+      expect(linkedinDirectCalls).toHaveLength(1);
+      const variant = await variantById(variantId);
+      expect(variant.status).toBe('published');
+      expect(variant.external_id).toBe('urn:li:share:direct-1');
+    });
+  });
 });
