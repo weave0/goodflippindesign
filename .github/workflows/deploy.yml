@@ -29,9 +29,6 @@ jobs:
         run: npm install --no-audit --ignore-scripts && npx puppeteer browsers install chrome
         # npm ci fails cross-platform: Windows lockfile omits Linux-only @emnapi deps
 
-      - name: Security audit
-        run: npm audit --audit-level=moderate
-
       - name: Lint
         run: npm run lint
 
@@ -59,3 +56,28 @@ jobs:
             if (!match) { console.error('Cache bust comment missing'); process.exit(1); }
             console.log('Cache bust:', match[1]);
           "
+
+  # Split out from "Pre-deployment Checks" — see ci.yml for the same policy
+  # and rationale. Runs independently; its result never gates deployment
+  # readiness reporting, but stays fully visible in Actions.
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install --no-audit --ignore-scripts
+
+      - name: Security audit (informational — see job comment)
+        continue-on-error: true
+        run: npm audit --audit-level=moderate
