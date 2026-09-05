@@ -1564,7 +1564,13 @@
 
                                 const statusClass = status === 'published' ? 'emerald'
                                     : status === 'scheduled' ? 'gold'
-                                        : status === 'failed' ? 'rose' : '';
+                                        : status === 'failed' ? 'rose'
+                                            : status === 'ambiguous' ? 'gold' : '';
+
+                                const scheduledText = kit.scheduled_at ? formatDateTime(kit.scheduled_at) : 'Not scheduled';
+                                const externalText = kit.external_url || kit.external_id || 'None recorded';
+                                const errorText = kit.error_message || kit.last_error || 'None';
+                                const reconcileText = kit.manual_reconciliation_required ? 'Required' : 'No';
 
                                 const thumbHTML = kit.thumbnail_path
                                     ? `<img class="sk-artwork" src="${escapeHtml(kit.thumbnail_path)}" alt="${escapeHtml(kit.asset_title || 'Post artwork')}" loading="lazy">`
@@ -1582,9 +1588,20 @@
                                     '<div class="sk-card-body">' +
                                     `<p class="sk-caption">${escapeHtml(caption || '\u2014')}</p>` +
                                     (hashtags ? `<p class="sk-hashtags">${escapeHtml(hashtags)}</p>` : '') +
+                                    '<dl class="sk-effect-meta">' +
+                                    `<div><dt>Variant</dt><dd>${escapeHtml(String(kit.id || '\u2014'))}</dd></div>` +
+                                    `<div><dt>Post</dt><dd>${escapeHtml(String(kit.post_id || '\u2014'))}</dd></div>` +
+                                    `<div><dt>Scheduled</dt><dd>${escapeHtml(scheduledText)}</dd></div>` +
+                                    `<div><dt>Effect state</dt><dd>${escapeHtml(status)}</dd></div>` +
+                                    `<div><dt>Retries</dt><dd>${escapeHtml(String(kit.retry_count ?? 0))}</dd></div>` +
+                                    `<div><dt>Reconcile</dt><dd>${escapeHtml(reconcileText)}</dd></div>` +
+                                    `<div class="sk-effect-wide"><dt>External</dt><dd>${kit.external_url ? `<a href="${escapeHtml(kit.external_url)}" target="_blank" rel="noopener">${escapeHtml(externalText)}</a>` : escapeHtml(externalText)}</dd></div>` +
+                                    `<div class="sk-effect-wide"><dt>Last error</dt><dd title="${escapeHtml(errorText)}">${escapeHtml(errorText)}</dd></div>` +
+                                    '</dl>' +
                                     '</div>' +
                                     '<div class="sk-card-footer">' +
                                     `<span class="sf-status-badge ${escapeHtml(status)}">${escapeHtml(status)}</span>` +
+                                    (status === 'ambiguous' ? '<span class="tag warn">Manual reconciliation required</span>' : '') +
                                     `<button class="sk-copy-btn" data-copy="${escapeHtml(copyText)}" title="Copy caption + hashtags to clipboard">Copy Caption</button>` +
                                     `<button class="sk-attach-btn" title="${kit.media_asset_id ? 'Change artwork' : 'Attach artwork'}" aria-label="Attach artwork to this post kit">${kit.media_asset_id ? '&#128247;' : '&#43; Art'}</button>` +
                                     '</div>';
@@ -6030,6 +6047,7 @@
                             const pending = document.getElementById('auto-pending');
                             const published = document.getElementById('auto-published');
                             const failed = document.getElementById('auto-failed');
+                            const ambiguous = document.getElementById('auto-ambiguous');
                             const lastSweep = document.getElementById('auto-last-sweep');
                             const sweepTbody = document.getElementById('auto-sweep-tbody');
                             const retryTbody = document.getElementById('auto-retry-tbody');
@@ -6037,17 +6055,20 @@
                             if (pending) pending.textContent = '…';
                             if (published) published.textContent = '…';
                             if (failed) failed.textContent = '…';
+                            if (ambiguous) ambiguous.textContent = '…';
                             if (lastSweep) lastSweep.textContent = '…';
 
                             try {
                                 const data = await api('/automation-center');
 
                                 // KPI strip — queue snapshot
-                                const qMap = {};
-                                (data.queue || []).forEach(r => { qMap[r.status] = r.count; });
+                                const qMap = Array.isArray(data.queue)
+                                    ? data.queue.reduce((acc, r) => { acc[r.status] = r.count; return acc; }, {})
+                                    : (data.queue || {});
                                 if (pending) pending.textContent = (qMap.pending || qMap.scheduled || 0);
                                 if (published) published.textContent = (qMap.published || 0);
                                 if (failed) failed.textContent = (qMap.failed || 0);
+                                if (ambiguous) ambiguous.textContent = (qMap.ambiguous || 0);
 
                                 // Last sweep timing
                                 if (lastSweep) {
@@ -6081,27 +6102,40 @@
                                 // Failed by brand bar list
                                 renderBarList('auto-failed-brand', data.failed_by_brand || [], 'brand', 'failed_count', 'rose');
 
-                                // Retry candidates table
+                                // Retry and reconciliation candidates table
                                 if (retryTbody) {
-                                    const cands = data.retry_candidates || [];
+                                    const retries = (data.retry_candidates || []).map(c => ({ ...c, effect_state: 'failed' }));
+                                    const ambiguities = (data.ambiguous_variants || []).map(c => ({ ...c, effect_state: 'ambiguous', manual_reconciliation_required: true }));
+                                    const cands = ambiguities.concat(retries);
                                     if (cands.length === 0) {
-                                        retryTbody.innerHTML = '<tr><td colspan="7" class="text-muted">No retry candidates — great!</td></tr>';
+                                        retryTbody.innerHTML = '<tr><td colspan="10" class="text-muted">No failed retry candidates or ambiguous variants.</td></tr>';
                                     } else {
-                                        retryTbody.innerHTML = cands.map(c => `<tr>
-                                            <td style="font-size:0.75rem;font-family:var(--mono)">${c.id ? String(c.id).slice(0, 8) : '—'}</td>
-                                            <td>${c.brand || '—'}</td>
-                                            <td>${c.platform || '—'}</td>
-                                            <td>${c.retry_count ?? 0}</td>
-                                            <td style="font-size:0.75rem">${fmt(c.scheduled_at)}</td>
-                                            <td style="font-size:0.75rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(c.error_message || '').replace(/"/g, '&quot;')}">${c.error_message || '—'}</td>
-                                            <td><button class="btn btn-secondary" style="font-size:0.75rem;padding:0.2rem 0.5rem" data-retry-variant="${c.id}">Retry</button></td>
-                                        </tr>`).join('');
+                                        retryTbody.innerHTML = cands.map(c => {
+                                            const isAmbiguous = c.effect_state === 'ambiguous';
+                                            const lastError = c.error_message || c.last_error || '—';
+                                            const external = c.external_url || c.external_id || 'None recorded';
+                                            const action = isAmbiguous
+                                                ? '<span class="tag warn" title="No ordinary retry is available for ambiguous external effects">Manual reconcile required</span>'
+                                                : `<button class="btn btn-secondary" style="font-size:0.75rem;padding:0.2rem 0.5rem" data-retry-variant="${escapeHtml(String(c.id))}">Retry</button>`;
+                                            return `<tr>
+                                                <td style="font-size:0.75rem;font-family:var(--mono)">${c.id ? escapeHtml(String(c.id).slice(0, 8)) : '—'}</td>
+                                                <td style="font-size:0.75rem;font-family:var(--mono)">${c.post_id ? escapeHtml(String(c.post_id).slice(0, 8)) : '—'}</td>
+                                                <td>${escapeHtml(c.brand || '—')}</td>
+                                                <td><span class="tag ${isAmbiguous ? 'warn' : 'fail'}">${escapeHtml(c.platform || '—')}</span></td>
+                                                <td>${escapeHtml(c.effect_state || c.status || '—')}</td>
+                                                <td>${Number(c.retry_count || 0)}</td>
+                                                <td style="font-size:0.75rem">${escapeHtml(fmt(c.scheduled_at))}</td>
+                                                <td style="font-size:0.75rem;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(lastError)}">${escapeHtml(lastError)}</td>
+                                                <td style="font-size:0.75rem;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.external_url ? `<a href="${escapeHtml(c.external_url)}" target="_blank" rel="noopener">${escapeHtml(external)}</a>` : escapeHtml(external)}</td>
+                                                <td>${action}</td>
+                                            </tr>`;
+                                        }).join('');
                                     }
                                 }
 
                             } catch (err) {
                                 if (sweepTbody) sweepTbody.innerHTML = `<tr><td colspan="6" class="text-muted">Error: ${escapeHtml(err.message)}</td></tr>`;
-                                if (retryTbody) retryTbody.innerHTML = `<tr><td colspan="7" class="text-muted">Error: ${escapeHtml(err.message)}</td></tr>`;
+                                if (retryTbody) retryTbody.innerHTML = `<tr><td colspan="10" class="text-muted">Error: ${escapeHtml(err.message)}</td></tr>`;
                             }
                         }
 
