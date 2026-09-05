@@ -90,6 +90,131 @@ function isSupportedPlatform(platform) {
 }
 
 // ──────────────────────────────────────────────────────────────
+//  AgentK-governed dispatch bridge (opt-in per platform)
+//
+//  When env.AGENTK_EXECUTOR_URL is configured and a platform is listed in
+//  env.AGENTK_EXECUTOR_PLATFORMS, GFD does not call the provider directly.
+//  Instead it submits the immutable publication intent to the AgentK
+//  executor, which owns effect identity, the dispatch-claim protocol, and
+//  ambiguity/reconciliation. GFD keeps holding the provider credential (see
+//  docs/social-publishing-agentk-readiness.md — "narrow bridge" authority
+//  model) but the executor is the one deciding whether dispatch may occur.
+//
+//  Hard invariant: there is NO fallback from this path to a direct provider
+//  call anywhere below. A network failure talking to the executor is
+//  resolved by inspecting the same stable effect identity, never by
+//  minting a new attempt or calling the provider ourselves.
+// ──────────────────────────────────────────────────────────────
+
+class AgentKRetryableRejectionError extends Error {}
+
+function agentKGovernedPlatforms(env) {
+  return new Set(
+    String(env.AGENTK_EXECUTOR_PLATFORMS || '')
+      .split(',')
+      .map(s => s.trim().toLowerCase())
+      .filter(Boolean)
+  );
+}
+
+function isAgentKGoverned(platform, env) {
+  return Boolean(env.AGENTK_EXECUTOR_URL) && agentKGovernedPlatforms(env).has(platform);
+}
+
+async function sha256Hex(text) {
+  const bytes = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Same string shape documented in docs/social-publishing-agentk-readiness.md
+ * and produced by the executor itself (AgentK-social-executor-proof/src/
+ * linkedin-effect.js). GFD computes this independently — never from an
+ * executor response — so it can still inspect the correct effect even when
+ * the response to /submit was lost entirely.
+ */
+async function computeAgentKScopedKey({ brand, platform, account, variantId, content, mediaUrl }) {
+  const contentHash = await sha256Hex(content);
+  const mediaHash = mediaUrl ? await sha256Hex(mediaUrl) : 'no-media';
+  return ['social.publish', brand, platform, account, String(variantId), contentHash, mediaHash].join(':');
+}
+
+async function agentKExecutorRequest(env, path, init) {
+  const url = `${String(env.AGENTK_EXECUTOR_URL).replace(/\/$/, '')}${path}`;
+  const res = await fetch(url, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${env.AGENTK_EXECUTOR_SECRET || ''}`,
+      ...(init && init.headers ? init.headers : {}),
+    },
+  });
+  if (!res.ok) {
+    const bodyText = await res.text().catch(() => '');
+    throw new Error(`AgentK executor ${path} returned HTTP ${res.status}: ${bodyText.substring(0, 300)}`);
+  }
+  return res.json();
+}
+
+function agentKResultToPublishResult(status, body, scopedKey) {
+  if (status === 'completed') {
+    return {
+      external_id: body.result?.externalId || '',
+      external_url: body.result?.externalUrl || '',
+    };
+  }
+  if (status === 'retryable') {
+    throw new AgentKRetryableRejectionError(
+      body.error || `AgentK executor reports effect ${scopedKey} as retryable (confirmed non-commit).`
+    );
+  }
+  // 'ambiguous' and 'in_flight' both mean GFD does not have a safe basis to
+  // treat this as failed-and-retryable or published — both must surface as
+  // ambiguous locally, since only 'retryable' is authoritative proof of
+  // non-commit.
+  throw new Error(
+    `AgentK executor reports effect ${scopedKey} as ${status}; manual reconciliation required.`
+  );
+}
+
+async function safeAgentKCall(fn) {
+  try {
+    return { ok: true, body: await fn() };
+  } catch (error) {
+    return { ok: false, error };
+  }
+}
+
+/**
+ * Submit the publication intent to the AgentK executor and translate its
+ * durable decision into the same { external_id, external_url } shape the
+ * direct postX() functions return, or throw (classified) on non-success.
+ */
+async function dispatchViaAgentKExecutor({ brand, platform, account, variantId, content, mediaUrl }, env) {
+  const scopedKey = await computeAgentKScopedKey({ brand, platform, account, variantId, content, mediaUrl });
+
+  const submitOutcome = await safeAgentKCall(() => agentKExecutorRequest(env, '/submit', {
+    method: 'POST',
+    body: JSON.stringify({ brand, platform, account, variantId: String(variantId), content, mediaUrl: mediaUrl || null }),
+  }));
+  if (submitOutcome.ok) {
+    return agentKResultToPublishResult(submitOutcome.body.status, submitOutcome.body, scopedKey);
+  }
+
+  // GFD lost the executor's response (timeout, connection reset, non-2xx).
+  // The one and only allowed remedy is to inspect the same stable identity —
+  // never resubmit blindly and never call the provider directly.
+  const inspectOutcome = await safeAgentKCall(() => agentKExecutorRequest(env, `/inspect/${encodeURIComponent(scopedKey)}`, { method: 'GET' }));
+  if (!inspectOutcome.ok) {
+    throw new Error(
+      `AgentK executor unreachable for submit and inspect of ${scopedKey} (submit: ${submitOutcome.error.message}; inspect: ${inspectOutcome.error.message}). Treating as ambiguous — no direct provider fallback is permitted.`
+    );
+  }
+  return agentKResultToPublishResult(inspectOutcome.body.status, inspectOutcome.body, scopedKey);
+}
+
+// ──────────────────────────────────────────────────────────────
 //  Token management (stored in D1, encrypted AES-GCM)
 // ──────────────────────────────────────────────────────────────
 
@@ -931,33 +1056,46 @@ async function publishVariant(variant, db, env) {
 
     let result;
     dispatchStarted = true;
-    switch (platform) {
-      case 'instagram':
-        result = await postInstagram(token, mediaUrl, text);
-        break;
-      case 'facebook':
-        result = await postFacebook(token, mediaUrl, text);
-        break;
-      case 'x':
-        result = await postX(token, mediaUrl, text);
-        break;
-      case 'linkedin':
-        result = await postLinkedIn(token, mediaUrl, text);
-        break;
-      case 'pinterest':
-        result = await postPinterest(token, mediaUrl, text.substring(0, 100), text, token.default_board_id);
-        break;
-      case 'threads':
-        result = await postThreads(token, mediaUrl, text);
-        break;
-      case 'tiktok':
-        result = await postTikTok(token, mediaUrl, text);
-        break;
-      case 'youtube':
-        result = await postYouTube(token, mediaUrl, text);
-        break;
-      default:
-        throw new Error(`Unsupported platform: ${platform}`);
+
+    if (isAgentKGoverned(platform, env)) {
+      // AgentK owns effect identity and the dispatch-claim/ambiguity state
+      // machine for this platform. GFD is a deterministic caller only — see
+      // the module header comment above dispatchViaAgentKExecutor for the
+      // no-fallback invariant.
+      const account = token.person_urn || token.page_id || token.account_id || 'unknown-account';
+      result = await dispatchViaAgentKExecutor(
+        { brand, platform, account, variantId: id, content: text, mediaUrl },
+        env
+      );
+    } else {
+      switch (platform) {
+        case 'instagram':
+          result = await postInstagram(token, mediaUrl, text);
+          break;
+        case 'facebook':
+          result = await postFacebook(token, mediaUrl, text);
+          break;
+        case 'x':
+          result = await postX(token, mediaUrl, text);
+          break;
+        case 'linkedin':
+          result = await postLinkedIn(token, mediaUrl, text);
+          break;
+        case 'pinterest':
+          result = await postPinterest(token, mediaUrl, text.substring(0, 100), text, token.default_board_id);
+          break;
+        case 'threads':
+          result = await postThreads(token, mediaUrl, text);
+          break;
+        case 'tiktok':
+          result = await postTikTok(token, mediaUrl, text);
+          break;
+        case 'youtube':
+          result = await postYouTube(token, mediaUrl, text);
+          break;
+        default:
+          throw new Error(`Unsupported platform: ${platform}`);
+      }
     }
 
     // Record success
@@ -976,7 +1114,11 @@ async function publishVariant(variant, db, env) {
 
   } catch (err) {
     const errorMsg = err.message || String(err);
-    const status = dispatchStarted ? 'ambiguous' : 'failed';
+    // AgentK's 'retryable' outcome is authoritative proof the provider never
+    // committed (e.g. it rejected the request before dispatch) — GFD may
+    // treat that exactly like its own pre-dispatch failures, even though
+    // dispatchStarted is true here (the executor call itself was attempted).
+    const status = (err instanceof AgentKRetryableRejectionError) ? 'failed' : (dispatchStarted ? 'ambiguous' : 'failed');
     const retryCount = variant.retry_count || 0;
     console.error(`[social-publisher] ${status} ${platform} variant ${id}: ${errorMsg}`);
 
@@ -1147,4 +1289,12 @@ export default {
   },
 };
 
-export { publishVariant, runScheduler, updateParentPostStatus };
+export {
+  publishVariant,
+  runScheduler,
+  updateParentPostStatus,
+  isAgentKGoverned,
+  computeAgentKScopedKey,
+  dispatchViaAgentKExecutor,
+  AgentKRetryableRejectionError,
+};

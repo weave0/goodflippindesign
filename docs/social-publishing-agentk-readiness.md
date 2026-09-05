@@ -1,7 +1,13 @@
 # Social Publishing AgentK Readiness
 
 Date: 2026-09-04
-Branch: `feat/learn-ai-nav-cta`
+Branch: `agent/gfd-agentk-executor-integration` (built on `agent/gfd-agentk-social-effects`)
+
+> Update (this pass): the architecture decision, effect identity, and durable
+> store choice below were independently re-verified and proven end-to-end
+> against the real published `@agentkagent/sdk@0.2.0-rc.1` npm package (the
+> `next` dist-tag) plus an isolated Postgres instance. See "AgentK Dogfood
+> Proof Results" at the bottom of this document.
 
 ## Current Safety Boundary
 
@@ -61,6 +67,94 @@ The effect arguments bound into the AgentK action hash must include:
 
 Do not include timestamps, attempt numbers, or runtime-generated retry counters in the effect identity.
 
+## Credential/Authority Boundary Decision
+
+Chosen model: **Option B — narrow authenticated GFD provider bridge.**
+
+Provider OAuth tokens remain exactly where they already live today: encrypted
+(AES-GCM) in GFD's D1, managed by GFD's existing `getToken()` lifecycle
+(including refresh) for eight platforms. The AgentK executor does not hold,
+duplicate, or request any provider credential. Instead:
+
+- The executor owns effect identity, the crash-honest dispatch-claim
+  protocol, and ambiguity/reconciliation — see `workers/social-publisher.js`
+  `dispatchViaAgentKExecutor()` / `isAgentKGoverned()` / `AGENTK_EXECUTOR_URL`
+  / `AGENTK_EXECUTOR_PLATFORMS`.
+- GFD is a deterministic caller: it submits the same intent fields for the
+  same variant every time and never varies them per attempt.
+- The bridge (the still-to-be-built authenticated GFD Worker endpoint the
+  executor would call to actually perform the LinkedIn HTTP request) must
+  contain no automatic retries of its own — the executor is the only thing
+  allowed to decide whether a dispatch attempt happens.
+- Response loss from that bridge, or from the provider through it, must
+  become AgentK ambiguity, never a silent local retry.
+- Reconciliation must query authoritative provider evidence, never
+  re-invoke publication.
+
+Why not Option A (executor owns provider execution): GFD already has a
+working, encrypted, multi-platform OAuth token store and refresh lifecycle.
+Rebuilding that inside the executor would duplicate credential material and
+lifecycle logic for no correctness benefit in this tranche, and would
+increase — not minimize — standing authority. Option B keeps today's
+credential authority exactly where it is and adds AgentK strictly as the
+dispatch-decision authority on top of it.
+
+Current status: the GFD-side scaffolding (config flags, the
+`dispatchViaAgentKExecutor` client, and its no-fallback-on-network-failure
+behavior) is implemented and tested against a fake executor HTTP server in
+`tests/workers/social-publisher-agentk-bridge.test.js`. The actual bridge
+endpoint that would call the real LinkedIn API from inside GFD's Worker, and
+a deployed executor process, are **not** built or deployed — `AGENTK_EXECUTOR_URL`
+is unset in every real environment, so this path is inert until an operator
+explicitly configures it.
+
+## AgentK Dogfood Proof Results
+
+A standalone proof workspace (gitignored, outside both the GFD and AgentK git
+histories — not merged or deployed anywhere) exercised the full LinkedIn
+dispatch lifecycle against the real published AgentK package:
+
+- `GFD Dev Projects/AgentK-social-executor-proof/` — consumes
+  `@agentkagent/sdk@0.2.0-rc.1` from the public npm registry (`next` dist-tag).
+- `GFD Dev Projects/AgentK-social-executor-proof-packed/` — same tests,
+  consuming a `npm pack` tarball built from `weave0/agentk` commit
+  `c6bd353f3f80e0f9fcf3e213a621a56b7b3bb310` (`origin/main` at verification
+  time), as a source-pinned proof distinct from the registry install.
+
+Both directories run identical tests (`test/effect-identity.test.mjs`,
+`test/dogfood.test.mjs`, `test/failure-matrix.test.mjs`) against an isolated,
+throwaway Postgres container (`agentk-dogfood-postgres`, port 5433 — never
+the CultureSherpa Postgres container on port 5432) using AgentK's own
+`PostgresActionStore`, `ReconciliationCoordinator`, `PostgresReconciliationLedger`,
+and `DispatchRecoveryCoordinator`. Results: 14/14 pass in both, repeatably.
+
+Proven directly:
+
+- Resubmitting the exact same publication intent always yields the same
+  `scopedKey`/`actionHash`; changing content, media, account, brand, or
+  platform always changes it.
+- Provider commit followed by response loss becomes durable `ambiguous`
+  with exactly one provider invocation.
+- Restarting the executor process (new store handle, new dispatch owner id)
+  and resubmitting the same intent never redispatches — `in_flight` is
+  returned, the provider is not called again.
+- A stuck `dispatched` row from a truly killed process cannot be moved by
+  ordinary resubmission at all; only `DispatchRecoveryCoordinator`, given
+  proof of the old owner's death, moves it — to `ambiguous`, never straight
+  back to retryable.
+- Reconciliation against fake authoritative provider evidence settles the
+  ambiguous effect as `completed`, and the executor never calls the provider
+  again afterward, including after settlement.
+- The full Phase 8 failure matrix (provider rejects before commit; commits
+  and succeeds; commits and loses the response; process dies mid-dispatch;
+  concurrent/duplicate resubmission; post-completion resubmission) each
+  produce at most one real provider invocation.
+
 ## Authorization Status
 
-No production publication was performed. No production credential was added, changed, printed, or requested.
+No production publication was performed. No production credential was
+added, changed, printed, or requested. No live LinkedIn API call was made —
+every proof above used a deterministic fake LinkedIn provider
+(`AgentK-social-executor-proof/src/linkedin-fake-provider.js`) that mirrors
+GFD's real request/response contract without ever reaching
+`api.linkedin.com`.
