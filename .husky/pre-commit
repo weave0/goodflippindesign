@@ -6,8 +6,14 @@ cp index.html temp_review.html
 git add temp_review.html
 
 # 2. Regenerate CSP / security headers from single source of truth
+# Scoped to the "gfd" site only: this repo's CSP config also generates
+# output for the separate CultureSherpa project (a sibling checkout that
+# does not exist in every GFD worktree/clone). Regenerating it here would
+# create/overwrite a foreign project's files as a side effect of committing
+# to THIS repo — see scripts/generate-csp.js if you need to run the full,
+# multi-site generation manually.
 echo "🔒 Regenerating CSP headers..."
-node scripts/generate-csp.js
+node scripts/generate-csp.js gfd
 git add _headers
 
 # 3. Update cache bust

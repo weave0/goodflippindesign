@@ -109,7 +109,19 @@ function write(outputPath, content, siteName) {
     return;
   }
 
-  fs.mkdirSync(path.dirname(absPath), { recursive: true });
+  const dir = path.dirname(absPath);
+  if (!fs.existsSync(dir)) {
+    // Some site targets (e.g. culturesherpa) point at a sibling project
+    // checkout that only exists next to the canonical GFD working copy —
+    // not in every clone or git worktree of this repo. Never fabricate a
+    // missing directory tree to write into: only ever update a file whose
+    // parent directory is already genuinely present. This makes it
+    // impossible for this script to materialize a foreign project's
+    // scaffold as a side effect of running from elsewhere.
+    console.log(`  ⚠ ${siteName}: skipping ${relativePath} — target directory does not exist in this checkout`);
+    return;
+  }
+
   const existing = fs.existsSync(absPath) ? fs.readFileSync(absPath, 'utf8') : null;
 
   if (existing === content) {
