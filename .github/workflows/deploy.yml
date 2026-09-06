@@ -79,5 +79,18 @@ jobs:
         run: npm install --no-audit --ignore-scripts
 
       - name: Security audit (informational — see job comment)
+        id: audit
         continue-on-error: true
         run: npm audit --audit-level=moderate
+
+      - name: Flag dependency vulnerabilities
+        if: steps.audit.outcome == 'failure'
+        run: |
+          echo "::warning title=Dependency vulnerabilities found::npm audit reported moderate-or-higher vulnerabilities. See the Security audit step log above for full detail. This job is intentionally non-blocking; the debt itself is not remediated by this workflow."
+          {
+            echo "### :warning: Dependency vulnerabilities found"
+            echo ""
+            echo "\`npm audit --audit-level=moderate\` reported moderate-or-higher vulnerabilities in this job. See the **Security audit** step log above for full detail."
+            echo ""
+            echo "This job is intentionally non-blocking — the debt itself is not remediated by this workflow."
+          } >> "$GITHUB_STEP_SUMMARY"

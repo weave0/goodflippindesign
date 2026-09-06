@@ -54,23 +54,43 @@ try {
   console.log(`Creating isolated worktree at: ${worktreeDir}`);
   run('git', ['worktree', 'add', '--detach', worktreeDir, 'HEAD'], REPO_ROOT);
 
-  console.log('Installing dependencies is not required — the hook only shells out to node/git/date.');
+  // No `npm install` step is needed here: the hook shells out only to
+  // standard POSIX utilities already present on the runner/dev machine
+  // (cp, node, git, date, grep, xargs, stat, awk) — it has no package
+  // dependencies of its own to install.
   console.log('Staging a trivial change and running .husky/pre-commit exactly as husky would...');
 
   fs.writeFileSync(path.join(worktreeDir, 'cache-bust.txt'), 'boundary-proof-run\n');
   run('git', ['add', 'cache-bust.txt'], worktreeDir);
 
-  const hookOutput = run('sh', ['.husky/pre-commit'], worktreeDir);
+  let hookOutput = '';
+  let hookFailed = false;
+  try {
+    hookOutput = run('sh', ['.husky/pre-commit'], worktreeDir);
+  } catch (err) {
+    // execFileSync throws on a non-zero exit — capture whatever stdout/
+    // stderr it collected before failing rather than letting the error
+    // propagate past this script's own reporting and cleanup.
+    hookFailed = true;
+    hookOutput = `${err.stdout || ''}${err.stderr || ''}`;
+    console.error(`.husky/pre-commit exited non-zero: ${err.message}`);
+  }
+
   console.log('--- hook output ---');
   console.log(hookOutput);
   console.log('--- end hook output ---');
+
+  if (hookFailed) {
+    failed = true;
+    console.error('FAIL: .husky/pre-commit itself exited non-zero inside the isolated worktree.');
+  }
 
   const foreignDirs = findForeignDirs(worktreeDir);
   if (foreignDirs.length > 0) {
     failed = true;
     console.error('FAIL: pre-commit hook created foreign-project directories:');
     for (const dir of foreignDirs) console.error(`  - ${dir}`);
-  } else {
+  } else if (!hookFailed) {
     console.log('PASS: no CultureSherpa / "GFD Dev Projects" directory exists anywhere under the isolated worktree.');
   }
 } finally {
