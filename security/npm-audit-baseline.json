@@ -1,0 +1,86 @@
+{
+    "generatedFrom": "post-update origin/main c6306fedecc8441df28394ae190a8aecf3f0cbec",
+    "policy": "Inherited full-tree development findings remain visible and report-only. New packages, advisories, or severity increases fail CI.",
+    "packages": {
+        "@cloudflare/vitest-pool-workers": {
+            "advisories": [],
+            "severity": "high"
+        },
+        "@puppeteer/browsers": {
+            "advisories": [],
+            "severity": "high"
+        },
+        "brace-expansion": {
+            "advisories": [
+                "1130591",
+                "1130734"
+            ],
+            "severity": "high"
+        },
+        "extract-zip": {
+            "advisories": [
+                "1139346",
+                "1193685"
+            ],
+            "severity": "high"
+        },
+        "fast-uri": {
+            "advisories": [
+                "1124064",
+                "1130720",
+                "1158524",
+                "1158527",
+                "1158530",
+                "1182133"
+            ],
+            "severity": "high"
+        },
+        "js-yaml": {
+            "advisories": [
+                "1138115",
+                "1193727"
+            ],
+            "severity": "high"
+        },
+        "miniflare": {
+            "advisories": [],
+            "severity": "high"
+        },
+        "puppeteer": {
+            "advisories": [],
+            "severity": "high"
+        },
+        "puppeteer-core": {
+            "advisories": [],
+            "severity": "high"
+        },
+        "qs": {
+            "advisories": [
+                "1158506",
+                "1158507"
+            ],
+            "severity": "moderate"
+        },
+        "sharp": {
+            "advisories": [
+                "1124066",
+                "1193725"
+            ],
+            "severity": "high"
+        },
+        "undici": {
+            "advisories": [
+                "1130715",
+                "1130718",
+                "1130726",
+                "1130729",
+                "1130731"
+            ],
+            "severity": "high"
+        },
+        "wrangler": {
+            "advisories": [],
+            "severity": "high"
+        }
+    }
+}

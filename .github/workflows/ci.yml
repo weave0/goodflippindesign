@@ -13,21 +13,42 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: "22"
+          node-version: "24"
           cache: "npm"
 
       - name: Install
-        run: npm install --no-audit --ignore-scripts && npx puppeteer browsers install chrome
-        # npm ci fails cross-platform: Windows lockfile omits Linux-only
-        # @emnapi/core + @emnapi/runtime (optional deps of @napi-rs/canvas)
+        run: npm ci --no-audit --ignore-scripts && npx puppeteer browsers install chrome
 
-      - name: Security audit
-        run: npm audit --audit-level=moderate
+      - name: Test security policy
+        run: npm run test:security
+
+      - name: Production security audit
+        run: |
+          node scripts/check-production-graph.js
+          npm audit --omit=dev --omit=optional --audit-level=moderate
+
+      - name: Governed full-tree security audit
+        run: |
+          set +e
+          npm audit --audit-level=moderate --json > npm-audit-full.json
+          audit_status=$?
+          set -e
+          node scripts/audit-policy.js npm-audit-full.json security/npm-audit-baseline.json "$audit_status"
+          base_sha="${{ github.event.pull_request.base.sha }}"
+          trusted_baseline="$(mktemp)"
+          if [ -n "$base_sha" ]; then
+            git fetch --no-tags origin "$base_sha" --depth=1
+          fi
+          if [ -n "$base_sha" ] && git cat-file -e "$base_sha:security/npm-audit-baseline.json" 2>/dev/null; then
+            git show "$base_sha:security/npm-audit-baseline.json" > "$trusted_baseline"
+          fi
+          node scripts/compare-audit-baseline.js security/npm-audit-baseline.json "$trusted_baseline" npm-audit-full.json
+          echo "npm audit exit status: $audit_status (1 means findings were reported and validated)"
 
       - name: Lint
         run: npm run lint
