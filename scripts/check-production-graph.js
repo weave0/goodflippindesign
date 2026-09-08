@@ -10,13 +10,13 @@ const visited = new Set();
 const violations = [];
 
 function resolvePackage(parentPath, name) {
-  let current = parentPath;
-  while (current) {
-    const candidate = `${current}/node_modules/${name}`;
+  let current = parentPath || "";
+  while (true) {
+    const candidate = current ? `${current}/node_modules/${name}` : `node_modules/${name}`;
     if (packages[candidate]) return candidate;
-    const next = current.slice(0, current.lastIndexOf("/node_modules/"));
-    if (next === current) break;
-    current = next;
+    const marker = current.lastIndexOf("/node_modules/");
+    if (marker < 0) break;
+    current = current.slice(0, marker);
   }
   return packages[`node_modules/${name}`] ? `node_modules/${name}` : null;
 }
