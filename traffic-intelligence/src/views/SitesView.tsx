@@ -44,7 +44,7 @@ export function SitesView({
               <div className="section-note">{site.measurementHealthNote}</div>
               <div className="chip-row">
                 {site.sourceCoverage.map((s) => (
-                  <span key={s.id} className="chip">
+                  <span key={`${s.id}:${s.shortLabel}`} className="chip">
                     {s.shortLabel} {s.typicalEvidence} · {s.coverage}
                   </span>
                 ))}
@@ -107,6 +107,7 @@ export function SiteDossierView({
             value: null,
             display: `${s.typicalEvidence} · ${s.coverage}`,
             source: s.id,
+            evidence_state: s.typicalEvidence,
             evidenceState: s.typicalEvidence,
             coverage: s.coverage,
             grain: "count" as const,

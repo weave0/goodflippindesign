@@ -192,6 +192,7 @@ export function App() {
             {payload.window.timezone ?? "timezone undeclared"}
             {payload.window.partialCurrentPeriod ? " · partial period" : ""}
           </span>
+          <span>generated_at {gold.contract.generatedAt}</span>
           <span>Shareable URL state is on.</span>
         </div>
       </nav>
@@ -245,7 +246,9 @@ export function App() {
           {filters.view === "content" && <ContentView payload={payload} filters={filters} />}
           {filters.view === "technology" && <TechnologyView payload={payload} filters={filters} onOpen={setEvidence} />}
           {filters.view === "geography" && <GeographyView payload={payload} filters={filters} />}
-          {filters.view === "laboratory" && <LaboratoryView payload={payload} filters={filters} onOpen={setEvidence} />}
+          {filters.view === "laboratory" && (
+            <LaboratoryView gold={gold} payload={payload} filters={filters} onOpen={setEvidence} />
+          )}
           {filters.view === "anomalies" && <AnomaliesView payload={payload} />}
           {filters.view === "health" && <HealthView payload={payload} filters={filters} onOpen={setEvidence} />}
         </main>

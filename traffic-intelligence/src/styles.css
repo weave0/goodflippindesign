@@ -425,16 +425,24 @@ h1 {
   align-items: center;
 }
 
-.badge-MEASURED { color: var(--status-exact); }
-.badge-SAMPLED { color: var(--status-sampled); border-style: dotted; }
-.badge-INFERRED { color: var(--status-inferred); border-style: dashed; }
-.badge-ESTIMATED { color: var(--status-estimated); border-style: dashed; }
-.badge-UNAVAILABLE { color: var(--status-unavailable); }
-.badge-UNKNOWABLE { color: var(--status-unavailable); border-style: double; }
-.badge-COMPLETE { color: var(--status-exact); }
-.badge-INCOMPLETE { color: var(--status-incomplete); }
-.badge-MISSING { color: var(--status-unavailable); }
-.badge-NOT_APPLICABLE { color: var(--status-unavailable); border-style: dotted; }
+.badge-measured, .badge-MEASURED { color: var(--status-exact); }
+.badge-sampled, .badge-SAMPLED { color: var(--status-sampled); border-style: dotted; }
+.badge-inferred, .badge-INFERRED { color: var(--status-inferred); border-style: dashed; }
+.badge-estimated, .badge-ESTIMATED { color: var(--status-estimated); border-style: dashed; }
+.badge-unavailable, .badge-UNAVAILABLE { color: var(--status-unavailable); }
+.badge-unknowable, .badge-UNKNOWABLE { color: var(--status-unavailable); border-style: double; }
+.badge-exact { color: var(--status-exact); }
+.badge-inexact { color: var(--status-estimated); border-style: dashed; }
+.badge-not_applicable { color: var(--status-unavailable); border-style: dotted; }
+.badge-unknown { color: var(--status-unavailable); }
+.badge-full_coverage, .badge-COMPLETE { color: var(--status-exact); }
+.badge-partial_coverage, .badge-INCOMPLETE { color: var(--status-incomplete); }
+.badge-source_unavailable, .badge-MISSING { color: var(--status-unavailable); }
+.badge-structurally_unknowable, .badge-NOT_APPLICABLE { color: var(--status-unavailable); border-style: dotted; }
+.badge-unknown_coverage, .badge-historical_data_unavailable, .badge-retention_exceeded,
+.badge-instrumentation_absent, .badge-measurement_bypass, .badge-scope_blocked { color: var(--status-incomplete); }
+.metric-card__source[data-source="cloudflare"] { color: var(--edge); }
+.metric-card__source[data-source="combined"] { color: var(--model); }
 
 .metric-card__ci.is-invalid {
   color: var(--warn);

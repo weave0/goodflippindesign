@@ -1,5 +1,5 @@
-import type { CoverageState, EvidenceState } from "../gold/types";
-import { coverageHint, evidenceHint } from "../gold/format";
+import type { CoverageState, EvidenceState, Exactness } from "../gold/types";
+import { coverageHint, evidenceHint, exactnessHint } from "../gold/format";
 
 export function EvidenceBadge({ state }: { state: EvidenceState }) {
   return (
@@ -9,8 +9,16 @@ export function EvidenceBadge({ state }: { state: EvidenceState }) {
   );
 }
 
+export function ExactnessBadge({ state }: { state: Exactness }) {
+  return (
+    <span className={`badge badge-${state}`} title={exactnessHint(state)}>
+      {state}
+    </span>
+  );
+}
+
 export function CoverageBadge({ state, always = false }: { state: CoverageState; always?: boolean }) {
-  if (state === "COMPLETE" && !always) return null;
+  if (state === "full_coverage" && !always) return null;
   return (
     <span className={`badge badge-coverage badge-${state}`} title={coverageHint(state)}>
       {state}
@@ -20,23 +28,25 @@ export function CoverageBadge({ state, always = false }: { state: CoverageState;
 
 export function EvidencePair({
   evidence,
+  exactness,
   coverage,
 }: {
   evidence: EvidenceState;
+  exactness?: Exactness;
   coverage?: CoverageState;
 }) {
   return (
     <span className="badge-pair">
       <EvidenceBadge state={evidence} />
+      {exactness ? <ExactnessBadge state={exactness} /> : null}
       {coverage ? <CoverageBadge state={coverage} /> : null}
     </span>
   );
 }
 
-/** @deprecated Prefer EvidencePair. Accepts evidence state. */
-export function StatusBadge({ status }: { status: EvidenceState | CoverageState | string }) {
+export function StatusBadge({ status }: { status: EvidenceState | CoverageState | Exactness | string }) {
   return (
-    <span className={`badge badge-${status}`} title={evidenceHint(status as EvidenceState)}>
+    <span className={`badge badge-${status}`} title={String(status)}>
       {status}
     </span>
   );

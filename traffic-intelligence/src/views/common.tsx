@@ -56,7 +56,7 @@ export function RankedTable({
               <td>{row.source}</td>
               <td>{row.grain}</td>
               <td>
-                <EvidencePair evidence={row.evidenceState} coverage={row.coverage} />
+                <EvidencePair evidence={row.evidence_state ?? row.evidenceState} exactness={row.exactness} coverage={row.coverage} />
               </td>
             </tr>
           ))}
@@ -102,7 +102,7 @@ export function ContentTable({ rows }: { rows: ContentRow[] }) {
 
 function cell(item?: RankedItem) {
   if (!item) return "—";
-  return `${item.display ?? (item.value === null ? "—" : item.value.toLocaleString("en-US"))} (${item.evidenceState})`;
+  return `${item.display ?? (item.value === null ? "—" : item.value.toLocaleString("en-US"))} (${item.evidence_state ?? item.evidenceState})`;
 }
 
 export function AnomalyList({
@@ -117,6 +117,7 @@ export function AnomalyList({
     severity: string;
     action?: string;
     sources: string[];
+    evidence_state?: string;
     evidenceState?: string;
     status?: string;
   }[];
@@ -131,7 +132,7 @@ export function AnomalyList({
               {item.ts} · {item.title}
             </strong>
             <span className="kicker">
-              {item.kind} · {item.evidenceState ?? item.status}
+              {item.kind} · {item.evidence_state ?? item.evidenceState ?? item.status}
             </span>
           </div>
           <div>{item.detail}</div>

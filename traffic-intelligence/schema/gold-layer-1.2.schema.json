@@ -1,0 +1,799 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://goodflippindesign.com/schemas/gfd-canonical-gold-1.2.0.json",
+    "title": "GFD Canonical Gold 1.2",
+    "description": "Authoritative source-neutral Gold 1.2 contract. Fixtures are contract data, not production traffic.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "schema_version",
+        "contract_name",
+        "fixture",
+        "generated_at",
+        "pipeline_version",
+        "metrics",
+        "topology",
+        "source_support"
+    ],
+    "properties": {
+        "schema_version": {
+            "const": "1.2.0"
+        },
+        "contract_name": {
+            "const": "gfd-canonical-gold"
+        },
+        "fixture": {
+            "const": true
+        },
+        "generated_at": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "pipeline_version": {
+            "type": "string"
+        },
+        "metrics": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/metric"
+            }
+        },
+        "topology": {
+            "$ref": "#/$defs/topology"
+        },
+        "source_support": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/source_support"
+            }
+        }
+    },
+    "$defs": {
+        "coverage": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "state"
+            ],
+            "properties": {
+                "state": {
+                    "enum": [
+                        "full_coverage",
+                        "partial_coverage",
+                        "unknown_coverage",
+                        "source_unavailable",
+                        "historical_data_unavailable",
+                        "retention_exceeded",
+                        "instrumentation_absent",
+                        "measurement_bypass",
+                        "scope_blocked",
+                        "structurally_unknowable"
+                    ]
+                },
+                "observed_fraction": {
+                    "type": [
+                        "number",
+                        "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "missingness_reason": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "affected_scope": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "semantics": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "semantic_type",
+                "population_scope",
+                "aggregation_semantics",
+                "unique_count_semantics",
+                "source_boundary"
+            ],
+            "properties": {
+                "semantic_type": {
+                    "enum": [
+                        "count",
+                        "ratio",
+                        "duration",
+                        "other"
+                    ]
+                },
+                "population_scope": {
+                    "type": "string"
+                },
+                "aggregation_semantics": {
+                    "type": "string"
+                },
+                "unique_count_semantics": {
+                    "enum": [
+                        "not_unique_count",
+                        "zone_native_unique",
+                        "sum_of_zone_native_uniques_non_deduplicated",
+                        "ecosystem_unique_deduplicated",
+                        "ecosystem_human_unique_deduplicated"
+                    ]
+                },
+                "source_boundary": {
+                    "type": "string"
+                },
+                "identity_transformation": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "observation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "start",
+                "end",
+                "timezone",
+                "boundary",
+                "partial_current_period",
+                "extracted_at",
+                "source_observation_id"
+            ],
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "end": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "boundary": {
+                    "enum": [
+                        "inclusive",
+                        "half_open",
+                        "closed",
+                        "open"
+                    ]
+                },
+                "partial_current_period": {
+                    "type": "boolean"
+                },
+                "extracted_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "source_observation_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "sampling": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "meaning"
+            ],
+            "properties": {
+                "interval": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "factor": {
+                    "type": [
+                        "number",
+                        "null"
+                    ],
+                    "exclusiveMinimum": 0
+                },
+                "meaning": {
+                    "type": "string"
+                }
+            }
+        },
+        "confidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "valid"
+            ],
+            "properties": {
+                "level": {
+                    "type": [
+                        "number",
+                        "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "valid": {
+                    "type": "boolean"
+                },
+                "lower_bound": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "upper_bound": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "invalid_reason": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "reference_type",
+                "reference_id"
+            ],
+            "properties": {
+                "reference_type": {
+                    "enum": [
+                        "metric_id",
+                        "source_observation_id"
+                    ]
+                },
+                "reference_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "ratio": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "ratio_unit",
+                "numerator",
+                "denominator"
+            ],
+            "properties": {
+                "ratio_value": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "ratio_unit": {
+                    "type": "string"
+                },
+                "numerator": {
+                    "$ref": "#/$defs/reference"
+                },
+                "denominator": {
+                    "$ref": "#/$defs/reference"
+                },
+                "numerator_value": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "denominator_value": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "supplied_display": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "classification": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "normalized_class",
+                "source_id",
+                "dataset_id"
+            ],
+            "properties": {
+                "source_native_class": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "normalized_class": {
+                    "type": "string"
+                },
+                "source_id": {
+                    "type": "string"
+                },
+                "dataset_id": {
+                    "type": "string"
+                },
+                "evidence": {
+                    "type": "object"
+                },
+                "confidence": {
+                    "enum": [
+                        "high",
+                        "medium",
+                        "low",
+                        "unknown"
+                    ]
+                },
+                "reason": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            }
+        },
+        "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "source_metrics": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "source_snapshots": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "method_id": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "method_version": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "limitations": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "metric": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "metric_id",
+                "label",
+                "metric_definition",
+                "source",
+                "semantics",
+                "evidence_state",
+                "exactness",
+                "coverage",
+                "observation",
+                "provenance"
+            ],
+            "properties": {
+                "metric_id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "label": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "metric_definition": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "source": {
+                    "enum": [
+                        "cloudflare",
+                        "ga4",
+                        "vercel",
+                        "first_party",
+                        "combined"
+                    ]
+                },
+                "semantics": {
+                    "$ref": "#/$defs/semantics"
+                },
+                "evidence_state": {
+                    "enum": [
+                        "measured",
+                        "sampled",
+                        "inferred",
+                        "estimated",
+                        "unavailable",
+                        "unknowable"
+                    ]
+                },
+                "exactness": {
+                    "enum": [
+                        "exact",
+                        "inexact",
+                        "not_applicable",
+                        "unknown"
+                    ]
+                },
+                "value": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "unit": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "coverage": {
+                    "$ref": "#/$defs/coverage"
+                },
+                "observation": {
+                    "$ref": "#/$defs/observation"
+                },
+                "sampling": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/sampling"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "confidence_interval": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/confidence"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "ratio": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/ratio"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "classification": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/classification"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "provenance": {
+                    "$ref": "#/$defs/provenance"
+                },
+                "supplied_display": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "evidence_state": {
+                                "enum": [
+                                    "unavailable",
+                                    "unknowable"
+                                ]
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "value": {
+                                "type": "null"
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "evidence_state": {
+                                "const": "sampled"
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "sampling"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "evidence_state": {
+                                "enum": [
+                                    "inferred",
+                                    "estimated"
+                                ]
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "provenance": {
+                                "required": [
+                                    "method_id",
+                                    "method_version"
+                                ]
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "semantics": {
+                                "properties": {
+                                    "semantic_type": {
+                                        "const": "ratio"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": [
+                            "ratio"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "semantics": {
+                                "properties": {
+                                    "source_boundary": {
+                                        "const": "request"
+                                    },
+                                    "unique_count_semantics": {
+                                        "enum": [
+                                            "ecosystem_unique_deduplicated",
+                                            "ecosystem_human_unique_deduplicated"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "semantics": {
+                                "required": [
+                                    "identity_transformation"
+                                ]
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "topology_node": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "node_id",
+                "node_type",
+                "label"
+            ],
+            "properties": {
+                "node_id": {
+                    "type": "string"
+                },
+                "node_type": {
+                    "enum": [
+                        "logical_property",
+                        "hostname",
+                        "zone",
+                        "pages_project",
+                        "pages_custom_domain",
+                        "worker",
+                        "worker_custom_domain",
+                        "worker_route",
+                        "rum_site_tag"
+                    ]
+                },
+                "label": {
+                    "type": "string"
+                },
+                "visibility": {
+                    "enum": [
+                        "proxied",
+                        "dns_only",
+                        "not_applicable",
+                        "unknown"
+                    ]
+                },
+                "active": {
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "metadata": {
+                    "type": "object"
+                }
+            }
+        },
+        "topology_relationship": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "relationship_id",
+                "from_node_id",
+                "to_node_id",
+                "relation"
+            ],
+            "properties": {
+                "relationship_id": {
+                    "type": "string"
+                },
+                "from_node_id": {
+                    "type": "string"
+                },
+                "to_node_id": {
+                    "type": "string"
+                },
+                "relation": {
+                    "enum": [
+                        "has_hostname",
+                        "alias_of",
+                        "serves_hostname",
+                        "custom_domain_for",
+                        "route_for",
+                        "tag_for",
+                        "associated_zone",
+                        "shared_serving_infrastructure"
+                    ]
+                },
+                "metadata": {
+                    "type": "object"
+                }
+            }
+        },
+        "topology": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "nodes",
+                "relationships"
+            ],
+            "properties": {
+                "nodes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/topology_node"
+                    }
+                },
+                "relationships": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/topology_relationship"
+                    }
+                }
+            }
+        },
+        "source_support": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "source_id",
+                "dataset_id",
+                "dataset_in_schema",
+                "query_permitted",
+                "requested_window_supported",
+                "historical_retention_supported",
+                "data_returned",
+                "sampling_status"
+            ],
+            "properties": {
+                "source_id": {
+                    "type": "string"
+                },
+                "dataset_id": {
+                    "type": "string"
+                },
+                "dataset_in_schema": {
+                    "type": "boolean"
+                },
+                "query_permitted": {
+                    "enum": [
+                        "true",
+                        "false",
+                        "unknown"
+                    ]
+                },
+                "requested_window_supported": {
+                    "enum": [
+                        "true",
+                        "false",
+                        "unknown"
+                    ]
+                },
+                "historical_retention_supported": {
+                    "enum": [
+                        "true",
+                        "false",
+                        "unknown"
+                    ]
+                },
+                "data_returned": {
+                    "enum": [
+                        "true",
+                        "false",
+                        "unknown"
+                    ]
+                },
+                "sampling_status": {
+                    "enum": [
+                        "unsampled",
+                        "sampled",
+                        "unknown",
+                        "not_applicable"
+                    ]
+                },
+                "observation_window": {
+                    "type": [
+                        "object",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

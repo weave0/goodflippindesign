@@ -28,7 +28,7 @@ export function AIView({
           {payload.ai.actors.map((actor) => (
             <span key={actor.id} className="chip">
               {actor.name} · {actor.sourceNativeClass} / {actor.normalizedClass} ·{" "}
-              <EvidencePair evidence={actor.evidenceState} coverage={actor.coverage} />
+              <EvidencePair evidence={actor.evidence_state ?? actor.evidenceState} exactness={actor.exactness} coverage={actor.coverage} />
             </span>
           ))}
         </div>
@@ -63,7 +63,7 @@ export function AIView({
                       )}
                     </td>
                     <td>
-                      <EvidencePair evidence={actor.evidenceState} coverage={actor.coverage} />
+                      <EvidencePair evidence={actor.evidence_state ?? actor.evidenceState} exactness={actor.exactness} coverage={actor.coverage} />
                     </td>
                   </tr>
                 );

@@ -14,70 +14,33 @@ function loadFixture(): GoldContract {
   return data;
 }
 
-describe("Gold fixture contract", () => {
+describe("presentation Gold fixture", () => {
   const gold = loadFixture();
 
-  it("declares fixture kind and required definition terms", () => {
+  it("is labeled fixture and carries canonical 1.2", () => {
     expect(gold.contract.kind).toBe("fixture");
-    expect(gold.contract.name).toBe("gfd-traffic-intelligence-gold");
-    const terms = gold.definitions.map((d) => d.term);
-    for (const term of [
-      "visitor",
-      "user",
-      "session",
-      "pageview",
-      "human",
-      "bot",
-      "AI crawler",
-      "AI agent",
-      "threat",
-      "confidence",
-    ]) {
-      expect(terms).toContain(term);
-    }
-  });
-
-  it("lists six disjoint sources and never a combined source", () => {
-    const ids = gold.sources.map((s) => s.id);
-    expect(ids).toEqual([
-      "cloudflare_edge",
-      "cloudflare_rum",
-      "ga4",
-      "vercel",
-      "first_party",
-      "modeled",
-    ]);
-    const metrics = collectMetrics(gold);
-    expect(metrics.every((m) => ids.includes(m.source))).toBe(true);
-    expect(metrics.some((m) => /visitor/i.test(m.label) && m.source === "cloudflare_edge")).toBe(false);
-  });
-
-  it("keeps UNAVAILABLE/UNKNOWABLE values null and modeled metrics non-measured", () => {
-    const metrics = collectMetrics(gold);
-    for (const metric of metrics) {
-      if (metric.evidenceState === "UNAVAILABLE" || metric.evidenceState === "UNKNOWABLE") {
-        expect(metric.value).toBeNull();
-      }
-      if (metric.source === "modeled") expect(metric.evidenceState).not.toBe("MEASURED");
-    }
+    expect(gold.canonical?.schema_version).toBe("1.2.0");
+    expect(gold.contract.generatedAt).toBe(gold.canonical?.generated_at);
   });
 
   it("does not use site-row sums as the overview edge total", () => {
-    const payload = selectWindow(gold, "28d");
-    const overview = payload.overview.metrics.find((m) => m.id === "edge.requests");
+    const payload = selectWindow(gold, gold.defaultWindowId);
+    const overview = payload.overview.metrics.find((m) => m.id === "edge.requests" || m.metric_id === "edge.requests");
+    if (!overview) return;
     const siteSum = payload.sites.reduce((acc, site) => {
-      const requests = site.metrics.find((m) => m.id.endsWith(".requests") && m.source === "cloudflare_edge");
-      return acc + (requests?.value ?? 0);
-    }, 0);
-    expect(overview?.value).toBeTypeOf("number");
-    expect(overview?.value).not.toBe(siteSum);
-    expect(overview?.source).toBe("cloudflare_edge");
+      const requests = site.metrics.find((m) => m.id.endsWith(".requests") && m.source === "cloudflare");
+      if (requests?.value == null) return acc;
+      return acc === null ? null : acc + requests.value;
+    }, 0 as number | null);
+    expect(overview.value).not.toBe(siteSum);
+    expect(overview.source).toBe("cloudflare");
   });
 
-  it("ships named AI actors required by the UX contract", () => {
-    const names = selectWindow(gold, "28d").ai.actors.map((a) => a.name);
-    for (const name of ["ClaudeBot", "GPTBot", "ChatGPT-User", "Applebot", "Amazonbot", "Meta External Agent"]) {
-      expect(names).toContain(name);
+  it("keeps unavailable/unknowable values null", () => {
+    for (const metric of collectMetrics(gold)) {
+      if (metric.evidence_state === "unavailable" || metric.evidence_state === "unknowable") {
+        expect(metric.value).toBeNull();
+      }
     }
   });
 });

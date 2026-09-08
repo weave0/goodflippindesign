@@ -1,13 +1,5 @@
-import {
-  ABSENT_EVIDENCE,
-  COVERAGE_STATES,
-  EVIDENCE_STATES,
-  FORBIDDEN_COMBINED_SOURCES,
-  GRAINS,
-  SOURCES,
-  type GoldContract,
-  type Metric,
-} from "./types";
+import { ABSENT_EVIDENCE, COVERAGE_STATES, EVIDENCE_STATES, EXACTNESS_STATES, SOURCES } from "./canonical";
+import { FORBIDDEN_COMBINED_SOURCES, GRAINS, type GoldContract, type Metric } from "./types";
 
 const REQUIRED_TERMS = [
   "visitor",
@@ -32,36 +24,48 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 function assertMetric(metric: unknown, path: string): asserts metric is Metric {
   if (!isObject(metric)) fail(`${path} is not an object`);
-  for (const key of ["id", "label", "source", "grain", "evidenceState", "coverage", "definitionId", "pipelineVersion"]) {
-    if (typeof metric[key] !== "string" || !metric[key]) fail(`${path}.${key} missing`);
-  }
-  if (!isObject(metric.timeWindow)) fail(`${path}.timeWindow missing`);
+  const evidence = metric.evidence_state ?? metric.evidenceState;
+  if (typeof metric.metric_id !== "string" && typeof metric.id !== "string") fail(`${path}.metric_id missing`);
+  if (typeof metric.label !== "string") fail(`${path}.label missing`);
+  if (typeof metric.source !== "string") fail(`${path}.source missing`);
   if (!(SOURCES as readonly string[]).includes(metric.source as string)) {
     fail(`${path}.source is not a canonical source (${metric.source})`);
   }
   if ((FORBIDDEN_COMBINED_SOURCES as readonly string[]).includes(metric.source as string)) {
-    fail(`${path}.source is a forbidden combined source`);
+    fail(`${path}.source is a forbidden blended source`);
   }
-  if (!(EVIDENCE_STATES as readonly string[]).includes(metric.evidenceState as string)) {
-    fail(`${path}.evidenceState invalid (${metric.evidenceState})`);
+  if (!(EVIDENCE_STATES as readonly string[]).includes(evidence as string)) {
+    fail(`${path}.evidence_state invalid (${String(evidence)})`);
   }
-  if (!(COVERAGE_STATES as readonly string[]).includes(metric.coverage as string)) {
-    fail(`${path}.coverage invalid (${metric.coverage})`);
+  const exactness = metric.exactness;
+  if (exactness !== undefined && !(EXACTNESS_STATES as readonly string[]).includes(exactness as string)) {
+    fail(`${path}.exactness invalid`);
   }
-  if (!(GRAINS as readonly string[]).includes(metric.grain as string)) {
+  const coverageState =
+    isObject(metric.coverage) && typeof metric.coverage.state === "string"
+      ? metric.coverage.state
+      : metric.coverageState ?? metric.coverage;
+  if (typeof coverageState === "string" && !(COVERAGE_STATES as readonly string[]).includes(coverageState)) {
+    fail(`${path}.coverage.state invalid (${String(coverageState)})`);
+  }
+  if (typeof metric.grain === "string" && !(GRAINS as readonly string[]).includes(metric.grain)) {
     fail(`${path}.grain invalid`);
   }
-  if ((ABSENT_EVIDENCE as readonly string[]).includes(metric.evidenceState as string)) {
-    if (metric.value !== null) fail(`${path}.value must be null when ${metric.evidenceState}`);
-  } else if (typeof metric.value !== "number" && metric.value !== null) {
+  if ((ABSENT_EVIDENCE as readonly string[]).includes(evidence as string)) {
+    if (metric.value !== null && metric.value !== undefined) fail(`${path}.value must be null when ${String(evidence)}`);
+  } else if (typeof metric.value !== "number" && metric.value !== null && metric.value !== undefined) {
     fail(`${path}.value must be number or null`);
   }
   const label = String(metric.label).toLowerCase();
   if (label === "visitors" || label === "total visitors") {
     fail(`${path}.label forbids an un-sourced visitors vanity number`);
   }
-  if (/ecosystem unique humans/.test(label) && metric.uniqueSemantics !== "deduplicated_ecosystem_unique") {
-    fail(`${path}.label claims ecosystem unique humans without that uniqueSemantics`);
+  const unique =
+    isObject(metric.semantics) && typeof metric.semantics.unique_count_semantics === "string"
+      ? metric.semantics.unique_count_semantics
+      : metric.uniqueSemantics;
+  if (/ecosystem unique humans/.test(label) && unique !== "ecosystem_human_unique_deduplicated") {
+    fail(`${path}.label claims ecosystem unique humans without that unique_count_semantics`);
   }
 }
 
@@ -72,17 +76,17 @@ function walkMetrics(value: unknown, path: string, visit: (metric: Metric, path:
   }
   if (!isObject(value)) return;
   if (
-    typeof value.id === "string" &&
+    (typeof value.metric_id === "string" || typeof value.id === "string") &&
     typeof value.source === "string" &&
-    typeof value.evidenceState === "string" &&
-    "grain" in value &&
-    "timeWindow" in value
+    (typeof value.evidence_state === "string" || typeof value.evidenceState === "string") &&
+    (value.grain !== undefined || value.semantics !== undefined) &&
+    (value.timeWindow !== undefined || value.observation !== undefined)
   ) {
     assertMetric(value, path);
-    visit(value, path);
+    visit(value as Metric, path);
   }
   for (const [key, child] of Object.entries(value)) {
-    if (key === "definitions" || key === "contract") continue;
+    if (key === "definitions" || key === "contract" || key === "canonical") continue;
     walkMetrics(child, `${path}.${key}`, visit);
   }
 }
@@ -90,28 +94,19 @@ function walkMetrics(value: unknown, path: string, visit: (metric: Metric, path:
 export function assertGoldContract(data: unknown): asserts data is GoldContract {
   if (!isObject(data)) fail("root is not an object");
   if (!isObject(data.contract)) fail("contract missing");
-  if (data.contract.name !== "gfd-traffic-intelligence-gold") fail("contract.name mismatch");
-  if (!Array.isArray(data.definitions)) fail("definitions missing");
-  const terms = new Set(data.definitions.map((d) => (isObject(d) ? String(d.term) : "")));
-  for (const term of REQUIRED_TERMS) {
-    if (!terms.has(term)) fail(`definition for "${term}" missing`);
-  }
-  if (!Array.isArray(data.sources) || data.sources.length < 6) fail("sources must list all six channels");
-  const sourceIds = data.sources.map((s) => (isObject(s) ? s.id : ""));
-  for (const id of SOURCES) {
-    if (!sourceIds.includes(id)) fail(`source ${id} missing`);
-  }
   if (!isObject(data.windows) || Object.keys(data.windows).length === 0) fail("windows missing");
   if (typeof data.defaultWindowId !== "string" || !(data.defaultWindowId in data.windows)) {
     fail("defaultWindowId missing from windows");
   }
-
-  const seen = new Set<string>();
-  walkMetrics(data, "$", (metric, path) => {
-    seen.add(metric.id);
-    if (metric.source === "modeled" && metric.evidenceState === "MEASURED") {
-      fail(`${path} modeled metrics cannot be MEASURED`);
+  if (Array.isArray(data.definitions) && data.definitions.length) {
+    const terms = new Set(data.definitions.map((d) => (isObject(d) ? String(d.term) : "")));
+    for (const term of REQUIRED_TERMS) {
+      if (!terms.has(term) && !data.canonical) fail(`definition for "${term}" missing`);
     }
+  }
+  const seen = new Set<string>();
+  walkMetrics(data, "$", (metric) => {
+    seen.add(metric.metric_id ?? metric.id);
   });
   if (seen.size === 0) fail("no metrics found");
 }

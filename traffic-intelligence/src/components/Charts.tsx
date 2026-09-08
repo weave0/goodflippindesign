@@ -3,12 +3,11 @@ import { formatMetric, formatNumber, sourceLabel } from "../gold/format";
 import type { Metric } from "../gold/types";
 
 const SOURCE_COLOR: Record<SourceId, string> = {
-  cloudflare_edge: "var(--edge)",
-  cloudflare_rum: "var(--rum)",
+  cloudflare: "var(--edge)",
   ga4: "var(--ga4)",
   vercel: "var(--vercel)",
   first_party: "var(--first)",
-  modeled: "var(--model)",
+  combined: "var(--model)",
 };
 
 export function Sparkline({ values, source }: { values: number[]; source: SourceId }) {
@@ -34,7 +33,7 @@ export function Sparkline({ values, source }: { values: number[]; source: Source
 }
 
 export function TimeSeriesChart({ series }: { series: NamedSeries[] }) {
-  const visible = series.filter((s) => s.points.some((p) => p.value !== null));
+  const visible = series.filter((s) => Array.isArray(s.points) && s.points.some((p) => p.value !== null));
   if (!visible.length) return <p className="empty">No series in this window.</p>;
   return (
     <div>
@@ -79,7 +78,7 @@ function MiniSeries({ series }: { series: NamedSeries }) {
         <span>
           {series.label} · {sourceLabel(series.source)}
         </span>
-        <span className={`badge badge-${series.evidenceState}`}>{series.evidenceState}</span>
+        <span className={`badge badge-${series.evidence_state ?? series.evidenceState}`}>{series.evidence_state ?? series.evidenceState}</span>
       </div>
       <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`${series.label} time series`}>
         <path
@@ -87,7 +86,13 @@ function MiniSeries({ series }: { series: NamedSeries }) {
           fill="none"
           stroke={SOURCE_COLOR[series.source]}
           strokeWidth="1.8"
-          strokeDasharray={series.evidenceState === "ESTIMATED" || series.evidenceState === "INFERRED" || series.coverage === "INCOMPLETE" ? "4 3" : undefined}
+          strokeDasharray={
+            series.evidence_state === "estimated" ||
+            series.evidence_state === "inferred" ||
+            series.coverage === "partial_coverage"
+              ? "4 3"
+              : undefined
+          }
         />
       </svg>
       <div className="row-between section-note">
@@ -152,7 +157,7 @@ export function HeatmapChart({ heatmap }: { heatmap: Heatmap }) {
   return (
     <div>
       <p className="section-note">
-        {heatmap.label} · {sourceLabel(heatmap.source)} · {heatmap.evidenceState} · {heatmap.coverage}
+        {heatmap.label} · {sourceLabel(heatmap.source)} · {heatmap.evidence_state ?? heatmap.evidenceState} · {heatmap.coverage}
       </p>
       <div className="heatmap" role="img" aria-label={heatmap.label}>
         <div className="heatmap-row">
@@ -173,7 +178,7 @@ export function HeatmapChart({ heatmap }: { heatmap: Heatmap }) {
                 <span
                   key={`${y}-${x}`}
                   className="heat-cell"
-                  title={`${y} ${x}: ${cell?.value ?? "—"} (${cell?.evidenceState ?? "UNAVAILABLE"})`}
+                  title={`${y} ${x}: ${cell?.value ?? "—"} (${cell?.evidence_state ?? cell?.evidenceState ?? "unavailable"})`}
                   style={{ background: `color-mix(in srgb, var(--ai) ${Math.round(t * 80)}%, var(--bg-hover))` }}
                 />
               );
@@ -198,7 +203,7 @@ export function SourceComparisonTable({
   }[];
   onOpen: (metric: Metric) => void;
 }) {
-  const sources: SourceId[] = ["cloudflare_edge", "cloudflare_rum", "ga4", "vercel", "first_party"];
+  const sources: SourceId[] = ["cloudflare", "ga4", "vercel", "first_party", "combined"];
   return (
     <div className="table-wrap">
       <table className="data">
@@ -221,14 +226,15 @@ export function SourceComparisonTable({
                 const metric = row.values[s];
                 if (!metric) return <td key={s}>—</td>;
                 return (
-                  <td key={s} className="num" title={`${metric.label} · ${metric.grain} · ${metric.evidenceState} · ${metric.coverage}`}>
+                  <td key={s} className="num" title={`${metric.label} · ${metric.grain} · ${metric.evidence_state} · ${metric.exactness} · ${metric.coverageState}`}>
                     <button type="button" className="linkish" onClick={() => onOpen(metric)}>
                       {formatMetric(metric)}
                     </button>
                     <div>
-                      <span className={`badge badge-${metric.evidenceState}`}>{metric.evidenceState}</span>
-                      {metric.coverage !== "COMPLETE" ? (
-                        <span className={`badge badge-${metric.coverage}`}>{metric.coverage}</span>
+                      <span className={`badge badge-${metric.evidence_state}`}>{metric.evidence_state}</span>
+                      <span className={`badge badge-${metric.exactness}`}>{metric.exactness}</span>
+                      {metric.coverageState !== "full_coverage" ? (
+                        <span className={`badge badge-${metric.coverageState}`}>{metric.coverageState}</span>
                       ) : null}
                     </div>
                   </td>

@@ -1,13 +1,12 @@
-import type { CoverageState, EvidenceState, Metric, SourceId } from "./types";
-import { ABSENT_EVIDENCE, SOURCES } from "./types";
+import type { CoverageState, EvidenceState, Exactness, Metric, SourceId } from "./types";
+import { ABSENT_EVIDENCE, SOURCES } from "./canonical";
 
 const SOURCE_LABEL: Record<SourceId, string> = {
-  cloudflare_edge: "Cloudflare edge",
-  cloudflare_rum: "Cloudflare RUM",
+  cloudflare: "Cloudflare",
   ga4: "GA4",
   vercel: "Vercel",
   first_party: "First-party",
-  modeled: "Modeled",
+  combined: "Combined (declared)",
 };
 
 export function sourceLabel(id: SourceId): string {
@@ -18,21 +17,25 @@ export function isSourceId(value: string): value is SourceId {
   return (SOURCES as readonly string[]).includes(value);
 }
 
-export function isAbsentMetric(metric: Pick<Metric, "evidenceState" | "value">): boolean {
-  return (ABSENT_EVIDENCE as readonly string[]).includes(metric.evidenceState);
+export function isAbsentMetric(metric: Pick<Metric, "evidence_state" | "evidenceState" | "value">): boolean {
+  const state = metric.evidence_state ?? metric.evidenceState;
+  return (ABSENT_EVIDENCE as readonly string[]).includes(state);
 }
 
-/** Display formatting only. Never renders 0 for UNAVAILABLE/UNKNOWABLE. */
 export function formatMetric(metric: Metric): string {
   if (isAbsentMetric(metric)) {
-    if (metric.display && metric.display !== "0" && metric.display !== "0.0") return metric.display;
-    return metric.evidenceState === "UNKNOWABLE" ? "unknowable" : "—";
+    const display = metric.display ?? metric.supplied_display;
+    if (display && display !== "0" && display !== "0.0") return display;
+    return (metric.evidence_state ?? metric.evidenceState) === "unknowable" ? "unknowable" : "—";
   }
   if (metric.display) return metric.display;
-  if (metric.ratio?.display) return metric.ratio.display;
-  if (metric.value === null) return "—";
+  if (metric.supplied_display) return metric.supplied_display;
+  const ratioDisplay = metric.ratio && "supplied_display" in metric.ratio ? metric.ratio.supplied_display : metric.ratio && "display" in metric.ratio ? metric.ratio.display : undefined;
+  if (ratioDisplay) return ratioDisplay;
+  if (metric.value === null || metric.value === undefined) return "—";
   const formatted = formatNumber(metric.value);
-  if (metric.evidenceState === "ESTIMATED" || metric.evidenceState === "INFERRED") return `≈ ${formatted}`;
+  const state = metric.evidence_state ?? metric.evidenceState;
+  if (state === "estimated" || state === "inferred") return `≈ ${formatted}`;
   return formatted;
 }
 
@@ -49,35 +52,52 @@ export function formatNumber(value: number): string {
 }
 
 export function formatConfidence(metric: Metric): string | null {
-  const c = metric.confidence;
+  const c = metric.confidence_interval ?? metric.confidence;
   if (!c) return null;
+  const lower = "lower_bound" in c && c.lower_bound != null ? c.lower_bound : "lower" in c ? c.lower : undefined;
+  const upper = "upper_bound" in c && c.upper_bound != null ? c.upper_bound : "upper" in c ? c.upper : undefined;
+  const valid = "valid" in c ? c.valid : c.intervalValid;
   const parts: string[] = [];
-  if (typeof c.lower === "number" && typeof c.upper === "number") {
-    const span = `CI ${formatNumber(c.lower)}–${formatNumber(c.upper)}`;
-    parts.push(c.intervalValid === false ? `${span} (invalid)` : span);
+  if (typeof lower === "number" && typeof upper === "number") {
+    const span = `CI ${formatNumber(lower)}–${formatNumber(upper)}`;
+    parts.push(valid === false ? `${span} (invalid)` : span);
   }
-  if (typeof c.level === "number") {
-    parts.push(`${Math.round(c.level * 100)}% level`);
-  }
-  if (c.intervalValid === false) parts.push("interval not valid");
-  if (c.note) parts.push(c.note);
+  if (typeof c.level === "number") parts.push(`${Math.round(c.level * 100)}% level`);
+  if (valid === false) parts.push("interval not valid");
+  if ("invalid_reason" in c && c.invalid_reason) parts.push(c.invalid_reason);
+  if ("note" in c && c.note) parts.push(c.note);
   return parts.length ? parts.join(" · ") : null;
 }
 
 export function evidenceHint(state: EvidenceState): string {
   switch (state) {
-    case "MEASURED":
-      return "Measured within the source product definition";
-    case "SAMPLED":
+    case "measured":
+      return "Measured within the source product definition. Not automatically exact.";
+    case "sampled":
       return "Sampled collection — not a census";
-    case "INFERRED":
-      return "Inferred from other measured signals by a declared rule — not a statistical estimate";
-    case "ESTIMATED":
+    case "inferred":
+      return "Inferred from other measured signals by a declared method — not a statistical estimate";
+    case "estimated":
       return "Modeled estimate with uncertainty — not a measurement";
-    case "UNAVAILABLE":
+    case "unavailable":
       return "Source did not emit this metric";
-    case "UNKNOWABLE":
+    case "unknowable":
       return "Cannot be known from available evidence";
+    default:
+      return state;
+  }
+}
+
+export function exactnessHint(state: Exactness): string {
+  switch (state) {
+    case "exact":
+      return "Exact within the source product definition";
+    case "inexact":
+      return "Inexact — measured or modeled with known imprecision";
+    case "not_applicable":
+      return "Exactness does not apply to this observation";
+    case "unknown":
+      return "Exactness was not supplied";
     default:
       return state;
   }
@@ -85,20 +105,43 @@ export function evidenceHint(state: EvidenceState): string {
 
 export function coverageHint(state: CoverageState): string {
   switch (state) {
-    case "COMPLETE":
+    case "full_coverage":
       return "Declared coverage is complete for this slice";
-    case "INCOMPLETE":
-      return "Partial coverage — missing properties, days, or fields";
-    case "MISSING":
-      return "This source is missing for the slice";
-    case "NOT_APPLICABLE":
-      return "Coverage is not applicable to this metric";
+    case "partial_coverage":
+      return "Partial coverage";
+    case "unknown_coverage":
+      return "Coverage is unknown";
+    case "source_unavailable":
+      return "Source unavailable for this query";
+    case "historical_data_unavailable":
+      return "Requested history is outside retained data";
+    case "retention_exceeded":
+      return "Retention exceeded";
+    case "instrumentation_absent":
+      return "Instrumentation is absent";
+    case "measurement_bypass":
+      return "Measurement was bypassed";
+    case "scope_blocked":
+      return "Scope is blocked";
+    case "structurally_unknowable":
+      return "Structurally unknowable";
     default:
       return state;
   }
 }
 
-/** @deprecated Use evidenceHint. Kept so older call sites compile during the pass. */
 export function statusHint(state: EvidenceState | string): string {
   return evidenceHint(state as EvidenceState);
+}
+
+export function coverageStateOf(metric: Metric): CoverageState {
+  if (metric.coverage && typeof metric.coverage === "object" && "state" in metric.coverage) return metric.coverage.state;
+  return metric.coverageState;
+}
+
+export function neverRecomputeRatio(metric: Metric): number | null {
+  if (!metric.ratio) return metric.value;
+  if ("ratio_value" in metric.ratio && metric.ratio.ratio_value != null) return metric.ratio.ratio_value;
+  if ("value" in metric.ratio && metric.ratio.value != null) return metric.ratio.value;
+  return metric.value;
 }

@@ -50,8 +50,8 @@ export function FiltersBar({
         <span>Source</span>
         <select value={filters.source} onChange={(e) => onChange({ source: e.target.value })}>
           <option value="all">All sources</option>
-          {gold.sources.map((source) => (
-            <option key={source.id} value={source.id}>
+          {gold.sources.map((source, index) => (
+            <option key={`${source.id}:${source.shortLabel}:${index}`} value={source.id}>
               {source.label}
             </option>
           ))}
@@ -192,22 +192,22 @@ export function FiltersBar({
         <span>Evidence state</span>
         <select value={filters.quality} onChange={(e) => onChange({ quality: e.target.value })}>
           <option value="all">All</option>
-          <option value="MEASURED">MEASURED</option>
-          <option value="SAMPLED">SAMPLED</option>
-          <option value="INFERRED">INFERRED</option>
-          <option value="ESTIMATED">ESTIMATED</option>
-          <option value="UNAVAILABLE">UNAVAILABLE</option>
-          <option value="UNKNOWABLE">UNKNOWABLE</option>
+          <option value="measured">measured</option>
+          <option value="sampled">sampled</option>
+          <option value="inferred">inferred</option>
+          <option value="estimated">estimated</option>
+          <option value="unavailable">unavailable</option>
+          <option value="unknowable">unknowable</option>
         </select>
       </label>
       <label className="filter">
         <span>Coverage</span>
         <select value={filters.coverage} onChange={(e) => onChange({ coverage: e.target.value })}>
           <option value="all">All</option>
-          <option value="COMPLETE">COMPLETE</option>
-          <option value="INCOMPLETE">INCOMPLETE</option>
-          <option value="MISSING">MISSING</option>
-          <option value="NOT_APPLICABLE">NOT_APPLICABLE</option>
+          <option value="full_coverage">full_coverage</option>
+          <option value="partial_coverage">partial_coverage</option>
+          <option value="source_unavailable">source_unavailable</option>
+          <option value="structurally_unknowable">structurally_unknowable</option>
         </select>
       </label>
     </div>

@@ -28,9 +28,14 @@ export function metricById(metrics: Metric[], id: string): Metric | undefined {
 export function unavailable(partial: Pick<Metric, "id" | "label" | "source" | "grain" | "definitionId" | "pipelineVersion" | "timeWindow">): Metric {
   return {
     ...partial,
+    metric_id: partial.id,
+    metric_definition: partial.definitionId,
     value: null,
-    evidenceState: "UNAVAILABLE",
-    coverage: "MISSING",
+    evidence_state: "unavailable",
+    evidenceState: "unavailable",
+    exactness: "unknown",
+    coverage: { state: "source_unavailable" },
+    coverageState: "source_unavailable",
     limitations: ["No matching Gold slice for the current filters."],
   };
 }
@@ -42,7 +47,7 @@ export function unavailable(partial: Pick<Metric, "id" | "label" | "source" | "g
 export function filterRanked(rows: RankedItem[], filters: Filters): RankedItem[] {
   return rows.filter((row) => {
     if (filters.source !== "all" && row.source !== filters.source) return false;
-    if (filters.quality !== "all" && row.evidenceState !== filters.quality) return false;
+    if (filters.quality !== "all" && row.evidence_state !== filters.quality && row.evidenceState !== filters.quality) return false;
     if (filters.coverage !== "all" && row.coverage !== filters.coverage) return false;
     if (filters.path && !row.label.toLowerCase().includes(filters.path.toLowerCase()) && row.id !== filters.path) {
       return false;
@@ -65,13 +70,17 @@ export function filterRanked(rows: RankedItem[], filters: Filters): RankedItem[]
 export function filterMetrics(metrics: Metric[], filters: Filters): Metric[] {
   return metrics.filter((metric) => {
     if (filters.source !== "all" && metric.source !== filters.source) return false;
-    if (filters.quality !== "all" && metric.evidenceState !== filters.quality) return false;
-    if (filters.coverage !== "all" && metric.coverage !== filters.coverage) return false;
+    if (filters.quality !== "all" && metric.evidence_state !== filters.quality && metric.evidenceState !== filters.quality) return false;
+    if (filters.coverage !== "all" && metric.coverageState !== filters.coverage && metric.coverage.state !== filters.coverage) return false;
     if (filters.confidence !== "all") {
-      const hasBounds = typeof metric.confidence?.lower === "number" && typeof metric.confidence?.upper === "number";
+      const ci = metric.confidence_interval ?? metric.confidence;
+      const lower = ci && ("lower_bound" in ci ? ci.lower_bound : "lower" in ci ? ci.lower : undefined);
+      const upper = ci && ("upper_bound" in ci ? ci.upper_bound : "upper" in ci ? ci.upper : undefined);
+      const valid = ci && ("valid" in ci ? ci.valid : ci.intervalValid);
+      const hasBounds = typeof lower === "number" && typeof upper === "number";
       if (filters.confidence === "has_interval" && !hasBounds) return false;
-      if (filters.confidence === "invalid" && metric.confidence?.intervalValid !== false) return false;
-      if (filters.confidence === "none" && metric.confidence) return false;
+      if (filters.confidence === "invalid" && valid !== false) return false;
+      if (filters.confidence === "none" && ci) return false;
     }
     return true;
   });
@@ -88,7 +97,7 @@ export function filterActors(actors: ActorRecord[], filters: Filters): ActorReco
     ) {
       return false;
     }
-    if (filters.source !== "all" && actor.source !== filters.source) return false;
+    if (filters.source !== "all" && actor.source !== filters.source && actor.source !== "cloudflare") return false;
     if (filters.site !== "all") {
       const hitsSite = actor.targetSites.some(
         (site) => site.id.endsWith(`.${filters.site}`) || site.label.includes(filters.site),

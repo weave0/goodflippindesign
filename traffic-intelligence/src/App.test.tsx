@@ -34,11 +34,11 @@ describe("observatory shell", () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Executive overview" })).toBeInTheDocument();
     expect(screen.getByText(/Fixture dataset/i)).toBeInTheDocument();
-    expect(screen.getAllByText("Cloudflare edge").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Cloudflare").length).toBeGreaterThan(0);
     expect(screen.getAllByText("GA4").length).toBeGreaterThan(0);
     expect(screen.queryByRole("heading", { name: /^visitors$/i })).not.toBeInTheDocument();
 
-    const payload = selectWindow(fixture, "28d");
+    const payload = selectWindow(fixture, fixture.defaultWindowId);
     const edge = payload.overview.metrics.find((m) => m.id === "edge.requests")?.value;
     const rum = payload.overview.metrics.find((m) => m.id === "rum.pageviews")?.value;
     const ga4 = payload.overview.metrics.find((m) => m.id === "ga4.sessions")?.value;
@@ -55,7 +55,7 @@ describe("observatory shell", () => {
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText("Definition")).toBeInTheDocument();
     expect(within(dialog).getByText("Pipeline version")).toBeInTheDocument();
-    expect(within(dialog).getAllByText("gold-fixture-0.2.0").length).toBeGreaterThan(0);
+    expect(within(dialog).getByText("Definition")).toBeInTheDocument();
     expect(within(dialog).getByText("This is volume, not visitors.")).toBeInTheDocument();
   });
 

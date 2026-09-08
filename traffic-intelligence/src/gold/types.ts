@@ -1,47 +1,52 @@
 /**
- * GFD Traffic Intelligence — Gold-layer *consumer view model*.
+ * Presentation view model built FROM Canonical Gold 1.2.
  *
- * Authoritative measurement lives in the pipeline. This file is what the UI
- * reads after `adaptGold()`. Field-name drift from canonical M1.1 is absorbed
- * in the adapter, not in views.
- *
- * The UI does not redefine visitor, user, session, pageview, human, bot,
- * AI crawler, AI agent, threat, or confidence.
- * The UI must not sum overlapping sources into a single visitors figure.
+ * Canonical producer fields are snake_case on Metric (evidence_state, exactness,
+ * coverage object, confidence_interval, …). CamelCase copies are reader-only
+ * aliases filled by the adapter — never producer fields.
  */
+export {
+  ABSENT_EVIDENCE,
+  COVERAGE_STATES,
+  EVIDENCE_STATES,
+  EXACTNESS_STATES,
+  SOURCES,
+  UNIQUE_COUNT_SEMANTICS,
+  type CanonicalGold12,
+  type CoverageMetadata,
+  type CoverageState,
+  type EvidenceState,
+  type Exactness,
+  type Gold12Classification,
+  type Gold12ConfidenceInterval,
+  type Gold12Metric,
+  type Gold12Provenance,
+  type Gold12RatioSemantics,
+  type Gold12SourceSupport,
+  type Gold12Topology,
+  type SourceId,
+  type UniqueCountSemantics,
+} from "./canonical";
 
-export const EVIDENCE_STATES = [
-  "MEASURED",
-  "SAMPLED",
-  "INFERRED",
-  "ESTIMATED",
-  "UNAVAILABLE",
-  "UNKNOWABLE",
-] as const;
-export type EvidenceState = (typeof EVIDENCE_STATES)[number];
+import type {
+  CanonicalGold12,
+  CoverageMetadata,
+  CoverageState,
+  EvidenceState,
+  Exactness,
+  Gold12Classification,
+  Gold12ConfidenceInterval,
+  Gold12Metric,
+  Gold12Provenance,
+  Gold12RatioSemantics,
+  Gold12SourceSupport,
+  Gold12Topology,
+  SourceId,
+  UniqueCountSemantics,
+} from "./canonical";
 
-export const ABSENT_EVIDENCE: readonly EvidenceState[] = ["UNAVAILABLE", "UNKNOWABLE"];
-
-export const COVERAGE_STATES = ["COMPLETE", "INCOMPLETE", "MISSING", "NOT_APPLICABLE"] as const;
-export type CoverageState = (typeof COVERAGE_STATES)[number];
-
-export const UNIQUE_SEMANTICS = [
-  "source_native_zone_unique",
-  "sum_of_zone_uniques",
-  "deduplicated_ecosystem_unique",
-  "not_unique",
-] as const;
-export type UniqueSemantics = (typeof UNIQUE_SEMANTICS)[number];
-
-export const SOURCES = [
-  "cloudflare_edge",
-  "cloudflare_rum",
-  "ga4",
-  "vercel",
-  "first_party",
-  "modeled",
-] as const;
-export type SourceId = (typeof SOURCES)[number];
+/** @deprecated Gold 1.2 uses unique_count_semantics. Kept as a reader alias type. */
+export type UniqueSemantics = UniqueCountSemantics;
 
 export const HUMAN_MACHINE_CLASSES = [
   "human_evidence",
@@ -91,40 +96,53 @@ export const GRAINS = [
 export type Grain = (typeof GRAINS)[number];
 
 export interface Sampling {
-  interval?: number | string;
+  interval?: number | string | null;
   intervalMeaning?: string;
-  factor?: number;
+  factor?: number | null;
   factorMeaning?: string;
+  meaning?: string;
 }
 
+/** Reader-shaped confidence. Canonical producer field is confidence_interval. */
 export interface Confidence {
-  /** 0–1, e.g. 0.95. Pipeline-provided. */
-  level?: number;
-  /** False means bounds are preserved but must not be treated as a valid CI. */
+  level?: number | null;
+  valid?: boolean;
   intervalValid?: boolean;
-  lower?: number;
-  upper?: number;
+  lower?: number | null;
+  upper?: number | null;
+  lower_bound?: number | null;
+  upper_bound?: number | null;
+  invalid_reason?: string | null;
   note?: string;
 }
 
 export interface RatioSemantics {
-  value: number | null;
-  unit: "share" | "rate" | "ratio" | string;
+  ratio_value?: number | null;
+  ratio_unit?: string;
+  value?: number | null;
+  unit?: string;
+  numerator?: { reference_type: "metric_id" | "source_observation_id"; reference_id: string };
+  denominator?: { reference_type: "metric_id" | "source_observation_id"; reference_id: string };
   numeratorRef?: string;
   denominatorRef?: string;
   numeratorValue?: number | null;
   denominatorValue?: number | null;
   display?: string;
-  /** When true the UI must not recompute from numerator/denominator. */
-  authoritative: boolean;
+  supplied_display?: string | null;
+  authoritative?: boolean;
 }
 
 export interface Provenance {
+  method_id?: string | null;
+  method_version?: string | null;
   modelId?: string;
   modelVersion?: string;
   method?: string;
   contributingSources?: SourceId[];
   contributingMetricIds?: string[];
+  source_metrics?: string[];
+  source_snapshots?: string[];
+  limitations?: string[];
 }
 
 export interface TimeWindow {
@@ -141,23 +159,33 @@ export interface TimeWindow {
 }
 
 export interface Metric {
+  metric_id: string;
   id: string;
   label: string;
-  /** Null when evidence is UNAVAILABLE or UNKNOWABLE. Zero is only a measured zero. */
+  metric_definition: string;
+  /** Null when evidence is unavailable/unknowable. Zero is only a measured zero. */
   value: number | null;
   display?: string;
-  unit?: string;
+  supplied_display?: string | null;
+  unit?: string | null;
   source: SourceId;
   grain: Grain;
+  evidence_state: EvidenceState;
   evidenceState: EvidenceState;
-  coverage: CoverageState;
+  exactness: Exactness;
+  coverage: CoverageMetadata;
+  coverageState: CoverageState;
   timeWindow: Pick<TimeWindow, "id" | "start" | "end"> & Partial<TimeWindow>;
+  observation?: Gold12Metric["observation"];
+  semantics?: Gold12Metric["semantics"];
   definitionId: string;
-  sampling?: Sampling;
+  sampling?: Sampling | Gold12Metric["sampling"];
   confidence?: Confidence;
-  ratio?: RatioSemantics;
-  provenance?: Provenance;
-  uniqueSemantics?: UniqueSemantics;
+  confidence_interval?: Gold12ConfidenceInterval | null;
+  ratio?: RatioSemantics | Gold12RatioSemantics | null;
+  classification?: Gold12Classification | null;
+  provenance?: Provenance | Gold12Provenance;
+  uniqueSemantics?: UniqueCountSemantics;
   sourceNativeClass?: string;
   normalizedClass?: string;
   limitations?: string[];
@@ -193,7 +221,9 @@ export interface RankedItem {
   display?: string;
   shareDisplay?: string;
   source: SourceId;
+  evidence_state: EvidenceState;
   evidenceState: EvidenceState;
+  exactness?: Exactness;
   coverage: CoverageState;
   grain: Grain;
   definitionId: string;
@@ -206,6 +236,7 @@ export interface RankedItem {
 export interface SeriesPoint {
   date: string;
   value: number | null;
+  evidence_state: EvidenceState;
   evidenceState: EvidenceState;
   coverage?: CoverageState;
 }
@@ -215,7 +246,9 @@ export interface NamedSeries {
   label: string;
   source: SourceId;
   grain: Grain;
+  evidence_state: EvidenceState;
   evidenceState: EvidenceState;
+  exactness?: Exactness;
   coverage: CoverageState;
   definitionId: string;
   points: SeriesPoint[];
@@ -225,6 +258,7 @@ export interface HeatCell {
   x: string;
   y: string;
   value: number | null;
+  evidence_state: EvidenceState;
   evidenceState: EvidenceState;
 }
 
@@ -233,6 +267,7 @@ export interface Heatmap {
   label: string;
   source: SourceId;
   grain: Grain;
+  evidence_state: EvidenceState;
   evidenceState: EvidenceState;
   coverage: CoverageState;
   definitionId: string;
@@ -278,7 +313,9 @@ export interface ActorRecord {
   sourceNativeClass: string;
   normalizedClass: string;
   source: SourceId;
+  evidence_state: EvidenceState;
   evidenceState: EvidenceState;
+  exactness?: Exactness;
   coverage: CoverageState;
   definitionId: string;
   metrics: Metric[];
@@ -306,6 +343,7 @@ export interface Anomaly {
   detail: string;
   siteId?: string;
   sources: SourceId[];
+  evidence_state: EvidenceState;
   evidenceState: EvidenceState;
   action?: string;
   severity: "info" | "watch" | "action";
@@ -412,19 +450,23 @@ export interface WindowPayload {
 
 export interface GoldContract {
   contract: {
-    name: "gfd-traffic-intelligence-gold";
+    name: string;
     version: string;
     pipelineVersion: string;
     producedAt: string;
+    generatedAt: string;
     kind: "fixture" | "production";
     notes: string[];
   };
+  canonical?: CanonicalGold12;
   definitions: Definition[];
   sources: SourceDescriptor[];
   defaultWindowId: string;
   windows: Record<string, WindowPayload>;
+  topology?: Gold12Topology;
+  sourceSupport?: Gold12SourceSupport[];
 }
 
-export const FORBIDDEN_COMBINED_SOURCES = ["combined", "total", "all_sources", "blended"] as const;
+export const FORBIDDEN_COMBINED_SOURCES = ["total", "all_sources", "blended"] as const;
 
 export const NATIVE_AI_CLASSES = ["AI Crawler", "AI Search", "AI Assistant"] as const;

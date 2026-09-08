@@ -1,90 +1,45 @@
-# Gold-layer consumer contract — schema assumptions
+# Gold 1.2 consumer — migration map
 
-This UI does **not** own the analytics pipeline. It consumes a Gold JSON
-document through a single adapter (`src/gold/adapter.ts`) into a view model
-(`src/gold/types.ts`). Canonical M1.1 field names from the
-measurement-engineering repository may differ; map them in the adapter.
+Canonical producer: `gfd-canonical-gold` **1.2.0** at measurement-engineering commit
+`2a3bce3a7e5761a25a6412e6f7aab4fb781d7c40`.
 
-Until that contract is frozen, this milestone implements consumer fixture
-contract `gfd-traffic-intelligence-gold` **1.1.0-consumer**,
-pipelineVersion `gold-fixture-0.2.0`.
+Parser: `src/gold/parse-canonical.ts` (producer spellings only).
+Aliases: `adaptLegacy()` only. They are not canonical fields.
 
-## Kind / dataset mode
+## Canonical field → internal UX field
 
-`contract.kind` is `"fixture"` for the bundled document. The shell shows a
-fixture-dataset indicator. Production documents must set `"production"`.
+| Canonical Gold 1.2 | Internal UX |
+|---|---|
+| `schema_version` | `contract.version` |
+| `contract_name` | `contract.name` |
+| `fixture` | `contract.kind` (`true` → fixture) |
+| `generated_at` | `contract.generatedAt` (not the observation window) |
+| `pipeline_version` | `contract.pipelineVersion` |
+| `metrics[].metric_id` | `metric.metric_id` / `metric.id` |
+| `metrics[].metric_definition` | `metric.metric_definition` |
+| `metrics[].evidence_state` | `metric.evidence_state` |
+| `metrics[].exactness` | `metric.exactness` |
+| `metrics[].coverage` (object) | `metric.coverage` (object retained) |
+| `metrics[].observation.*` | `metric.observation` + `timeWindow` |
+| `metrics[].sampling` | `metric.sampling` |
+| `metrics[].confidence_interval` | `metric.confidence_interval` |
+| `metrics[].ratio.numerator/denominator` | typed `{ reference_type, reference_id }` |
+| `metrics[].classification` | `metric.classification` |
+| `metrics[].provenance.method_id/version` | `metric.provenance` |
+| `metrics[].semantics.unique_count_semantics` | uniqueness vocabulary |
+| `topology` | `gold.topology` (Laboratory) |
+| `source_support` | `gold.sourceSupport` (Laboratory) |
 
-## Evidence vs coverage
+## Independent exactness
 
-These are separate axes. Do not collapse them into one badge.
+`evidence_state` is not exactness. `measured` + `exact` and `measured` + `inexact` both exist.
+The adapter does **not** map `EXACT → measured + full_coverage` on the canonical path.
 
-**Evidence state:** `MEASURED | SAMPLED | INFERRED | ESTIMATED | UNAVAILABLE | UNKNOWABLE`
+## Reader-only aliases (legacy documents)
 
-**Coverage state:** `COMPLETE | INCOMPLETE | MISSING | NOT_APPLICABLE`
+See `CANONICAL_ALIASES_READER_ONLY` in `src/gold/adapter.ts`.
 
-`INCOMPLETE` is coverage, not evidence.
+## Fixture files
 
-The adapter maps a legacy overloaded `status` (`EXACT`, `SAMPLED`,
-`ESTIMATED`, `INCOMPLETE`, `UNAVAILABLE`) if a document still uses it.
-
-## Missing evidence
-
-`value` is `null` when evidence is `UNAVAILABLE` or `UNKNOWABLE`.
-The UI never renders `0` for those states.
-
-## Confidence and sampling
-
-Sampling is `{ interval, intervalMeaning, factor, factorMeaning }`.
-
-Confidence is `{ level, intervalValid, lower, upper, note }`.
-Invalid intervals retain bounds and `intervalValid: false`.
-
-## Unique-user semantics
-
-`uniqueSemantics` is one of:
-
-- `source_native_zone_unique`
-- `sum_of_zone_uniques`
-- `deduplicated_ecosystem_unique`
-- `not_unique`
-
-A deduplicated ecosystem-human figure must be pipeline-provided with that
-semantics. The UI never calculates it. Sum of zone uniques is not ecosystem
-unique humans.
-
-## Classification
-
-Ranked/AI rows may carry both:
-
-- `sourceNativeClass` (e.g. Cloudflare `AI Crawler`, `AI Search`, `AI Assistant`)
-- `normalizedClass` (GFD taxonomy, including `unknown`)
-
-UNKNOWN is first-class. A browser-like UA is not proof of a human.
-
-## Ratios
-
-Ratios preserve numeric `value`, `unit`, numerator/denominator refs, and a
-pipeline `display`. `authoritative: true` means the UI must not recompute.
-
-## Provenance
-
-Modeled / inferred / estimated metrics may carry `modelId`, `modelVersion`,
-`method`, contributing sources and metric ids, plus limitations and confidence.
-
-## Windows
-
-Presets `7d` and `28d`. Metadata: start, end, timezone, boundary,
-extractedAt, generatedAt, `partialCurrentPeriod`. The UI does not label a
-window “current” merely because it is open.
-
-## Geography
-
-Four lists with explicit location meaning (Cloudflare request country,
-RUM/GA4-observed geography, AI request country, threat request country).
-Not audience demographics.
-
-## Non-additivity
-
-The UI never derives an ecosystem total by arithmetic over Cloudflare, RUM,
-GA4, Vercel, or first-party values. Source disagreement belongs in the
-Measurement Laboratory.
+- `public/gold/canonical-gold-m1.2.json` — byte-for-byte canonical contract fixture
+- `public/gold/fixture.v1.json` — canonical envelope + `presentation.windows` for milestone screens

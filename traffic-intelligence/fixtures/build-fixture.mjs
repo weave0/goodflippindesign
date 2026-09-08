@@ -7,7 +7,7 @@
  * Same-source daily series may be rolled into a window total here so the
  * fixture is internally consistent. Cross-source totals are never created.
  */
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -112,8 +112,11 @@ const VERCEL_REQUESTS_28 = [
 const DATES_7 = DATES_28.slice(-7);
 const take = (arr, n) => arr.slice(-n);
 
-function sumKnown(arr) {
-  return arr.reduce((acc, n) => acc + (typeof n === "number" ? n : 0), 0);
+/** Sum observed numbers only. Nulls are not zeros. Caller must treat holes as incomplete coverage. */
+function sumObserved(arr) {
+  const nums = arr.filter((n) => typeof n === "number");
+  if (!nums.length) return null;
+  return nums.reduce((acc, n) => acc + n, 0);
 }
 
 function mapEvidence(status, explicit) {
@@ -509,16 +512,16 @@ function buildWindow(windowId, dates, slices) {
   const start = dates[0];
   const end = dates[dates.length - 1];
   const m = (spec) => metric(windowId, start, end, spec);
-  const edgeRequests = sumKnown(slices.edgeRequests);
-  const edgePageviews = sumKnown(slices.edgePageviews);
-  const rumPageviews = sumKnown(slices.rumPageviews);
-  const ga4Sessions = sumKnown(slices.ga4Sessions);
-  const ga4Users = sumKnown(slices.ga4Users);
+  const edgeRequests = sumObserved(slices.edgeRequests);
+  const edgePageviews = sumObserved(slices.edgePageviews);
+  const rumPageviews = sumObserved(slices.rumPageviews);
+  const ga4Sessions = sumObserved(slices.ga4Sessions);
+  const ga4Users = sumObserved(slices.ga4Users);
   const vercelPresent = slices.vercelRequests.some((v) => typeof v === "number");
-  const vercelRequests = vercelPresent ? sumKnown(slices.vercelRequests) : null;
-  const aiRequests = sumKnown(slices.aiRequests);
-  const threats = sumKnown(slices.edgeThreats);
-  const errors = sumKnown(slices.edgeErrors);
+  const vercelRequests = vercelPresent ? sumObserved(slices.vercelRequests) : null;
+  const aiRequests = sumObserved(slices.aiRequests);
+  const threats = sumObserved(slices.edgeThreats);
+  const errors = sumObserved(slices.edgeErrors);
 
   const overviewMetrics = [
     m({
@@ -1764,7 +1767,7 @@ function siteRow(m, spec) {
       ranked({
         id: `${spec.id}.gptbot`,
         label: "GPTBot",
-        value: Math.round((spec.ai ?? 0) * 0.4),
+        value: spec.ai == null ? null : Math.round(spec.ai * 0.4),
         source: "cloudflare_edge",
         status: "EXACT",
         grain: "request",
@@ -1773,7 +1776,7 @@ function siteRow(m, spec) {
       ranked({
         id: `${spec.id}.claudebott`,
         label: "ClaudeBot",
-        value: Math.round((spec.ai ?? 0) * 0.22),
+        value: spec.ai == null ? null : Math.round(spec.ai * 0.22),
         source: "cloudflare_edge",
         status: "EXACT",
         grain: "request",
@@ -1784,7 +1787,7 @@ function siteRow(m, spec) {
       ranked({
         id: `${spec.id}.404`,
         label: "404",
-        value: Math.round((spec.errors ?? 0) * 0.5),
+        value: spec.errors == null ? null : Math.round(spec.errors * 0.5),
         source: "cloudflare_edge",
         status: "EXACT",
         grain: "request",
@@ -3812,6 +3815,25 @@ const gold = {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const outDir = join(__dirname, "..", "public", "gold");
 mkdirSync(outDir, { recursive: true });
+const canonicalPath = join(outDir, "canonical-gold-m1.2.json");
+const canonical = JSON.parse(readFileSync(canonicalPath, "utf8"));
+const presentation = scrub(gold);
+const wrapped = {
+  schema_version: "1.2.0",
+  contract_name: "gfd-canonical-gold",
+  fixture: true,
+  generated_at: canonical.generated_at,
+  pipeline_version: canonical.pipeline_version,
+  metrics: canonical.metrics,
+  topology: canonical.topology,
+  source_support: canonical.source_support,
+  presentation: {
+    windows: presentation.windows,
+    definitions: presentation.definitions,
+    sources: presentation.sources,
+    defaultWindowId: presentation.defaultWindowId,
+  },
+};
 const outFile = join(outDir, "fixture.v1.json");
-writeFileSync(outFile, `${JSON.stringify(scrub(gold), null, 2)}\n`, "utf8");
+writeFileSync(outFile, `${JSON.stringify(wrapped, null, 2)}\n`, "utf8");
 console.log(`Wrote ${outFile}`);

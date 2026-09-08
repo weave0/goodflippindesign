@@ -1,6 +1,6 @@
 import type { Definition, GoldContract, Metric } from "../gold/types";
-import { coverageHint, evidenceHint, formatConfidence, formatMetric, sourceLabel } from "../gold/format";
-import { CoverageBadge, EvidenceBadge } from "./StatusBadge";
+import { coverageHint, coverageStateOf, evidenceHint, exactnessHint, formatConfidence, formatMetric, sourceLabel } from "../gold/format";
+import { CoverageBadge, EvidenceBadge, ExactnessBadge } from "./StatusBadge";
 
 export function EvidenceDrawer({
   metric,
@@ -13,8 +13,12 @@ export function EvidenceDrawer({
 }) {
   if (!metric) return null;
   const definition: Definition | undefined = gold.definitions.find((d) => d.id === metric.definitionId);
-  const source = gold.sources.find((s) => s.id === metric.source);
+  const evidence = metric.evidence_state ?? metric.evidenceState;
+  const coverage = coverageStateOf(metric);
   const window = metric.timeWindow;
+  const observation = metric.observation;
+  const ratio = metric.ratio;
+  const provenance = metric.provenance;
   return (
     <>
       <button type="button" className="drawer-backdrop" aria-label="Close evidence" onClick={onClose} />
@@ -30,117 +34,127 @@ export function EvidenceDrawer({
           {formatMetric(metric)} · {sourceLabel(metric.source)}
         </p>
         <p className="badge-pair">
-          <EvidenceBadge state={metric.evidenceState} />
-          <CoverageBadge state={metric.coverage} />
+          <EvidenceBadge state={evidence} />
+          <ExactnessBadge state={metric.exactness} />
+          <CoverageBadge state={coverage} always />
         </p>
         <p className="section-note">
-          {evidenceHint(metric.evidenceState)} · {coverageHint(metric.coverage)}
+          {evidenceHint(evidence)} · {exactnessHint(metric.exactness)} · {coverageHint(coverage)}
         </p>
         <dl>
           <dt>Definition</dt>
           <dd>
-            {definition ? (
+            {metric.metric_definition || (definition ? (
               <>
                 <strong>{definition.term}</strong>
                 <div>{definition.text}</div>
               </>
             ) : (
               metric.definitionId
-            )}
+            ))}
           </dd>
           <dt>Source</dt>
+          <dd>{sourceLabel(metric.source)}</dd>
+          <dt>Grain / boundary</dt>
           <dd>
-            {sourceLabel(metric.source)}
-            {source ? <div className="section-note">{source.coverageNote}</div> : null}
+            {metric.grain}
+            {metric.semantics?.source_boundary ? ` · ${metric.semantics.source_boundary}` : ""}
           </dd>
-          <dt>Grain</dt>
-          <dd>{metric.grain}</dd>
+          <dt>Uniqueness</dt>
+          <dd>{metric.semantics?.unique_count_semantics ?? metric.uniqueSemantics ?? "not_unique_count"}</dd>
           <dt>Observation window</dt>
           <dd>
-            {window.start} → {window.end} ({window.id})
+            {(observation?.start ?? window.start)} → {(observation?.end ?? window.end)}
             <div className="section-note">
-              timezone {window.timezone ?? "not declared"}
-              {window.boundary ? ` · ${window.boundary}` : ""}
-              {window.partialCurrentPeriod ? " · partial current period (pipeline flag)" : ""}
+              timezone {observation?.timezone ?? window.timezone ?? "not declared"}
+              {observation?.boundary ? ` · ${observation.boundary}` : window.boundary ? ` · ${window.boundary}` : ""}
+              {(observation?.partial_current_period ?? window.partialCurrentPeriod) ? " · partial current period" : ""}
             </div>
-            {window.extractedAt || window.generatedAt ? (
-              <div className="section-note">
-                extracted {window.extractedAt ?? "—"} · generated {window.generatedAt ?? "—"}
-              </div>
-            ) : null}
+            <div className="section-note">
+              extracted_at {observation?.extracted_at ?? window.extractedAt ?? "—"}
+            </div>
+            <div className="section-note">
+              document generated_at {gold.contract.generatedAt} — not the measurement period
+            </div>
           </dd>
           <dt>Evidence state</dt>
-          <dd>{metric.evidenceState}</dd>
+          <dd>{evidence}</dd>
+          <dt>Exactness</dt>
+          <dd>{metric.exactness}</dd>
           <dt>Coverage</dt>
-          <dd>{metric.coverage}</dd>
+          <dd>
+            {coverage}
+            {metric.coverage.observed_fraction != null ? ` · observed_fraction ${metric.coverage.observed_fraction}` : ""}
+            {metric.coverage.missingness_reason ? <div className="section-note">{metric.coverage.missingness_reason}</div> : null}
+          </dd>
           <dt>Sample interval</dt>
           <dd>
-            {metric.sampling?.interval ?? "—"}
-            {metric.sampling?.intervalMeaning ? <div className="section-note">{metric.sampling.intervalMeaning}</div> : null}
+            {metric.sampling && "interval" in metric.sampling ? String(metric.sampling.interval ?? "—") : "—"}
+            {metric.sampling && "meaning" in metric.sampling && metric.sampling.meaning ? (
+              <div className="section-note">{metric.sampling.meaning}</div>
+            ) : null}
           </dd>
           <dt>Sample factor</dt>
-          <dd>
-            {metric.sampling?.factor ?? "—"}
-            {metric.sampling?.factorMeaning ? <div className="section-note">{metric.sampling.factorMeaning}</div> : null}
-          </dd>
+          <dd>{metric.sampling && "factor" in metric.sampling ? String(metric.sampling.factor ?? "—") : "—"}</dd>
           <dt>Confidence</dt>
           <dd>
             {formatConfidence(metric) ?? "Unknown — missing confidence is not 100%."}
-            {metric.confidence?.intervalValid === false ? (
+            {(metric.confidence_interval?.valid === false || metric.confidence?.valid === false || metric.confidence?.intervalValid === false) && (
               <div className="callout">Interval marked invalid. Bounds are retained and must not be read as a valid CI.</div>
-            ) : null}
-            {typeof metric.confidence?.lower === "number" ? (
-              <div className="section-note">
-                lower {metric.confidence.lower} · upper {metric.confidence.upper} · valid{" "}
-                {String(metric.confidence.intervalValid ?? "undeclared")}
-              </div>
-            ) : null}
+            )}
           </dd>
-          {metric.ratio ? (
+          {ratio ? (
             <>
               <dt>Ratio</dt>
               <dd>
-                {metric.ratio.display ?? metric.ratio.value} ({metric.ratio.unit})
-                {metric.ratio.authoritative ? " · pipeline-authoritative" : ""}
-                <div className="section-note">
-                  numerator {metric.ratio.numeratorRef ?? "—"}
-                  {metric.ratio.numeratorValue != null ? ` = ${metric.ratio.numeratorValue}` : ""} · denominator{" "}
-                  {metric.ratio.denominatorRef ?? "—"}
-                  {metric.ratio.denominatorValue != null ? ` = ${metric.ratio.denominatorValue}` : ""}
-                </div>
+                {"supplied_display" in ratio ? ratio.supplied_display : "display" in ratio ? ratio.display : null} ({"ratio_unit" in ratio ? ratio.ratio_unit : "unit" in ratio ? ratio.unit : ""})
+                <div className="section-note">Producer-supplied. The UI does not recompute this ratio.</div>
+                {"numerator" in ratio && ratio.numerator ? (
+                  <div className="section-note">
+                    numerator {ratio.numerator.reference_type}:{ratio.numerator.reference_id}
+                    {"numerator_value" in ratio && ratio.numerator_value != null ? ` = ${ratio.numerator_value}` : ""}
+                  </div>
+                ) : (
+                  <div className="section-note">numerator {"numeratorRef" in ratio ? ratio.numeratorRef : "—"}</div>
+                )}
+                {"denominator" in ratio && ratio.denominator ? (
+                  <div className="section-note">
+                    denominator {ratio.denominator.reference_type}:{ratio.denominator.reference_id}
+                    {"denominator_value" in ratio && ratio.denominator_value != null ? ` = ${ratio.denominator_value}` : ""}
+                  </div>
+                ) : (
+                  <div className="section-note">denominator {"denominatorRef" in ratio ? ratio.denominatorRef : "—"}</div>
+                )}
               </dd>
             </>
           ) : null}
-          {metric.uniqueSemantics ? (
-            <>
-              <dt>Unique semantics</dt>
-              <dd>{metric.uniqueSemantics.replaceAll("_", " ")}</dd>
-            </>
-          ) : null}
-          {metric.sourceNativeClass || metric.normalizedClass ? (
+          {metric.classification ? (
             <>
               <dt>Classification</dt>
               <dd>
-                native: {metric.sourceNativeClass ?? "—"}
-                <div className="section-note">normalized: {metric.normalizedClass ?? "—"}</div>
+                native: {metric.classification.source_native_class ?? "—"}
+                <div className="section-note">normalized: {metric.classification.normalized_class}</div>
+                <div className="section-note">
+                  source {metric.classification.source_id} · dataset {metric.classification.dataset_id}
+                </div>
+                {metric.classification.reason ? <div className="section-note">{metric.classification.reason}</div> : null}
               </dd>
             </>
           ) : null}
-          {metric.provenance ? (
+          {provenance ? (
             <>
-              <dt>Provenance</dt>
+              <dt>Method lineage</dt>
               <dd>
-                {metric.provenance.modelId ? (
+                {("method_id" in provenance && provenance.method_id) || ("modelId" in provenance && provenance.modelId) ? (
                   <div>
-                    {metric.provenance.modelId} {metric.provenance.modelVersion ?? ""}
+                    {("method_id" in provenance && provenance.method_id) || ("modelId" in provenance ? provenance.modelId : "")}{" "}
+                    {("method_version" in provenance && provenance.method_version) || ("modelVersion" in provenance ? provenance.modelVersion : "")}
                   </div>
-                ) : null}
-                {metric.provenance.method ? <div>{metric.provenance.method}</div> : null}
-                {metric.provenance.contributingSources?.length ? (
-                  <div className="section-note">sources: {metric.provenance.contributingSources.join(", ")}</div>
-                ) : null}
-                {metric.provenance.contributingMetricIds?.length ? (
-                  <div className="section-note">metrics: {metric.provenance.contributingMetricIds.join(", ")}</div>
+                ) : (
+                  "—"
+                )}
+                {("source_metrics" in provenance && provenance.source_metrics?.length) ? (
+                  <div className="section-note">source_metrics: {provenance.source_metrics.join(", ")}</div>
                 ) : null}
               </dd>
             </>
@@ -148,7 +162,9 @@ export function EvidenceDrawer({
           <dt>Known limitations</dt>
           <dd>
             <ul>
-              {(metric.limitations ?? definition?.knownLimitations ?? ["None declared on this metric."]).map((item) => (
+              {(metric.limitations ??
+                (provenance && "limitations" in provenance ? provenance.limitations : undefined) ??
+                definition?.knownLimitations ?? ["None declared on this metric."]).map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
