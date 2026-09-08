@@ -1,10 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://goodflippindesign.com/schema/gfd-traffic-intelligence-gold.v1.json",
-  "title": "GFD Traffic Intelligence Gold contract",
+  "title": "GFD Traffic Intelligence Gold consumer view model",
   "type": "object",
   "required": ["contract", "definitions", "sources", "defaultWindowId", "windows"],
-  "additionalProperties": false,
   "properties": {
     "contract": {
       "type": "object",
@@ -18,33 +17,17 @@
         "notes": { "type": "array", "items": { "type": "string" } }
       }
     },
-    "definitions": {
-      "type": "array",
-      "minItems": 10,
-      "items": {
-        "type": "object",
-        "required": ["id", "term", "text", "source", "knownLimitations"],
-        "properties": {
-          "id": { "type": "string" },
-          "term": { "type": "string" },
-          "text": { "type": "string" },
-          "source": { "type": "string" },
-          "grain": { "type": "string" },
-          "knownLimitations": { "type": "array", "items": { "type": "string" } }
-        }
-      }
-    },
+    "definitions": { "type": "array", "minItems": 10 },
     "sources": { "type": "array", "minItems": 6 },
     "defaultWindowId": { "type": "string" },
-    "windows": {
-      "type": "object",
-      "minProperties": 1,
-      "additionalProperties": { "$ref": "#/$defs/windowPayload" }
-    }
+    "windows": { "type": "object", "minProperties": 1 }
   },
   "$defs": {
-    "status": {
-      "enum": ["EXACT", "SAMPLED", "ESTIMATED", "INCOMPLETE", "UNAVAILABLE"]
+    "evidenceState": {
+      "enum": ["MEASURED", "SAMPLED", "INFERRED", "ESTIMATED", "UNAVAILABLE", "UNKNOWABLE"]
+    },
+    "coverageState": {
+      "enum": ["COMPLETE", "INCOMPLETE", "MISSING", "NOT_APPLICABLE"]
     },
     "source": {
       "enum": ["cloudflare_edge", "cloudflare_rum", "ga4", "vercel", "first_party", "modeled"]
@@ -57,53 +40,37 @@
         "value",
         "source",
         "grain",
-        "status",
+        "evidenceState",
+        "coverage",
         "timeWindow",
         "definitionId",
         "pipelineVersion"
       ],
       "properties": {
-        "id": { "type": "string" },
-        "label": { "type": "string" },
+        "evidenceState": { "$ref": "#/$defs/evidenceState" },
+        "coverage": { "$ref": "#/$defs/coverageState" },
         "value": { "type": ["number", "null"] },
-        "display": { "type": "string" },
-        "unit": { "type": "string" },
-        "source": { "$ref": "#/$defs/source" },
-        "grain": { "type": "string" },
-        "status": { "$ref": "#/$defs/status" },
-        "timeWindow": {
+        "sampling": { "type": "object" },
+        "confidence": {
           "type": "object",
-          "required": ["id", "start", "end"]
+          "properties": {
+            "level": { "type": "number" },
+            "intervalValid": { "type": "boolean" },
+            "lower": { "type": "number" },
+            "upper": { "type": "number" }
+          }
         },
-        "definitionId": { "type": "string" },
-        "sampleInterval": { "type": "string" },
-        "sampleFactor": { "type": "number" },
-        "confidence": { "type": "object" },
-        "limitations": { "type": "array", "items": { "type": "string" } },
-        "pipelineVersion": { "type": "string" },
-        "sparkline": { "type": "array", "items": { "type": "number" } },
-        "direction": { "enum": ["up", "down", "flat", "n/a"] },
-        "deltaDisplay": { "type": "string" }
+        "ratio": { "type": "object" },
+        "provenance": { "type": "object" },
+        "uniqueSemantics": {
+          "enum": [
+            "source_native_zone_unique",
+            "sum_of_zone_uniques",
+            "deduplicated_ecosystem_unique",
+            "not_unique"
+          ]
+        }
       }
-    },
-    "windowPayload": {
-      "type": "object",
-      "required": [
-        "window",
-        "overview",
-        "series",
-        "taxonomy",
-        "humans",
-        "ai",
-        "automation",
-        "sites",
-        "content",
-        "technology",
-        "geography",
-        "laboratory",
-        "anomalies",
-        "health"
-      ]
     }
   }
 }

@@ -154,7 +154,7 @@ export function App() {
   }
 
   return (
-    <div className="app" data-theme={filters.theme}>
+    <div className="app" data-theme={filters.theme} data-dataset={gold.contract.kind}>
       <a className="skip" href="#main">
         Skip to content
       </a>
@@ -162,8 +162,13 @@ export function App() {
         <div className="brand">
           <strong>GFD Traffic Intelligence</strong>
           <span>
-            {gold.contract.kind} · {gold.contract.pipelineVersion}
+            {gold.contract.pipelineVersion}
           </span>
+          {gold.contract.kind === "fixture" ? (
+            <div className="data-mode" data-mode="fixture">
+              Fixture dataset · not live GFD traffic
+            </div>
+          ) : null}
         </div>
         <div className="nav-list">
           {NAV.map((item) => (
@@ -182,7 +187,11 @@ export function App() {
           ))}
         </div>
         <div className="nav-foot">
-          Window {payload.window.start} → {payload.window.end}
+          Observation {payload.window.start} → {payload.window.end}
+          <span>
+            {payload.window.timezone ?? "timezone undeclared"}
+            {payload.window.partialCurrentPeriod ? " · partial period" : ""}
+          </span>
           <span>Shareable URL state is on.</span>
         </div>
       </nav>

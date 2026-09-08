@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { ContentRow, RankedItem } from "../gold/types";
-import { StatusBadge } from "../components/StatusBadge";
+import { EvidencePair } from "../components/StatusBadge";
 
 export function Section({
   title,
@@ -37,7 +37,7 @@ export function RankedTable({
             <th>{valueHeader}</th>
             <th>Source</th>
             <th>Grain</th>
-            <th>Status</th>
+            <th>Evidence</th>
           </tr>
         </thead>
         <tbody>
@@ -46,12 +46,17 @@ export function RankedTable({
               <td>
                 {row.label}
                 {row.extra ? <div className="section-note">{row.extra}</div> : null}
+                {row.sourceNativeClass || row.normalizedClass ? (
+                  <div className="section-note">
+                    native {row.sourceNativeClass ?? "—"} · normalized {row.normalizedClass ?? "—"}
+                  </div>
+                ) : null}
               </td>
               <td className="num">{row.display ?? (row.value === null ? "—" : row.value.toLocaleString("en-US"))}</td>
               <td>{row.source}</td>
               <td>{row.grain}</td>
               <td>
-                <StatusBadge status={row.status} />
+                <EvidencePair evidence={row.evidenceState} coverage={row.coverage} />
               </td>
             </tr>
           ))}
@@ -85,7 +90,7 @@ export function ContentTable({ rows }: { rows: ContentRow[] }) {
               <td className="num">{cell(row.ai)}</td>
               <td className="num">{cell(row.searchCrawler ?? row.errors ?? row.notFound ?? row.bandwidth ?? row.engagement)}</td>
               <td>
-                {row.aiToHumanDisplay ?? row.humanToMachineDisplay ?? "—"}
+                {row.aiToHuman?.display ?? row.humanToMachine?.display ?? row.aiToHumanDisplay ?? row.humanToMachineDisplay ?? "—"}
               </td>
             </tr>
           ))}
@@ -97,7 +102,7 @@ export function ContentTable({ rows }: { rows: ContentRow[] }) {
 
 function cell(item?: RankedItem) {
   if (!item) return "—";
-  return `${item.display ?? (item.value === null ? "—" : item.value.toLocaleString("en-US"))} (${item.status})`;
+  return `${item.display ?? (item.value === null ? "—" : item.value.toLocaleString("en-US"))} (${item.evidenceState})`;
 }
 
 export function AnomalyList({
@@ -112,7 +117,8 @@ export function AnomalyList({
     severity: string;
     action?: string;
     sources: string[];
-    status: string;
+    evidenceState?: string;
+    status?: string;
   }[];
 }) {
   if (!items.length) return <p className="empty">No anomalies in this window.</p>;
@@ -125,7 +131,7 @@ export function AnomalyList({
               {item.ts} · {item.title}
             </strong>
             <span className="kicker">
-              {item.kind} · {item.status}
+              {item.kind} · {item.evidenceState ?? item.status}
             </span>
           </div>
           <div>{item.detail}</div>

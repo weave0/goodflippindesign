@@ -79,6 +79,7 @@ export function FiltersBar({
           <option value="user_triggered_ai_agent">User-triggered AI agent</option>
           <option value="search_crawler">Search crawler</option>
           <option value="hostile">Hostile</option>
+          <option value="unknown">UNKNOWN</option>
         </select>
       </label>
       <label className="filter">
@@ -182,19 +183,31 @@ export function FiltersBar({
         <span>Confidence</span>
         <select value={filters.confidence} onChange={(e) => onChange({ confidence: e.target.value })}>
           <option value="all">All</option>
-          <option value="has_interval">Has interval</option>
+          <option value="has_interval">Has bounds</option>
+          <option value="invalid">Invalid interval</option>
           <option value="none">No interval declared</option>
         </select>
       </label>
       <label className="filter">
-        <span>Measurement quality</span>
+        <span>Evidence state</span>
         <select value={filters.quality} onChange={(e) => onChange({ quality: e.target.value })}>
           <option value="all">All</option>
-          <option value="EXACT">EXACT</option>
+          <option value="MEASURED">MEASURED</option>
           <option value="SAMPLED">SAMPLED</option>
+          <option value="INFERRED">INFERRED</option>
           <option value="ESTIMATED">ESTIMATED</option>
-          <option value="INCOMPLETE">INCOMPLETE</option>
           <option value="UNAVAILABLE">UNAVAILABLE</option>
+          <option value="UNKNOWABLE">UNKNOWABLE</option>
+        </select>
+      </label>
+      <label className="filter">
+        <span>Coverage</span>
+        <select value={filters.coverage} onChange={(e) => onChange({ coverage: e.target.value })}>
+          <option value="all">All</option>
+          <option value="COMPLETE">COMPLETE</option>
+          <option value="INCOMPLETE">INCOMPLETE</option>
+          <option value="MISSING">MISSING</option>
+          <option value="NOT_APPLICABLE">NOT_APPLICABLE</option>
         </select>
       </label>
     </div>

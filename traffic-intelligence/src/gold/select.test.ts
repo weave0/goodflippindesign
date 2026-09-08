@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { adaptGold } from "./adapter";
 import { assertGoldContract } from "./assert";
 import { filterMetrics, overviewMetrics, selectSite, selectWindow } from "./select";
 import { FILTER_DEFAULTS } from "./url-state";
@@ -9,9 +10,11 @@ import type { GoldContract } from "./types";
 const gold = assertAndLoad();
 
 function assertAndLoad(): GoldContract {
-  const data = JSON.parse(
-    readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/gold/fixture.v1.json"), "utf8"),
-  ) as unknown;
+  const data = adaptGold(
+    JSON.parse(
+      readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/gold/fixture.v1.json"), "utf8"),
+    ) as unknown,
+  );
   assertGoldContract(data);
   return data;
 }

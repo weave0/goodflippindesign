@@ -1,22 +1,37 @@
 /**
- * GFD Traffic Intelligence — Gold-layer consumer contract.
+ * GFD Traffic Intelligence — Gold-layer *consumer view model*.
  *
- * The UI is a display surface. It does not redefine visitor, user, session,
- * pageview, human, bot, AI crawler, AI agent, threat, or confidence.
- * Those strings are opaque labels owned by the pipeline and copied from
- * `definitions` for evidence display only.
+ * Authoritative measurement lives in the pipeline. This file is what the UI
+ * reads after `adaptGold()`. Field-name drift from canonical M1.1 is absorbed
+ * in the adapter, not in views.
  *
- * The UI must not sum overlapping sources into a single "visitors" figure.
+ * The UI does not redefine visitor, user, session, pageview, human, bot,
+ * AI crawler, AI agent, threat, or confidence.
+ * The UI must not sum overlapping sources into a single visitors figure.
  */
 
-export const MEASUREMENT_STATUSES = [
-  "EXACT",
+export const EVIDENCE_STATES = [
+  "MEASURED",
   "SAMPLED",
+  "INFERRED",
   "ESTIMATED",
-  "INCOMPLETE",
   "UNAVAILABLE",
+  "UNKNOWABLE",
 ] as const;
-export type MeasurementStatus = (typeof MEASUREMENT_STATUSES)[number];
+export type EvidenceState = (typeof EVIDENCE_STATES)[number];
+
+export const ABSENT_EVIDENCE: readonly EvidenceState[] = ["UNAVAILABLE", "UNKNOWABLE"];
+
+export const COVERAGE_STATES = ["COMPLETE", "INCOMPLETE", "MISSING", "NOT_APPLICABLE"] as const;
+export type CoverageState = (typeof COVERAGE_STATES)[number];
+
+export const UNIQUE_SEMANTICS = [
+  "source_native_zone_unique",
+  "sum_of_zone_uniques",
+  "deduplicated_ecosystem_unique",
+  "not_unique",
+] as const;
+export type UniqueSemantics = (typeof UNIQUE_SEMANTICS)[number];
 
 export const SOURCES = [
   "cloudflare_edge",
@@ -45,7 +60,7 @@ export const HUMAN_MACHINE_CLASSES = [
   "scanner",
   "hostile",
   "internal_platform",
-  "unclassified",
+  "unknown",
 ] as const;
 export type TrafficClass = (typeof HUMAN_MACHINE_CLASSES)[number];
 
@@ -65,6 +80,7 @@ export const GRAINS = [
   "engaged_session",
   "user",
   "visitor",
+  "unique",
   "byte",
   "event",
   "ratio",
@@ -74,12 +90,41 @@ export const GRAINS = [
 ] as const;
 export type Grain = (typeof GRAINS)[number];
 
+export interface Sampling {
+  interval?: number | string;
+  intervalMeaning?: string;
+  factor?: number;
+  factorMeaning?: string;
+}
+
 export interface Confidence {
-  /** Inclusive interval around `value`, in the same unit. Pipeline-provided. */
-  interval?: [number, number];
-  /** e.g. 0.95. Pipeline-provided. */
+  /** 0–1, e.g. 0.95. Pipeline-provided. */
   level?: number;
+  /** False means bounds are preserved but must not be treated as a valid CI. */
+  intervalValid?: boolean;
+  lower?: number;
+  upper?: number;
   note?: string;
+}
+
+export interface RatioSemantics {
+  value: number | null;
+  unit: "share" | "rate" | "ratio" | string;
+  numeratorRef?: string;
+  denominatorRef?: string;
+  numeratorValue?: number | null;
+  denominatorValue?: number | null;
+  display?: string;
+  /** When true the UI must not recompute from numerator/denominator. */
+  authoritative: boolean;
+}
+
+export interface Provenance {
+  modelId?: string;
+  modelVersion?: string;
+  method?: string;
+  contributingSources?: SourceId[];
+  contributingMetricIds?: string[];
 }
 
 export interface TimeWindow {
@@ -88,31 +133,36 @@ export interface TimeWindow {
   start: string;
   end: string;
   grain: "day" | "hour" | "week";
+  timezone?: string;
+  boundary?: string;
+  extractedAt?: string;
+  generatedAt?: string;
+  partialCurrentPeriod?: boolean;
 }
 
 export interface Metric {
   id: string;
   label: string;
-  /** Null iff status is UNAVAILABLE. */
+  /** Null when evidence is UNAVAILABLE or UNKNOWABLE. Zero is only a measured zero. */
   value: number | null;
-  /**
-   * Optional preformatted display string from the pipeline.
-   * When present the UI must use it instead of local rounding policy.
-   */
   display?: string;
   unit?: string;
   source: SourceId;
   grain: Grain;
-  status: MeasurementStatus;
-  timeWindow: Pick<TimeWindow, "id" | "start" | "end">;
+  evidenceState: EvidenceState;
+  coverage: CoverageState;
+  timeWindow: Pick<TimeWindow, "id" | "start" | "end"> & Partial<TimeWindow>;
   definitionId: string;
-  sampleInterval?: string;
-  sampleFactor?: number;
+  sampling?: Sampling;
   confidence?: Confidence;
+  ratio?: RatioSemantics;
+  provenance?: Provenance;
+  uniqueSemantics?: UniqueSemantics;
+  sourceNativeClass?: string;
+  normalizedClass?: string;
   limitations?: string[];
   pipelineVersion: string;
   sparkline?: number[];
-  /** Display-only hint. Not a calculated score. */
   direction?: "up" | "down" | "flat" | "n/a";
   deltaDisplay?: string;
 }
@@ -130,10 +180,10 @@ export interface SourceDescriptor {
   id: SourceId;
   label: string;
   shortLabel: string;
-  coverage: MeasurementStatus;
+  typicalEvidence: EvidenceState;
+  coverage: CoverageState;
   coverageNote: string;
-  sampleInterval?: string;
-  sampleFactor?: number;
+  sampling?: Sampling;
 }
 
 export interface RankedItem {
@@ -143,17 +193,21 @@ export interface RankedItem {
   display?: string;
   shareDisplay?: string;
   source: SourceId;
-  status: MeasurementStatus;
+  evidenceState: EvidenceState;
+  coverage: CoverageState;
   grain: Grain;
   definitionId: string;
   extra?: string;
   href?: string;
+  sourceNativeClass?: string;
+  normalizedClass?: string;
 }
 
 export interface SeriesPoint {
   date: string;
   value: number | null;
-  status: MeasurementStatus;
+  evidenceState: EvidenceState;
+  coverage?: CoverageState;
 }
 
 export interface NamedSeries {
@@ -161,7 +215,8 @@ export interface NamedSeries {
   label: string;
   source: SourceId;
   grain: Grain;
-  status: MeasurementStatus;
+  evidenceState: EvidenceState;
+  coverage: CoverageState;
   definitionId: string;
   points: SeriesPoint[];
 }
@@ -170,7 +225,7 @@ export interface HeatCell {
   x: string;
   y: string;
   value: number | null;
-  status: MeasurementStatus;
+  evidenceState: EvidenceState;
 }
 
 export interface Heatmap {
@@ -178,7 +233,8 @@ export interface Heatmap {
   label: string;
   source: SourceId;
   grain: Grain;
-  status: MeasurementStatus;
+  evidenceState: EvidenceState;
+  coverage: CoverageState;
   definitionId: string;
   xLabel: string;
   yLabel: string;
@@ -192,7 +248,7 @@ export interface SiteRecord {
   tier?: string;
   metrics: Metric[];
   sourceCoverage: SourceDescriptor[];
-  measurementHealth: MeasurementStatus;
+  measurementHealth: CoverageState;
   measurementHealthNote: string;
   aiActors?: RankedItem[];
   errors?: RankedItem[];
@@ -209,7 +265,8 @@ export interface ContentRow {
   notFound?: RankedItem;
   bandwidth?: RankedItem;
   engagement?: RankedItem;
-  /** Pipeline-provided ratio display. UI must not compute this. */
+  aiToHuman?: RatioSemantics;
+  humanToMachine?: RatioSemantics;
   aiToHumanDisplay?: string;
   humanToMachineDisplay?: string;
 }
@@ -218,8 +275,11 @@ export interface ActorRecord {
   id: string;
   name: string;
   class: AiClass | TrafficClass;
+  sourceNativeClass: string;
+  normalizedClass: string;
   source: SourceId;
-  status: MeasurementStatus;
+  evidenceState: EvidenceState;
+  coverage: CoverageState;
   definitionId: string;
   metrics: Metric[];
   targetSites: RankedItem[];
@@ -246,7 +306,7 @@ export interface Anomaly {
   detail: string;
   siteId?: string;
   sources: SourceId[];
-  status: MeasurementStatus;
+  evidenceState: EvidenceState;
   action?: string;
   severity: "info" | "watch" | "action";
 }
@@ -366,3 +426,5 @@ export interface GoldContract {
 }
 
 export const FORBIDDEN_COMBINED_SOURCES = ["combined", "total", "all_sources", "blended"] as const;
+
+export const NATIVE_AI_CLASSES = ["AI Crawler", "AI Search", "AI Assistant"] as const;

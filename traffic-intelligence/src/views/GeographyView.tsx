@@ -9,14 +9,14 @@ export function GeographyView({ payload, filters }: { payload: WindowPayload; fi
   return (
     <>
       <p className="callout">
-        Four geographies, four meanings. Edge country is not a human map. Browser geography is sampled GA4. AI geography is
-        actor infrastructure. Threat geography is security events.
+        Cloudflare request country is not a demographic dataset and not human location. RUM-observed browser geography and
+        GA4-observed user geography are separate, sampled, browser-side slices.
       </p>
       <div className="split">
-        <Section title="Total edge geography" note={g.captions.edge}>
+        <Section title="Cloudflare request country" note={g.captions.edge}>
           <RankedBars rows={filterRanked(g.edge, filters)} />
         </Section>
-        <Section title="Confirmed browser geography" note={g.captions.browser}>
+        <Section title="RUM / GA4-observed geography" note={g.captions.browser}>
           <RankedBars rows={filterRanked(g.browser, filters)} />
         </Section>
       </div>

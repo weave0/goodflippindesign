@@ -1,6 +1,6 @@
 import type { Metric } from "../gold/types";
-import { formatConfidence, formatMetric, sourceLabel, statusHint } from "../gold/format";
-import { StatusBadge } from "./StatusBadge";
+import { evidenceHint, formatConfidence, formatMetric, isAbsentMetric, sourceLabel } from "../gold/format";
+import { EvidencePair } from "./StatusBadge";
 import { Sparkline } from "./Charts";
 
 export function MetricCard({
@@ -11,26 +11,32 @@ export function MetricCard({
   onOpen: (metric: Metric) => void;
 }) {
   const ci = formatConfidence(metric);
+  const absent = isAbsentMetric(metric);
   return (
     <button
       type="button"
-      className={`metric-card${metric.status === "UNAVAILABLE" ? " is-unavailable" : ""}`}
+      className={`metric-card${absent ? " is-unavailable" : ""}`}
       onClick={() => onOpen(metric)}
-      aria-label={`${metric.label}, ${sourceLabel(metric.source)}, ${formatMetric(metric)}, ${metric.status}. ${statusHint(metric.status)}`}
+      aria-label={`${metric.label}, ${sourceLabel(metric.source)}, ${formatMetric(metric)}, ${metric.evidenceState}, coverage ${metric.coverage}. ${evidenceHint(metric.evidenceState)}`}
     >
       <div className="metric-card__meta">
         <span className="metric-card__source" data-source={metric.source}>
           {sourceLabel(metric.source)}
         </span>
-        <StatusBadge status={metric.status} />
+        <EvidencePair evidence={metric.evidenceState} coverage={metric.coverage} />
       </div>
       <div className="metric-card__label">{metric.label}</div>
       <div className="metric-card__value">{formatMetric(metric)}</div>
-      {metric.unit && metric.status !== "UNAVAILABLE" && !metric.display ? (
-        <div className="metric-card__unit">{metric.unit}</div>
-      ) : null}
+      {metric.unit && !absent && !metric.display ? <div className="metric-card__unit">{metric.unit}</div> : null}
       {metric.deltaDisplay ? <div className="metric-card__delta">{metric.deltaDisplay}</div> : null}
-      {ci ? <div className="metric-card__ci">{ci}</div> : null}
+      {ci ? (
+        <div className={`metric-card__ci${metric.confidence?.intervalValid === false ? " is-invalid" : ""}`}>{ci}</div>
+      ) : null}
+      {typeof metric.sampling?.interval === "number" ? (
+        <div className="metric-card__ci">
+          sample interval {metric.sampling.interval}
+        </div>
+      ) : null}
       {metric.sparkline && metric.sparkline.length > 1 ? (
         <Sparkline values={metric.sparkline} source={metric.source} />
       ) : null}

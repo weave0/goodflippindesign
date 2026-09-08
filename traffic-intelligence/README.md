@@ -26,4 +26,4 @@ npm run dev            # http://localhost:4177
 - Assumptions: `schema/SCHEMA_ASSUMPTIONS.md`
 - Fixture: `public/gold/fixture.v1.json` (`contract.kind = fixture`)
 
-Production Gold documents should keep the same envelope (`Metric.source`, `Metric.status`, `definitions[]`) and set `contract.kind` to `production`.
+The UI reads a view model after `adaptGold()`. Evidence state and coverage are separate axes. Production Gold documents should set `contract.kind` to `production`. Field-name drift from canonical M1.1 is mapped in `src/gold/adapter.ts`.

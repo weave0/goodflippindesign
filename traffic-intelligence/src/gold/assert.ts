@@ -1,7 +1,9 @@
 import {
+  ABSENT_EVIDENCE,
+  COVERAGE_STATES,
+  EVIDENCE_STATES,
   FORBIDDEN_COMBINED_SOURCES,
   GRAINS,
-  MEASUREMENT_STATUSES,
   SOURCES,
   type GoldContract,
   type Metric,
@@ -30,7 +32,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 function assertMetric(metric: unknown, path: string): asserts metric is Metric {
   if (!isObject(metric)) fail(`${path} is not an object`);
-  for (const key of ["id", "label", "source", "grain", "status", "definitionId", "pipelineVersion"]) {
+  for (const key of ["id", "label", "source", "grain", "evidenceState", "coverage", "definitionId", "pipelineVersion"]) {
     if (typeof metric[key] !== "string" || !metric[key]) fail(`${path}.${key} missing`);
   }
   if (!isObject(metric.timeWindow)) fail(`${path}.timeWindow missing`);
@@ -40,20 +42,26 @@ function assertMetric(metric: unknown, path: string): asserts metric is Metric {
   if ((FORBIDDEN_COMBINED_SOURCES as readonly string[]).includes(metric.source as string)) {
     fail(`${path}.source is a forbidden combined source`);
   }
-  if (!(MEASUREMENT_STATUSES as readonly string[]).includes(metric.status as string)) {
-    fail(`${path}.status invalid`);
+  if (!(EVIDENCE_STATES as readonly string[]).includes(metric.evidenceState as string)) {
+    fail(`${path}.evidenceState invalid (${metric.evidenceState})`);
+  }
+  if (!(COVERAGE_STATES as readonly string[]).includes(metric.coverage as string)) {
+    fail(`${path}.coverage invalid (${metric.coverage})`);
   }
   if (!(GRAINS as readonly string[]).includes(metric.grain as string)) {
     fail(`${path}.grain invalid`);
   }
-  if (metric.status === "UNAVAILABLE") {
-    if (metric.value !== null) fail(`${path}.value must be null when UNAVAILABLE`);
+  if ((ABSENT_EVIDENCE as readonly string[]).includes(metric.evidenceState as string)) {
+    if (metric.value !== null) fail(`${path}.value must be null when ${metric.evidenceState}`);
   } else if (typeof metric.value !== "number" && metric.value !== null) {
     fail(`${path}.value must be number or null`);
   }
   const label = String(metric.label).toLowerCase();
   if (label === "visitors" || label === "total visitors") {
     fail(`${path}.label forbids an un-sourced visitors vanity number`);
+  }
+  if (/ecosystem unique humans/.test(label) && metric.uniqueSemantics !== "deduplicated_ecosystem_unique") {
+    fail(`${path}.label claims ecosystem unique humans without that uniqueSemantics`);
   }
 }
 
@@ -63,7 +71,13 @@ function walkMetrics(value: unknown, path: string, visit: (metric: Metric, path:
     return;
   }
   if (!isObject(value)) return;
-  if (typeof value.id === "string" && typeof value.source === "string" && typeof value.status === "string" && "grain" in value && "timeWindow" in value) {
+  if (
+    typeof value.id === "string" &&
+    typeof value.source === "string" &&
+    typeof value.evidenceState === "string" &&
+    "grain" in value &&
+    "timeWindow" in value
+  ) {
     assertMetric(value, path);
     visit(value, path);
   }
@@ -95,8 +109,8 @@ export function assertGoldContract(data: unknown): asserts data is GoldContract 
   const seen = new Set<string>();
   walkMetrics(data, "$", (metric, path) => {
     seen.add(metric.id);
-    if (metric.source === "modeled" && metric.status === "EXACT") {
-      fail(`${path} modeled metrics cannot be EXACT`);
+    if (metric.source === "modeled" && metric.evidenceState === "MEASURED") {
+      fail(`${path} modeled metrics cannot be MEASURED`);
     }
   });
   if (seen.size === 0) fail("no metrics found");

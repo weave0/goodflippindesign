@@ -4,15 +4,15 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { App } from "./App";
+import { adaptGold } from "./gold/adapter";
 import { assertGoldContract } from "./gold/assert";
 import { selectWindow } from "./gold/select";
 import type { GoldContract } from "./gold/types";
 
-const gold = JSON.parse(
-  readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../public/gold/fixture.v1.json"), "utf8"),
-) as unknown;
-assertGoldContract(gold);
-const fixture = gold as GoldContract;
+const fixture: GoldContract = adaptGold(
+  JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../public/gold/fixture.v1.json"), "utf8")) as unknown,
+);
+assertGoldContract(fixture);
 
 beforeEach(() => {
   window.history.replaceState({}, "", "/");
@@ -33,6 +33,7 @@ describe("observatory shell", () => {
   it("renders independent source cards and does not sum them into visitors", async () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Executive overview" })).toBeInTheDocument();
+    expect(screen.getByText(/Fixture dataset/i)).toBeInTheDocument();
     expect(screen.getAllByText("Cloudflare edge").length).toBeGreaterThan(0);
     expect(screen.getAllByText("GA4").length).toBeGreaterThan(0);
     expect(screen.queryByRole("heading", { name: /^visitors$/i })).not.toBeInTheDocument();
@@ -54,7 +55,7 @@ describe("observatory shell", () => {
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText("Definition")).toBeInTheDocument();
     expect(within(dialog).getByText("Pipeline version")).toBeInTheDocument();
-    expect(within(dialog).getAllByText("gold-fixture-0.1.0").length).toBeGreaterThan(0);
+    expect(within(dialog).getAllByText("gold-fixture-0.2.0").length).toBeGreaterThan(0);
     expect(within(dialog).getByText("This is volume, not visitors.")).toBeInTheDocument();
   });
 

@@ -3,7 +3,7 @@ import { formatMetric } from "../gold/format";
 import { MetricGrid } from "../components/MetricCard";
 import { RankedBars } from "../components/Charts";
 import { RankedTable, Section } from "./common";
-import { StatusBadge } from "../components/StatusBadge";
+import { CoverageBadge } from "../components/StatusBadge";
 
 function pick(site: SiteRecord, suffix: string) {
   return site.metrics.find((m) => m.id.endsWith(suffix) || m.id.includes(suffix));
@@ -39,13 +39,13 @@ export function SitesView({
                   <h3>{site.name}</h3>
                   <div className="domain">{site.domain}</div>
                 </div>
-                <StatusBadge status={site.measurementHealth} />
+                <CoverageBadge state={site.measurementHealth} always />
               </div>
               <div className="section-note">{site.measurementHealthNote}</div>
               <div className="chip-row">
                 {site.sourceCoverage.map((s) => (
                   <span key={s.id} className="chip">
-                    {s.shortLabel} {s.coverage}
+                    {s.shortLabel} {s.typicalEvidence} · {s.coverage}
                   </span>
                 ))}
               </div>
@@ -96,7 +96,7 @@ export function SiteDossierView({
     <>
       <Section title={`${site.name} dossier`} note={site.measurementHealthNote}>
         <p className="lede">{site.domain}</p>
-        <StatusBadge status={site.measurementHealth} />
+        <CoverageBadge state={site.measurementHealth} always />
         <MetricGrid metrics={site.metrics} onOpen={onOpen} />
       </Section>
       <Section title="Source coverage">
@@ -105,10 +105,11 @@ export function SiteDossierView({
             id: s.id,
             label: s.label,
             value: null,
-            display: s.coverage,
+            display: `${s.typicalEvidence} · ${s.coverage}`,
             source: s.id,
-            status: s.coverage,
-            grain: "count",
+            evidenceState: s.typicalEvidence,
+            coverage: s.coverage,
+            grain: "count" as const,
             definitionId: "def.confidence",
             extra: s.coverageNote,
           }))}

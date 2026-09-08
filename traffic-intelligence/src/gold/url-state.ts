@@ -33,6 +33,7 @@ export interface Filters {
   cache: string;
   confidence: string;
   quality: string;
+  coverage: string;
   theme: "dark" | "light";
 }
 
@@ -54,6 +55,7 @@ export const FILTER_DEFAULTS: Filters = {
   cache: "all",
   confidence: "all",
   quality: "all",
+  coverage: "all",
   theme: "dark",
 };
 

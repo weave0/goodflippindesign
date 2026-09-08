@@ -4,7 +4,7 @@ import { filterActors, filterMetrics, filterRanked } from "../gold/select";
 import { MetricGrid } from "../components/MetricCard";
 import { HeatmapChart, RankedBars, TimeSeriesChart } from "../components/Charts";
 import { RankedTable, Section } from "./common";
-import { StatusBadge } from "../components/StatusBadge";
+import { EvidencePair } from "../components/StatusBadge";
 
 export function AIView({
   payload,
@@ -20,14 +20,15 @@ export function AIView({
 
   return (
     <>
-      <Section title="AI classes" note="Pipeline classes at the edge. AI Crawler, AI Search, AI Assistant, and user-triggered agents are separate.">
+      <Section title="AI classes" note="Source-native Cloudflare classes (AI Crawler, AI Search, AI Assistant) are preserved. They are not collapsed into one AI bucket. UNKNOWN remains visible in taxonomy.">
         <RankedBars rows={filterRanked(payload.ai.classTotals, filters)} tone="ai" />
       </Section>
       <Section title="Named actors">
         <div className="chip-row">
           {payload.ai.actors.map((actor) => (
             <span key={actor.id} className="chip">
-              {actor.name} · {actor.class} · <StatusBadge status={actor.status} />
+              {actor.name} · {actor.sourceNativeClass} / {actor.normalizedClass} ·{" "}
+              <EvidencePair evidence={actor.evidenceState} coverage={actor.coverage} />
             </span>
           ))}
         </div>
@@ -36,9 +37,10 @@ export function AIView({
             <thead>
               <tr>
                 <th>Actor</th>
-                <th>Class</th>
+                <th>Native class</th>
+                <th>Normalized</th>
                 <th>Requests</th>
-                <th>Status</th>
+                <th>Evidence</th>
               </tr>
             </thead>
             <tbody>
@@ -49,7 +51,8 @@ export function AIView({
                     <td>
                       <strong>{actor.name}</strong>
                     </td>
-                    <td>{actor.class}</td>
+                    <td>{actor.sourceNativeClass}</td>
+                    <td>{actor.normalizedClass}</td>
                     <td className="num">
                       {requests ? (
                         <button type="button" className="icon-btn" onClick={() => onOpen(requests)}>
@@ -60,7 +63,7 @@ export function AIView({
                       )}
                     </td>
                     <td>
-                      <StatusBadge status={actor.status} />
+                      <EvidencePair evidence={actor.evidenceState} coverage={actor.coverage} />
                     </td>
                   </tr>
                 );

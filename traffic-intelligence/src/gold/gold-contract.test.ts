@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { adaptGold } from "./adapter";
 import { assertGoldContract, collectMetrics } from "./assert";
 import { selectWindow } from "./select";
 import type { GoldContract } from "./types";
@@ -8,7 +9,7 @@ import type { GoldContract } from "./types";
 const fixturePath = join(dirname(fileURLToPath(import.meta.url)), "../../public/gold/fixture.v1.json");
 
 function loadFixture(): GoldContract {
-  const data = JSON.parse(readFileSync(fixturePath, "utf8")) as unknown;
+  const data = adaptGold(JSON.parse(readFileSync(fixturePath, "utf8")) as unknown);
   assertGoldContract(data);
   return data;
 }
@@ -51,11 +52,13 @@ describe("Gold fixture contract", () => {
     expect(metrics.some((m) => /visitor/i.test(m.label) && m.source === "cloudflare_edge")).toBe(false);
   });
 
-  it("keeps UNAVAILABLE values null and modeled metrics non-exact", () => {
+  it("keeps UNAVAILABLE/UNKNOWABLE values null and modeled metrics non-measured", () => {
     const metrics = collectMetrics(gold);
     for (const metric of metrics) {
-      if (metric.status === "UNAVAILABLE") expect(metric.value).toBeNull();
-      if (metric.source === "modeled") expect(metric.status).toBe("ESTIMATED");
+      if (metric.evidenceState === "UNAVAILABLE" || metric.evidenceState === "UNKNOWABLE") {
+        expect(metric.value).toBeNull();
+      }
+      if (metric.source === "modeled") expect(metric.evidenceState).not.toBe("MEASURED");
     }
   });
 

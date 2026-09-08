@@ -24,7 +24,7 @@ export function HumansView({
     <>
       <Section
         title="Humans vs machines"
-        note="Left: browser-side evidence (RUM / GA4 / first-party). Right: edge taxonomy. These are different objects. The left column is not 'true visitors' and the right column is not 'everyone else minus humans'."
+        note="Left: browser-side evidence (RUM / GA4 / first-party). Right: edge taxonomy, including UNKNOWN. These are different objects. A browser-like UA is not proof of a human."
       >
         <div className="split">
           <div>

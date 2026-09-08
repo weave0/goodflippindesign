@@ -4,7 +4,7 @@ import { filterMetrics, filterRanked } from "../gold/select";
 import { MetricGrid } from "../components/MetricCard";
 import { SourceComparisonTable } from "../components/Charts";
 import { RankedTable, Section } from "./common";
-import { StatusBadge } from "../components/StatusBadge";
+import { CoverageBadge, EvidenceBadge } from "../components/StatusBadge";
 
 export function LaboratoryView({
   payload,
@@ -25,7 +25,7 @@ export function LaboratoryView({
         <div className="chip-row">
           {lab.coverage.map((s) => (
             <span key={s.id} className="chip">
-              {s.label} <StatusBadge status={s.coverage} />
+              {s.label} <EvidenceBadge state={s.typicalEvidence} /> <CoverageBadge state={s.coverage} />
             </span>
           ))}
         </div>

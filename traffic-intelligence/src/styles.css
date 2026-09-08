@@ -28,6 +28,7 @@
   --status-exact: #5ee9a6;
   --status-sampled: #7eb0ff;
   --status-estimated: #e2a336;
+  --status-inferred: #c4a3ff;
   --status-incomplete: #f5c542;
   --status-unavailable: #6d7080;
   --drawer: 400px;
@@ -60,6 +61,7 @@
   --status-exact: #0f7a4a;
   --status-sampled: #2a62c2;
   --status-estimated: #9a6700;
+  --status-inferred: #6d3cc9;
   --status-incomplete: #9a6700;
   --status-unavailable: #7a7d8a;
 }
@@ -416,11 +418,38 @@ h1 {
   white-space: nowrap;
 }
 
-.badge-EXACT { color: var(--status-exact); }
+.badge-pair {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.badge-MEASURED { color: var(--status-exact); }
 .badge-SAMPLED { color: var(--status-sampled); border-style: dotted; }
+.badge-INFERRED { color: var(--status-inferred); border-style: dashed; }
 .badge-ESTIMATED { color: var(--status-estimated); border-style: dashed; }
-.badge-INCOMPLETE { color: var(--status-incomplete); }
 .badge-UNAVAILABLE { color: var(--status-unavailable); }
+.badge-UNKNOWABLE { color: var(--status-unavailable); border-style: double; }
+.badge-COMPLETE { color: var(--status-exact); }
+.badge-INCOMPLETE { color: var(--status-incomplete); }
+.badge-MISSING { color: var(--status-unavailable); }
+.badge-NOT_APPLICABLE { color: var(--status-unavailable); border-style: dotted; }
+
+.metric-card__ci.is-invalid {
+  color: var(--warn);
+}
+
+.data-mode {
+  margin-top: 8px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--warn);
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, var(--line));
+  border-radius: 6px;
+  padding: 4px 7px;
+}
 
 .split {
   display: grid;

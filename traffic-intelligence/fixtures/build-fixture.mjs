@@ -11,8 +11,8 @@ import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const PIPELINE = "gold-fixture-0.1.0";
-const CONTRACT_VERSION = "1.0.0";
+const PIPELINE = "gold-fixture-0.2.0";
+const CONTRACT_VERSION = "1.1.0-consumer";
 const PRODUCED_AT = "2026-09-08T12:00:00Z";
 
 const DATES_28 = [
@@ -116,24 +116,101 @@ function sumKnown(arr) {
   return arr.reduce((acc, n) => acc + (typeof n === "number" ? n : 0), 0);
 }
 
+function mapEvidence(status, explicit) {
+  if (explicit) return explicit;
+  switch (status) {
+    case "EXACT":
+    case "MEASURED":
+      return "MEASURED";
+    case "SAMPLED":
+      return "SAMPLED";
+    case "INFERRED":
+      return "INFERRED";
+    case "ESTIMATED":
+      return "ESTIMATED";
+    case "UNAVAILABLE":
+      return "UNAVAILABLE";
+    case "UNKNOWABLE":
+      return "UNKNOWABLE";
+    case "INCOMPLETE":
+      return "MEASURED";
+    default:
+      return "MEASURED";
+  }
+}
+
+function mapCoverage(status, explicit) {
+  if (explicit) return explicit;
+  switch (status) {
+    case "INCOMPLETE":
+      return "INCOMPLETE";
+    case "UNAVAILABLE":
+    case "MISSING":
+      return "MISSING";
+    case "UNKNOWABLE":
+    case "NOT_APPLICABLE":
+      return "NOT_APPLICABLE";
+    case "COMPLETE":
+      return "COMPLETE";
+    default:
+      return "COMPLETE";
+  }
+}
+
+function shapeConfidence(raw) {
+  if (!raw) return undefined;
+  const lower = raw.lower ?? raw.interval?.[0];
+  const upper = raw.upper ?? raw.interval?.[1];
+  return {
+    ...(typeof raw.level === "number" ? { level: raw.level } : {}),
+    ...(typeof raw.intervalValid === "boolean" ? { intervalValid: raw.intervalValid } : lower !== undefined && upper !== undefined ? { intervalValid: true } : {}),
+    ...(typeof lower === "number" ? { lower } : {}),
+    ...(typeof upper === "number" ? { upper } : {}),
+    ...(raw.note ? { note: raw.note } : {}),
+  };
+}
+
 function seriesPoints(dates, values, statusFor) {
   return dates.map((date, i) => {
     const value = values[i] ?? null;
+    const legacy = statusFor(value);
     return {
       date,
       value,
-      status: statusFor(value),
+      evidenceState: mapEvidence(legacy),
+      coverage: mapCoverage(legacy),
     };
   });
 }
 
 function tw(windowId, start, end) {
-  return { id: windowId, start, end };
+  return {
+    id: windowId,
+    start,
+    end,
+    timezone: "UTC",
+    boundary: "start_inclusive_end_inclusive",
+    extractedAt: PRODUCED_AT,
+    generatedAt: PRODUCED_AT,
+    partialCurrentPeriod: windowId === "7d",
+  };
 }
 
 function metric(windowId, start, end, spec) {
-  const status = spec.status;
-  const value = status === "UNAVAILABLE" ? null : spec.value;
+  const evidenceState = mapEvidence(spec.status, spec.evidenceState);
+  const coverage = mapCoverage(spec.status, spec.coverage);
+  const absent = evidenceState === "UNAVAILABLE" || evidenceState === "UNKNOWABLE";
+  const value = absent ? null : spec.value;
+  const sampling =
+    spec.sampling ??
+    (spec.sampleInterval !== undefined || spec.sampleFactor !== undefined
+      ? {
+          interval: spec.sampleInterval,
+          factor: spec.sampleFactor,
+          ...(spec.sampleIntervalMeaning ? { intervalMeaning: spec.sampleIntervalMeaning } : {}),
+          ...(spec.sampleFactorMeaning ? { factorMeaning: spec.sampleFactorMeaning } : {}),
+        }
+      : undefined);
   return {
     id: spec.id,
     label: spec.label,
@@ -142,12 +219,17 @@ function metric(windowId, start, end, spec) {
     ...(spec.unit ? { unit: spec.unit } : {}),
     source: spec.source,
     grain: spec.grain,
-    status,
+    evidenceState,
+    coverage,
     timeWindow: tw(windowId, start, end),
     definitionId: spec.definitionId,
-    ...(spec.sampleInterval ? { sampleInterval: spec.sampleInterval } : {}),
-    ...(spec.sampleFactor !== undefined ? { sampleFactor: spec.sampleFactor } : {}),
-    ...(spec.confidence ? { confidence: spec.confidence } : {}),
+    ...(sampling ? { sampling } : {}),
+    ...(spec.confidence ? { confidence: shapeConfidence(spec.confidence) } : {}),
+    ...(spec.ratio ? { ratio: { authoritative: true, ...spec.ratio } } : {}),
+    ...(spec.provenance ? { provenance: spec.provenance } : {}),
+    ...(spec.uniqueSemantics ? { uniqueSemantics: spec.uniqueSemantics } : {}),
+    ...(spec.sourceNativeClass ? { sourceNativeClass: spec.sourceNativeClass } : {}),
+    ...(spec.normalizedClass ? { normalizedClass: spec.normalizedClass } : {}),
     ...(spec.limitations ? { limitations: spec.limitations } : {}),
     pipelineVersion: PIPELINE,
     ...(spec.sparkline ? { sparkline: spec.sparkline } : {}),
@@ -157,28 +239,37 @@ function metric(windowId, start, end, spec) {
 }
 
 function ranked(spec) {
+  const evidenceState = mapEvidence(spec.status, spec.evidenceState);
+  const coverage = mapCoverage(spec.status, spec.coverage);
+  const absent = evidenceState === "UNAVAILABLE" || evidenceState === "UNKNOWABLE";
   return {
     id: spec.id,
     label: spec.label,
-    value: spec.status === "UNAVAILABLE" ? null : spec.value,
+    value: absent ? null : spec.value,
     ...(spec.display ? { display: spec.display } : {}),
     ...(spec.shareDisplay ? { shareDisplay: spec.shareDisplay } : {}),
     source: spec.source,
-    status: spec.status,
+    evidenceState,
+    coverage,
     grain: spec.grain,
     definitionId: spec.definitionId,
     ...(spec.extra ? { extra: spec.extra } : {}),
     ...(spec.href ? { href: spec.href } : {}),
+    ...(spec.sourceNativeClass ? { sourceNativeClass: spec.sourceNativeClass } : {}),
+    ...(spec.normalizedClass ? { normalizedClass: spec.normalizedClass } : {}),
   };
 }
 
 function namedSeries(spec, dates, values, statusFor) {
+  const evidenceState = mapEvidence(spec.status, spec.evidenceState);
+  const coverage = mapCoverage(spec.status, spec.coverage);
   return {
     id: spec.id,
     label: spec.label,
     source: spec.source,
     grain: spec.grain,
-    status: spec.status,
+    evidenceState,
+    coverage,
     definitionId: spec.definitionId,
     points: seriesPoints(dates, values, statusFor),
   };
@@ -187,6 +278,23 @@ function namedSeries(spec, dates, values, statusFor) {
 const exact = (v) => (v === null ? "UNAVAILABLE" : "EXACT");
 const sampled = (v) => (v === null ? "UNAVAILABLE" : "SAMPLED");
 const incomplete = (v) => (v === null ? "UNAVAILABLE" : "INCOMPLETE");
+
+function nativeAi(classId) {
+  switch (classId) {
+    case "ai_crawler":
+      return "AI Crawler";
+    case "ai_search":
+      return "AI Search";
+    case "ai_assistant":
+      return "AI Assistant";
+    case "user_triggered_ai_agent":
+      return "user-triggered AI agent";
+    case "unknown":
+      return "UNKNOWN";
+    default:
+      return classId;
+  }
+}
 
 const DEFINITIONS = [
   {
@@ -319,31 +427,33 @@ const SOURCE_DEFS = [
     id: "cloudflare_edge",
     label: "Cloudflare edge",
     shortLabel: "Edge",
-    coverage: "EXACT",
-    coverageNote: "Zone HTTP analytics for enrolled properties. Exact within Cloudflare's product definition.",
+    typicalEvidence: "MEASURED",
+    coverage: "COMPLETE",
+    coverageNote: "Zone HTTP analytics for enrolled properties. Measured within Cloudflare's product definition.",
   },
   {
     id: "cloudflare_rum",
     label: "Cloudflare RUM",
     shortLabel: "RUM",
-    coverage: "SAMPLED",
+    typicalEvidence: "SAMPLED",
+    coverage: "INCOMPLETE",
     coverageNote: "Browser beacons. JS required. Not installed on every property.",
-    sampleInterval: "beacon",
-    sampleFactor: 1,
+    sampling: { interval: "beacon", intervalMeaning: "one beacon per observed page view", factor: 1, factorMeaning: "declared sample factor of 1 is still SAMPLED" },
   },
   {
     id: "ga4",
     label: "GA4",
     shortLabel: "GA4",
-    coverage: "SAMPLED",
+    typicalEvidence: "SAMPLED",
+    coverage: "INCOMPLETE",
     coverageNote: "Enrolled properties only. Consent and ad-block apply.",
-    sampleInterval: "hit",
-    sampleFactor: 1,
+    sampling: { interval: "hit", intervalMeaning: "GA4 hit collection", factor: 1, factorMeaning: "declared sample factor of 1 is still SAMPLED" },
   },
   {
     id: "vercel",
     label: "Vercel",
     shortLabel: "Vercel",
+    typicalEvidence: "MEASURED",
     coverage: "INCOMPLETE",
     coverageNote: "Only properties that actually deploy on Vercel. Most of the ecosystem does not.",
   },
@@ -351,6 +461,7 @@ const SOURCE_DEFS = [
     id: "first_party",
     label: "First-party telemetry",
     shortLabel: "1P",
+    typicalEvidence: "MEASURED",
     coverage: "INCOMPLETE",
     coverageNote: "Sparse studio telemetry. Not a substitute for RUM or GA4.",
   },
@@ -358,8 +469,9 @@ const SOURCE_DEFS = [
     id: "modeled",
     label: "Modeled estimate",
     shortLabel: "Model",
-    coverage: "ESTIMATED",
-    coverageNote: "Pipeline estimates with declared limitations. Never mix into exact cards.",
+    typicalEvidence: "ESTIMATED",
+    coverage: "NOT_APPLICABLE",
+    coverageNote: "Pipeline estimates with declared limitations. Never mix into measured cards.",
   },
 ];
 
@@ -368,8 +480,11 @@ function actor(windowId, start, end, spec) {
     id: spec.id,
     name: spec.name,
     class: spec.class,
+    sourceNativeClass: spec.sourceNativeClass ?? nativeAi(spec.class),
+    normalizedClass: spec.normalizedClass ?? spec.class,
     source: "cloudflare_edge",
-    status: "EXACT",
+    evidenceState: "MEASURED",
+    coverage: "COMPLETE",
     definitionId: spec.definitionId,
     metrics: spec.metrics.map((m) => metric(windowId, start, end, m)),
     targetSites: spec.targetSites,
@@ -384,7 +499,8 @@ function actor(windowId, start, end, spec) {
 function siteCoverage(overrides = {}) {
   return SOURCE_DEFS.map((s) => ({
     ...s,
-    coverage: overrides[s.id] ?? s.coverage,
+    coverage: overrides[s.id] ? mapCoverage(overrides[s.id]) : s.coverage,
+    typicalEvidence: overrides[s.id] === "UNAVAILABLE" ? "UNAVAILABLE" : s.typicalEvidence,
     coverageNote: overrides[`${s.id}Note`] ?? s.coverageNote,
   }));
 }
@@ -522,7 +638,23 @@ function buildWindow(windowId, dates, slices) {
       confidence: {
         interval: windowId === "28d" ? [0.07, 0.16] : [0.06, 0.17],
         level: 0.8,
+        intervalValid: true,
         note: "Wide interval. Browser evidence is a small subset of edge volume.",
+      },
+      ratio: {
+        value: windowId === "28d" ? 0.11 : 0.1,
+        unit: "share",
+        numeratorRef: "rum.pageviews",
+        denominatorRef: "edge.requests",
+        display: windowId === "28d" ? "≈ 11%" : "≈ 10%",
+        authoritative: true,
+      },
+      provenance: {
+        modelId: "gfd.human-share",
+        modelVersion: "0.1.0",
+        method: "browser-evidence over edge volume (pipeline)",
+        contributingSources: ["cloudflare_rum", "ga4", "cloudflare_edge"],
+        contributingMetricIds: ["rum.pageviews", "ga4.sessions", "edge.requests"],
       },
       limitations: [
         "Not a visitor number.",
@@ -538,6 +670,111 @@ function buildWindow(windowId, dates, slices) {
       status: "INCOMPLETE",
       definitionId: "def.session",
       limitations: ["Studio surfaces only. Missing on most properties."],
+    }),
+    m({
+      id: "edge.inferred_automation_from_ua",
+      label: "Inferred automation (UA taxonomy)",
+      value: windowId === "28d" ? 38400 : 9200,
+      source: "cloudflare_edge",
+      grain: "request",
+      evidenceState: "INFERRED",
+      coverage: "INCOMPLETE",
+      definitionId: "def.bot",
+      provenance: {
+        method: "source-native UA / bot-score table applied to edge requests",
+        contributingSources: ["cloudflare_edge"],
+        contributingMetricIds: ["edge.requests"],
+      },
+      limitations: ["Inference from declared actor tables. A browser-like UA is not proof of a human."],
+    }),
+    m({
+      id: "edge.sum_of_zone_uniques",
+      label: "Sum of zone-level unique counts",
+      value: windowId === "28d" ? 18400 : 4200,
+      source: "cloudflare_edge",
+      grain: "unique",
+      status: "EXACT",
+      definitionId: "def.visitor",
+      uniqueSemantics: "sum_of_zone_uniques",
+      limitations: [
+        "Arithmetic across zones inside one source, authored by the pipeline.",
+        "Not deduplicated. Not ecosystem unique humans.",
+      ],
+    }),
+    m({
+      id: "edge.deduplicated_ecosystem_unique",
+      label: "Deduplicated ecosystem unique",
+      value: null,
+      display: "unknowable",
+      source: "modeled",
+      grain: "unique",
+      evidenceState: "UNKNOWABLE",
+      coverage: "NOT_APPLICABLE",
+      definitionId: "def.visitor",
+      uniqueSemantics: "deduplicated_ecosystem_unique",
+      limitations: ["No pipeline-provided cross-zone identity graph. The UI must not compute this."],
+    }),
+    m({
+      id: "true.human_visitors",
+      label: "True human visitor count",
+      value: null,
+      display: "unknowable",
+      source: "modeled",
+      grain: "visitor",
+      evidenceState: "UNKNOWABLE",
+      coverage: "NOT_APPLICABLE",
+      definitionId: "def.human",
+      limitations: ["Not knowable from edge, RUM, or GA4. Absence of bot signals is not a census."],
+    }),
+    m({
+      id: "lab.invalid_ci_example",
+      label: "Modeled request estimate (invalid CI)",
+      value: 1100,
+      source: "modeled",
+      grain: "request",
+      evidenceState: "ESTIMATED",
+      coverage: "INCOMPLETE",
+      definitionId: "def.confidence",
+      sampling: {
+        interval: 100,
+        intervalMeaning: "pipeline sample interval of 100 requests",
+        factor: 100,
+        factorMeaning: "each sampled request stands for 100 in the estimate",
+      },
+      confidence: {
+        level: 0.95,
+        intervalValid: false,
+        lower: 453.21,
+        upper: 1746.79,
+        note: "Bounds preserved; interval is not valid. Do not treat as a 95% CI.",
+      },
+      provenance: {
+        modelId: "gfd.sampled-expand",
+        modelVersion: "0.0.1",
+        method: "sample-interval expansion (pipeline)",
+        contributingSources: ["cloudflare_edge"],
+      },
+      limitations: ["Fixture of an invalid interval. Validity=false is part of the evidence."],
+    }),
+    m({
+      id: "health.threat_rate",
+      label: "Threat rate",
+      value: windowId === "28d" ? 0.012 : 0.011,
+      display: windowId === "28d" ? "1.2%" : "1.1%",
+      source: "cloudflare_edge",
+      grain: "ratio",
+      status: "EXACT",
+      definitionId: "def.threat",
+      ratio: {
+        value: windowId === "28d" ? 0.012 : 0.011,
+        unit: "rate",
+        numeratorRef: "edge.threats",
+        denominatorRef: "edge.requests",
+        numeratorValue: threats,
+        denominatorValue: edgeRequests,
+        display: windowId === "28d" ? "1.2%" : "1.1%",
+        authoritative: true,
+      },
     }),
   ];
 
@@ -757,6 +994,11 @@ function buildWindow(windowId, dates, slices) {
       start,
       end,
       grain: "day",
+      timezone: "UTC",
+      boundary: "start_inclusive_end_inclusive",
+      extractedAt: PRODUCED_AT,
+      generatedAt: PRODUCED_AT,
+      partialCurrentPeriod: windowId === "7d",
     },
     overview: {
       metrics: overviewMetrics,
@@ -923,15 +1165,17 @@ function buildWindow(windowId, dates, slices) {
     ],
     taxonomy: [
       ranked({
-        id: "tax.unclassified",
-        label: "Unclassified",
+        id: "tax.unknown",
+        label: "UNKNOWN",
         value: windowId === "28d" ? 61200 : 14800,
         shareDisplay: "pipeline share on card",
         source: "cloudflare_edge",
         status: "EXACT",
         grain: "request",
         definitionId: "def.bot",
-        extra: "Not humans. Not proven bots.",
+        extra: "UNKNOWN is first-class. Not humans. Not proven bots. A browser-like UA is not proof of a human.",
+        sourceNativeClass: "UNKNOWN",
+        normalizedClass: "unknown",
       }),
       ranked({
         id: "tax.ai_crawler",
@@ -941,12 +1185,16 @@ function buildWindow(windowId, dates, slices) {
         status: "EXACT",
         grain: "request",
         definitionId: "def.ai_crawler",
+        sourceNativeClass: "AI Crawler",
+        normalizedClass: "ai_crawler",
       }),
       ranked({
         id: "tax.ai_search",
         label: "AI Search",
         value: windowId === "28d" ? 3100 : 780,
         source: "cloudflare_edge",
+        sourceNativeClass: "AI Search",
+        normalizedClass: "ai_search",
         status: "EXACT",
         grain: "request",
         definitionId: "def.ai_agent",
@@ -959,6 +1207,8 @@ function buildWindow(windowId, dates, slices) {
         status: "EXACT",
         grain: "request",
         definitionId: "def.ai_agent",
+        sourceNativeClass: "AI Assistant",
+        normalizedClass: "ai_assistant",
       }),
       ranked({
         id: "tax.user_triggered_ai_agent",
@@ -1359,7 +1609,7 @@ function siteRow(m, spec) {
     domain: spec.domain,
     name: spec.name,
     tier: spec.tier,
-    measurementHealth: spec.health,
+    measurementHealth: mapCoverage(spec.health),
     measurementHealthNote: spec.healthNote,
     sourceCoverage: siteCoverage(spec.coverage),
     metrics: [
@@ -1371,6 +1621,17 @@ function siteRow(m, spec) {
         grain: "request",
         status: "EXACT",
         definitionId: "def.edge_request",
+      }),
+      m({
+        id: `${spec.id}.zone_unique`,
+        label: "Zone unique (Cloudflare)",
+        value: spec.rum === null ? Math.round(spec.requests * 0.12) : Math.round(spec.requests * 0.08),
+        source: "cloudflare_edge",
+        grain: "unique",
+        status: "EXACT",
+        definitionId: "def.visitor",
+        uniqueSemantics: "source_native_zone_unique",
+        limitations: ["Source-native unique for this zone only. Not ecosystem unique humans. Not additive across sites."],
       }),
       m({
         id: `${spec.id}.edge_pv`,
@@ -1430,6 +1691,18 @@ function siteRow(m, spec) {
         grain: "ratio",
         status: spec.requests ? "EXACT" : "UNAVAILABLE",
         definitionId: "def.threat",
+        ratio: spec.requests
+          ? {
+              value: spec.threats / spec.requests,
+              unit: "rate",
+              numeratorRef: `${spec.id}.errors`,
+              denominatorRef: `${spec.id}.requests`,
+              numeratorValue: spec.threats,
+              denominatorValue: spec.requests,
+              display: `${((spec.threats / spec.requests) * 100).toFixed(1)}%`,
+              authoritative: true,
+            }
+          : undefined,
       }),
       m({
         id: `${spec.id}.cache`,
@@ -1958,7 +2231,7 @@ function buildAi(windowId, start, end, m, gptTemporal, aiRequests) {
         x,
         y,
         value: n((weekend ? 40 : 90) + (night ? 30 : 10) + Number(x)),
-        status: "EXACT",
+        evidenceState: "MEASURED",
       });
     }
   }
@@ -1972,6 +2245,8 @@ function buildAi(windowId, start, end, m, gptTemporal, aiRequests) {
         status: "EXACT",
         grain: "request",
         definitionId: "def.ai_crawler",
+        sourceNativeClass: "AI Crawler",
+        normalizedClass: "ai_crawler",
       }),
       ranked({
         id: "ai.class.search",
@@ -1981,6 +2256,8 @@ function buildAi(windowId, start, end, m, gptTemporal, aiRequests) {
         status: "EXACT",
         grain: "request",
         definitionId: "def.ai_agent",
+        sourceNativeClass: "AI Search",
+        normalizedClass: "ai_search",
       }),
       ranked({
         id: "ai.class.assistant",
@@ -1990,6 +2267,8 @@ function buildAi(windowId, start, end, m, gptTemporal, aiRequests) {
         status: "EXACT",
         grain: "request",
         definitionId: "def.ai_agent",
+        sourceNativeClass: "AI Assistant",
+        normalizedClass: "ai_assistant",
       }),
       ranked({
         id: "ai.class.user_agent",
@@ -2449,7 +2728,8 @@ function buildAi(windowId, start, end, m, gptTemporal, aiRequests) {
       label: "AI-classed requests by weekday × hour (edge)",
       source: "cloudflare_edge",
       grain: "request",
-      status: "EXACT",
+      evidenceState: "MEASURED",
+      coverage: "COMPLETE",
       definitionId: "def.ai_crawler",
       xLabel: "UTC hour",
       yLabel: "Weekday",
@@ -2665,7 +2945,15 @@ function buildContent(windowId) {
     ],
     aiToHuman: [
       row("/learn", "aiaimate", {
-        aiToHumanDisplay: "pipeline 22:1 (AI requests : GA4 sessions)",
+        aiToHuman: {
+          value: 22,
+          unit: "ratio",
+          numeratorRef: "c.r.ai.learn",
+          denominatorRef: "c.r.h.learn",
+          display: "22:1 (AI requests : GA4 sessions)",
+          authoritative: true,
+        },
+        aiToHumanDisplay: "22:1 (AI requests : GA4 sessions)",
         ai: ranked({
           id: "c.r.ai.learn",
           label: "/learn",
@@ -2686,7 +2974,14 @@ function buildContent(windowId) {
         }),
       }),
       row("/robots.txt", "gfd", {
-        aiToHumanDisplay: "pipeline ∞ (no GA4 sessions)",
+        aiToHuman: {
+          value: null,
+          unit: "ratio",
+          numeratorRef: "c.r.ai.robots",
+          display: "∞ (no GA4 sessions)",
+          authoritative: true,
+        },
+        aiToHumanDisplay: "∞ (no GA4 sessions)",
         ai: ranked({
           id: "c.r.ai.robots",
           label: "/robots.txt",
@@ -2700,7 +2995,15 @@ function buildContent(windowId) {
     ],
     humanToMachine: [
       row("/donate.html", "gfd", {
-        humanToMachineDisplay: "pipeline 4.2:1 (GA4 sessions : AI requests)",
+        humanToMachine: {
+          value: 4.2,
+          unit: "ratio",
+          numeratorRef: "c.hm.h.donate",
+          denominatorRef: "c.hm.a.donate",
+          display: "4.2:1 (GA4 sessions : AI requests)",
+          authoritative: true,
+        },
+        humanToMachineDisplay: "4.2:1 (GA4 sessions : AI requests)",
         human: ranked({
           id: "c.hm.h.donate",
           label: "/donate.html",
@@ -2997,10 +3300,10 @@ function buildGeography(windowId) {
   const n = (v) => Math.round(v * s);
   return {
     captions: {
-      edge: "Edge country is the connecting client’s country at the Cloudflare edge. It is not a human census.",
-      browser: "Browser geography is GA4 country on sessions with a beacon. Sampled. Not edge.",
-      ai: "AI geography is edge country of requests the pipeline classed as AI. Actor IPs, not readers.",
-      threat: "Threat geography is edge country of Cloudflare threat events. Not bot share.",
+      edge: "Cloudflare request country — connecting client country at the edge. Not a demographic dataset and not human location.",
+      browser: "RUM-observed browser geography and GA4-observed user geography. Sampled. Not Cloudflare request country.",
+      ai: "Cloudflare request country of requests the pipeline classed as AI. Actor infrastructure, not readers.",
+      threat: "Cloudflare request country of threat events. Not audience demographics.",
     },
     edge: [
       ranked({
@@ -3165,6 +3468,29 @@ function buildLaboratory(m, windowId, totals) {
         definitionId: "def.confidence",
         sampleFactor: 1,
         sampleInterval: "beacon",
+      }),
+      m({
+        id: "lab.invalid_ci_ref",
+        label: "Modeled request estimate (invalid CI)",
+        value: 1100,
+        source: "modeled",
+        grain: "request",
+        evidenceState: "ESTIMATED",
+        coverage: "INCOMPLETE",
+        definitionId: "def.confidence",
+        sampling: {
+          interval: 100,
+          intervalMeaning: "pipeline sample interval of 100 requests",
+          factor: 100,
+          factorMeaning: "each sampled request stands for 100 in the estimate",
+        },
+        confidence: {
+          level: 0.95,
+          intervalValid: false,
+          lower: 453.21,
+          upper: 1746.79,
+          note: "Bounds preserved; interval is not valid.",
+        },
       }),
     ],
     disagreement: [
@@ -3411,10 +3737,18 @@ function anomaliesFor(windowId) {
       severity: "info",
     },
   ];
+  const mapped = all.map((a) => {
+    const { status, ...rest } = a;
+    return {
+      ...rest,
+      evidenceState: mapEvidence(status),
+      coverage: mapCoverage(status),
+    };
+  });
   if (windowId === "7d") {
-    return all.filter((a) => a.ts >= "2026-09-02");
+    return mapped.filter((a) => a.ts >= "2026-09-02");
   }
-  return all;
+  return mapped;
 }
 
 function scrub(value) {
@@ -3439,8 +3773,9 @@ const gold = {
     producedAt: PRODUCED_AT,
     kind: "fixture",
     notes: [
-      "FIXTURE. Not production Gold output.",
+      "FIXTURE. Not production Gold output. Not live GFD traffic.",
       "Sources are never combined into a visitors total.",
+      "Evidence state is separate from coverage/missingness.",
       "Definitions are opaque pipeline text.",
       "Windows are precomputed; the UI must not rebuild totals by summing series.",
     ],

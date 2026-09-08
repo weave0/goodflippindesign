@@ -1,5 +1,7 @@
 import type {
   ActorRecord,
+  CoverageState,
+  EvidenceState,
   GoldContract,
   Metric,
   RankedItem,
@@ -7,7 +9,7 @@ import type {
   SourceId,
   WindowPayload,
 } from "./types";
-import { MEASUREMENT_STATUSES } from "./types";
+import { COVERAGE_STATES, EVIDENCE_STATES } from "./types";
 import type { Filters } from "./url-state";
 
 export function selectWindow(gold: GoldContract, windowId: string): WindowPayload {
@@ -27,7 +29,8 @@ export function unavailable(partial: Pick<Metric, "id" | "label" | "source" | "g
   return {
     ...partial,
     value: null,
-    status: "UNAVAILABLE",
+    evidenceState: "UNAVAILABLE",
+    coverage: "MISSING",
     limitations: ["No matching Gold slice for the current filters."],
   };
 }
@@ -39,7 +42,8 @@ export function unavailable(partial: Pick<Metric, "id" | "label" | "source" | "g
 export function filterRanked(rows: RankedItem[], filters: Filters): RankedItem[] {
   return rows.filter((row) => {
     if (filters.source !== "all" && row.source !== filters.source) return false;
-    if (filters.quality !== "all" && row.status !== filters.quality) return false;
+    if (filters.quality !== "all" && row.evidenceState !== filters.quality) return false;
+    if (filters.coverage !== "all" && row.coverage !== filters.coverage) return false;
     if (filters.path && !row.label.toLowerCase().includes(filters.path.toLowerCase()) && row.id !== filters.path) {
       return false;
     }
@@ -61,9 +65,12 @@ export function filterRanked(rows: RankedItem[], filters: Filters): RankedItem[]
 export function filterMetrics(metrics: Metric[], filters: Filters): Metric[] {
   return metrics.filter((metric) => {
     if (filters.source !== "all" && metric.source !== filters.source) return false;
-    if (filters.quality !== "all" && metric.status !== filters.quality) return false;
+    if (filters.quality !== "all" && metric.evidenceState !== filters.quality) return false;
+    if (filters.coverage !== "all" && metric.coverage !== filters.coverage) return false;
     if (filters.confidence !== "all") {
-      if (filters.confidence === "has_interval" && !metric.confidence?.interval) return false;
+      const hasBounds = typeof metric.confidence?.lower === "number" && typeof metric.confidence?.upper === "number";
+      if (filters.confidence === "has_interval" && !hasBounds) return false;
+      if (filters.confidence === "invalid" && metric.confidence?.intervalValid !== false) return false;
       if (filters.confidence === "none" && metric.confidence) return false;
     }
     return true;
@@ -73,7 +80,14 @@ export function filterMetrics(metrics: Metric[], filters: Filters): Metric[] {
 export function filterActors(actors: ActorRecord[], filters: Filters): ActorRecord[] {
   return actors.filter((actor) => {
     if (filters.actor !== "all" && actor.id !== filters.actor && actor.name !== filters.actor) return false;
-    if (filters.class !== "all" && actor.class !== filters.class) return false;
+    if (
+      filters.class !== "all" &&
+      actor.class !== filters.class &&
+      actor.normalizedClass !== filters.class &&
+      actor.sourceNativeClass !== filters.class
+    ) {
+      return false;
+    }
     if (filters.source !== "all" && actor.source !== filters.source) return false;
     if (filters.site !== "all") {
       const hitsSite = actor.targetSites.some(
@@ -93,8 +107,12 @@ export function sourceNote(gold: GoldContract, id: SourceId) {
   return gold.sources.find((source) => source.id === id);
 }
 
-export function isStatus(value: string): value is (typeof MEASUREMENT_STATUSES)[number] {
-  return (MEASUREMENT_STATUSES as readonly string[]).includes(value);
+export function isEvidenceState(value: string): value is EvidenceState {
+  return (EVIDENCE_STATES as readonly string[]).includes(value);
+}
+
+export function isCoverageState(value: string): value is CoverageState {
+  return (COVERAGE_STATES as readonly string[]).includes(value);
 }
 
 /** Overview cards come from the window payload — never from summing sites. */
