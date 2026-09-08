@@ -46,13 +46,6 @@
             "advisories": [],
             "severity": "high"
         },
-        "nanoid": {
-            "advisories": [
-                "1138811",
-                "1139427"
-            ],
-            "severity": "high"
-        },
         "puppeteer": {
             "advisories": [],
             "severity": "high"

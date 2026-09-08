@@ -24,6 +24,9 @@ jobs:
       - name: Install
         run: npm ci --no-audit --ignore-scripts && npx puppeteer browsers install chrome
 
+      - name: Test security policy
+        run: npm run test:security
+
       - name: Production security audit
         run: |
           node scripts/check-production-graph.js
@@ -35,8 +38,17 @@ jobs:
           npm audit --audit-level=moderate --json > npm-audit-full.json
           audit_status=$?
           set -e
-          node scripts/audit-policy.js npm-audit-full.json security/npm-audit-baseline.json
-          echo "npm audit exit status: $audit_status (nonzero is expected for governed inherited findings)"
+          node scripts/audit-policy.js npm-audit-full.json security/npm-audit-baseline.json "$audit_status"
+          base_sha="${{ github.event.pull_request.base.sha }}"
+          trusted_baseline="$(mktemp)"
+          if [ -n "$base_sha" ]; then
+            git fetch --no-tags origin "$base_sha" --depth=1
+          fi
+          if [ -n "$base_sha" ] && git cat-file -e "$base_sha:security/npm-audit-baseline.json" 2>/dev/null; then
+            git show "$base_sha:security/npm-audit-baseline.json" > "$trusted_baseline"
+          fi
+          node scripts/compare-audit-baseline.js security/npm-audit-baseline.json "$trusted_baseline" npm-audit-full.json
+          echo "npm audit exit status: $audit_status (1 means findings were reported and validated)"
 
       - name: Lint
         run: npm run lint
