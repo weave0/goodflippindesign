@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://goodflippindesign.com/schema/gfd-traffic-intelligence-gold.v1.json",
+  "title": "GFD Traffic Intelligence Gold contract",
+  "type": "object",
+  "required": ["contract", "definitions", "sources", "defaultWindowId", "windows"],
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "type": "object",
+      "required": ["name", "version", "pipelineVersion", "producedAt", "kind", "notes"],
+      "properties": {
+        "name": { "const": "gfd-traffic-intelligence-gold" },
+        "version": { "type": "string" },
+        "pipelineVersion": { "type": "string" },
+        "producedAt": { "type": "string" },
+        "kind": { "enum": ["fixture", "production"] },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "definitions": {
+      "type": "array",
+      "minItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["id", "term", "text", "source", "knownLimitations"],
+        "properties": {
+          "id": { "type": "string" },
+          "term": { "type": "string" },
+          "text": { "type": "string" },
+          "source": { "type": "string" },
+          "grain": { "type": "string" },
+          "knownLimitations": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "sources": { "type": "array", "minItems": 6 },
+    "defaultWindowId": { "type": "string" },
+    "windows": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/windowPayload" }
+    }
+  },
+  "$defs": {
+    "status": {
+      "enum": ["EXACT", "SAMPLED", "ESTIMATED", "INCOMPLETE", "UNAVAILABLE"]
+    },
+    "source": {
+      "enum": ["cloudflare_edge", "cloudflare_rum", "ga4", "vercel", "first_party", "modeled"]
+    },
+    "metric": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "value",
+        "source",
+        "grain",
+        "status",
+        "timeWindow",
+        "definitionId",
+        "pipelineVersion"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "value": { "type": ["number", "null"] },
+        "display": { "type": "string" },
+        "unit": { "type": "string" },
+        "source": { "$ref": "#/$defs/source" },
+        "grain": { "type": "string" },
+        "status": { "$ref": "#/$defs/status" },
+        "timeWindow": {
+          "type": "object",
+          "required": ["id", "start", "end"]
+        },
+        "definitionId": { "type": "string" },
+        "sampleInterval": { "type": "string" },
+        "sampleFactor": { "type": "number" },
+        "confidence": { "type": "object" },
+        "limitations": { "type": "array", "items": { "type": "string" } },
+        "pipelineVersion": { "type": "string" },
+        "sparkline": { "type": "array", "items": { "type": "number" } },
+        "direction": { "enum": ["up", "down", "flat", "n/a"] },
+        "deltaDisplay": { "type": "string" }
+      }
+    },
+    "windowPayload": {
+      "type": "object",
+      "required": [
+        "window",
+        "overview",
+        "series",
+        "taxonomy",
+        "humans",
+        "ai",
+        "automation",
+        "sites",
+        "content",
+        "technology",
+        "geography",
+        "laboratory",
+        "anomalies",
+        "health"
+      ]
+    }
+  }
+}
