@@ -16,8 +16,8 @@ const files = [
   ["schema/gold-layer-1.2.schema.json", "schemas/gold-layer-1.2.schema.json"],
 ];
 
-function sha256(path) {
-  return createHash("sha256").update(readFileSync(path)).digest("hex");
+function sha256(bytes) {
+  return createHash("sha256").update(bytes).digest("hex");
 }
 
 function fail(message) {
@@ -30,22 +30,24 @@ if (!existsSync(producerRoot)) {
 
 let producerCommit;
 try {
-  producerCommit = execFileSync("git", ["-C", producerRoot, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  producerCommit = execFileSync("git", ["-C", producerRoot, "rev-parse", `${expectedCommit}^{commit}`], { encoding: "utf8" }).trim();
 } catch (error) {
-  fail(`cannot read producer Git SHA: ${error.message}`);
-}
-if (producerCommit !== expectedCommit) {
-  fail(`producer checkout is ${producerCommit}, expected ${expectedCommit}`);
+  fail(`producer commit ${expectedCommit} is unavailable: ${error.message}`);
 }
 
 for (const [consumerRelative, producerRelative] of files) {
   const consumerPath = resolve(consumerRoot, consumerRelative);
-  const producerPath = resolve(producerRoot, producerRelative);
-  if (!existsSync(consumerPath) || !existsSync(producerPath)) {
-    fail(`missing synchronized artifact: ${consumerRelative} or ${producerRelative}`);
+  if (!existsSync(consumerPath)) {
+    fail(`missing consumer artifact: ${consumerRelative}`);
   }
-  const consumerHash = sha256(consumerPath);
-  const producerHash = sha256(producerPath);
+  let producerBytes;
+  try {
+    producerBytes = execFileSync("git", ["-C", producerRoot, "show", `${expectedCommit}:${producerRelative}`]);
+  } catch (error) {
+    fail(`missing producer artifact ${producerRelative} at ${expectedCommit}: ${error.message}`);
+  }
+  const consumerHash = sha256(readFileSync(consumerPath));
+  const producerHash = sha256(producerBytes);
   if (consumerHash !== producerHash) {
     fail(`${consumerRelative} differs from producer ${producerRelative}`);
   }
