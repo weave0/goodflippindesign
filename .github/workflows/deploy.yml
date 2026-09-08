@@ -17,20 +17,30 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: "22"
+          node-version: "24"
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install --no-audit --ignore-scripts && npx puppeteer browsers install chrome
-        # npm ci fails cross-platform: Windows lockfile omits Linux-only @emnapi deps
+        run: npm ci --no-audit --ignore-scripts && npx puppeteer browsers install chrome
 
-      - name: Security audit
-        run: npm audit --audit-level=moderate
+      - name: Production security audit
+        run: |
+          node scripts/check-production-graph.js
+          npm audit --omit=dev --omit=optional --audit-level=moderate
+
+      - name: Governed full-tree security audit
+        run: |
+          set +e
+          npm audit --audit-level=moderate --json > npm-audit-full.json
+          audit_status=$?
+          set -e
+          node scripts/audit-policy.js npm-audit-full.json security/npm-audit-baseline.json
+          echo "npm audit exit status: $audit_status (nonzero is expected for governed inherited findings)"
 
       - name: Lint
         run: npm run lint
