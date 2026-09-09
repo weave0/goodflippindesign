@@ -110,6 +110,58 @@ jobs:
           jq '.' <<<"$attach_response"
           test "$(jq -r '.success' <<<"$attach_response")" = "true"
 
+      - name: Ensure custom-domain DNS record exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          domain_url="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/domains/$CF_CUSTOM_DOMAIN"
+          domain_response="$(curl -sS "$domain_url" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+          test "$(jq -r '.success' <<<"$domain_response")" = "true"
+
+          zone_id="$(jq -r '.result.zone_tag // empty' <<<"$domain_response")"
+          test -n "$zone_id" || {
+            echo "Pages custom domain did not expose a zone_tag"
+            jq '.' <<<"$domain_response"
+            exit 1
+          }
+
+          target="$CF_PROJECT_NAME.pages.dev"
+          records_response="$(curl -sS -G \
+            "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            --data-urlencode "type=CNAME" \
+            --data-urlencode "name=$CF_CUSTOM_DOMAIN")"
+          test "$(jq -r '.success' <<<"$records_response")" = "true"
+
+          record_count="$(jq -r '.result | length' <<<"$records_response")"
+          if [ "$record_count" -gt 1 ]; then
+            echo "Multiple CNAME records unexpectedly match $CF_CUSTOM_DOMAIN"
+            jq '.' <<<"$records_response"
+            exit 1
+          fi
+
+          if [ "$record_count" -eq 1 ]; then
+            existing_target="$(jq -r '.result[0].content' <<<"$records_response")"
+            existing_target="${existing_target%.}"
+            existing_proxied="$(jq -r '.result[0].proxied' <<<"$records_response")"
+            if [ "$existing_target" != "$target" ] || [ "$existing_proxied" != "true" ]; then
+              echo "Existing DNS record conflicts with the required Pages target"
+              jq '.result[0]' <<<"$records_response"
+              exit 1
+            fi
+            echo "DNS already correct: $CF_CUSTOM_DOMAIN -> $target (proxied)"
+            exit 0
+          fi
+
+          echo "Creating proxied CNAME: $CF_CUSTOM_DOMAIN -> $target"
+          create_response="$(curl -sS -X POST \
+            "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data "{\"type\":\"CNAME\",\"name\":\"$CF_CUSTOM_DOMAIN\",\"content\":\"$target\",\"proxied\":true,\"ttl\":1}")"
+          jq '.' <<<"$create_response"
+          test "$(jq -r '.success' <<<"$create_response")" = "true"
+
       - name: Verify Pages production URL
         shell: bash
         run: |
