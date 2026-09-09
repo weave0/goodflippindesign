@@ -25,6 +25,24 @@ const PRIMARY_NAV: { id: ViewId; label: string; matches: ViewId[] }[] = [
   { id: "laboratory", label: "Data quality", matches: ["laboratory", "health", "technology"] },
 ];
 
+const PRIMARY_NAV_RESET: Partial<Filters> = {
+  source: FILTER_DEFAULTS.source,
+  taxonomy: FILTER_DEFAULTS.taxonomy,
+  class: FILTER_DEFAULTS.class,
+  actor: FILTER_DEFAULTS.actor,
+  country: FILTER_DEFAULTS.country,
+  device: FILTER_DEFAULTS.device,
+  browser: FILTER_DEFAULTS.browser,
+  referrerClass: FILTER_DEFAULTS.referrerClass,
+  path: FILTER_DEFAULTS.path,
+  status: FILTER_DEFAULTS.status,
+  contentType: FILTER_DEFAULTS.contentType,
+  cache: FILTER_DEFAULTS.cache,
+  confidence: FILTER_DEFAULTS.confidence,
+  quality: FILTER_DEFAULTS.quality,
+  coverage: FILTER_DEFAULTS.coverage,
+};
+
 const VIEW_COPY: Record<ViewId, { title: string; lede: string }> = {
   overview: {
     title: "Traffic overview",
@@ -161,7 +179,7 @@ export function App() {
             >
               {filters.theme === "dark" ? "Light" : "Dark"}
             </button>
-            <button type="button" className="icon-btn" onClick={() => patchFilters({ view: "laboratory" })}>
+            <button type="button" className="icon-btn" onClick={() => patchFilters({ ...PRIMARY_NAV_RESET, view: "laboratory" })}>
               Data notes
             </button>
           </div>
@@ -181,7 +199,11 @@ export function App() {
               type="button"
               className="primary-nav__button"
               aria-current={item.matches.includes(filters.view) ? "page" : undefined}
-              onClick={() => patchFilters({ view: item.id })}
+              onClick={() => {
+                if (!item.matches.includes(filters.view)) {
+                  patchFilters({ ...PRIMARY_NAV_RESET, view: item.id });
+                }
+              }}
             >
               {item.label}
             </button>
@@ -227,6 +249,7 @@ export function App() {
             <>
               <LaboratoryView gold={gold} payload={payload} filters={filters} onOpen={setEvidence} />
               <HealthView payload={payload} filters={filters} onOpen={setEvidence} />
+              <TechnologyView payload={payload} filters={filters} onOpen={setEvidence} />
             </>
           )}
           {filters.view === "technology" && <TechnologyView payload={payload} filters={filters} onOpen={setEvidence} />}
