@@ -116,7 +116,11 @@ jobs:
           set -euo pipefail
           domain_url="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/domains/$CF_CUSTOM_DOMAIN"
           domain_response="$(curl -sS "$domain_url" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
-          test "$(jq -r '.success' <<<"$domain_response")" = "true"
+          if [ "$(jq -r '.success' <<<"$domain_response")" != "true" ]; then
+            echo "Unable to read Pages custom-domain state"
+            jq '.' <<<"$domain_response"
+            exit 1
+          fi
 
           zone_id="$(jq -r '.result.zone_tag // empty' <<<"$domain_response")"
           test -n "$zone_id" || {
@@ -129,23 +133,33 @@ jobs:
           records_response="$(curl -sS -G \
             "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            --data-urlencode "type=CNAME" \
             --data-urlencode "name=$CF_CUSTOM_DOMAIN")"
-          test "$(jq -r '.success' <<<"$records_response")" = "true"
-
-          record_count="$(jq -r '.result | length' <<<"$records_response")"
-          if [ "$record_count" -gt 1 ]; then
-            echo "Multiple CNAME records unexpectedly match $CF_CUSTOM_DOMAIN"
+          if [ "$(jq -r '.success' <<<"$records_response")" != "true" ]; then
+            echo "Unable to query DNS records for $CF_CUSTOM_DOMAIN"
             jq '.' <<<"$records_response"
             exit 1
           fi
 
+          record_count="$(jq -r '.result | length' <<<"$records_response")"
+          if [ "$record_count" -gt 1 ]; then
+            echo "Multiple DNS records unexpectedly match $CF_CUSTOM_DOMAIN; refusing to mutate"
+            jq '.result' <<<"$records_response"
+            exit 1
+          fi
+
           if [ "$record_count" -eq 1 ]; then
+            existing_type="$(jq -r '.result[0].type' <<<"$records_response")"
+            if [ "$existing_type" != "CNAME" ]; then
+              echo "Existing non-CNAME DNS record conflicts with the required Pages CNAME"
+              jq '.result[0]' <<<"$records_response"
+              exit 1
+            fi
+
             existing_target="$(jq -r '.result[0].content' <<<"$records_response")"
             existing_target="${existing_target%.}"
             existing_proxied="$(jq -r '.result[0].proxied' <<<"$records_response")"
             if [ "$existing_target" != "$target" ] || [ "$existing_proxied" != "true" ]; then
-              echo "Existing DNS record conflicts with the required Pages target"
+              echo "Existing CNAME conflicts with the required Pages target or proxy state"
               jq '.result[0]' <<<"$records_response"
               exit 1
             fi
