@@ -17,13 +17,17 @@ async function authorizeAdmin(request) {
     },
   });
 
-  if (!response.ok) return { ok: false, status: response.status === 401 ? 401 : 403 };
+  if (!response.ok) {
+    if (response.status === 401) return { ok: false, status: 401 };
+    if (response.status === 403) return { ok: false, status: 403 };
+    return { ok: false, status: 503 };
+  }
 
   let profile;
   try {
     profile = await response.json();
   } catch {
-    return { ok: false, status: 403 };
+    return { ok: false, status: 503 };
   }
 
   const email = typeof profile?.email === "string" ? profile.email.toLowerCase() : "";
@@ -33,11 +37,17 @@ async function authorizeAdmin(request) {
 }
 
 function denied(status) {
-  return new Response(status === 401 ? "Authentication required" : "Forbidden", {
+  const message = status === 401
+    ? "Authentication required"
+    : status === 403
+      ? "Forbidden"
+      : "Administrator verification unavailable";
+  return new Response(message, {
     status,
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "no-store",
+      "Vary": "Authorization",
       "X-Robots-Tag": "noindex, nofollow, noarchive",
     },
   });
@@ -52,7 +62,7 @@ export default {
       if (!auth.ok) return denied(auth.status);
       return Response.json(
         { ok: true, admin: true },
-        { headers: { "Cache-Control": "no-store" } },
+        { headers: { "Cache-Control": "no-store", "Vary": "Authorization" } },
       );
     }
 
@@ -62,6 +72,7 @@ export default {
       const asset = await env.ASSETS.fetch(request);
       const response = new Response(asset.body, asset);
       response.headers.set("Cache-Control", "private, no-store, max-age=0");
+      response.headers.set("Vary", "Authorization");
       response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
       return response;
     }
