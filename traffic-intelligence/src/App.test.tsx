@@ -100,7 +100,7 @@ describe("human-first traffic intelligence shell", () => {
     await user.click(screen.getByRole("button", { name: "Data quality" }));
     expect(await screen.findByRole("heading", { level: 1, name: "Data quality" })).toBeInTheDocument();
     expect(window.location.search).toContain("view=laboratory");
-    expect(screen.getByText(/Source disagreement/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Source disagreement" })).toBeInTheDocument();
     expect(screen.getByLabelText("Source")).toBeInTheDocument();
     expect(screen.getByLabelText("Evidence")).toBeInTheDocument();
   });
