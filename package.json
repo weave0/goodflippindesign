@@ -72,7 +72,11 @@
     "test:workers": "vitest run --config vitest.workers.config.mjs",
     "test:security": "node tests/security/audit-policy.test.js",
     "test:workers:payments": "vitest run --config vitest.stripe-payments.config.mjs",
-    "test:all": "npm test && npm run test:workers && npm run test:workers:payments"
+    "test:all": "npm test && npm run test:workers && npm run test:workers:payments",
+    "traffic:dev": "npm --prefix traffic-intelligence run dev",
+    "traffic:test": "npm --prefix traffic-intelligence test",
+    "traffic:build": "npm --prefix traffic-intelligence run build",
+    "traffic:lint": "npm --prefix traffic-intelligence run lint"
   },
   "repository": {
     "type": "git",
