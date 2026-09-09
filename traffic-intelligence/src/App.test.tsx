@@ -93,7 +93,7 @@ describe("human-first traffic intelligence shell", () => {
     cleanup();
   });
 
-  it("moves source disagreement into Data quality and keeps URL state shareable", async () => {
+  it("moves source disagreement and technical evidence into Data quality", async () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("heading", { name: "Traffic overview" });
@@ -101,8 +101,22 @@ describe("human-first traffic intelligence shell", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Data quality" })).toBeInTheDocument();
     expect(window.location.search).toContain("view=laboratory");
     expect(screen.getByRole("heading", { name: "Source disagreement" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "HTTP method" })).toBeInTheDocument();
     expect(screen.getByLabelText("Source")).toBeInTheDocument();
     expect(screen.getByLabelText("Evidence")).toBeInTheDocument();
+  });
+
+  it("clears filters that become hidden when switching primary destinations", async () => {
+    const user = userEvent.setup();
+    window.history.replaceState({}, "", "/?view=laboratory&class=ai_crawler&quality=measured&coverage=partial_coverage");
+    render(<App />);
+    expect(await screen.findByRole("heading", { level: 1, name: "Data quality" })).toBeInTheDocument();
+    expect(window.location.search).toContain("quality=measured");
+    await user.click(screen.getByRole("button", { name: "Overview" }));
+    expect(await screen.findByRole("heading", { level: 1, name: "Traffic overview" })).toBeInTheDocument();
+    expect(window.location.search).not.toContain("class=");
+    expect(window.location.search).not.toContain("quality=");
+    expect(window.location.search).not.toContain("coverage=");
   });
 
   it("groups named AI actors with other automation", async () => {
