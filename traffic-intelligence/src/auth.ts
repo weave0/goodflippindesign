@@ -1,4 +1,4 @@
-const CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsuZ29vZGZsaXBwaW52aWJlcy5jb20k";
+const CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsuZ29vZGZsaXBwaW5kZXNpZ24uY29tJA";
 
 interface ClerkSession {
   getToken(): Promise<string | null>;
@@ -70,7 +70,10 @@ export async function authorizeAdmin(): Promise<"authorized" | "signed_out" | "f
   });
 
   if (response.status === 401) return "signed_out";
-  if (!response.ok) return "forbidden";
+  if (response.status === 403) return "forbidden";
+  if (!response.ok) {
+    throw new Error(`Administrator verification HTTP ${response.status}`);
+  }
 
   adminToken = token;
   return "authorized";
