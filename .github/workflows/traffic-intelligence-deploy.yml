@@ -194,27 +194,34 @@ jobs:
           set -euo pipefail
           domain_url="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/domains/$CF_CUSTOM_DOMAIN"
           status="unknown"
+          verification="unknown"
+          validation="unknown"
           response='{}'
 
           for attempt in $(seq 1 24); do
             response="$(curl -sS "$domain_url" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+            if [ "$(jq -r '.success // false' <<<"$response")" != "true" ]; then
+              echo "Custom-domain API attempt $attempt returned success=false"
+              jq '.' <<<"$response"
+              sleep 5
+              continue
+            fi
+
             status="$(jq -r '.result.status // "unknown"' <<<"$response")"
-            echo "Custom-domain status attempt $attempt: $status"
-            if [ "$status" = "active" ]; then
+            verification="$(jq -r '.result.verification_data.status // "unknown"' <<<"$response")"
+            validation="$(jq -r '.result.validation_data.status // "unknown"' <<<"$response")"
+            echo "Custom-domain attempt $attempt: status=$status verification=$verification validation=$validation"
+            if [ "$status" = "active" ] && [ "$verification" = "active" ] && [ "$validation" = "active" ]; then
               break
             fi
             sleep 5
           done
 
-          if [ "$status" != "active" ]; then
-            echo "Custom domain did not become active: $CF_CUSTOM_DOMAIN"
+          if [ "$status" != "active" ] || [ "$verification" != "active" ] || [ "$validation" != "active" ]; then
+            echo "Custom domain did not reach complete active state: status=$status verification=$verification validation=$validation"
             jq '.' <<<"$response"
             exit 1
           fi
 
-          verification="$(jq -r '.result.verification_data.status // "unknown"' <<<"$response")"
-          validation="$(jq -r '.result.validation_data.status // "unknown"' <<<"$response")"
-          test "$verification" = "active"
-          test "$validation" = "active"
           echo "Custom domain active: https://$CF_CUSTOM_DOMAIN"
           echo "Direct HTTP curl is intentionally not a gate here because zone Bot Fight Mode rejects non-browser GitHub runners."
