@@ -17,68 +17,62 @@ import { LaboratoryView } from "./views/LaboratoryView";
 import { AnomaliesView } from "./views/AnomaliesView";
 import { HealthView } from "./views/HealthView";
 
-const NAV: { id: ViewId; label: string }[] = [
-  { id: "overview", label: "Overview" },
-  { id: "humans", label: "Humans" },
-  { id: "ai", label: "AI & agents" },
-  { id: "automation", label: "Other automation" },
-  { id: "sites", label: "Sites" },
-  { id: "content", label: "Content" },
-  { id: "technology", label: "Technology" },
-  { id: "geography", label: "Geography" },
-  { id: "laboratory", label: "Laboratory" },
-  { id: "anomalies", label: "Anomalies" },
-  { id: "health", label: "Technical health" },
+const PRIMARY_NAV: { id: ViewId; label: string; matches: ViewId[] }[] = [
+  { id: "overview", label: "Overview", matches: ["overview", "anomalies"] },
+  { id: "humans", label: "Audience", matches: ["humans", "geography"] },
+  { id: "sites", label: "Sites & content", matches: ["sites", "site", "content"] },
+  { id: "ai", label: "AI & automation", matches: ["ai", "automation"] },
+  { id: "laboratory", label: "Data quality", matches: ["laboratory", "health", "technology"] },
 ];
 
 const VIEW_COPY: Record<ViewId, { title: string; lede: string }> = {
   overview: {
-    title: "Executive overview",
-    lede: "Edge volume, browser observations, GA4, Vercel, machine/AI activity, errors, threats, and measurement health — each from its own source.",
+    title: "Traffic overview",
+    lede: "What changed, what matters, and where to look next.",
   },
   humans: {
-    title: "Human evidence",
-    lede: "Browser-side sessions, engagement, acquisition and Core Web Vitals. Not an edge unique count.",
+    title: "Audience",
+    lede: "Observed human activity, acquisition, engagement, devices and geography from browser-side evidence.",
   },
   ai: {
-    title: "AI & agents",
-    lede: "Crawlers, search, assistants and user-triggered agents as classed by the pipeline, with named actors.",
+    title: "AI & automation",
+    lede: "Measured machine activity, named AI actors and other automation kept separate from human evidence.",
   },
   automation: {
-    title: "Other automation",
-    lede: "Search crawlers, monitors, clients, scanners and hostile traffic — kept out of the AI view.",
+    title: "AI & automation",
+    lede: "Machine activity that is not classified as AI.",
   },
   sites: {
-    title: "Sites",
-    lede: "One card per property. Click through for a dossier. Coverage is part of the measurement.",
+    title: "Sites & content",
+    lede: "Which properties and pages are attracting attention, growing, failing or wasting traffic.",
   },
   site: {
-    title: "Site dossier",
-    lede: "Single-property Gold slice. Still not a blended visitor number.",
+    title: "Property detail",
+    lede: "A single property's measured activity and coverage.",
   },
   content: {
-    title: "Content",
-    lede: "Pages that attract humans, AI, search crawlers — and pages that fail.",
+    title: "Sites & content",
+    lede: "Pages attracting humans, AI and search crawlers, including high-error and high-bandwidth paths.",
   },
   technology: {
-    title: "Technology",
-    lede: "Status, method, protocol, TLS, cache, colo, origin timing, deployment correlation.",
+    title: "Data quality",
+    lede: "Technical evidence used to explain traffic and measurement behavior.",
   },
   geography: {
-    title: "Geography",
-    lede: "Edge, browser, AI and threat maps are not interchangeable.",
+    title: "Audience",
+    lede: "Where observed traffic originates, without mixing incompatible measurement sources.",
   },
   laboratory: {
-    title: "Measurement laboratory",
-    lede: "Where Cloudflare edge, RUM, GA4, Vercel and first-party disagree — on purpose.",
+    title: "Data quality",
+    lede: "Coverage, source disagreement, missingness and measurement limitations.",
   },
   anomalies: {
-    title: "Anomalies",
-    lede: "Pipeline-flagged spikes, divergence, and deployment-correlated changes.",
+    title: "Traffic overview",
+    lede: "Material changes and exceptions that deserve attention.",
   },
   health: {
-    title: "Technical health",
-    lede: "Errors, threats, and paths that deserve operator action.",
+    title: "Data quality",
+    lede: "Errors, threats and measurement gaps that require operator action.",
   },
 };
 
@@ -89,7 +83,6 @@ export function App() {
     typeof window === "undefined" ? FILTER_DEFAULTS : parseFilters(window.location.search),
   );
   const [evidence, setEvidence] = useState<Metric | null>(null);
-  const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,9 +112,7 @@ export function App() {
     const qs = serializeFilters(filters);
     const next = `${window.location.pathname}${qs}${window.location.hash}`;
     const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-    if (next !== current) {
-      window.history.replaceState(filters, "", next);
-    }
+    if (next !== current) window.history.replaceState(filters, "", next);
   }, [filters]);
 
   const patchFilters = (patch: Partial<Filters>) => {
@@ -137,8 +128,8 @@ export function App() {
 
   if (error) {
     return (
-      <main className="main">
-        <h1>Gold contract unavailable</h1>
+      <main className="main fatal-state">
+        <h1>Traffic intelligence unavailable</h1>
         <p>{error}</p>
       </main>
     );
@@ -146,56 +137,58 @@ export function App() {
 
   if (!gold || !payload) {
     return (
-      <main className="main">
-        <h1>Loading Gold contract…</h1>
-        <p className="lede">Static JSON only. No live analytics APIs.</p>
+      <main className="main fatal-state">
+        <h1>Loading traffic intelligence…</h1>
       </main>
     );
   }
 
   return (
     <div className="app" data-theme={filters.theme} data-dataset={gold.contract.kind}>
-      <a className="skip" href="#main">
-        Skip to content
-      </a>
-      <nav className={`nav${navOpen ? " is-open" : ""}`} aria-label="Observatory">
-        <div className="brand">
-          <strong>GFD Traffic Intelligence</strong>
-          <span>
-            {gold.contract.pipelineVersion}
-          </span>
-          {gold.contract.kind === "fixture" ? (
-            <div className="data-mode" data-mode="fixture">
-              Fixture dataset · not live GFD traffic
-            </div>
-          ) : null}
+      <a className="skip" href="#main">Skip to content</a>
+
+      <header className="app-header">
+        <div className="brand-row">
+          <div className="brand">
+            <strong>GFD Traffic Intelligence</strong>
+            <span>{payload.window.start} → {payload.window.end}</span>
+          </div>
+          <div className="top-actions">
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => patchFilters({ theme: filters.theme === "dark" ? "light" : "dark" })}
+            >
+              {filters.theme === "dark" ? "Light" : "Dark"}
+            </button>
+            <button type="button" className="icon-btn" onClick={() => patchFilters({ view: "laboratory" })}>
+              Data notes
+            </button>
+          </div>
         </div>
-        <div className="nav-list">
-          {NAV.map((item) => (
+
+        {gold.contract.kind === "fixture" ? (
+          <div className="fixture-warning" role="status">
+            <strong>Live traffic is not connected.</strong>
+            <span>This environment is displaying contract test data, not current GFD performance.</span>
+          </div>
+        ) : null}
+
+        <nav className="primary-nav" aria-label="Traffic intelligence">
+          {PRIMARY_NAV.map((item) => (
             <button
               key={item.id}
               type="button"
-              className="nav-btn"
-              aria-current={filters.view === item.id || (item.id === "sites" && filters.view === "site") ? "page" : undefined}
-              onClick={() => {
-                patchFilters({ view: item.id });
-                setNavOpen(false);
-              }}
+              className="primary-nav__button"
+              aria-current={item.matches.includes(filters.view) ? "page" : undefined}
+              onClick={() => patchFilters({ view: item.id })}
             >
               {item.label}
             </button>
           ))}
-        </div>
-        <div className="nav-foot">
-          Observation {payload.window.start} → {payload.window.end}
-          <span>
-            {payload.window.timezone ?? "timezone undeclared"}
-            {payload.window.partialCurrentPeriod ? " · partial period" : ""}
-          </span>
-          <span>generated_at {gold.contract.generatedAt}</span>
-          <span>Shareable URL state is on.</span>
-        </div>
-      </nav>
+        </nav>
+      </header>
+
       <div className="workspace">
         <header className="topbar">
           <div className="topbar-row">
@@ -203,56 +196,45 @@ export function App() {
               <h1>{copy.title}</h1>
               <p className="lede">{copy.lede}</p>
             </div>
-            <div className="top-actions">
-              <button type="button" className="icon-btn mobile-nav-toggle" onClick={() => setNavOpen((v) => !v)}>
-                Menu
-              </button>
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={() => patchFilters({ theme: filters.theme === "dark" ? "light" : "dark" })}
-              >
-                {filters.theme === "dark" ? "Light" : "Dark"}
-              </button>
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={() => {
-                  const first = payload.overview.metrics[0];
-                  if (first) setEvidence(first);
-                }}
-              >
-                Methodology
-              </button>
-            </div>
           </div>
           <FiltersBar gold={gold} payload={payload} filters={filters} onChange={patchFilters} />
         </header>
+
         <main id="main" className="main">
           {filters.view === "overview" && <OverviewView payload={payload} filters={filters} onOpen={setEvidence} />}
           {filters.view === "humans" && <HumansView payload={payload} filters={filters} onOpen={setEvidence} />}
-          {filters.view === "ai" && <AIView payload={payload} filters={filters} onOpen={setEvidence} />}
-          {filters.view === "automation" && <AutomationView payload={payload} filters={filters} />}
+          {filters.view === "geography" && <GeographyView payload={payload} filters={filters} />}
+
           {filters.view === "sites" && (
-            <SitesView
-              payload={payload}
-              onOpenSite={(id) => patchFilters({ view: "site", site: id })}
-            />
+            <>
+              <SitesView payload={payload} onOpenSite={(id) => patchFilters({ view: "site", site: id })} />
+              <ContentView payload={payload} filters={filters} />
+            </>
           )}
           {filters.view === "site" && site && <SiteDossierView site={site} onOpen={setEvidence} />}
-          {filters.view === "site" && !site && (
-            <p className="empty">Select a site in the filter bar to open a dossier.</p>
-          )}
+          {filters.view === "site" && !site && <p className="empty">Select a property above to open its detail.</p>}
           {filters.view === "content" && <ContentView payload={payload} filters={filters} />}
-          {filters.view === "technology" && <TechnologyView payload={payload} filters={filters} onOpen={setEvidence} />}
-          {filters.view === "geography" && <GeographyView payload={payload} filters={filters} />}
-          {filters.view === "laboratory" && (
-            <LaboratoryView gold={gold} payload={payload} filters={filters} onOpen={setEvidence} />
+
+          {filters.view === "ai" && (
+            <>
+              <AIView payload={payload} filters={filters} onOpen={setEvidence} />
+              <AutomationView payload={payload} filters={filters} />
+            </>
           )}
-          {filters.view === "anomalies" && <AnomaliesView payload={payload} />}
+          {filters.view === "automation" && <AutomationView payload={payload} filters={filters} />}
+
+          {filters.view === "laboratory" && (
+            <>
+              <LaboratoryView gold={gold} payload={payload} filters={filters} onOpen={setEvidence} />
+              <HealthView payload={payload} filters={filters} onOpen={setEvidence} />
+            </>
+          )}
+          {filters.view === "technology" && <TechnologyView payload={payload} filters={filters} onOpen={setEvidence} />}
           {filters.view === "health" && <HealthView payload={payload} filters={filters} onOpen={setEvidence} />}
+          {filters.view === "anomalies" && <AnomaliesView payload={payload} />}
         </main>
       </div>
+
       <EvidenceDrawer metric={evidence} gold={gold} onClose={() => setEvidence(null)} />
     </div>
   );
