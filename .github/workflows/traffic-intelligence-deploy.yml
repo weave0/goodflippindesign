@@ -127,6 +127,8 @@ jobs:
         run: |
           set -euo pipefail
           domain_url="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/domains/$CF_CUSTOM_DOMAIN"
+          status="unknown"
+          response='{}'
 
           for attempt in $(seq 1 24); do
             response="$(curl -sS "$domain_url" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
@@ -137,6 +139,12 @@ jobs:
             fi
             sleep 5
           done
+
+          if [ "$status" != "active" ]; then
+            echo "Custom domain did not become active: $CF_CUSTOM_DOMAIN"
+            jq '.' <<<"$response"
+            exit 1
+          fi
 
           curl -fsSL --retry 12 --retry-delay 5 --retry-all-errors \
             "https://$CF_CUSTOM_DOMAIN/" -o /tmp/traffic-custom-index.html
