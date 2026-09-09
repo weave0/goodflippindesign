@@ -178,4 +178,10 @@ describe(`Canonical Gold 1.2 consumer (${CANONICAL_SHA})`, () => {
     expect(sumOrNull([])).toBeNull();
     expect(CANONICAL_ALIASES_READER_ONLY.length).toBeGreaterThan(0);
   });
+
+  it("23. missing metric provenance is rejected", () => {
+    const withoutProvenance = structuredClone(raw);
+    delete (withoutProvenance.metrics as Record<string, unknown>[])[0]!.provenance;
+    expect(() => parseCanonicalGold12(withoutProvenance)).toThrow(CanonicalParseError);
+  });
 });

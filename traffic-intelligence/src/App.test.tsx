@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -57,6 +57,30 @@ describe("observatory shell", () => {
     expect(within(dialog).getByText("Pipeline version")).toBeInTheDocument();
     expect(within(dialog).getByText("Definition")).toBeInTheDocument();
     expect(within(dialog).getByText("This is volume, not visitors.")).toBeInTheDocument();
+  });
+
+  it("keeps the canonical definition authoritative and renders a glossary entry only as supplemental", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(await screen.findByRole("button", { name: /Edge requests/i }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("This is volume, not visitors.")).toBeInTheDocument();
+    expect(within(dialog).getByText("Supplemental glossary")).toBeInTheDocument();
+  });
+
+  it("safely omits supplemental glossary content when no matching definition exists", async () => {
+    const user = userEvent.setup();
+    const noGlossary = { ...fixture, definitions: [] };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({ ok: true, json: async () => noGlossary })),
+    );
+    render(<App />);
+    await user.click(await screen.findByRole("button", { name: /Edge requests/i }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("def.edge_request")).toBeInTheDocument();
+    expect(within(dialog).queryByText("Supplemental glossary")).not.toBeInTheDocument();
+    cleanup();
   });
 
   it("navigates to the laboratory and keeps URL state shareable", async () => {

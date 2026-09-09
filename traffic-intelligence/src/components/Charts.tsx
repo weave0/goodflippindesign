@@ -18,11 +18,18 @@ export function Sparkline({ values, source }: { values: number[]; source: Source
   const span = max - min || 1;
   const w = 120;
   const h = 28;
+  let drawing = false;
   const d = values
-    .map((value, index) => {
+    .flatMap((value, index) => {
+      if (!Number.isFinite(value)) {
+        drawing = false;
+        return [];
+      }
       const x = (index / (values.length - 1)) * w;
       const y = h - ((value - min) / span) * (h - 4) - 2;
-      return `${index === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+      const command = drawing ? "L" : "M";
+      drawing = true;
+      return `${command}${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
   return (

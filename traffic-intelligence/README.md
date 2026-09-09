@@ -24,6 +24,6 @@ npm run dev            # http://localhost:4177
 
 - Schema: `schema/gold-contract.schema.json`
 - Assumptions: `schema/SCHEMA_ASSUMPTIONS.md`
-- Fixture: `public/gold/fixture.v1.json` (`contract.kind = fixture`)
+- Fixture: `public/gold/fixture.v1.json` (Canonical Gold fixture envelope with `fixture: true`; after `adaptGold()`, the internal UX model exposes `contract.kind = fixture`)
 
-The UI reads a view model after `adaptGold()`. Evidence state and coverage are separate axes. Production Gold documents should set `contract.kind` to `production`. Field-name drift from canonical M1.1 is mapped in `src/gold/adapter.ts`.
+The UI reads a view model after `adaptGold()`. Evidence state and coverage are separate axes. This pinned producer schema validates its fixture envelope; any future production Gold contract generalization must first be versioned by the producer. Field-name drift from canonical M1.1 is mapped in `src/gold/adapter.ts`.

@@ -1,8 +1,14 @@
+import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+
+const defaultOutputDir = fileURLToPath(new URL(".", import.meta.url));
+export const screenshotOutputDir = process.env.TRAFFIC_INTELLIGENCE_SCREENSHOT_DIR ?? defaultOutputDir;
+
 export default async function run(page) {
-  const dir = "Z:/GFD/traffic-intelligence/screenshots/";
+  const dir = screenshotOutputDir;
   const shots = [];
   async function shot(name) {
-    await page.screenshot({ path: dir + name, fullPage: true });
+    await page.screenshot({ path: join(dir, name), fullPage: true });
     shots.push(name);
   }
 

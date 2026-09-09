@@ -43,16 +43,18 @@ export function EvidenceDrawer({
         </p>
         <dl>
           <dt>Definition</dt>
-          <dd>
-            {metric.metric_definition || (definition ? (
+          <dd>{metric.metric_definition}</dd>
+          {definition ? (
+            <>
+              <dt>Supplemental glossary</dt>
+              <dd>
               <>
                 <strong>{definition.term}</strong>
                 <div>{definition.text}</div>
               </>
-            ) : (
-              metric.definitionId
-            ))}
-          </dd>
+              </dd>
+            </>
+          ) : null}
           <dt>Source</dt>
           <dd>{sourceLabel(metric.source)}</dd>
           <dt>Grain / boundary</dt>

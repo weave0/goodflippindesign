@@ -192,7 +192,6 @@ function parseClassification(raw: unknown, path: string): Gold12Classification {
 }
 
 function parseProvenance(raw: unknown, path: string): Gold12Provenance {
-  if (raw === undefined) return {};
   if (!isObject(raw)) fail(path, "provenance object required");
   return {
     source_metrics: Array.isArray(raw.source_metrics) ? raw.source_metrics.map(String) : [],
