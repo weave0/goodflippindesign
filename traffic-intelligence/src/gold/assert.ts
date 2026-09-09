@@ -86,7 +86,7 @@ function walkMetrics(value: unknown, path: string, visit: (metric: Metric, path:
     visit(value as Metric, path);
   }
   for (const [key, child] of Object.entries(value)) {
-    if (key === "definitions" || key === "contract" || key === "canonical") continue;
+    if (key === "definitions" || key === "contract" || (key === "canonical" && path === "$")) continue;
     walkMetrics(child, `${path}.${key}`, visit);
   }
 }

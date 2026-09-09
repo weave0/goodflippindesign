@@ -51,6 +51,7 @@ jobs:
           npm --prefix traffic-intelligence run build
           test -f traffic-intelligence/dist/index.html
           test -f traffic-intelligence/dist/gold/canonical-gold-m1.2.json
+          test -f traffic-intelligence/dist/_worker.js
           test -f traffic-intelligence/dist/_headers
           test -f traffic-intelligence/dist/robots.txt
 
@@ -183,10 +184,9 @@ jobs:
           pages_url="https://$CF_PROJECT_NAME.pages.dev"
           curl -fsSL --retry 12 --retry-delay 5 --retry-all-errors "$pages_url/" -o /tmp/traffic-index.html
           grep -q "GFD Traffic Intelligence" /tmp/traffic-index.html
-          curl -fsSL --retry 12 --retry-delay 5 --retry-all-errors \
-            "$pages_url/gold/canonical-gold-m1.2.json" \
-            | jq -e '.schema_version == "1.2.0" and .contract_name == "gfd-canonical-gold" and .fixture == true' >/dev/null
-          echo "Verified: $pages_url"
+          gold_status="$(curl -sS -o /tmp/pages-gold-denied.txt -w '%{http_code}' "$pages_url/gold/canonical-gold-m1.2.json")"
+          test "$gold_status" = "401" || test "$gold_status" = "403"
+          echo "Verified admin wall: $pages_url"
 
       - name: Verify custom domain
         shell: bash
@@ -215,7 +215,6 @@ jobs:
           curl -fsSL --retry 12 --retry-delay 5 --retry-all-errors \
             "https://$CF_CUSTOM_DOMAIN/" -o /tmp/traffic-custom-index.html
           grep -q "GFD Traffic Intelligence" /tmp/traffic-custom-index.html
-          curl -fsSL --retry 12 --retry-delay 5 --retry-all-errors \
-            "https://$CF_CUSTOM_DOMAIN/gold/canonical-gold-m1.2.json" \
-            | jq -e '.schema_version == "1.2.0" and .contract_name == "gfd-canonical-gold" and .fixture == true' >/dev/null
-          echo "Production observatory verified: https://$CF_CUSTOM_DOMAIN"
+          gold_status="$(curl -sS -o /tmp/custom-gold-denied.txt -w '%{http_code}' "https://$CF_CUSTOM_DOMAIN/gold/canonical-gold-m1.2.json")"
+          test "$gold_status" = "401" || test "$gold_status" = "403"
+          echo "Production observatory admin wall verified: https://$CF_CUSTOM_DOMAIN"
