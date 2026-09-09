@@ -68,3 +68,14 @@ jobs:
 
       - name: Run Tests
         run: npm test
+
+      - name: Install Traffic Intelligence
+        run: npm ci --prefix traffic-intelligence --no-audit
+
+      - name: Validate Traffic Intelligence
+        run: |
+          npm run traffic:lint
+          npm run traffic:test
+          npm run traffic:build
+          test -f traffic-intelligence/dist/index.html
+          test -f traffic-intelligence/dist/gold/canonical-gold-m1.2.json

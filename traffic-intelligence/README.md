@@ -8,6 +8,14 @@ It does not talk to Cloudflare, GA4, or Vercel. It does not invent visitor, user
 
 Application shell, global filters, overview, sites, humans vs machines, AI actors, measurement laboratory, technical health, evidence drawer, responsive layout, fixture schema, fast tests.
 
+## TI-002 production surface
+
+The production target is `https://traffic.goodflippindesign.com`, deployed as the isolated Cloudflare Pages project `gfd-traffic-intelligence`.
+
+The deployment workflow builds only `traffic-intelligence/`, deploys the exact `dist/` artifact, attaches the custom domain idempotently, and verifies both the HTML shell and Canonical Gold fixture after deployment. It does not modify the existing `goodflippindesign` Pages project.
+
+The currently published Gold document is still an explicit Canonical Gold **fixture** (`fixture: true`), not a live analytics feed. The surface is marked `noindex`/`nofollow`; before TI-003 introduces live production Gold, access control must be reviewed and explicitly promoted alongside the live-data contract.
+
 ## Commands
 
 ```bash
