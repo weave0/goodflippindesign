@@ -28,7 +28,6 @@ env:
   CF_CUSTOM_DOMAIN: traffic.goodflippindesign.com
   WRANGLER_VERSION: 4.129.0
   PRODUCER_REPOSITORY: weave0/gfd-traffic-intelligence
-  LIVE_GOLD_PATH: ${{ runner.temp }}/gfdti-live/canonical-gold-1.2.production.json
 
 jobs:
   deploy:
@@ -97,7 +96,7 @@ jobs:
           from pathlib import Path
           from gfdti.contracts import CanonicalGold12
 
-          artifact_path = Path(os.environ["LIVE_GOLD_PATH"])
+          artifact_path = Path(os.environ["RUNNER_TEMP"]) / "gfdti-live" / "canonical-gold-1.2.production.json"
           artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
           CanonicalGold12.model_validate(artifact)
           if artifact.get("fixture") is not False:
@@ -135,7 +134,7 @@ jobs:
       - name: Inject validated live Gold into ephemeral build
         shell: bash
         run: |
-          install -m 600 "$LIVE_GOLD_PATH" traffic-intelligence/public/gold/canonical-gold-m1.2.json
+          install -m 600 "$RUNNER_TEMP/gfdti-live/canonical-gold-1.2.production.json" traffic-intelligence/public/gold/canonical-gold-m1.2.json
           echo "Live Gold injected only into the runner workspace; it is not committed to the public repository."
 
       - name: Build and verify production artifact
