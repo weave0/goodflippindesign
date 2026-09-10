@@ -12,8 +12,107 @@ import type {
 import { COVERAGE_STATES, EVIDENCE_STATES } from "./types";
 import type { Filters } from "./url-state";
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function metricSpanDays(metric: Metric): number | null {
+  const start = new Date(metric.timeWindow.start).getTime();
+  const end = new Date(metric.timeWindow.end).getTime();
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null;
+  return Math.round((end - start) / DAY_MS);
+}
+
+function requestedSpanDays(windowId: string): number | null {
+  const match = /^(\d+)d$/.exec(windowId);
+  return match ? Number(match[1]) : null;
+}
+
+function canonicalBaseWindow(gold: GoldContract): WindowPayload | null {
+  if (gold.windows.canonical) return gold.windows.canonical;
+  return gold.windows[gold.defaultWindowId] ?? Object.values(gold.windows)[0] ?? null;
+}
+
+export function windowIsAvailable(gold: GoldContract, windowId: string): boolean {
+  if (gold.windows[windowId]) return true;
+  const days = requestedSpanDays(windowId);
+  const base = canonicalBaseWindow(gold);
+  if (!days || !base || gold.contract.version !== "1.2.0") return false;
+  return base.overview.metrics.some((metric) => metricSpanDays(metric) === days);
+}
+
+function filterMetricList(metrics: Metric[], ids: Set<string>): Metric[] {
+  return metrics.filter((metric) => ids.has(metric.metric_id));
+}
+
+function filterRankedByMetric(rows: RankedItem[], ids: Set<string>): RankedItem[] {
+  return rows.filter((row) => ids.has(row.id) || ids.has(row.definitionId));
+}
+
+function deriveCanonicalWindow(gold: GoldContract, windowId: string): WindowPayload | null {
+  const days = requestedSpanDays(windowId);
+  const base = canonicalBaseWindow(gold);
+  if (!days || !base || gold.contract.version !== "1.2.0") return null;
+
+  const metrics = base.overview.metrics.filter((metric) => metricSpanDays(metric) === days);
+  if (!metrics.length) return null;
+
+  const ids = new Set(metrics.map((metric) => metric.metric_id));
+  const first = metrics[0]!;
+  const actors = base.ai.actors
+    .map((actor) => ({ ...actor, metrics: filterMetricList(actor.metrics, ids) }))
+    .filter((actor) => actor.metrics.length > 0);
+
+  return {
+    ...base,
+    window: {
+      ...base.window,
+      id: windowId,
+      label: `${days} days`,
+      start: first.timeWindow.start,
+      end: first.timeWindow.end,
+      timezone: first.timeWindow.timezone ?? base.window.timezone,
+      boundary: first.timeWindow.boundary ?? base.window.boundary,
+      extractedAt: first.timeWindow.extractedAt ?? base.window.extractedAt,
+      generatedAt: first.timeWindow.generatedAt ?? base.window.generatedAt,
+      partialCurrentPeriod: metrics.some((metric) => metric.timeWindow.partialCurrentPeriod === true),
+    },
+    overview: {
+      ...base.overview,
+      metrics,
+      health: filterMetricList(base.overview.health, ids),
+    },
+    taxonomy: filterRankedByMetric(base.taxonomy, ids),
+    humans: {
+      ...base.humans,
+      metrics: filterMetricList(base.humans.metrics, ids),
+      sessions: filterMetricList(base.humans.sessions, ids),
+      cwv: filterMetricList(base.humans.cwv, ids),
+    },
+    ai: {
+      ...base.ai,
+      actors,
+      classTotals: filterRankedByMetric(base.ai.classTotals, ids),
+      robots: filterMetricList(base.ai.robots, ids),
+    },
+    laboratory: {
+      ...base.laboratory,
+      sampleFactors: filterMetricList(base.laboratory.sampleFactors, ids),
+      missingness: filterRankedByMetric(base.laboratory.missingness, ids),
+    },
+    health: {
+      ...base.health,
+      metrics: filterMetricList(base.health.metrics, ids),
+    },
+  };
+}
+
 export function selectWindow(gold: GoldContract, windowId: string): WindowPayload {
-  return gold.windows[windowId] ?? gold.windows[gold.defaultWindowId] ?? Object.values(gold.windows)[0]!;
+  const explicit = gold.windows[windowId];
+  if (explicit) return explicit;
+
+  const derived = deriveCanonicalWindow(gold, windowId);
+  if (derived) return derived;
+
+  return gold.windows[gold.defaultWindowId] ?? Object.values(gold.windows)[0]!;
 }
 
 export function selectSite(payload: WindowPayload, siteId: string): SiteRecord | null {
