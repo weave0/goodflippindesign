@@ -78,7 +78,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
       PRODUCER_REPOSITORY: weave0/gfd-traffic-intelligence
 
@@ -102,19 +101,64 @@ jobs:
         shell: bash
         env:
           PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
+          ANALYTICS_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
+          DEPLOY_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
           test -n "$PRODUCER_READ_TOKEN" || { echo "GFD_TI_READ_TOKEN is not available"; exit 1; }
-          test -n "$CLOUDFLARE_API_TOKEN" || { echo "CF_GFD_TI_DEPLOY_TOKEN is not available"; exit 1; }
+          test -n "$ANALYTICS_TOKEN" || { echo "CF_GFD_TI_ANALYTICS_TOKEN is not available"; exit 1; }
+          test -n "$DEPLOY_TOKEN" || { echo "CF_GFD_TI_DEPLOY_TOKEN is not available"; exit 1; }
 
-      - name: Verify Cloudflare API token
+      - name: Verify Cloudflare API tokens
         shell: bash
+        env:
+          ANALYTICS_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
+          DEPLOY_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
           set -euo pipefail
-          response="$(curl -fsS https://api.cloudflare.com/client/v4/user/tokens/verify \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
-          test "$(jq -r '.success' <<<"$response")" = "true"
-          test "$(jq -r '.result.status' <<<"$response")" = "active"
-          echo "cloudflare_api_token=active"
+          for token_name in ANALYTICS_TOKEN DEPLOY_TOKEN; do
+            token="${!token_name}"
+            response="$(curl -fsS https://api.cloudflare.com/client/v4/user/tokens/verify \
+              -H "Authorization: Bearer $token")"
+            test "$(jq -r '.success' <<<"$response")" = "true"
+            test "$(jq -r '.result.status' <<<"$response")" = "active"
+            echo "${token_name,,}=active"
+          done
+
+      - name: Verify Cloudflare analytics access
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
+        run: |
+          set -euo pipefail
+          zones_response="$(curl -fsS -G "https://api.cloudflare.com/client/v4/zones" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            --data-urlencode "account.id=$CF_ACCOUNT_ID" \
+            --data-urlencode "per_page=50")"
+          test "$(jq -r '.success' <<<"$zones_response")" = "true"
+          zone_count="$(jq -r '.result | length' <<<"$zones_response")"
+          test "$zone_count" -gt 0 || {
+            echo "CF_GFD_TI_ANALYTICS_TOKEN cannot enumerate any Cloudflare zones"
+            exit 1
+          }
+
+          zone_id="$(jq -r '.result[0].id' <<<"$zones_response")"
+          start="$(date -u -d '2 days ago' +%F)"
+          end="$(date -u -d '1 day ago' +%F)"
+          graphql_payload="$(jq -n --arg zone "$zone_id" --arg start "$start" --arg end "$end" '{
+            query: "query($zone: String!, $start: Date!, $end: Date!) { viewer { zones(filter: {zoneTag: $zone}) { httpRequests1dGroups(limit: 1, filter: {date_geq: $start, date_leq: $end}) { dimensions { date } } } } }",
+            variables: {zone: $zone, start: $start, end: $end}
+          }')"
+          analytics_response="$(curl -fsS https://api.cloudflare.com/client/v4/graphql \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data "$graphql_payload")"
+          if [ "$(jq '.errors // [] | length' <<<"$analytics_response")" -ne 0 ]; then
+            echo "CF_GFD_TI_ANALYTICS_TOKEN cannot query Cloudflare GraphQL Analytics"
+            jq -r '.errors[]?.message' <<<"$analytics_response"
+            exit 1
+          fi
+          echo "analytics_visible_zones=$zone_count"
+          echo "cloudflare_analytics_access=verified"
 
       - name: Checkout private Gold producer
         uses: actions/checkout@v7
@@ -158,12 +202,16 @@ jobs:
         run: python -m pytest -q .producer/tests/test_canonical_gold_1_2.py .producer/tests/test_contracts.py
 
       - name: Acquire current Cloudflare Gold
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
         run: python -m gfdti.cli --acquire-cloudflare-gold --output-dir "$RUNNER_TEMP/gfdti-live"
 
       - name: Validate live producer artifact
         shell: bash
         env:
           PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
+          ANALYTICS_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
+          DEPLOY_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
           python - <<'PY'
           import json
@@ -188,7 +236,7 @@ jobs:
           if generated_at < now - timedelta(hours=36):
               raise SystemExit("production artifact is stale (>36h)")
           serialized = json.dumps(artifact)
-          for secret_name in ("CLOUDFLARE_API_TOKEN", "PRODUCER_READ_TOKEN"):
+          for secret_name in ("ANALYTICS_TOKEN", "DEPLOY_TOKEN", "PRODUCER_READ_TOKEN"):
               secret = os.environ.get(secret_name)
               if secret and secret in serialized:
                   raise SystemExit(f"secret {secret_name} was serialized into the artifact")
@@ -228,7 +276,9 @@ jobs:
           test -f traffic-intelligence/dist/_headers
           test -f traffic-intelligence/dist/robots.txt
 
-      - name: Verify Cloudflare credential is available
+      - name: Verify Cloudflare deploy credential is available
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
           test -n "$CLOUDFLARE_API_TOKEN" || {
             echo "CF_GFD_TI_DEPLOY_TOKEN is not available to this workflow"
@@ -237,6 +287,8 @@ jobs:
 
       - name: Ensure isolated Pages project exists
         shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
           set -euo pipefail
           project_url="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME"
@@ -258,6 +310,8 @@ jobs:
           test "$(jq -r '.success' <<<"$create_response")" = "true"
 
       - name: Deploy exact production artifact
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
           npx --yes "wrangler@$WRANGLER_VERSION" pages deploy traffic-intelligence/dist \
             --project-name="$CF_PROJECT_NAME" \
@@ -265,6 +319,8 @@ jobs:
 
       - name: Ensure custom domain is attached
         shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
           set -euo pipefail
           domain_url="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/domains/$CF_CUSTOM_DOMAIN"
@@ -286,6 +342,8 @@ jobs:
 
       - name: Ensure custom-domain DNS record exists
         shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
           set -euo pipefail
           domain_url="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/domains/$CF_CUSTOM_DOMAIN"
@@ -363,6 +421,8 @@ jobs:
 
       - name: Verify custom-domain activation
         shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
           set -euo pipefail
           domain_url="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$CF_PROJECT_NAME/domains/$CF_CUSTOM_DOMAIN"
