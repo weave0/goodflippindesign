@@ -11,6 +11,8 @@ on:
     paths:
       - "traffic-intelligence/**"
       - ".github/workflows/traffic-intelligence-deploy.yml"
+  schedule:
+    - cron: "0 6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -76,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_FULL_ITHINK }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
       PRODUCER_REPOSITORY: weave0/gfd-traffic-intelligence
 
@@ -102,7 +104,17 @@ jobs:
           PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
         run: |
           test -n "$PRODUCER_READ_TOKEN" || { echo "GFD_TI_READ_TOKEN is not available"; exit 1; }
-          test -n "$CLOUDFLARE_API_TOKEN" || { echo "CF_FULL_ITHINK is not available"; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "CF_GFD_TI_DEPLOY_TOKEN is not available"; exit 1; }
+
+      - name: Verify Cloudflare API token
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsS https://api.cloudflare.com/client/v4/user/tokens/verify \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+          test "$(jq -r '.success' <<<"$response")" = "true"
+          test "$(jq -r '.result.status' <<<"$response")" = "active"
+          echo "cloudflare_api_token=active"
 
       - name: Checkout private Gold producer
         uses: actions/checkout@v7
@@ -219,7 +231,7 @@ jobs:
       - name: Verify Cloudflare credential is available
         run: |
           test -n "$CLOUDFLARE_API_TOKEN" || {
-            echo "CF_FULL_ITHINK is not available to this workflow"
+            echo "CF_GFD_TI_DEPLOY_TOKEN is not available to this workflow"
             exit 1
           }
 
