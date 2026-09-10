@@ -151,7 +151,7 @@ jobs:
           print(f"install_requirements={target}")
           PY
           python -m pip install -r "$RUNNER_TEMP/gfdti-requirements.txt"
-          python -m pip install ./.producer
+          python -m pip install --no-deps ./.producer
           python -m pip install "pytest<9"
 
       - name: Validate producer Canonical Gold contract
