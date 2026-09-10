@@ -1,18 +1,25 @@
 name: Traffic Intelligence - Deploy
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "traffic-intelligence/**"
+      - ".github/workflows/traffic-intelligence-deploy.yml"
   push:
     branches: [main]
     paths:
       - "traffic-intelligence/**"
       - ".github/workflows/traffic-intelligence-deploy.yml"
+  schedule:
+    - cron: "0 6 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: traffic-intelligence-production
+  group: traffic-intelligence-production-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'main' }}
   cancel-in-progress: false
 
 env:
@@ -22,16 +29,14 @@ env:
   WRANGLER_VERSION: 4.129.0
 
 jobs:
-  deploy:
-    name: Build, deploy, and verify
+  pr-validation:
+    name: PR fixture validation
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_FULL_ITHINK }}
-      CLOUDFLARE_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
 
     steps:
-      - name: Checkout
+      - name: Checkout consumer
         uses: actions/checkout@v7
 
       - name: Setup Node
@@ -44,10 +49,178 @@ jobs:
       - name: Install Traffic Intelligence
         run: npm ci --prefix traffic-intelligence --no-audit
 
-      - name: Validate Traffic Intelligence
+      - name: Validate committed fixture
         run: |
           npm --prefix traffic-intelligence run lint
           npm --prefix traffic-intelligence test
+          npm --prefix traffic-intelligence run build
+          test -f traffic-intelligence/dist/index.html
+          test -f traffic-intelligence/dist/gold/canonical-gold-m1.2.json
+          test -f traffic-intelligence/dist/_worker.js
+          test -f traffic-intelligence/dist/_headers
+          test -f traffic-intelligence/dist/robots.txt
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const gold = JSON.parse(fs.readFileSync("traffic-intelligence/dist/gold/canonical-gold-m1.2.json", "utf8"));
+          if (gold.fixture !== true) throw new Error("PR validation must use the committed fixture");
+          if (!Array.isArray(gold.metrics) || gold.metrics.length === 0) throw new Error("fixture metrics are empty");
+          console.log("fixture_validation=true");
+          NODE
+
+      - name: Assert deployment is skipped for pull requests
+        run: |
+          grep -q "if: github.event_name != 'pull_request'" .github/workflows/traffic-intelligence-deploy.yml
+          echo "live_deployment_skipped=true"
+
+  deploy:
+    name: Build, deploy, and verify
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.event_name == 'schedule')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
+      PRODUCER_REPOSITORY: weave0/gfd-traffic-intelligence
+
+    steps:
+      - name: Checkout consumer
+        uses: actions/checkout@v7
+
+      - name: Verify trusted event
+        shell: bash
+        run: |
+          case "$GITHUB_EVENT_NAME" in
+            push|schedule|workflow_dispatch) ;;
+            *) echo "Unsupported live deployment event: $GITHUB_EVENT_NAME"; exit 1 ;;
+          esac
+          if [ "$GITHUB_EVENT_NAME" != "schedule" ] && [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "Live deployment requires the main branch"
+            exit 1
+          fi
+
+      - name: Verify governed credentials are available
+        shell: bash
+        env:
+          PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
+        run: |
+          test -n "$PRODUCER_READ_TOKEN" || { echo "GFD_TI_READ_TOKEN is not available"; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "CF_GFD_TI_DEPLOY_TOKEN is not available"; exit 1; }
+
+      - name: Verify Cloudflare API token
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsS https://api.cloudflare.com/client/v4/user/tokens/verify \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+          test "$(jq -r '.success' <<<"$response")" = "true"
+          test "$(jq -r '.result.status' <<<"$response")" = "active"
+          echo "cloudflare_api_token=active"
+
+      - name: Checkout private Gold producer
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.PRODUCER_REPOSITORY }}
+          ref: main
+          token: ${{ secrets.GFD_TI_READ_TOKEN }}
+          path: .producer
+          persist-credentials: false
+
+      - name: Record producer identity
+        shell: bash
+        run: |
+          producer_sha="$(git -C .producer rev-parse HEAD)"
+          test -n "$producer_sha"
+          echo "PRODUCER_SHA=$producer_sha" >> "$GITHUB_ENV"
+          echo "Producer: $PRODUCER_REPOSITORY@$producer_sha" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: .producer/requirements-lock.txt
+
+      - name: Install certified producer
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          source = Path(".producer/requirements-lock.txt")
+          target = Path(os.environ["RUNNER_TEMP"]) / "gfdti-requirements.txt"
+          target.write_text("".join(line for line in source.read_text(encoding="utf-8").splitlines(True) if not line.startswith("pytest==")), encoding="utf-8")
+          print(f"install_requirements={target}")
+          PY
+          python -m pip install -r "$RUNNER_TEMP/gfdti-requirements.txt"
+          python -m pip install --no-deps ./.producer
+          python -m pip install "pytest<9"
+
+      - name: Validate producer Canonical Gold contract
+        run: python -m pytest -q .producer/tests/test_canonical_gold_1_2.py .producer/tests/test_contracts.py
+
+      - name: Acquire current Cloudflare Gold
+        run: python -m gfdti.cli --acquire-cloudflare-gold --output-dir "$RUNNER_TEMP/gfdti-live"
+
+      - name: Validate live producer artifact
+        shell: bash
+        env:
+          PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timedelta, timezone
+          from pathlib import Path
+          from gfdti.contracts import CanonicalGold12
+
+          artifact_path = Path(os.environ["RUNNER_TEMP"]) / "gfdti-live" / "canonical-gold-1.2.production.json"
+          artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+          CanonicalGold12.model_validate(artifact)
+          if artifact.get("fixture") is not False:
+              raise SystemExit("production artifact must declare fixture=false")
+          if artifact.get("schema_version") != "1.2.0":
+              raise SystemExit(f"unsupported schema_version={artifact.get('schema_version')!r}")
+          if not artifact.get("metrics"):
+              raise SystemExit("production artifact contains no metrics")
+          generated_at = datetime.fromisoformat(artifact["generated_at"].replace("Z", "+00:00"))
+          now = datetime.now(timezone.utc)
+          if generated_at > now + timedelta(minutes=15):
+              raise SystemExit("production artifact generated_at is implausibly in the future")
+          if generated_at < now - timedelta(hours=36):
+              raise SystemExit("production artifact is stale (>36h)")
+          serialized = json.dumps(artifact)
+          for secret_name in ("CLOUDFLARE_API_TOKEN", "PRODUCER_READ_TOKEN"):
+              secret = os.environ.get(secret_name)
+              if secret and secret in serialized:
+                  raise SystemExit(f"secret {secret_name} was serialized into the artifact")
+          print("live_gold_valid=true")
+          print(f"generated_at={artifact['generated_at']}")
+          print(f"metrics={len(artifact['metrics'])}")
+          PY
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: traffic-intelligence/package-lock.json
+
+      - name: Install Traffic Intelligence
+        run: npm ci --prefix traffic-intelligence --no-audit
+
+      - name: Validate consumer against committed fixture
+        run: |
+          npm --prefix traffic-intelligence run lint
+          npm --prefix traffic-intelligence test
+
+      - name: Inject validated live Gold into ephemeral build
+        shell: bash
+        run: |
+          install -m 600 "$RUNNER_TEMP/gfdti-live/canonical-gold-1.2.production.json" traffic-intelligence/public/gold/canonical-gold-m1.2.json
+          echo "live_gold_injected_ephemerally=true"
+
+      - name: Build and verify live artifact
+        shell: bash
+        run: |
           npm --prefix traffic-intelligence run build
           test -f traffic-intelligence/dist/index.html
           test -f traffic-intelligence/dist/gold/canonical-gold-m1.2.json
@@ -58,7 +231,7 @@ jobs:
       - name: Verify Cloudflare credential is available
         run: |
           test -n "$CLOUDFLARE_API_TOKEN" || {
-            echo "CF_FULL_ITHINK is not available to this workflow"
+            echo "CF_GFD_TI_DEPLOY_TOKEN is not available to this workflow"
             exit 1
           }
 
