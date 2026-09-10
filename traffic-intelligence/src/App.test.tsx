@@ -51,10 +51,16 @@ describe("human-first traffic intelligence shell", () => {
     expect(screen.queryByText("Independent source cards")).not.toBeInTheDocument();
   });
 
-  it("keeps only period and property as default global filters", async () => {
+  it("keeps truthful reporting range and property as the default global controls", async () => {
     render(<App />);
     await screen.findByRole("heading", { name: "Traffic overview" });
-    expect(screen.getByLabelText("Period")).toBeInTheDocument();
+
+    expect(screen.getByRole("region", { name: "Active reporting period" })).toBeInTheDocument();
+    const rangeGroup = screen.getByRole("group", { name: "Reporting range" });
+    expect(within(rangeGroup).getByRole("button", { name: "7 days" })).toBeEnabled();
+    expect(within(rangeGroup).getByRole("button", { name: "28 days" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(rangeGroup).getByRole("button", { name: "90 days" })).toBeDisabled();
+    expect(screen.getByText(/Range: 28 days/i)).toBeInTheDocument();
     expect(screen.getByLabelText("Property")).toBeInTheDocument();
     expect(screen.queryByLabelText("Taxonomy")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Confidence")).not.toBeInTheDocument();
