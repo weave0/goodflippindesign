@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { authorizeAdmin } from "./auth";
 import "./styles.css";
+import "./human-first.css";
 
 type AuthState = "checking" | "authorized" | "signed_out" | "forbidden" | "error";
 
@@ -36,10 +37,10 @@ function AdminGate() {
           <>
             <p>
               {state === "forbidden"
-                ? "Your signed-in account is not authorized for the GFD administrator observatory."
+                ? "Your signed-in account is not authorized for GFD Traffic Intelligence."
                 : state === "error"
                   ? "Administrator verification is temporarily unavailable."
-                  : "Sign in through the GFD Command Center to access the observatory."}
+                  : "Sign in through the GFD Command Center to access Traffic Intelligence."}
             </p>
             <p>
               <a href="https://goodflippindesign.com/admin.html">Open GFD Command Center</a>
