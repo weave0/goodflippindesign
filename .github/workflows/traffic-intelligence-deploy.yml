@@ -27,6 +27,7 @@ env:
   CF_PROJECT_NAME: gfd-traffic-intelligence
   CF_CUSTOM_DOMAIN: traffic.goodflippindesign.com
   WRANGLER_VERSION: 4.129.0
+  CF_EXPECTED_ZONES: agentkagent.com,aiaimate.com,artificelligance.com,artificelligence.com,brettleeweaver.com,citizenapproved.org,culturesherpa.com,culturesherpa.org,cyancanoe.com,flipskillet.com,flipskillit.com,foxyana.com,fwomps.com,fwomp.us,gflippinv.com,globaldeets.com,goodflippindesign.com,goodflippinluck.com,goodflippinnews.com,goodflippinvibes.com,goodflippinyikes.com,heavymoose.com,lowertownstpaul.org,minnesotapeace.com,redleopardofstpaul.com
 
 jobs:
   pr-validation:
@@ -97,16 +98,21 @@ jobs:
             exit 1
           fi
 
-      - name: Verify governed credentials are available
+      - name: Verify governed credentials are available and distinct
         shell: bash
         env:
           PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
           ANALYTICS_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
           DEPLOY_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
+          set -euo pipefail
           test -n "$PRODUCER_READ_TOKEN" || { echo "GFD_TI_READ_TOKEN is not available"; exit 1; }
           test -n "$ANALYTICS_TOKEN" || { echo "CF_GFD_TI_ANALYTICS_TOKEN is not available"; exit 1; }
           test -n "$DEPLOY_TOKEN" || { echo "CF_GFD_TI_DEPLOY_TOKEN is not available"; exit 1; }
+          test "$ANALYTICS_TOKEN" != "$DEPLOY_TOKEN" || {
+            echo "Cloudflare analytics and deploy credentials must be distinct tokens"
+            exit 1
+          }
 
       - name: Verify Cloudflare API tokens
         shell: bash
@@ -124,41 +130,55 @@ jobs:
             echo "${token_name,,}=active"
           done
 
-      - name: Verify Cloudflare analytics access
+      - name: Verify complete Cloudflare analytics estate access
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
         run: |
           set -euo pipefail
-          zones_response="$(curl -fsS -G "https://api.cloudflare.com/client/v4/zones" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            --data-urlencode "account.id=$CF_ACCOUNT_ID" \
-            --data-urlencode "per_page=50")"
-          test "$(jq -r '.success' <<<"$zones_response")" = "true"
-          zone_count="$(jq -r '.result | length' <<<"$zones_response")"
-          test "$zone_count" -gt 0 || {
-            echo "CF_GFD_TI_ANALYTICS_TOKEN cannot enumerate any Cloudflare zones"
-            exit 1
-          }
+          all_zones='[]'
+          page=1
+          total_pages=1
+          while [ "$page" -le "$total_pages" ]; do
+            zones_response="$(curl -fsS -G "https://api.cloudflare.com/client/v4/zones" \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              --data-urlencode "account.id=$CF_ACCOUNT_ID" \
+              --data-urlencode "per_page=50" \
+              --data-urlencode "page=$page")"
+            test "$(jq -r '.success' <<<"$zones_response")" = "true"
+            all_zones="$(jq -c --argjson accumulated "$all_zones" '$accumulated + .result' <<<"$zones_response")"
+            total_pages="$(jq -r '.result_info.total_pages // 1' <<<"$zones_response")"
+            page=$((page + 1))
+          done
 
-          zone_id="$(jq -r '.result[0].id' <<<"$zones_response")"
-          start="$(date -u -d '2 days ago' +%F)"
-          end="$(date -u -d '1 day ago' +%F)"
-          graphql_payload="$(jq -n --arg zone "$zone_id" --arg start "$start" --arg end "$end" '{
-            query: "query($zone: String!, $start: Date!, $end: Date!) { viewer { zones(filter: {zoneTag: $zone}) { httpRequests1dGroups(limit: 1, filter: {date_geq: $start, date_leq: $end}) { dimensions { date } } } } }",
-            variables: {zone: $zone, start: $start, end: $end}
-          }')"
-          analytics_response="$(curl -fsS https://api.cloudflare.com/client/v4/graphql \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data "$graphql_payload")"
-          if [ "$(jq '.errors // [] | length' <<<"$analytics_response")" -ne 0 ]; then
-            echo "CF_GFD_TI_ANALYTICS_TOKEN cannot query Cloudflare GraphQL Analytics"
-            jq -r '.errors[]?.message' <<<"$analytics_response"
+          visible_names="$(jq -r '.[].name' <<<"$all_zones" | sort)"
+          expected_names="$(tr ',' '\n' <<<"$CF_EXPECTED_ZONES" | sed '/^$/d' | sort)"
+          if ! diff -u <(printf '%s\n' "$expected_names") <(printf '%s\n' "$visible_names"); then
+            echo "CF_GFD_TI_ANALYTICS_TOKEN does not expose the exact governed GFD zone inventory"
+            echo "Expected inventory changes must be reviewed in CF_EXPECTED_ZONES before production acquisition"
             exit 1
           fi
+
+          zone_count="$(jq -r 'length' <<<"$all_zones")"
+          start="$(date -u -d '2 days ago' +%F)"
+          end="$(date -u -d '1 day ago' +%F)"
+          while IFS=$'\t' read -r zone_id zone_name; do
+            graphql_payload="$(jq -n --arg zone "$zone_id" --arg start "$start" --arg end "$end" '{
+              query: "query($zone: String!, $start: Date!, $end: Date!) { viewer { zones(filter: {zoneTag: $zone}) { httpRequests1dGroups(limit: 1, filter: {date_geq: $start, date_leq: $end}) { dimensions { date } } } } }",
+              variables: {zone: $zone, start: $start, end: $end}
+            }')"
+            analytics_response="$(curl -fsS https://api.cloudflare.com/client/v4/graphql \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data "$graphql_payload")"
+            if [ "$(jq '.errors // [] | length' <<<"$analytics_response")" -ne 0 ]; then
+              echo "CF_GFD_TI_ANALYTICS_TOKEN cannot query Cloudflare GraphQL Analytics for $zone_name"
+              jq -r '.errors[]?.message' <<<"$analytics_response"
+              exit 1
+            fi
+          done < <(jq -r '.[] | [.id, .name] | @tsv' <<<"$all_zones")
           echo "analytics_visible_zones=$zone_count"
-          echo "cloudflare_analytics_access=verified"
+          echo "cloudflare_analytics_estate_access=verified"
 
       - name: Checkout private Gold producer
         uses: actions/checkout@v7
@@ -208,19 +228,14 @@ jobs:
 
       - name: Validate live producer artifact
         shell: bash
-        env:
-          PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
-          ANALYTICS_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
-          DEPLOY_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
           python - <<'PY'
           import json
-          import os
           from datetime import datetime, timedelta, timezone
           from pathlib import Path
           from gfdti.contracts import CanonicalGold12
 
-          artifact_path = Path(os.environ["RUNNER_TEMP"]) / "gfdti-live" / "canonical-gold-1.2.production.json"
+          artifact_path = Path(__import__('os').environ["RUNNER_TEMP"]) / "gfdti-live" / "canonical-gold-1.2.production.json"
           artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
           CanonicalGold12.model_validate(artifact)
           if artifact.get("fixture") is not False:
@@ -235,15 +250,28 @@ jobs:
               raise SystemExit("production artifact generated_at is implausibly in the future")
           if generated_at < now - timedelta(hours=36):
               raise SystemExit("production artifact is stale (>36h)")
-          serialized = json.dumps(artifact)
-          for secret_name in ("ANALYTICS_TOKEN", "DEPLOY_TOKEN", "PRODUCER_READ_TOKEN"):
-              secret = os.environ.get(secret_name)
-              if secret and secret in serialized:
-                  raise SystemExit(f"secret {secret_name} was serialized into the artifact")
           print("live_gold_valid=true")
           print(f"generated_at={artifact['generated_at']}")
           print(f"metrics={len(artifact['metrics'])}")
           PY
+
+      - name: Assert governed secrets are absent from live Gold
+        shell: bash
+        env:
+          PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
+          ANALYTICS_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
+          DEPLOY_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+          artifact="$RUNNER_TEMP/gfdti-live/canonical-gold-1.2.production.json"
+          for secret_name in PRODUCER_READ_TOKEN ANALYTICS_TOKEN DEPLOY_TOKEN; do
+            secret="${!secret_name}"
+            if grep -Fq -- "$secret" "$artifact"; then
+              echo "secret $secret_name was serialized into the artifact"
+              exit 1
+            fi
+          done
+          echo "governed_secret_exclusion=verified"
 
       - name: Setup Node
         uses: actions/setup-node@v7
