@@ -29,11 +29,12 @@ function formatDateTime(value?: string): string | null {
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: "UTC",
     timeZoneName: "short",
   }).format(date);
 }
 
-function lastCompleteDay(payload: WindowPayload): string {
+function includedEnd(payload: WindowPayload): string {
   const end = new Date(payload.window.end);
   if (Number.isNaN(end.getTime())) return payload.window.end;
   if (payload.window.boundary === "half_open") end.setUTCDate(end.getUTCDate() - 1);
@@ -54,9 +55,11 @@ export function FiltersBar({
   const windows = Object.keys(gold.windows);
   const showAdvanced = ["laboratory", "health", "technology"].includes(filters.view);
   const activeWindowId = payload.window.id;
-  const exactSpan = `${formatDate(payload.window.start)} – ${formatDate(payload.window.end)}`;
+  const exactSpan = `${formatDate(payload.window.start)} – ${includedEnd(payload)}`;
   const freshness = formatDateTime(payload.window.extractedAt ?? payload.window.generatedAt ?? gold.contract.producedAt);
   const availablePresetCount = RANGE_PRESETS.filter((preset) => windowIsAvailable(gold, preset.id)).length;
+  const nonPresetWindows = windows.filter((id) => !RANGE_PRESETS.some((preset) => preset.id === id));
+  const showOtherWindow = nonPresetWindows.includes(activeWindowId);
 
   return (
     <div className={`filters${showAdvanced ? " is-advanced" : ""}`} role="search" aria-label="Traffic filters">
@@ -67,8 +70,8 @@ export function FiltersBar({
             <strong className="time-context__span">{exactSpan}</strong>
           </div>
           <div className="time-context__meta">
-            <span>{payload.window.timezone || "UTC"}</span>
-            <span>Last complete day: {lastCompleteDay(payload)}</span>
+            <span>{payload.window.timezone || "UTC"} complete days</span>
+            <span>Range: {payload.window.label}</span>
             {freshness ? <span>Collected: {freshness}</span> : null}
             {payload.window.partialCurrentPeriod ? <strong>Includes partial current period</strong> : null}
           </div>
@@ -92,11 +95,11 @@ export function FiltersBar({
             );
           })}
 
-          {windows.some((id) => !RANGE_PRESETS.some((preset) => preset.id === id)) ? (
+          {showOtherWindow ? (
             <label className="time-context__other">
               <span>Other governed range</span>
               <select value={activeWindowId} onChange={(e) => onChange({ window: e.target.value })}>
-                {windows.map((id) => (
+                {nonPresetWindows.map((id) => (
                   <option key={id} value={id}>
                     {gold.windows[id]?.window.label ?? id}
                   </option>
