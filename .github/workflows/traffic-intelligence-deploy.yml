@@ -1,18 +1,25 @@
 name: Traffic Intelligence - Deploy
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "traffic-intelligence/**"
+      - ".github/workflows/traffic-intelligence-deploy.yml"
   push:
     branches: [main]
     paths:
       - "traffic-intelligence/**"
       - ".github/workflows/traffic-intelligence-deploy.yml"
+  schedule:
+    - cron: "17 2 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: traffic-intelligence-production
+  group: traffic-intelligence-production-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'main' }}
   cancel-in-progress: false
 
 env:
@@ -20,12 +27,14 @@ env:
   CF_PROJECT_NAME: gfd-traffic-intelligence
   CF_CUSTOM_DOMAIN: traffic.goodflippindesign.com
   WRANGLER_VERSION: 4.129.0
+  PRODUCER_REPOSITORY: weave0/gfd-traffic-intelligence
+  LIVE_GOLD_PATH: ${{ runner.temp }}/gfdti-live/canonical-gold-1.2.production.json
 
 jobs:
   deploy:
     name: Build, deploy, and verify
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CF_FULL_ITHINK }}
       CLOUDFLARE_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
@@ -33,6 +42,80 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Verify governed credentials are available
+        shell: bash
+        env:
+          PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
+        run: |
+          test -n "$PRODUCER_READ_TOKEN" || {
+            echo "GFD_TI_READ_TOKEN is not available to this workflow"
+            exit 1
+          }
+          test -n "$CLOUDFLARE_API_TOKEN" || {
+            echo "CF_FULL_ITHINK is not available to this workflow"
+            exit 1
+          }
+
+      - name: Checkout private Gold producer
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.PRODUCER_REPOSITORY }}
+          ref: main
+          token: ${{ secrets.GFD_TI_READ_TOKEN }}
+          path: .producer
+          persist-credentials: false
+
+      - name: Record producer identity
+        shell: bash
+        run: |
+          producer_sha="$(git -C .producer rev-parse HEAD)"
+          test -n "$producer_sha"
+          echo "PRODUCER_SHA=$producer_sha" >> "$GITHUB_ENV"
+          echo "Producer: $PRODUCER_REPOSITORY@$producer_sha" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: .producer/requirements-lock.txt
+
+      - name: Install certified producer
+        run: python -m pip install --require-hashes -r .producer/requirements-lock.txt && python -m pip install --no-deps ./.producer
+
+      - name: Acquire current Cloudflare Gold
+        run: python -m gfdti.cli --acquire-cloudflare-gold --output-dir "$RUNNER_TEMP/gfdti-live"
+
+      - name: Validate live producer artifact
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timedelta, timezone
+          from pathlib import Path
+          from gfdti.contracts import CanonicalGold12
+
+          artifact_path = Path(os.environ["LIVE_GOLD_PATH"])
+          artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+          CanonicalGold12.model_validate(artifact)
+          if artifact.get("fixture") is not False:
+              raise SystemExit("production artifact must declare fixture=false")
+          if artifact.get("schema_version") != "1.2.0":
+              raise SystemExit(f"unsupported schema_version={artifact.get('schema_version')!r}")
+          if not artifact.get("metrics"):
+              raise SystemExit("production artifact contains no metrics")
+          generated_at = datetime.fromisoformat(artifact["generated_at"].replace("Z", "+00:00"))
+          now = datetime.now(timezone.utc)
+          if generated_at > now + timedelta(minutes=15):
+              raise SystemExit("production artifact generated_at is implausibly in the future")
+          if generated_at < now - timedelta(hours=36):
+              raise SystemExit("production artifact is stale (>36h)")
+          print("live_gold_valid=true")
+          print(f"generated_at={artifact['generated_at']}")
+          print(f"metrics={len(artifact['metrics'])}")
+          PY
 
       - name: Setup Node
         uses: actions/setup-node@v7
@@ -44,16 +127,37 @@ jobs:
       - name: Install Traffic Intelligence
         run: npm ci --prefix traffic-intelligence --no-audit
 
-      - name: Validate Traffic Intelligence
+      - name: Validate consumer against committed fixture
         run: |
           npm --prefix traffic-intelligence run lint
           npm --prefix traffic-intelligence test
+
+      - name: Inject validated live Gold into ephemeral build
+        shell: bash
+        run: |
+          install -m 600 "$LIVE_GOLD_PATH" traffic-intelligence/public/gold/canonical-gold-m1.2.json
+          echo "Live Gold injected only into the runner workspace; it is not committed to the public repository."
+
+      - name: Build and verify production artifact
+        shell: bash
+        run: |
           npm --prefix traffic-intelligence run build
           test -f traffic-intelligence/dist/index.html
           test -f traffic-intelligence/dist/gold/canonical-gold-m1.2.json
           test -f traffic-intelligence/dist/_worker.js
           test -f traffic-intelligence/dist/_headers
           test -f traffic-intelligence/dist/robots.txt
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          artifact = json.loads(Path("traffic-intelligence/dist/gold/canonical-gold-m1.2.json").read_text(encoding="utf-8"))
+          if artifact.get("fixture") is not False:
+              raise SystemExit("built artifact regressed to fixture data")
+          if not artifact.get("metrics"):
+              raise SystemExit("built artifact contains no metrics")
+          print("built_live_gold=true")
+          print(f"metrics={len(artifact['metrics'])}")
+          PY
 
       - name: Verify Cloudflare credential is available
         run: |
@@ -63,6 +167,7 @@ jobs:
           }
 
       - name: Ensure isolated Pages project exists
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -85,12 +190,14 @@ jobs:
           test "$(jq -r '.success' <<<"$create_response")" = "true"
 
       - name: Deploy exact production artifact
+        if: github.event_name != 'pull_request'
         run: |
           npx --yes "wrangler@$WRANGLER_VERSION" pages deploy traffic-intelligence/dist \
             --project-name="$CF_PROJECT_NAME" \
             --branch=main
 
       - name: Ensure custom domain is attached
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -112,6 +219,7 @@ jobs:
           test "$(jq -r '.success' <<<"$attach_response")" = "true"
 
       - name: Ensure custom-domain DNS record exists
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -178,6 +286,7 @@ jobs:
           test "$(jq -r '.success' <<<"$create_response")" = "true"
 
       - name: Verify Pages production URL
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
@@ -189,6 +298,7 @@ jobs:
           echo "Verified production artifact and admin wall: $pages_url"
 
       - name: Verify custom-domain activation
+        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
