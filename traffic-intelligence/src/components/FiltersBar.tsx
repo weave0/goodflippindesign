@@ -1,4 +1,5 @@
 import type { GoldContract, WindowPayload } from "../gold/types";
+import { windowIsAvailable } from "../gold/select";
 import type { Filters } from "../gold/url-state";
 
 const RANGE_PRESETS = [
@@ -52,10 +53,10 @@ export function FiltersBar({
 }) {
   const windows = Object.keys(gold.windows);
   const showAdvanced = ["laboratory", "health", "technology"].includes(filters.view);
-  const activeWindowId = gold.windows[filters.window] ? filters.window : payload.window.id;
+  const activeWindowId = payload.window.id;
   const exactSpan = `${formatDate(payload.window.start)} – ${formatDate(payload.window.end)}`;
   const freshness = formatDateTime(payload.window.extractedAt ?? payload.window.generatedAt ?? gold.contract.producedAt);
-  const availablePresetCount = RANGE_PRESETS.filter((preset) => Boolean(gold.windows[preset.id])).length;
+  const availablePresetCount = RANGE_PRESETS.filter((preset) => windowIsAvailable(gold, preset.id)).length;
 
   return (
     <div className={`filters${showAdvanced ? " is-advanced" : ""}`} role="search" aria-label="Traffic filters">
@@ -75,7 +76,7 @@ export function FiltersBar({
 
         <div className="time-context__presets" role="group" aria-label="Reporting range">
           {RANGE_PRESETS.map((preset) => {
-            const available = Boolean(gold.windows[preset.id]);
+            const available = windowIsAvailable(gold, preset.id);
             return (
               <button
                 key={preset.id}
@@ -107,7 +108,7 @@ export function FiltersBar({
 
         {availablePresetCount < 2 ? (
           <p className="time-context__warning" role="status">
-            Only one governed analytical window is currently available. Range controls will remain limited until live Gold is projected into distinct 7d, 28d, and 90d windows.
+            Only one governed analytical window is currently available. Additional range controls stay disabled rather than pretending unsupported history exists.
           </p>
         ) : null}
       </section>
