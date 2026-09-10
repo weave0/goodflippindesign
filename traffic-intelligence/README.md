@@ -1,37 +1,45 @@
 # GFD Traffic Intelligence
 
-Observatory UI for the GFD ecosystem. It is a **Gold-layer consumer**.
+Human-first, administrator-only Traffic Intelligence for the GFD ecosystem. The application is a **Gold-layer consumer**: it renders certified producer output and does not query Cloudflare, GA4, or Vercel from browser code.
 
-It does not talk to Cloudflare, GA4, or Vercel. It does not invent visitor, user, session, pageview, human, bot, AI crawler, AI agent, threat, or confidence. It does not sum overlapping sources into a vanity “visitors” number.
+It does not invent visitor, user, session, pageview, human, bot, AI crawler, AI agent, threat, or confidence values. It does not sum overlapping sources into a synthetic “visitors” number.
 
-## First milestone
+## Production surface
 
-Application shell, global filters, overview, sites, humans vs machines, AI actors, measurement laboratory, technical health, evidence drawer, responsive layout, fixture schema, fast tests.
+Production is `https://traffic.goodflippindesign.com`, deployed as the isolated Cloudflare Pages project `gfd-traffic-intelligence`.
 
-## TI-002 production surface
+The deployment workflow:
 
-The production target is `https://traffic.goodflippindesign.com`, deployed as the isolated Cloudflare Pages project `gfd-traffic-intelligence`.
+1. checks out the private `weave0/gfd-traffic-intelligence` producer with the read-only `GFD_TI_READ_TOKEN`;
+2. runs the producer's read-only Cloudflare acquisition using the existing Cloudflare Actions credential;
+3. validates Canonical Gold 1.2, `fixture: false`, non-empty metrics, and freshness;
+4. injects the validated document only into the ephemeral runner workspace;
+5. builds and deploys the authenticated Pages application; and
+6. verifies the deployed shell and admin wall.
 
-The deployment workflow builds only `traffic-intelligence/`, deploys the exact `dist/` artifact, attaches the custom domain idempotently, and verifies both the HTML shell and Canonical Gold fixture after deployment. It does not modify the existing `goodflippindesign` Pages project.
+The live Gold document is never committed to this public repository. The deployment refreshes daily at 02:17 UTC, on relevant pushes to `main`, and by manual dispatch.
 
-The currently published Gold document is still an explicit Canonical Gold **fixture** (`fixture: true`), not a live analytics feed. The surface is marked `noindex`/`nofollow`; before TI-003 introduces live production Gold, access control must be reviewed and explicitly promoted alongside the live-data contract.
+Current source coverage is Cloudflare. GA4 and Vercel remain unavailable until governed producer adapters and credentials are added. Canonical Gold 1.2 currently supplies metrics, topology, and source-support evidence; governed anomaly, opportunity, and time-series findings are a separate producer-contract tranche and must not be improvised in the consumer.
 
 ## Commands
 
 ```bash
 cd traffic-intelligence
 npm install
-npm run emit-fixture   # writes public/gold/fixture.v1.json
-npm run lint           # tsc --noEmit
+npm run emit-fixture
+npm run lint
 npm test
 npm run build
-npm run dev            # http://localhost:4177
+npm run dev
 ```
+
+Local development and consumer tests use the explicit fixture. Production deployment replaces it only after producer validation passes.
 
 ## Contract
 
 - Schema: `schema/gold-contract.schema.json`
 - Assumptions: `schema/SCHEMA_ASSUMPTIONS.md`
-- Fixture: `public/gold/fixture.v1.json` (Canonical Gold fixture envelope with `fixture: true`; after `adaptGold()`, the internal UX model exposes `contract.kind = fixture`)
+- Local fixture: `public/gold/fixture.v1.json`
+- Production input: private producer output `reports/cloudflare/canonical-gold-1.2.production.json`
 
-The UI reads a view model after `adaptGold()`. Evidence state and coverage are separate axes. This pinned producer schema validates its fixture envelope; any future production Gold contract generalization must first be versioned by the producer. Field-name drift from canonical M1.1 is mapped in `src/gold/adapter.ts`.
+The UI reads a view model after `adaptGold()`. Evidence state and coverage are separate axes. Field-name drift from Canonical Gold 1.2 is mapped at the consumer boundary and fails closed when the contract is invalid.
