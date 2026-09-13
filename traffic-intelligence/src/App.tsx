@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { GoldContract, Metric } from "./gold/types";
 import { loadGold } from "./gold/load";
+import { loadInsights } from "./insights/load";
+import type { TrafficInsightDocument } from "./insights/types";
 import { selectSite, selectWindow } from "./gold/select";
 import { FILTER_DEFAULTS, filtersEqual, parseFilters, serializeFilters, type Filters, type ViewId } from "./gold/url-state";
 import { EvidenceDrawer } from "./components/EvidenceDrawer";
@@ -96,6 +98,8 @@ const VIEW_COPY: Record<ViewId, { title: string; lede: string }> = {
 
 export function App() {
   const [gold, setGold] = useState<GoldContract | null>(null);
+  const [insights, setInsights] = useState<TrafficInsightDocument | null>(null);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>(() =>
     typeof window === "undefined" ? FILTER_DEFAULTS : parseFilters(window.location.search),
@@ -110,6 +114,19 @@ export function App() {
       })
       .catch((err: unknown) => {
         if (!cancelled) setError(err instanceof Error ? err.message : String(err));
+      });
+    loadInsights()
+      .then((doc) => {
+        if (!cancelled) {
+          setInsights(doc);
+          setInsightsError(null);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setInsights(null);
+          setInsightsError(err instanceof Error ? err.message : String(err));
+        }
       });
     return () => {
       cancelled = true;
@@ -185,7 +202,7 @@ export function App() {
           </div>
         </div>
 
-        {gold.contract.kind === "fixture" ? (
+        {gold.contract.kind === "fixture" || insights?.fixture ? (
           <div className="fixture-warning" role="status">
             <strong>Live traffic is not connected.</strong>
             <span>This environment is displaying contract test data, not current GFD performance.</span>
@@ -223,7 +240,15 @@ export function App() {
         </header>
 
         <main id="main" className="main">
-          {filters.view === "overview" && <OverviewView payload={payload} filters={filters} onOpen={setEvidence} />}
+          {filters.view === "overview" && (
+            <OverviewView
+              payload={payload}
+              filters={filters}
+              insights={insights}
+              insightsError={insightsError}
+              onOpen={setEvidence}
+            />
+          )}
           {filters.view === "humans" && <HumansView payload={payload} filters={filters} onOpen={setEvidence} />}
           {filters.view === "geography" && <GeographyView payload={payload} filters={filters} />}
 

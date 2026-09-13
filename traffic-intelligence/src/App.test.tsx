@@ -15,12 +15,19 @@ assertGoldContract(fixture);
 
 beforeEach(() => {
   window.history.replaceState({}, "", "/");
+  const insights = JSON.parse(
+    readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../public/gold/traffic-insights-1.0.json"), "utf8"),
+  );
   vi.stubGlobal(
     "fetch",
-    vi.fn(async () => ({
-      ok: true,
-      json: async () => fixture,
-    })),
+    vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      const body = url.includes("traffic-insights") ? insights : fixture;
+      return {
+        ok: true,
+        json: async () => body,
+      };
+    }),
   );
 });
 
@@ -45,9 +52,11 @@ describe("human-first traffic intelligence shell", () => {
   it("puts findings before supporting measurements", async () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Traffic overview" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "What matters now" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Needs attention" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Momentum / wins" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Measurement gaps" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Key measurements" })).toBeInTheDocument();
-    expect(screen.getByText(/things deserve attention|No material findings/i)).toBeInTheDocument();
+    expect(screen.getByText(/items need attention|No material issues|Governed insights unavailable/i)).toBeInTheDocument();
     expect(screen.queryByText("Independent source cards")).not.toBeInTheDocument();
   });
 
@@ -90,7 +99,14 @@ describe("human-first traffic intelligence shell", () => {
   it("safely omits supplemental glossary content when no matching definition exists", async () => {
     const user = userEvent.setup();
     const noGlossary = { ...fixture, definitions: [] };
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => noGlossary })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        const body = url.includes("traffic-insights") ? insights : noGlossary;
+        return { ok: true, json: async () => body };
+      }),
+    );
     render(<App />);
     await user.click(await screen.findByRole("button", { name: /Edge requests/i }));
     const dialog = await screen.findByRole("dialog");

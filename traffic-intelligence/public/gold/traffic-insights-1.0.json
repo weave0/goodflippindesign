@@ -1,0 +1,410 @@
+{
+  "schema_version": "1.0.0",
+  "contract_name": "gfd-traffic-insights",
+  "fixture": true,
+  "generated_at": "2026-09-10T01:00:00Z",
+  "source_gold_schema_version": "1.2.0",
+  "source_gold_generated_at": "2026-09-10T01:00:00Z",
+  "series": [
+    {
+      "series_id": "cloudflare.example.com.daily.requests",
+      "source": "cloudflare",
+      "property_id": "example.com",
+      "metric_name": "requests",
+      "label": "HTTP requests",
+      "unit": "requests",
+      "source_metric_id": "cloudflare.example.com.28d.requests",
+      "source_snapshot": "snapshot-fixture",
+      "evidence_state": "measured",
+      "exactness": "unknown",
+      "coverage": {
+        "state": "full_coverage",
+        "observed_fraction": 1.0,
+        "missing_dates": []
+      },
+      "observation_start": "2026-08-13T00:00:00Z",
+      "observation_end": "2026-09-10T00:00:00Z",
+      "points": [
+        {
+          "date": "2026-08-13",
+          "value": 100
+        },
+        {
+          "date": "2026-08-14",
+          "value": 103
+        },
+        {
+          "date": "2026-08-15",
+          "value": 106
+        },
+        {
+          "date": "2026-08-16",
+          "value": 109
+        },
+        {
+          "date": "2026-08-17",
+          "value": 112
+        },
+        {
+          "date": "2026-08-18",
+          "value": 115
+        },
+        {
+          "date": "2026-08-19",
+          "value": 118
+        },
+        {
+          "date": "2026-08-20",
+          "value": 121
+        },
+        {
+          "date": "2026-08-21",
+          "value": 124
+        },
+        {
+          "date": "2026-08-22",
+          "value": 127
+        },
+        {
+          "date": "2026-08-23",
+          "value": 130
+        },
+        {
+          "date": "2026-08-24",
+          "value": 133
+        },
+        {
+          "date": "2026-08-25",
+          "value": 136
+        },
+        {
+          "date": "2026-08-26",
+          "value": 139
+        },
+        {
+          "date": "2026-08-27",
+          "value": 142
+        },
+        {
+          "date": "2026-08-28",
+          "value": 145
+        },
+        {
+          "date": "2026-08-29",
+          "value": 148
+        },
+        {
+          "date": "2026-08-30",
+          "value": 151
+        },
+        {
+          "date": "2026-08-31",
+          "value": 154
+        },
+        {
+          "date": "2026-09-01",
+          "value": 157
+        },
+        {
+          "date": "2026-09-02",
+          "value": 160
+        },
+        {
+          "date": "2026-09-03",
+          "value": 163
+        },
+        {
+          "date": "2026-09-04",
+          "value": 166
+        },
+        {
+          "date": "2026-09-05",
+          "value": 169
+        },
+        {
+          "date": "2026-09-06",
+          "value": 172
+        },
+        {
+          "date": "2026-09-07",
+          "value": 175
+        },
+        {
+          "date": "2026-09-08",
+          "value": 178
+        },
+        {
+          "date": "2026-09-09",
+          "value": 181
+        }
+      ],
+      "missing_dates": [],
+      "limitations": [
+        "Fixture series for consumer tests only."
+      ]
+    },
+    {
+      "series_id": "cloudflare.example.com.daily.pageViews",
+      "source": "cloudflare",
+      "property_id": "example.com",
+      "metric_name": "pageViews",
+      "label": "Cloudflare page views",
+      "unit": "page views",
+      "source_metric_id": "cloudflare.example.com.28d.pageViews",
+      "source_snapshot": "snapshot-fixture",
+      "evidence_state": "measured",
+      "exactness": "unknown",
+      "coverage": {
+        "state": "full_coverage",
+        "observed_fraction": 1.0,
+        "missing_dates": []
+      },
+      "observation_start": "2026-08-13T00:00:00Z",
+      "observation_end": "2026-09-10T00:00:00Z",
+      "points": [
+        {
+          "date": "2026-08-13",
+          "value": 50
+        },
+        {
+          "date": "2026-08-14",
+          "value": 51
+        },
+        {
+          "date": "2026-08-15",
+          "value": 53
+        },
+        {
+          "date": "2026-08-16",
+          "value": 54
+        },
+        {
+          "date": "2026-08-17",
+          "value": 56
+        },
+        {
+          "date": "2026-08-18",
+          "value": 57
+        },
+        {
+          "date": "2026-08-19",
+          "value": 59
+        },
+        {
+          "date": "2026-08-20",
+          "value": 60
+        },
+        {
+          "date": "2026-08-21",
+          "value": 62
+        },
+        {
+          "date": "2026-08-22",
+          "value": 63
+        },
+        {
+          "date": "2026-08-23",
+          "value": 65
+        },
+        {
+          "date": "2026-08-24",
+          "value": 66
+        },
+        {
+          "date": "2026-08-25",
+          "value": 68
+        },
+        {
+          "date": "2026-08-26",
+          "value": 69
+        },
+        {
+          "date": "2026-08-27",
+          "value": 71
+        },
+        {
+          "date": "2026-08-28",
+          "value": 72
+        },
+        {
+          "date": "2026-08-29",
+          "value": 74
+        },
+        {
+          "date": "2026-08-30",
+          "value": 75
+        },
+        {
+          "date": "2026-08-31",
+          "value": 77
+        },
+        {
+          "date": "2026-09-01",
+          "value": 78
+        },
+        {
+          "date": "2026-09-02",
+          "value": 80
+        },
+        {
+          "date": "2026-09-03",
+          "value": 81
+        },
+        {
+          "date": "2026-09-04",
+          "value": 83
+        },
+        {
+          "date": "2026-09-05",
+          "value": 84
+        },
+        {
+          "date": "2026-09-06",
+          "value": 86
+        },
+        {
+          "date": "2026-09-07",
+          "value": 87
+        },
+        {
+          "date": "2026-09-08",
+          "value": 89
+        },
+        {
+          "date": "2026-09-09",
+          "value": 90
+        }
+      ],
+      "missing_dates": [],
+      "limitations": [
+        "Fixture series for consumer tests only."
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "cloudflare.example.com.7d.requests.movement",
+      "kind": "success",
+      "severity": "medium",
+      "scope": "property",
+      "property_id": "example.com",
+      "source_id": "cloudflare",
+      "title": "HTTP requests increased 40.0%",
+      "explanation": "HTTP requests for example.com increased from 500 in the prior 7 complete UTC days to 700 in the latest 7.",
+      "why_it_matters": "Same-source equal-window change for prioritization; does not identify people or explain cause.",
+      "recommended_action": "Review deployments and content changes before attributing a cause.",
+      "verification_condition": "After the next complete 7-day window, recompute the same Cloudflare comparison.",
+      "action_class": "research",
+      "source_metric_ids": [
+        "cloudflare.example.com.7d.requests"
+      ],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ],
+      "evidence_state": "measured",
+      "exactness": "unknown",
+      "coverage_state": "full_coverage",
+      "comparison": {
+        "metric_name": "requests",
+        "unit": "requests",
+        "current_start": "2026-09-03",
+        "current_end": "2026-09-09",
+        "baseline_start": "2026-08-27",
+        "baseline_end": "2026-09-02",
+        "current_value": 700,
+        "baseline_value": 500,
+        "absolute_delta": 200,
+        "percent_delta": 0.4,
+        "percentage_point_delta": null
+      },
+      "limitations": [],
+      "created_at": "2026-09-10T01:00:00Z"
+    },
+    {
+      "finding_id": "cloudflare.example.com.7d.cache-rate.issue",
+      "kind": "issue",
+      "severity": "medium",
+      "scope": "property",
+      "property_id": "example.com",
+      "source_id": "cloudflare",
+      "title": "Cache rate deteriorated",
+      "explanation": "Cached request share fell from 64% to 39%.",
+      "why_it_matters": "Lower cache efficiency increases origin load.",
+      "recommended_action": "Inspect cache rules and bypass conditions.",
+      "verification_condition": "Confirm cache rate recovers after config change.",
+      "action_class": "config",
+      "source_metric_ids": [
+        "cloudflare.example.com.7d.cachedRequests"
+      ],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ],
+      "evidence_state": "measured",
+      "exactness": "unknown",
+      "coverage_state": "full_coverage",
+      "comparison": null,
+      "limitations": [],
+      "created_at": "2026-09-10T01:00:00Z"
+    },
+    {
+      "finding_id": "cloudflare.example.com.coverage-gap",
+      "kind": "data_gap",
+      "severity": "high",
+      "scope": "property",
+      "property_id": "example.com",
+      "source_id": "cloudflare",
+      "title": "Cloudflare daily series has missing dates",
+      "explanation": "One or more dates are absent from the 90d daily series.",
+      "why_it_matters": "Missing dates are evidence gaps, not zero traffic.",
+      "recommended_action": "Determine whether dates are absent due to retention, inactivity, or acquisition failure; do not impute.",
+      "verification_condition": "Re-run acquisition and confirm missing_dates is empty.",
+      "action_class": "observe",
+      "source_metric_ids": [],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ],
+      "evidence_state": "unavailable",
+      "exactness": "not_applicable",
+      "coverage_state": "partial_coverage",
+      "comparison": null,
+      "limitations": [],
+      "created_at": "2026-09-10T01:00:00Z"
+    }
+  ],
+  "actions": [
+    {
+      "action_id": "action.cloudflare.example.com.7d.cache-rate.issue",
+      "finding_id": "cloudflare.example.com.7d.cache-rate.issue",
+      "priority": 2,
+      "severity": "medium",
+      "scope": "property",
+      "property_id": "example.com",
+      "action_class": "config",
+      "recommended_action": "Inspect cache rules and bypass conditions.",
+      "verification_condition": "Confirm cache rate recovers after config change.",
+      "evidence_refs": [
+        "snapshot-fixture"
+      ],
+      "status": "new"
+    },
+    {
+      "action_id": "action.cloudflare.example.com.coverage-gap",
+      "finding_id": "cloudflare.example.com.coverage-gap",
+      "priority": 1,
+      "severity": "high",
+      "scope": "property",
+      "property_id": "example.com",
+      "action_class": "observe",
+      "recommended_action": "Determine whether dates are absent due to retention, inactivity, or acquisition failure; do not impute.",
+      "verification_condition": "Re-run acquisition and confirm missing_dates is empty.",
+      "evidence_refs": [
+        "snapshot-fixture"
+      ],
+      "status": "new"
+    }
+  ],
+  "limitations": [
+    "Fixture insight document for consumer tests only. Not live GFD traffic.",
+    "Do not sum daily zone-native uniques into a period-unique or human total."
+  ]
+}
