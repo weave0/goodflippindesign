@@ -92,18 +92,32 @@ export function insightTrendSeries(
     .filter((series) => matchesProperty(series.property_id, siteDomain))
     .map((series) => sliceSeriesToWindow(series, payload))
     .filter((series): series is InsightDailySeries => series !== null)
-    .map((series) => ({
-      id: series.series_id,
-      label: `${series.label} · ${series.property_id}`,
-      source: "cloudflare" as const,
-      grain: metricName === "pageViews" ? ("edge_pageview" as const) : ("request" as const),
-      evidence_state: "measured" as const,
-      evidenceState: "measured" as const,
-      exactness: series.exactness as NamedSeries["exactness"],
-      coverage: series.coverage.state as NamedSeries["coverage"],
-      definitionId: series.source_metric_id,
-      points: series.points.map((point) => ({ date: point.date, value: point.value })),
-    }));
+    .map((series): NamedSeries => {
+      const coverage = series.coverage.state as NamedSeries["coverage"];
+      return {
+        id: series.series_id,
+        label: `${series.label} · ${series.property_id}`,
+        source: "cloudflare",
+        grain: metricName === "pageViews" ? "edge_pageview" : "request",
+        evidence_state: "measured",
+        evidenceState: "measured",
+        exactness:
+          series.exactness === "exact" ||
+          series.exactness === "inexact" ||
+          series.exactness === "not_applicable" ||
+          series.exactness === "unknown"
+            ? series.exactness
+            : "unknown",
+        coverage,
+        definitionId: series.source_metric_id,
+        points: series.points.map((point) => ({
+          date: point.date,
+          value: point.value,
+          evidence_state: "measured",
+          evidenceState: "measured",
+        })),
+      };
+    });
 }
 
 type FindingCountRow = Record<InsightFindingKind | "total", number>;
