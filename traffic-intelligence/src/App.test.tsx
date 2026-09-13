@@ -13,11 +13,12 @@ const fixture: GoldContract = adaptGold(
 );
 assertGoldContract(fixture);
 
+const insights = JSON.parse(
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../public/gold/traffic-insights-1.0.json"), "utf8"),
+);
+
 beforeEach(() => {
   window.history.replaceState({}, "", "/");
-  const insights = JSON.parse(
-    readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../public/gold/traffic-insights-1.0.json"), "utf8"),
-  );
   vi.stubGlobal(
     "fetch",
     vi.fn(async (input: RequestInfo | URL) => {

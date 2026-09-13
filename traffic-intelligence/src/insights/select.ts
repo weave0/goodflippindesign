@@ -96,7 +96,7 @@ export function insightTrendSeries(
       id: series.series_id,
       label: `${series.label} · ${series.property_id}`,
       source: "cloudflare" as const,
-      grain: "day" as const,
+      grain: metricName === "pageViews" ? ("edge_pageview" as const) : ("request" as const),
       evidence_state: "measured" as const,
       evidenceState: "measured" as const,
       exactness: series.exactness as NamedSeries["exactness"],
@@ -106,17 +106,23 @@ export function insightTrendSeries(
     }));
 }
 
-export function findingCountsByProperty(insights: TrafficInsightDocument | null): Map<string, Record<InsightFindingKind | "total", number>> {
-  const map = new Map<string, Record<string, number>>();
-  if (!insights) return map as Map<string, Record<InsightFindingKind | "total", number>>;
+type FindingCountRow = Record<InsightFindingKind | "total", number>;
+
+function emptyFindingCounts(): FindingCountRow {
+  return { total: 0, issue: 0, opportunity: 0, success: 0, data_gap: 0, change: 0 };
+}
+
+export function findingCountsByProperty(insights: TrafficInsightDocument | null): Map<string, FindingCountRow> {
+  const map = new Map<string, FindingCountRow>();
+  if (!insights) return map;
   for (const finding of insights.findings) {
     const key = finding.property_id ?? finding.source_id;
-    const row = map.get(key) ?? { total: 0, issue: 0, opportunity: 0, success: 0, data_gap: 0, change: 0 };
+    const row = map.get(key) ?? emptyFindingCounts();
     row.total += 1;
-    row[finding.kind] = (row[finding.kind] ?? 0) + 1;
+    row[finding.kind] += 1;
     map.set(key, row);
   }
-  return map as Map<string, Record<InsightFindingKind | "total", number>>;
+  return map;
 }
 
 export const TREND_METRIC_OPTIONS = [
