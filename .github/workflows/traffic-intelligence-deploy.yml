@@ -57,6 +57,7 @@ jobs:
           npm --prefix traffic-intelligence run build
           test -f traffic-intelligence/dist/index.html
           test -f traffic-intelligence/dist/gold/canonical-gold-m1.2.json
+          test -f traffic-intelligence/dist/gold/traffic-insights-1.0.json
           test -f traffic-intelligence/dist/_worker.js
           test -f traffic-intelligence/dist/_headers
           test -f traffic-intelligence/dist/robots.txt
@@ -65,6 +66,9 @@ jobs:
           const gold = JSON.parse(fs.readFileSync("traffic-intelligence/dist/gold/canonical-gold-m1.2.json", "utf8"));
           if (gold.fixture !== true) throw new Error("PR validation must use the committed fixture");
           if (!Array.isArray(gold.metrics) || gold.metrics.length === 0) throw new Error("fixture metrics are empty");
+          const insights = JSON.parse(fs.readFileSync("traffic-intelligence/dist/gold/traffic-insights-1.0.json", "utf8"));
+          if (insights.fixture !== true) throw new Error("PR validation must use the committed insight fixture");
+          if (insights.contract_name !== "gfd-traffic-insights") throw new Error("insight fixture contract mismatch");
           console.log("fixture_validation=true");
           NODE
 
@@ -255,6 +259,47 @@ jobs:
           print(f"metrics={len(artifact['metrics'])}")
           PY
 
+      - name: Validate live insight sidecar
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timedelta, timezone
+          from pathlib import Path
+          from gfdti.insights import TrafficInsightDocument
+
+          root = Path(__import__('os').environ["RUNNER_TEMP"]) / "gfdti-live"
+          gold_path = root / "canonical-gold-1.2.production.json"
+          insight_path = root / "traffic-insights-1.0.production.json"
+          if not insight_path.is_file():
+              raise SystemExit(f"missing insight sidecar: {insight_path}")
+          gold = json.loads(gold_path.read_text(encoding="utf-8"))
+          artifact = json.loads(insight_path.read_text(encoding="utf-8"))
+          doc = TrafficInsightDocument.model_validate(artifact)
+          if doc.fixture is not False:
+              raise SystemExit("production insight sidecar must declare fixture=false")
+          if doc.schema_version != "1.0.0":
+              raise SystemExit(f"unsupported insight schema_version={doc.schema_version!r}")
+          if doc.contract_name != "gfd-traffic-insights":
+              raise SystemExit(f"unexpected insight contract_name={doc.contract_name!r}")
+          if not doc.series:
+              raise SystemExit("production insight sidecar contains no series")
+          gold_ts = datetime.fromisoformat(gold["generated_at"].replace("Z", "+00:00"))
+          if doc.source_gold_generated_at != gold_ts:
+              raise SystemExit("insight sidecar source_gold_generated_at does not match live Gold")
+          generated_at = doc.generated_at if doc.generated_at.tzinfo else doc.generated_at.replace(tzinfo=timezone.utc)
+          now = datetime.now(timezone.utc)
+          if generated_at > now + timedelta(minutes=15):
+              raise SystemExit("insight sidecar generated_at is implausibly in the future")
+          if generated_at < now - timedelta(hours=36):
+              raise SystemExit("insight sidecar is stale (>36h)")
+          print("live_insights_valid=true")
+          print(f"generated_at={doc.generated_at.isoformat()}")
+          print(f"series={len(doc.series)}")
+          print(f"findings={len(doc.findings)}")
+          print(f"actions={len(doc.actions)}")
+          PY
+
       - name: Assert governed secrets are absent from live Gold
         shell: bash
         env:
@@ -263,13 +308,17 @@ jobs:
           DEPLOY_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
         run: |
           set -euo pipefail
-          artifact="$RUNNER_TEMP/gfdti-live/canonical-gold-1.2.production.json"
-          for secret_name in PRODUCER_READ_TOKEN ANALYTICS_TOKEN DEPLOY_TOKEN; do
-            secret="${!secret_name}"
-            if grep -Fq -- "$secret" "$artifact"; then
-              echo "secret $secret_name was serialized into the artifact"
-              exit 1
-            fi
+          for artifact in \
+            "$RUNNER_TEMP/gfdti-live/canonical-gold-1.2.production.json" \
+            "$RUNNER_TEMP/gfdti-live/traffic-insights-1.0.production.json"
+          do
+            for secret_name in PRODUCER_READ_TOKEN ANALYTICS_TOKEN DEPLOY_TOKEN; do
+              secret="${!secret_name}"
+              if grep -Fq -- "$secret" "$artifact"; then
+                echo "secret $secret_name was serialized into $artifact"
+                exit 1
+              fi
+            done
           done
           echo "governed_secret_exclusion=verified"
 
@@ -288,11 +337,13 @@ jobs:
           npm --prefix traffic-intelligence run lint
           npm --prefix traffic-intelligence test
 
-      - name: Inject validated live Gold into ephemeral build
+      - name: Inject validated live Gold and insights into ephemeral build
         shell: bash
         run: |
           install -m 600 "$RUNNER_TEMP/gfdti-live/canonical-gold-1.2.production.json" traffic-intelligence/public/gold/canonical-gold-m1.2.json
+          install -m 600 "$RUNNER_TEMP/gfdti-live/traffic-insights-1.0.production.json" traffic-intelligence/public/gold/traffic-insights-1.0.json
           echo "live_gold_injected_ephemerally=true"
+          echo "live_insights_injected_ephemerally=true"
 
       - name: Build and verify live artifact
         shell: bash
@@ -300,9 +351,20 @@ jobs:
           npm --prefix traffic-intelligence run build
           test -f traffic-intelligence/dist/index.html
           test -f traffic-intelligence/dist/gold/canonical-gold-m1.2.json
+          test -f traffic-intelligence/dist/gold/traffic-insights-1.0.json
           test -f traffic-intelligence/dist/_worker.js
           test -f traffic-intelligence/dist/_headers
           test -f traffic-intelligence/dist/robots.txt
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const gold = JSON.parse(fs.readFileSync("traffic-intelligence/dist/gold/canonical-gold-m1.2.json", "utf8"));
+          const insights = JSON.parse(fs.readFileSync("traffic-intelligence/dist/gold/traffic-insights-1.0.json", "utf8"));
+          if (gold.fixture !== false) throw new Error("built Gold must be live fixture=false");
+          if (insights.fixture !== false) throw new Error("built insights must be live fixture=false");
+          if (insights.contract_name !== "gfd-traffic-insights") throw new Error("built insights contract mismatch");
+          if (!Array.isArray(insights.series) || insights.series.length === 0) throw new Error("built insights series empty");
+          console.log("live_build_gold_and_insights_verified=true");
+          NODE
 
       - name: Verify Cloudflare deploy credential is available
         env:
@@ -445,7 +507,9 @@ jobs:
           grep -q "GFD Traffic Intelligence" /tmp/traffic-index.html
           gold_status="$(curl -sS -o /tmp/pages-gold-denied.txt -w '%{http_code}' "$pages_url/gold/canonical-gold-m1.2.json")"
           test "$gold_status" = "401" || test "$gold_status" = "403"
-          echo "Verified production artifact and admin wall: $pages_url"
+          insights_status="$(curl -sS -o /tmp/pages-insights-denied.txt -w '%{http_code}' "$pages_url/gold/traffic-insights-1.0.json")"
+          test "$insights_status" = "401" || test "$insights_status" = "403"
+          echo "Verified production Gold + insights admin wall: $pages_url"
 
       - name: Verify custom-domain activation
         shell: bash
