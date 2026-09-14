@@ -48,7 +48,7 @@ const PRIMARY_NAV_RESET: Partial<Filters> = {
 const VIEW_COPY: Record<ViewId, { title: string; lede: string }> = {
   overview: {
     title: "Traffic overview",
-    lede: "What changed, what matters, and where to look next.",
+    lede: "Estate status, material changes, ranked briefs, and the next actions — a decision cockpit.",
   },
   humans: {
     title: "Audience",
@@ -247,6 +247,15 @@ export function App() {
               insights={insights}
               insightsError={insightsError}
               onOpen={setEvidence}
+              onSelectProperty={(propertyId) => {
+                const mapped =
+                  payload.sites.find((site) => site.id === propertyId)?.id ??
+                  payload.sites.find(
+                    (site) => site.domain.toLowerCase() === propertyId.toLowerCase(),
+                  )?.id ??
+                  propertyId;
+                patchFilters({ site: mapped, view: "overview" });
+              }}
             />
           )}
           {filters.view === "humans" && <HumansView payload={payload} filters={filters} onOpen={setEvidence} />}

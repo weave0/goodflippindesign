@@ -1,11 +1,21 @@
 export type InsightFindingKind = "issue" | "opportunity" | "success" | "data_gap" | "change";
-export type InsightSeverity = "low" | "medium" | "high" | "critical";
+export type InsightSeverity = "low" | "medium" | "high" | "critical" | "info";
 export type InsightActionClass =
   | "observe"
   | "code"
   | "config"
   | "research"
   | "credential/instrumentation";
+export type InsightPriority =
+  | "act_now"
+  | "investigate"
+  | "watch"
+  | "healthy"
+  | "measurement_blocked";
+export type InsightBriefCategory = "traffic" | "delivery" | "security" | "measurement" | "mixed";
+export type InsightConfidence = "high" | "medium" | "low";
+export type InsightEstateStatus = "stable" | "attention_required" | "degraded" | "insufficient_evidence";
+export type InsightPersistenceWindow = "7d" | "28d";
 
 export interface InsightCoverage {
   state: string;
@@ -74,10 +84,15 @@ export interface InsightFinding {
   created_at: string;
 }
 
+/** Schema 1.1 action: numeric priority 1–5 + categorical priority_class for ranking. */
 export interface InsightAction {
   action_id: string;
   finding_id: string;
+  finding_ids: string[];
+  brief_id: string | null;
+  /** Additive 1.0 numeric urgency (1–5). Prefer priority_class for ranking/UI. */
   priority: number;
+  priority_class: InsightPriority;
   severity: InsightSeverity;
   scope: "property" | "source";
   property_id: string | null;
@@ -88,8 +103,77 @@ export interface InsightAction {
   status: "new";
 }
 
+export interface InsightMateriality {
+  absolute_delta_requests: number | null;
+  absolute_delta_pageviews: number | null;
+  percent_delta: number | null;
+}
+
+export interface OperationalBrief {
+  brief_id: string;
+  property_id: string;
+  category: InsightBriefCategory;
+  headline: string;
+  summary: string;
+  severity: InsightSeverity;
+  priority: InsightPriority;
+  direction: "up" | "down" | "flat" | "unknown";
+  materiality: InsightMateriality;
+  persistence: InsightPersistenceWindow[];
+  finding_ids: string[];
+  corroborating_signals: string[];
+  contradictory_signals: string[];
+  confidence: InsightConfidence;
+  recommended_action: string;
+  verification_condition: string;
+  action_class: InsightActionClass;
+  limitations: string[];
+}
+
+export interface EstateBrief {
+  status: InsightEstateStatus;
+  top_changes: string[];
+  top_wins: string[];
+  measurement_limitations: string[];
+  top_actions: string[];
+  properties_to_inspect: string[];
+}
+
+export interface PropertyHealth {
+  property_id: string;
+  traffic: "declining" | "rising" | "stable" | "unknown";
+  delivery: "healthy" | "degraded" | "unknown";
+  threats: "elevated" | "normal" | "unknown";
+  measurement: "complete" | "partial" | "blocked" | "unknown";
+  overall: InsightPriority;
+  notes: string;
+}
+
+export interface TrendComparison {
+  property_id: string;
+  metric_name: string;
+  period_days: 7 | 28 | 90;
+  current_start: string | null;
+  current_end: string | null;
+  baseline_start: string | null;
+  baseline_end: string | null;
+  current_value: number | null;
+  baseline_value: number | null;
+  absolute_delta: number | null;
+  percent_delta: number | null;
+  available: boolean;
+  unavailable_reason: string | null;
+  source: "cloudflare";
+  exactness: string;
+  coverage_state: string;
+  expected_date_count: number | null;
+  missing_dates: string[];
+  source_metric_ids: string[];
+  source_snapshots: string[];
+}
+
 export interface TrafficInsightDocument {
-  schema_version: "1.0.0";
+  schema_version: "1.0.0" | "1.1.0";
   contract_name: "gfd-traffic-insights";
   fixture: boolean;
   generated_at: string;
@@ -98,5 +182,10 @@ export interface TrafficInsightDocument {
   series: InsightDailySeries[];
   findings: InsightFinding[];
   actions: InsightAction[];
+  briefs: OperationalBrief[];
+  estate_brief: EstateBrief | null;
+  property_health: PropertyHealth[];
+  /** Producer-governed equal-window comparative rows — sole source of numeric deltas. */
+  trend_comparisons: TrendComparison[];
   limitations: string[];
 }

@@ -4,16 +4,187 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+function isNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function isBoolean(value: unknown): value is boolean {
+  return typeof value === "boolean";
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(isString);
+}
+
+const PRIORITIES = new Set(["act_now", "investigate", "watch", "healthy", "measurement_blocked"]);
+const SEVERITIES = new Set(["low", "medium", "high", "critical", "info"]);
+const ESTATE_STATUSES = new Set(["stable", "attention_required", "degraded", "insufficient_evidence"]);
+const DIRECTIONS = new Set(["up", "down", "flat", "unknown"]);
+const PERIOD_DAYS = new Set([7, 28, 90]);
+
+function assertPriority(value: unknown, label: string): void {
+  if (!isString(value) || !PRIORITIES.has(value)) {
+    throw new Error(`Insights ${label} must be a known priority_class`);
+  }
+}
+
+function assertEstateBrief(value: unknown): void {
+  if (!isObject(value)) throw new Error("Insights schema 1.1.0 requires estate_brief object");
+  if (!isString(value.status) || !ESTATE_STATUSES.has(value.status)) {
+    throw new Error("Insights estate_brief.status is invalid");
+  }
+  for (const key of [
+    "top_changes",
+    "top_wins",
+    "measurement_limitations",
+    "top_actions",
+    "properties_to_inspect",
+  ] as const) {
+    if (!isStringArray(value[key])) {
+      throw new Error(`Insights estate_brief.${key} must be a string array`);
+    }
+  }
+}
+
+function assertBrief(value: unknown, index: number): void {
+  if (!isObject(value)) throw new Error(`Insights briefs[${index}] must be an object`);
+  for (const key of ["brief_id", "property_id", "category", "headline", "summary", "recommended_action", "verification_condition"] as const) {
+    if (!isString(value[key])) throw new Error(`Insights briefs[${index}].${key} must be a string`);
+  }
+  if (!isString(value.severity) || !SEVERITIES.has(value.severity)) {
+    throw new Error(`Insights briefs[${index}].severity is invalid`);
+  }
+  assertPriority(value.priority, `briefs[${index}].priority`);
+  if (value.direction !== undefined && (!isString(value.direction) || !DIRECTIONS.has(value.direction))) {
+    throw new Error(`Insights briefs[${index}].direction is invalid`);
+  }
+  if (!isObject(value.materiality)) throw new Error(`Insights briefs[${index}].materiality must be an object`);
+  if (!isStringArray(value.persistence)) throw new Error(`Insights briefs[${index}].persistence must be a string array`);
+  if (!isStringArray(value.finding_ids)) throw new Error(`Insights briefs[${index}].finding_ids must be a string array`);
+  if (!isString(value.confidence)) throw new Error(`Insights briefs[${index}].confidence must be a string`);
+  if (!isString(value.action_class)) throw new Error(`Insights briefs[${index}].action_class must be a string`);
+  if (!isStringArray(value.limitations ?? [])) throw new Error(`Insights briefs[${index}].limitations must be a string array`);
+  // OverviewView always .join()s these — reject wrong types fail-closed (match limitations).
+  if (!isStringArray(value.corroborating_signals ?? [])) {
+    throw new Error(`Insights briefs[${index}].corroborating_signals must be a string array`);
+  }
+  if (!isStringArray(value.contradictory_signals ?? [])) {
+    throw new Error(`Insights briefs[${index}].contradictory_signals must be a string array`);
+  }
+}
+
+function assertPropertyHealth(value: unknown, index: number): void {
+  if (!isObject(value)) throw new Error(`Insights property_health[${index}] must be an object`);
+  if (!isString(value.property_id)) throw new Error(`Insights property_health[${index}].property_id must be a string`);
+  assertPriority(value.overall, `property_health[${index}].overall`);
+  for (const key of ["traffic", "delivery", "threats", "measurement"] as const) {
+    if (!isString(value[key])) throw new Error(`Insights property_health[${index}].${key} must be a string`);
+  }
+  if (value.notes !== undefined && !isString(value.notes)) {
+    throw new Error(`Insights property_health[${index}].notes must be a string`);
+  }
+}
+
+function assertTrendComparison(value: unknown, index: number): void {
+  if (!isObject(value)) throw new Error(`Insights trend_comparisons[${index}] must be an object`);
+  if (!isString(value.property_id)) throw new Error(`Insights trend_comparisons[${index}].property_id must be a string`);
+  if (!isString(value.metric_name)) throw new Error(`Insights trend_comparisons[${index}].metric_name must be a string`);
+  if (!isNumber(value.period_days) || !PERIOD_DAYS.has(value.period_days)) {
+    throw new Error(`Insights trend_comparisons[${index}].period_days must be 7, 28, or 90`);
+  }
+  if (!isBoolean(value.available)) throw new Error(`Insights trend_comparisons[${index}].available must be boolean`);
+  if (!isString(value.coverage_state)) throw new Error(`Insights trend_comparisons[${index}].coverage_state must be a string`);
+  if (!isString(value.source)) throw new Error(`Insights trend_comparisons[${index}].source must be a string`);
+  if (value.exactness !== undefined && !isString(value.exactness)) {
+    throw new Error(`Insights trend_comparisons[${index}].exactness must be a string`);
+  }
+  if (!isStringArray(value.missing_dates ?? [])) {
+    throw new Error(`Insights trend_comparisons[${index}].missing_dates must be a string array`);
+  }
+  if (value.available) {
+    for (const key of ["current_value", "baseline_value", "absolute_delta"] as const) {
+      if (!isNumber(value[key])) {
+        throw new Error(`Insights trend_comparisons[${index}].${key} required when available=true`);
+      }
+    }
+    // Overview renders (percent_delta * 100).toFixed(1) when available && !== null.
+    // isNumber already rejects NaN; still require key present as null | finite number.
+    if (value.percent_delta !== null && !isNumber(value.percent_delta)) {
+      throw new Error(
+        `Insights trend_comparisons[${index}].percent_delta must be null or a finite number when available=true`,
+      );
+    }
+  } else if (value.absolute_delta != null || value.percent_delta != null) {
+    // Allow nulls only; reject invented numerics on unavailable rows.
+    if (value.absolute_delta !== null && value.absolute_delta !== undefined) {
+      throw new Error(`Insights trend_comparisons[${index}] unavailable row must not expose absolute_delta`);
+    }
+    if (value.percent_delta !== null && value.percent_delta !== undefined) {
+      throw new Error(`Insights trend_comparisons[${index}] unavailable row must not expose percent_delta`);
+    }
+  }
+}
+
+function assertAction(value: unknown, index: number): void {
+  if (!isObject(value)) throw new Error(`Insights actions[${index}] must be an object`);
+  if (!isString(value.action_id)) throw new Error(`Insights actions[${index}].action_id must be a string`);
+  if (!isString(value.finding_id)) throw new Error(`Insights actions[${index}].finding_id must be a string`);
+  if (!isString(value.severity) || !SEVERITIES.has(value.severity)) {
+    throw new Error(`Insights actions[${index}].severity is invalid`);
+  }
+  if (!isString(value.recommended_action)) throw new Error(`Insights actions[${index}].recommended_action must be a string`);
+  // OverviewView joins evidence_refs and finding_ids — reject wrong types fail-closed.
+  if (!isStringArray(value.evidence_refs ?? [])) {
+    throw new Error(`Insights actions[${index}].evidence_refs must be a string array`);
+  }
+  if (!isStringArray(value.finding_ids ?? [])) {
+    throw new Error(`Insights actions[${index}].finding_ids must be a string array`);
+  }
+  // priority_class preferred; legacy categorical priority string also accepted at assert time.
+  const cls = value.priority_class ?? (typeof value.priority === "string" ? value.priority : undefined);
+  if (cls !== undefined) assertPriority(cls, `actions[${index}].priority_class`);
+  if (typeof value.priority === "number") {
+    if (!Number.isInteger(value.priority) || value.priority < 1 || value.priority > 5) {
+      throw new Error(`Insights actions[${index}].priority must be int 1–5`);
+    }
+  } else if (typeof value.priority === "string") {
+    assertPriority(value.priority, `actions[${index}].priority`);
+  } else if (cls === undefined) {
+    throw new Error(`Insights actions[${index}] requires priority_class or priority`);
+  }
+}
+
 export function assertTrafficInsights(raw: unknown): asserts raw is TrafficInsightDocument {
   if (!isObject(raw)) throw new Error("Traffic insights must be an object");
   if (raw.contract_name !== "gfd-traffic-insights") {
     throw new Error(`Unexpected insights contract_name: ${String(raw.contract_name)}`);
   }
-  if (raw.schema_version !== "1.0.0") {
-    throw new Error(`Unexpected insights schema_version: ${String(raw.schema_version)}`);
+  const version = raw.schema_version;
+  if (version !== "1.0.0" && version !== "1.1.0") {
+    throw new Error(`Unexpected insights schema_version: ${String(version)}`);
   }
   if (typeof raw.fixture !== "boolean") throw new Error("Insights fixture flag must be boolean");
   if (!Array.isArray(raw.series) || !Array.isArray(raw.findings) || !Array.isArray(raw.actions)) {
     throw new Error("Insights require series, findings, and actions arrays");
+  }
+  raw.actions.forEach((action, index) => assertAction(action, index));
+  if (version === "1.1.0") {
+    if (!Array.isArray(raw.briefs)) {
+      throw new Error("Insights schema 1.1.0 requires briefs array");
+    }
+    raw.briefs.forEach((brief, index) => assertBrief(brief, index));
+    assertEstateBrief(raw.estate_brief);
+    if (!Array.isArray(raw.property_health)) {
+      throw new Error("Insights schema 1.1.0 requires property_health array");
+    }
+    raw.property_health.forEach((row, index) => assertPropertyHealth(row, index));
+    if (!Array.isArray(raw.trend_comparisons)) {
+      throw new Error("Insights schema 1.1.0 requires trend_comparisons array");
+    }
+    raw.trend_comparisons.forEach((row, index) => assertTrendComparison(row, index));
   }
 }

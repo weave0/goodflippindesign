@@ -50,15 +50,54 @@ describe("human-first traffic intelligence shell", () => {
     expect(screen.queryByRole("button", { name: "Laboratory" })).not.toBeInTheDocument();
   });
 
-  it("puts findings before supporting measurements", async () => {
+  it("renders the decision cockpit from estate_brief before queues of raw findings", async () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Traffic overview" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Needs attention" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Momentum / wins" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Measurement gaps" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Key measurements" })).toBeInTheDocument();
-    expect(screen.getByText(/items need attention|No material issues|Governed insights unavailable/i)).toBeInTheDocument();
-    expect(screen.queryByText("Independent source cards")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Executive estate brief" })).toBeInTheDocument();
+    expect(screen.getAllByText(/Attention required/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "Top briefs" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Comparative trends" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Property health matrix" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Action queue" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Needs attention" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Insight sidecar is fixture/i)).toBeInTheDocument();
+  });
+
+  it("defaults Top briefs to Act now + Investigate and can expand Watch", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("heading", { name: "Top briefs" });
+    expect(screen.getByText(/Measurement gaps block some comparisons/i)).toBeInTheDocument();
+    expect(screen.getByText(/Cache rate deteriorated on example.com/i)).toBeInTheDocument();
+    expect(screen.queryByText(/HTTP requests increased on example.com/i)).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Show Watch/i }));
+    expect(screen.getByText(/HTTP requests increased on example.com/i)).toBeInTheDocument();
+  });
+
+  it("opens a property dossier from the health matrix using URL site state", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("heading", { name: "Property health matrix" });
+    await user.click(screen.getAllByRole("button", { name: "example.com" })[0]!);
+    expect(window.location.search).toContain("site=example.com");
+    expect(await screen.findByRole("heading", { name: /Property dossier · example.com/i })).toBeInTheDocument();
+  });
+
+  it("fail-closes overview decision surfaces when insights are missing", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("traffic-insights")) {
+          return { ok: false, status: 503, json: async () => ({}) };
+        }
+        return { ok: true, json: async () => fixture };
+      }),
+    );
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: /Governed insights unavailable/i })).toBeInTheDocument();
+    expect(screen.getByText(/Traffic insights HTTP 503/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Unavailable until the insight sidecar loads/i).length).toBeGreaterThan(0);
   });
 
   it("keeps truthful reporting range and property as the default global controls", async () => {
@@ -71,15 +110,16 @@ describe("human-first traffic intelligence shell", () => {
     expect(within(rangeGroup).getByRole("button", { name: "28 days" })).toHaveAttribute("aria-pressed", "true");
     expect(within(rangeGroup).getByRole("button", { name: "90 days" })).toBeDisabled();
     expect(screen.getByText(/Range: 28 days/i)).toBeInTheDocument();
-    expect(screen.getByLabelText("Property")).toBeInTheDocument();
+    expect(within(screen.getByRole("search", { name: "Traffic filters" })).getByLabelText("Property")).toBeInTheDocument();
     expect(screen.queryByLabelText("Taxonomy")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Confidence")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Content type")).not.toBeInTheDocument();
   });
 
-  it("opens evidence without making methodology primary navigation", async () => {
+  it("opens evidence from supporting measurements without making methodology primary navigation", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await user.click(await screen.findByRole("button", { name: /Show key measurements/i }));
     const card = await screen.findByRole("button", { name: /Edge requests/i });
     await user.click(card);
     const dialog = await screen.findByRole("dialog");
@@ -91,6 +131,7 @@ describe("human-first traffic intelligence shell", () => {
   it("keeps the canonical definition authoritative and glossary supplemental", async () => {
     const user = userEvent.setup();
     render(<App />);
+    await user.click(await screen.findByRole("button", { name: /Show key measurements/i }));
     await user.click(await screen.findByRole("button", { name: /Edge requests/i }));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText("This is volume, not visitors.")).toBeInTheDocument();
@@ -109,6 +150,7 @@ describe("human-first traffic intelligence shell", () => {
       }),
     );
     render(<App />);
+    await user.click(await screen.findByRole("button", { name: /Show key measurements/i }));
     await user.click(await screen.findByRole("button", { name: /Edge requests/i }));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText("def.edge_request")).toBeInTheDocument();
