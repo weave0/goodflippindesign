@@ -443,3 +443,252 @@
   color: var(--warn);
   font-size: 12px;
 }
+
+/* TI-007 decision cockpit */
+.cockpit-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: 24px;
+  align-items: start;
+  padding: clamp(22px, 4vw, 34px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background:
+    radial-gradient(700px 280px at 0% 0%, color-mix(in srgb, var(--edge) 14%, transparent), transparent 70%),
+    var(--bg-panel);
+}
+
+.cockpit-hero__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.cockpit-hero h2 {
+  margin: 0;
+  font-size: clamp(26px, 4vw, 40px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.cockpit-hero p {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+  max-width: 72ch;
+}
+
+.cockpit-hero__period {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg-raised);
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.cockpit-hero__period strong {
+  color: var(--text);
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.status-badge--ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+.status-badge--watch { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
+.status-badge--action { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
+.status-badge--blocked { color: var(--text-muted); border-color: var(--line); }
+
+.estate-brief-grid,
+.dossier-grid,
+.trend-focus-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.estate-brief-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.trend-focus-grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  align-items: start;
+}
+
+.estate-panel,
+.trend-focus-chart,
+.brief-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-raised);
+  padding: 14px 16px;
+}
+
+.estate-panel h3,
+.trend-focus-chart h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.plain-list,
+.chip-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.chip-list {
+  list-style: none;
+  padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-button,
+.linkish,
+.disclosure-toggle {
+  border: 0;
+  background: transparent;
+  color: var(--edge);
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.chip-button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: var(--bg-panel);
+  color: var(--text);
+}
+
+.disclosure-toggle {
+  margin-top: 10px;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.disclosure-panel {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.brief-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.brief-card--action { border-left: 3px solid var(--bad); }
+.brief-card--watch { border-left: 3px solid var(--warn); }
+.brief-card--ok { border-left: 3px solid var(--ok); }
+.brief-card--blocked { border-left: 3px solid var(--line); }
+
+.brief-card h3 {
+  margin: 8px 0 4px;
+  font-size: 15px;
+}
+
+.brief-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.brief-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.brief-card__badges,
+.health-components {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.brief-card__action {
+  margin-top: 8px !important;
+  color: var(--text) !important;
+}
+
+.priority-pill,
+.meta-chip,
+.health-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.priority-pill--act_now { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 50%, var(--line)); }
+.priority-pill--investigate { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 50%, var(--line)); }
+.priority-pill--watch { color: var(--text-muted); }
+.priority-pill--healthy { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 50%, var(--line)); }
+.priority-pill--measurement_blocked { color: var(--text-faint); }
+
+.health-chip em {
+  font-style: normal;
+  color: var(--text-faint);
+}
+
+.health-chip--ok { color: var(--ok); }
+.health-chip--watch { color: var(--warn); }
+.health-chip--action { color: var(--bad); }
+.health-chip--blocked { color: var(--text-faint); }
+
+.trend-focus-chart__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.trend-focus-chart__header select {
+  max-width: 180px;
+}
+
+.dossier-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+@media (max-width: 900px) {
+  .cockpit-hero,
+  .trend-focus-grid {
+    grid-template-columns: 1fr;
+  }
+}

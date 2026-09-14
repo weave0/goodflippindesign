@@ -69,6 +69,16 @@ jobs:
           const insights = JSON.parse(fs.readFileSync("traffic-intelligence/dist/gold/traffic-insights-1.0.json", "utf8"));
           if (insights.fixture !== true) throw new Error("PR validation must use the committed insight fixture");
           if (insights.contract_name !== "gfd-traffic-insights") throw new Error("insight fixture contract mismatch");
+          if (insights.schema_version !== "1.1.0" && insights.schema_version !== "1.0.0") {
+            throw new Error(`insight fixture schema_version unsupported: ${insights.schema_version}`);
+          }
+          if (insights.schema_version === "1.1.0") {
+            if (!Array.isArray(insights.briefs)) throw new Error("insight fixture 1.1 requires briefs");
+            if (!insights.estate_brief || typeof insights.estate_brief !== "object") {
+              throw new Error("insight fixture 1.1 requires estate_brief");
+            }
+            if (!Array.isArray(insights.property_health)) throw new Error("insight fixture 1.1 requires property_health");
+          }
           console.log("fixture_validation=true");
           NODE
 
@@ -188,7 +198,8 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: ${{ env.PRODUCER_REPOSITORY }}
-          ref: main
+          # Pin to TI-007 producer insight schema 1.1 until weave0/gfd-traffic-intelligence#5 is on main.
+          ref: 177b203c47dbe7e5aab2845d79b3a77fcf556e31
           token: ${{ secrets.GFD_TI_READ_TOKEN }}
           path: .producer
           persist-credentials: false
@@ -270,20 +281,36 @@ jobs:
 
           root = Path(__import__('os').environ["RUNNER_TEMP"]) / "gfdti-live"
           gold_path = root / "canonical-gold-1.2.production.json"
-          insight_path = root / "traffic-insights-1.0.production.json"
-          if not insight_path.is_file():
-              raise SystemExit(f"missing insight sidecar: {insight_path}")
+          preferred = root / "traffic-insights-1.1.production.json"
+          legacy = root / "traffic-insights-1.0.production.json"
+          if preferred.is_file():
+              insight_path = preferred
+          elif legacy.is_file():
+              raise SystemExit(
+                  "Found traffic-insights-1.0.production.json only. "
+                  "Consumer TI-007 requires producer schema 1.1 "
+                  "(traffic-insights-1.1.production.json with briefs + estate_brief). "
+                  "Merge weave0/gfd-traffic-intelligence#5 or keep the pinned producer SHA."
+              )
+          else:
+              raise SystemExit(f"missing insight sidecar: expected {preferred.name}")
           gold = json.loads(gold_path.read_text(encoding="utf-8"))
           artifact = json.loads(insight_path.read_text(encoding="utf-8"))
           doc = TrafficInsightDocument.model_validate(artifact)
           if doc.fixture is not False:
               raise SystemExit("production insight sidecar must declare fixture=false")
-          if doc.schema_version != "1.0.0":
-              raise SystemExit(f"unsupported insight schema_version={doc.schema_version!r}")
+          if doc.schema_version != "1.1.0":
+              raise SystemExit(f"unsupported insight schema_version={doc.schema_version!r} (require 1.1.0)")
           if doc.contract_name != "gfd-traffic-insights":
               raise SystemExit(f"unexpected insight contract_name={doc.contract_name!r}")
           if not doc.series:
               raise SystemExit("production insight sidecar contains no series")
+          if not doc.briefs:
+              raise SystemExit("production insight sidecar 1.1 requires non-empty briefs")
+          if doc.estate_brief is None:
+              raise SystemExit("production insight sidecar 1.1 requires estate_brief")
+          if not doc.property_health:
+              raise SystemExit("production insight sidecar 1.1 requires property_health")
           gold_ts = datetime.fromisoformat(gold["generated_at"].replace("Z", "+00:00"))
           if doc.source_gold_generated_at != gold_ts:
               raise SystemExit("insight sidecar source_gold_generated_at does not match live Gold")
@@ -294,10 +321,13 @@ jobs:
           if generated_at < now - timedelta(hours=36):
               raise SystemExit("insight sidecar is stale (>36h)")
           print("live_insights_valid=true")
+          print(f"insight_path={insight_path.name}")
           print(f"generated_at={doc.generated_at.isoformat()}")
           print(f"series={len(doc.series)}")
           print(f"findings={len(doc.findings)}")
           print(f"actions={len(doc.actions)}")
+          print(f"briefs={len(doc.briefs)}")
+          print(f"estate_status={doc.estate_brief.status}")
           PY
 
       - name: Assert governed secrets are absent from live Gold
@@ -310,7 +340,7 @@ jobs:
           set -euo pipefail
           for artifact in \
             "$RUNNER_TEMP/gfdti-live/canonical-gold-1.2.production.json" \
-            "$RUNNER_TEMP/gfdti-live/traffic-insights-1.0.production.json"
+            "$RUNNER_TEMP/gfdti-live/traffic-insights-1.1.production.json"
           do
             for secret_name in PRODUCER_READ_TOKEN ANALYTICS_TOKEN DEPLOY_TOKEN; do
               secret="${!secret_name}"
@@ -341,9 +371,11 @@ jobs:
         shell: bash
         run: |
           install -m 600 "$RUNNER_TEMP/gfdti-live/canonical-gold-1.2.production.json" traffic-intelligence/public/gold/canonical-gold-m1.2.json
-          install -m 600 "$RUNNER_TEMP/gfdti-live/traffic-insights-1.0.production.json" traffic-intelligence/public/gold/traffic-insights-1.0.json
+          # Keep consumer URL stable (admin wall + load path) while shipping schema 1.1 contents.
+          install -m 600 "$RUNNER_TEMP/gfdti-live/traffic-insights-1.1.production.json" traffic-intelligence/public/gold/traffic-insights-1.0.json
           echo "live_gold_injected_ephemerally=true"
           echo "live_insights_injected_ephemerally=true"
+          echo "live_insights_filename_decision=serve_1.1_contents_at_traffic-insights-1.0.json"
 
       - name: Build and verify live artifact
         shell: bash
@@ -362,7 +394,11 @@ jobs:
           if (gold.fixture !== false) throw new Error("built Gold must be live fixture=false");
           if (insights.fixture !== false) throw new Error("built insights must be live fixture=false");
           if (insights.contract_name !== "gfd-traffic-insights") throw new Error("built insights contract mismatch");
+          if (insights.schema_version !== "1.1.0") throw new Error(`built insights must be schema 1.1.0, got ${insights.schema_version}`);
           if (!Array.isArray(insights.series) || insights.series.length === 0) throw new Error("built insights series empty");
+          if (!Array.isArray(insights.briefs) || insights.briefs.length === 0) throw new Error("built insights must include briefs");
+          if (!insights.estate_brief || typeof insights.estate_brief !== "object") throw new Error("built insights must include estate_brief");
+          if (!Array.isArray(insights.property_health)) throw new Error("built insights must include property_health");
           console.log("live_build_gold_and_insights_verified=true");
           NODE
 

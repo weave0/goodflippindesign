@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "contract_name": "gfd-traffic-insights",
   "fixture": true,
   "generated_at": "2026-09-10T01:00:00Z",
@@ -279,6 +279,143 @@
       "limitations": [
         "Fixture series for consumer tests only."
       ]
+    },
+    {
+      "series_id": "cloudflare.shop.example.com.daily.requests",
+      "source": "cloudflare",
+      "property_id": "shop.example.com",
+      "metric_name": "requests",
+      "label": "HTTP requests",
+      "unit": "requests",
+      "source_metric_id": "cloudflare.shop.example.com.28d.requests",
+      "source_snapshot": "snapshot-fixture",
+      "evidence_state": "measured",
+      "exactness": "unknown",
+      "coverage": {
+        "state": "full_coverage",
+        "observed_fraction": 1.0,
+        "missing_dates": []
+      },
+      "observation_start": "2026-08-13T00:00:00Z",
+      "observation_end": "2026-09-10T00:00:00Z",
+      "points": [
+        {
+          "date": "2026-08-13",
+          "value": 220
+        },
+        {
+          "date": "2026-08-14",
+          "value": 215
+        },
+        {
+          "date": "2026-08-15",
+          "value": 210
+        },
+        {
+          "date": "2026-08-16",
+          "value": 205
+        },
+        {
+          "date": "2026-08-17",
+          "value": 200
+        },
+        {
+          "date": "2026-08-18",
+          "value": 195
+        },
+        {
+          "date": "2026-08-19",
+          "value": 190
+        },
+        {
+          "date": "2026-08-20",
+          "value": 185
+        },
+        {
+          "date": "2026-08-21",
+          "value": 180
+        },
+        {
+          "date": "2026-08-22",
+          "value": 175
+        },
+        {
+          "date": "2026-08-23",
+          "value": 170
+        },
+        {
+          "date": "2026-08-24",
+          "value": 165
+        },
+        {
+          "date": "2026-08-25",
+          "value": 160
+        },
+        {
+          "date": "2026-08-26",
+          "value": 155
+        },
+        {
+          "date": "2026-08-27",
+          "value": 150
+        },
+        {
+          "date": "2026-08-28",
+          "value": 145
+        },
+        {
+          "date": "2026-08-29",
+          "value": 140
+        },
+        {
+          "date": "2026-08-30",
+          "value": 135
+        },
+        {
+          "date": "2026-08-31",
+          "value": 130
+        },
+        {
+          "date": "2026-09-01",
+          "value": 125
+        },
+        {
+          "date": "2026-09-02",
+          "value": 120
+        },
+        {
+          "date": "2026-09-03",
+          "value": 115
+        },
+        {
+          "date": "2026-09-04",
+          "value": 110
+        },
+        {
+          "date": "2026-09-05",
+          "value": 105
+        },
+        {
+          "date": "2026-09-06",
+          "value": 100
+        },
+        {
+          "date": "2026-09-07",
+          "value": 95
+        },
+        {
+          "date": "2026-09-08",
+          "value": 90
+        },
+        {
+          "date": "2026-09-09",
+          "value": 85
+        }
+      ],
+      "missing_dates": [],
+      "limitations": [
+        "Fixture series for consumer tests only."
+      ]
     }
   ],
   "findings": [
@@ -375,7 +512,7 @@
     {
       "action_id": "action.cloudflare.example.com.7d.cache-rate.issue",
       "finding_id": "cloudflare.example.com.7d.cache-rate.issue",
-      "priority": 2,
+      "priority": "investigate",
       "severity": "medium",
       "scope": "property",
       "property_id": "example.com",
@@ -385,12 +522,16 @@
       "evidence_refs": [
         "snapshot-fixture"
       ],
-      "status": "new"
+      "status": "new",
+      "finding_ids": [
+        "cloudflare.example.com.7d.cache-rate.issue"
+      ],
+      "brief_id": "brief.example.com.delivery.cache"
     },
     {
       "action_id": "action.cloudflare.example.com.coverage-gap",
       "finding_id": "cloudflare.example.com.coverage-gap",
-      "priority": 1,
+      "priority": "act_now",
       "severity": "high",
       "scope": "property",
       "property_id": "example.com",
@@ -400,11 +541,205 @@
       "evidence_refs": [
         "snapshot-fixture"
       ],
+      "status": "new",
+      "finding_ids": [
+        "cloudflare.example.com.coverage-gap"
+      ],
+      "brief_id": "brief.example.com.measurement.gap"
+    },
+    {
+      "action_id": "action.cloudflare.shop.example.com.traffic.drop",
+      "finding_id": "cloudflare.example.com.7d.requests.movement",
+      "finding_ids": [
+        "cloudflare.example.com.7d.requests.movement"
+      ],
+      "brief_id": "brief.shop.example.com.traffic.drop",
+      "priority": "act_now",
+      "severity": "high",
+      "scope": "property",
+      "property_id": "shop.example.com",
+      "action_class": "research",
+      "recommended_action": "Inspect routing, incidents, and content changes for shop.example.com.",
+      "verification_condition": "Confirm the next equal window does not continue the decline.",
+      "evidence_refs": [
+        "snapshot-fixture"
+      ],
       "status": "new"
     }
   ],
   "limitations": [
     "Fixture insight document for consumer tests only. Not live GFD traffic.",
-    "Do not sum daily zone-native uniques into a period-unique or human total."
+    "Do not sum daily zone-native uniques into a period-unique or human total.",
+    "Schema 1.1 briefs/estate_brief/property_health are fixture synthesis for TI-007 UI."
+  ],
+  "briefs": [
+    {
+      "brief_id": "brief.example.com.delivery.cache",
+      "property_id": "example.com",
+      "category": "delivery",
+      "headline": "Cache rate deteriorated on example.com",
+      "summary": "Cached request share fell materially; origin load risk is elevated while traffic itself is rising.",
+      "severity": "medium",
+      "priority": "investigate",
+      "materiality": {
+        "absolute_delta_requests": null,
+        "absolute_delta_pageviews": null,
+        "percent_delta": -0.25
+      },
+      "persistence": [
+        "7d"
+      ],
+      "finding_ids": [
+        "cloudflare.example.com.7d.cache-rate.issue"
+      ],
+      "corroborating_signals": [
+        "cache rate share decline"
+      ],
+      "contradictory_signals": [
+        "HTTP requests increased 40%"
+      ],
+      "confidence": "medium",
+      "recommended_action": "Inspect cache rules and bypass conditions.",
+      "verification_condition": "Confirm cache rate recovers after config change.",
+      "action_class": "config",
+      "limitations": [
+        "Fixture synthesis for UI tests only."
+      ]
+    },
+    {
+      "brief_id": "brief.example.com.measurement.gap",
+      "property_id": "example.com",
+      "category": "measurement",
+      "headline": "Measurement gaps block some comparisons",
+      "summary": "Missing dates in the daily series prevent fail-open comparisons for longer windows.",
+      "severity": "high",
+      "priority": "act_now",
+      "materiality": {
+        "absolute_delta_requests": null,
+        "absolute_delta_pageviews": null,
+        "percent_delta": null
+      },
+      "persistence": [
+        "7d",
+        "28d"
+      ],
+      "finding_ids": [
+        "cloudflare.example.com.coverage-gap"
+      ],
+      "corroborating_signals": [
+        "partial_coverage"
+      ],
+      "contradictory_signals": [],
+      "confidence": "high",
+      "recommended_action": "Determine whether dates are absent due to retention, inactivity, or acquisition failure; do not impute.",
+      "verification_condition": "Re-run acquisition and confirm missing_dates is empty.",
+      "action_class": "observe",
+      "limitations": [
+        "Absence of evidence is not a zero."
+      ]
+    },
+    {
+      "brief_id": "brief.example.com.traffic.win",
+      "property_id": "example.com",
+      "category": "traffic",
+      "headline": "HTTP requests increased on example.com",
+      "summary": "Same-source equal-window traffic increased; treat as momentum, not attribution.",
+      "severity": "medium",
+      "priority": "watch",
+      "materiality": {
+        "absolute_delta_requests": 200,
+        "absolute_delta_pageviews": null,
+        "percent_delta": 0.4
+      },
+      "persistence": [
+        "7d"
+      ],
+      "finding_ids": [
+        "cloudflare.example.com.7d.requests.movement"
+      ],
+      "corroborating_signals": [
+        "requests +40%"
+      ],
+      "contradictory_signals": [],
+      "confidence": "medium",
+      "recommended_action": "Review deployments and content changes before attributing a cause.",
+      "verification_condition": "After the next complete 7-day window, recompute the same Cloudflare comparison.",
+      "action_class": "research",
+      "limitations": []
+    },
+    {
+      "brief_id": "brief.shop.example.com.traffic.drop",
+      "property_id": "shop.example.com",
+      "category": "traffic",
+      "headline": "shop.example.com requests are declining across the window",
+      "summary": "Fixture property with sustained decline for comparative trend ranking.",
+      "severity": "high",
+      "priority": "act_now",
+      "materiality": {
+        "absolute_delta_requests": -140,
+        "absolute_delta_pageviews": null,
+        "percent_delta": -0.45
+      },
+      "persistence": [
+        "7d",
+        "28d"
+      ],
+      "finding_ids": [
+        "cloudflare.example.com.7d.requests.movement"
+      ],
+      "corroborating_signals": [
+        "half-window decline"
+      ],
+      "contradictory_signals": [],
+      "confidence": "medium",
+      "recommended_action": "Inspect routing, incidents, and content changes for shop.example.com.",
+      "verification_condition": "Confirm the next equal window does not continue the decline.",
+      "action_class": "research",
+      "limitations": [
+        "Uses shared finding id only for fixture wiring."
+      ]
+    }
+  ],
+  "estate_brief": {
+    "status": "attention_required",
+    "top_changes": [
+      "shop.example.com requests declining across the active window",
+      "example.com cache rate deteriorated"
+    ],
+    "top_wins": [
+      "example.com HTTP requests increased 40% week-over-week"
+    ],
+    "measurement_limitations": [
+      "example.com has missing dates that block some comparisons"
+    ],
+    "top_actions": [
+      "Resolve measurement gaps on example.com before trusting long-window deltas",
+      "Inspect cache rules on example.com",
+      "Investigate shop.example.com traffic decline"
+    ],
+    "properties_to_inspect": [
+      "shop.example.com",
+      "example.com"
+    ]
+  },
+  "property_health": [
+    {
+      "property_id": "example.com",
+      "traffic": "rising",
+      "delivery": "degraded",
+      "threats": "normal",
+      "measurement": "partial",
+      "overall": "investigate",
+      "notes": "Traffic up; cache and coverage need attention."
+    },
+    {
+      "property_id": "shop.example.com",
+      "traffic": "declining",
+      "delivery": "unknown",
+      "threats": "unknown",
+      "measurement": "complete",
+      "overall": "act_now",
+      "notes": "Sustained request decline in fixture series."
+    }
   ]
 }
