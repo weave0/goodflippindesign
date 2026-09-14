@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Metric, WindowPayload } from "../gold/types";
+import type { Gold12Topology, Metric, WindowPayload } from "../gold/types";
 import type { Filters } from "../gold/url-state";
 import { filterMetrics, overviewMetrics, selectSite } from "../gold/select";
 import { MetricGrid } from "../components/MetricCard";
@@ -22,6 +22,11 @@ import {
   rankedBriefs,
   rankedTrendChanges,
 } from "../insights/select";
+import {
+  countHiddenOperatorProperties,
+  filterOperatorPropertyIds,
+  isOperatorProperty,
+} from "../insights/operator-properties";
 import { Section } from "./common";
 
 function statusTone(status: string): "ok" | "watch" | "action" | "blocked" {
@@ -101,6 +106,7 @@ export function OverviewView({
   filters,
   insights,
   insightsError,
+  topology = null,
   onOpen,
   onSelectProperty,
 }: {
@@ -108,6 +114,7 @@ export function OverviewView({
   filters: Filters;
   insights: TrafficInsightDocument | null;
   insightsError: string | null;
+  topology?: Gold12Topology | null;
   onOpen: (metric: Metric) => void;
   onSelectProperty: (propertyId: string) => void;
 }) {
@@ -134,7 +141,27 @@ export function OverviewView({
     [insights, siteDomain],
   );
   const actions = useMemo(() => prioritizedActions(insights, siteDomain), [insights, siteDomain]);
-  const health = useMemo(() => propertyHealthRows(insights, siteDomain), [insights, siteDomain]);
+  const operatorCtx = useMemo(
+    () => ({
+      insights,
+      sites: payload.sites,
+      topology,
+    }),
+    [insights, payload.sites, topology],
+  );
+  const allHealth = useMemo(() => propertyHealthRows(insights, siteDomain), [insights, siteDomain]);
+  const health = useMemo(
+    () => allHealth.filter((row) => isOperatorProperty(row.property_id, operatorCtx)),
+    [allHealth, operatorCtx],
+  );
+  const hiddenHealthCount = useMemo(
+    () =>
+      countHiddenOperatorProperties(
+        allHealth.map((row) => row.property_id),
+        operatorCtx,
+      ),
+    [allHealth, operatorCtx],
+  );
   const trendRows = useMemo(
     () => rankedTrendChanges(insights, payload, trendMetric, siteDomain, 8),
     [insights, payload, trendMetric, siteDomain],
@@ -145,8 +172,9 @@ export function OverviewView({
       ...trendRows.map((r) => r.property_id),
       ...health.map((h) => h.property_id),
     ];
-    return ids.filter((id, idx, arr) => arr.indexOf(id) === idx);
-  }, [trendRows, health]);
+    const unique = ids.filter((id, idx, arr) => arr.indexOf(id) === idx);
+    return filterOperatorPropertyIds(unique, operatorCtx);
+  }, [trendRows, health, operatorCtx]);
 
   useEffect(() => {
     if (focusProperty && siteDomain && focusProperty !== siteDomain) {
@@ -477,6 +505,11 @@ export function OverviewView({
                 ))}
               </tbody>
             </table>
+            {hiddenHealthCount > 0 ? (
+              <p className="section-note" role="status">
+                {hiddenHealthCount} topology-only row{hiddenHealthCount === 1 ? "" : "s"} hidden; see Sites &amp; content.
+              </p>
+            ) : null}
           </div>
         )}
       </Section>
