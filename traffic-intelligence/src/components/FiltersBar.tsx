@@ -1,6 +1,9 @@
-import type { GoldContract, WindowPayload } from "../gold/types";
+import { useEffect, useMemo } from "react";
+import type { GoldContract, SiteRecord, WindowPayload } from "../gold/types";
 import { windowIsAvailable } from "../gold/select";
 import type { Filters } from "../gold/url-state";
+import { filterOperatorSites, isOperatorProperty } from "../insights/operator-properties";
+import type { TrafficInsightDocument } from "../insights/types";
 
 const RANGE_PRESETS = [
   { id: "7d", label: "7 days" },
@@ -46,12 +49,59 @@ export function FiltersBar({
   payload,
   filters,
   onChange,
+  insights = null,
 }: {
   gold: GoldContract;
   payload: WindowPayload;
   filters: Filters;
   onChange: (patch: Partial<Filters>) => void;
+  insights?: TrafficInsightDocument | null;
 }) {
+  const operatorCtx = useMemo(
+    () => ({
+      insights,
+      sites: payload.sites,
+      topology: gold.topology ?? null,
+    }),
+    [insights, payload.sites, gold.topology],
+  );
+  const operatorSites = useMemo(() => {
+    const base = filterOperatorSites(payload.sites, operatorCtx);
+    // Preserve insight-only operator selections (property_id not present as a Gold site id).
+    if (
+      filters.site !== "all" &&
+      isOperatorProperty(filters.site, operatorCtx) &&
+      !base.some((site) => site.id === filters.site || site.domain.toLowerCase() === filters.site.toLowerCase())
+    ) {
+      const synthetic: SiteRecord = {
+        id: filters.site,
+        domain: filters.site,
+        name: filters.site,
+        metrics: [],
+        sourceCoverage: [],
+        measurementHealth: "unknown_coverage",
+        measurementHealthNote: "Insight property selection (not a Gold topology site id).",
+      };
+      return [...base, synthetic];
+    }
+    return base;
+  }, [payload.sites, operatorCtx, filters.site]);
+
+  const siteSelectionHidden =
+    filters.site !== "all" && !isOperatorProperty(filters.site, operatorCtx);
+
+  useEffect(() => {
+    if (siteSelectionHidden) {
+      onChange({ site: "all" });
+    }
+  }, [siteSelectionHidden, onChange]);
+
+  const siteSelectValue = siteSelectionHidden
+    ? "all"
+    : operatorSites.some((site) => site.id === filters.site)
+      ? filters.site
+      : (operatorSites.find((site) => site.domain.toLowerCase() === filters.site.toLowerCase())?.id ?? "all");
+
   const windows = Object.keys(gold.windows);
   const showAdvanced = ["laboratory", "health", "technology"].includes(filters.view);
   const activeWindowId = payload.window.id;
@@ -118,9 +168,12 @@ export function FiltersBar({
 
       <label className="filter">
         <span>Property</span>
-        <select value={filters.site} onChange={(e) => onChange({ site: e.target.value })}>
+        <select
+          value={siteSelectValue}
+          onChange={(e) => onChange({ site: e.target.value })}
+        >
           <option value="all">All properties</option>
-          {payload.sites.map((site) => (
+          {operatorSites.map((site) => (
             <option key={site.id} value={site.id}>
               {site.domain}
             </option>

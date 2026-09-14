@@ -236,7 +236,7 @@ export function App() {
               <p className="lede">{copy.lede}</p>
             </div>
           </div>
-          <FiltersBar gold={gold} payload={payload} filters={filters} onChange={patchFilters} />
+          <FiltersBar gold={gold} payload={payload} filters={filters} onChange={patchFilters} insights={insights} />
         </header>
 
         <main id="main" className="main">
@@ -246,6 +246,7 @@ export function App() {
               filters={filters}
               insights={insights}
               insightsError={insightsError}
+              topology={gold.topology ?? null}
               onOpen={setEvidence}
               onSelectProperty={(propertyId) => {
                 const mapped =
