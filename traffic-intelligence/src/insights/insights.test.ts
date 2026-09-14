@@ -131,7 +131,7 @@ describe("governed traffic insights", () => {
   });
 
   it("rejects briefs with corroborating_signals / contradictory_signals wrong types (fail closed)", () => {
-    const baseBrief = (fixtureRaw.briefs as Record<string, unknown>[])[0]!;
+    const baseBrief = (fixtureRaw.briefs as unknown as Record<string, unknown>[])[0]!;
     expect(() =>
       assertTrafficInsights({
         ...fixtureRaw,
@@ -159,7 +159,7 @@ describe("governed traffic insights", () => {
   });
 
   it("rejects actions with malformed evidence_refs / finding_ids (fail closed)", () => {
-    const baseAction = (fixtureRaw.actions as Record<string, unknown>[])[0]!;
+    const baseAction = (fixtureRaw.actions as unknown as Record<string, unknown>[])[0]!;
     expect(() =>
       assertTrafficInsights({
         ...fixtureRaw,
@@ -175,7 +175,7 @@ describe("governed traffic insights", () => {
   });
 
   it("rejects available trend rows with missing/NaN/string percent_delta; accepts well-formed rows", () => {
-    const baseRow = (fixtureRaw.trend_comparisons as Record<string, unknown>[]).find(
+    const baseRow = (fixtureRaw.trend_comparisons as unknown as Record<string, unknown>[]).find(
       (row) => row.available === true,
     )!;
     expect(baseRow).toBeTruthy();
