@@ -130,6 +130,106 @@ describe("governed traffic insights", () => {
     ).toThrow(/trend_comparisons\[0\]/);
   });
 
+  it("rejects briefs with corroborating_signals / contradictory_signals wrong types (fail closed)", () => {
+    const baseBrief = (fixtureRaw.briefs as Record<string, unknown>[])[0]!;
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        briefs: [{ ...baseBrief, corroborating_signals: "not-an-array" }],
+      }),
+    ).toThrow(/corroborating_signals/);
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        briefs: [{ ...baseBrief, corroborating_signals: { signal: "x" } }],
+      }),
+    ).toThrow(/corroborating_signals/);
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        briefs: [{ ...baseBrief, contradictory_signals: "malformed" }],
+      }),
+    ).toThrow(/contradictory_signals/);
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        briefs: [{ ...baseBrief, contradictory_signals: [1, 2] }],
+      }),
+    ).toThrow(/contradictory_signals/);
+  });
+
+  it("rejects actions with malformed evidence_refs / finding_ids (fail closed)", () => {
+    const baseAction = (fixtureRaw.actions as Record<string, unknown>[])[0]!;
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        actions: [{ ...baseAction, evidence_refs: "snapshot" }],
+      }),
+    ).toThrow(/evidence_refs/);
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        actions: [{ ...baseAction, finding_ids: "single-id" }],
+      }),
+    ).toThrow(/finding_ids/);
+  });
+
+  it("rejects available trend rows with missing/NaN/string percent_delta; accepts well-formed rows", () => {
+    const baseRow = (fixtureRaw.trend_comparisons as Record<string, unknown>[]).find(
+      (row) => row.available === true,
+    )!;
+    expect(baseRow).toBeTruthy();
+
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        trend_comparisons: [{ ...baseRow, percent_delta: undefined }],
+      }),
+    ).toThrow(/percent_delta/);
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        trend_comparisons: [{ ...baseRow, percent_delta: Number.NaN }],
+      }),
+    ).toThrow(/percent_delta/);
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        trend_comparisons: [{ ...baseRow, percent_delta: "0.1" }],
+      }),
+    ).toThrow(/percent_delta/);
+
+    // Well-formed: finite number
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        trend_comparisons: [{ ...baseRow, percent_delta: 0.139 }],
+      }),
+    ).not.toThrow();
+    // Well-formed: explicit null (allowed when available)
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        trend_comparisons: [{ ...baseRow, percent_delta: null }],
+      }),
+    ).not.toThrow();
+    // Unavailable must not expose numeric percent_delta
+    const unavailable = {
+      ...baseRow,
+      available: false,
+      absolute_delta: null,
+      percent_delta: null,
+      coverage_state: "insufficient_coverage",
+    };
+    expect(() => assertTrafficInsights({ ...fixtureRaw, trend_comparisons: [unavailable] })).not.toThrow();
+    expect(() =>
+      assertTrafficInsights({
+        ...fixtureRaw,
+        trend_comparisons: [{ ...unavailable, percent_delta: 0.5 }],
+      }),
+    ).toThrow(/percent_delta/);
+  });
+
   it("partitions producer findings into mission-control queues", () => {
     const queues = partitionFindings(fixture, null);
     expect(queues.needsAttention.map((f) => f.kind).sort()).toEqual(["issue", "issue"]);

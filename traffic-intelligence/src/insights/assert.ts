@@ -68,6 +68,13 @@ function assertBrief(value: unknown, index: number): void {
   if (!isString(value.confidence)) throw new Error(`Insights briefs[${index}].confidence must be a string`);
   if (!isString(value.action_class)) throw new Error(`Insights briefs[${index}].action_class must be a string`);
   if (!isStringArray(value.limitations ?? [])) throw new Error(`Insights briefs[${index}].limitations must be a string array`);
+  // OverviewView always .join()s these — reject wrong types fail-closed (match limitations).
+  if (!isStringArray(value.corroborating_signals ?? [])) {
+    throw new Error(`Insights briefs[${index}].corroborating_signals must be a string array`);
+  }
+  if (!isStringArray(value.contradictory_signals ?? [])) {
+    throw new Error(`Insights briefs[${index}].contradictory_signals must be a string array`);
+  }
 }
 
 function assertPropertyHealth(value: unknown, index: number): void {
@@ -91,6 +98,10 @@ function assertTrendComparison(value: unknown, index: number): void {
   }
   if (!isBoolean(value.available)) throw new Error(`Insights trend_comparisons[${index}].available must be boolean`);
   if (!isString(value.coverage_state)) throw new Error(`Insights trend_comparisons[${index}].coverage_state must be a string`);
+  if (!isString(value.source)) throw new Error(`Insights trend_comparisons[${index}].source must be a string`);
+  if (value.exactness !== undefined && !isString(value.exactness)) {
+    throw new Error(`Insights trend_comparisons[${index}].exactness must be a string`);
+  }
   if (!isStringArray(value.missing_dates ?? [])) {
     throw new Error(`Insights trend_comparisons[${index}].missing_dates must be a string array`);
   }
@@ -99,6 +110,13 @@ function assertTrendComparison(value: unknown, index: number): void {
       if (!isNumber(value[key])) {
         throw new Error(`Insights trend_comparisons[${index}].${key} required when available=true`);
       }
+    }
+    // Overview renders (percent_delta * 100).toFixed(1) when available && !== null.
+    // isNumber already rejects NaN; still require key present as null | finite number.
+    if (value.percent_delta !== null && !isNumber(value.percent_delta)) {
+      throw new Error(
+        `Insights trend_comparisons[${index}].percent_delta must be null or a finite number when available=true`,
+      );
     }
   } else if (value.absolute_delta != null || value.percent_delta != null) {
     // Allow nulls only; reject invented numerics on unavailable rows.
@@ -119,6 +137,13 @@ function assertAction(value: unknown, index: number): void {
     throw new Error(`Insights actions[${index}].severity is invalid`);
   }
   if (!isString(value.recommended_action)) throw new Error(`Insights actions[${index}].recommended_action must be a string`);
+  // OverviewView joins evidence_refs and finding_ids — reject wrong types fail-closed.
+  if (!isStringArray(value.evidence_refs ?? [])) {
+    throw new Error(`Insights actions[${index}].evidence_refs must be a string array`);
+  }
+  if (!isStringArray(value.finding_ids ?? [])) {
+    throw new Error(`Insights actions[${index}].finding_ids must be a string array`);
+  }
   // priority_class preferred; legacy categorical priority string also accepted at assert time.
   const cls = value.priority_class ?? (typeof value.priority === "string" ? value.priority : undefined);
   if (cls !== undefined) assertPriority(cls, `actions[${index}].priority_class`);
