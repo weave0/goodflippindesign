@@ -78,6 +78,9 @@ jobs:
               throw new Error("insight fixture 1.1 requires estate_brief");
             }
             if (!Array.isArray(insights.property_health)) throw new Error("insight fixture 1.1 requires property_health");
+            if (!Array.isArray(insights.trend_comparisons)) {
+              throw new Error("insight fixture 1.1 requires trend_comparisons");
+            }
           }
           console.log("fixture_validation=true");
           NODE
@@ -198,8 +201,8 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: ${{ env.PRODUCER_REPOSITORY }}
-          # Pin to TI-007 producer insight schema 1.1 until weave0/gfd-traffic-intelligence#5 is on main.
-          ref: 177b203c47dbe7e5aab2845d79b3a77fcf556e31
+          # Pin to repaired producer TI-007 head (trend_comparisons + priority_class) until #5 is on main.
+          ref: e5aceacd3353d7f7d5400a9db29e07adc815f093
           token: ${{ secrets.GFD_TI_READ_TOKEN }}
           path: .producer
           persist-credentials: false
@@ -311,6 +314,8 @@ jobs:
               raise SystemExit("production insight sidecar 1.1 requires estate_brief")
           if not doc.property_health:
               raise SystemExit("production insight sidecar 1.1 requires property_health")
+          if not isinstance(doc.trend_comparisons, list):
+              raise SystemExit("production insight sidecar 1.1 requires trend_comparisons list")
           gold_ts = datetime.fromisoformat(gold["generated_at"].replace("Z", "+00:00"))
           if doc.source_gold_generated_at != gold_ts:
               raise SystemExit("insight sidecar source_gold_generated_at does not match live Gold")
@@ -399,6 +404,7 @@ jobs:
           if (!Array.isArray(insights.briefs) || insights.briefs.length === 0) throw new Error("built insights must include briefs");
           if (!insights.estate_brief || typeof insights.estate_brief !== "object") throw new Error("built insights must include estate_brief");
           if (!Array.isArray(insights.property_health)) throw new Error("built insights must include property_health");
+          if (!Array.isArray(insights.trend_comparisons)) throw new Error("built insights must include trend_comparisons");
           console.log("live_build_gold_and_insights_verified=true");
           NODE
 

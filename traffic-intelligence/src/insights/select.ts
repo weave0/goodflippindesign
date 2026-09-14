@@ -9,6 +9,7 @@ import type {
   OperationalBrief,
   PropertyHealth,
   TrafficInsightDocument,
+  TrendComparison,
 } from "./types";
 
 const TREND_METRICS = new Set(["requests", "pageViews", "cachedRequests", "threats"]);
@@ -24,9 +25,9 @@ const SEVERITY_RANK: Record<string, number> = {
 export const PRIORITY_RANK: Record<InsightPriority, number> = {
   act_now: 0,
   investigate: 1,
-  watch: 2,
-  healthy: 3,
-  measurement_blocked: 4,
+  measurement_blocked: 2,
+  watch: 3,
+  healthy: 4,
 };
 
 export const DEFAULT_BRIEF_PRIORITIES: InsightPriority[] = ["act_now", "investigate"];
@@ -40,12 +41,11 @@ export function priorityRank(value: InsightPriority | number | string): number {
   return PRIORITY_RANK[value as InsightPriority] ?? 99;
 }
 
+/** Exact property match only — no suffix leak between example.com and shop.example.com. */
 export function matchesProperty(propertyId: string | null | undefined, siteDomain: string | null): boolean {
   if (!siteDomain) return true;
   if (!propertyId) return false;
-  const a = propertyId.toLowerCase();
-  const b = siteDomain.toLowerCase();
-  return a === b || a.endsWith(`.${b}`) || b.endsWith(`.${a}`);
+  return propertyId.toLowerCase() === siteDomain.toLowerCase();
 }
 
 export function partitionFindings(
@@ -67,6 +67,10 @@ export function partitionFindings(
   return { needsAttention, momentum, gaps };
 }
 
+function actionPriorityClass(action: InsightAction): InsightPriority {
+  return action.priority_class;
+}
+
 export function prioritizedActions(
   insights: TrafficInsightDocument | null,
   siteDomain: string | null,
@@ -76,7 +80,7 @@ export function prioritizedActions(
     .filter((action) => matchesProperty(action.property_id, siteDomain))
     .sort(
       (a, b) =>
-        priorityRank(a.priority) - priorityRank(b.priority) ||
+        priorityRank(actionPriorityClass(a)) - priorityRank(actionPriorityClass(b)) ||
         severityRank(a.severity) - severityRank(b.severity) ||
         a.action_id.localeCompare(b.action_id),
     );
@@ -101,16 +105,20 @@ export function rankedBriefs(
     );
 }
 
+/**
+ * Tie-break only. Never add absolute_delta_requests + pageviews (different units).
+ * Prefer requests absolute, else pageviews absolute, else percent — separate dimensions.
+ */
 export function materialityScore(brief: OperationalBrief): number {
   const m = brief.materiality ?? {
     absolute_delta_requests: null,
     absolute_delta_pageviews: null,
     percent_delta: null,
   };
-  const absReq = Math.abs(m.absolute_delta_requests ?? 0);
-  const absPv = Math.abs(m.absolute_delta_pageviews ?? 0);
-  const pct = Math.abs(m.percent_delta ?? 0) * 1000;
-  return absReq + absPv + pct;
+  if (m.absolute_delta_requests != null) return Math.abs(m.absolute_delta_requests);
+  if (m.absolute_delta_pageviews != null) return Math.abs(m.absolute_delta_pageviews);
+  if (m.percent_delta != null) return Math.abs(m.percent_delta);
+  return 0;
 }
 
 export function estateBriefOf(insights: TrafficInsightDocument | null): EstateBrief | null {
@@ -147,6 +155,7 @@ function windowDayCount(payload: WindowPayload): number | null {
   return Math.round((end - start) / (24 * 60 * 60 * 1000));
 }
 
+/** Visualization-only: slice observation points for charts. Never use for analytical deltas. */
 function sliceSeriesToWindow(series: InsightDailySeries, payload: WindowPayload): InsightDailySeries | null {
   const days = windowDayCount(payload);
   if (!days || !series.points.length) return null;
@@ -203,7 +212,7 @@ export function insightTrendSeries(
     .map((series) => toNamedSeries(series, metricName));
 }
 
-/** Focused single-property chart (avoids 25 independent mini-series). */
+/** Focused single-property chart (avoids 25 independent mini-series). Exact property match. */
 export function focusedTrendSeries(
   insights: TrafficInsightDocument | null,
   payload: WindowPayload,
@@ -217,17 +226,58 @@ export function focusedTrendSeries(
 export interface TrendChangeRow {
   property_id: string;
   metric_name: string;
+  period_days: 7 | 28 | 90;
   label: string;
   unit: string;
-  current_value: number;
+  current_value: number | null;
   prior_value: number | null;
   absolute_delta: number | null;
   percent_delta: number | null;
-  missing_dates: number;
+  available: boolean;
+  unavailable_reason: string | null;
+  missing_dates: string[];
+  coverage_state: string;
   source: "cloudflare";
+  exactness: string;
 }
 
-/** Ranked comparative change table from producer series (equal half-window vs prior half). */
+function unitForMetric(metricName: string): string {
+  switch (metricName) {
+    case "pageViews":
+      return "page views";
+    case "cachedRequests":
+      return "cached requests";
+    case "threats":
+      return "threats";
+    default:
+      return "requests";
+  }
+}
+
+function toTrendChangeRow(row: TrendComparison): TrendChangeRow {
+  return {
+    property_id: row.property_id,
+    metric_name: row.metric_name,
+    period_days: row.period_days,
+    label: `${row.metric_name} · ${row.period_days}d`,
+    unit: unitForMetric(row.metric_name),
+    current_value: row.available ? row.current_value : null,
+    prior_value: row.available ? row.baseline_value : null,
+    absolute_delta: row.available ? row.absolute_delta : null,
+    percent_delta: row.available ? row.percent_delta : null,
+    available: row.available,
+    unavailable_reason: row.unavailable_reason,
+    missing_dates: row.missing_dates ?? [],
+    coverage_state: row.coverage_state,
+    source: "cloudflare",
+    exactness: row.exactness,
+  };
+}
+
+/**
+ * Ranked comparative change table from producer trend_comparisons only.
+ * Never half-splits browser series or invents windows from last observed points.
+ */
 export function rankedTrendChanges(
   insights: TrafficInsightDocument | null,
   payload: WindowPayload,
@@ -235,45 +285,24 @@ export function rankedTrendChanges(
   siteDomain: string | null,
   limit = 8,
 ): TrendChangeRow[] {
-  if (!insights || !TREND_METRICS.has(metricName)) return [];
-  const rows: TrendChangeRow[] = [];
-  for (const series of insights.series) {
-    if (series.metric_name !== metricName) continue;
-    if (!matchesProperty(series.property_id, siteDomain)) continue;
-    const sliced = sliceSeriesToWindow(series, payload);
-    if (!sliced || sliced.points.length < 4) continue;
-    const mid = Math.floor(sliced.points.length / 2);
-    const priorPts = sliced.points.slice(0, mid);
-    const currentPts = sliced.points.slice(mid);
-    const prior = priorPts.reduce((sum, p) => sum + p.value, 0);
-    const current = currentPts.reduce((sum, p) => sum + p.value, 0);
-    const absolute = current - prior;
-    const percent = prior !== 0 ? absolute / prior : null;
-    const missingInWindow = sliced.missing_dates.filter((d) => {
-      const t = Date.parse(d);
-      const start = Date.parse(sliced.points[0]!.date);
-      const end = Date.parse(sliced.points[sliced.points.length - 1]!.date);
-      return Number.isFinite(t) && t >= start && t <= end;
-    }).length;
-    rows.push({
-      property_id: series.property_id,
-      metric_name: series.metric_name,
-      label: series.label,
-      unit: series.unit,
-      current_value: current,
-      prior_value: prior,
-      absolute_delta: absolute,
-      percent_delta: percent,
-      missing_dates: missingInWindow + (sliced.coverage.state !== "full_coverage" ? 1 : 0),
-      source: "cloudflare",
-    });
-  }
+  if (!insights?.trend_comparisons?.length || !TREND_METRICS.has(metricName)) return [];
+  const periodDays = windowDayCount(payload);
+  if (periodDays !== 7 && periodDays !== 28 && periodDays !== 90) return [];
+
+  const rows = insights.trend_comparisons
+    .filter((row) => row.metric_name === metricName)
+    .filter((row) => row.period_days === periodDays)
+    .filter((row) => matchesProperty(row.property_id, siteDomain))
+    .map(toTrendChangeRow);
+
   return rows
-    .sort(
-      (a, b) =>
+    .sort((a, b) => {
+      if (a.available !== b.available) return a.available ? -1 : 1;
+      return (
         Math.abs(b.absolute_delta ?? 0) - Math.abs(a.absolute_delta ?? 0) ||
-        a.property_id.localeCompare(b.property_id),
-    )
+        a.property_id.localeCompare(b.property_id)
+      );
+    })
     .slice(0, limit);
 }
 

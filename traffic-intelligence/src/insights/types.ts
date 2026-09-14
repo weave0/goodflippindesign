@@ -84,13 +84,15 @@ export interface InsightFinding {
   created_at: string;
 }
 
-/** Schema 1.1 action: categorical priority, optional brief clustering. */
+/** Schema 1.1 action: numeric priority 1–5 + categorical priority_class for ranking. */
 export interface InsightAction {
   action_id: string;
   finding_id: string;
   finding_ids: string[];
   brief_id: string | null;
-  priority: InsightPriority;
+  /** Additive 1.0 numeric urgency (1–5). Prefer priority_class for ranking/UI. */
+  priority: number;
+  priority_class: InsightPriority;
   severity: InsightSeverity;
   scope: "property" | "source";
   property_id: string | null;
@@ -115,6 +117,7 @@ export interface OperationalBrief {
   summary: string;
   severity: InsightSeverity;
   priority: InsightPriority;
+  direction: "up" | "down" | "flat" | "unknown";
   materiality: InsightMateriality;
   persistence: InsightPersistenceWindow[];
   finding_ids: string[];
@@ -146,6 +149,29 @@ export interface PropertyHealth {
   notes: string;
 }
 
+export interface TrendComparison {
+  property_id: string;
+  metric_name: string;
+  period_days: 7 | 28 | 90;
+  current_start: string | null;
+  current_end: string | null;
+  baseline_start: string | null;
+  baseline_end: string | null;
+  current_value: number | null;
+  baseline_value: number | null;
+  absolute_delta: number | null;
+  percent_delta: number | null;
+  available: boolean;
+  unavailable_reason: string | null;
+  source: "cloudflare";
+  exactness: string;
+  coverage_state: string;
+  expected_date_count: number | null;
+  missing_dates: string[];
+  source_metric_ids: string[];
+  source_snapshots: string[];
+}
+
 export interface TrafficInsightDocument {
   schema_version: "1.0.0" | "1.1.0";
   contract_name: "gfd-traffic-insights";
@@ -159,5 +185,7 @@ export interface TrafficInsightDocument {
   briefs: OperationalBrief[];
   estate_brief: EstateBrief | null;
   property_health: PropertyHealth[];
+  /** Producer-governed equal-window comparative rows — sole source of numeric deltas. */
+  trend_comparisons: TrendComparison[];
   limitations: string[];
 }

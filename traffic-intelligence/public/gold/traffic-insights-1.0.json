@@ -426,8 +426,8 @@
       "scope": "property",
       "property_id": "example.com",
       "source_id": "cloudflare",
-      "title": "HTTP requests increased 40.0%",
-      "explanation": "HTTP requests for example.com increased from 500 in the prior 7 complete UTC days to 700 in the latest 7.",
+      "title": "HTTP requests increased 13.9%",
+      "explanation": "HTTP requests for example.com increased from 1057 in the prior 7 complete UTC days to 1204 in the latest 7.",
       "why_it_matters": "Same-source equal-window change for prioritization; does not identify people or explain cause.",
       "recommended_action": "Review deployments and content changes before attributing a cause.",
       "verification_condition": "After the next complete 7-day window, recompute the same Cloudflare comparison.",
@@ -448,10 +448,10 @@
         "current_end": "2026-09-09",
         "baseline_start": "2026-08-27",
         "baseline_end": "2026-09-02",
-        "current_value": 700,
-        "baseline_value": 500,
-        "absolute_delta": 200,
-        "percent_delta": 0.4,
+        "current_value": 1204,
+        "baseline_value": 1057,
+        "absolute_delta": 147,
+        "percent_delta": 0.1390728476821192,
         "percentage_point_delta": null
       },
       "limitations": [],
@@ -506,13 +506,51 @@
       "comparison": null,
       "limitations": [],
       "created_at": "2026-09-10T01:00:00Z"
+    },
+    {
+      "finding_id": "cloudflare.shop.example.com.7d.requests.movement",
+      "kind": "issue",
+      "severity": "high",
+      "scope": "property",
+      "property_id": "shop.example.com",
+      "source_id": "cloudflare",
+      "title": "HTTP requests decreased 25.9%",
+      "explanation": "HTTP requests for shop.example.com decreased from 945 in the prior 7 complete UTC days to 700 in the latest 7.",
+      "why_it_matters": "Same-source equal-window decline for prioritization; does not identify people or explain cause.",
+      "recommended_action": "Inspect routing, incidents, and content changes for shop.example.com.",
+      "verification_condition": "Confirm the next equal window does not continue the decline.",
+      "action_class": "research",
+      "source_metric_ids": [
+        "cloudflare.shop.example.com.7d.requests"
+      ],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ],
+      "evidence_state": "measured",
+      "exactness": "unknown",
+      "coverage_state": "full_coverage",
+      "comparison": {
+        "metric_name": "requests",
+        "unit": "requests",
+        "current_start": "2026-09-03",
+        "current_end": "2026-09-09",
+        "baseline_start": "2026-08-27",
+        "baseline_end": "2026-09-02",
+        "current_value": 700,
+        "baseline_value": 945,
+        "absolute_delta": -245,
+        "percent_delta": -0.25925925925925924,
+        "percentage_point_delta": null
+      },
+      "limitations": [],
+      "created_at": "2026-09-10T01:00:00Z"
     }
   ],
   "actions": [
     {
       "action_id": "action.cloudflare.example.com.7d.cache-rate.issue",
       "finding_id": "cloudflare.example.com.7d.cache-rate.issue",
-      "priority": "investigate",
+      "priority": 2,
       "severity": "medium",
       "scope": "property",
       "property_id": "example.com",
@@ -526,12 +564,13 @@
       "finding_ids": [
         "cloudflare.example.com.7d.cache-rate.issue"
       ],
-      "brief_id": "brief.example.com.delivery.cache"
+      "brief_id": "brief.example.com.delivery.cache",
+      "priority_class": "investigate"
     },
     {
       "action_id": "action.cloudflare.example.com.coverage-gap",
       "finding_id": "cloudflare.example.com.coverage-gap",
-      "priority": "act_now",
+      "priority": 1,
       "severity": "high",
       "scope": "property",
       "property_id": "example.com",
@@ -545,16 +584,17 @@
       "finding_ids": [
         "cloudflare.example.com.coverage-gap"
       ],
-      "brief_id": "brief.example.com.measurement.gap"
+      "brief_id": "brief.example.com.measurement.gap",
+      "priority_class": "act_now"
     },
     {
       "action_id": "action.cloudflare.shop.example.com.traffic.drop",
-      "finding_id": "cloudflare.example.com.7d.requests.movement",
+      "finding_id": "cloudflare.shop.example.com.7d.requests.movement",
       "finding_ids": [
-        "cloudflare.example.com.7d.requests.movement"
+        "cloudflare.shop.example.com.7d.requests.movement"
       ],
       "brief_id": "brief.shop.example.com.traffic.drop",
-      "priority": "act_now",
+      "priority": 1,
       "severity": "high",
       "scope": "property",
       "property_id": "shop.example.com",
@@ -564,13 +604,15 @@
       "evidence_refs": [
         "snapshot-fixture"
       ],
-      "status": "new"
+      "status": "new",
+      "priority_class": "act_now"
     }
   ],
   "limitations": [
     "Fixture insight document for consumer tests only. Not live GFD traffic.",
     "Do not sum daily zone-native uniques into a period-unique or human total.",
-    "Schema 1.1 briefs/estate_brief/property_health are fixture synthesis for TI-007 UI."
+    "Schema 1.1 briefs/estate_brief/property_health/trend_comparisons are fixture synthesis for TI-007 UI.",
+    "Numeric comparative deltas come only from trend_comparisons; browser must not half-split series."
   ],
   "briefs": [
     {
@@ -604,7 +646,8 @@
       "action_class": "config",
       "limitations": [
         "Fixture synthesis for UI tests only."
-      ]
+      ],
+      "direction": "down"
     },
     {
       "brief_id": "brief.example.com.measurement.gap",
@@ -636,7 +679,8 @@
       "action_class": "observe",
       "limitations": [
         "Absence of evidence is not a zero."
-      ]
+      ],
+      "direction": "unknown"
     },
     {
       "brief_id": "brief.example.com.traffic.win",
@@ -647,9 +691,9 @@
       "severity": "medium",
       "priority": "watch",
       "materiality": {
-        "absolute_delta_requests": 200,
+        "absolute_delta_requests": 147,
         "absolute_delta_pageviews": null,
-        "percent_delta": 0.4
+        "percent_delta": 0.1390728476821192
       },
       "persistence": [
         "7d"
@@ -665,7 +709,8 @@
       "recommended_action": "Review deployments and content changes before attributing a cause.",
       "verification_condition": "After the next complete 7-day window, recompute the same Cloudflare comparison.",
       "action_class": "research",
-      "limitations": []
+      "limitations": [],
+      "direction": "up"
     },
     {
       "brief_id": "brief.shop.example.com.traffic.drop",
@@ -676,16 +721,16 @@
       "severity": "high",
       "priority": "act_now",
       "materiality": {
-        "absolute_delta_requests": -140,
+        "absolute_delta_requests": -245,
         "absolute_delta_pageviews": null,
-        "percent_delta": -0.45
+        "percent_delta": -0.25925925925925924
       },
       "persistence": [
         "7d",
         "28d"
       ],
       "finding_ids": [
-        "cloudflare.example.com.7d.requests.movement"
+        "cloudflare.shop.example.com.7d.requests.movement"
       ],
       "corroborating_signals": [
         "half-window decline"
@@ -696,8 +741,9 @@
       "verification_condition": "Confirm the next equal window does not continue the decline.",
       "action_class": "research",
       "limitations": [
-        "Uses shared finding id only for fixture wiring."
-      ]
+        "Fixture synthesis for UI tests only."
+      ],
+      "direction": "down"
     }
   ],
   "estate_brief": {
@@ -740,6 +786,220 @@
       "measurement": "complete",
       "overall": "act_now",
       "notes": "Sustained request decline in fixture series."
+    }
+  ],
+  "trend_comparisons": [
+    {
+      "property_id": "example.com",
+      "metric_name": "requests",
+      "period_days": 7,
+      "current_start": "2026-09-03",
+      "current_end": "2026-09-09",
+      "baseline_start": "2026-08-27",
+      "baseline_end": "2026-09-02",
+      "current_value": 1204,
+      "baseline_value": 1057,
+      "absolute_delta": 147,
+      "percent_delta": 0.1390728476821192,
+      "available": true,
+      "unavailable_reason": null,
+      "source": "cloudflare",
+      "exactness": "unknown",
+      "coverage_state": "full_coverage",
+      "expected_date_count": 7,
+      "missing_dates": [],
+      "source_metric_ids": [
+        "cloudflare.example.com.7d.requests"
+      ],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ]
+    },
+    {
+      "property_id": "shop.example.com",
+      "metric_name": "requests",
+      "period_days": 7,
+      "current_start": "2026-09-03",
+      "current_end": "2026-09-09",
+      "baseline_start": "2026-08-27",
+      "baseline_end": "2026-09-02",
+      "current_value": 700,
+      "baseline_value": 945,
+      "absolute_delta": -245,
+      "percent_delta": -0.25925925925925924,
+      "available": true,
+      "unavailable_reason": null,
+      "source": "cloudflare",
+      "exactness": "unknown",
+      "coverage_state": "full_coverage",
+      "expected_date_count": 7,
+      "missing_dates": [],
+      "source_metric_ids": [
+        "cloudflare.shop.example.com.7d.requests"
+      ],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ]
+    },
+    {
+      "property_id": "example.com",
+      "metric_name": "pageViews",
+      "period_days": 7,
+      "current_start": "2026-09-03",
+      "current_end": "2026-09-09",
+      "baseline_start": "2026-08-27",
+      "baseline_end": "2026-09-02",
+      "current_value": 600,
+      "baseline_value": 527,
+      "absolute_delta": 73,
+      "percent_delta": 0.13851992409867173,
+      "available": true,
+      "unavailable_reason": null,
+      "source": "cloudflare",
+      "exactness": "unknown",
+      "coverage_state": "full_coverage",
+      "expected_date_count": 7,
+      "missing_dates": [],
+      "source_metric_ids": [
+        "cloudflare.example.com.7d.pageViews"
+      ],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ]
+    },
+    {
+      "property_id": "example.com",
+      "metric_name": "requests",
+      "period_days": 28,
+      "current_start": "2026-08-13",
+      "current_end": "2026-09-09",
+      "baseline_start": "2026-07-16",
+      "baseline_end": "2026-08-12",
+      "current_value": 2800,
+      "baseline_value": 2400,
+      "absolute_delta": 400,
+      "percent_delta": 0.16666666666666666,
+      "available": true,
+      "unavailable_reason": null,
+      "source": "cloudflare",
+      "exactness": "unknown",
+      "coverage_state": "full_coverage",
+      "expected_date_count": 28,
+      "missing_dates": [],
+      "source_metric_ids": [
+        "cloudflare.example.com.28d.requests"
+      ],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ]
+    },
+    {
+      "property_id": "shop.example.com",
+      "metric_name": "requests",
+      "period_days": 28,
+      "current_start": "2026-08-13",
+      "current_end": "2026-09-09",
+      "baseline_start": "2026-07-16",
+      "baseline_end": "2026-08-12",
+      "current_value": 2100,
+      "baseline_value": 3200,
+      "absolute_delta": -1100,
+      "percent_delta": -0.34375,
+      "available": true,
+      "unavailable_reason": null,
+      "source": "cloudflare",
+      "exactness": "unknown",
+      "coverage_state": "full_coverage",
+      "expected_date_count": 28,
+      "missing_dates": [],
+      "source_metric_ids": [
+        "cloudflare.shop.example.com.28d.requests"
+      ],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ]
+    },
+    {
+      "property_id": "example.com",
+      "metric_name": "requests",
+      "period_days": 90,
+      "current_start": null,
+      "current_end": null,
+      "baseline_start": null,
+      "baseline_end": null,
+      "current_value": null,
+      "baseline_value": null,
+      "absolute_delta": null,
+      "percent_delta": null,
+      "available": false,
+      "unavailable_reason": "Insufficient coverage for equal 90-day windows.",
+      "source": "cloudflare",
+      "exactness": "unknown",
+      "coverage_state": "insufficient_coverage",
+      "expected_date_count": 90,
+      "missing_dates": [
+        "2026-06-15"
+      ],
+      "source_metric_ids": [
+        "cloudflare.example.com.90d.requests"
+      ],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ]
+    },
+    {
+      "property_id": "shop.example.com",
+      "metric_name": "requests",
+      "period_days": 90,
+      "current_start": null,
+      "current_end": null,
+      "baseline_start": null,
+      "baseline_end": null,
+      "current_value": null,
+      "baseline_value": null,
+      "absolute_delta": null,
+      "percent_delta": null,
+      "available": false,
+      "unavailable_reason": "Insufficient coverage for equal 90-day windows.",
+      "source": "cloudflare",
+      "exactness": "unknown",
+      "coverage_state": "insufficient_coverage",
+      "expected_date_count": 90,
+      "missing_dates": [],
+      "source_metric_ids": [
+        "cloudflare.shop.example.com.90d.requests"
+      ],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ]
+    },
+    {
+      "property_id": "example.com",
+      "metric_name": "threats",
+      "period_days": 7,
+      "current_start": null,
+      "current_end": null,
+      "baseline_start": null,
+      "baseline_end": null,
+      "current_value": null,
+      "baseline_value": null,
+      "absolute_delta": null,
+      "percent_delta": null,
+      "available": false,
+      "unavailable_reason": "Missing date in current window; comparison not certified.",
+      "source": "cloudflare",
+      "exactness": "not_applicable",
+      "coverage_state": "partial_coverage",
+      "expected_date_count": 7,
+      "missing_dates": [
+        "2026-09-05"
+      ],
+      "source_metric_ids": [
+        "cloudflare.example.com.7d.threats"
+      ],
+      "source_snapshots": [
+        "snapshot-fixture"
+      ]
     }
   ]
 }

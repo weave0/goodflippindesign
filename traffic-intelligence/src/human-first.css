@@ -571,16 +571,21 @@
   border: 0;
   background: transparent;
   color: var(--edge);
-  padding: 0;
+  padding: 0 10px;
   font: inherit;
   cursor: pointer;
   text-align: left;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .chip-button {
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 4px 10px;
+  padding: 8px 14px;
   background: var(--bg-panel);
   color: var(--text);
 }

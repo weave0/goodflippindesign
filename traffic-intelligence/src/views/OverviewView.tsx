@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Metric, WindowPayload } from "../gold/types";
 import type { Filters } from "../gold/url-state";
 import { filterMetrics, overviewMetrics, selectSite } from "../gold/select";
@@ -25,13 +25,19 @@ import {
 import { Section } from "./common";
 
 function statusTone(status: string): "ok" | "watch" | "action" | "blocked" {
+  if (
+    status === "measurement_blocked" ||
+    status === "insufficient_evidence" ||
+    status === "blocked"
+  ) {
+    return "blocked";
+  }
   if (status === "stable" || status === "healthy" || status === "rising" || status === "normal" || status === "complete") {
     return "ok";
   }
-  if (status === "degraded" || status === "act_now" || status === "declining" || status === "elevated" || status === "blocked") {
+  if (status === "degraded" || status === "act_now" || status === "declining" || status === "elevated") {
     return "action";
   }
-  if (status === "measurement_blocked" || status === "insufficient_evidence") return "blocked";
   return "watch";
 }
 
@@ -134,8 +140,28 @@ export function OverviewView({
     [insights, payload, trendMetric, siteDomain],
   );
 
+  const focusCandidates = useMemo(() => {
+    const ids = [
+      ...trendRows.map((r) => r.property_id),
+      ...health.map((h) => h.property_id),
+    ];
+    return ids.filter((id, idx, arr) => arr.indexOf(id) === idx);
+  }, [trendRows, health]);
+
+  useEffect(() => {
+    if (focusProperty && siteDomain && focusProperty !== siteDomain) {
+      setFocusProperty(null);
+      return;
+    }
+    if (focusProperty && focusCandidates.length && !focusCandidates.includes(focusProperty)) {
+      setFocusProperty(null);
+    }
+  }, [focusProperty, siteDomain, focusCandidates]);
+
   const chartProperty =
-    focusProperty ||
+    (focusProperty && (!focusCandidates.length || focusCandidates.includes(focusProperty))
+      ? focusProperty
+      : null) ||
     siteDomain ||
     trendRows[0]?.property_id ||
     health[0]?.property_id ||
@@ -297,7 +323,7 @@ export function OverviewView({
 
       <Section
         title="Comparative trends"
-        note={`${metricOption?.label ?? trendMetric} · Cloudflare edge · units labeled · missingness shown. Ranked change table + focused chart — not 25 mini-series.`}
+        note={`${metricOption?.label ?? trendMetric} · Cloudflare edge · producer trend_comparisons only (no browser half-splits). Unavailable windows show coverage reasons, never invented deltas.`}
       >
         <div className="trend-controls" role="group" aria-label="Trend metric">
           {TREND_METRIC_OPTIONS.map((option) => (
@@ -321,16 +347,16 @@ export function OverviewView({
                 <thead>
                   <tr>
                     <th>Property</th>
-                    <th>Current half</th>
-                    <th>Prior half</th>
+                    <th>Current window</th>
+                    <th>Baseline</th>
                     <th>Δ</th>
-                    <th>Missingness</th>
+                    <th>Coverage</th>
                   </tr>
                 </thead>
                 <tbody>
                   {trendRows.length ? (
                     trendRows.map((row) => (
-                      <tr key={`${row.property_id}:${row.metric_name}`}>
+                      <tr key={`${row.property_id}:${row.metric_name}:${row.period_days}`}>
                         <td>
                           <button type="button" className="linkish" onClick={() => openProperty(row.property_id)}>
                             {row.property_id}
@@ -339,25 +365,42 @@ export function OverviewView({
                             {row.label} · {row.unit} · {row.source}
                           </div>
                         </td>
-                        <td className="num">{row.current_value.toLocaleString("en-US")}</td>
                         <td className="num">
-                          {row.prior_value === null ? "—" : row.prior_value.toLocaleString("en-US")}
+                          {row.available && row.current_value !== null
+                            ? row.current_value.toLocaleString("en-US")
+                            : "—"}
                         </td>
                         <td className="num">
-                          {row.absolute_delta === null
-                            ? "—"
-                            : `${row.absolute_delta >= 0 ? "+" : ""}${row.absolute_delta.toLocaleString("en-US")}`}
-                          {row.percent_delta !== null
+                          {row.available && row.prior_value !== null
+                            ? row.prior_value.toLocaleString("en-US")
+                            : "—"}
+                        </td>
+                        <td className="num">
+                          {!row.available
+                            ? "unavailable"
+                            : row.absolute_delta === null
+                              ? "—"
+                              : `${row.absolute_delta >= 0 ? "+" : ""}${row.absolute_delta.toLocaleString("en-US")}`}
+                          {row.available && row.percent_delta !== null
                             ? ` (${row.percent_delta >= 0 ? "+" : ""}${(row.percent_delta * 100).toFixed(1)}%)`
                             : ""}
+                          {!row.available && row.unavailable_reason ? (
+                            <div className="section-note">{row.unavailable_reason}</div>
+                          ) : null}
                         </td>
-                        <td className="num">{row.missing_dates ? `${row.missing_dates} gap signal` : "none"}</td>
+                        <td className="num">
+                          {row.available
+                            ? row.missing_dates.length
+                              ? `${row.missing_dates.length} missing`
+                              : row.coverage_state
+                            : row.coverage_state || "insufficient coverage"}
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
                       <td colSpan={5}>
-                        <p className="empty">No comparable series for this metric/filter.</p>
+                        <p className="empty">No producer trend_comparisons for this metric/period/filter.</p>
                       </td>
                     </tr>
                   )}
@@ -374,12 +417,7 @@ export function OverviewView({
                     onChange={(event) => setFocusProperty(event.target.value || null)}
                   >
                     <option value="">Select…</option>
-                    {(trendRows.length
-                      ? trendRows.map((r) => r.property_id)
-                      : health.map((h) => h.property_id)
-                    )
-                      .filter((id, idx, arr) => arr.indexOf(id) === idx)
-                      .map((id) => (
+                    {focusCandidates.map((id) => (
                         <option key={id} value={id}>
                           {id}
                         </option>
@@ -463,8 +501,8 @@ export function OverviewView({
                   {visibleActions.map((action) => (
                     <tr key={action.action_id}>
                       <td>
-                        <span className={`priority-pill priority-pill--${action.priority}`}>
-                          {priorityLabel(action.priority)}
+                        <span className={`priority-pill priority-pill--${action.priority_class}`}>
+                          {priorityLabel(action.priority_class)}
                         </span>
                         <div className="section-note">{action.severity}</div>
                       </td>

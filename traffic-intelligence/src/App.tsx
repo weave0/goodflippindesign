@@ -247,7 +247,15 @@ export function App() {
               insights={insights}
               insightsError={insightsError}
               onOpen={setEvidence}
-              onSelectProperty={(propertyId) => patchFilters({ site: propertyId, view: "overview" })}
+              onSelectProperty={(propertyId) => {
+                const mapped =
+                  payload.sites.find((site) => site.id === propertyId)?.id ??
+                  payload.sites.find(
+                    (site) => site.domain.toLowerCase() === propertyId.toLowerCase(),
+                  )?.id ??
+                  propertyId;
+                patchFilters({ site: mapped, view: "overview" });
+              }}
             />
           )}
           {filters.view === "humans" && <HumansView payload={payload} filters={filters} onOpen={setEvidence} />}
