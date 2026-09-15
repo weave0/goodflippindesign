@@ -17,6 +17,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: traffic-intelligence-production-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'main' }}
@@ -58,6 +59,7 @@ jobs:
           test -f traffic-intelligence/dist/index.html
           test -f traffic-intelligence/dist/gold/canonical-gold-m1.2.json
           test -f traffic-intelligence/dist/gold/traffic-insights-1.0.json
+          test -f traffic-intelligence/dist/gold/ti-work-queue-1.0.json
           test -f traffic-intelligence/dist/_worker.js
           test -f traffic-intelligence/dist/_headers
           test -f traffic-intelligence/dist/robots.txt
@@ -82,6 +84,10 @@ jobs:
               throw new Error("insight fixture 1.1 requires trend_comparisons");
             }
           }
+          const workQueue = JSON.parse(fs.readFileSync("traffic-intelligence/dist/gold/ti-work-queue-1.0.json", "utf8"));
+          if (workQueue.contract_name !== "gfd-ti-work-queue") throw new Error("work queue contract mismatch");
+          if (workQueue.schema_version !== "1.0.0") throw new Error("work queue schema_version mismatch");
+          if (workQueue.fixture !== true) throw new Error("PR validation must use the committed work-queue fixture");
           console.log("fixture_validation=true");
           NODE
 
@@ -372,14 +378,27 @@ jobs:
           npm --prefix traffic-intelligence run lint
           npm --prefix traffic-intelligence test
 
-      - name: Inject validated live Gold and insights into ephemeral build
+      - name: Sync GitHub work queue from validated live insights
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TI_WORK_REPO: weave0/goodflippindesign
+        run: |
+          set -euo pipefail
+          npm --prefix traffic-intelligence run sync:work -- \
+            --insights "$RUNNER_TEMP/gfdti-live/traffic-insights-1.1.production.json" \
+            --out "$RUNNER_TEMP/gfdti-live/ti-work-queue-1.0.json"
+          echo "ti_work_sync=true"
+
+      - name: Inject validated live Gold, insights, and work queue into ephemeral build
         shell: bash
         run: |
           install -m 600 "$RUNNER_TEMP/gfdti-live/canonical-gold-1.2.production.json" traffic-intelligence/public/gold/canonical-gold-m1.2.json
           # Keep consumer URL stable (admin wall + load path) while shipping schema 1.1 contents.
           install -m 600 "$RUNNER_TEMP/gfdti-live/traffic-insights-1.1.production.json" traffic-intelligence/public/gold/traffic-insights-1.0.json
+          install -m 600 "$RUNNER_TEMP/gfdti-live/ti-work-queue-1.0.json" traffic-intelligence/public/gold/ti-work-queue-1.0.json
           echo "live_gold_injected_ephemerally=true"
           echo "live_insights_injected_ephemerally=true"
+          echo "live_work_queue_injected_ephemerally=true"
           echo "live_insights_filename_decision=serve_1.1_contents_at_traffic-insights-1.0.json"
 
       - name: Build and verify live artifact
@@ -389,6 +408,7 @@ jobs:
           test -f traffic-intelligence/dist/index.html
           test -f traffic-intelligence/dist/gold/canonical-gold-m1.2.json
           test -f traffic-intelligence/dist/gold/traffic-insights-1.0.json
+          test -f traffic-intelligence/dist/gold/ti-work-queue-1.0.json
           test -f traffic-intelligence/dist/_worker.js
           test -f traffic-intelligence/dist/_headers
           test -f traffic-intelligence/dist/robots.txt
@@ -396,6 +416,7 @@ jobs:
           const fs = require("node:fs");
           const gold = JSON.parse(fs.readFileSync("traffic-intelligence/dist/gold/canonical-gold-m1.2.json", "utf8"));
           const insights = JSON.parse(fs.readFileSync("traffic-intelligence/dist/gold/traffic-insights-1.0.json", "utf8"));
+          const workQueue = JSON.parse(fs.readFileSync("traffic-intelligence/dist/gold/ti-work-queue-1.0.json", "utf8"));
           if (gold.fixture !== false) throw new Error("built Gold must be live fixture=false");
           if (insights.fixture !== false) throw new Error("built insights must be live fixture=false");
           if (insights.contract_name !== "gfd-traffic-insights") throw new Error("built insights contract mismatch");
@@ -405,6 +426,9 @@ jobs:
           if (!insights.estate_brief || typeof insights.estate_brief !== "object") throw new Error("built insights must include estate_brief");
           if (!Array.isArray(insights.property_health)) throw new Error("built insights must include property_health");
           if (!Array.isArray(insights.trend_comparisons)) throw new Error("built insights must include trend_comparisons");
+          if (workQueue.contract_name !== "gfd-ti-work-queue") throw new Error("built work queue contract mismatch");
+          if (workQueue.schema_version !== "1.0.0") throw new Error("built work queue schema mismatch");
+          if (workQueue.fixture !== false) throw new Error("built work queue must be live fixture=false");
           console.log("live_build_gold_and_insights_verified=true");
           NODE
 
@@ -551,7 +575,9 @@ jobs:
           test "$gold_status" = "401" || test "$gold_status" = "403"
           insights_status="$(curl -sS -o /tmp/pages-insights-denied.txt -w '%{http_code}' "$pages_url/gold/traffic-insights-1.0.json")"
           test "$insights_status" = "401" || test "$insights_status" = "403"
-          echo "Verified production Gold + insights admin wall: $pages_url"
+          work_status="$(curl -sS -o /tmp/pages-work-denied.txt -w '%{http_code}' "$pages_url/gold/ti-work-queue-1.0.json")"
+          test "$work_status" = "401" || test "$work_status" = "403"
+          echo "Verified production Gold + insights + work-queue admin wall: $pages_url"
 
       - name: Verify custom-domain activation
         shell: bash

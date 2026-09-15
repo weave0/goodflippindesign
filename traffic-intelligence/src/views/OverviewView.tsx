@@ -27,6 +27,9 @@ import {
   filterOperatorPropertyIds,
   isOperatorProperty,
 } from "../insights/operator-properties";
+import type { WorkQueueDocument } from "../work/types";
+import { WorkActionControls, workItemFor } from "../work/WorkActionControls";
+import { eligibilityFor } from "../work/eligibility";
 import { Section } from "./common";
 
 function statusTone(status: string): "ok" | "watch" | "action" | "blocked" {
@@ -106,6 +109,7 @@ export function OverviewView({
   filters,
   insights,
   insightsError,
+  workQueue = null,
   topology = null,
   onOpen,
   onSelectProperty,
@@ -114,6 +118,7 @@ export function OverviewView({
   filters: Filters;
   insights: TrafficInsightDocument | null;
   insightsError: string | null;
+  workQueue?: WorkQueueDocument | null;
   topology?: Gold12Topology | null;
   onOpen: (metric: Metric) => void;
   onSelectProperty: (propertyId: string) => void;
@@ -141,6 +146,25 @@ export function OverviewView({
     [insights, siteDomain],
   );
   const actions = useMemo(() => prioritizedActions(insights, siteDomain), [insights, siteDomain]);
+  const recommendActions = useMemo(() => {
+    if (!insights) return [];
+    return actions.filter((action) => {
+      const brief =
+        (action.brief_id ? insights.briefs.find((b) => b.brief_id === action.brief_id) : null) ??
+        insights.briefs.find((b) =>
+          b.finding_ids.some((id) => (action.finding_ids ?? []).includes(id) || id === action.finding_id),
+        ) ??
+        null;
+      const findings = (action.finding_ids?.length ? action.finding_ids : [action.finding_id])
+        .map((id) => insights.findings.find((f) => f.finding_id === id))
+        .filter((f): f is NonNullable<typeof f> => Boolean(f));
+      const item = workItemFor(workQueue, action.action_id);
+      const eligibility =
+        item?.eligibility ??
+        eligibilityFor({ action, brief, finding: findings[0] ?? null, findings });
+      return eligibility === "recommend";
+    });
+  }, [actions, insights, workQueue]);
   const operatorCtx = useMemo(
     () => ({
       insights,
@@ -514,11 +538,23 @@ export function OverviewView({
         )}
       </Section>
 
-      <Section title="Action queue" note="Deduped producer actions (one per brief). Top 5–8 by priority; expand for the rest.">
+      <Section
+        title="Action queue"
+        note="Deduped producer actions with GitHub work links (central queue: weave0/goodflippindesign). Top 5–8 by priority; expand for the rest."
+      >
         {insightsError || !insights ? (
           <p className="empty">Unavailable until the insight sidecar loads.</p>
         ) : actions.length ? (
           <>
+            {!workQueue ? (
+              <p className="section-note" role="status">
+                Work queue sidecar missing — showing actions without issue links (fail soft).
+              </p>
+            ) : workQueue.fixture ? (
+              <p className="section-note" role="status">
+                Work queue is fixture data — issue links appear after deploy-time sync.
+              </p>
+            ) : null}
             <div className="table-wrap">
               <table className="data">
                 <thead>
@@ -527,32 +563,60 @@ export function OverviewView({
                     <th>Property</th>
                     <th>Class</th>
                     <th>Action</th>
-                    <th>Verify</th>
+                    <th>Work</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {visibleActions.map((action) => (
-                    <tr key={action.action_id}>
-                      <td>
-                        <span className={`priority-pill priority-pill--${action.priority_class}`}>
-                          {priorityLabel(action.priority_class)}
-                        </span>
-                        <div className="section-note">{action.severity}</div>
-                      </td>
-                      <td>
-                        {action.property_id ? (
-                          <button type="button" className="linkish" onClick={() => openProperty(action.property_id!)}>
-                            {action.property_id}
-                          </button>
-                        ) : (
-                          action.scope
-                        )}
-                      </td>
-                      <td>{action.action_class}</td>
-                      <td>{action.recommended_action}</td>
-                      <td>{action.verification_condition}</td>
-                    </tr>
-                  ))}
+                  {visibleActions.map((action) => {
+                    const brief =
+                      (action.brief_id ? insights.briefs.find((b) => b.brief_id === action.brief_id) : null) ??
+                      insights.briefs.find((b) =>
+                        b.finding_ids.some(
+                          (id) => (action.finding_ids ?? []).includes(id) || id === action.finding_id,
+                        ),
+                      ) ??
+                      null;
+                    const findings = (action.finding_ids?.length ? action.finding_ids : [action.finding_id])
+                      .map((id) => insights.findings.find((f) => f.finding_id === id))
+                      .filter((f): f is NonNullable<typeof f> => Boolean(f));
+                    const item = workItemFor(workQueue, action.action_id);
+                    return (
+                      <tr key={action.action_id}>
+                        <td>
+                          <span className={`priority-pill priority-pill--${action.priority_class}`}>
+                            {priorityLabel(action.priority_class)}
+                          </span>
+                          <div className="section-note">{action.severity}</div>
+                        </td>
+                        <td>
+                          {action.property_id ? (
+                            <button type="button" className="linkish" onClick={() => openProperty(action.property_id!)}>
+                              {action.property_id}
+                            </button>
+                          ) : (
+                            action.scope
+                          )}
+                        </td>
+                        <td>{action.action_class}</td>
+                        <td>
+                          {action.recommended_action}
+                          <div className="section-note">Verify: {action.verification_condition}</div>
+                        </td>
+                        <td>
+                          <WorkActionControls
+                            action={action}
+                            brief={brief}
+                            findings={findings}
+                            insights={insights}
+                            workItem={item}
+                            onViewEvidence={(propertyId) => {
+                              if (propertyId) openProperty(propertyId);
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -569,6 +633,45 @@ export function OverviewView({
           </>
         ) : (
           <p className="empty">No governed actions for this filter.</p>
+        )}
+      </Section>
+
+      <Section
+        title="Recommendations"
+        note="Weaker findings stay recommendations until promoted into the GitHub work queue."
+      >
+        {insightsError || !insights ? (
+          <p className="empty">Unavailable until the insight sidecar loads.</p>
+        ) : recommendActions.length ? (
+          <ul className="plain-list recommend-list">
+            {recommendActions.map((action) => {
+              const brief =
+                (action.brief_id ? insights.briefs.find((b) => b.brief_id === action.brief_id) : null) ??
+                null;
+              const findings = (action.finding_ids?.length ? action.finding_ids : [action.finding_id])
+                .map((id) => insights.findings.find((f) => f.finding_id === id))
+                .filter((f): f is NonNullable<typeof f> => Boolean(f));
+              const item = workItemFor(workQueue, action.action_id);
+              return (
+                <li key={`rec-${action.action_id}`}>
+                  <strong>{priorityLabel(action.priority_class)}</strong>
+                  {action.property_id ? ` · ${action.property_id}` : ""} — {action.recommended_action}
+                  <WorkActionControls
+                    action={action}
+                    brief={brief}
+                    findings={findings}
+                    insights={insights}
+                    workItem={item}
+                    onViewEvidence={(propertyId) => {
+                      if (propertyId) openProperty(propertyId);
+                    }}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="empty">No recommendation-only actions for this filter.</p>
         )}
       </Section>
 

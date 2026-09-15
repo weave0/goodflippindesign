@@ -1,0 +1,161 @@
+name: Traffic Intelligence - Work sync
+
+# Standalone sync for workflow_dispatch + daily verification freshness.
+# Primary path: deploy-time sync in traffic-intelligence-deploy.yml injects the live queue.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Plan only (no GitHub issue mutations)"
+        required: false
+        type: boolean
+        default: false
+      use_fixture:
+        description: "Force committed fixture insights (no producer acquire)"
+        required: false
+        type: boolean
+        default: false
+  schedule:
+    - cron: "0 13 * * *"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ti-work-sync
+  cancel-in-progress: false
+
+env:
+  PRODUCER_REPOSITORY: weave0/gfd-traffic-intelligence
+  # Keep in lockstep with traffic-intelligence-deploy.yml producer pin.
+  PRODUCER_REF: e5aceacd3353d7f7d5400a9db29e07adc815f093
+  TI_WORK_REPO: weave0/goodflippindesign
+  CF_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
+
+jobs:
+  sync:
+    name: Sync TI work queue
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout consumer
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: traffic-intelligence/package-lock.json
+
+      - name: Install Traffic Intelligence
+        run: npm ci --prefix traffic-intelligence --no-audit
+
+      - name: Decide insights source
+        id: source
+        shell: bash
+        env:
+          PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
+          ANALYTICS_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
+          USE_FIXTURE: ${{ github.event.inputs.use_fixture }}
+        run: |
+          set -euo pipefail
+          if [ "${USE_FIXTURE:-false}" = "true" ]; then
+            echo "mode=fixture" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -n "${PRODUCER_READ_TOKEN:-}" ] && [ -n "${ANALYTICS_TOKEN:-}" ]; then
+            echo "mode=live" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Producer credentials unavailable — fixture dry-run"
+          echo "mode=fixture" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout private Gold producer
+        if: steps.source.outputs.mode == 'live'
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.PRODUCER_REPOSITORY }}
+          ref: ${{ env.PRODUCER_REF }}
+          token: ${{ secrets.GFD_TI_READ_TOKEN }}
+          path: .producer
+          persist-credentials: false
+
+      - name: Setup Python
+        if: steps.source.outputs.mode == 'live'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: .producer/requirements-lock.txt
+
+      - name: Install certified producer
+        if: steps.source.outputs.mode == 'live'
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          source = Path(".producer/requirements-lock.txt")
+          target = Path(os.environ["RUNNER_TEMP"]) / "gfdti-requirements.txt"
+          target.write_text(
+              "".join(line for line in source.read_text(encoding="utf-8").splitlines(True) if not line.startswith("pytest==")),
+              encoding="utf-8",
+          )
+          PY
+          python -m pip install -r "$RUNNER_TEMP/gfdti-requirements.txt"
+          python -m pip install --no-deps ./.producer
+
+      - name: Acquire current Cloudflare Gold + insights
+        if: steps.source.outputs.mode == 'live'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
+        run: python -m gfdti.cli --acquire-cloudflare-gold --output-dir "$RUNNER_TEMP/gfdti-live"
+
+      - name: Resolve insights path
+        id: insights
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.source.outputs.mode }}" = "live" ]; then
+            preferred="$RUNNER_TEMP/gfdti-live/traffic-insights-1.1.production.json"
+            legacy="$RUNNER_TEMP/gfdti-live/traffic-insights-1.0.production.json"
+            if [ -f "$preferred" ]; then
+              echo "path=$preferred" >> "$GITHUB_OUTPUT"
+            elif [ -f "$legacy" ]; then
+              echo "path=$legacy" >> "$GITHUB_OUTPUT"
+            else
+              echo "Live insights missing after acquire" >&2
+              exit 1
+            fi
+          else
+            echo "path=traffic-intelligence/public/gold/traffic-insights-1.0.json" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run work sync
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TI_WORK_REPO: ${{ env.TI_WORK_REPO }}
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/ti-work-queue-1.0.json"
+          EXTRA=()
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ] || [ "${{ steps.source.outputs.mode }}" = "fixture" ]; then
+            EXTRA+=(--dry-run)
+          fi
+          npm --prefix traffic-intelligence run sync:work -- \
+            --insights "${{ steps.insights.outputs.path }}" \
+            --out "$OUT" \
+            "${EXTRA[@]}"
+          mkdir -p traffic-intelligence/public/gold
+          cp "$OUT" traffic-intelligence/public/gold/ti-work-queue-1.0.json
+          echo "work_sync_complete mode=${{ steps.source.outputs.mode }}"
+
+      - name: Upload work queue artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ti-work-queue-1.0
+          path: traffic-intelligence/public/gold/ti-work-queue-1.0.json
+          if-no-files-found: error

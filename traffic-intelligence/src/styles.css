@@ -794,3 +794,25 @@ table.data tr:hover td {
     animation: none !important;
   }
 }
+
+
+/* TI-009 work funnel controls */
+.work-action-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 14rem;
+}
+.work-action-controls__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+a.work-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+.recommend-list > li {
+  margin-bottom: 0.85rem;
+}

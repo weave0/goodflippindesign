@@ -17,13 +17,21 @@ const insights = JSON.parse(
   readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../public/gold/traffic-insights-1.0.json"), "utf8"),
 );
 
+const workQueue = JSON.parse(
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../public/gold/ti-work-queue-1.0.json"), "utf8"),
+);
+
 beforeEach(() => {
   window.history.replaceState({}, "", "/");
   vi.stubGlobal(
     "fetch",
     vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-      const body = url.includes("traffic-insights") ? insights : fixture;
+      const body = url.includes("ti-work-queue")
+        ? workQueue
+        : url.includes("traffic-insights")
+          ? insights
+          : fixture;
       return {
         ok: true,
         json: async () => body,

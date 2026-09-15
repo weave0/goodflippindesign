@@ -2,7 +2,7 @@
   "name": "@gfd/traffic-intelligence",
   "private": true,
   "version": "0.1.0",
-  "description": "GFD Traffic Intelligence observatory — Gold-layer consumer UI. Reads static Gold JSON only.",
+  "description": "GFD Traffic Intelligence observatory \u2014 Gold-layer consumer UI. Reads static Gold JSON only.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,8 @@
     "test": "vitest run --reporter=dot",
     "check:canonical": "node ./scripts/check-canonical-gold-sync.mjs",
     "test:watch": "vitest",
-    "emit-fixture": "node ./fixtures/build-fixture.mjs"
+    "emit-fixture": "node ./fixtures/build-fixture.mjs",
+    "sync:work": "vite-node ./scripts/ti-work-sync.ts"
   },
   "engines": {
     "node": ">=24.0.0"
