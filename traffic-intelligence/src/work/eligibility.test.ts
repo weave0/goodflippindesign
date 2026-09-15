@@ -55,7 +55,7 @@ function finding(partial: Partial<InsightFinding> & Pick<InsightFinding, "kind">
     scope: "property",
     property_id: "example.com",
     source_id: "cloudflare",
-    title: "Title",
+    title: "Cloudflare daily series has missing dates",
     explanation: "Expl",
     why_it_matters: "Why",
     recommended_action: "Do",
@@ -73,7 +73,7 @@ function finding(partial: Partial<InsightFinding> & Pick<InsightFinding, "kind">
   };
 }
 
-describe("eligibilityFor", () => {
+describe("eligibilityFor (TI-010)", () => {
   it("auto for act_now regardless of confidence", () => {
     expect(
       eligibilityFor({
@@ -98,7 +98,29 @@ describe("eligibilityFor", () => {
     ).toBe("auto");
   });
 
-  it("auto for data_gap with high confidence or measurement_blocked", () => {
+  it("does not auto low-confidence measurement_blocked floods (per-property)", () => {
+    expect(
+      eligibilityFor({
+        action: action({ action_id: "a4", priority_class: "measurement_blocked" }),
+        brief: brief({ confidence: "low", category: "measurement" }),
+        finding: finding({ kind: "data_gap", finding_id: "cloudflare.example.com.90d.daily-coverage-gap" }),
+      }),
+    ).toBe("recommend");
+  });
+
+  it("auto low-confidence measurement_blocked only as consolidated primary", () => {
+    expect(
+      eligibilityFor({
+        action: action({ action_id: "a4", priority_class: "measurement_blocked" }),
+        brief: brief({ confidence: "low", category: "measurement" }),
+        finding: finding({ kind: "data_gap", finding_id: "cloudflare.example.com.90d.daily-coverage-gap" }),
+        consolidatedPrimary: true,
+        groupSize: 9,
+      }),
+    ).toBe("auto");
+  });
+
+  it("auto for high-confidence data_gap", () => {
     expect(
       eligibilityFor({
         action: action({ action_id: "a3", priority_class: "watch" }),
@@ -106,16 +128,9 @@ describe("eligibilityFor", () => {
         finding: finding({ kind: "data_gap" }),
       }),
     ).toBe("auto");
-    expect(
-      eligibilityFor({
-        action: action({ action_id: "a4", priority_class: "measurement_blocked" }),
-        brief: brief({ confidence: "low" }),
-        finding: finding({ kind: "data_gap" }),
-      }),
-    ).toBe("auto");
   });
 
-  it("auto for material healthy/watch opportunity with high confidence", () => {
+  it("prefers recommend for material healthy opportunity (review, not repair)", () => {
     expect(
       eligibilityFor({
         action: action({ action_id: "a5", priority_class: "healthy" }),
@@ -124,7 +139,25 @@ describe("eligibilityFor", () => {
           materiality: {
             absolute_delta_requests: 1500,
             absolute_delta_pageviews: null,
-            percent_delta: null,
+            percent_delta: 0.799,
+          },
+        }),
+        finding: finding({ kind: "opportunity" }),
+      }),
+    ).toBe("recommend");
+  });
+
+  it("auto healthy opportunity only when explicitly flagged", () => {
+    expect(
+      eligibilityFor({
+        action: action({ action_id: "a5b", priority_class: "healthy" }),
+        brief: brief({
+          confidence: "high",
+          limitations: ["ti-auto-opportunity=true"],
+          materiality: {
+            absolute_delta_requests: 1500,
+            absolute_delta_pageviews: null,
+            percent_delta: 0.799,
           },
         }),
         finding: finding({ kind: "opportunity" }),

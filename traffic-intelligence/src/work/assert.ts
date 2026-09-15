@@ -1,10 +1,12 @@
 import {
+  IMPACT_CLASSES,
   WORK_LIFECYCLES,
   WORK_QUEUE_CONTRACT,
   WORK_QUEUE_SCHEMA_VERSION,
   type WorkLifecycle,
   type WorkQueueDocument,
   type WorkQueueItem,
+  type WorkQueueMetrics,
 } from "./types";
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -21,6 +23,29 @@ function isBoolean(value: unknown): value is boolean {
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every(isString);
+}
+
+function isNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function assertMetrics(value: unknown): asserts value is WorkQueueMetrics {
+  if (!isObject(value)) throw new Error("Work queue metrics must be an object");
+  for (const key of [
+    "planned",
+    "auto",
+    "recommend",
+    "open_issues",
+    "creates_last_sync",
+    "updates_last_sync",
+    "closes_last_sync",
+    "consolidated_groups",
+    "superseded_duplicates",
+  ] as const) {
+    if (!isNumber(value[key])) throw new Error(`Work queue metrics.${key} must be a number`);
+  }
+  if (!isObject(value.by_lifecycle)) throw new Error("Work queue metrics.by_lifecycle must be an object");
+  if (!isObject(value.by_impact_class)) throw new Error("Work queue metrics.by_impact_class must be an object");
 }
 
 function assertItem(value: unknown, key: string): asserts value is WorkQueueItem {
@@ -49,6 +74,22 @@ function assertItem(value: unknown, key: string): asserts value is WorkQueueItem
   if (value.issue_number != null && typeof value.issue_number !== "number") {
     throw new Error(`Work queue items[${key}].issue_number must be number|null`);
   }
+  if (!isNumber(value.impact_score)) {
+    throw new Error(`Work queue items[${key}].impact_score must be a number`);
+  }
+  if (!(IMPACT_CLASSES as readonly string[]).includes(value.impact_class as string)) {
+    throw new Error(`Work queue items[${key}].impact_class invalid`);
+  }
+  if (!isString(value.impact_rationale)) {
+    throw new Error(`Work queue items[${key}].impact_rationale must be a string`);
+  }
+  const role = value.group_role;
+  if (role !== "primary" && role !== "member" && role !== "standalone") {
+    throw new Error(`Work queue items[${key}].group_role must be primary|member|standalone`);
+  }
+  if (!isStringArray(value.group_member_action_ids ?? [])) {
+    throw new Error(`Work queue items[${key}].group_member_action_ids must be a string array`);
+  }
 }
 
 export function assertWorkQueue(raw: unknown): asserts raw is WorkQueueDocument {
@@ -64,6 +105,7 @@ export function assertWorkQueue(raw: unknown): asserts raw is WorkQueueDocument 
   if (!isString(raw.target_repo)) throw new Error("Work queue target_repo must be a string");
   if (!isObject(raw.items)) throw new Error("Work queue items must be an object map");
   if (!isStringArray(raw.limitations ?? [])) throw new Error("Work queue limitations must be a string array");
+  assertMetrics(raw.metrics);
   for (const [key, item] of Object.entries(raw.items)) {
     assertItem(item, key);
   }

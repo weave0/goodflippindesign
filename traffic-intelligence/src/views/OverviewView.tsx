@@ -30,6 +30,7 @@ import {
 import type { WorkQueueDocument } from "../work/types";
 import { WorkActionControls, workItemFor } from "../work/WorkActionControls";
 import { eligibilityFor } from "../work/eligibility";
+import { rankNextWork } from "../work/ranking";
 import { Section } from "./common";
 
 function statusTone(status: string): "ok" | "watch" | "action" | "blocked" {
@@ -237,6 +238,12 @@ export function OverviewView({
     [insights, dossierProperty],
   );
 
+  const nextWork = useMemo(
+    () => (workQueue?.items ? rankNextWork(workQueue.items).slice(0, 8) : []),
+    [workQueue],
+  );
+  const funnelMetrics = workQueue?.metrics ?? null;
+
   const visibleActions = showAllActions ? actions : actions.slice(0, 8);
   const schemaReady = Boolean(insights && (insights.schema_version === "1.0.0" || insights.estate_brief));
   const missingSynthesis =
@@ -307,6 +314,114 @@ export function OverviewView({
           <span>{payload.sites.length} properties in Gold topology</span>
         </aside>
       </section>
+
+      {funnelMetrics ? (
+        <Section title="Work funnel metrics" note="Additive schema 1.1.0 metrics from last sync — counts only, no invented success.">
+          <div className="estate-brief-grid" role="group" aria-label="Work funnel metrics">
+            <div className="estate-panel">
+              <h3>Queue</h3>
+              <p className="section-note">
+                planned {funnelMetrics.planned} · auto {funnelMetrics.auto} · recommend {funnelMetrics.recommend} · open
+                issues {funnelMetrics.open_issues}
+              </p>
+            </div>
+            <div className="estate-panel">
+              <h3>Last sync</h3>
+              <p className="section-note">
+                creates {funnelMetrics.creates_last_sync} · updates {funnelMetrics.updates_last_sync} · closes{" "}
+                {funnelMetrics.closes_last_sync} · consolidated {funnelMetrics.consolidated_groups} · superseded{" "}
+                {funnelMetrics.superseded_duplicates}
+              </p>
+            </div>
+            <div className="estate-panel">
+              <h3>By impact</h3>
+              <p className="section-note">
+                {Object.keys(funnelMetrics.by_impact_class).length
+                  ? Object.entries(funnelMetrics.by_impact_class)
+                      .map(([k, v]) => `${k} ${v}`)
+                      .join(" · ")
+                  : "—"}
+              </p>
+            </div>
+            <div className="estate-panel">
+              <h3>By lifecycle</h3>
+              <p className="section-note">
+                {Object.keys(funnelMetrics.by_lifecycle).length
+                  ? Object.entries(funnelMetrics.by_lifecycle)
+                      .map(([k, v]) => `${k} ${v}`)
+                      .join(" · ")
+                  : "—"}
+              </p>
+            </div>
+          </div>
+        </Section>
+      ) : null}
+
+      <Section
+        title="What should we work on next?"
+        note="Ranked by governed impact_score (desc). Actionable lifecycles only; consolidated members nest under the primary row."
+      >
+        {!workQueue ? (
+          <p className="empty">Work queue sidecar missing — ranking unavailable (fail soft).</p>
+        ) : nextWork.length === 0 ? (
+          <p className="empty">No actionable work items in the queue for this estate snapshot.</p>
+        ) : (
+          <div className="table-wrap">
+            <table className="data">
+              <thead>
+                <tr>
+                  <th>Impact</th>
+                  <th>Title / why</th>
+                  <th>Property / group</th>
+                  <th>Lifecycle</th>
+                  <th>Issue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {nextWork.map(({ item, members }) => (
+                  <tr key={item.action_id}>
+                    <td>
+                      <span className="meta-chip">
+                        {item.impact_class} · {item.impact_score}
+                      </span>
+                    </td>
+                    <td>
+                      <strong>{item.title}</strong>
+                      <div className="section-note">{item.impact_rationale}</div>
+                      {members.length ? (
+                        <div className="section-note">
+                          Members: {members.map((m) => m.property_id ?? m.action_id).join(", ")}
+                        </div>
+                      ) : null}
+                    </td>
+                    <td>
+                      {item.group_role === "primary" && item.root_cause_key ? (
+                        <span className="mono">{item.root_cause_key}</span>
+                      ) : item.property_id ? (
+                        <button type="button" className="linkish" onClick={() => openProperty(item.property_id!)}>
+                          {item.property_id}
+                        </button>
+                      ) : (
+                        item.root_cause_key ?? "estate"
+                      )}
+                    </td>
+                    <td>{item.lifecycle}</td>
+                    <td>
+                      {item.html_url ? (
+                        <a className="work-link" href={item.html_url} target="_blank" rel="noreferrer">
+                          #{item.issue_number}
+                        </a>
+                      ) : (
+                        <span className="section-note">no issue yet</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Section>
 
       <Section title="Executive estate brief" note="Producer estate_brief — not browser-invented narrative.">
         {insightsError || !insights ? (
