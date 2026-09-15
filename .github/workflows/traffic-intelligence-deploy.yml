@@ -86,7 +86,8 @@ jobs:
           }
           const workQueue = JSON.parse(fs.readFileSync("traffic-intelligence/dist/gold/ti-work-queue-1.0.json", "utf8"));
           if (workQueue.contract_name !== "gfd-ti-work-queue") throw new Error("work queue contract mismatch");
-          if (workQueue.schema_version !== "1.0.0") throw new Error("work queue schema_version mismatch");
+          if (workQueue.schema_version !== "1.1.0" && workQueue.schema_version !== "1.0.0") throw new Error(`work queue schema_version mismatch: ${workQueue.schema_version}`);
+          if (workQueue.schema_version === "1.1.0" && (!workQueue.metrics || typeof workQueue.metrics !== "object")) throw new Error("work queue 1.1 requires metrics");
           if (workQueue.fixture !== true) throw new Error("PR validation must use the committed work-queue fixture");
           console.log("fixture_validation=true");
           NODE
@@ -427,7 +428,7 @@ jobs:
           if (!Array.isArray(insights.property_health)) throw new Error("built insights must include property_health");
           if (!Array.isArray(insights.trend_comparisons)) throw new Error("built insights must include trend_comparisons");
           if (workQueue.contract_name !== "gfd-ti-work-queue") throw new Error("built work queue contract mismatch");
-          if (workQueue.schema_version !== "1.0.0") throw new Error("built work queue schema mismatch");
+          if (workQueue.schema_version !== "1.1.0" && workQueue.schema_version !== "1.0.0") throw new Error(`built work queue schema mismatch: ${workQueue.schema_version}`);
           if (workQueue.fixture !== false) throw new Error("built work queue must be live fixture=false");
           console.log("live_build_gold_and_insights_verified=true");
           NODE
