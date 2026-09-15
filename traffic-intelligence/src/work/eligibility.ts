@@ -10,6 +10,7 @@ import {
   MATERIALITY_PERCENT_DELTA_MIN,
   type WorkEligibility,
 } from "./types";
+import { isConsolidatableRootCause, rootCauseKey } from "./grouping";
 
 export interface EligibilityContext {
   action: InsightAction;
@@ -17,17 +18,28 @@ export interface EligibilityContext {
   finding?: InsightFinding | null;
   /** Optional extra findings linked via finding_ids. */
   findings?: InsightFinding[];
+  /**
+   * When true, this action is the primary of a consolidatable root-cause group.
+   * Low-confidence measurement_blocked may auto as a **single** consolidated item.
+   */
+  consolidatedPrimary?: boolean;
+  /** Member count in the root-cause group (including primary). */
+  groupSize?: number;
 }
 
 /**
  * Decide whether an action should auto-create a GitHub work item or stay a recommendation.
  *
- * Rules (v1):
+ * TI-010 rules (tightened vs TI-009):
  * 1. auto if priority_class ∈ {act_now, investigate} AND (brief.confidence === 'high' OR priority_class === 'act_now')
- * 2. OR linked finding kind ∈ {data_gap} AND (confidence high OR priority_class === measurement_blocked)
- * 3. OR opportunity/success path: priority_class ∈ {healthy, watch} AND kind ∈ {opportunity, success}
- *    AND confidence high AND materiality present with meaningful magnitude
- *    (|percent_delta| ≥ 0.1 OR |abs requests| ≥ 1000 OR |abs pageviews| ≥ 1000)
+ * 2. measurement_blocked / data_gap:
+ *    - confidence high → auto (still prefer consolidation when groupSize ≥ 2)
+ *    - confidence low/medium → recommend **unless** consolidatedPrimary && groupSize ≥ 2
+ *      (one consolidated auto issue for the flood, not per-property spam)
+ * 3. healthy / watch opportunity|success:
+ *    - prefer **recommend** as "review opportunity" (not repair), even when material
+ *    - auto only when explicitly flagged via brief limitation `ti-auto-opportunity=true`
+ *      AND confidence high AND meaningful materiality
  * 4. else recommend
  * 5. Never auto-create pure healthy with no opportunity/success signal
  */
@@ -41,24 +53,42 @@ export function eligibilityFor(ctx: EligibilityContext): WorkEligibility {
     if (pc === "act_now" || confidence === "high") return "auto";
   }
 
-  const hasDataGap = findings.some((f) => f.kind === "data_gap");
-  if (hasDataGap && (confidence === "high" || pc === "measurement_blocked")) {
-    return "auto";
+  const hasDataGap = findings.some((f) => f.kind === "data_gap") || pc === "measurement_blocked";
+  if (hasDataGap) {
+    if (confidence === "high") return "auto";
+    // Low/medium confidence measurement flood: only auto as consolidated primary.
+    if (
+      ctx.consolidatedPrimary &&
+      (ctx.groupSize ?? 0) >= 2 &&
+      isConsolidatableRootCause(
+        rootCauseKey({
+          action,
+          brief,
+          finding: findings[0] ?? null,
+          findings,
+        }),
+      )
+    ) {
+      return "auto";
+    }
+    return "recommend";
   }
 
   const hasOpportunitySignal = findings.some(
     (f) => f.kind === "opportunity" || f.kind === "success",
   );
-  if (
-    (pc === "healthy" || pc === "watch") &&
-    hasOpportunitySignal &&
-    confidence === "high" &&
-    hasMeaningfulMateriality(brief?.materiality ?? null)
-  ) {
-    return "auto";
+  if ((pc === "healthy" || pc === "watch") && hasOpportunitySignal) {
+    const flagged = (brief?.limitations ?? []).some((l) => /ti-auto-opportunity\s*=\s*true/i.test(l));
+    if (
+      flagged &&
+      confidence === "high" &&
+      hasMeaningfulMateriality(brief?.materiality ?? null)
+    ) {
+      return "auto";
+    }
+    return "recommend";
   }
 
-  // Explicit: pure healthy without opportunity/success stays recommend (already covered).
   return "recommend";
 }
 
@@ -94,7 +124,6 @@ function resolveConfidence(
   findings: InsightFinding[],
 ): string | null {
   if (brief?.confidence) return brief.confidence;
-  // Findings do not carry confidence in the contract; treat missing as null (not high).
   void findings;
   return null;
 }

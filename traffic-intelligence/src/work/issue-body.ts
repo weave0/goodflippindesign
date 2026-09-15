@@ -5,8 +5,17 @@ import type {
   TrafficInsightDocument,
 } from "../insights/types";
 import { eligibilityFor } from "./eligibility";
+import { rootCauseKey } from "./grouping";
+import { scoreImpact } from "./scoring";
+import {
+  snapshotFromInsights,
+  upsertEvidenceSection,
+  type EvidenceSnapshot,
+} from "./evidence";
 import {
   DEFAULT_TARGET_REPO,
+  type GroupRole,
+  type ImpactClass,
   type WorkEligibility,
   type WorkLifecycle,
   type WorkMachineBlock,
@@ -25,6 +34,21 @@ export interface IssueComposeInput {
   eligibility?: WorkEligibility;
   target_repo?: string;
   snooze_until?: string | null;
+  root_cause_key?: string | null;
+  group_role?: GroupRole;
+  group_issue_number?: number | null;
+  group_members?: Array<{
+    action_id: string;
+    property_id: string | null;
+    confidence: string | null;
+  }>;
+  impact_score?: number | null;
+  impact_class?: ImpactClass | null;
+  impact_rationale?: string | null;
+  /** Prior body — preserves first-detection evidence before snapshot. */
+  prior_body?: string | null;
+  consolidatedPrimary?: boolean;
+  groupSize?: number;
 }
 
 export interface ComposedIssue {
@@ -42,12 +66,33 @@ export function composeIssue(input: IssueComposeInput): ComposedIssue {
     findings.find((f) => f.finding_id === action.finding_id) ?? findings[0] ?? null;
   const eligibility =
     input.eligibility ??
-    eligibilityFor({ action, brief, finding: primaryFinding, findings });
+    eligibilityFor({
+      action,
+      brief,
+      finding: primaryFinding,
+      findings,
+      consolidatedPrimary: input.consolidatedPrimary,
+      groupSize: input.groupSize,
+    });
   const lifecycle: WorkLifecycle = input.lifecycle ?? "detected";
   const target_repo = input.target_repo ?? DEFAULT_TARGET_REPO;
   const confidence = brief?.confidence ?? null;
   const findingIds =
     action.finding_ids?.length > 0 ? action.finding_ids : [action.finding_id];
+
+  const scored =
+    input.impact_score != null && input.impact_class
+      ? {
+          impact_score: input.impact_score,
+          impact_class: input.impact_class,
+          rationale: input.impact_rationale ?? "",
+        }
+      : scoreImpact({ action, brief, finding: primaryFinding, findings });
+
+  const rcKey =
+    input.root_cause_key ??
+    rootCauseKey({ action, brief, finding: primaryFinding, findings });
+  const group_role: GroupRole = input.group_role ?? "standalone";
 
   const machine: WorkMachineBlock = {
     action_id: action.action_id,
@@ -62,14 +107,44 @@ export function composeIssue(input: IssueComposeInput): ComposedIssue {
     finding_ids: findingIds,
     priority_class: action.priority_class,
     confidence,
+    root_cause_key: rcKey,
+    group_role,
+    group_issue_number: input.group_issue_number ?? null,
+    impact_score: scored.impact_score,
+    impact_class: scored.impact_class,
   };
 
   const property = action.property_id ?? "estate";
-  const titleSeed = brief?.headline ?? primaryFinding?.title ?? action.recommended_action;
-  const title = truncate(`[TI] ${priorityShort(action.priority_class)} · ${property} — ${titleSeed}`, 240);
+  const titleSeed =
+    group_role === "primary" && input.group_members && input.group_members.length > 1
+      ? `${primaryFinding?.title ?? brief?.headline ?? action.recommended_action} (${input.group_members.length} properties)`
+      : brief?.headline ?? primaryFinding?.title ?? action.recommended_action;
+  const title = truncate(
+    group_role === "primary"
+      ? `[TI] ${priorityShort(action.priority_class)} · group:${rcKey} — ${titleSeed}`
+      : `[TI] ${priorityShort(action.priority_class)} · ${property} — ${titleSeed}`,
+    240,
+  );
 
   const materiality = brief?.materiality;
   const expectedBenefit = formatExpectedBenefit(materiality, brief?.summary ?? primaryFinding?.why_it_matters);
+
+  const memberSection =
+    group_role === "primary" && input.group_members?.length
+      ? [
+          `### Consolidated members`,
+          ``,
+          `| Property | action_id | confidence |`,
+          `| --- | --- | --- |`,
+          ...input.group_members.map(
+            (m) =>
+              `| \`${m.property_id ?? "estate"}\` | \`${m.action_id}\` | ${m.confidence ?? "—"} |`,
+          ),
+          ``,
+          `_Child action_ids retain identity in the work-queue with \`group_role: member\` pointing at this issue._`,
+          ``,
+        ].join("\n")
+      : null;
 
   const bodyParts = [
     `## Traffic Intelligence work item`,
@@ -79,14 +154,20 @@ export function composeIssue(input: IssueComposeInput): ComposedIssue {
     `| Severity | ${action.severity} |`,
     `| Confidence | ${confidence ?? "—"} |`,
     `| Priority | ${action.priority_class} |`,
+    `| Impact | ${scored.impact_class} (${scored.impact_score}) |`,
     `| Eligibility | ${eligibility} |`,
     `| Lifecycle | ${lifecycle} |`,
     `| Property | \`${property}\` |`,
+    `| Root cause | \`${rcKey}\` |`,
+    `| Group role | ${group_role} |`,
     `| Target repo | \`${target_repo}\` |`,
     `| Action ID | \`${action.action_id}\` |`,
     `| Brief ID | \`${machine.brief_id ?? "—"}\` |`,
     `| Finding IDs | ${findingIds.map((id) => `\`${id}\``).join(", ") || "—"} |`,
     `| Insights generated | ${machine.insights_generated_at ?? "—"} |`,
+    ``,
+    `### Impact rationale`,
+    scored.rationale || "_n/a_",
     ``,
     `### Recommended action`,
     action.recommended_action,
@@ -97,11 +178,7 @@ export function composeIssue(input: IssueComposeInput): ComposedIssue {
     `### Verification condition`,
     action.verification_condition,
     ``,
-    `### Evidence`,
-    action.evidence_refs.length
-      ? action.evidence_refs.map((r) => `- \`${r}\``).join("\n")
-      : "_No evidence_refs on action._",
-    ``,
+    memberSection,
     brief
       ? [
           `### Brief`,
@@ -126,19 +203,50 @@ export function composeIssue(input: IssueComposeInput): ComposedIssue {
     `- Assign in GitHub to claim ownership.`,
     `- Add label \`ti-lifecycle:dismissed\` to dismiss (sync will not reopen).`,
     `- Set \`snooze_until: YYYY-MM-DD\` in the machine block (or comment \`ti-snooze-until:YYYY-MM-DD\`) to pause sync.`,
-    `- Set lifecycle \`ti-lifecycle:verify\` after a fix; sync measures clearance → resolved.`,
+    `- Set lifecycle \`ti-lifecycle:verify\` after a fix; sync measures clearance with **fresh** insights → resolved.`,
+    `- GitHub labels are source of truth for operator-set states; cockpit queue refreshes on sync.`,
     ``,
     renderMachineBlock(machine),
-  ].filter((p) => p !== null);
+  ].filter((p) => p !== null && p !== undefined);
+
+  let body = bodyParts.join("\n");
+
+  const snap: EvidenceSnapshot = snapshotFromInsights({
+    action,
+    brief,
+    findings,
+    insightsGeneratedAt: machine.insights_generated_at,
+  });
+  body = upsertEvidenceSection(input.prior_body ? mergePrior(input.prior_body, body) : body, snap);
+
+  // Re-attach machine block at end after evidence upsert may shuffle.
+  body = upsertMachineBlock(stripTrailingMachine(body), machine);
 
   const labels = [
     "ti-work",
     `ti-lifecycle:${lifecycle}`,
     `ti-eligibility:${eligibility}`,
     `ti-priority:${action.priority_class}`,
+    `ti-impact:${scored.impact_class}`,
   ];
+  if (group_role === "primary") labels.push("ti-group:primary");
 
-  return { title, body: bodyParts.join("\n"), machine, labels };
+  return { title, body, machine, labels };
+}
+
+function mergePrior(prior: string, composed: string): string {
+  // Prefer composed structure but keep prior evidence before fence via upsertEvidenceSection(prior).
+  // Seed composed with prior's before-fence by injecting prior body evidence markers.
+  const fence = /```ti-evidence-before\n([\s\S]*?)\n```/.exec(prior);
+  if (!fence) return composed;
+  if (composed.includes("```ti-evidence-before")) return composed;
+  return `${composed}\n\n\`\`\`ti-evidence-before\n${fence[1]}\n\`\`\`\n`;
+}
+
+function stripTrailingMachine(body: string): string {
+  const start = body.indexOf(MACHINE_START);
+  if (start < 0) return body;
+  return body.slice(0, start).trimEnd() + "\n\n";
 }
 
 export function renderMachineBlock(machine: WorkMachineBlock): string {
@@ -156,6 +264,11 @@ export function renderMachineBlock(machine: WorkMachineBlock): string {
     `finding_ids: ${JSON.stringify(machine.finding_ids)}`,
     `priority_class: ${yamlScalar(machine.priority_class)}`,
     `confidence: ${yamlScalar(machine.confidence)}`,
+    `root_cause_key: ${yamlScalar(machine.root_cause_key)}`,
+    `group_role: ${yamlScalar(machine.group_role)}`,
+    `group_issue_number: ${machine.group_issue_number == null ? "null" : String(machine.group_issue_number)}`,
+    `impact_score: ${machine.impact_score == null ? "null" : String(machine.impact_score)}`,
+    `impact_class: ${yamlScalar(machine.impact_class)}`,
     MACHINE_END,
   ];
   return lines.join("\n");
@@ -200,6 +313,26 @@ export function parseMachineBlock(body: string): WorkMachineBlock | null {
   const eligibilityRaw = unquote(map.get("eligibility") ?? "recommend");
   const eligibility: WorkEligibility = eligibilityRaw === "auto" ? "auto" : "recommend";
 
+  const groupRoleRaw = unquote(map.get("group_role") ?? "standalone");
+  const group_role: GroupRole =
+    groupRoleRaw === "primary" || groupRoleRaw === "member" ? groupRoleRaw : "standalone";
+
+  const impactRaw = unquote(map.get("impact_class") ?? "");
+  const impact_class =
+    impactRaw === "critical" ||
+    impactRaw === "high" ||
+    impactRaw === "medium" ||
+    impactRaw === "low" ||
+    impactRaw === "informational"
+      ? impactRaw
+      : null;
+
+  const scoreRaw = unquote(map.get("impact_score") ?? "");
+  const impact_score = scoreRaw && scoreRaw !== "null" ? Number(scoreRaw) : null;
+
+  const ginRaw = unquote(map.get("group_issue_number") ?? "");
+  const group_issue_number = ginRaw && ginRaw !== "null" ? Number(ginRaw) : null;
+
   return {
     action_id,
     lifecycle,
@@ -213,6 +346,11 @@ export function parseMachineBlock(body: string): WorkMachineBlock | null {
     finding_ids,
     priority_class: nullIfEmpty(unquote(map.get("priority_class") ?? "")),
     confidence: nullIfEmpty(unquote(map.get("confidence") ?? "")),
+    root_cause_key: nullIfEmpty(unquote(map.get("root_cause_key") ?? "")),
+    group_role,
+    group_issue_number: Number.isFinite(group_issue_number) ? group_issue_number : null,
+    impact_score: Number.isFinite(impact_score) ? impact_score : null,
+    impact_class,
   };
 }
 

@@ -1,12 +1,25 @@
 {
   "contract_name": "gfd-ti-work-queue",
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "fixture": true,
   "generated_at": "2026-01-01T00:00:00.000Z",
   "source_insights_generated_at": null,
   "target_repo": "weave0/goodflippindesign",
   "items": {},
   "limitations": [
-    "Fixture work queue — no live GitHub issues linked. Production injects ti-work-queue-1.0.json during deploy sync."
-  ]
+    "Fixture work queue \u2014 no live GitHub issues linked. Production injects ti-work-queue-1.0.json during deploy sync."
+  ],
+  "metrics": {
+    "planned": 0,
+    "auto": 0,
+    "recommend": 0,
+    "open_issues": 0,
+    "by_lifecycle": {},
+    "by_impact_class": {},
+    "creates_last_sync": 0,
+    "updates_last_sync": 0,
+    "closes_last_sync": 0,
+    "consolidated_groups": 0,
+    "superseded_duplicates": 0
+  }
 }

@@ -230,3 +230,236 @@ describe("rankActionsForCreate", () => {
     expect(ranked.map((a) => a.action_id)).toEqual(["a", "b"]);
   });
 });
+
+describe("TI-010 consolidation + reopen", () => {
+  it("plans a single consolidated create for daily-coverage-gap flood", () => {
+    const findings = ["a.com", "b.com", "c.com"].map((property) => ({
+      finding_id: `cloudflare.${property}.90d.daily-coverage-gap`,
+      kind: "data_gap" as const,
+      severity: "medium" as const,
+      scope: "property" as const,
+      property_id: property,
+      source_id: "cloudflare",
+      title: "Cloudflare daily series has missing dates",
+      explanation: "missing 2026-06-17, 2026-06-18",
+      why_it_matters: "w",
+      recommended_action: "Fix",
+      verification_condition: "Dates present",
+      action_class: "research" as const,
+      source_metric_ids: [],
+      source_snapshots: [],
+      evidence_state: "unavailable" as const,
+      exactness: "exact",
+      coverage_state: "partial",
+      comparison: null,
+      limitations: [],
+      created_at: "2026-09-15T12:00:00.000Z",
+    }));
+    const actions = findings.map((f) => ({
+      action_id: `action.brief.${f.property_id}.measurement`,
+      finding_id: f.finding_id,
+      finding_ids: [f.finding_id],
+      brief_id: `brief.${f.property_id}.measurement`,
+      priority: 3,
+      priority_class: "measurement_blocked" as const,
+      severity: "medium" as const,
+      scope: "property" as const,
+      property_id: f.property_id,
+      action_class: "research" as const,
+      recommended_action: "Determine gap cause",
+      verification_condition: "Dates present",
+      evidence_refs: [],
+      status: "new" as const,
+    }));
+    const insights = baseInsights(actions);
+    insights.findings = findings;
+    insights.briefs = findings.map((f) => ({
+      brief_id: `brief.${f.property_id}.measurement`,
+      property_id: f.property_id!,
+      category: "measurement" as const,
+      headline: `${f.property_id} measurement gap: Cloudflare daily series has missing dates`,
+      summary: "gap",
+      severity: "medium" as const,
+      priority: "measurement_blocked" as const,
+      direction: "unknown" as const,
+      materiality: { absolute_delta_requests: null, absolute_delta_pageviews: null, percent_delta: null },
+      persistence: [],
+      finding_ids: [f.finding_id],
+      corroborating_signals: [],
+      contradictory_signals: [],
+      confidence: "low" as const,
+      recommended_action: "Fix",
+      verification_condition: "Dates present",
+      action_class: "research" as const,
+      limitations: [],
+    }));
+    const plan = planWorkSync({ insights, issues: [], createCap: 15 });
+    const creates = plan.plans.filter((p) => p.kind === "create");
+    expect(creates).toHaveLength(1);
+    expect(creates[0]?.composed?.machine.group_role).toBe("primary");
+    expect(plan.metrics.consolidated_groups).toBe(1);
+    const members = Object.values(plan.queueItems).filter((i) => i.group_role === "member");
+    expect(members.length).toBe(2);
+  });
+
+  it("supersedes per-property duplicates when primary exists", () => {
+    const findingA = {
+      finding_id: "cloudflare.a.com.90d.daily-coverage-gap",
+      kind: "data_gap" as const,
+      severity: "medium" as const,
+      scope: "property" as const,
+      property_id: "a.com",
+      source_id: "cloudflare",
+      title: "Cloudflare daily series has missing dates",
+      explanation: "missing 2026-06-17",
+      why_it_matters: "w",
+      recommended_action: "Fix",
+      verification_condition: "Dates present",
+      action_class: "research" as const,
+      source_metric_ids: [],
+      source_snapshots: [],
+      evidence_state: "unavailable" as const,
+      exactness: "exact",
+      coverage_state: "partial",
+      comparison: null,
+      limitations: [],
+      created_at: "2026-09-15T12:00:00.000Z",
+    };
+    const findingB = { ...findingA, finding_id: "cloudflare.b.com.90d.daily-coverage-gap", property_id: "b.com" };
+    const memberAction = {
+      action_id: "action.brief.a.com.measurement",
+      finding_id: findingA.finding_id,
+      finding_ids: [findingA.finding_id],
+      brief_id: "brief.a.com.measurement",
+      priority: 3,
+      priority_class: "measurement_blocked" as const,
+      severity: "medium" as const,
+      scope: "property" as const,
+      property_id: "a.com",
+      action_class: "research" as const,
+      recommended_action: "Determine gap cause",
+      verification_condition: "Dates present",
+      evidence_refs: [],
+      status: "new" as const,
+    };
+    const primaryAction = {
+      ...memberAction,
+      action_id: "action.brief.b.com.measurement",
+      property_id: "b.com",
+      finding_id: findingB.finding_id,
+      finding_ids: [findingB.finding_id],
+      brief_id: "brief.b.com.measurement",
+    };
+    const insights = baseInsights([memberAction, primaryAction]);
+    insights.findings = [findingA, findingB];
+    insights.briefs = [
+      {
+        brief_id: "brief.a.com.measurement",
+        property_id: "a.com",
+        category: "measurement",
+        headline: "gap",
+        summary: "s",
+        severity: "medium",
+        priority: "measurement_blocked",
+        direction: "unknown",
+        materiality: { absolute_delta_requests: null, absolute_delta_pageviews: null, percent_delta: null },
+        persistence: [],
+        finding_ids: [findingA.finding_id],
+        corroborating_signals: [],
+        contradictory_signals: [],
+        confidence: "low",
+        recommended_action: "Fix",
+        verification_condition: "Dates present",
+        action_class: "research",
+        limitations: [],
+      },
+      {
+        brief_id: "brief.b.com.measurement",
+        property_id: "b.com",
+        category: "measurement",
+        headline: "gap",
+        summary: "s",
+        severity: "medium",
+        priority: "measurement_blocked",
+        direction: "unknown",
+        materiality: { absolute_delta_requests: null, absolute_delta_pageviews: null, percent_delta: null },
+        persistence: [],
+        finding_ids: [findingB.finding_id],
+        corroborating_signals: [],
+        contradictory_signals: [],
+        confidence: "low",
+        recommended_action: "Fix",
+        verification_condition: "Dates present",
+        action_class: "research",
+        limitations: [],
+      },
+    ];
+
+    const primaryBody = composeIssue({
+      action: primaryAction,
+      brief: insights.briefs[1],
+      findings: [findingB],
+      eligibility: "auto",
+      lifecycle: "detected",
+      group_role: "primary",
+      root_cause_key: "cloudflare.daily-coverage-gap",
+      consolidatedPrimary: true,
+      groupSize: 2,
+    }).body;
+    const memberBody = composeIssue({
+      action: memberAction,
+      brief: insights.briefs[0],
+      findings: [findingA],
+      eligibility: "auto",
+      lifecycle: "detected",
+    }).body;
+
+    const issues: ExistingIssue[] = [
+      {
+        number: 100,
+        html_url: "https://github.com/weave0/goodflippindesign/issues/100",
+        title: "primary",
+        body: primaryBody,
+        state: "open",
+        labels: ["ti-work", "ti-lifecycle:detected", "ti-group:primary"],
+        updated_at: "2026-09-15T12:00:00.000Z",
+      },
+      {
+        number: 101,
+        html_url: "https://github.com/weave0/goodflippindesign/issues/101",
+        title: "dup",
+        body: memberBody,
+        state: "open",
+        labels: ["ti-work", "ti-lifecycle:detected"],
+        updated_at: "2026-09-15T12:00:00.000Z",
+      },
+    ];
+    const plan = planWorkSync({ insights, issues });
+    // pickPrimaryMember chooses lowest action_id (a.com) as primary → supersede the other open issue (#100).
+    expect(plan.plans.some((p) => p.kind === "supersede_duplicate")).toBe(true);
+    const superseded = plan.plans.find((p) => p.kind === "supersede_duplicate");
+    expect(superseded?.primary_issue_number).toBeTruthy();
+    expect(plan.queueItems[memberAction.action_id]?.group_role === "member" || plan.queueItems[memberAction.action_id]?.group_role === "primary").toBe(true);
+    expect(plan.queueItems[primaryAction.action_id]?.group_role === "member" || plan.queueItems[primaryAction.action_id]?.group_role === "primary").toBe(true);
+    const roles = [plan.queueItems[memberAction.action_id]?.group_role, plan.queueItems[primaryAction.action_id]?.group_role];
+    expect(roles).toContain("primary");
+    expect(roles).toContain("member");
+  });
+
+  it("reopens closed issue when action_id returns (regressed)", () => {
+    const action = act("a-reopen");
+    const composed = composeIssue({ action, eligibility: "auto", lifecycle: "resolved" });
+    const issue: ExistingIssue = {
+      number: 55,
+      html_url: "https://github.com/weave0/goodflippindesign/issues/55",
+      title: composed.title,
+      body: composed.body,
+      state: "closed",
+      labels: ["ti-work", "ti-lifecycle:resolved"],
+      updated_at: "2026-09-10T12:00:00.000Z",
+    };
+    const plan = planWorkSync({ insights: baseInsights([action]), issues: [issue] });
+    expect(plan.plans.some((p) => p.kind === "reopen" && p.next_lifecycle === "regressed")).toBe(true);
+    expect(plan.queueItems["a-reopen"]?.lifecycle).toBe("regressed");
+  });
+});

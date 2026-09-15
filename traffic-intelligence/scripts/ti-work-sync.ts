@@ -1,5 +1,5 @@
 /**
- * TI-009 work-queue sync: insights → GitHub issues (weave0/goodflippindesign) → work-queue JSON.
+ * TI-010 work-queue sync: insights → GitHub issues (weave0/goodflippindesign) → work-queue JSON.
  *
  * Usage:
  *   GITHUB_TOKEN=… npm run sync:work -- --insights path/to/traffic-insights.json --out path/to/ti-work-queue-1.0.json
@@ -18,10 +18,13 @@ import {
   DEFAULT_TARGET_REPO,
   AUTO_CREATE_CAP_PER_RUN,
   TI_WORK_LABEL,
+  TI_SUPERSEDED_LABEL,
+  TI_GROUP_PRIMARY_LABEL,
   lifecycleLabel,
   TI_ELIGIBILITY_AUTO,
   TI_ELIGIBILITY_RECOMMEND,
   priorityLabelName,
+  impactLabelName,
   WORK_LIFECYCLES,
   parseMachineBlock,
   upsertMachineBlock,
@@ -84,6 +87,8 @@ async function ensureLabels(repo: string, auth: string): Promise<void> {
     { name: TI_WORK_LABEL, color: "0E8A16", description: "Traffic Intelligence work item" },
     { name: TI_ELIGIBILITY_AUTO, color: "1D76DB", description: "Auto-created TI work" },
     { name: TI_ELIGIBILITY_RECOMMEND, color: "FBCA04", description: "Recommended TI work (promoted)" },
+    { name: TI_SUPERSEDED_LABEL, color: "BFDADC", description: "TI duplicate superseded by consolidated issue" },
+    { name: TI_GROUP_PRIMARY_LABEL, color: "5319E7", description: "TI consolidated root-cause primary" },
     ...WORK_LIFECYCLES.map((lc) => ({
       name: lifecycleLabel(lc),
       color: "5319E7",
@@ -93,6 +98,11 @@ async function ensureLabels(repo: string, auth: string): Promise<void> {
       name: priorityLabelName(pc),
       color: "B60205",
       description: `TI priority: ${pc}`,
+    })),
+    ...["critical", "high", "medium", "low", "informational"].map((ic) => ({
+      name: impactLabelName(ic as "critical" | "high" | "medium" | "low" | "informational"),
+      color: "D93F0B",
+      description: `TI impact: ${ic}`,
     })),
   ];
 
@@ -225,6 +235,7 @@ async function main(): Promise<void> {
         ...plan.plans.filter((p) => p.kind === "skip_cap").map((p) => `cap skip ${p.action_id}`),
       ],
       targetRepo: repo,
+      metrics: plan.metrics,
     });
     mkdirSync(dirname(resolve(outPath)), { recursive: true });
     writeFileSync(resolve(outPath), `${JSON.stringify(doc, null, 2)}\n`);
@@ -241,6 +252,7 @@ async function main(): Promise<void> {
     `plan_items=${plan.plans.length} creates=${plan.createsSelected} cap_skips=${plan.createsSkippedByCap} existing_ti_issues=${issues.length}`,
   );
 
+  let metrics_superseded = 0;
   const issueByAction = new Map(
     issues
       .map((iss) => {
@@ -309,6 +321,66 @@ async function main(): Promise<void> {
         console.log(`commented=#${item.issue_number} kind=${item.kind}`);
         break;
       }
+      case "supersede_duplicate": {
+        if (item.issue_number == null) break;
+        const existing = issues.find((i) => i.number === item.issue_number);
+        const body = existing?.body ?? "";
+        const machine = parseMachineBlock(body);
+        const nextLifecycle = item.next_lifecycle ?? "resolved";
+        const nextBody = machine
+          ? upsertMachineBlock(body, {
+              ...machine,
+              lifecycle: nextLifecycle,
+              group_role: "member",
+              group_issue_number: item.primary_issue_number ?? machine.group_issue_number,
+              root_cause_key: item.root_cause_key ?? machine.root_cause_key,
+            })
+          : body;
+        const labels = replaceLifecycleLabels(existing?.labels ?? [TI_WORK_LABEL], nextLifecycle);
+        if (!labels.includes(TI_SUPERSEDED_LABEL)) labels.push(TI_SUPERSEDED_LABEL);
+        for (const extra of item.labels_add ?? []) {
+          if (!labels.includes(extra)) labels.push(extra);
+        }
+        await updateIssue(repo, auth, item.issue_number, {
+          body: nextBody,
+          labels,
+          state: "closed",
+        });
+        if (item.comment) {
+          await commentIssue(repo, auth, item.issue_number, item.comment);
+        }
+        console.log(
+          `superseded=#${item.issue_number} → primary=#${item.primary_issue_number} action_id=${item.action_id}`,
+        );
+        metrics_superseded += 1;
+        if (plan.queueItems[item.action_id] && item.primary_issue_number != null) {
+          const primary = issues.find((i) => i.number === item.primary_issue_number);
+          plan.queueItems[item.action_id].issue_number = item.primary_issue_number;
+          plan.queueItems[item.action_id].html_url =
+            primary?.html_url ??
+            `https://github.com/${repo}/issues/${item.primary_issue_number}`;
+          plan.queueItems[item.action_id].group_role = "member";
+        }
+        break;
+      }
+      case "reopen": {
+        if (item.issue_number == null || !item.composed) break;
+        const labels = replaceLifecycleLabels(item.composed.labels, item.next_lifecycle ?? "regressed");
+        await updateIssue(repo, auth, item.issue_number, {
+          body: item.composed.body,
+          labels,
+          state: "open",
+        });
+        if (item.comment) {
+          await commentIssue(repo, auth, item.issue_number, item.comment);
+        }
+        console.log(`reopened=#${item.issue_number} action_id=${item.action_id}`);
+        if (plan.queueItems[item.action_id]) {
+          plan.queueItems[item.action_id].lifecycle = item.next_lifecycle ?? "regressed";
+          plan.queueItems[item.action_id].issue_number = item.issue_number;
+        }
+        break;
+      }
       case "comment_cleared":
       case "set_lifecycle": {
         if (item.issue_number == null || !item.next_lifecycle) break;
@@ -346,6 +418,10 @@ async function main(): Promise<void> {
     }
   }
 
+  const metrics = {
+    ...plan.metrics,
+    superseded_duplicates: plan.metrics.superseded_duplicates + metrics_superseded,
+  };
   const doc = buildWorkQueueDocument({
     insights,
     items: plan.queueItems,
@@ -354,8 +430,15 @@ async function main(): Promise<void> {
       ...(plan.createsSkippedByCap
         ? [`Auto-create cap skipped ${plan.createsSkippedByCap} action(s) this run.`]
         : []),
+      ...(metrics.consolidated_groups
+        ? [`Consolidated ${metrics.consolidated_groups} root-cause group(s) this run.`]
+        : []),
+      ...(metrics.superseded_duplicates
+        ? [`Superseded ${metrics.superseded_duplicates} duplicate issue(s) this run.`]
+        : []),
     ],
     targetRepo: repo,
+    metrics,
   });
 
   mkdirSync(dirname(resolve(outPath)), { recursive: true });

@@ -5,3 +5,7 @@ export * from "./assert";
 export * from "./load";
 export * from "./sync-core";
 export * from "./urls";
+export * from "./scoring";
+export * from "./grouping";
+export * from "./evidence";
+export * from "./ranking";
