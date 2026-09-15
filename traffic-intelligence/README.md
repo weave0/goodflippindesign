@@ -35,3 +35,12 @@ npm run dev            # http://localhost:4177
 - Fixture: `public/gold/fixture.v1.json` (Canonical Gold fixture envelope with `fixture: true`; after `adaptGold()`, the internal UX model exposes `contract.kind = fixture`)
 
 The UI reads a view model after `adaptGold()`. Evidence state and coverage are separate axes. This pinned producer schema validates its fixture envelope; any future production Gold contract generalization must first be versioned by the producer. Field-name drift from canonical M1.1 is mapped in `src/gold/adapter.ts`.
+
+
+## TI-009 work funnel
+
+Meaningful insights become GitHub work items in `weave0/goodflippindesign` (central queue), deduped by `action_id`, with a measured verification loop.
+
+- Docs: [`docs/ti-work-funnel.md`](docs/ti-work-funnel.md)
+- Work queue sidecar: `public/gold/ti-work-queue-1.0.json` (fixture in PRs; live inject on deploy)
+- Sync: `npm run sync:work -- --insights <path> --out public/gold/ti-work-queue-1.0.json`

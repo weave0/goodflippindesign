@@ -3,6 +3,8 @@ import type { GoldContract, Metric } from "./gold/types";
 import { loadGold } from "./gold/load";
 import { loadInsights } from "./insights/load";
 import type { TrafficInsightDocument } from "./insights/types";
+import { loadWorkQueue } from "./work/load";
+import type { WorkQueueDocument } from "./work/types";
 import { selectSite, selectWindow } from "./gold/select";
 import { FILTER_DEFAULTS, filtersEqual, parseFilters, serializeFilters, type Filters, type ViewId } from "./gold/url-state";
 import { EvidenceDrawer } from "./components/EvidenceDrawer";
@@ -100,6 +102,7 @@ export function App() {
   const [gold, setGold] = useState<GoldContract | null>(null);
   const [insights, setInsights] = useState<TrafficInsightDocument | null>(null);
   const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [workQueue, setWorkQueue] = useState<WorkQueueDocument | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>(() =>
     typeof window === "undefined" ? FILTER_DEFAULTS : parseFilters(window.location.search),
@@ -128,6 +131,9 @@ export function App() {
           setInsightsError(err instanceof Error ? err.message : String(err));
         }
       });
+    loadWorkQueue().then((doc) => {
+      if (!cancelled) setWorkQueue(doc);
+    });
     return () => {
       cancelled = true;
     };
@@ -246,6 +252,7 @@ export function App() {
               filters={filters}
               insights={insights}
               insightsError={insightsError}
+              workQueue={workQueue}
               topology={gold.topology ?? null}
               onOpen={setEvidence}
               onSelectProperty={(propertyId) => {
