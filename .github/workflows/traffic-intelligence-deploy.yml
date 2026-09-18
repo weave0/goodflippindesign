@@ -209,8 +209,8 @@ jobs:
         with:
           repository: ${{ env.PRODUCER_REPOSITORY }}
           # TI-011 candidate: bounded path/status acquisition + governed HTTP failure findings.
-          # Keep exact-SHA pinned until producer PR #6 is independently accepted/merged.
-          ref: 2e8503ebcd1dd73fd279e5d808a938bb0421fb64
+          # Accepted producer PR #6 merge commit; immutable production authority.
+          ref: af8bf3ea882a4dc19c14fd0709240e1ea5a8df8c
           token: ${{ secrets.GFD_TI_READ_TOKEN }}
           path: .producer
           persist-credentials: false
