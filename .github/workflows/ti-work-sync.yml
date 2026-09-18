@@ -30,7 +30,7 @@ concurrency:
 env:
   PRODUCER_REPOSITORY: weave0/gfd-traffic-intelligence
   # Keep in lockstep with traffic-intelligence-deploy.yml producer pin.
-  PRODUCER_REF: e5aceacd3353d7f7d5400a9db29e07adc815f093
+  PRODUCER_REF: af8bf3ea882a4dc19c14fd0709240e1ea5a8df8c
   TI_WORK_REPO: weave0/goodflippindesign
   CF_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
 
