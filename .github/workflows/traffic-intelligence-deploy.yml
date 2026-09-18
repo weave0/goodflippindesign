@@ -210,7 +210,7 @@ jobs:
           repository: ${{ env.PRODUCER_REPOSITORY }}
           # TI-011 candidate: bounded path/status acquisition + governed HTTP failure findings.
           # Accepted producer PR #6 merge commit; immutable production authority.
-          ref: af8bf3ea882a4dc19c14fd0709240e1ea5a8df8c
+          ref: 41f01db8d8b6fac0d29461ce17e609092663e4e5
           token: ${{ secrets.GFD_TI_READ_TOKEN }}
           path: .producer
           persist-credentials: false
@@ -251,6 +251,58 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
         run: python -m gfdti.cli --acquire-cloudflare-gold --output-dir "$RUNNER_TEMP/gfdti-live"
+
+      - name: Acquire bounded Cloudflare estate configuration evidence
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/gfdti-live/estate-config-1.0.production.json"
+          projects="$(curl -fsS "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects?per_page=100" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+          test "$(jq -r '.success' <<<"$projects")" = "true"
+          zones="$(curl -fsS "https://api.cloudflare.com/client/v4/zones?per_page=50" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+          test "$(jq -r '.success' <<<"$zones")" = "true"
+          tmp="$(mktemp)"
+          printf '{"schema_version":"1.0.0","contract_name":"gfd-estate-config","fixture":false,"properties":[' > "$tmp"
+          first=1
+          IFS=',' read -ra expected_zones <<< "$CF_EXPECTED_ZONES"
+          for zone_name in "${expected_zones[@]}"; do
+            zone="$(jq -c --arg n "$zone_name" '.result[] | select(.name==$n)' <<<"$zones" | head -1)"
+            test -n "$zone" || continue
+            zone_id="$(jq -r '.id' <<<"$zone")"
+            dns="$(curl -fsS "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?per_page=100" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+            test "$(jq -r '.success' <<<"$dns")" = "true"
+            project="$(jq -c --arg d "$zone_name" '.result[] | select((.domains // []) | index($d))' <<<"$projects" | head -1)"
+            record="$(jq -n --arg property "$zone_name" --argjson z "$zone" --argjson dns "$dns" --argjson p "${project:-null}" '
+              {
+                property_id:$property,
+                zone_status:$z.status,
+                dns_apex:[$dns.result[] | select(.name==$property) | {name,type,content,proxied}],
+                dns_www:[$dns.result[] | select(.name==("www."+$property)) | {name,type,content,proxied}],
+                pages:(if $p == null then {} else {
+                  project_name:$p.name,
+                  source_type:($p.source.type // null),
+                  source_repository:(if ($p.source.type // null) == "github" then (($p.source.config.owner // "") + "/" + ($p.source.config.repo_name // "")) else null end),
+                  latest_production_deployment:($p.latest_deployment.created_on // null)
+                } end)
+              }')"
+            if [ "$first" -eq 0 ]; then printf ',' >> "$tmp"; fi
+            printf '%s' "$record" >> "$tmp"
+            first=0
+          done
+          printf ']}' >> "$tmp"
+          jq '.' "$tmp" > "$out"
+          rm -f "$tmp"
+          test "$(jq -r '.fixture' "$out")" = "false"
+          test "$(jq '.properties | length' "$out")" -gt 0
+          if grep -Fq "$CLOUDFLARE_API_TOKEN" "$out"; then echo "credential serialized"; exit 1; fi
+          echo "estate_config_properties=$(jq '.properties | length' "$out")"
+
+      - name: Rebuild insights with bounded estate configuration evidence
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
+        run: python -m gfdti.cli --build-cloudflare-insights --output-dir "$RUNNER_TEMP/gfdti-live"
 
       - name: Validate live producer artifact
         shell: bash

@@ -237,6 +237,17 @@ export function OverviewView({
     () => (dossierProperty ? prioritizedActions(insights, dossierProperty) : []),
     [insights, dossierProperty],
   );
+  const dossierConfigFindings = useMemo(
+    () =>
+      dossierProperty && insights
+        ? insights.findings.filter(
+            (finding) =>
+              finding.property_id === dossierProperty &&
+              finding.finding_id.includes(".estate-config."),
+          )
+        : [],
+    [insights, dossierProperty],
+  );
   const dossierPathFailures = useMemo(
     () =>
       dossierProperty && insights
@@ -836,6 +847,24 @@ export function OverviewView({
                 </ul>
               ) : (
                 <p className="empty">No briefs for this property.</p>
+              )}
+            </div>
+            <div className="estate-panel">
+              <h3>Deployment &amp; config</h3>
+              {dossierConfigFindings.length ? (
+                <ul className="plain-list">
+                  {dossierConfigFindings.map((finding) => (
+                    <li key={finding.finding_id}>
+                      <strong>{finding.title}</strong>
+                      <div>{finding.explanation}</div>
+                      <div className="section-note">
+                        {finding.kind} · {finding.action_class} · {finding.coverage_state}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="empty">No observed deployment/config drift or governance gap.</p>
               )}
             </div>
             <div className="estate-panel">
