@@ -237,6 +237,17 @@ export function OverviewView({
     () => (dossierProperty ? prioritizedActions(insights, dossierProperty) : []),
     [insights, dossierProperty],
   );
+  const dossierPathFailures = useMemo(
+    () =>
+      dossierProperty && insights
+        ? insights.findings.filter(
+            (finding) =>
+              finding.property_id === dossierProperty &&
+              finding.finding_id.includes(".path-health."),
+          )
+        : [],
+    [insights, dossierProperty],
+  );
 
   const nextWork = useMemo(
     () => (workQueue?.items ? rankNextWork(workQueue.items).slice(0, 8) : []),
@@ -825,6 +836,24 @@ export function OverviewView({
                 </ul>
               ) : (
                 <p className="empty">No briefs for this property.</p>
+              )}
+            </div>
+            <div className="estate-panel">
+              <h3>HTTP failures</h3>
+              {dossierPathFailures.length ? (
+                <ul className="plain-list">
+                  {dossierPathFailures.map((finding) => (
+                    <li key={finding.finding_id}>
+                      <strong>{finding.title}</strong>
+                      <div>{finding.explanation}</div>
+                      <div className="section-note">
+                        {finding.coverage_state} · {finding.source_id}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="empty">No material path/status failure cluster detected.</p>
               )}
             </div>
             <div className="estate-panel">

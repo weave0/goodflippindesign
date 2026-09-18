@@ -208,8 +208,9 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: ${{ env.PRODUCER_REPOSITORY }}
-          # Pin to repaired producer TI-007 head (trend_comparisons + priority_class) until #5 is on main.
-          ref: e5aceacd3353d7f7d5400a9db29e07adc815f093
+          # TI-011 candidate: bounded path/status acquisition + governed HTTP failure findings.
+          # Accepted producer PR #6 merge commit; immutable production authority.
+          ref: af8bf3ea882a4dc19c14fd0709240e1ea5a8df8c
           token: ${{ secrets.GFD_TI_READ_TOKEN }}
           path: .producer
           persist-credentials: false
