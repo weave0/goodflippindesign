@@ -59,6 +59,10 @@ async function runScript(baseUrl) {
         CLOUDFLARE_API_TOKEN: "test-token",
       },
       encoding: "utf8",
+      // Default (1MB) is smaller than a large real-world inventory; raise
+      // it so the harness doesn't mask output the script legitimately
+      // produced (see the large-inventory regression test below).
+      maxBuffer: 64 * 1024 * 1024,
     });
     return { status: 0, stdout, stderr };
   } catch (error) {
@@ -248,6 +252,33 @@ test("the previously rejected per_page request form is never sent again", async 
       for (const url of requests) {
         assert.equal(url.searchParams.has("per_page"), false, "per_page must not be reintroduced");
       }
+    }
+  );
+});
+
+test("a large inventory does not overflow the argument list (production regression)", async () => {
+  // Production run 35414829781 failed with "Argument list too long" because
+  // the final aggregation step passed the whole project list as a jq
+  // --argjson CLI argument. A real account can have enough Pages projects
+  // to exceed ARG_MAX (~2MB on Linux) that way. Build a payload comfortably
+  // past that so a regression trips this test instead of production.
+  const bigProjects = Array.from({ length: 20000 }, (_, i) =>
+    project(`id-${i}-${"x".repeat(40)}`, `site-${i}-${"y".repeat(40)}`)
+  );
+  await withMockServer(
+    () => ({
+      status: 200,
+      body: {
+        success: true,
+        result: bigProjects,
+        result_info: { page: 1, total_pages: 1 },
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.equal(proc.status, 0, proc.stderr);
+      const out = JSON.parse(proc.stdout);
+      assert.equal(out.result.length, 20000);
     }
   );
 });

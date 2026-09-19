@@ -75,4 +75,4 @@ if [ "$project_count" != "$unique_count" ]; then
   exit 1
 fi
 
-jq -c -n --argjson result "$projects" '{success:true, result:$result}'
+jq -c '{success:true, result:.}' <<<"$projects"
