@@ -566,3 +566,57 @@ for (const hostileValue of [false, null]) {
     );
   });
 }
+
+for (const hostileResultInfo of [false, null, "oops", [1, 2]]) {
+  test(`fails closed on a non-object result_info (${JSON.stringify(hostileResultInfo)}) instead of treating it as absent`, async () => {
+    // `(.result_info // {})` treats an explicit false/null result_info the
+    // same as a missing key, and a non-object result_info (a string or
+    // array) makes has() itself raise a jq error that a naive
+    // `2>/dev/null || echo` fallback also converts to a default. Either
+    // path would silently accept a malformed result_info as "absent"
+    // and default total_pages to 1, stopping pagination after page 1.
+    await withMockServer(
+      () => ({
+        status: 200,
+        body: {
+          success: true,
+          result: [project("p1", "site-one")],
+          result_info: hostileResultInfo,
+        },
+      }),
+      async (baseUrl) => {
+        const proc = await runScript(baseUrl);
+        assert.notEqual(
+          proc.status,
+          0,
+          `result_info: ${JSON.stringify(hostileResultInfo)} must fail closed, not be treated as absent`
+        );
+        assert.equal(proc.stdout.trim(), "");
+        assert.match(proc.stderr, /non-object result_info/);
+      }
+    );
+  });
+}
+
+test("fails closed on an explicit result_info.page: \"\" instead of skipping the page-mismatch check", async () => {
+  // An empty string is a value `has("page")` reports as present, but the
+  // page-mismatch check only ran when the extracted page string was
+  // non-empty — silently treating an explicit "" the same as truly
+  // absent and skipping validation instead of failing closed on it.
+  await withMockServer(
+    () => ({
+      status: 200,
+      body: {
+        success: true,
+        result: [project("p1", "site-one")],
+        result_info: { page: "", total_pages: 1 },
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, 'result_info.page: "" must fail closed, not be treated as absent');
+      assert.equal(proc.stdout.trim(), "");
+      assert.match(proc.stderr, /non-positive-integer result_info\.page/);
+    }
+  );
+});

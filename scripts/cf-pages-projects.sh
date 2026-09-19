@@ -71,13 +71,39 @@ while [ "$page" -le "$total_pages" ]; do
     exit 1
   fi
 
-  # `// default` treats an explicit JSON false/null the same as an absent
-  # key, so a hostile response with result_info.total_pages:false would
-  # silently become "1" and skip the numeric validation below entirely.
-  # Distinguish "field absent" (legitimately default) from "field present
-  # but not a positive integer" (must reach the fail-closed check).
-  reported_page="$(jq -r '(.result_info // {}) | if has("page") then (.page | tostring) else "" end' <<<"$body" 2>/dev/null || echo "")"
-  reported_total_pages="$(jq -r '(.result_info // {}) | if has("total_pages") then (.total_pages | tostring) else "1" end' <<<"$body" 2>/dev/null || echo "1")"
+  # `(.result_info // {})` treats an explicit JSON false/null result_info
+  # the same as an absent key, silently swapping in {} and defaulting
+  # every field — and a non-object result_info (e.g. a string or array)
+  # makes has() itself raise a jq error, which the `2>/dev/null || echo`
+  # fallback then *also* converts to a default. Either path lets a
+  # malformed result_info be accepted as "absent" instead of failing
+  # closed. Distinguish "result_info absent" (legitimately default) from
+  # "result_info present but not an object" (must fail closed) before
+  # ever looking at its fields.
+  result_info_kind="$(jq -r '
+    if has("result_info") then
+      if (.result_info | type) == "object" then "object" else "invalid" end
+    else "absent" end
+  ' <<<"$body" 2>/dev/null || echo "invalid")"
+
+  case "$result_info_kind" in
+    absent)
+      reported_page="" reported_page_present="false"
+      reported_total_pages="1"
+      ;;
+    object)
+      reported_page_present="$(jq -r '.result_info | has("page")' <<<"$body" 2>/dev/null || echo "false")"
+      reported_page="$(jq -r '.result_info | if has("page") then (.page | tostring) else "" end' <<<"$body" 2>/dev/null || echo "")"
+      # Same absent-vs-invalid distinction at the field level: a naive
+      # `// 1` would treat an explicit false/null total_pages the same as
+      # absent and skip validation entirely.
+      reported_total_pages="$(jq -r '.result_info | if has("total_pages") then (.total_pages | tostring) else "1" end' <<<"$body" 2>/dev/null || echo "1")"
+      ;;
+    *)
+      echo "Pages project inventory returned a non-object result_info on page $page" >&2
+      exit 1
+      ;;
+  esac
 
   # A 2xx/success response is still an untrusted body: validate these are
   # plain non-negative integers before they ever reach an arithmetic or
@@ -86,7 +112,7 @@ while [ "$page" -le "$total_pages" ]; do
   # expected" runtime error echo that value straight to stderr, bypassing
   # cf_redact entirely — so the failure message here deliberately does not
   # interpolate the offending raw value.
-  if [ -n "$reported_page" ] && ! [[ "$reported_page" =~ ^[1-9][0-9]{0,6}$ ]]; then
+  if [ "$reported_page_present" = "true" ] && ! [[ "$reported_page" =~ ^[1-9][0-9]{0,6}$ ]]; then
     echo "Pages project inventory returned a non-positive-integer result_info.page on page $page" >&2
     exit 1
   fi
@@ -99,7 +125,7 @@ while [ "$page" -le "$total_pages" ]; do
     exit 1
   fi
 
-  if [ -n "$reported_page" ] && [ "$reported_page" != "$page" ]; then
+  if [ "$reported_page_present" = "true" ] && [ "$reported_page" != "$page" ]; then
     echo "Pages project inventory page mismatch: requested page $page, Cloudflare reported page $reported_page" >&2
     exit 1
   fi

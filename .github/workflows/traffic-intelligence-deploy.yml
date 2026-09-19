@@ -334,13 +334,37 @@ jobs:
               --data-urlencode "per_page=50" \
               --data-urlencode "page=$zone_page")"
             zones_tmp="$(jq -c --argjson accumulated "$zones_tmp" '$accumulated + .result' <<<"$zones_response")"
-            # `// default` treats an explicit JSON false/null the same as
-            # an absent key, so a hostile response with
-            # result_info.total_pages:false would silently become "1" and
-            # skip the numeric validation below entirely. Distinguish
-            # "field absent" (legitimately default) from "field present
-            # but not a positive integer" (must reach the fail-closed check).
-            zone_total_pages="$(jq -r '(.result_info // {}) | if has("total_pages") then (.total_pages | tostring) else "1" end' <<<"$zones_response" 2>/dev/null || echo "1")"
+            # `(.result_info // {})` treats an explicit JSON false/null
+            # result_info the same as an absent key, silently swapping in
+            # {} and defaulting every field — and a non-object result_info
+            # (e.g. a string or array) makes has() itself raise a jq
+            # error, which the `2>/dev/null || echo` fallback then also
+            # converts to a default. Either path lets a malformed
+            # result_info be accepted as "absent" instead of failing
+            # closed. Distinguish "result_info absent" (legitimately
+            # default) from "result_info present but not an object" (must
+            # fail closed) before ever looking at its fields.
+            zone_result_info_kind="$(jq -r '
+              if has("result_info") then
+                if (.result_info | type) == "object" then "object" else "invalid" end
+              else "absent" end
+            ' <<<"$zones_response" 2>/dev/null || echo "invalid")"
+            case "$zone_result_info_kind" in
+              absent)
+                zone_total_pages="1"
+                ;;
+              object)
+                # Same absent-vs-invalid distinction at the field level: a
+                # naive `// 1` would treat an explicit false/null
+                # total_pages the same as absent and skip validation
+                # entirely.
+                zone_total_pages="$(jq -r '.result_info | if has("total_pages") then (.total_pages | tostring) else "1" end' <<<"$zones_response" 2>/dev/null || echo "1")"
+                ;;
+              *)
+                echo "zone-list returned a non-object result_info on page $zone_page" >&2
+                exit 1
+                ;;
+            esac
             # A 2xx/success response body is still untrusted: validate this
             # is a plain integer before it reaches the loop's `-le` test.
             # Otherwise a hostile response reflecting a credential into
