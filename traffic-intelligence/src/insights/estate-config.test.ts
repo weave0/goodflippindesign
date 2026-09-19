@@ -16,7 +16,7 @@ const row = (overrides: Partial<EstateConfigPropertyAccounting> = {}): EstateCon
   reason: "Pages project exposes GitHub production authority and no conflicting serving DNS was observed.",
   authorities: { zone: "analytics_credential", dns: "analytics_credential", pages: "deploy_credential" },
   evidence_status: { zone: "observed", dns: "observed", pages: "observed" },
-  unavailable_reasons: {},
+  evidence_reasons: {},
   ...overrides,
 });
 
@@ -53,13 +53,13 @@ describe("estate_config accounting contract", () => {
       state: "unobserved",
       reason: "Pages configuration was not observed.",
       evidence_status: { zone: "observed", dns: "observed", pages: "unavailable" },
-      unavailable_reasons: { pages: "HTTP 403 — Cloudflare error 10000: Authentication error" },
+      evidence_reasons: { pages: "HTTP 403 — Cloudflare error 10000: Authentication error" },
     });
     const noProject = row({
       property_id: "none.com",
       state: "governance_gap",
       evidence_status: { zone: "observed", dns: "observed", pages: "no_project" },
-      unavailable_reasons: { pages: "The complete Pages inventory (3 projects) contains no project claiming none.com" },
+      evidence_reasons: { pages: "The complete Pages inventory (3 projects) contains no project claiming none.com" },
     });
     expect(() => assertEstateConfig(accounting([row(), unavailable, noProject]))).not.toThrow();
   });
@@ -72,7 +72,9 @@ describe("estate_config accounting contract", () => {
     ["an invalid state", (a) => { (a.properties[0] as { state: string }).state = "fine"; }, /state is invalid/],
     ["unavailable evidence with no reason", (a) => { a.properties[0]!.evidence_status.pages = "unavailable"; }, /without an explicit reason/],
     ["an invalid evidence status", (a) => { a.properties[0]!.evidence_status.dns = "maybe"; }, /invalid dns evidence status/],
-    ["a missing authority", (a) => { a.properties[0]!.authorities.pages = ""; }, /no pages authority/],
+    ["a missing authority", (a) => { a.properties[0]!.authorities.pages = ""; }, /pages evidence must name authority deploy_credential/],
+    ["Pages attributed to the measurement credential", (a) => { a.properties[0]!.authorities.pages = "analytics_credential"; }, /pages evidence must name authority deploy_credential/],
+    ["DNS attributed to the deployment credential", (a) => { a.properties[0]!.authorities.dns = "deploy_credential"; }, /dns evidence must name authority analytics_credential/],
     ["a non-array properties", (a) => { (a as unknown as { properties: unknown }).properties = {}; }, /properties must be an array/],
     ["an unsupported schema", (a) => { (a as unknown as { schema_version: string }).schema_version = "9"; }, /schema_version must be 1\.1\.0/],
     ["a malformed inventory", (a) => { (a.pages_inventory as unknown as { complete: string }).complete = "yes"; }, /pages_inventory/],
@@ -119,7 +121,7 @@ describe("estate_config selectors", () => {
     const lines = estateProvenanceLines(
       row({
         evidence_status: { zone: "observed", dns: "unavailable", pages: "no_project" },
-        unavailable_reasons: { dns: "HTTP 403", pages: "no project in complete inventory" },
+        evidence_reasons: { dns: "HTTP 403", pages: "no project in complete inventory" },
       }),
     );
     expect(lines[1]).toBe("DNS records: not observed (HTTP 403)");

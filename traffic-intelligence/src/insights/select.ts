@@ -168,7 +168,7 @@ export function estateProvenanceLines(row: EstateConfigPropertyAccounting): stri
     if (status === "no_project") {
       return `${noun[evidenceClass]}: the ${authority} positively found no Pages project for this domain`;
     }
-    return `${noun[evidenceClass]}: not observed (${row.unavailable_reasons[evidenceClass] ?? "no reason recorded"})`;
+    return `${noun[evidenceClass]}: not observed (${row.evidence_reasons[evidenceClass] ?? "no reason recorded"})`;
   });
 }
 

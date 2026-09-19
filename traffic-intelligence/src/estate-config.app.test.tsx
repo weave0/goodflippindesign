@@ -31,7 +31,7 @@ const estateConfig = {
       reason: "Pages project exposes GitHub production authority and no conflicting serving DNS was observed.",
       authorities: { zone: "analytics_credential", dns: "analytics_credential", pages: "deploy_credential" },
       evidence_status: { zone: "observed", dns: "observed", pages: "observed" },
-      unavailable_reasons: {},
+      evidence_reasons: {},
     },
     {
       property_id: "direct.example",
@@ -39,7 +39,7 @@ const estateConfig = {
       reason: "Pages production is direct/ad-hoc; repository authority cannot be proven from Cloudflare project metadata.",
       authorities: { zone: "analytics_credential", dns: "analytics_credential", pages: "deploy_credential" },
       evidence_status: { zone: "observed", dns: "observed", pages: "observed" },
-      unavailable_reasons: {},
+      evidence_reasons: {},
     },
     {
       property_id: "dark.example",
@@ -47,7 +47,7 @@ const estateConfig = {
       reason: "Pages configuration was not observed by the deploy_credential: HTTP 403.",
       authorities: { zone: "analytics_credential", dns: "analytics_credential", pages: "deploy_credential" },
       evidence_status: { zone: "observed", dns: "observed", pages: "unavailable" },
-      unavailable_reasons: { pages: "HTTP 403" },
+      evidence_reasons: { pages: "HTTP 403" },
     },
   ],
 };

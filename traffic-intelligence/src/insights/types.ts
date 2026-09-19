@@ -183,8 +183,8 @@ export interface EstateConfigPropertyAccounting {
   /** Which credential/authority proved (or failed to prove) each evidence class. */
   authorities: Record<string, string>;
   evidence_status: Record<string, string>;
-  /** Safe reasons for anything not `observed`. */
-  unavailable_reasons: Record<string, string>;
+  /** Safe reasons for any evidence class that is not `observed` (unavailable, or a positive no_project). */
+  evidence_reasons: Record<string, string>;
 }
 
 export interface EstateConfigInventory {

@@ -53,6 +53,12 @@ function assertEstateBrief(value: unknown): void {
 const ESTATE_CONFIG_STATES = new Set(["healthy", "governance_gap", "config_drift", "unobserved"]);
 const ESTATE_EVIDENCE_CLASSES = ["zone", "dns", "pages"] as const;
 const ESTATE_EVIDENCE_STATUSES = new Set(["observed", "no_project", "unavailable"]);
+/** Only the designated credential can prove each class of fact. */
+const ESTATE_EVIDENCE_AUTHORITY = {
+  zone: "analytics_credential",
+  dns: "analytics_credential",
+  pages: "deploy_credential",
+} as const;
 
 function isStringRecord(value: unknown): value is Record<string, string> {
   return isObject(value) && Object.values(value).every(isString);
@@ -92,7 +98,7 @@ export function assertEstateConfig(value: unknown): void {
     if (!isString(row.state) || !ESTATE_CONFIG_STATES.has(row.state)) {
       throw new Error(`Insights estate_config.properties[${index}].state is invalid`);
     }
-    if (!isStringRecord(row.authorities) || !isStringRecord(row.evidence_status) || !isStringRecord(row.unavailable_reasons)) {
+    if (!isStringRecord(row.authorities) || !isStringRecord(row.evidence_status) || !isStringRecord(row.evidence_reasons)) {
       throw new Error(`Insights estate_config.properties[${index}] provenance maps must be string maps`);
     }
     if (seen.has(row.property_id)) throw new Error(`Insights estate_config lists ${row.property_id} more than once`);
@@ -102,11 +108,13 @@ export function assertEstateConfig(value: unknown): void {
       if (!isString(status) || !ESTATE_EVIDENCE_STATUSES.has(status)) {
         throw new Error(`Insights estate_config.properties[${index}] has an invalid ${evidenceClass} evidence status`);
       }
-      if (status !== "observed" && !row.unavailable_reasons[evidenceClass]?.trim()) {
+      if (status !== "observed" && !row.evidence_reasons[evidenceClass]?.trim()) {
         throw new Error(`Insights estate_config.properties[${index}] ${evidenceClass} evidence is ${status} without an explicit reason`);
       }
-      if (!isString(row.authorities[evidenceClass]) || !row.authorities[evidenceClass]) {
-        throw new Error(`Insights estate_config.properties[${index}] has no ${evidenceClass} authority`);
+      if (row.authorities[evidenceClass] !== ESTATE_EVIDENCE_AUTHORITY[evidenceClass]) {
+        throw new Error(
+          `Insights estate_config.properties[${index}] ${evidenceClass} evidence must name authority ${ESTATE_EVIDENCE_AUTHORITY[evidenceClass]}`,
+        );
       }
     }
   });

@@ -416,7 +416,7 @@ jobs:
               raise SystemExit("estate accounting reports an incomplete zone or Pages inventory")
           for row in accounting.properties:
               for evidence_class, status in row.evidence_status.items():
-                  if status != "observed" and not row.unavailable_reasons.get(evidence_class):
+                  if status != "observed" and not row.evidence_reasons.get(evidence_class):
                       raise SystemExit(f"{row.property_id}: {evidence_class} evidence is {status} without an explicit reason")
           print(f"governed_zone_count={accounting.governed_zone_count}")
           print(f"estate_accounted_zones={accounting.accounted_zone_count}")
@@ -426,7 +426,7 @@ jobs:
           for row in accounting.properties:
               statuses = ",".join(f"{k}={v}" for k, v in sorted(row.evidence_status.items()))
               print(f"estate_zone={row.property_id} state={row.state} evidence[{statuses}]")
-              for evidence_class, reason in sorted(row.unavailable_reasons.items()):
+              for evidence_class, reason in sorted(row.evidence_reasons.items()):
                   print(f"estate_zone_reason={row.property_id} {evidence_class}: {reason}")
           PY
 
