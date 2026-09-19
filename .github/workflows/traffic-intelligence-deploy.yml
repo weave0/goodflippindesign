@@ -340,7 +340,7 @@ jobs:
             # Otherwise a hostile response reflecting a credential into
             # result_info would surface it via bash's own "integer
             # expression expected" runtime error, bypassing cf_redact.
-            if ! [[ "$zone_total_pages" =~ ^[1-9][0-9]*$ ]]; then
+            if ! [[ "$zone_total_pages" =~ ^[1-9][0-9]{0,6}$ ]]; then
               # total_pages:0 on a page-1 response with actual results is
               # self-contradictory (Cloudflare reports total_pages=1 even
               # for an empty result set); accepting it would silently

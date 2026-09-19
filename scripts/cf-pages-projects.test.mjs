@@ -517,3 +517,27 @@ test("fails closed on result_info.total_pages: 0 instead of silently truncating 
     }
   );
 });
+
+test("fails closed on an oversized result_info.total_pages instead of overflowing bash's integer comparison", async () => {
+  // A digit-only value that's merely unbounded in length can still exceed
+  // bash's integer range. `[ "$page" -le "$total_pages" ]` then errors
+  // with "integer expression expected" — but that error happens inside a
+  // `while` condition, which set -e does not treat as fatal, so the loop
+  // would just silently stop and emit a partial inventory as complete.
+  await withMockServer(
+    () => ({
+      status: 200,
+      body: {
+        success: true,
+        result: [project("p1", "site-one")],
+        result_info: { page: 1, total_pages: "99999999999999999999999999999999" },
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, "an oversized total_pages must fail closed, not silently truncate");
+      assert.equal(proc.stdout.trim(), "");
+      assert.match(proc.stderr, /non-positive-integer result_info\.total_pages/);
+    }
+  );
+});
