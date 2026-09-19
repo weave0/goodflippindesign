@@ -275,8 +275,25 @@ jobs:
           # using it for the zone list here silently under-reports the estate.
           projects="$(scripts/cf-pages-projects.sh)"
           test "$(jq -r '.success' <<<"$projects")" = "true"
-          zones="$(curl -fsS "https://api.cloudflare.com/client/v4/zones?per_page=50" -H "Authorization: Bearer $CF_ZONE_API_TOKEN")"
-          test "$(jq -r '.success' <<<"$zones")" = "true"
+          # Account-scoped and paginated, mirroring "Verify complete Cloudflare
+          # analytics estate access" above: an unscoped zone query can match a
+          # same-named zone the token can see in a different account and pull
+          # DNS evidence for the wrong estate entirely.
+          zones_tmp='[]'
+          zone_page=1
+          zone_total_pages=1
+          while [ "$zone_page" -le "$zone_total_pages" ]; do
+            zones_response="$(curl -fsS -G "https://api.cloudflare.com/client/v4/zones" \
+              -H "Authorization: Bearer $CF_ZONE_API_TOKEN" \
+              --data-urlencode "account.id=$CF_ACCOUNT_ID" \
+              --data-urlencode "per_page=50" \
+              --data-urlencode "page=$zone_page")"
+            test "$(jq -r '.success' <<<"$zones_response")" = "true"
+            zones_tmp="$(jq -c --argjson accumulated "$zones_tmp" '$accumulated + .result' <<<"$zones_response")"
+            zone_total_pages="$(jq -r '.result_info.total_pages // 1' <<<"$zones_response")"
+            zone_page=$((zone_page + 1))
+          done
+          zones="$(jq -c '{success:true, result:.}' <<<"$zones_tmp")"
           tmp="$(mktemp)"
           printf '{"schema_version":"1.0.0","contract_name":"gfd-estate-config","fixture":false,"properties":[' > "$tmp"
           first=1
