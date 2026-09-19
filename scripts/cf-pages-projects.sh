@@ -64,7 +64,12 @@ while [ "$page" -le "$total_pages" ]; do
   http_code="${response##*$'\n'}"
   body="${response%$'\n'*}"
 
-  if [[ "$http_code" != 2?? ]] || [ "$(jq -r '.success? // false' <<<"$body" 2>/dev/null || echo false)" != "true" ]; then
+  # `jq -r` stringifies JSON strings, so a naive `[ "$(jq -r '.success? // false')" != "true" ]`
+  # would treat a hostile `.success: "true"` (a string) the same as the
+  # boolean `true`, since both render as the text `true`. Compare the
+  # actual JSON value's identity with `jq -e '.success == true'` instead
+  # of comparing its rendered text, so only a genuine boolean true passes.
+  if [[ "$http_code" != 2?? ]] || ! jq -e '.success == true' <<<"$body" >/dev/null 2>&1; then
     code="$(jq -r '.errors[0].code // "unknown"' <<<"$body" 2>/dev/null || echo unknown)"
     message="$(jq -r '.errors[0].message // "no error detail provided"' <<<"$body" 2>/dev/null || echo "no error detail provided")"
     echo "$(cf_redact "Pages project inventory request rejected on page $page: HTTP $http_code — Cloudflare error $code: $message")" >&2

@@ -620,3 +620,22 @@ test("fails closed on an explicit result_info.page: \"\" instead of skipping the
     }
   );
 });
+
+test('fails closed on a string success: "true" instead of accepting it like the boolean', async () => {
+  // `jq -r` stringifies JSON strings, so a naive `.success? // false`
+  // compared against the text "true" would treat a hostile
+  // `.success: "true"` (a string) the same as the boolean `true`, since
+  // both render identically. Only a genuine JSON boolean true may pass.
+  await withMockServer(
+    () => ({
+      status: 200,
+      body: { success: "true", result: [project("p1", "site-one")], result_info: { page: 1, total_pages: 1 } },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, 'success: "true" (string) must not be accepted like the boolean');
+      assert.equal(proc.stdout.trim(), "");
+      assert.match(proc.stderr, /request rejected on page 1/);
+    }
+  );
+});
