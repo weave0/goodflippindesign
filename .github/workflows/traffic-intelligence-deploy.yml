@@ -286,9 +286,9 @@ jobs:
           cf_redact() {
             local text="$1"
             text="$(sed -E '
-              s/(authorization"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/gI;
+              s/(authorization"?[[:space:]]*:[[:space:]]*"?).*/\1[REDACTED]/gI;
               s/bearer[[:space:]]+[A-Za-z0-9._~+/=-]+/Bearer [REDACTED]/gI;
-              s/(cookie"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/gI
+              s/(cookie"?[[:space:]]*:[[:space:]]*"?).*/\1[REDACTED]/gI
             ' <<<"$text")"
             text="${text//$CF_ZONE_API_TOKEN/[REDACTED]}"
             text="${text//$CLOUDFLARE_API_TOKEN/[REDACTED]}"

@@ -30,10 +30,14 @@ cf_redact() {
   # Structural patterns first (Authorization/Bearer/Cookie shapes), then a
   # literal mop-up for the actual token value wherever it appears outside
   # those shapes (e.g. reflected raw in an error message or URL).
+  # Redact to end-of-string rather than stopping at a comma/quote/brace: a
+  # comma-delimited or quoted scheme value (e.g. Digest's
+  # username="...", response="...") would otherwise leave a suffix
+  # unredacted. Over-redaction here is intentional and safe.
   text="$(sed -E '
-    s/(authorization"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/gI;
+    s/(authorization"?[[:space:]]*:[[:space:]]*"?).*/\1[REDACTED]/gI;
     s/bearer[[:space:]]+[A-Za-z0-9._~+/=-]+/Bearer [REDACTED]/gI;
-    s/(cookie"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/gI
+    s/(cookie"?[[:space:]]*:[[:space:]]*"?).*/\1[REDACTED]/gI
   ' <<<"$text")"
   text="${text//$CLOUDFLARE_API_TOKEN/[REDACTED]}"
   printf '%s' "$text"

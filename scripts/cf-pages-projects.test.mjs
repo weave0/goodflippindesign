@@ -364,6 +364,32 @@ test("redacts fully mixed-case Authorization and Cookie header names", async () 
   );
 });
 
+test("redacts a comma-delimited, quoted Authorization scheme value in full", async () => {
+  // A scheme like Digest carries comma-separated quoted sub-fields
+  // (username="...", response="..."). Stopping at the first comma or
+  // quote would leave the response (the actual secret) unredacted.
+  await withMockServer(
+    () => ({
+      status: 401,
+      body: {
+        success: false,
+        errors: [{
+          code: 9110,
+          message: 'Rejected: Authorization: Digest username="alice", realm="cf", response="leaked-digest-secret"; Cookie: session=leaked, other=leaked-too',
+        }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      assert.doesNotMatch(proc.stderr, /alice/);
+      assert.doesNotMatch(proc.stderr, /leaked-digest-secret/);
+      assert.doesNotMatch(proc.stderr, /leaked-too/);
+      assert.match(proc.stderr, /\[REDACTED\]/);
+    }
+  );
+});
+
 test("fails closed without leaking on a non-numeric result_info.total_pages", async () => {
   // A 2xx/success body is still untrusted. If result_info.total_pages
   // reflects a credential and is used unvalidated in a bash integer
