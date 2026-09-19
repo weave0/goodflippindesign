@@ -31,9 +31,9 @@ cf_redact() {
   # literal mop-up for the actual token value wherever it appears outside
   # those shapes (e.g. reflected raw in an error message or URL).
   text="$(sed -E '
-    s/([Aa]uthorization"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/g;
+    s/(authorization"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/gI;
     s/bearer[[:space:]]+[A-Za-z0-9._~+/=-]+/Bearer [REDACTED]/gI;
-    s/([Cc]ookie"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/g
+    s/(cookie"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/gI
   ' <<<"$text")"
   text="${text//$CLOUDFLARE_API_TOKEN/[REDACTED]}"
   printf '%s' "$text"
@@ -62,6 +62,22 @@ while [ "$page" -le "$total_pages" ]; do
 
   reported_page="$(jq -r '.result_info.page // empty' <<<"$body")"
   reported_total_pages="$(jq -r '.result_info.total_pages // 1' <<<"$body")"
+
+  # A 2xx/success response is still an untrusted body: validate these are
+  # plain non-negative integers before they ever reach an arithmetic or
+  # `[ -eq/-le ]` context. Otherwise a hostile response that reflects a
+  # credential into result_info would make bash's own "integer expression
+  # expected" runtime error echo that value straight to stderr, bypassing
+  # cf_redact entirely — so the failure message here deliberately does not
+  # interpolate the offending raw value.
+  if [ -n "$reported_page" ] && ! [[ "$reported_page" =~ ^[0-9]+$ ]]; then
+    echo "Pages project inventory returned a non-numeric result_info.page on page $page" >&2
+    exit 1
+  fi
+  if ! [[ "$reported_total_pages" =~ ^[0-9]+$ ]]; then
+    echo "Pages project inventory returned a non-numeric result_info.total_pages on page $page" >&2
+    exit 1
+  fi
 
   if [ -n "$reported_page" ] && [ "$reported_page" != "$page" ]; then
     echo "Pages project inventory page mismatch: requested page $page, Cloudflare reported page $reported_page" >&2

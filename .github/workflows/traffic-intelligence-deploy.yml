@@ -286,9 +286,9 @@ jobs:
           cf_redact() {
             local text="$1"
             text="$(sed -E '
-              s/([Aa]uthorization"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/g;
+              s/(authorization"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/gI;
               s/bearer[[:space:]]+[A-Za-z0-9._~+/=-]+/Bearer [REDACTED]/gI;
-              s/([Cc]ookie"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/g
+              s/(cookie"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/gI
             ' <<<"$text")"
             text="${text//$CF_ZONE_API_TOKEN/[REDACTED]}"
             text="${text//$CLOUDFLARE_API_TOKEN/[REDACTED]}"
@@ -321,6 +321,15 @@ jobs:
               --data-urlencode "page=$zone_page")"
             zones_tmp="$(jq -c --argjson accumulated "$zones_tmp" '$accumulated + .result' <<<"$zones_response")"
             zone_total_pages="$(jq -r '.result_info.total_pages // 1' <<<"$zones_response")"
+            # A 2xx/success response body is still untrusted: validate this
+            # is a plain integer before it reaches the loop's `-le` test.
+            # Otherwise a hostile response reflecting a credential into
+            # result_info would surface it via bash's own "integer
+            # expression expected" runtime error, bypassing cf_redact.
+            if ! [[ "$zone_total_pages" =~ ^[0-9]+$ ]]; then
+              echo "zone-list returned a non-numeric result_info.total_pages on page $zone_page" >&2
+              exit 1
+            fi
             zone_page=$((zone_page + 1))
           done
           zones="$(jq -c '{success:true, result:.}' <<<"$zones_tmp")"

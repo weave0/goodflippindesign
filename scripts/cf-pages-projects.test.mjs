@@ -343,6 +343,52 @@ test("redacts Authorization/Bearer/Cookie shapes even for a credential that isn'
   );
 });
 
+test("redacts fully mixed-case Authorization and Cookie header names", async () => {
+  // [Aa]uthorization/[Cc]ookie only covers two casings; a header name like
+  // "aUtHoRiZaTiOn" is neither, so the rule must be truly case-insensitive.
+  await withMockServer(
+    () => ({
+      status: 403,
+      body: {
+        success: false,
+        errors: [{ code: 9108, message: "reflected: aUtHoRiZaTiOn: Basic leaked-value; cOoKiE: session=leaked-cookie" }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      assert.doesNotMatch(proc.stderr, /leaked-value/);
+      assert.doesNotMatch(proc.stderr, /leaked-cookie/);
+      assert.match(proc.stderr, /\[REDACTED\]/);
+    }
+  );
+});
+
+test("fails closed without leaking on a non-numeric result_info.total_pages", async () => {
+  // A 2xx/success body is still untrusted. If result_info.total_pages
+  // reflects a credential and is used unvalidated in a bash integer
+  // comparison, bash's own "integer expression expected" runtime error
+  // would echo it to stderr, bypassing cf_redact entirely.
+  await withMockServer(
+    () => ({
+      status: 200,
+      body: {
+        success: true,
+        result: [project("p1", "site-one")],
+        result_info: { page: 1, total_pages: "Bearer supersecrettoken123-leaked" },
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, "non-numeric pagination metadata must fail closed");
+      assert.equal(proc.stdout.trim(), "");
+      assert.doesNotMatch(proc.stderr, /test-token/);
+      assert.doesNotMatch(proc.stderr, /Bearer supersecrettoken123-leaked/);
+      assert.match(proc.stderr, /non-numeric result_info\.total_pages/);
+    }
+  );
+});
+
 test("redacts a standalone Bearer credential regardless of casing or token68 characters", async () => {
   // The standalone Bearer scrubber (for a reflected value not preceded by
   // "Authorization:") must match any scheme casing and the full token68
