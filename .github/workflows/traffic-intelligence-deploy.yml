@@ -285,6 +285,11 @@ jobs:
           # credential redacted from anything echoed.
           cf_redact() {
             local text="$1"
+            # sed processes input line by line, so a literal newline in a
+            # hostile message would let content past it dodge every rule
+            # below ("." never matches "\n"). Flatten to one line first.
+            text="${text//$'\n'/ }"
+            text="${text//$'\r'/ }"
             text="$(sed -E '
               s/(authorization"?[[:space:]]*:[[:space:]]*"?).*/\1[REDACTED]/gI;
               s/bearer[[:space:]]+[A-Za-z0-9._~+/=-]+/Bearer [REDACTED]/gI;

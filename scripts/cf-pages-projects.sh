@@ -27,6 +27,13 @@ CF_API_BASE="${CF_API_BASE:-https://api.cloudflare.com/client/v4}"
 # Cloudflare response reflects request headers back in an error body.
 cf_redact() {
   local text="$1"
+  # sed processes input line by line, so a literal newline in a hostile
+  # message would let content past it dodge every rule below ("." never
+  # matches "\n"). Flatten to a single line first so end-of-string
+  # redaction really does mean the rest of the message, not just the
+  # rest of the current line.
+  text="${text//$'\n'/ }"
+  text="${text//$'\r'/ }"
   # Structural patterns first (Authorization/Bearer/Cookie shapes), then a
   # literal mop-up for the actual token value wherever it appears outside
   # those shapes (e.g. reflected raw in an error message or URL).

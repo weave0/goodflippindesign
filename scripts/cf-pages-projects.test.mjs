@@ -471,3 +471,26 @@ test("fails closed on a non-2xx response even when the body falsely claims succe
     }
   );
 });
+
+test("redacts a credential on a line after an embedded newline", async () => {
+  // sed's "." never matches "\n": a hostile message with a literal
+  // newline (e.g. a pretty-printed value, or "Authorization:\nBasic ...")
+  // would let the continuation line dodge every redaction rule unless
+  // newlines are flattened first.
+  await withMockServer(
+    () => ({
+      status: 401,
+      body: {
+        success: false,
+        errors: [{ code: 9111, message: "Rejected: Authorization:\nBasic leaked-newline-secret\nCookie:\nsession=leaked-newline-cookie" }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      assert.doesNotMatch(proc.stderr, /leaked-newline-secret/);
+      assert.doesNotMatch(proc.stderr, /leaked-newline-cookie/);
+      assert.match(proc.stderr, /\[REDACTED\]/);
+    }
+  );
+});
