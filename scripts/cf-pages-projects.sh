@@ -32,7 +32,7 @@ cf_redact() {
   # those shapes (e.g. reflected raw in an error message or URL).
   text="$(sed -E '
     s/([Aa]uthorization"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/g;
-    s/[Bb]earer[[:space:]]+[A-Za-z0-9_.\-]+/Bearer [REDACTED]/g;
+    s/bearer[[:space:]]+[A-Za-z0-9._~+/=-]+/Bearer [REDACTED]/gI;
     s/([Cc]ookie"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/g
   ' <<<"$text")"
   text="${text//$CLOUDFLARE_API_TOKEN/[REDACTED]}"

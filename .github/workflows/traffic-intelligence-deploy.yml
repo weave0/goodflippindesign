@@ -287,7 +287,7 @@ jobs:
             local text="$1"
             text="$(sed -E '
               s/([Aa]uthorization"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/g;
-              s/[Bb]earer[[:space:]]+[A-Za-z0-9_.\-]+/Bearer [REDACTED]/g;
+              s/bearer[[:space:]]+[A-Za-z0-9._~+/=-]+/Bearer [REDACTED]/gI;
               s/([Cc]ookie"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/g
             ' <<<"$text")"
             text="${text//$CF_ZONE_API_TOKEN/[REDACTED]}"

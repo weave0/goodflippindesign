@@ -343,6 +343,27 @@ test("redacts Authorization/Bearer/Cookie shapes even for a credential that isn'
   );
 });
 
+test("redacts a standalone Bearer credential regardless of casing or token68 characters", async () => {
+  // The standalone Bearer scrubber (for a reflected value not preceded by
+  // "Authorization:") must match any scheme casing and the full token68
+  // charset (letters, digits, -._~+/=), not just [A-Za-z0-9_.-].
+  await withMockServer(
+    () => ({
+      status: 403,
+      body: {
+        success: false,
+        errors: [{ code: 9107, message: "Rejected: bEaReR abc+def==~test/xyz leaked raw" }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      assert.doesNotMatch(proc.stderr, /abc\+def==~test\/xyz/);
+      assert.match(proc.stderr, /Bearer \[REDACTED\]/);
+    }
+  );
+});
+
 test("redacts the token in a network-failure diagnostic (no server listening)", async () => {
   // A hardcoded port (e.g. 1) being closed isn't guaranteed on every host.
   // Bind an ephemeral port, close it immediately, and use that: nothing is
