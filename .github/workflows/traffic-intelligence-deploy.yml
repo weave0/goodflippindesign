@@ -51,6 +51,9 @@ jobs:
       - name: Install Traffic Intelligence
         run: npm ci --prefix traffic-intelligence --no-audit
 
+      - name: Validate Cloudflare Pages project pagination (TI-012)
+        run: node --test scripts/cf-pages-projects.test.mjs
+
       - name: Validate committed fixture
         run: |
           npm --prefix traffic-intelligence run lint
@@ -259,7 +262,7 @@ jobs:
         run: |
           set -euo pipefail
           out="$RUNNER_TEMP/gfdti-live/estate-config-1.0.production.json"
-          projects="$(curl -fsS "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+          projects="$(scripts/cf-pages-projects.sh)"
           test "$(jq -r '.success' <<<"$projects")" = "true"
           zones="$(curl -fsS "https://api.cloudflare.com/client/v4/zones?per_page=50" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
           test "$(jq -r '.success' <<<"$zones")" = "true"
