@@ -259,7 +259,7 @@ jobs:
         run: |
           set -euo pipefail
           out="$RUNNER_TEMP/gfdti-live/estate-config-1.0.production.json"
-          projects="$(curl -fsS "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects?per_page=100" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+          projects="$(curl -fsS "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
           test "$(jq -r '.success' <<<"$projects")" = "true"
           zones="$(curl -fsS "https://api.cloudflare.com/client/v4/zones?per_page=50" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
           test "$(jq -r '.success' <<<"$zones")" = "true"
