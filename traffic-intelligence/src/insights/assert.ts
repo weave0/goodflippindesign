@@ -50,6 +50,80 @@ function assertEstateBrief(value: unknown): void {
   }
 }
 
+const ESTATE_CONFIG_STATES = new Set(["healthy", "governance_gap", "config_drift", "unobserved"]);
+const ESTATE_EVIDENCE_CLASSES = ["zone", "dns", "pages"] as const;
+const ESTATE_EVIDENCE_STATUSES = new Set(["observed", "no_project", "unavailable"]);
+
+function isStringRecord(value: unknown): value is Record<string, string> {
+  return isObject(value) && Object.values(value).every(isString);
+}
+
+function assertEstateInventory(value: unknown, label: string): void {
+  if (!isObject(value) || !isString(value.authority) || !isBoolean(value.complete) || !isNumber(value.count)) {
+    throw new Error(`Insights estate_config.${label} must declare authority, complete and count`);
+  }
+}
+
+/**
+ * The estate accounting must reconcile: every governed zone accounted exactly
+ * once, and any non-observed evidence must carry a reason. A partially-accounted
+ * estate is rejected rather than rendered as if it were complete.
+ */
+export function assertEstateConfig(value: unknown): void {
+  if (!isObject(value)) throw new Error("Insights estate_config must be an object");
+  if (value.schema_version !== "1.1.0") throw new Error("Insights estate_config.schema_version must be 1.1.0");
+  if (!isNumber(value.governed_zone_count) || !isNumber(value.accounted_zone_count)) {
+    throw new Error("Insights estate_config requires governed_zone_count and accounted_zone_count");
+  }
+  if (!isObject(value.state_counts) || !Object.values(value.state_counts).every(isNumber)) {
+    throw new Error("Insights estate_config.state_counts must map states to counts");
+  }
+  assertEstateInventory(value.zone_inventory, "zone_inventory");
+  assertEstateInventory(value.pages_inventory, "pages_inventory");
+  if (!isStringArray(value.credential_boundaries)) {
+    throw new Error("Insights estate_config.credential_boundaries must be a string array");
+  }
+  if (!Array.isArray(value.properties)) throw new Error("Insights estate_config.properties must be an array");
+  const seen = new Set<string>();
+  value.properties.forEach((row: unknown, index: number) => {
+    if (!isObject(row) || !isString(row.property_id) || !isString(row.reason)) {
+      throw new Error(`Insights estate_config.properties[${index}] is malformed`);
+    }
+    if (!isString(row.state) || !ESTATE_CONFIG_STATES.has(row.state)) {
+      throw new Error(`Insights estate_config.properties[${index}].state is invalid`);
+    }
+    if (!isStringRecord(row.authorities) || !isStringRecord(row.evidence_status) || !isStringRecord(row.unavailable_reasons)) {
+      throw new Error(`Insights estate_config.properties[${index}] provenance maps must be string maps`);
+    }
+    if (seen.has(row.property_id)) throw new Error(`Insights estate_config lists ${row.property_id} more than once`);
+    seen.add(row.property_id);
+    for (const evidenceClass of ESTATE_EVIDENCE_CLASSES) {
+      const status = row.evidence_status[evidenceClass];
+      if (!isString(status) || !ESTATE_EVIDENCE_STATUSES.has(status)) {
+        throw new Error(`Insights estate_config.properties[${index}] has an invalid ${evidenceClass} evidence status`);
+      }
+      if (status !== "observed" && !row.unavailable_reasons[evidenceClass]?.trim()) {
+        throw new Error(`Insights estate_config.properties[${index}] ${evidenceClass} evidence is ${status} without an explicit reason`);
+      }
+      if (!isString(row.authorities[evidenceClass]) || !row.authorities[evidenceClass]) {
+        throw new Error(`Insights estate_config.properties[${index}] has no ${evidenceClass} authority`);
+      }
+    }
+  });
+  if (value.properties.length !== value.accounted_zone_count) {
+    throw new Error("Insights estate_config.accounted_zone_count does not match its properties");
+  }
+  if (value.accounted_zone_count !== value.governed_zone_count) {
+    throw new Error(
+      `Insights estate_config accounts for ${value.accounted_zone_count} of ${value.governed_zone_count} governed zones`,
+    );
+  }
+  const counted = Object.values(value.state_counts as Record<string, number>).reduce((a, b) => a + b, 0);
+  if (counted !== value.accounted_zone_count) {
+    throw new Error("Insights estate_config.state_counts do not sum to the accounted zone count");
+  }
+}
+
 function assertBrief(value: unknown, index: number): void {
   if (!isObject(value)) throw new Error(`Insights briefs[${index}] must be an object`);
   for (const key of ["brief_id", "property_id", "category", "headline", "summary", "recommended_action", "verification_condition"] as const) {
@@ -186,5 +260,6 @@ export function assertTrafficInsights(raw: unknown): asserts raw is TrafficInsig
       throw new Error("Insights schema 1.1.0 requires trend_comparisons array");
     }
     raw.trend_comparisons.forEach((row, index) => assertTrendComparison(row, index));
+    if (raw.estate_config !== undefined && raw.estate_config !== null) assertEstateConfig(raw.estate_config);
   }
 }

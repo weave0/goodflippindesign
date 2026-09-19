@@ -1,6 +1,9 @@
 import type { NamedSeries, WindowPayload } from "../gold/types";
 import type {
   EstateBrief,
+  EstateConfigAccounting,
+  EstateConfigPropertyAccounting,
+  EstateConfigState,
   InsightAction,
   InsightDailySeries,
   InsightFinding,
@@ -123,6 +126,50 @@ export function materialityScore(brief: OperationalBrief): number {
 
 export function estateBriefOf(insights: TrafficInsightDocument | null): EstateBrief | null {
   return insights?.estate_brief ?? null;
+}
+
+/** The producer's deployment/config accounting; null means no estate evidence was supplied (unobserved, never healthy). */
+export function estateConfigOf(insights: TrafficInsightDocument | null): EstateConfigAccounting | null {
+  return insights?.estate_config ?? null;
+}
+
+export function estateConfigRow(
+  insights: TrafficInsightDocument | null,
+  propertyId: string | null,
+): EstateConfigPropertyAccounting | null {
+  if (!propertyId) return null;
+  return estateConfigOf(insights)?.properties.find((row) => row.property_id === propertyId) ?? null;
+}
+
+export const ESTATE_CONFIG_STATE_LABEL: Record<EstateConfigState, string> = {
+  healthy: "Healthy",
+  governance_gap: "Governance gap",
+  config_drift: "Config drift",
+  unobserved: "Unobserved",
+};
+
+export const ESTATE_AUTHORITY_LABEL: Record<string, string> = {
+  analytics_credential: "measurement (analytics) credential",
+  deploy_credential: "trusted deployment credential",
+};
+
+/**
+ * Plain-language provenance: which authority proved which fact. A not-observed
+ * fact names its reason; the measurement credential lacking Pages authority is
+ * never reported as a failure here because the deployment credential is the
+ * authority that speaks for Pages.
+ */
+export function estateProvenanceLines(row: EstateConfigPropertyAccounting): string[] {
+  const noun: Record<string, string> = { zone: "Zone status", dns: "DNS records", pages: "Pages configuration" };
+  return (["zone", "dns", "pages"] as const).map((evidenceClass) => {
+    const authority = ESTATE_AUTHORITY_LABEL[row.authorities[evidenceClass] ?? ""] ?? row.authorities[evidenceClass] ?? "unknown authority";
+    const status = row.evidence_status[evidenceClass];
+    if (status === "observed") return `${noun[evidenceClass]}: proven by the ${authority}`;
+    if (status === "no_project") {
+      return `${noun[evidenceClass]}: the ${authority} positively found no Pages project for this domain`;
+    }
+    return `${noun[evidenceClass]}: not observed (${row.unavailable_reasons[evidenceClass] ?? "no reason recorded"})`;
+  });
 }
 
 export function propertyHealthRows(
