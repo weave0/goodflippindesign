@@ -314,6 +314,15 @@ jobs:
               echo "$(cf_redact "$operation request rejected: HTTP $http_code — Cloudflare error $code: $message")" >&2
               return 1
             fi
+            # A 2xx/success body is still untrusted: every caller treats
+            # .result as an array. If a hostile response makes it a scalar
+            # (e.g. a reflected credential), jq's own type-mismatch error
+            # at the call site would echo that value unredacted. Fail
+            # closed here, with a static message, before any caller sees it.
+            if ! jq -e '.result | type == "array"' <<<"$body" >/dev/null 2>&1; then
+              echo "$operation response did not contain a result array" >&2
+              return 1
+            fi
             printf '%s' "$body"
           }
           zones_tmp='[]'
