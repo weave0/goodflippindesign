@@ -263,22 +263,49 @@ jobs:
         shell: bash
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
+          CF_ZONE_API_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
         run: |
           set -euo pipefail
           out="$RUNNER_TEMP/gfdti-live/estate-config-1.0.production.json"
+          # Pages project authority belongs to the deploy credential; zone/DNS
+          # observation belongs to the analytics credential, which is the one
+          # already verified (see "Verify complete Cloudflare analytics estate
+          # access") to expose the full governed zone inventory. The deploy
+          # credential is scoped narrowly to its own Pages project's zone, so
+          # using it for the zone list here silently under-reports the estate.
           projects="$(scripts/cf-pages-projects.sh)"
           test "$(jq -r '.success' <<<"$projects")" = "true"
-          zones="$(curl -fsS "https://api.cloudflare.com/client/v4/zones?per_page=50" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
-          test "$(jq -r '.success' <<<"$zones")" = "true"
+          # Account-scoped and paginated, mirroring "Verify complete Cloudflare
+          # analytics estate access" above: an unscoped zone query can match a
+          # same-named zone the token can see in a different account and pull
+          # DNS evidence for the wrong estate entirely.
+          zones_tmp='[]'
+          zone_page=1
+          zone_total_pages=1
+          while [ "$zone_page" -le "$zone_total_pages" ]; do
+            zones_response="$(curl -fsS -G "https://api.cloudflare.com/client/v4/zones" \
+              -H "Authorization: Bearer $CF_ZONE_API_TOKEN" \
+              --data-urlencode "account.id=$CF_ACCOUNT_ID" \
+              --data-urlencode "per_page=50" \
+              --data-urlencode "page=$zone_page")"
+            test "$(jq -r '.success' <<<"$zones_response")" = "true"
+            zones_tmp="$(jq -c --argjson accumulated "$zones_tmp" '$accumulated + .result' <<<"$zones_response")"
+            zone_total_pages="$(jq -r '.result_info.total_pages // 1' <<<"$zones_response")"
+            zone_page=$((zone_page + 1))
+          done
+          zones="$(jq -c '{success:true, result:.}' <<<"$zones_tmp")"
           tmp="$(mktemp)"
           printf '{"schema_version":"1.0.0","contract_name":"gfd-estate-config","fixture":false,"properties":[' > "$tmp"
           first=1
           IFS=',' read -ra expected_zones <<< "$CF_EXPECTED_ZONES"
           for zone_name in "${expected_zones[@]}"; do
             zone="$(jq -c --arg n "$zone_name" '.result[] | select(.name==$n)' <<<"$zones" | head -1)"
-            test -n "$zone" || continue
+            if [ -z "$zone" ]; then
+              echo "Governed zone missing from Cloudflare zone-list evidence: $zone_name"
+              exit 1
+            fi
             zone_id="$(jq -r '.id' <<<"$zone")"
-            dns="$(curl -fsS "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?per_page=100" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"
+            dns="$(curl -fsS "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?per_page=100" -H "Authorization: Bearer $CF_ZONE_API_TOKEN")"
             test "$(jq -r '.success' <<<"$dns")" = "true"
             project="$(jq -c --arg d "$zone_name" '.result[] | select((.domains // []) | index($d))' <<<"$projects" | head -1)"
             record="$(jq -n --arg property "$zone_name" --argjson z "$zone" --argjson dns "$dns" --argjson p "${project:-null}" '
@@ -302,9 +329,14 @@ jobs:
           jq '.' "$tmp" > "$out"
           rm -f "$tmp"
           test "$(jq -r '.fixture' "$out")" = "false"
-          test "$(jq '.properties | length' "$out")" -gt 0
+          property_count="$(jq '.properties | length' "$out")"
+          test "$property_count" -eq "${#expected_zones[@]}" || {
+            echo "estate artifact has $property_count properties but ${#expected_zones[@]} zones are governed"
+            exit 1
+          }
           if grep -Fq "$CLOUDFLARE_API_TOKEN" "$out"; then echo "credential serialized"; exit 1; fi
-          echo "estate_config_properties=$(jq '.properties | length' "$out")"
+          if grep -Fq "$CF_ZONE_API_TOKEN" "$out"; then echo "credential serialized"; exit 1; fi
+          echo "estate_config_properties=$property_count"
 
       - name: Rebuild insights with bounded estate configuration evidence
         env:
