@@ -361,7 +361,7 @@ jobs:
                 # validation entirely.
                 zone_reported_page_present="$(jq -r '.result_info | has("page")' <<<"$zones_response" 2>/dev/null || echo "false")"
                 zone_reported_page="$(jq -r '.result_info | if has("page") then (.page | tostring) else "" end' <<<"$zones_response" 2>/dev/null || echo "")"
-                zone_total_pages="$(jq -r '.result_info | if has("total_pages") then (.total_pages | tostring) else "1" end' <<<"$zones_response" 2>/dev/null || echo "1")"
+                zone_reported_total_pages="$(jq -r '.result_info | if has("total_pages") then (.total_pages | tostring) else "1" end' <<<"$zones_response" 2>/dev/null || echo "1")"
                 ;;
               *)
                 echo "zone-list returned a non-object result_info on page $zone_page" >&2
@@ -378,7 +378,7 @@ jobs:
               echo "zone-list returned a non-positive-integer result_info.page on page $zone_page" >&2
               exit 1
             fi
-            if ! [[ "$zone_total_pages" =~ ^[1-9][0-9]{0,6}$ ]]; then
+            if ! [[ "$zone_reported_total_pages" =~ ^[1-9][0-9]{0,6}$ ]]; then
               # total_pages:0 on a page-1 response with actual results is
               # self-contradictory (Cloudflare reports total_pages=1 even
               # for an empty result set); accepting it would silently
@@ -393,6 +393,19 @@ jobs:
             # inventory.
             if [ "$zone_reported_page_present" = "true" ] && [ "$zone_reported_page" != "$zone_page" ]; then
               echo "zone-list page mismatch: requested page $zone_page, Cloudflare reported page $zone_reported_page" >&2
+              exit 1
+            fi
+            # `zone_total_pages` also gates the loop's own `-le` condition,
+            # so reassigning it from every response without checking
+            # consistency would let a later page silently lower/omit it
+            # (stopping before the advertised inventory is complete) or
+            # raise it (ballooning into far more requests than the first
+            # page ever promised). Pin it to the first page's value and
+            # fail closed if a later page disagrees.
+            if [ "$zone_page" -eq 1 ]; then
+              zone_total_pages="$zone_reported_total_pages"
+            elif [ "$zone_reported_total_pages" != "$zone_total_pages" ]; then
+              echo "zone-list pagination became inconsistent: total_pages changed from $zone_total_pages to $zone_reported_total_pages while reading page $zone_page" >&2
               exit 1
             fi
             zone_page=$((zone_page + 1))
