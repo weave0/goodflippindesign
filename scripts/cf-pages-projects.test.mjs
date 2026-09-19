@@ -282,3 +282,72 @@ test("a large inventory does not overflow the argument list (production regressi
     }
   );
 });
+
+// --- Hostile redaction tests -----------------------------------------
+// Diagnostics must never become a secret-exfiltration path. These assume
+// a worst case: Cloudflare's own error body (or a malicious/compromised
+// endpoint standing in for it) reflects the credential back verbatim.
+// runScript always sets CLOUDFLARE_API_TOKEN="test-token".
+
+test("redacts the live token when Cloudflare's error message reflects it back", async () => {
+  await withMockServer(
+    () => ({
+      status: 400,
+      body: {
+        success: false,
+        errors: [{ code: 9999, message: "Rejected for Authorization: Bearer test-token — token test-token is invalid" }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      assert.doesNotMatch(proc.stderr, /test-token/, "the raw token value must never appear in diagnostics");
+      assert.match(proc.stderr, /\[REDACTED\]/);
+      assert.match(proc.stderr, /rejected on page 1/);
+      assert.match(proc.stderr, /HTTP 400/);
+    }
+  );
+});
+
+test("redacts Authorization/Bearer/Cookie shapes even for a credential that isn't the live token", async () => {
+  await withMockServer(
+    () => ({
+      status: 403,
+      body: {
+        success: false,
+        errors: [{
+          code: 9106,
+          message: 'Upstream debug echo: {"authorization":"Bearer sk-unrelated-secret-abc123","cookie":"session=other-secret-xyz789"} Authorization: Bearer another-leaked-value; Cookie: raw=leaked-cookie-value',
+        }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      for (const leaked of [
+        "sk-unrelated-secret-abc123",
+        "other-secret-xyz789",
+        "another-leaked-value",
+        "leaked-cookie-value",
+      ]) {
+        assert.doesNotMatch(
+          proc.stderr,
+          new RegExp(leaked.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")),
+          `credential-shaped value "${leaked}" must be redacted`
+        );
+      }
+      assert.match(proc.stderr, /\[REDACTED\]/);
+      assert.match(proc.stderr, /HTTP 403/);
+    }
+  );
+});
+
+test("redacts the token in a network-failure diagnostic (no server listening)", async () => {
+  // Point at a closed local port so curl fails at the transport level,
+  // exercising the "unable to reach Cloudflare API" path directly.
+  const proc = await runScript("http://127.0.0.1:1");
+  assert.notEqual(proc.status, 0);
+  assert.doesNotMatch(proc.stderr, /test-token/);
+  assert.match(proc.stderr, /unable to reach Cloudflare API/);
+  assert.match(proc.stderr, /endpoint class: pages\/projects/);
+});

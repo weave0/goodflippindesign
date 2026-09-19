@@ -21,6 +21,24 @@ set -euo pipefail
 : "${CLOUDFLARE_API_TOKEN:?CLOUDFLARE_API_TOKEN is required}"
 CF_API_BASE="${CF_API_BASE:-https://api.cloudflare.com/client/v4}"
 
+# Diagnostics must never become a secret-exfiltration path: scrub the token
+# value itself plus any Authorization/Bearer/Cookie-shaped text from a
+# message before it is ever echoed, in case a hostile or malformed
+# Cloudflare response reflects request headers back in an error body.
+cf_redact() {
+  local text="$1"
+  # Structural patterns first (Authorization/Bearer/Cookie shapes), then a
+  # literal mop-up for the actual token value wherever it appears outside
+  # those shapes (e.g. reflected raw in an error message or URL).
+  text="$(sed -E '
+    s/([Aa]uthorization"?[[:space:]]*:[[:space:]]*"?[Bb]earer[[:space:]]+)[^",}[:space:]]*/\1[REDACTED]/g;
+    s/[Bb]earer[[:space:]]+[A-Za-z0-9_.\-]+/Bearer [REDACTED]/g;
+    s/([Cc]ookie"?[[:space:]]*:[[:space:]]*"?)[^",}[:space:]]*/\1[REDACTED]/g
+  ' <<<"$text")"
+  text="${text//$CLOUDFLARE_API_TOKEN/[REDACTED]}"
+  printf '%s' "$text"
+}
+
 pages_dir="$(mktemp -d)"
 trap 'rm -rf "$pages_dir"' EXIT
 
@@ -29,7 +47,7 @@ total_pages=1
 while [ "$page" -le "$total_pages" ]; do
   url="$CF_API_BASE/accounts/$CF_ACCOUNT_ID/pages/projects?page=$page"
   if ! response="$(curl -sS -w '\n%{http_code}' "$url" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN")"; then
-    echo "Pages project inventory request failed on page $page: unable to reach Cloudflare API" >&2
+    echo "Pages project inventory request failed on page $page: unable to reach Cloudflare API (endpoint class: pages/projects)" >&2
     exit 1
   fi
   http_code="${response##*$'\n'}"
@@ -38,7 +56,7 @@ while [ "$page" -le "$total_pages" ]; do
   if [ "$(jq -r '.success? // false' <<<"$body" 2>/dev/null || echo false)" != "true" ]; then
     code="$(jq -r '.errors[0].code // "unknown"' <<<"$body" 2>/dev/null || echo unknown)"
     message="$(jq -r '.errors[0].message // "no error detail provided"' <<<"$body" 2>/dev/null || echo "no error detail provided")"
-    echo "Pages project inventory request rejected on page $page: HTTP $http_code — Cloudflare error $code: $message" >&2
+    echo "$(cf_redact "Pages project inventory request rejected on page $page: HTTP $http_code — Cloudflare error $code: $message")" >&2
     exit 1
   fi
 

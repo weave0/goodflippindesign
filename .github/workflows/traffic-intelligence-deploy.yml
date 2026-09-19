@@ -279,16 +279,46 @@ jobs:
           # analytics estate access" above: an unscoped zone query can match a
           # same-named zone the token can see in a different account and pull
           # DNS evidence for the wrong estate entirely.
+          # Operator-grade diagnostics: on a rejected request, report the
+          # logical operation, HTTP status, and Cloudflare's own error
+          # code/message rather than a bare curl failure, with the
+          # credential redacted from anything echoed.
+          cf_redact() {
+            local text="$1"
+            text="$(sed -E '
+              s/([Aa]uthorization"?[[:space:]]*:[[:space:]]*"?[Bb]earer[[:space:]]+)[^",}[:space:]]*/\1[REDACTED]/g;
+              s/[Bb]earer[[:space:]]+[A-Za-z0-9_.\-]+/Bearer [REDACTED]/g;
+              s/([Cc]ookie"?[[:space:]]*:[[:space:]]*"?)[^",}[:space:]]*/\1[REDACTED]/g
+            ' <<<"$text")"
+            text="${text//$CF_ZONE_API_TOKEN/[REDACTED]}"
+            text="${text//$CLOUDFLARE_API_TOKEN/[REDACTED]}"
+            printf '%s' "$text"
+          }
+          cf_zone_request() {
+            local operation="$1" url_and_args=("${@:2}")
+            local response
+            if ! response="$(curl -sS -w '\n%{http_code}' -G "${url_and_args[@]}" -H "Authorization: Bearer $CF_ZONE_API_TOKEN")"; then
+              echo "$operation request failed: unable to reach Cloudflare API (endpoint class: ${operation})" >&2
+              return 1
+            fi
+            local http_code="${response##*$'\n'}" body="${response%$'\n'*}"
+            if [ "$(jq -r '.success? // false' <<<"$body" 2>/dev/null || echo false)" != "true" ]; then
+              local code message
+              code="$(jq -r '.errors[0].code // "unknown"' <<<"$body" 2>/dev/null || echo unknown)"
+              message="$(jq -r '.errors[0].message // "no error detail provided"' <<<"$body" 2>/dev/null || echo "no error detail provided")"
+              echo "$(cf_redact "$operation request rejected: HTTP $http_code — Cloudflare error $code: $message")" >&2
+              return 1
+            fi
+            printf '%s' "$body"
+          }
           zones_tmp='[]'
           zone_page=1
           zone_total_pages=1
           while [ "$zone_page" -le "$zone_total_pages" ]; do
-            zones_response="$(curl -fsS -G "https://api.cloudflare.com/client/v4/zones" \
-              -H "Authorization: Bearer $CF_ZONE_API_TOKEN" \
+            zones_response="$(cf_zone_request "zone-list" "https://api.cloudflare.com/client/v4/zones" \
               --data-urlencode "account.id=$CF_ACCOUNT_ID" \
               --data-urlencode "per_page=50" \
               --data-urlencode "page=$zone_page")"
-            test "$(jq -r '.success' <<<"$zones_response")" = "true"
             zones_tmp="$(jq -c --argjson accumulated "$zones_tmp" '$accumulated + .result' <<<"$zones_response")"
             zone_total_pages="$(jq -r '.result_info.total_pages // 1' <<<"$zones_response")"
             zone_page=$((zone_page + 1))
@@ -305,8 +335,7 @@ jobs:
               exit 1
             fi
             zone_id="$(jq -r '.id' <<<"$zone")"
-            dns="$(curl -fsS "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?per_page=100" -H "Authorization: Bearer $CF_ZONE_API_TOKEN")"
-            test "$(jq -r '.success' <<<"$dns")" = "true"
+            dns="$(cf_zone_request "dns-records:$zone_name" "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" --data-urlencode "per_page=100")"
             project="$(jq -c --arg d "$zone_name" '.result[] | select((.domains // []) | index($d))' <<<"$projects" | head -1)"
             record="$(jq -n --arg property "$zone_name" --argjson z "$zone" --argjson dns "$dns" --argjson p "${project:-null}" '
               {
