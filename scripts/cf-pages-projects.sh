@@ -31,9 +31,9 @@ cf_redact() {
   # literal mop-up for the actual token value wherever it appears outside
   # those shapes (e.g. reflected raw in an error message or URL).
   text="$(sed -E '
-    s/([Aa]uthorization"?[[:space:]]*:[[:space:]]*"?[Bb]earer[[:space:]]+)[^",}[:space:]]*/\1[REDACTED]/g;
+    s/([Aa]uthorization"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/g;
     s/[Bb]earer[[:space:]]+[A-Za-z0-9_.\-]+/Bearer [REDACTED]/g;
-    s/([Cc]ookie"?[[:space:]]*:[[:space:]]*"?)[^",}[:space:]]*/\1[REDACTED]/g
+    s/([Cc]ookie"?[[:space:]]*:[[:space:]]*"?)[^",}]*/\1[REDACTED]/g
   ' <<<"$text")"
   text="${text//$CLOUDFLARE_API_TOKEN/[REDACTED]}"
   printf '%s' "$text"
@@ -53,7 +53,7 @@ while [ "$page" -le "$total_pages" ]; do
   http_code="${response##*$'\n'}"
   body="${response%$'\n'*}"
 
-  if [ "$(jq -r '.success? // false' <<<"$body" 2>/dev/null || echo false)" != "true" ]; then
+  if [[ "$http_code" != 2?? ]] || [ "$(jq -r '.success? // false' <<<"$body" 2>/dev/null || echo false)" != "true" ]; then
     code="$(jq -r '.errors[0].code // "unknown"' <<<"$body" 2>/dev/null || echo unknown)"
     message="$(jq -r '.errors[0].message // "no error detail provided"' <<<"$body" 2>/dev/null || echo "no error detail provided")"
     echo "$(cf_redact "Pages project inventory request rejected on page $page: HTTP $http_code — Cloudflare error $code: $message")" >&2

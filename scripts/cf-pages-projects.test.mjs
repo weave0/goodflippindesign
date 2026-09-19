@@ -317,7 +317,7 @@ test("redacts Authorization/Bearer/Cookie shapes even for a credential that isn'
         success: false,
         errors: [{
           code: 9106,
-          message: 'Upstream debug echo: {"authorization":"Bearer sk-unrelated-secret-abc123","cookie":"session=other-secret-xyz789"} Authorization: Bearer another-leaked-value; Cookie: raw=leaked-cookie-value',
+          message: 'Upstream debug echo: {"authorization":"Bearer sk-unrelated-secret-abc123","cookie":"session=other-secret-xyz789"} Authorization: Bearer another-leaked-value; Cookie: raw=leaked-cookie-value; Authorization: Basic dXNlcjpwYXNzd29yZA==',
         }],
       },
     }),
@@ -329,6 +329,7 @@ test("redacts Authorization/Bearer/Cookie shapes even for a credential that isn'
         "other-secret-xyz789",
         "another-leaked-value",
         "leaked-cookie-value",
+        "dXNlcjpwYXNzd29yZA==",
       ]) {
         assert.doesNotMatch(
           proc.stderr,
@@ -343,11 +344,37 @@ test("redacts Authorization/Bearer/Cookie shapes even for a credential that isn'
 });
 
 test("redacts the token in a network-failure diagnostic (no server listening)", async () => {
-  // Point at a closed local port so curl fails at the transport level,
-  // exercising the "unable to reach Cloudflare API" path directly.
-  const proc = await runScript("http://127.0.0.1:1");
+  // A hardcoded port (e.g. 1) being closed isn't guaranteed on every host.
+  // Bind an ephemeral port, close it immediately, and use that: nothing is
+  // listening there, so curl fails at the transport level, exercising the
+  // "unable to reach Cloudflare API" path directly.
+  const probe = createServer();
+  await new Promise((resolve) => probe.listen(0, "127.0.0.1", resolve));
+  const { port } = probe.address();
+  await new Promise((resolve) => probe.close(resolve));
+
+  const proc = await runScript(`http://127.0.0.1:${port}`);
   assert.notEqual(proc.status, 0);
   assert.doesNotMatch(proc.stderr, /test-token/);
   assert.match(proc.stderr, /unable to reach Cloudflare API/);
   assert.match(proc.stderr, /endpoint class: pages\/projects/);
+});
+
+test("fails closed on a non-2xx response even when the body falsely claims success:true", async () => {
+  // A rejected request could still carry a JSON body shaped like a
+  // successful one (proxy/WAF error pages, or a malformed upstream). The
+  // HTTP status must gate acceptance independently of the body's own
+  // claimed .success flag.
+  await withMockServer(
+    () => ({
+      status: 503,
+      body: { success: true, result: [project("p1", "site-one")], result_info: { page: 1, total_pages: 1 } },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, "a non-2xx response must not be accepted");
+      assert.equal(proc.stdout.trim(), "");
+      assert.match(proc.stderr, /HTTP 503/);
+    }
+  );
 });
