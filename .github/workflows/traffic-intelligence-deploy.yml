@@ -279,18 +279,142 @@ jobs:
           # analytics estate access" above: an unscoped zone query can match a
           # same-named zone the token can see in a different account and pull
           # DNS evidence for the wrong estate entirely.
+          # Operator-grade diagnostics: on a rejected request, report the
+          # logical operation, HTTP status, and Cloudflare's own error
+          # code/message rather than a bare curl failure, with the
+          # credential redacted from anything echoed.
+          cf_redact() {
+            local text="$1"
+            # sed processes input line by line, so a literal newline in a
+            # hostile message would let content past it dodge every rule
+            # below ("." never matches "\n"). Flatten to one line first.
+            text="${text//$'\n'/ }"
+            text="${text//$'\r'/ }"
+            text="$(sed -E '
+              s/(authorization"?[[:space:]]*:[[:space:]]*"?).*/\1[REDACTED]/gI;
+              s/bearer[[:space:]]+[A-Za-z0-9._~+/=-]+/Bearer [REDACTED]/gI;
+              s/(cookie"?[[:space:]]*:[[:space:]]*"?).*/\1[REDACTED]/gI
+            ' <<<"$text")"
+            text="${text//$CF_ZONE_API_TOKEN/[REDACTED]}"
+            text="${text//$CLOUDFLARE_API_TOKEN/[REDACTED]}"
+            printf '%s' "$text"
+          }
+          cf_zone_request() {
+            local operation="$1" url_and_args=("${@:2}")
+            local response
+            if ! response="$(curl -sS -w '\n%{http_code}' -G "${url_and_args[@]}" -H "Authorization: Bearer $CF_ZONE_API_TOKEN")"; then
+              echo "$operation request failed: unable to reach Cloudflare API (endpoint class: ${operation})" >&2
+              return 1
+            fi
+            local http_code="${response##*$'\n'}" body="${response%$'\n'*}"
+            # `jq -r` stringifies JSON strings, so a naive
+            # `[ "$(jq -r '.success? // false')" != "true" ]` would treat
+            # a hostile `.success: "true"` (a string) the same as the
+            # boolean `true`, since both render as the text `true`.
+            # Compare the actual JSON value's identity with
+            # `jq -e '.success == true'` instead of comparing its
+            # rendered text, so only a genuine boolean true passes.
+            if [[ "$http_code" != 2?? ]] || ! jq -e '.success == true' <<<"$body" >/dev/null 2>&1; then
+              local code message
+              code="$(jq -r '.errors[0].code // "unknown"' <<<"$body" 2>/dev/null || echo unknown)"
+              message="$(jq -r '.errors[0].message // "no error detail provided"' <<<"$body" 2>/dev/null || echo "no error detail provided")"
+              echo "$(cf_redact "$operation request rejected: HTTP $http_code — Cloudflare error $code: $message")" >&2
+              return 1
+            fi
+            # A 2xx/success body is still untrusted: every caller treats
+            # .result as an array. If a hostile response makes it a scalar
+            # (e.g. a reflected credential), jq's own type-mismatch error
+            # at the call site would echo that value unredacted. Fail
+            # closed here, with a static message, before any caller sees it.
+            if ! jq -e '.result | type == "array"' <<<"$body" >/dev/null 2>&1; then
+              echo "$operation response did not contain a result array" >&2
+              return 1
+            fi
+            printf '%s' "$body"
+          }
           zones_tmp='[]'
           zone_page=1
           zone_total_pages=1
           while [ "$zone_page" -le "$zone_total_pages" ]; do
-            zones_response="$(curl -fsS -G "https://api.cloudflare.com/client/v4/zones" \
-              -H "Authorization: Bearer $CF_ZONE_API_TOKEN" \
+            zones_response="$(cf_zone_request "zone-list" "https://api.cloudflare.com/client/v4/zones" \
               --data-urlencode "account.id=$CF_ACCOUNT_ID" \
               --data-urlencode "per_page=50" \
               --data-urlencode "page=$zone_page")"
-            test "$(jq -r '.success' <<<"$zones_response")" = "true"
             zones_tmp="$(jq -c --argjson accumulated "$zones_tmp" '$accumulated + .result' <<<"$zones_response")"
-            zone_total_pages="$(jq -r '.result_info.total_pages // 1' <<<"$zones_response")"
+            # `(.result_info // {})` treats an explicit JSON false/null
+            # result_info the same as an absent key, silently swapping in
+            # {} and defaulting every field — and a non-object result_info
+            # (e.g. a string or array) makes has() itself raise a jq
+            # error, which the `2>/dev/null || echo` fallback then also
+            # converts to a default. Either path lets a malformed
+            # result_info be accepted as "absent" instead of failing
+            # closed. Distinguish "result_info absent" (legitimately
+            # default) from "result_info present but not an object" (must
+            # fail closed) before ever looking at its fields.
+            zone_result_info_kind="$(jq -r '
+              if has("result_info") then
+                if (.result_info | type) == "object" then "object" else "invalid" end
+              else "absent" end
+            ' <<<"$zones_response" 2>/dev/null || echo "invalid")"
+            case "$zone_result_info_kind" in
+              absent)
+                zone_reported_page="" zone_reported_page_present="false"
+                zone_total_pages="1"
+                ;;
+              object)
+                # Same absent-vs-invalid distinction at the field level: a
+                # naive `// 1`/`// ""` would treat an explicit false/null/
+                # empty-string value the same as absent and skip
+                # validation entirely.
+                zone_reported_page_present="$(jq -r '.result_info | has("page")' <<<"$zones_response" 2>/dev/null || echo "false")"
+                zone_reported_page="$(jq -r '.result_info | if has("page") then (.page | tostring) else "" end' <<<"$zones_response" 2>/dev/null || echo "")"
+                zone_reported_total_pages="$(jq -r '.result_info | if has("total_pages") then (.total_pages | tostring) else "1" end' <<<"$zones_response" 2>/dev/null || echo "1")"
+                ;;
+              *)
+                echo "zone-list returned a non-object result_info on page $zone_page" >&2
+                exit 1
+                ;;
+            esac
+            # A 2xx/success response body is still untrusted: validate these
+            # are plain integers before they reach the loop's `-le` test or
+            # a page-mismatch comparison. Otherwise a hostile response
+            # reflecting a credential into result_info would surface it via
+            # bash's own "integer expression expected" runtime error,
+            # bypassing cf_redact.
+            if [ "$zone_reported_page_present" = "true" ] && ! [[ "$zone_reported_page" =~ ^[1-9][0-9]{0,6}$ ]]; then
+              echo "zone-list returned a non-positive-integer result_info.page on page $zone_page" >&2
+              exit 1
+            fi
+            if ! [[ "$zone_reported_total_pages" =~ ^[1-9][0-9]{0,6}$ ]]; then
+              # total_pages:0 on a page-1 response with actual results is
+              # self-contradictory (Cloudflare reports total_pages=1 even
+              # for an empty result set); accepting it would silently
+              # truncate a real multi-page zone list to just page 1.
+              echo "zone-list returned a non-positive-integer result_info.total_pages on page $zone_page" >&2
+              exit 1
+            fi
+            # A reported page that doesn't match the requested one means
+            # the response can't be trusted to belong to this iteration —
+            # accepting it (or a repeated page) could silently aggregate
+            # duplicate or wrong-page zones into an apparently complete
+            # inventory.
+            if [ "$zone_reported_page_present" = "true" ] && [ "$zone_reported_page" != "$zone_page" ]; then
+              echo "zone-list page mismatch: requested page $zone_page, Cloudflare reported page $zone_reported_page" >&2
+              exit 1
+            fi
+            # `zone_total_pages` also gates the loop's own `-le` condition,
+            # so reassigning it from every response without checking
+            # consistency would let a later page silently lower/omit it
+            # (stopping before the advertised inventory is complete) or
+            # raise it (ballooning into far more requests than the first
+            # page ever promised). Pin it to the first page's value and
+            # fail closed if a later page disagrees.
+            if [ "$zone_page" -eq 1 ]; then
+              zone_total_pages="$zone_reported_total_pages"
+            elif [ "$zone_reported_total_pages" != "$zone_total_pages" ]; then
+              echo "zone-list pagination became inconsistent: total_pages changed from $zone_total_pages to $zone_reported_total_pages while reading page $zone_page" >&2
+              exit 1
+            fi
             zone_page=$((zone_page + 1))
           done
           zones="$(jq -c '{success:true, result:.}' <<<"$zones_tmp")"
@@ -305,8 +429,7 @@ jobs:
               exit 1
             fi
             zone_id="$(jq -r '.id' <<<"$zone")"
-            dns="$(curl -fsS "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records?per_page=100" -H "Authorization: Bearer $CF_ZONE_API_TOKEN")"
-            test "$(jq -r '.success' <<<"$dns")" = "true"
+            dns="$(cf_zone_request "dns-records:$zone_name" "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" --data-urlencode "per_page=100")"
             project="$(jq -c --arg d "$zone_name" '.result[] | select((.domains // []) | index($d))' <<<"$projects" | head -1)"
             record="$(jq -n --arg property "$zone_name" --argjson z "$zone" --argjson dns "$dns" --argjson p "${project:-null}" '
               {

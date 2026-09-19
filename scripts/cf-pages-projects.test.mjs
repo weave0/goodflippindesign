@@ -282,3 +282,360 @@ test("a large inventory does not overflow the argument list (production regressi
     }
   );
 });
+
+// --- Hostile redaction tests -----------------------------------------
+// Diagnostics must never become a secret-exfiltration path. These assume
+// a worst case: Cloudflare's own error body (or a malicious/compromised
+// endpoint standing in for it) reflects the credential back verbatim.
+// runScript always sets CLOUDFLARE_API_TOKEN="test-token".
+
+test("redacts the live token when Cloudflare's error message reflects it back", async () => {
+  await withMockServer(
+    () => ({
+      status: 400,
+      body: {
+        success: false,
+        errors: [{ code: 9999, message: "Rejected for Authorization: Bearer test-token — token test-token is invalid" }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      assert.doesNotMatch(proc.stderr, /test-token/, "the raw token value must never appear in diagnostics");
+      assert.match(proc.stderr, /\[REDACTED\]/);
+      assert.match(proc.stderr, /rejected on page 1/);
+      assert.match(proc.stderr, /HTTP 400/);
+    }
+  );
+});
+
+test("redacts Authorization/Bearer/Cookie shapes even for a credential that isn't the live token", async () => {
+  await withMockServer(
+    () => ({
+      status: 403,
+      body: {
+        success: false,
+        errors: [{
+          code: 9106,
+          message: 'Upstream debug echo: {"authorization":"Bearer sk-unrelated-secret-abc123","cookie":"session=other-secret-xyz789"} Authorization: Bearer another-leaked-value; Cookie: raw=leaked-cookie-value; Authorization: Basic dXNlcjpwYXNzd29yZA==',
+        }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      for (const leaked of [
+        "sk-unrelated-secret-abc123",
+        "other-secret-xyz789",
+        "another-leaked-value",
+        "leaked-cookie-value",
+        "dXNlcjpwYXNzd29yZA==",
+      ]) {
+        assert.doesNotMatch(
+          proc.stderr,
+          new RegExp(leaked.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")),
+          `credential-shaped value "${leaked}" must be redacted`
+        );
+      }
+      assert.match(proc.stderr, /\[REDACTED\]/);
+      assert.match(proc.stderr, /HTTP 403/);
+    }
+  );
+});
+
+test("redacts fully mixed-case Authorization and Cookie header names", async () => {
+  // [Aa]uthorization/[Cc]ookie only covers two casings; a header name like
+  // "aUtHoRiZaTiOn" is neither, so the rule must be truly case-insensitive.
+  await withMockServer(
+    () => ({
+      status: 403,
+      body: {
+        success: false,
+        errors: [{ code: 9108, message: "reflected: aUtHoRiZaTiOn: Basic leaked-value; cOoKiE: session=leaked-cookie" }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      assert.doesNotMatch(proc.stderr, /leaked-value/);
+      assert.doesNotMatch(proc.stderr, /leaked-cookie/);
+      assert.match(proc.stderr, /\[REDACTED\]/);
+    }
+  );
+});
+
+test("redacts a comma-delimited, quoted Authorization scheme value in full", async () => {
+  // A scheme like Digest carries comma-separated quoted sub-fields
+  // (username="...", response="..."). Stopping at the first comma or
+  // quote would leave the response (the actual secret) unredacted.
+  await withMockServer(
+    () => ({
+      status: 401,
+      body: {
+        success: false,
+        errors: [{
+          code: 9110,
+          message: 'Rejected: Authorization: Digest username="alice", realm="cf", response="leaked-digest-secret"; Cookie: session=leaked, other=leaked-too',
+        }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      assert.doesNotMatch(proc.stderr, /alice/);
+      assert.doesNotMatch(proc.stderr, /leaked-digest-secret/);
+      assert.doesNotMatch(proc.stderr, /leaked-too/);
+      assert.match(proc.stderr, /\[REDACTED\]/);
+    }
+  );
+});
+
+test("fails closed without leaking on a non-numeric result_info.total_pages", async () => {
+  // A 2xx/success body is still untrusted. If result_info.total_pages
+  // reflects a credential and is used unvalidated in a bash integer
+  // comparison, bash's own "integer expression expected" runtime error
+  // would echo it to stderr, bypassing cf_redact entirely.
+  await withMockServer(
+    () => ({
+      status: 200,
+      body: {
+        success: true,
+        result: [project("p1", "site-one")],
+        result_info: { page: 1, total_pages: "Bearer supersecrettoken123-leaked" },
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, "non-numeric pagination metadata must fail closed");
+      assert.equal(proc.stdout.trim(), "");
+      assert.doesNotMatch(proc.stderr, /test-token/);
+      assert.doesNotMatch(proc.stderr, /Bearer supersecrettoken123-leaked/);
+      assert.match(proc.stderr, /non-positive-integer result_info\.total_pages/);
+    }
+  );
+});
+
+test("redacts a standalone Bearer credential regardless of casing or token68 characters", async () => {
+  // The standalone Bearer scrubber (for a reflected value not preceded by
+  // "Authorization:") must match any scheme casing and the full token68
+  // charset (letters, digits, -._~+/=), not just [A-Za-z0-9_.-].
+  await withMockServer(
+    () => ({
+      status: 403,
+      body: {
+        success: false,
+        errors: [{ code: 9107, message: "Rejected: bEaReR abc+def==~test/xyz leaked raw" }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      assert.doesNotMatch(proc.stderr, /abc\+def==~test\/xyz/);
+      assert.match(proc.stderr, /Bearer \[REDACTED\]/);
+    }
+  );
+});
+
+test("redacts the token in a network-failure diagnostic (no server listening)", async () => {
+  // A hardcoded port (e.g. 1) being closed isn't guaranteed on every host.
+  // Bind an ephemeral port, close it immediately, and use that: nothing is
+  // listening there, so curl fails at the transport level, exercising the
+  // "unable to reach Cloudflare API" path directly.
+  const probe = createServer();
+  await new Promise((resolve) => probe.listen(0, "127.0.0.1", resolve));
+  const { port } = probe.address();
+  await new Promise((resolve) => probe.close(resolve));
+
+  const proc = await runScript(`http://127.0.0.1:${port}`);
+  assert.notEqual(proc.status, 0);
+  assert.doesNotMatch(proc.stderr, /test-token/);
+  assert.match(proc.stderr, /unable to reach Cloudflare API/);
+  assert.match(proc.stderr, /endpoint class: pages\/projects/);
+});
+
+test("fails closed on a non-2xx response even when the body falsely claims success:true", async () => {
+  // A rejected request could still carry a JSON body shaped like a
+  // successful one (proxy/WAF error pages, or a malformed upstream). The
+  // HTTP status must gate acceptance independently of the body's own
+  // claimed .success flag.
+  await withMockServer(
+    () => ({
+      status: 503,
+      body: { success: true, result: [project("p1", "site-one")], result_info: { page: 1, total_pages: 1 } },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, "a non-2xx response must not be accepted");
+      assert.equal(proc.stdout.trim(), "");
+      assert.match(proc.stderr, /HTTP 503/);
+    }
+  );
+});
+
+test("redacts a credential on a line after an embedded newline", async () => {
+  // sed's "." never matches "\n": a hostile message with a literal
+  // newline (e.g. a pretty-printed value, or "Authorization:\nBasic ...")
+  // would let the continuation line dodge every redaction rule unless
+  // newlines are flattened first.
+  await withMockServer(
+    () => ({
+      status: 401,
+      body: {
+        success: false,
+        errors: [{ code: 9111, message: "Rejected: Authorization:\nBasic leaked-newline-secret\nCookie:\nsession=leaked-newline-cookie" }],
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0);
+      assert.doesNotMatch(proc.stderr, /leaked-newline-secret/);
+      assert.doesNotMatch(proc.stderr, /leaked-newline-cookie/);
+      assert.match(proc.stderr, /\[REDACTED\]/);
+    }
+  );
+});
+
+test("fails closed on result_info.total_pages: 0 instead of silently truncating to one page", async () => {
+  // total_pages:0 on a page-1 response that also has actual results is
+  // self-contradictory (Cloudflare reports total_pages=1 even for an
+  // empty result set). Accepting 0 as "valid" would make the while loop
+  // stop after page 1 and report a truncated inventory as complete.
+  await withMockServer(
+    () => ({
+      status: 200,
+      body: {
+        success: true,
+        result: [project("p1", "site-one")],
+        result_info: { page: 1, total_pages: 0 },
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, "total_pages: 0 must fail closed, not silently succeed with one page");
+      assert.equal(proc.stdout.trim(), "");
+      assert.match(proc.stderr, /non-positive-integer result_info\.total_pages/);
+    }
+  );
+});
+
+test("fails closed on an oversized result_info.total_pages instead of overflowing bash's integer comparison", async () => {
+  // A digit-only value that's merely unbounded in length can still exceed
+  // bash's integer range. `[ "$page" -le "$total_pages" ]` then errors
+  // with "integer expression expected" — but that error happens inside a
+  // `while` condition, which set -e does not treat as fatal, so the loop
+  // would just silently stop and emit a partial inventory as complete.
+  await withMockServer(
+    () => ({
+      status: 200,
+      body: {
+        success: true,
+        result: [project("p1", "site-one")],
+        result_info: { page: 1, total_pages: "99999999999999999999999999999999" },
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, "an oversized total_pages must fail closed, not silently truncate");
+      assert.equal(proc.stdout.trim(), "");
+      assert.match(proc.stderr, /non-positive-integer result_info\.total_pages/);
+    }
+  );
+});
+
+for (const hostileValue of [false, null]) {
+  test(`fails closed on an explicit result_info.total_pages: ${hostileValue} instead of treating it as absent`, async () => {
+    // jq's `// default` treats an explicit JSON false/null the same as a
+    // missing key, so a naive `.total_pages // 1` would silently turn
+    // this into "1" and skip the numeric validation entirely, truncating
+    // a real multi-page inventory to just page 1.
+    await withMockServer(
+      () => ({
+        status: 200,
+        body: {
+          success: true,
+          result: [project("p1", "site-one")],
+          result_info: { page: 1, total_pages: hostileValue },
+        },
+      }),
+      async (baseUrl) => {
+        const proc = await runScript(baseUrl);
+        assert.notEqual(proc.status, 0, `total_pages: ${hostileValue} must fail closed, not be treated as absent`);
+        assert.equal(proc.stdout.trim(), "");
+        assert.match(proc.stderr, /non-positive-integer result_info\.total_pages/);
+      }
+    );
+  });
+}
+
+for (const hostileResultInfo of [false, null, "oops", [1, 2]]) {
+  test(`fails closed on a non-object result_info (${JSON.stringify(hostileResultInfo)}) instead of treating it as absent`, async () => {
+    // `(.result_info // {})` treats an explicit false/null result_info the
+    // same as a missing key, and a non-object result_info (a string or
+    // array) makes has() itself raise a jq error that a naive
+    // `2>/dev/null || echo` fallback also converts to a default. Either
+    // path would silently accept a malformed result_info as "absent"
+    // and default total_pages to 1, stopping pagination after page 1.
+    await withMockServer(
+      () => ({
+        status: 200,
+        body: {
+          success: true,
+          result: [project("p1", "site-one")],
+          result_info: hostileResultInfo,
+        },
+      }),
+      async (baseUrl) => {
+        const proc = await runScript(baseUrl);
+        assert.notEqual(
+          proc.status,
+          0,
+          `result_info: ${JSON.stringify(hostileResultInfo)} must fail closed, not be treated as absent`
+        );
+        assert.equal(proc.stdout.trim(), "");
+        assert.match(proc.stderr, /non-object result_info/);
+      }
+    );
+  });
+}
+
+test("fails closed on an explicit result_info.page: \"\" instead of skipping the page-mismatch check", async () => {
+  // An empty string is a value `has("page")` reports as present, but the
+  // page-mismatch check only ran when the extracted page string was
+  // non-empty — silently treating an explicit "" the same as truly
+  // absent and skipping validation instead of failing closed on it.
+  await withMockServer(
+    () => ({
+      status: 200,
+      body: {
+        success: true,
+        result: [project("p1", "site-one")],
+        result_info: { page: "", total_pages: 1 },
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, 'result_info.page: "" must fail closed, not be treated as absent');
+      assert.equal(proc.stdout.trim(), "");
+      assert.match(proc.stderr, /non-positive-integer result_info\.page/);
+    }
+  );
+});
+
+test('fails closed on a string success: "true" instead of accepting it like the boolean', async () => {
+  // `jq -r` stringifies JSON strings, so a naive `.success? // false`
+  // compared against the text "true" would treat a hostile
+  // `.success: "true"` (a string) the same as the boolean `true`, since
+  // both render identically. Only a genuine JSON boolean true may pass.
+  await withMockServer(
+    () => ({
+      status: 200,
+      body: { success: "true", result: [project("p1", "site-one")], result_info: { page: 1, total_pages: 1 } },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, 'success: "true" (string) must not be accepted like the boolean');
+      assert.equal(proc.stdout.trim(), "");
+      assert.match(proc.stderr, /request rejected on page 1/);
+    }
+  );
+});
