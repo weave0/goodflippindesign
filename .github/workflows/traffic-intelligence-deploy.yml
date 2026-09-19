@@ -5,11 +5,15 @@ on:
     branches: [main]
     paths:
       - "traffic-intelligence/**"
+      - "scripts/cf-pages-projects.sh"
+      - "scripts/cf-pages-projects.test.mjs"
       - ".github/workflows/traffic-intelligence-deploy.yml"
   push:
     branches: [main]
     paths:
       - "traffic-intelligence/**"
+      - "scripts/cf-pages-projects.sh"
+      - "scripts/cf-pages-projects.test.mjs"
       - ".github/workflows/traffic-intelligence-deploy.yml"
   schedule:
     - cron: "0 6 * * *"
