@@ -410,7 +410,7 @@ test("fails closed without leaking on a non-numeric result_info.total_pages", as
       assert.equal(proc.stdout.trim(), "");
       assert.doesNotMatch(proc.stderr, /test-token/);
       assert.doesNotMatch(proc.stderr, /Bearer supersecrettoken123-leaked/);
-      assert.match(proc.stderr, /non-numeric result_info\.total_pages/);
+      assert.match(proc.stderr, /non-positive-integer result_info\.total_pages/);
     }
   );
 });
@@ -491,6 +491,29 @@ test("redacts a credential on a line after an embedded newline", async () => {
       assert.doesNotMatch(proc.stderr, /leaked-newline-secret/);
       assert.doesNotMatch(proc.stderr, /leaked-newline-cookie/);
       assert.match(proc.stderr, /\[REDACTED\]/);
+    }
+  );
+});
+
+test("fails closed on result_info.total_pages: 0 instead of silently truncating to one page", async () => {
+  // total_pages:0 on a page-1 response that also has actual results is
+  // self-contradictory (Cloudflare reports total_pages=1 even for an
+  // empty result set). Accepting 0 as "valid" would make the while loop
+  // stop after page 1 and report a truncated inventory as complete.
+  await withMockServer(
+    () => ({
+      status: 200,
+      body: {
+        success: true,
+        result: [project("p1", "site-one")],
+        result_info: { page: 1, total_pages: 0 },
+      },
+    }),
+    async (baseUrl) => {
+      const proc = await runScript(baseUrl);
+      assert.notEqual(proc.status, 0, "total_pages: 0 must fail closed, not silently succeed with one page");
+      assert.equal(proc.stdout.trim(), "");
+      assert.match(proc.stderr, /non-positive-integer result_info\.total_pages/);
     }
   );
 });

@@ -81,12 +81,16 @@ while [ "$page" -le "$total_pages" ]; do
   # expected" runtime error echo that value straight to stderr, bypassing
   # cf_redact entirely — so the failure message here deliberately does not
   # interpolate the offending raw value.
-  if [ -n "$reported_page" ] && ! [[ "$reported_page" =~ ^[0-9]+$ ]]; then
-    echo "Pages project inventory returned a non-numeric result_info.page on page $page" >&2
+  if [ -n "$reported_page" ] && ! [[ "$reported_page" =~ ^[1-9][0-9]*$ ]]; then
+    echo "Pages project inventory returned a non-positive-integer result_info.page on page $page" >&2
     exit 1
   fi
-  if ! [[ "$reported_total_pages" =~ ^[0-9]+$ ]]; then
-    echo "Pages project inventory returned a non-numeric result_info.total_pages on page $page" >&2
+  if ! [[ "$reported_total_pages" =~ ^[1-9][0-9]*$ ]]; then
+    # total_pages:0 alongside a page 1 response that has actual results is
+    # self-contradictory (Cloudflare reports total_pages=1 even for an
+    # empty result set); accepting it would silently truncate a real
+    # multi-page inventory to just the first page.
+    echo "Pages project inventory returned a non-positive-integer result_info.total_pages on page $page" >&2
     exit 1
   fi
 
