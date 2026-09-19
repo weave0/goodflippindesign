@@ -351,13 +351,16 @@ jobs:
             ' <<<"$zones_response" 2>/dev/null || echo "invalid")"
             case "$zone_result_info_kind" in
               absent)
+                zone_reported_page="" zone_reported_page_present="false"
                 zone_total_pages="1"
                 ;;
               object)
                 # Same absent-vs-invalid distinction at the field level: a
-                # naive `// 1` would treat an explicit false/null
-                # total_pages the same as absent and skip validation
-                # entirely.
+                # naive `// 1`/`// ""` would treat an explicit false/null/
+                # empty-string value the same as absent and skip
+                # validation entirely.
+                zone_reported_page_present="$(jq -r '.result_info | has("page")' <<<"$zones_response" 2>/dev/null || echo "false")"
+                zone_reported_page="$(jq -r '.result_info | if has("page") then (.page | tostring) else "" end' <<<"$zones_response" 2>/dev/null || echo "")"
                 zone_total_pages="$(jq -r '.result_info | if has("total_pages") then (.total_pages | tostring) else "1" end' <<<"$zones_response" 2>/dev/null || echo "1")"
                 ;;
               *)
@@ -365,17 +368,31 @@ jobs:
                 exit 1
                 ;;
             esac
-            # A 2xx/success response body is still untrusted: validate this
-            # is a plain integer before it reaches the loop's `-le` test.
-            # Otherwise a hostile response reflecting a credential into
-            # result_info would surface it via bash's own "integer
-            # expression expected" runtime error, bypassing cf_redact.
+            # A 2xx/success response body is still untrusted: validate these
+            # are plain integers before they reach the loop's `-le` test or
+            # a page-mismatch comparison. Otherwise a hostile response
+            # reflecting a credential into result_info would surface it via
+            # bash's own "integer expression expected" runtime error,
+            # bypassing cf_redact.
+            if [ "$zone_reported_page_present" = "true" ] && ! [[ "$zone_reported_page" =~ ^[1-9][0-9]{0,6}$ ]]; then
+              echo "zone-list returned a non-positive-integer result_info.page on page $zone_page" >&2
+              exit 1
+            fi
             if ! [[ "$zone_total_pages" =~ ^[1-9][0-9]{0,6}$ ]]; then
               # total_pages:0 on a page-1 response with actual results is
               # self-contradictory (Cloudflare reports total_pages=1 even
               # for an empty result set); accepting it would silently
               # truncate a real multi-page zone list to just page 1.
               echo "zone-list returned a non-positive-integer result_info.total_pages on page $zone_page" >&2
+              exit 1
+            fi
+            # A reported page that doesn't match the requested one means
+            # the response can't be trusted to belong to this iteration —
+            # accepting it (or a repeated page) could silently aggregate
+            # duplicate or wrong-page zones into an apparently complete
+            # inventory.
+            if [ "$zone_reported_page_present" = "true" ] && [ "$zone_reported_page" != "$zone_page" ]; then
+              echo "zone-list page mismatch: requested page $zone_page, Cloudflare reported page $zone_reported_page" >&2
               exit 1
             fi
             zone_page=$((zone_page + 1))
