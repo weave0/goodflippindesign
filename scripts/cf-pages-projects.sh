@@ -71,8 +71,13 @@ while [ "$page" -le "$total_pages" ]; do
     exit 1
   fi
 
-  reported_page="$(jq -r '.result_info.page // empty' <<<"$body")"
-  reported_total_pages="$(jq -r '.result_info.total_pages // 1' <<<"$body")"
+  # `// default` treats an explicit JSON false/null the same as an absent
+  # key, so a hostile response with result_info.total_pages:false would
+  # silently become "1" and skip the numeric validation below entirely.
+  # Distinguish "field absent" (legitimately default) from "field present
+  # but not a positive integer" (must reach the fail-closed check).
+  reported_page="$(jq -r '(.result_info // {}) | if has("page") then (.page | tostring) else "" end' <<<"$body" 2>/dev/null || echo "")"
+  reported_total_pages="$(jq -r '(.result_info // {}) | if has("total_pages") then (.total_pages | tostring) else "1" end' <<<"$body" 2>/dev/null || echo "1")"
 
   # A 2xx/success response is still an untrusted body: validate these are
   # plain non-negative integers before they ever reach an arithmetic or

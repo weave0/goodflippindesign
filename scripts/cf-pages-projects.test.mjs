@@ -541,3 +541,28 @@ test("fails closed on an oversized result_info.total_pages instead of overflowin
     }
   );
 });
+
+for (const hostileValue of [false, null]) {
+  test(`fails closed on an explicit result_info.total_pages: ${hostileValue} instead of treating it as absent`, async () => {
+    // jq's `// default` treats an explicit JSON false/null the same as a
+    // missing key, so a naive `.total_pages // 1` would silently turn
+    // this into "1" and skip the numeric validation entirely, truncating
+    // a real multi-page inventory to just page 1.
+    await withMockServer(
+      () => ({
+        status: 200,
+        body: {
+          success: true,
+          result: [project("p1", "site-one")],
+          result_info: { page: 1, total_pages: hostileValue },
+        },
+      }),
+      async (baseUrl) => {
+        const proc = await runScript(baseUrl);
+        assert.notEqual(proc.status, 0, `total_pages: ${hostileValue} must fail closed, not be treated as absent`);
+        assert.equal(proc.stdout.trim(), "");
+        assert.match(proc.stderr, /non-positive-integer result_info\.total_pages/);
+      }
+    );
+  });
+}
