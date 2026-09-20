@@ -198,6 +198,8 @@ export interface EstateConfigAccounting {
   schema_version: "1.1.0";
   governed_zone_count: number;
   accounted_zone_count: number;
+  /** The governed estate itself (sorted): the accounting must cover exactly these zones. */
+  governed_zones: string[];
   state_counts: Record<string, number>;
   zone_inventory: EstateConfigInventory;
   pages_inventory: EstateConfigInventory;

@@ -18,6 +18,7 @@ const estateConfig = {
   schema_version: "1.1.0",
   governed_zone_count: 3,
   accounted_zone_count: 3,
+  governed_zones: ["dark.example", "direct.example", "example.com"],
   state_counts: { healthy: 1, governance_gap: 1, config_drift: 0, unobserved: 1 },
   zone_inventory: { authority: "analytics_credential", complete: true, count: 3 },
   pages_inventory: { authority: "deploy_credential", complete: true, count: 7 },
@@ -122,9 +123,9 @@ describe("estate deployment/config authority in the cockpit", () => {
   });
 
   it("rejects a partially-accounted estate instead of rendering it as complete", async () => {
-    stubFetch({ ...baseInsights, estate_config: { ...estateConfig, governed_zone_count: 4 } });
+    stubFetch({ ...baseInsights, estate_config: { ...estateConfig, governed_zone_count: 4, governed_zones: [...estateConfig.governed_zones, "missing.example"] } });
     render(<App />);
-    expect(await screen.findByText(/accounts for 3 of 4 governed zones/)).toBeInTheDocument();
+    expect(await screen.findByText(/properties do not exactly match governed_zones/)).toBeInTheDocument();
     expect(screen.queryByTestId("estate-config-summary")).toBeNull();
   });
 });

@@ -27,6 +27,7 @@ const accounting = (rows: EstateConfigPropertyAccounting[] = [row(), row({ prope
     schema_version: "1.1.0",
     governed_zone_count: rows.length,
     accounted_zone_count: rows.length,
+    governed_zones: rows.map((r) => r.property_id).sort(),
     state_counts: counts,
     zone_inventory: { authority: "analytics_credential", complete: true, count: rows.length },
     pages_inventory: { authority: "deploy_credential", complete: true, count: 3 },
@@ -65,7 +66,11 @@ describe("estate_config accounting contract", () => {
   });
 
   const bad: Array<[string, (a: EstateConfigAccounting) => void, RegExp]> = [
-    ["a governed zone unaccounted for", (a) => { a.governed_zone_count = 3; }, /accounts for 2 of 3 governed zones/],
+    ["a governed zone unaccounted for", (a) => { a.governed_zone_count = 3; a.governed_zones.push("c.com"); }, /do not exactly match governed_zones/],
+    ["a same-size swap of governed zone identities", (a) => { a.governed_zones = ["a.com", "zzz-arbitrary.com"]; }, /do not exactly match governed_zones/],
+    ["duplicate governed zones", (a) => { a.governed_zones = ["a.com", "a.com"]; }, /governed_zones contains duplicates/],
+    ["governed_zones missing", (a) => { delete (a as unknown as { governed_zones?: unknown }).governed_zones; }, /governed_zones must be a list of zone names/],
+    ["governed_zones not matching governed_zone_count", (a) => { a.governed_zone_count = 3; }, /governed_zones does not match governed_zone_count/],
     ["accounted count that disagrees with the rows", (a) => { a.accounted_zone_count = 5; }, /does not match its properties/],
     ["state counts that disagree with the per-property states", (a) => { a.state_counts.healthy = 1; a.state_counts.unobserved = 1; }, /state_counts\.healthy does not match/],
     ["a state count that is fractional", (a) => { a.state_counts.healthy = 2.5; }, /exactly the four known states/],

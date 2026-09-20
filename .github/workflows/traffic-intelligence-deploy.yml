@@ -410,6 +410,8 @@ jobs:
               missing = sorted(set(expected_zones) - set(accounted))
               extra = sorted(set(accounted) - set(expected_zones))
               raise SystemExit(f"estate accounting does not reconcile with the governed estate: missing={missing} extra={extra}")
+          if sorted(accounting.governed_zones) != sorted(expected_zones):
+              raise SystemExit("estate accounting governed_zones does not equal CF_EXPECTED_ZONES")
           if accounting.governed_zone_count != len(expected_zones) or accounting.accounted_zone_count != len(expected_zones):
               raise SystemExit("estate accounting counts do not match the governed zone count")
           if not (accounting.zone_inventory.complete and accounting.pages_inventory.complete):

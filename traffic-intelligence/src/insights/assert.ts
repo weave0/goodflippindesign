@@ -92,6 +92,9 @@ export function assertEstateConfig(value: unknown): void {
   if (!isCount(value.governed_zone_count) || !isCount(value.accounted_zone_count)) {
     throw new Error("Insights estate_config requires non-negative integer governed_zone_count and accounted_zone_count");
   }
+  if (!isStringArray(value.governed_zones) || value.governed_zones.some((zone) => zone === "")) {
+    throw new Error("Insights estate_config.governed_zones must be a list of zone names");
+  }
   // Exactly the four known states, each a non-negative integer: an arbitrary key or a
   // fractional/negative count is a false accounting.
   const stateCounts = value.state_counts;
@@ -136,6 +139,19 @@ export function assertEstateConfig(value: unknown): void {
       }
     }
   });
+  // The governed zone identities, not just their number: a same-size swap of the real zones
+  // for arbitrary ids must not validate as a complete accounting.
+  const governedZones = value.governed_zones as string[];
+  if (new Set(governedZones).size !== governedZones.length) {
+    throw new Error("Insights estate_config.governed_zones contains duplicates");
+  }
+  const accountedIds = new Set((value.properties as Array<{ property_id: string }>).map((row) => row.property_id));
+  if (governedZones.length !== accountedIds.size || governedZones.some((zone) => !accountedIds.has(zone))) {
+    throw new Error("Insights estate_config.properties do not exactly match governed_zones");
+  }
+  if (governedZones.length !== value.governed_zone_count) {
+    throw new Error("Insights estate_config.governed_zones does not match governed_zone_count");
+  }
   if (value.properties.length !== value.accounted_zone_count) {
     throw new Error("Insights estate_config.accounted_zone_count does not match its properties");
   }
