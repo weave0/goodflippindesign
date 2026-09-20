@@ -64,9 +64,13 @@ function isStringRecord(value: unknown): value is Record<string, string> {
   return isObject(value) && Object.values(value).every(isString);
 }
 
+function isCount(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
 function assertEstateInventory(value: unknown, label: string): void {
-  if (!isObject(value) || !isString(value.authority) || !isBoolean(value.complete) || !isNumber(value.count)) {
-    throw new Error(`Insights estate_config.${label} must declare authority, complete and count`);
+  if (!isObject(value) || !isString(value.authority) || !isBoolean(value.complete) || !isCount(value.count)) {
+    throw new Error(`Insights estate_config.${label} must declare authority, complete and a non-negative integer count`);
   }
 }
 
@@ -78,11 +82,18 @@ function assertEstateInventory(value: unknown, label: string): void {
 export function assertEstateConfig(value: unknown): void {
   if (!isObject(value)) throw new Error("Insights estate_config must be an object");
   if (value.schema_version !== "1.1.0") throw new Error("Insights estate_config.schema_version must be 1.1.0");
-  if (!isNumber(value.governed_zone_count) || !isNumber(value.accounted_zone_count)) {
-    throw new Error("Insights estate_config requires governed_zone_count and accounted_zone_count");
+  if (!isCount(value.governed_zone_count) || !isCount(value.accounted_zone_count)) {
+    throw new Error("Insights estate_config requires non-negative integer governed_zone_count and accounted_zone_count");
   }
-  if (!isObject(value.state_counts) || !Object.values(value.state_counts).every(isNumber)) {
-    throw new Error("Insights estate_config.state_counts must map states to counts");
+  // Exactly the four known states, each a non-negative integer: an arbitrary key or a
+  // fractional/negative count is a false accounting.
+  const stateCounts = value.state_counts;
+  if (
+    !isObject(stateCounts) ||
+    Object.keys(stateCounts).length !== ESTATE_CONFIG_STATES.size ||
+    ![...ESTATE_CONFIG_STATES].every((state) => isCount(stateCounts[state]))
+  ) {
+    throw new Error("Insights estate_config.state_counts must map exactly the four known states to non-negative integers");
   }
   assertEstateInventory(value.zone_inventory, "zone_inventory");
   assertEstateInventory(value.pages_inventory, "pages_inventory");
@@ -126,9 +137,13 @@ export function assertEstateConfig(value: unknown): void {
       `Insights estate_config accounts for ${value.accounted_zone_count} of ${value.governed_zone_count} governed zones`,
     );
   }
-  const counted = Object.values(value.state_counts as Record<string, number>).reduce((a, b) => a + b, 0);
-  if (counted !== value.accounted_zone_count) {
-    throw new Error("Insights estate_config.state_counts do not sum to the accounted zone count");
+  // Derive each state's count from the rows and compare: the summary may not disagree with the properties.
+  const derived: Record<string, number> = {};
+  for (const row of value.properties as Array<{ state: string }>) derived[row.state] = (derived[row.state] ?? 0) + 1;
+  for (const state of ESTATE_CONFIG_STATES) {
+    if ((derived[state] ?? 0) !== (stateCounts as Record<string, number>)[state]) {
+      throw new Error(`Insights estate_config.state_counts.${state} does not match the per-property states`);
+    }
   }
 }
 

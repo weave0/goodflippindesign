@@ -18,6 +18,7 @@ import {
   EstateAcquisitionError,
   EstateValidationError,
   acquireEstate,
+  assertGovernedZoneNames,
   cfGet,
   fetchAllPages,
   parseExpectedZones,
@@ -584,6 +585,65 @@ test("validation reports every problem, not just the first", async () => {
   await assert.rejects(
     async () => validateEstateArtifact(artifact, { expectedZones: ["a.com", "b.com"] }),
     (error) => error.problems.length >= 3,
+  );
+});
+
+test("expected zones must be plain hostnames: anything else is refused and never echoed", () => {
+  for (const hostile of [
+    `evil.com\n::error::forged`,
+    `${ZONE_TOKEN}`,
+    "a.com/../../accounts",
+    "a.com?x=1",
+    "a b.com",
+    "-bad.com",
+    "nodot",
+    "a.com,${ZONE_TOKEN}",
+  ]) {
+    assert.throws(
+      () => parseExpectedZones(hostile),
+      (error) => {
+        assert.ok(error instanceof EstateAcquisitionError);
+        assert.match(error.message, /not a valid hostname/);
+        assert.ok(!error.message.includes(ZONE_TOKEN) && !error.message.includes("::error::"));
+        return true;
+      },
+      JSON.stringify(hostile),
+    );
+  }
+  assert.deepEqual(parseExpectedZones("fwomp.us,goodflippinvibes.com,xn--bcher-kva.example"), ["fwomp.us", "goodflippinvibes.com", "xn--bcher-kva.example"]);
+});
+
+test("a hostile governed zone name is refused at every layer before it can reach any sink", async () => {
+  // The library layers must be safe on their own, not only via parseExpectedZones.
+  const hostileZone = `${ZONE_TOKEN}\n::error::forged Authorization: Bearer ${DEPLOY_TOKEN}`;
+  assert.throws(() => assertGovernedZoneNames([hostileZone]), /not a valid hostname/);
+  await withMockServer(
+    () => ok([], { page: 1, total_pages: 1 }),
+    async (base, requests) => {
+      await assert.rejects(acquire(base, [hostileZone]), (error) => {
+        assert.match(error.message, /not a valid hostname/);
+        assert.ok(!error.message.includes(ZONE_TOKEN) && !error.message.includes(DEPLOY_TOKEN));
+        return true;
+      });
+      assert.equal(requests.length, 0, "no request may be made with a hostile zone name");
+    },
+  );
+  const artifact = await goodArtifact();
+  assert.throws(() => validateEstateArtifact(artifact, { expectedZones: [hostileZone] }), /not a valid hostname/);
+});
+
+test("the operation and endpoint labels in every diagnostic are redacted (defence in depth)", async () => {
+  await withMockServer(
+    () => ok([zone("a.com")], { page: 1, total_pages: 0 }),
+    async (base) => {
+      await assert.rejects(
+        fetchAllPages({ base, path: "/zones", token: ZONE_TOKEN, operation: `dns-records:${ZONE_TOKEN}`, endpointClass: `cls-${DEPLOY_TOKEN}`, secrets: [DEPLOY_TOKEN], ...FAST }),
+        (error) => {
+          assert.ok(!error.message.includes(ZONE_TOKEN) && !error.message.includes(DEPLOY_TOKEN), error.message);
+          return true;
+        },
+      );
+    },
   );
 });
 

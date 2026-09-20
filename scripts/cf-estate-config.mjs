@@ -108,6 +108,11 @@ export function redact(input, secrets = []) {
   return text;
 }
 
+/** A short, single-line, redacted label for interpolation into diagnostics. */
+function label(value, secrets) {
+  return bounded(redact(String(value ?? ""), secrets));
+}
+
 function bounded(text) {
   return text.length > MAX_MESSAGE_LENGTH ? `${text.slice(0, MAX_MESSAGE_LENGTH)}…` : text;
 }
@@ -161,6 +166,10 @@ export async function cfGet({
   timeoutMs = 30_000,
 }) {
   const allSecrets = [token, ...secrets];
+  // Labels can carry externally supplied text (a governed zone name from
+  // CF_EXPECTED_ZONES is part of the DNS operation): sanitize before interpolation.
+  const op = label(operation, allSecrets);
+  const endpoint = label(endpointClass, allSecrets);
   const url = new URL(`${base}${path}`);
   for (const [key, value] of Object.entries(query)) url.searchParams.set(key, String(value));
 
@@ -177,7 +186,7 @@ export async function cfGet({
     } catch {
       // Deliberately does not include the underlying error text or cause.
       lastError = new EstateAcquisitionError(
-        `${operation} request failed: unable to reach Cloudflare API (endpoint class: ${endpointClass})`,
+        `${op} request failed: unable to reach Cloudflare API (endpoint class: ${endpoint})`,
         { reason: "unable to reach Cloudflare API" },
       );
       continue;
@@ -200,7 +209,7 @@ export async function cfGet({
     if (!httpOk || body?.success !== true) {
       const { status, tail } = describeRejection({ operation, status: response.status, body, rawText, secrets: allSecrets });
       lastError = new EstateAcquisitionError(
-        `${operation} request rejected: HTTP ${status} — ${tail} (endpoint class: ${endpointClass})`,
+        `${op} request rejected: HTTP ${status} — ${tail} (endpoint class: ${endpoint})`,
         { reason: `HTTP ${status} — ${tail}` },
       );
       if (RETRYABLE(response.status)) continue;
@@ -210,7 +219,7 @@ export async function cfGet({
     // A 2xx/success body is still untrusted.
     if (!Array.isArray(body.result)) {
       throw new EstateAcquisitionError(
-        `${operation} response did not contain a result array (endpoint class: ${endpointClass})`,
+        `${op} response did not contain a result array (endpoint class: ${endpoint})`,
         { reason: "response did not contain a result array" },
       );
     }
@@ -232,8 +241,11 @@ function positiveInteger(value, max = 9_999_999) {
  * partial inventory.
  */
 export async function fetchAllPages({ operation, endpointClass, path, query = {}, idKey = "id", ...context }) {
+  const secretsForLabels = [context.token, ...(context.secrets ?? [])];
+  const op = label(operation, secretsForLabels);
+  const endpoint = label(endpointClass, secretsForLabels);
   const fail = (message) => {
-    throw new EstateAcquisitionError(`${operation} ${message} (endpoint class: ${endpointClass})`, { reason: message });
+    throw new EstateAcquisitionError(`${op} ${message} (endpoint class: ${endpoint})`, { reason: message });
   };
   const items = [];
   let page = 1;
@@ -366,12 +378,27 @@ function pagesEvidenceFor(zoneName, projects) {
 // Acquisition
 // ---------------------------------------------------------------------------
 
+const HOSTNAME = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
+
+/**
+ * Governed zone names flow into request paths, operation labels, evidence reasons,
+ * warnings and property ids. The one choke point: anything that is not a plain
+ * hostname is refused outright and never echoed, so hostile text cannot reach any
+ * sink. Applied on parse, on acquisition and on validation.
+ */
+export function assertGovernedZoneNames(zones) {
+  if (!Array.isArray(zones) || !zones.every((zone) => typeof zone === "string" && HOSTNAME.test(zone))) {
+    throw new EstateAcquisitionError("governed zones contain an entry that is not a valid hostname");
+  }
+}
+
 export function parseExpectedZones(text) {
   const zones = String(text ?? "")
     .split(",")
     .map((zone) => zone.trim())
     .filter(Boolean);
   if (zones.length === 0) throw new EstateAcquisitionError("CF_EXPECTED_ZONES is empty: there is no governed estate to account for");
+  assertGovernedZoneNames(zones);
   if (new Set(zones).size !== zones.length) throw new EstateAcquisitionError("CF_EXPECTED_ZONES contains duplicate zones");
   return zones;
 }
@@ -391,6 +418,7 @@ export async function acquireEstate({
   retryDelayMs,
   onWarning = () => {},
 }) {
+  assertGovernedZoneNames(expectedZones);
   const context = { fetchImpl, base, token: zoneToken, secrets, retries, retryDelayMs };
 
   const zones = await fetchAllPages({
@@ -493,6 +521,7 @@ const EXPECTED_AUTHORITY = { zone: AUTHORITY_ANALYTICS, dns: AUTHORITY_ANALYTICS
  * Throws EstateValidationError listing every problem; returns the accounting.
  */
 export function validateEstateArtifact(artifact, { expectedZones, secrets = [] }) {
+  assertGovernedZoneNames(expectedZones);
   const problems = [];
   const add = (message) => problems.push(message);
 
