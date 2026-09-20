@@ -12,6 +12,7 @@ import {
   extractSnoozeFromLabelsOrBody,
   lifecycleFromLabels,
   parseMachineBlock,
+  proseDiffers,
   upsertMachineBlock,
   type ComposedIssue,
 } from "./issue-body";
@@ -558,7 +559,11 @@ export function planWorkSync(options: {
       groupSize,
     });
 
-    if (materialFieldsChanged(machine, composed.machine) || consolidatable) {
+    // The prose is written once from the finding/brief current at first detection. If those
+    // have since changed (e.g. a finding was reclassified as intentional least privilege),
+    // refresh it so the issue does not keep announcing a stale headline.
+    const proseStale = proseDiffers(existing.body, composed.body);
+    if (materialFieldsChanged(machine, composed.machine) || consolidatable || proseStale) {
       composed.machine.lifecycle = lifecycle;
       // Ensure evidence section refreshed from prior body
       const snap = snapshotFromInsights({
@@ -570,7 +575,7 @@ export function planWorkSync(options: {
       let nextBody = upsertEvidenceSection(existing.body, snap);
       nextBody = upsertMachineBlock(nextBody, composed.machine);
       // Prefer full composed body when structure upgraded (group members section).
-      if (consolidatable || !existing.body.includes("### Evidence (closed-loop)")) {
+      if (consolidatable || proseStale || !existing.body.includes("### Evidence (closed-loop)")) {
         nextBody = composed.body;
       }
       composed.body = nextBody;
@@ -580,7 +585,11 @@ export function planWorkSync(options: {
         eligibility,
         issue_number: existing.number,
         composed,
-        reason: consolidatable ? "consolidated evidence refresh" : "material fields / evidence changed",
+        reason: consolidatable
+          ? "consolidated evidence refresh"
+          : proseStale
+            ? "headline prose no longer matches current finding/brief"
+            : "material fields / evidence changed",
       });
       metrics.updates_last_sync += 1;
     } else {

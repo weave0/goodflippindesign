@@ -430,6 +430,15 @@ jobs:
               print(f"estate_zone={row.property_id} state={row.state} evidence[{statuses}]")
               for evidence_class, reason in sorted(row.evidence_reasons.items()):
                   print(f"estate_zone_reason={row.property_id} {evidence_class}: {reason}")
+
+          # Source-scope findings ("Cloudflare source evidence unavailable") must explain
+          # themselves: which source/dataset, why, and the producer's HTTP note. These are
+          # producer-generated text (dataset ids and HTTP codes), bounded here.
+          source_findings = [f for f in doc.findings if f.scope == "source"]
+          print(f"source_scope_findings={len(source_findings)}")
+          for finding in source_findings[:60]:
+              notes = "; ".join(finding.limitations) or "no producer note"
+              print(f"source_finding={finding.finding_id} | {finding.explanation[:200]} | {notes[:200]}")
           PY
 
       - name: Assert governed secrets are absent from live Gold

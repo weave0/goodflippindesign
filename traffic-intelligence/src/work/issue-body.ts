@@ -234,6 +234,31 @@ export function composeIssue(input: IssueComposeInput): ComposedIssue {
   return { title, body, machine, labels };
 }
 
+/** The prose sections an issue is written from; the evidence table and machine block refresh separately. */
+const PROSE_HEADINGS = ["Expected benefit", "Brief", "Primary finding"] as const;
+
+export function proseSections(body: string): Record<string, string | null> {
+  const out: Record<string, string | null> = {};
+  for (const heading of PROSE_HEADINGS) {
+    // Up to the next markdown heading, code fence or machine block.
+    const match = new RegExp("^### " + heading + "\\n([\\s\\S]*?)(?=\\n### |\\n```|\\n<!-- |(?![\\s\\S]))", "m").exec(body);
+    out[heading] = match ? match[1]!.trim() : null;
+  }
+  return out;
+}
+
+/**
+ * True when the headline prose an issue was first written from no longer matches what the
+ * current insights say (e.g. the primary finding it announced has since been reclassified
+ * or removed). Without this, an issue keeps announcing a stale finding forever because only
+ * its evidence block and machine block refresh.
+ */
+export function proseDiffers(existingBody: string, composedBody: string): boolean {
+  const existing = proseSections(existingBody);
+  const composed = proseSections(composedBody);
+  return PROSE_HEADINGS.some((heading) => existing[heading] !== composed[heading]);
+}
+
 function mergePrior(prior: string, composed: string): string {
   // Prefer composed structure but keep prior evidence before fence via upsertEvidenceSection(prior).
   // Seed composed with prior's before-fence by injecting prior body evidence markers.
