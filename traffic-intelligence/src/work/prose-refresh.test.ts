@@ -130,6 +130,25 @@ describe("issue prose refresh", () => {
     expect(proseDiffers(first, current)).toBe(true);
   });
 
+  it("detects a change confined to a later line of a section (a $-anchored multiline match would miss it)", () => {
+    const base = insights(FINDING, STALE_SUMMARY, "2026-09-15T12:00:00.000Z");
+    // Same title, same brief, same expected benefit: ONLY the second line of the primary
+    // finding (its explanation) differs.
+    const onlyExplanation = insights(
+      { ...FINDING, explanation: "cloudflare.zone.account / cloudflare.workers.scripts.list.v1.7d returned no usable evidence." } as InsightFinding,
+      STALE_SUMMARY,
+      "2026-09-15T12:00:00.000Z",
+    );
+    const before = issueFrom(base).body;
+    const after = issueFrom(onlyExplanation).body;
+    const a = proseSections(before);
+    const b = proseSections(after);
+    expect(a["Brief"]).toBe(b["Brief"]);
+    expect(a["Expected benefit"]).toBe(b["Expected benefit"]);
+    expect(a["Primary finding"]).not.toBe(b["Primary finding"]);
+    expect(proseDiffers(before, after)).toBe(true);
+  });
+
   it("re-composes an issue whose headline finding was reclassified, keeping first-detection evidence and operator state", () => {
     const old = insights(FINDING, STALE_SUMMARY, "2026-09-15T12:00:00.000Z");
     const issue = issueFrom(old);

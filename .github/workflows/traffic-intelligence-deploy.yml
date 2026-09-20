@@ -425,20 +425,29 @@ jobs:
           print(f"pages_inventory_projects={accounting.pages_inventory.count}")
           for state_name, count in sorted(accounting.state_counts.items()):
               print(f"estate_state_{state_name}={count}")
+          # Sidecar text is external input written to the Actions command stream: a value
+          # containing a newline followed by "::" could otherwise forge a workflow command.
+          # Free text is therefore emitted JSON-serialized (one line, control chars escaped).
+          def emit(key, **fields):
+              print(f"{key}=" + json.dumps(fields, ensure_ascii=True, sort_keys=True))
+
           for row in accounting.properties:
-              statuses = ",".join(f"{k}={v}" for k, v in sorted(row.evidence_status.items()))
-              print(f"estate_zone={row.property_id} state={row.state} evidence[{statuses}]")
+              emit("estate_zone", zone=row.property_id, state=row.state, evidence=dict(sorted(row.evidence_status.items())))
               for evidence_class, reason in sorted(row.evidence_reasons.items()):
-                  print(f"estate_zone_reason={row.property_id} {evidence_class}: {reason}")
+                  emit("estate_zone_reason", zone=row.property_id, evidence_class=evidence_class, reason=reason[:300])
 
           # Source-scope findings ("Cloudflare source evidence unavailable") must explain
           # themselves: which source/dataset, why, and the producer's HTTP note. These are
           # producer-generated text (dataset ids and HTTP codes), bounded here.
           source_findings = [f for f in doc.findings if f.scope == "source"]
           print(f"source_scope_findings={len(source_findings)}")
-          for finding in source_findings[:60]:
-              notes = "; ".join(finding.limitations) or "no producer note"
-              print(f"source_finding={finding.finding_id} | {finding.explanation[:200]} | {notes[:200]}")
+          for finding in source_findings:  # every one: an opaque finding is the failure mode being removed
+              emit(
+                  "source_finding",
+                  id=finding.finding_id[:200],
+                  explanation=finding.explanation[:200],
+                  notes=("; ".join(finding.limitations) or "no producer note")[:200],
+              )
           PY
 
       - name: Assert governed secrets are absent from live Gold
