@@ -222,9 +222,9 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: ${{ env.PRODUCER_REPOSITORY }}
-          # TI-011 candidate: bounded path/status acquisition + governed HTTP failure findings.
-          # Accepted producer PR #6 merge commit; immutable production authority.
-          ref: 41f01db8d8b6fac0d29461ce17e609092663e4e5
+          # TI-012: estate evidence 1.1 (authority provenance, fail-closed accounting, least-privilege
+          # semantics). Accepted producer PR #8 merge commit; immutable production authority.
+          ref: 8d8e1233958d89b1ae16674e1d29bec73b614526
           token: ${{ secrets.GFD_TI_READ_TOKEN }}
           path: .producer
           persist-credentials: false
