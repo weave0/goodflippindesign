@@ -223,8 +223,8 @@ jobs:
         with:
           repository: ${{ env.PRODUCER_REPOSITORY }}
           # TI-012: estate evidence 1.1 (authority provenance, fail-closed accounting, least-privilege
-          # semantics). Accepted producer PR #8 merge commit; immutable production authority.
-          ref: 8d8e1233958d89b1ae16674e1d29bec73b614526
+          # semantics). Accepted producer PR #9 merge commit (estate_config carries governed_zones); immutable production authority.
+          ref: 3ed3963ca5e7c2b3c51a86b62a35e5030597bd23
           token: ${{ secrets.GFD_TI_READ_TOKEN }}
           path: .producer
           persist-credentials: false
