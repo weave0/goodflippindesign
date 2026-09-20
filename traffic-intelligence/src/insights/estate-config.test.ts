@@ -72,6 +72,8 @@ describe("estate_config accounting contract", () => {
     ["a negative state count", (a) => { a.state_counts.healthy = -1; }, /exactly the four known states/],
     ["an unknown state key", (a) => { a.state_counts.bogus = 0; }, /exactly the four known states/],
     ["a missing state key", (a) => { delete a.state_counts.unobserved; }, /exactly the four known states/],
+    ["an incomplete pages inventory", (a) => { a.pages_inventory.complete = false; }, /pages_inventory is not complete/],
+    ["an incomplete zone inventory", (a) => { a.zone_inventory.complete = false; }, /zone_inventory is not complete/],
     ["a negative inventory count", (a) => { a.pages_inventory.count = -1; }, /non-negative integer count/],
     ["a fractional inventory count", (a) => { a.zone_inventory.count = 1.5; }, /non-negative integer count/],
     ["a fractional governed_zone_count", (a) => { a.governed_zone_count = 2.5; }, /non-negative integer governed_zone_count/],

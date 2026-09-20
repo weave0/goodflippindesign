@@ -72,6 +72,8 @@ function assertEstateInventory(value: unknown, label: string): void {
   if (!isObject(value) || !isString(value.authority) || !isBoolean(value.complete) || !isCount(value.count)) {
     throw new Error(`Insights estate_config.${label} must declare authority, complete and a non-negative integer count`);
   }
+  // A partially-enumerated inventory is never renderable as an accounted estate.
+  if (value.complete !== true) throw new Error(`Insights estate_config.${label} is not complete`);
 }
 
 /**

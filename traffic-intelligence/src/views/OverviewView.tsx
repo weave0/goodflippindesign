@@ -507,8 +507,7 @@ export function OverviewView({
               {(["healthy", "governance_gap", "config_drift", "unobserved"] as const)
                 .map((state) => `${ESTATE_CONFIG_STATE_LABEL[state]} ${estateConfig.state_counts[state] ?? 0}`)
                 .join(" · ")}{" "}
-              · Pages inventory {estateConfig.pages_inventory.count} projects (
-              {estateConfig.pages_inventory.complete ? "complete" : "INCOMPLETE"})
+              · Pages inventory {estateConfig.pages_inventory.count} projects (complete)
             </p>
             <ul className="plain-list">
               {estateConfig.credential_boundaries.map((note) => (
