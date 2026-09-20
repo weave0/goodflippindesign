@@ -285,8 +285,15 @@ export async function fetchAllPages({ operation, endpointClass, path, query = {}
         if (!Number.isSafeInteger(info.total_count) || info.total_count < 0) fail("returned an invalid result_info.total_count");
         advertisedTotal = info.total_count;
       }
-    } else if (reportedTotal !== totalPages) {
-      fail(`pagination became inconsistent: total_pages changed from ${totalPages} to ${reportedTotal} while reading page ${page}`);
+    } else {
+      if (reportedTotal !== totalPages) {
+        fail(`pagination became inconsistent: total_pages changed from ${totalPages} to ${reportedTotal} while reading page ${page}`);
+      }
+      // A later page may not introduce, drop or change the advertised total.
+      const laterHasTotal = Object.prototype.hasOwnProperty.call(info, "total_count");
+      if (laterHasTotal !== (advertisedTotal !== undefined) || (laterHasTotal && info.total_count !== advertisedTotal)) {
+        fail(`pagination became inconsistent: total_count changed while reading page ${page}`);
+      }
     }
 
     for (const item of body.result) {
@@ -324,8 +331,11 @@ export function parsePagesInventory(text) {
     if (!project || typeof project !== "object" || typeof project.id !== "string" || typeof project.name !== "string") {
       throw new EstateAcquisitionError("Pages project inventory contains a malformed project entry");
     }
-    if (project.domains !== undefined && !(Array.isArray(project.domains) && project.domains.every((d) => typeof d === "string"))) {
-      throw new EstateAcquisitionError(`Pages project ${project.name} has a malformed domains list`);
+    // Required: a project with no `domains` can never be joined to a zone, so an inventory
+    // of such projects would turn every governed zone into a false `no_project` "positive
+    // negative". A response that lacks them is malformed, not empty.
+    if (!(Array.isArray(project.domains) && project.domains.every((d) => typeof d === "string"))) {
+      throw new EstateAcquisitionError(`Pages project ${project.name} has a missing or malformed domains list`);
     }
     if (seenIds.has(project.id) || seenNames.has(project.name)) {
       throw new EstateAcquisitionError("Pages project inventory contains duplicate projects");
@@ -338,7 +348,7 @@ export function parsePagesInventory(text) {
 
 function pagesEvidenceFor(zoneName, projects) {
   const claimed = new Set([zoneName, `www.${zoneName}`]);
-  const claiming = projects.filter((project) => (project.domains ?? []).some((domain) => claimed.has(domain)));
+  const claiming = projects.filter((project) => project.domains.some((domain) => claimed.has(domain)));
   if (claiming.length === 0) {
     return {
       pages: {},

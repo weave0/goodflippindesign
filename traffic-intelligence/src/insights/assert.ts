@@ -52,7 +52,12 @@ function assertEstateBrief(value: unknown): void {
 
 const ESTATE_CONFIG_STATES = new Set(["healthy", "governance_gap", "config_drift", "unobserved"]);
 const ESTATE_EVIDENCE_CLASSES = ["zone", "dns", "pages"] as const;
-const ESTATE_EVIDENCE_STATUSES = new Set(["observed", "no_project", "unavailable"]);
+/** `no_project` is a Pages-only observation (a complete deploy-authority inventory holds no project). */
+const ESTATE_EVIDENCE_STATUSES: Record<(typeof ESTATE_EVIDENCE_CLASSES)[number], Set<string>> = {
+  zone: new Set(["observed", "unavailable"]),
+  dns: new Set(["observed", "unavailable"]),
+  pages: new Set(["observed", "no_project", "unavailable"]),
+};
 /** Only the designated credential can prove each class of fact. */
 const ESTATE_EVIDENCE_AUTHORITY = {
   zone: "analytics_credential",
@@ -118,7 +123,7 @@ export function assertEstateConfig(value: unknown): void {
     seen.add(row.property_id);
     for (const evidenceClass of ESTATE_EVIDENCE_CLASSES) {
       const status = row.evidence_status[evidenceClass];
-      if (!isString(status) || !ESTATE_EVIDENCE_STATUSES.has(status)) {
+      if (!isString(status) || !ESTATE_EVIDENCE_STATUSES[evidenceClass].has(status)) {
         throw new Error(`Insights estate_config.properties[${index}] has an invalid ${evidenceClass} evidence status`);
       }
       if (status !== "observed" && !row.evidence_reasons[evidenceClass]?.trim()) {

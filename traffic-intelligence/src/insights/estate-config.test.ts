@@ -81,6 +81,8 @@ describe("estate_config accounting contract", () => {
     ["an invalid state", (a) => { (a.properties[0] as { state: string }).state = "fine"; }, /state is invalid/],
     ["unavailable evidence with no reason", (a) => { a.properties[0]!.evidence_status.pages = "unavailable"; }, /without an explicit reason/],
     ["an invalid evidence status", (a) => { a.properties[0]!.evidence_status.dns = "maybe"; }, /invalid dns evidence status/],
+    ["no_project as a zone evidence status", (a) => { a.properties[0]!.evidence_status.zone = "no_project"; a.properties[0]!.evidence_reasons.zone = "x"; }, /invalid zone evidence status/],
+    ["no_project as a dns evidence status", (a) => { a.properties[0]!.evidence_status.dns = "no_project"; a.properties[0]!.evidence_reasons.dns = "x"; }, /invalid dns evidence status/],
     ["a missing authority", (a) => { a.properties[0]!.authorities.pages = ""; }, /pages evidence must name authority deploy_credential/],
     ["Pages attributed to the measurement credential", (a) => { a.properties[0]!.authorities.pages = "analytics_credential"; }, /pages evidence must name authority deploy_credential/],
     ["DNS attributed to the deployment credential", (a) => { a.properties[0]!.authorities.dns = "deploy_credential"; }, /dns evidence must name authority analytics_credential/],

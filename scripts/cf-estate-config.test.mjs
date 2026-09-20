@@ -470,11 +470,39 @@ for (const [label, text] of [
   ["result not an array", JSON.stringify({ success: true, result: {} })],
   ["a project without an id", JSON.stringify({ success: true, result: [{ name: "x" }] })],
   ["malformed domains", JSON.stringify({ success: true, result: [{ id: "1", name: "x", domains: [1] }] })],
+  ["a project with no domains list", JSON.stringify({ success: true, result: [{ id: "1", name: "x" }] })],
+  ["a project with null domains", JSON.stringify({ success: true, result: [{ id: "1", name: "x", domains: null }] })],
 ]) {
   test(`the Pages inventory file is rejected when malformed (${label})`, () => {
     assert.throws(() => parsePagesInventory(text), EstateAcquisitionError);
   });
 }
+
+test("a later page may not introduce, drop or change total_count", async () => {
+  for (const [label, second] of [
+    ["changes it", { page: 2, total_pages: 2, total_count: 3 }],
+    ["drops it", { page: 2, total_pages: 2 }],
+  ]) {
+    await withMockServer(
+      (url) => {
+        const page = Number(url.searchParams.get("page") ?? "1");
+        return page === 1 ? ok([zone("a.com")], { page: 1, total_pages: 2, total_count: 2 }) : ok([zone("b.com")], second);
+      },
+      async (base) => {
+        await assert.rejects(acquire(base, ["a.com", "b.com"]), /total_count changed/, label);
+      },
+    );
+  }
+  await withMockServer(
+    (url) => {
+      const page = Number(url.searchParams.get("page") ?? "1");
+      return page === 1 ? ok([zone("a.com")], { page: 1, total_pages: 2 }) : ok([zone("b.com")], { page: 2, total_pages: 2, total_count: 2 });
+    },
+    async (base) => {
+      await assert.rejects(acquire(base, ["a.com", "b.com"]), /total_count changed/, "introduces it");
+    },
+  );
+});
 
 test("an empty Pages inventory is valid and yields explicit no_project evidence for every zone", async () => {
   await withMockServer(healthyCloudflare([zone("a.com")]), async (base) => {
