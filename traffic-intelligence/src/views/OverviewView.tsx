@@ -13,7 +13,11 @@ import type {
 import {
   TREND_METRIC_OPTIONS,
   briefsForProperty,
+  ESTATE_CONFIG_STATE_LABEL,
   estateBriefOf,
+  estateConfigOf,
+  estateConfigRow,
+  estateProvenanceLines,
   estateStatusLabel,
   focusedTrendSeries,
   priorityLabel,
@@ -135,6 +139,7 @@ export function OverviewView({
   const metrics = filterMetrics(overviewMetrics(payload, site), filters).filter((metric) => metric.value !== null);
 
   const estate = useMemo(() => estateBriefOf(insights), [insights]);
+  const estateConfig = useMemo(() => estateConfigOf(insights), [insights]);
   const primaryPriorities: InsightPriority[] = showWatch
     ? ["act_now", "investigate", "watch"]
     : ["act_now", "investigate"];
@@ -227,6 +232,10 @@ export function OverviewView({
   const dossierProperty = siteDomain;
   const dossierBriefs = useMemo(
     () => (dossierProperty ? briefsForProperty(insights, dossierProperty) : []),
+    [insights, dossierProperty],
+  );
+  const dossierEstateConfig = useMemo(
+    () => (dossierProperty ? estateConfigRow(insights, dossierProperty) : null),
     [insights, dossierProperty],
   );
   const dossierHealth = useMemo(
@@ -476,6 +485,59 @@ export function OverviewView({
                 <p className="empty">None flagged.</p>
               )}
             </div>
+          </div>
+        )}
+      </Section>
+
+      <Section
+        title="Deployment & config authority"
+        note="Producer estate_config accounting — every governed zone, and which authority proved which fact. Least privilege is not a defect."
+      >
+        {insightsError || !insights ? (
+          <p className="empty">Unavailable until the insight sidecar loads.</p>
+        ) : !estateConfig ? (
+          <p className="empty">
+            Deployment/config evidence was not supplied to this sidecar: deployment authority is unobserved, not
+            healthy.
+          </p>
+        ) : (
+          <div className="estate-config">
+            <p className="section-note" data-testid="estate-config-summary">
+              {estateConfig.accounted_zone_count} of {estateConfig.governed_zone_count} governed zones accounted for ·{" "}
+              {(["healthy", "governance_gap", "config_drift", "unobserved"] as const)
+                .map((state) => `${ESTATE_CONFIG_STATE_LABEL[state]} ${estateConfig.state_counts[state] ?? 0}`)
+                .join(" · ")}{" "}
+              · Pages inventory {estateConfig.pages_inventory.count} projects (complete)
+            </p>
+            <ul className="plain-list">
+              {estateConfig.credential_boundaries.map((note) => (
+                <li key={note} className="section-note">
+                  {note}
+                </li>
+              ))}
+            </ul>
+            <table className="data">
+              <thead>
+                <tr>
+                  <th>Zone</th>
+                  <th>State</th>
+                  <th>Why</th>
+                </tr>
+              </thead>
+              <tbody>
+                {estateConfig.properties.map((row) => (
+                  <tr key={row.property_id}>
+                    <td>
+                      <button type="button" className="chip-button" onClick={() => openProperty(row.property_id)}>
+                        {row.property_id}
+                      </button>
+                    </td>
+                    <td>{ESTATE_CONFIG_STATE_LABEL[row.state]}</td>
+                    <td>{row.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </Section>
@@ -851,6 +913,22 @@ export function OverviewView({
             </div>
             <div className="estate-panel">
               <h3>Deployment &amp; config</h3>
+              {dossierEstateConfig ? (
+                <div data-testid="dossier-estate-config">
+                  <p>
+                    <strong>{ESTATE_CONFIG_STATE_LABEL[dossierEstateConfig.state]}</strong> — {dossierEstateConfig.reason}
+                  </p>
+                  <ul className="plain-list">
+                    {estateProvenanceLines(dossierEstateConfig).map((line) => (
+                      <li key={line} className="section-note">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : insights && !estateConfig ? (
+                <p className="empty">Deployment/config evidence was not supplied: unobserved, not healthy.</p>
+              ) : null}
               {dossierConfigFindings.length ? (
                 <ul className="plain-list">
                   {dossierConfigFindings.map((finding) => (
@@ -863,9 +941,9 @@ export function OverviewView({
                     </li>
                   ))}
                 </ul>
-              ) : (
-                <p className="empty">No observed deployment/config drift or governance gap.</p>
-              )}
+              ) : dossierEstateConfig?.state === "healthy" ? (
+                <p className="empty">Healthy: no deployment/config drift or governance gap.</p>
+              ) : null}
             </div>
             <div className="estate-panel">
               <h3>HTTP failures</h3>

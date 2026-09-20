@@ -16,6 +16,7 @@ export function normalizeInsightsForTest(doc: TrafficInsightDocument): TrafficIn
     ...doc,
     briefs: (doc.briefs ?? []).map((brief) => ({ ...brief, direction: brief.direction ?? "unknown" })),
     estate_brief: doc.estate_brief ?? null,
+    estate_config: doc.estate_config ?? null,
     property_health: doc.property_health ?? [],
     trend_comparisons: doc.trend_comparisons ?? [],
     actions: (doc.actions ?? []).map((action) => {

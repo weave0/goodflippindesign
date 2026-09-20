@@ -172,6 +172,41 @@ export interface TrendComparison {
   source_snapshots: string[];
 }
 
+export type EstateConfigState = "healthy" | "governance_gap" | "config_drift" | "unobserved";
+export type EstateEvidenceClass = "zone" | "dns" | "pages";
+export type EstateEvidenceStatus = "observed" | "no_project" | "unavailable";
+
+export interface EstateConfigPropertyAccounting {
+  property_id: string;
+  state: EstateConfigState;
+  reason: string;
+  /** Which credential/authority proved (or failed to prove) each evidence class. */
+  authorities: Record<string, string>;
+  evidence_status: Record<string, string>;
+  /** Safe reasons for any evidence class that is not `observed` (unavailable, or a positive no_project). */
+  evidence_reasons: Record<string, string>;
+}
+
+export interface EstateConfigInventory {
+  authority: string;
+  complete: boolean;
+  count: number;
+}
+
+/** Producer-governed reconciliation of the deployment/config estate (TI-012). */
+export interface EstateConfigAccounting {
+  schema_version: "1.1.0";
+  governed_zone_count: number;
+  accounted_zone_count: number;
+  /** The governed estate itself (sorted): the accounting must cover exactly these zones. */
+  governed_zones: string[];
+  state_counts: Record<string, number>;
+  zone_inventory: EstateConfigInventory;
+  pages_inventory: EstateConfigInventory;
+  credential_boundaries: string[];
+  properties: EstateConfigPropertyAccounting[];
+}
+
 export interface TrafficInsightDocument {
   schema_version: "1.0.0" | "1.1.0";
   contract_name: "gfd-traffic-insights";
@@ -188,4 +223,6 @@ export interface TrafficInsightDocument {
   /** Producer-governed equal-window comparative rows — sole source of numeric deltas. */
   trend_comparisons: TrendComparison[];
   limitations: string[];
+  /** null when no estate deployment/config evidence was supplied: unobserved, never healthy. */
+  estate_config?: EstateConfigAccounting | null;
 }

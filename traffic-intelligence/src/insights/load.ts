@@ -47,6 +47,7 @@ function normalizeInsights(doc: TrafficInsightDocument): TrafficInsightDocument 
         }))
       : [],
     estate_brief: doc.estate_brief ?? null,
+    estate_config: doc.estate_config ?? null,
     property_health: Array.isArray(doc.property_health) ? doc.property_health : [],
     trend_comparisons: Array.isArray(doc.trend_comparisons) ? doc.trend_comparisons : [],
     actions: (doc.actions ?? []).map((action) => normalizeAction(action)),

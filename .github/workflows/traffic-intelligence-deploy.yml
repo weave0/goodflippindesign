@@ -7,6 +7,8 @@ on:
       - "traffic-intelligence/**"
       - "scripts/cf-pages-projects.sh"
       - "scripts/cf-pages-projects.test.mjs"
+      - "scripts/cf-estate-config.mjs"
+      - "scripts/cf-estate-config.test.mjs"
       - ".github/workflows/traffic-intelligence-deploy.yml"
   push:
     branches: [main]
@@ -14,6 +16,8 @@ on:
       - "traffic-intelligence/**"
       - "scripts/cf-pages-projects.sh"
       - "scripts/cf-pages-projects.test.mjs"
+      - "scripts/cf-estate-config.mjs"
+      - "scripts/cf-estate-config.test.mjs"
       - ".github/workflows/traffic-intelligence-deploy.yml"
   schedule:
     - cron: "0 6 * * *"
@@ -57,6 +61,9 @@ jobs:
 
       - name: Validate Cloudflare Pages project pagination (TI-012)
         run: node --test scripts/cf-pages-projects.test.mjs
+
+      - name: Validate estate configuration builder, diagnostics and completeness (TI-012)
+        run: node --test scripts/cf-estate-config.test.mjs
 
       - name: Validate committed fixture
         run: |
@@ -215,9 +222,9 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: ${{ env.PRODUCER_REPOSITORY }}
-          # TI-011 candidate: bounded path/status acquisition + governed HTTP failure findings.
-          # Accepted producer PR #6 merge commit; immutable production authority.
-          ref: 41f01db8d8b6fac0d29461ce17e609092663e4e5
+          # TI-012: estate evidence 1.1 (authority provenance, fail-closed accounting, least-privilege
+          # semantics). Accepted producer PR #9 merge commit (estate_config carries governed_zones); immutable production authority.
+          ref: 3ed3963ca5e7c2b3c51a86b62a35e5030597bd23
           token: ${{ secrets.GFD_TI_READ_TOKEN }}
           path: .producer
           persist-credentials: false
@@ -266,200 +273,34 @@ jobs:
           CF_ZONE_API_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
         run: |
           set -euo pipefail
-          out="$RUNNER_TEMP/gfdti-live/estate-config-1.0.production.json"
-          # Pages project authority belongs to the deploy credential; zone/DNS
-          # observation belongs to the analytics credential, which is the one
-          # already verified (see "Verify complete Cloudflare analytics estate
-          # access") to expose the full governed zone inventory. The deploy
-          # credential is scoped narrowly to its own Pages project's zone, so
-          # using it for the zone list here silently under-reports the estate.
-          projects="$(scripts/cf-pages-projects.sh)"
-          test "$(jq -r '.success' <<<"$projects")" = "true"
-          # Account-scoped and paginated, mirroring "Verify complete Cloudflare
-          # analytics estate access" above: an unscoped zone query can match a
-          # same-named zone the token can see in a different account and pull
-          # DNS evidence for the wrong estate entirely.
-          # Operator-grade diagnostics: on a rejected request, report the
-          # logical operation, HTTP status, and Cloudflare's own error
-          # code/message rather than a bare curl failure, with the
-          # credential redacted from anything echoed.
-          cf_redact() {
-            local text="$1"
-            # sed processes input line by line, so a literal newline in a
-            # hostile message would let content past it dodge every rule
-            # below ("." never matches "\n"). Flatten to one line first.
-            text="${text//$'\n'/ }"
-            text="${text//$'\r'/ }"
-            text="$(sed -E '
-              s/(authorization"?[[:space:]]*:[[:space:]]*"?).*/\1[REDACTED]/gI;
-              s/bearer[[:space:]]+[A-Za-z0-9._~+/=-]+/Bearer [REDACTED]/gI;
-              s/(cookie"?[[:space:]]*:[[:space:]]*"?).*/\1[REDACTED]/gI
-            ' <<<"$text")"
-            text="${text//$CF_ZONE_API_TOKEN/[REDACTED]}"
-            text="${text//$CLOUDFLARE_API_TOKEN/[REDACTED]}"
-            printf '%s' "$text"
-          }
-          cf_zone_request() {
-            local operation="$1" url_and_args=("${@:2}")
-            local response
-            if ! response="$(curl -sS -w '\n%{http_code}' -G "${url_and_args[@]}" -H "Authorization: Bearer $CF_ZONE_API_TOKEN")"; then
-              echo "$operation request failed: unable to reach Cloudflare API (endpoint class: ${operation})" >&2
-              return 1
-            fi
-            local http_code="${response##*$'\n'}" body="${response%$'\n'*}"
-            # `jq -r` stringifies JSON strings, so a naive
-            # `[ "$(jq -r '.success? // false')" != "true" ]` would treat
-            # a hostile `.success: "true"` (a string) the same as the
-            # boolean `true`, since both render as the text `true`.
-            # Compare the actual JSON value's identity with
-            # `jq -e '.success == true'` instead of comparing its
-            # rendered text, so only a genuine boolean true passes.
-            if [[ "$http_code" != 2?? ]] || ! jq -e '.success == true' <<<"$body" >/dev/null 2>&1; then
-              local code message
-              code="$(jq -r '.errors[0].code // "unknown"' <<<"$body" 2>/dev/null || echo unknown)"
-              message="$(jq -r '.errors[0].message // "no error detail provided"' <<<"$body" 2>/dev/null || echo "no error detail provided")"
-              echo "$(cf_redact "$operation request rejected: HTTP $http_code — Cloudflare error $code: $message")" >&2
-              return 1
-            fi
-            # A 2xx/success body is still untrusted: every caller treats
-            # .result as an array. If a hostile response makes it a scalar
-            # (e.g. a reflected credential), jq's own type-mismatch error
-            # at the call site would echo that value unredacted. Fail
-            # closed here, with a static message, before any caller sees it.
-            if ! jq -e '.result | type == "array"' <<<"$body" >/dev/null 2>&1; then
-              echo "$operation response did not contain a result array" >&2
-              return 1
-            fi
-            printf '%s' "$body"
-          }
-          zones_tmp='[]'
-          zone_page=1
-          zone_total_pages=1
-          while [ "$zone_page" -le "$zone_total_pages" ]; do
-            zones_response="$(cf_zone_request "zone-list" "https://api.cloudflare.com/client/v4/zones" \
-              --data-urlencode "account.id=$CF_ACCOUNT_ID" \
-              --data-urlencode "per_page=50" \
-              --data-urlencode "page=$zone_page")"
-            zones_tmp="$(jq -c --argjson accumulated "$zones_tmp" '$accumulated + .result' <<<"$zones_response")"
-            # `(.result_info // {})` treats an explicit JSON false/null
-            # result_info the same as an absent key, silently swapping in
-            # {} and defaulting every field — and a non-object result_info
-            # (e.g. a string or array) makes has() itself raise a jq
-            # error, which the `2>/dev/null || echo` fallback then also
-            # converts to a default. Either path lets a malformed
-            # result_info be accepted as "absent" instead of failing
-            # closed. Distinguish "result_info absent" (legitimately
-            # default) from "result_info present but not an object" (must
-            # fail closed) before ever looking at its fields.
-            zone_result_info_kind="$(jq -r '
-              if has("result_info") then
-                if (.result_info | type) == "object" then "object" else "invalid" end
-              else "absent" end
-            ' <<<"$zones_response" 2>/dev/null || echo "invalid")"
-            case "$zone_result_info_kind" in
-              absent)
-                zone_reported_page="" zone_reported_page_present="false"
-                zone_total_pages="1"
-                ;;
-              object)
-                # Same absent-vs-invalid distinction at the field level: a
-                # naive `// 1`/`// ""` would treat an explicit false/null/
-                # empty-string value the same as absent and skip
-                # validation entirely.
-                zone_reported_page_present="$(jq -r '.result_info | has("page")' <<<"$zones_response" 2>/dev/null || echo "false")"
-                zone_reported_page="$(jq -r '.result_info | if has("page") then (.page | tostring) else "" end' <<<"$zones_response" 2>/dev/null || echo "")"
-                zone_reported_total_pages="$(jq -r '.result_info | if has("total_pages") then (.total_pages | tostring) else "1" end' <<<"$zones_response" 2>/dev/null || echo "1")"
-                ;;
-              *)
-                echo "zone-list returned a non-object result_info on page $zone_page" >&2
-                exit 1
-                ;;
-            esac
-            # A 2xx/success response body is still untrusted: validate these
-            # are plain integers before they reach the loop's `-le` test or
-            # a page-mismatch comparison. Otherwise a hostile response
-            # reflecting a credential into result_info would surface it via
-            # bash's own "integer expression expected" runtime error,
-            # bypassing cf_redact.
-            if [ "$zone_reported_page_present" = "true" ] && ! [[ "$zone_reported_page" =~ ^[1-9][0-9]{0,6}$ ]]; then
-              echo "zone-list returned a non-positive-integer result_info.page on page $zone_page" >&2
-              exit 1
-            fi
-            if ! [[ "$zone_reported_total_pages" =~ ^[1-9][0-9]{0,6}$ ]]; then
-              # total_pages:0 on a page-1 response with actual results is
-              # self-contradictory (Cloudflare reports total_pages=1 even
-              # for an empty result set); accepting it would silently
-              # truncate a real multi-page zone list to just page 1.
-              echo "zone-list returned a non-positive-integer result_info.total_pages on page $zone_page" >&2
-              exit 1
-            fi
-            # A reported page that doesn't match the requested one means
-            # the response can't be trusted to belong to this iteration —
-            # accepting it (or a repeated page) could silently aggregate
-            # duplicate or wrong-page zones into an apparently complete
-            # inventory.
-            if [ "$zone_reported_page_present" = "true" ] && [ "$zone_reported_page" != "$zone_page" ]; then
-              echo "zone-list page mismatch: requested page $zone_page, Cloudflare reported page $zone_reported_page" >&2
-              exit 1
-            fi
-            # `zone_total_pages` also gates the loop's own `-le` condition,
-            # so reassigning it from every response without checking
-            # consistency would let a later page silently lower/omit it
-            # (stopping before the advertised inventory is complete) or
-            # raise it (ballooning into far more requests than the first
-            # page ever promised). Pin it to the first page's value and
-            # fail closed if a later page disagrees.
-            if [ "$zone_page" -eq 1 ]; then
-              zone_total_pages="$zone_reported_total_pages"
-            elif [ "$zone_reported_total_pages" != "$zone_total_pages" ]; then
-              echo "zone-list pagination became inconsistent: total_pages changed from $zone_total_pages to $zone_reported_total_pages while reading page $zone_page" >&2
-              exit 1
-            fi
-            zone_page=$((zone_page + 1))
-          done
-          zones="$(jq -c '{success:true, result:.}' <<<"$zones_tmp")"
-          tmp="$(mktemp)"
-          printf '{"schema_version":"1.0.0","contract_name":"gfd-estate-config","fixture":false,"properties":[' > "$tmp"
-          first=1
-          IFS=',' read -ra expected_zones <<< "$CF_EXPECTED_ZONES"
-          for zone_name in "${expected_zones[@]}"; do
-            zone="$(jq -c --arg n "$zone_name" '.result[] | select(.name==$n)' <<<"$zones" | head -1)"
-            if [ -z "$zone" ]; then
-              echo "Governed zone missing from Cloudflare zone-list evidence: $zone_name"
-              exit 1
-            fi
-            zone_id="$(jq -r '.id' <<<"$zone")"
-            dns="$(cf_zone_request "dns-records:$zone_name" "https://api.cloudflare.com/client/v4/zones/$zone_id/dns_records" --data-urlencode "per_page=100")"
-            project="$(jq -c --arg d "$zone_name" '.result[] | select((.domains // []) | index($d))' <<<"$projects" | head -1)"
-            record="$(jq -n --arg property "$zone_name" --argjson z "$zone" --argjson dns "$dns" --argjson p "${project:-null}" '
-              {
-                property_id:$property,
-                zone_status:$z.status,
-                dns_apex:[$dns.result[] | select(.name==$property) | {name,type,content,proxied}],
-                dns_www:[$dns.result[] | select(.name==("www."+$property)) | {name,type,content,proxied}],
-                pages:(if $p == null then {} else {
-                  project_name:$p.name,
-                  source_type:($p.source.type // null),
-                  source_repository:(if ($p.source.type // null) == "github" then (($p.source.config.owner // "") + "/" + ($p.source.config.repo_name // "")) else null end),
-                  latest_production_deployment:($p.latest_deployment.created_on // null)
-                } end)
-              }')"
-            if [ "$first" -eq 0 ]; then printf ',' >> "$tmp"; fi
-            printf '%s' "$record" >> "$tmp"
-            first=0
-          done
-          printf ']}' >> "$tmp"
-          jq '.' "$tmp" > "$out"
-          rm -f "$tmp"
-          test "$(jq -r '.fixture' "$out")" = "false"
-          property_count="$(jq '.properties | length' "$out")"
-          test "$property_count" -eq "${#expected_zones[@]}" || {
-            echo "estate artifact has $property_count properties but ${#expected_zones[@]} zones are governed"
-            exit 1
-          }
-          if grep -Fq "$CLOUDFLARE_API_TOKEN" "$out"; then echo "credential serialized"; exit 1; fi
-          if grep -Fq "$CF_ZONE_API_TOKEN" "$out"; then echo "credential serialized"; exit 1; fi
-          echo "estate_config_properties=$property_count"
+          live="$RUNNER_TEMP/gfdti-live"
+          # Authority separation. The deploy credential is the only authority
+          # for Pages project configuration (complete, paginated inventory,
+          # failing closed on a rejected/inconsistent page). The analytics
+          # credential is intentionally least-privilege and is the authority for
+          # the zone list and DNS. Both are handed to one tested builder that
+          # reconciles the artifact against the governed estate
+          # (CF_EXPECTED_ZONES) before it is ever written: every governed zone is
+          # observed or carries an explicit reason; a silently absent zone,
+          # inconsistent pagination or a rejected request terminates the run.
+          # Failures print the operation, HTTP status and Cloudflare's own
+          # error code/message with credentials redacted.
+          # The raw Pages inventory can carry deployment configuration; it never
+          # leaves the ephemeral runner and is removed as soon as the builder is done.
+          trap 'rm -f "$live/pages-projects.json"' EXIT
+          scripts/cf-pages-projects.sh > "$live/pages-projects.json"
+          node scripts/cf-estate-config.mjs build \
+            --pages-projects "$live/pages-projects.json" \
+            --out "$live/estate-config-1.1.production.json" \
+            --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Retain estate configuration accounting
+        uses: actions/upload-artifact@v7
+        with:
+          name: estate-config-accounting
+          path: ${{ runner.temp }}/gfdti-live/estate-config-1.1.production.json
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Rebuild insights with bounded estate configuration evidence
         env:
@@ -500,6 +341,7 @@ jobs:
         run: |
           python - <<'PY'
           import json
+          import os
           from datetime import datetime, timedelta, timezone
           from pathlib import Path
           from gfdti.insights import TrafficInsightDocument
@@ -555,6 +397,39 @@ jobs:
           print(f"actions={len(doc.actions)}")
           print(f"briefs={len(doc.briefs)}")
           print(f"estate_status={doc.estate_brief.status}")
+
+          # TI-012: reconcile the estate accounting against the governed estate.
+          # A valid sidecar cannot merely carry "some properties": every governed
+          # zone must appear exactly once, each observed or explicitly unavailable.
+          expected_zones = [z.strip() for z in os.environ["CF_EXPECTED_ZONES"].split(",") if z.strip()]
+          accounting = doc.estate_config
+          if accounting is None:
+              raise SystemExit("production insight sidecar requires estate_config accounting (estate evidence was not consumed)")
+          accounted = [row.property_id for row in accounting.properties]
+          if sorted(accounted) != sorted(expected_zones):
+              missing = sorted(set(expected_zones) - set(accounted))
+              extra = sorted(set(accounted) - set(expected_zones))
+              raise SystemExit(f"estate accounting does not reconcile with the governed estate: missing={missing} extra={extra}")
+          if sorted(accounting.governed_zones) != sorted(expected_zones):
+              raise SystemExit("estate accounting governed_zones does not equal CF_EXPECTED_ZONES")
+          if accounting.governed_zone_count != len(expected_zones) or accounting.accounted_zone_count != len(expected_zones):
+              raise SystemExit("estate accounting counts do not match the governed zone count")
+          if not (accounting.zone_inventory.complete and accounting.pages_inventory.complete):
+              raise SystemExit("estate accounting reports an incomplete zone or Pages inventory")
+          for row in accounting.properties:
+              for evidence_class, status in row.evidence_status.items():
+                  if status != "observed" and not row.evidence_reasons.get(evidence_class):
+                      raise SystemExit(f"{row.property_id}: {evidence_class} evidence is {status} without an explicit reason")
+          print(f"governed_zone_count={accounting.governed_zone_count}")
+          print(f"estate_accounted_zones={accounting.accounted_zone_count}")
+          print(f"pages_inventory_projects={accounting.pages_inventory.count}")
+          for state_name, count in sorted(accounting.state_counts.items()):
+              print(f"estate_state_{state_name}={count}")
+          for row in accounting.properties:
+              statuses = ",".join(f"{k}={v}" for k, v in sorted(row.evidence_status.items()))
+              print(f"estate_zone={row.property_id} state={row.state} evidence[{statuses}]")
+              for evidence_class, reason in sorted(row.evidence_reasons.items()):
+                  print(f"estate_zone_reason={row.property_id} {evidence_class}: {reason}")
           PY
 
       - name: Assert governed secrets are absent from live Gold
