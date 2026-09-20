@@ -573,15 +573,45 @@ export function validateEstateArtifact(artifact, { expectedZones, secrets = [] }
       if (evidence.pages?.status === "observed" && !(property.pages && typeof property.pages.project_name === "string")) {
         add(`property ${id} claims observed Pages evidence but carries no project`);
       }
-      if (evidence.pages?.status !== "observed" && property.pages && Object.keys(property.pages).length > 0) {
+      // Substantive values only: a fixed-shape {project_name: null, source_type: ""} carries no facts.
+      const hasPagesFacts =
+        property.pages &&
+        typeof property.pages === "object" &&
+        Object.values(property.pages).some((v) => v !== null && v !== undefined && v !== "" && !(Array.isArray(v) && v.length === 0));
+      if (evidence.pages?.status !== "observed" && hasPagesFacts) {
         add(`property ${id} carries Pages facts its evidence accounting does not claim`);
       }
       if (evidence.zone?.status === "observed" && typeof property.zone_status !== "string") {
         add(`property ${id} claims observed zone evidence but has no zone_status`);
       }
-      if (!Array.isArray(property.dns_apex) || !Array.isArray(property.dns_www)) add(`property ${id} DNS records must be lists`);
+      if (!Array.isArray(property.dns_apex) || !Array.isArray(property.dns_www)) {
+        add(`property ${id} DNS records must be lists`);
+      } else {
+        // Required fields, not "a string if present": an entry with none of them would
+        // otherwise be silently ignored while dns evidence reads `observed`.
+        const wellFormed = (r) =>
+          r !== null &&
+          typeof r === "object" &&
+          ["name", "type", "content"].every((f) => typeof r[f] === "string" && r[f] !== "") &&
+          (r.proxied === undefined || r.proxied === null || typeof r.proxied === "boolean");
+        if (![...property.dns_apex, ...property.dns_www].every(wellFormed)) add(`property ${id} contains a malformed DNS record`);
+      }
       if (unavailable) counts.accounted_unavailable += 1;
       else counts.observed += 1;
+    }
+
+    // Declared inventory counts must reconcile with the evidence built from them.
+    const zoneCount = inventory?.zones?.count;
+    const pagesCount = inventory?.pages?.count;
+    const observedZones = properties.filter((p) => p?.evidence?.zone?.status === "observed").length;
+    if (Number.isSafeInteger(zoneCount) && zoneCount < observedZones) {
+      add(`zone inventory count ${zoneCount} is smaller than the ${observedZones} zones observed from it`);
+    }
+    const observedProjects = new Set(
+      properties.filter((p) => p?.evidence?.pages?.status === "observed" && p?.pages?.project_name).map((p) => p.pages.project_name),
+    );
+    if (Number.isSafeInteger(pagesCount) && pagesCount < observedProjects.size) {
+      add(`pages inventory count ${pagesCount} is smaller than the ${observedProjects.size} distinct projects observed from it`);
     }
 
     // Systemic-failure guard: per-zone loss is legitimate accounting, but a

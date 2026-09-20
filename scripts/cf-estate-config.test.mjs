@@ -509,6 +509,8 @@ const mutations = [
   ["an incomplete zone inventory", (a) => { a.inventory.zones.complete = "yes"; }, /zones inventory is not declared complete/],
   ["a Pages inventory with no declared authority", (a) => { delete a.inventory.pages.authority; }, /pages inventory must declare authority deploy_credential/],
   ["a zone inventory attributed to the wrong authority", (a) => { a.inventory.zones.authority = "deploy_credential"; }, /zones inventory must declare authority analytics_credential/],
+  ["a zone inventory smaller than the zones observed from it", (a) => { a.inventory.zones.count = 1; }, /zone inventory count 1 is smaller than the 2 zones observed/],
+  ["a Pages inventory smaller than the distinct projects observed", (a) => { a.inventory.pages.count = 0; }, /pages inventory count 0 is smaller than the 2 distinct projects observed/],
   ["a non-integer zone inventory count", (a) => { a.inventory.zones.count = "2"; }, /zones inventory count must be a non-negative integer/],
   ["a missing inventory", (a) => { delete a.inventory; }, /inventory\.zones is missing/],
   ["a property with no evidence block", (a) => { delete a.properties[0].evidence; }, /no evidence accounting/],
@@ -520,6 +522,9 @@ const mutations = [
   ["Pages facts that the evidence does not claim", (a) => { a.properties[1].evidence.pages = { status: "no_project", authority: "deploy_credential", reason: "none" }; }, /Pages facts its evidence accounting does not claim/],
   ["observed zone evidence with no zone_status", (a) => { a.properties[0].zone_status = null; }, /no zone_status/],
   ["non-list DNS records", (a) => { a.properties[0].dns_apex = "nope"; }, /DNS records must be lists/],
+  ["a DNS record missing every required field", (a) => { a.properties[0].dns_apex = [{}]; }, /malformed DNS record/],
+  ["a DNS record with a non-string content", (a) => { a.properties[0].dns_www = [{ name: "www.a.com", type: "CNAME", content: null }]; }, /malformed DNS record/],
+  ["a DNS record with a non-boolean proxied", (a) => { a.properties[0].dns_apex = [{ name: "a.com", type: "A", content: "1.2.3.4", proxied: "yes" }]; }, /malformed DNS record/],
   ["properties not being a list", (a) => { a.properties = {}; }, /properties must be a list/],
 ];
 for (const [label, mutate, pattern] of mutations) {
@@ -548,6 +553,18 @@ test("Pages evidence unavailable for EVERY zone is a systemic failure, but all n
     p.evidence.pages = { status: "no_project", authority: "deploy_credential", reason: "complete inventory, no project claims it" };
   }
   assert.doesNotThrow(() => validateEstateArtifact(negative, { expectedZones: ["a.com", "b.com"] }));
+});
+
+test("a fixed-shape empty Pages object is not mistaken for Pages facts (but a real value still contradicts no_project)", async () => {
+  const empty = await goodArtifact();
+  empty.properties[0].pages = { project_name: null, source_type: null, source_repository: null, latest_production_deployment: null };
+  empty.properties[0].evidence.pages = { status: "no_project", authority: "deploy_credential", reason: "complete inventory" };
+  assert.doesNotThrow(() => validateEstateArtifact(empty, { expectedZones: ["a.com", "b.com"] }));
+
+  const contradiction = await goodArtifact();
+  contradiction.properties[0].pages = { project_name: null, source_type: "github" };
+  contradiction.properties[0].evidence.pages = { status: "no_project", authority: "deploy_credential", reason: "complete inventory" };
+  assert.throws(() => validateEstateArtifact(contradiction, { expectedZones: ["a.com", "b.com"] }), /Pages facts its evidence accounting does not claim/);
 });
 
 test("validation fails closed when a credential was serialized into the artifact", async () => {
