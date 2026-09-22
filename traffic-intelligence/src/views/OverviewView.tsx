@@ -425,6 +425,15 @@ export function OverviewView({
     () => rankedBriefs(insights, siteDomain, ["act_now", "investigate"]).slice(0, 3),
     [insights, siteDomain],
   );
+  const topContentRows = useMemo(
+    () =>
+      siteDomain
+        ? []
+        : filterRanked(payload.humans.content, filters)
+            .filter((row) => row.value != null)
+            .slice(0, 5),
+    [filters, payload.humans.content, siteDomain],
+  );
 
   const openProperty = (propertyId: string) => {
     setFocusProperty(propertyId);
@@ -635,6 +644,25 @@ export function OverviewView({
                   )}
                 </div>
               </div>
+            )}
+          </article>
+
+          <article className="operator-answer-card">
+            <h3>Content drawing attention</h3>
+            <p className="operator-answer-card__note">Browser content evidence where the current Gold payload supports it.</p>
+            {siteDomain ? (
+              <p className="empty">Property-level content ranking is not asserted on this overview.</p>
+            ) : topContentRows.length ? (
+              <ol className="operator-rank-list">
+                {topContentRows.map((row) => (
+                  <li key={row.id}>
+                    <span>{row.label}</span>
+                    <strong>{rankedValue(row)}</strong>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="empty">Content evidence is unavailable for this period.</p>
             )}
           </article>
         </div>
