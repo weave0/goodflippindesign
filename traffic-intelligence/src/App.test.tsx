@@ -137,6 +137,58 @@ describe("human-first traffic intelligence shell", () => {
     expect(heading.compareDocumentPosition(funnel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it("does not render a dead Evidence control for estate-level ranked work", async () => {
+    const estateAction = { ...insights.actions[0], action_id: "action.brief._source.measurement", property_id: null };
+    const estateInsights = { ...insights, actions: [estateAction, ...insights.actions.slice(1)] };
+    const estateQueue = {
+      ...workQueue,
+      items: {
+        [estateAction.action_id]: {
+          action_id: estateAction.action_id,
+          issue_number: 284,
+          html_url: "https://github.com/weave0/goodflippindesign/issues/284",
+          lifecycle: "detected",
+          eligibility: "auto",
+          property_id: null,
+          target_repo: "weave0/goodflippindesign",
+          title: "Cloudflare source measurement gap",
+          priority_class: estateAction.priority_class,
+          confidence: "medium",
+          severity: estateAction.severity,
+          recommended_action: estateAction.recommended_action,
+          verification_condition: estateAction.verification_condition,
+          brief_id: estateAction.brief_id,
+          finding_ids: estateAction.finding_ids,
+          snooze_until: null,
+          updated_at: null,
+          impact_score: 60,
+          impact_class: "medium",
+          impact_rationale: "estate measurement authority",
+          root_cause_key: "cloudflare.source-measurement-gap",
+          group_role: "standalone",
+          group_member_action_ids: [],
+        },
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        const body = url.includes("ti-work-queue")
+          ? estateQueue
+          : url.includes("traffic-insights")
+            ? estateInsights
+            : fixture;
+        return { ok: true, json: async () => body };
+      }),
+    );
+    render(<App />);
+    const heading = await screen.findByRole("heading", { name: "What should we work on next?" });
+    const section = within(heading.closest("section")!);
+    expect(section.getByRole("link", { name: "Open #284" })).toHaveAttribute("href", expect.stringContaining("/issues/284"));
+    expect(section.queryByRole("button", { name: "Evidence" })).not.toBeInTheDocument();
+  });
+
   it("keeps ranked next work scoped to the selected property", async () => {
     const [exampleAction, , shopAction] = insights.actions;
     const makeItem = (action: typeof exampleAction, score: number) => ({

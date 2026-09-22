@@ -102,9 +102,11 @@ export function WorkActionControls({
         <a className="range-button work-link work-link--primary" href={openUrl} target="_blank" rel="noreferrer">
           {primaryLabel}
         </a>
-        <button type="button" className="range-button" onClick={() => onViewEvidence(action.property_id)}>
-          Evidence
-        </button>
+        {action.property_id ? (
+          <button type="button" className="range-button" onClick={() => onViewEvidence(action.property_id)}>
+            Evidence
+          </button>
+        ) : null}
       </div>
     );
   }
@@ -157,9 +159,11 @@ export function WorkActionControls({
         ) : (
           <span className="section-note">Verify (needs issue)</span>
         )}
-        <button type="button" className="range-button" onClick={() => onViewEvidence(action.property_id)}>
-          View evidence
-        </button>
+        {action.property_id ? (
+          <button type="button" className="range-button" onClick={() => onViewEvidence(action.property_id)}>
+            View evidence
+          </button>
+        ) : null}
       </div>
     </div>
   );
