@@ -379,6 +379,7 @@ async function main(): Promise<void> {
         if (item.issue_number == null || !item.composed) break;
         const labels = replaceLifecycleLabels(item.composed.labels, item.next_lifecycle ?? "regressed");
         await updateIssue(repo, auth, item.issue_number, {
+          title: item.composed.title,
           body: item.composed.body,
           labels,
           state: "open",
@@ -432,7 +433,8 @@ async function main(): Promise<void> {
 
   const metrics = {
     ...plan.metrics,
-    superseded_duplicates: plan.metrics.superseded_duplicates + metrics_superseded,
+    // Planner count is intent; live output reports mutations that actually ran.
+    superseded_duplicates: metrics_superseded,
   };
   const doc = buildWorkQueueDocument({
     insights,
