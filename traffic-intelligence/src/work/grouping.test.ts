@@ -61,6 +61,21 @@ describe("rootCauseKey / groupActions", () => {
     expect(groups[0]?.members).toHaveLength(2);
   });
 
+  it("collapses live property-scoped Cloudflare source ids to the provider family", () => {
+    const a = action("a-live-1", "fwomps.com");
+    const b = action("a-live-2", "agentkagent.com");
+    const fa = { ...finding("fwomps.com"), source_id: "cloudflare.zone.fwomps.com" };
+    const fb = { ...finding("agentkagent.com"), source_id: "cloudflare.zone.agentkagent.com" };
+    expect(rootCauseKey({ action: a, finding: fa })).toBe("cloudflare.daily-coverage-gap");
+    expect(rootCauseKey({ action: b, finding: fb })).toBe("cloudflare.daily-coverage-gap");
+    const groups = groupActions([
+      { action: a, finding: fa },
+      { action: b, finding: fb },
+    ]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]?.consolidatable).toBe(true);
+  });
+
   it("keeps unique action keys non-consolidatable alone", () => {
     const a = action("solo", "only.com");
     // change finding to non-pattern
