@@ -4,6 +4,10 @@ name: Traffic Intelligence - Work sync
 # Primary path: deploy-time sync in traffic-intelligence-deploy.yml injects the live queue.
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ti-work-sync.yml"
   workflow_dispatch:
     inputs:
       dry_run:
