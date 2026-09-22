@@ -135,6 +135,22 @@ async function runAdminTests() {
         }
 
         try {
+            const operatorHome = await page.$('#operator-home[aria-labelledby="operator-home-title"]');
+            Assertions.isTrue(operatorHome !== null, 'Admin overview exposes the operator home');
+            const operatorTasks = await page.$$('#operator-home [data-operator-task]');
+            Assertions.equals(operatorTasks.length, 5, `Exactly 5 primary operator tasks (found: ${operatorTasks.length})`);
+            const taskNames = await page.$$eval('#operator-home [data-operator-task]', (nodes) =>
+                nodes.map((node) => node.getAttribute('data-operator-task'))
+            );
+            for (const expected of ['attention', 'publishing', 'traffic', 'sites', 'operations']) {
+                Assertions.isTrue(taskNames.includes(expected), `Operator task present: ${expected}`);
+            }
+            results.pass('Admin overview is organized around five primary operator jobs');
+        } catch (e) {
+            results.fail('Admin operator home', e.message);
+        }
+
+        try {
             const overviewBtn = await page.$('.nav-btn[data-view="overview"]');
             Assertions.isTrue(overviewBtn !== null, 'Overview nav button exists');
             const hasActiveClass = await page.$eval('.nav-btn[data-view="overview"]', (el) => el.classList.contains('active'));

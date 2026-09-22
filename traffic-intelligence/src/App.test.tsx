@@ -67,6 +67,7 @@ describe("human-first traffic intelligence shell", () => {
     expect(screen.getByRole("heading", { name: "Biggest changes" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Where traffic came from" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Human vs machine evidence" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Content drawing attention" })).toBeInTheDocument();
 
     const trafficOverview = screen.getByRole("heading", { name: "What happened across the web estate" });
     const queue = screen.getByRole("heading", { name: "Work funnel metrics" });

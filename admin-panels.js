@@ -641,7 +641,7 @@
                     }
 
                     function bindUI() {
-                        document.querySelectorAll('.nav-btn').forEach((btn) => {
+                        document.querySelectorAll('.nav-btn[data-view]').forEach((btn) => {
                             btn.addEventListener('click', () => {
                                 navigateToView(btn.dataset.view);
                             });
@@ -3152,7 +3152,7 @@
 
                     // ── Page context map ────────────────────────────────────────────
                     const PAGE_CONTEXTS = {
-                        overview: { name: 'Overview', title: 'Overview', sub: 'Global stats, platform connections, and quick-start guide for your content pipeline.' },
+                        overview: { name: 'Overview', title: 'Overview', sub: 'What needs attention, what is publishing, how the estate is performing, and where to act.' },
                         connections: { name: 'Platform Connect', title: 'Platform Connect', sub: 'Manage OAuth tokens, social handles, and per-brand platform authentication.' },
                         planner: { name: 'Campaign Planner', title: 'Campaign Planner', sub: 'Schedule yearly campaigns, set objectives, and view your content calendar.' },
                         composer: { name: 'Post Composer', title: 'Post Composer', sub: 'Draft and schedule posts across all platforms with per-channel character limits.' },
