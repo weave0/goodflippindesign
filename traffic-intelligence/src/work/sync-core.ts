@@ -253,6 +253,22 @@ export function planWorkSync(options: {
   for (const g of groups) {
     for (const m of g.members) groupByActionId.set(m.action.action_id, g);
   }
+  metrics.consolidated_groups = groups.filter((g) => g.consolidatable).length;
+
+  // Migration authority: when the computed primary already has an open legacy
+  // issue, bind the normalized root cause to it before walking members. This
+  // allows every duplicate to supersede in one sync regardless of action order.
+  for (const g of groups) {
+    if (!g.consolidatable) continue;
+    const primary = pickPrimaryMember(g.members);
+    const primaryIssue = byAction.get(primary.action.action_id);
+    if (
+      primaryIssue?.state === "open" &&
+      !primaryIssue.labels.includes("ti-superseded")
+    ) {
+      primaryByRoot.set(g.root_cause_key, primaryIssue);
+    }
+  }
 
   const actionIdsPresent = new Set(options.insights.actions.map((a) => a.action_id));
   const createCandidates: Array<{
@@ -560,20 +576,10 @@ export function planWorkSync(options: {
 
     if (materialFieldsChanged(machine, composed.machine) || consolidatable) {
       composed.machine.lifecycle = lifecycle;
-      // Ensure evidence section refreshed from prior body
-      const snap = snapshotFromInsights({
-        action,
-        brief,
-        findings,
-        insightsGeneratedAt: options.insights.generated_at,
-      });
-      let nextBody = upsertEvidenceSection(existing.body, snap);
-      nextBody = upsertMachineBlock(nextBody, composed.machine);
-      // Prefer full composed body when structure upgraded (group members section).
-      if (consolidatable || !existing.body.includes("### Evidence (closed-loop)")) {
-        nextBody = composed.body;
-      }
-      composed.body = nextBody;
+      // composeIssue() already carries the preserved first-detection evidence
+      // from prior_body while rebuilding all human-readable fields from the
+      // latest insight. Never leave a stale headline/summary above fresh evidence.
+      composed.body = upsertMachineBlock(composed.body, composed.machine);
       plans.push({
         kind: "update_body",
         action_id: action.action_id,
@@ -797,7 +803,6 @@ export function planWorkSync(options: {
     createsSelected += 1;
     metrics.creates_last_sync += 1;
     if (cand.group_role === "primary") {
-      metrics.consolidated_groups += 1;
       primaryHandled.add(cand.root_cause_key);
     }
     queueItems[action.action_id] = queueItemFromAction({
