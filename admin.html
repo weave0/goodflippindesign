@@ -246,7 +246,7 @@
                     <div class="topbar-context">
                         <div class="topbar-breadcrumb">GFD Admin <span class="topbar-sep">&#8250;</span> <span id="topbar-section-name">Overview</span></div>
                         <h1 class="heading" id="topbar-heading">Overview</h1>
-                        <p class="subheading" id="topbar-subheading">Global KPIs, platform connections, and quick-start guide for your content pipeline.</p>
+                        <p class="subheading" id="topbar-subheading">What needs attention, what is publishing, how the estate is performing, and where to act.</p>
                     </div>
                     <div class="inline-actions">
                         <button class="btn btn-secondary btn-cmd-k" id="cmd-k-btn" title="Command palette (Ctrl+K)"><span class="cmd-k-badge">Ctrl K</span> Quick Nav</button>
@@ -257,7 +257,7 @@
                     </div>
                 </div>
 
-                <div class="status-strip" id="kpi-row" role="region" aria-label="Platform statistics">
+                <div class="status-strip status-strip--secondary" id="kpi-row" role="region" aria-label="Platform statistics">
                     <div class="status-chip">
                         <div class="chip-value cyan" id="kpi-assets">—</div>
                         <div class="chip-label">Assets</div>
@@ -309,18 +309,59 @@
                 </div>
 
                 <section class="view active" id="view-overview">
-                    <article class="panel mb-085" id="overview-traffic-entry">
-                        <div class="section-head">
+                    <section class="operator-home mb-085" id="operator-home" aria-labelledby="operator-home-title">
+                        <div class="operator-home__header">
                             <div>
-                                <h2 class="section-title">Web Traffic</h2>
-                                <p class="subheading">Understand what happened across the governed GFD web estate, what is missing, and what deserves attention.</p>
-                            </div>
-                            <div class="inline-actions">
-                                <a class="btn btn-primary" href="https://traffic.goodflippindesign.com" target="_blank" rel="noopener">Open Traffic Intelligence &rarr;</a>
+                                <div class="operator-home__eyebrow">Operator home</div>
+                                <h2 class="operator-home__title" id="operator-home-title">What needs attention and where do I act?</h2>
+                                <p class="subheading">Start with the job you need to do. Detailed system inventories stay below these operator paths.</p>
                             </div>
                         </div>
-                        <p class="text-muted" style="margin:0">Traffic Intelligence is the human-facing traffic workspace. Estate coverage must reconcile to the canonical registry; unknown or unavailable properties remain visible rather than disappearing.</p>
-                    </article>
+                        <div class="operator-home-grid" role="group" aria-label="Operator priorities">
+                            <article class="operator-task-card operator-task-card--attention" data-operator-task="attention">
+                                <div class="operator-task-card__eyebrow">Attention</div>
+                                <h3>What needs me now?</h3>
+                                <p>Review active operational flags, site-health issues, and work that should not wait.</p>
+                                <div class="operator-task-card__actions">
+                                    <a class="btn btn-primary" href="#gap-flags-panel">Open Operations Board &rarr;</a>
+                                </div>
+                            </article>
+                            <article class="operator-task-card" data-operator-task="publishing">
+                                <div class="operator-task-card__eyebrow">Publishing</div>
+                                <h3>What are we shipping?</h3>
+                                <p>See today's CultureSherpa schedule, compose content, and manage upcoming campaigns.</p>
+                                <div class="operator-task-card__actions">
+                                    <button class="btn btn-secondary" data-view-shortcut="daily-cultures">Today's schedule</button>
+                                    <button class="btn btn-secondary" data-view-shortcut="planner">Campaigns</button>
+                                </div>
+                            </article>
+                            <article class="operator-task-card operator-task-card--traffic" id="overview-traffic-entry" data-operator-task="traffic">
+                                <div class="operator-task-card__eyebrow">Audience &amp; traffic</div>
+                                <h3>What happened across the web estate?</h3>
+                                <p>Traffic, change, property performance, acquisition, human/machine evidence, coverage gaps, and what deserves attention.</p>
+                                <div class="operator-task-card__actions">
+                                    <a class="btn btn-primary" href="https://traffic.goodflippindesign.com" target="_blank" rel="noopener">Open Traffic Intelligence &rarr;</a>
+                                </div>
+                            </article>
+                            <article class="operator-task-card" data-operator-task="sites">
+                                <div class="operator-task-card__eyebrow">Sites</div>
+                                <h3>Is the estate healthy?</h3>
+                                <p>Inspect site health, governed properties, deployment status, and ecosystem problems.</p>
+                                <div class="operator-task-card__actions">
+                                    <button class="btn btn-secondary" data-view-shortcut="ecosystem">Open Ecosystem Health</button>
+                                </div>
+                            </article>
+                            <article class="operator-task-card" data-operator-task="operations">
+                                <div class="operator-task-card__eyebrow">Operations</div>
+                                <h3>Are the systems ready to work?</h3>
+                                <p>Check publishing connections, review queues, and automation surfaces without hunting through the sidebar.</p>
+                                <div class="operator-task-card__actions">
+                                    <button class="btn btn-secondary" data-view-shortcut="connections">Connections</button>
+                                    <button class="btn btn-secondary" data-view-shortcut="review-queue">Review queue</button>
+                                </div>
+                            </article>
+                        </div>
+                    </section>
                     <!-- Health Alert Banner (shown when sweep detects downed sites) -->
                     <div id="overview-health-alert" style="display:none" role="alert" aria-live="polite"></div>
 
