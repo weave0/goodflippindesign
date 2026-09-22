@@ -32,7 +32,7 @@ env:
   # Keep in lockstep with traffic-intelligence-deploy.yml producer pin.
   PRODUCER_REF: 3ed3963ca5e7c2b3c51a86b62a35e5030597bd23
   TI_WORK_REPO: weave0/goodflippindesign
-  CF_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
+  CLOUDFLARE_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
 
 jobs:
   sync:
@@ -107,6 +107,23 @@ jobs:
           PY
           python -m pip install -r "$RUNNER_TEMP/gfdti-requirements.txt"
           python -m pip install --no-deps ./.producer
+
+      - name: Verify live Cloudflare acquisition authority
+        if: steps.source.outputs.mode == 'live'
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || {
+            echo "CLOUDFLARE_ACCOUNT_ID is required for production acquisition"
+            exit 1
+          }
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || {
+            echo "CF_GFD_TI_ANALYTICS_TOKEN is required for production acquisition"
+            exit 1
+          }
+          echo "live_cloudflare_authority=ready"
 
       - name: Acquire current Cloudflare Gold + insights
         if: steps.source.outputs.mode == 'live'
