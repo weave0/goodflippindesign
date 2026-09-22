@@ -125,6 +125,16 @@ async function runAdminTests() {
         }
 
         try {
+            const trafficLink = await page.$('#traffic-intelligence-link[href="https://traffic.goodflippindesign.com"]');
+            Assertions.isTrue(trafficLink !== null, 'Traffic Intelligence is directly reachable from Admin navigation');
+            const overviewTrafficLink = await page.$('#overview-traffic-entry a[href="https://traffic.goodflippindesign.com"]');
+            Assertions.isTrue(overviewTrafficLink !== null, 'Admin overview exposes the Traffic Intelligence operator entry point');
+            results.pass('Traffic Intelligence is a first-class Admin destination');
+        } catch (e) {
+            results.fail('Traffic Intelligence linked from Admin', e.message);
+        }
+
+        try {
             const overviewBtn = await page.$('.nav-btn[data-view="overview"]');
             Assertions.isTrue(overviewBtn !== null, 'Overview nav button exists');
             const hasActiveClass = await page.$eval('.nav-btn[data-view="overview"]', (el) => el.classList.contains('active'));
