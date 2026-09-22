@@ -53,6 +53,23 @@ jobs:
       - name: Validate canonical estate registry
         run: npm run estate:validate
 
+      - name: Validate TI work-sync live authority contract
+        run: |
+          node - <<'NODE'
+          const fs = require("fs");
+          const workflow = fs.readFileSync(".github/workflows/ti-work-sync.yml", "utf8");
+          if (!workflow.includes("CLOUDFLARE_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193")) {
+            throw new Error("ti-work-sync must expose CLOUDFLARE_ACCOUNT_ID to the production producer");
+          }
+          if (!workflow.includes("Verify live Cloudflare acquisition authority")) {
+            throw new Error("ti-work-sync must fail explicitly before acquisition when live authority is incomplete");
+          }
+          if (workflow.includes("\n  CF_ACCOUNT_ID:")) {
+            throw new Error("ti-work-sync must not use the producer-incompatible CF_ACCOUNT_ID name");
+          }
+          console.log("ti_work_sync_live_authority_contract=true");
+          NODE
+
       - name: Lint
         run: npm run lint
 
