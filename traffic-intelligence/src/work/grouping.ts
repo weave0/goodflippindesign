@@ -18,7 +18,7 @@ export interface GroupingInput {
 export function rootCauseKey(input: GroupingInput): string {
   const findings = collectFindings(input);
   const primary = input.finding ?? findings[0] ?? null;
-  const source = (primary?.source_id ?? "unknown").toLowerCase();
+  const source = sourceFamily(primary?.source_id ?? "unknown");
   const title = (primary?.title ?? input.brief?.headline ?? input.action.recommended_action ?? "").toLowerCase();
   const findingId = (primary?.finding_id ?? input.action.finding_id ?? "").toLowerCase();
   const kind = primary?.kind ?? "unknown";
@@ -56,6 +56,15 @@ export function isConsolidatableRootCause(key: string): boolean {
   if (key.endsWith(".daily-coverage-gap")) return true;
   if (key.includes(".data_gap.")) return true;
   return false;
+}
+
+export function sourceFamily(sourceId: string): string {
+  const source = sourceId.toLowerCase().trim();
+  // Live producer source ids are authority-scoped (for example
+  // cloudflare.zone.agentkagent.com). Grouping must use the provider family,
+  // otherwise identical cross-property findings never consolidate.
+  if (/^cloudflare(?:[.:/]|$)/.test(source)) return "cloudflare";
+  return source || "unknown";
 }
 
 export function normalizePattern(title: string, propertyId: string | null | undefined): string {
