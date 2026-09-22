@@ -137,9 +137,9 @@ async function runAdminTests() {
         try {
             const operatorHome = await page.$('#operator-home[aria-labelledby="operator-home-title"]');
             Assertions.isTrue(operatorHome !== null, 'Admin overview exposes the operator home');
-            const operatorTasks = await page.$('#operator-home [data-operator-task]');
+            const operatorTasks = await page.$$('#operator-home [data-operator-task]');
             Assertions.equals(operatorTasks.length, 5, `Exactly 5 primary operator tasks (found: ${operatorTasks.length})`);
-            const taskNames = await page.$eval('#operator-home [data-operator-task]', (nodes) =>
+            const taskNames = await page.$$eval('#operator-home [data-operator-task]', (nodes) =>
                 nodes.map((node) => node.getAttribute('data-operator-task'))
             );
             for (const expected of ['attention', 'publishing', 'traffic', 'sites', 'operations']) {
