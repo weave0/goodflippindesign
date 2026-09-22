@@ -22,7 +22,6 @@ import {
   type GroupingInput,
 } from "./grouping";
 import { scoreImpact } from "./scoring";
-import { snapshotFromInsights, upsertEvidenceSection } from "./evidence";
 import {
   AUTO_CREATE_CAP_PER_RUN,
   DEFAULT_TARGET_REPO,
