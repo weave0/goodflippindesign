@@ -74,6 +74,124 @@ describe("human-first traffic intelligence shell", () => {
     expect(trafficOverview.compareDocumentPosition(queue) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it("makes ranked next work actionable where the operator makes the decision", async () => {
+    const action = insights.actions[0];
+    const actionableQueue = {
+      ...workQueue,
+      items: {
+        [action.action_id]: {
+          action_id: action.action_id,
+          issue_number: null,
+          html_url: null,
+          lifecycle: "detected",
+          eligibility: "recommend",
+          property_id: action.property_id,
+          target_repo: "weave0/goodflippindesign",
+          title: "Review cache deterioration",
+          priority_class: action.priority_class,
+          confidence: "medium",
+          severity: action.severity,
+          recommended_action: action.recommended_action,
+          verification_condition: action.verification_condition,
+          brief_id: action.brief_id,
+          finding_ids: action.finding_ids,
+          snooze_until: null,
+          updated_at: null,
+          impact_score: 72,
+          impact_class: "high",
+          impact_rationale: "material delivery change",
+          root_cause_key: `action:${action.action_id}`,
+          group_role: "standalone",
+          group_member_action_ids: [],
+        },
+      },
+      metrics: {
+        ...workQueue.metrics,
+        planned: 1,
+        recommend: 1,
+        by_lifecycle: { detected: 1 },
+        by_impact_class: { high: 1 },
+      },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        const body = url.includes("ti-work-queue")
+          ? actionableQueue
+          : url.includes("traffic-insights")
+            ? insights
+            : fixture;
+        return { ok: true, json: async () => body };
+      }),
+    );
+
+    render(<App />);
+    const heading = await screen.findByRole("heading", { name: "What should we work on next?" });
+    const section = within(heading.closest("section")!);
+    expect(section.getByText("Review cache deterioration")).toBeInTheDocument();
+    expect(section.getByRole("link", { name: "Promote to work" })).toHaveAttribute("href", expect.stringContaining("/issues/new?"));
+    expect(section.getByRole("button", { name: "Evidence" })).toBeInTheDocument();
+
+    const funnel = screen.getByRole("heading", { name: "Work funnel metrics" });
+    expect(heading.compareDocumentPosition(funnel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("keeps ranked next work scoped to the selected property", async () => {
+    const [exampleAction, , shopAction] = insights.actions;
+    const makeItem = (action: typeof exampleAction, score: number) => ({
+      action_id: action.action_id,
+      issue_number: null,
+      html_url: null,
+      lifecycle: "detected",
+      eligibility: "recommend",
+      property_id: action.property_id,
+      target_repo: "weave0/goodflippindesign",
+      title: `Work for ${action.property_id}`,
+      priority_class: action.priority_class,
+      confidence: "medium",
+      severity: action.severity,
+      recommended_action: action.recommended_action,
+      verification_condition: action.verification_condition,
+      brief_id: action.brief_id,
+      finding_ids: action.finding_ids,
+      snooze_until: null,
+      updated_at: null,
+      impact_score: score,
+      impact_class: "high",
+      impact_rationale: "scope test",
+      root_cause_key: `action:${action.action_id}`,
+      group_role: "standalone",
+      group_member_action_ids: [],
+    });
+    const scopedQueue = {
+      ...workQueue,
+      items: {
+        [exampleAction.action_id]: makeItem(exampleAction, 90),
+        [shopAction.action_id]: makeItem(shopAction, 80),
+      },
+    };
+    window.history.replaceState({}, "", "/?site=shop.example.com");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        const body = url.includes("ti-work-queue")
+          ? scopedQueue
+          : url.includes("traffic-insights")
+            ? insights
+            : fixture;
+        return { ok: true, json: async () => body };
+      }),
+    );
+
+    render(<App />);
+    const heading = await screen.findByRole("heading", { name: "What should we work on next?" });
+    const section = within(heading.closest("section")!);
+    expect(section.getByText("Work for shop.example.com")).toBeInTheDocument();
+    expect(section.queryByText("Work for example.com")).not.toBeInTheDocument();
+  });
+
   it("renders the decision cockpit from estate_brief before queues of raw findings", async () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Traffic overview" })).toBeInTheDocument();
