@@ -58,6 +58,21 @@ describe("human-first traffic intelligence shell", () => {
     expect(screen.queryByRole("button", { name: "Laboratory" })).not.toBeInTheDocument();
   });
 
+  it("puts human traffic answers ahead of queue internals", async () => {
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "What happened across the web estate" })).toBeInTheDocument();
+    expect(screen.getByText("Measured edge requests")).toBeInTheDocument();
+    expect(screen.getByText("Change vs prior period")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Top properties by traffic" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Biggest changes" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Where traffic came from" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Human vs machine evidence" })).toBeInTheDocument();
+
+    const trafficOverview = screen.getByRole("heading", { name: "What happened across the web estate" });
+    const queue = screen.getByRole("heading", { name: "Work funnel metrics" });
+    expect(trafficOverview.compareDocumentPosition(queue) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("renders the decision cockpit from estate_brief before queues of raw findings", async () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Traffic overview" })).toBeInTheDocument();
