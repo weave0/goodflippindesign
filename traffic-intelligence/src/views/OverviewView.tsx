@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Gold12Topology, Metric, WindowPayload } from "../gold/types";
 import type { Filters } from "../gold/url-state";
-import { filterMetrics, overviewMetrics, selectSite } from "../gold/select";
+import { filterMetrics, filterRanked, overviewMetrics, selectSite } from "../gold/select";
 import { MetricGrid } from "../components/MetricCard";
 import { TimeSeriesChart } from "../components/Charts";
 import type {
@@ -107,6 +107,37 @@ function HealthCell({ label, value }: { label: string; value: string }) {
       <em>{label}</em> {value}
     </span>
   );
+}
+
+function compactNumber(value: number | null): string {
+  if (value == null || !Number.isFinite(value)) return "Unavailable";
+  return new Intl.NumberFormat("en-US", {
+    notation: value >= 1000 ? "compact" : "standard",
+    maximumFractionDigits: value >= 1000 ? 1 : 0,
+  }).format(value);
+}
+
+function signedPercent(value: number | null): string {
+  if (value == null || !Number.isFinite(value)) return "Not comparable";
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${value.toFixed(1)}%`;
+}
+
+function rankedValue(row: { value: number | null; display?: string; shareDisplay?: string }): string {
+  if (row.shareDisplay) return row.shareDisplay;
+  if (row.display) return row.display;
+  return compactNumber(row.value);
+}
+
+function comparisonStatus(
+  available: boolean | undefined,
+  measurement: PropertyHealth["measurement"] | undefined,
+): string {
+  if (available) return "Comparable";
+  if (measurement === "complete") return "Measured; comparison unavailable";
+  if (measurement === "partial") return "Partial measurement";
+  if (measurement === "blocked") return "Measurement blocked";
+  return "Unavailable";
 }
 
 export function OverviewView({
@@ -281,6 +312,120 @@ export function OverviewView({
     insights?.schema_version === "1.1.0" && (!insights.estate_brief || !insights.briefs);
   const metricOption = TREND_METRIC_OPTIONS.find((o) => o.id === trendMetric);
 
+  const periodDaysMatch = /^(\\d+)d$/.exec(payload.window.id);
+  const periodDays = periodDaysMatch ? Number(periodDaysMatch[1]) : null;
+  const requestComparisonRows = useMemo(
+    () =>
+      (insights?.trend_comparisons ?? []).filter(
+        (row) =>
+          row.metric_name === "requests" &&
+          (periodDays == null || row.period_days === periodDays) &&
+          (!siteDomain || row.property_id === siteDomain),
+      ),
+    [insights, periodDays, siteDomain],
+  );
+  const comparableRequestRows = useMemo(
+    () =>
+      requestComparisonRows.filter(
+        (row) =>
+          row.available &&
+          typeof row.current_value === "number" &&
+          typeof row.baseline_value === "number",
+      ),
+    [requestComparisonRows],
+  );
+  const currentRequests =
+    comparableRequestRows.length > 0
+      ? comparableRequestRows.reduce((sum, row) => sum + (row.current_value ?? 0), 0)
+      : null;
+  const priorRequests =
+    comparableRequestRows.length > 0
+      ? comparableRequestRows.reduce((sum, row) => sum + (row.baseline_value ?? 0), 0)
+      : null;
+  const requestPercentChange =
+    currentRequests != null && priorRequests != null && priorRequests !== 0
+      ? ((currentRequests - priorRequests) / priorRequests) * 100
+      : null;
+
+  const governedZones = useMemo(() => {
+    if (siteDomain) return [siteDomain];
+    if (estateConfig?.governed_zones?.length) return estateConfig.governed_zones;
+    const observed = [
+      ...health.map((row) => row.property_id),
+      ...payload.sites.map((row) => row.domain),
+      ...requestComparisonRows.map((row) => row.property_id),
+    ];
+    return observed.filter((id, index, all) => all.indexOf(id) === index).sort();
+  }, [estateConfig, health, payload.sites, requestComparisonRows, siteDomain]);
+
+  const propertyCoverageRows = useMemo(
+    () =>
+      governedZones.map((propertyId) => {
+        const comparison = requestComparisonRows.find((row) => row.property_id === propertyId);
+        const propertyHealth = allHealth.find((row) => row.property_id === propertyId);
+        const config = estateConfig?.properties.find((row) => row.property_id === propertyId) ?? null;
+        return {
+          propertyId,
+          comparison,
+          propertyHealth,
+          config,
+          status: comparisonStatus(comparison?.available, propertyHealth?.measurement),
+        };
+      }),
+    [allHealth, estateConfig, governedZones, requestComparisonRows],
+  );
+  const comparablePropertyCount = propertyCoverageRows.filter((row) => row.comparison?.available).length;
+  const limitedPropertyCount = Math.max(0, propertyCoverageRows.length - comparablePropertyCount);
+
+  const topTrafficProperties = useMemo(
+    () =>
+      [...comparableRequestRows]
+        .sort((a, b) => (b.current_value ?? 0) - (a.current_value ?? 0))
+        .slice(0, 5),
+    [comparableRequestRows],
+  );
+  const biggestChanges = useMemo(
+    () =>
+      [...comparableRequestRows]
+        .sort((a, b) => Math.abs(b.absolute_delta ?? 0) - Math.abs(a.absolute_delta ?? 0))
+        .slice(0, 5),
+    [comparableRequestRows],
+  );
+  const sourceRows = useMemo(
+    () =>
+      siteDomain
+        ? []
+        : filterRanked(payload.humans.acquisition, filters)
+            .filter((row) => row.value != null)
+            .slice(0, 5),
+    [filters, payload.humans.acquisition, siteDomain],
+  );
+  const humanEvidence = useMemo(
+    () =>
+      siteDomain
+        ? []
+        : filterMetrics(payload.humans.metrics, filters)
+            .filter((metric) => metric.value != null)
+            .slice(0, 3),
+    [filters, payload.humans.metrics, siteDomain],
+  );
+  const machineEvidence = useMemo(
+    () =>
+      siteDomain
+        ? []
+        : filterRanked(
+            payload.taxonomy.filter((row) => row.id !== "tax.human_evidence"),
+            filters,
+          )
+            .filter((row) => row.value != null)
+            .slice(0, 3),
+    [filters, payload.taxonomy, siteDomain],
+  );
+  const attentionBriefs = useMemo(
+    () => rankedBriefs(insights, siteDomain, ["act_now", "investigate"]).slice(0, 3),
+    [insights, siteDomain],
+  );
+
   const openProperty = (propertyId: string) => {
     setFocusProperty(propertyId);
     onSelectProperty(propertyId);
@@ -344,6 +489,223 @@ export function OverviewView({
           )}
           <span>{payload.sites.length} properties in Gold topology</span>
         </aside>
+      </section>
+
+      <section className="operator-overview" aria-labelledby="operator-overview-title">
+        <header className="operator-overview__header">
+          <div>
+            <span className="eyebrow">Traffic at a glance</span>
+            <h2 id="operator-overview-title">
+              {siteDomain ? `${siteDomain} performance` : "What happened across the web estate"}
+            </h2>
+            <p>
+              Measured traffic first. Comparisons only use equal producer windows; unavailable evidence stays unavailable.
+            </p>
+          </div>
+          <div className="operator-period" aria-label="Overview reporting period">
+            <span>{payload.window.label}</span>
+            <strong>{payload.window.start} → {payload.window.end}</strong>
+          </div>
+        </header>
+
+        <div className="operator-kpis" role="group" aria-label="Traffic summary">
+          <article className="operator-kpi">
+            <span>Measured edge requests</span>
+            <strong data-testid="overview-measured-requests">{compactNumber(currentRequests)}</strong>
+            <small>
+              {comparablePropertyCount} of {propertyCoverageRows.length || "—"} properties have an equal-window comparison.
+            </small>
+          </article>
+          <article className="operator-kpi">
+            <span>Change vs prior period</span>
+            <strong>{signedPercent(requestPercentChange)}</strong>
+            <small>
+              {periodDays ? `Current ${periodDays} days vs prior ${periodDays} days` : "Comparison basis unavailable"}.
+            </small>
+          </article>
+          <article className="operator-kpi">
+            <span>Coverage limitations</span>
+            <strong>{limitedPropertyCount}</strong>
+            <small>
+              {propertyCoverageRows.length
+                ? `${comparablePropertyCount} comparable · ${limitedPropertyCount} limited/unavailable`
+                : "Governed property accounting unavailable"}
+            </small>
+          </article>
+          <article className="operator-kpi">
+            <span>Needs attention</span>
+            <strong>{attentionBriefs.length}</strong>
+            <small>Act-now or investigate briefs in the current scope.</small>
+          </article>
+        </div>
+
+        <div className="operator-answer-grid">
+          <article className="operator-answer-card">
+            <h3>Top properties by traffic</h3>
+            <p className="operator-answer-card__note">Edge requests in the active period; not unique visitors.</p>
+            {topTrafficProperties.length ? (
+              <ol className="operator-rank-list">
+                {topTrafficProperties.map((row) => (
+                  <li key={row.property_id}>
+                    <button type="button" className="linkish" onClick={() => openProperty(row.property_id)}>
+                      {row.property_id}
+                    </button>
+                    <strong>{compactNumber(row.current_value)}</strong>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="empty">No comparable property request totals are available for this period.</p>
+            )}
+          </article>
+
+          <article className="operator-answer-card">
+            <h3>Biggest changes</h3>
+            <p className="operator-answer-card__note">Largest absolute request changes among comparable properties.</p>
+            {biggestChanges.length ? (
+              <ol className="operator-rank-list">
+                {biggestChanges.map((row) => (
+                  <li key={row.property_id}>
+                    <button type="button" className="linkish" onClick={() => openProperty(row.property_id)}>
+                      {row.property_id}
+                    </button>
+                    <strong>{signedPercent(row.percent_delta)}</strong>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="empty">No truthful equal-window changes are available.</p>
+            )}
+          </article>
+
+          <article className="operator-answer-card">
+            <h3>Where traffic came from</h3>
+            <p className="operator-answer-card__note">Browser acquisition evidence where the current Gold payload supports it.</p>
+            {siteDomain ? (
+              <p className="empty">Property-level acquisition is not asserted on this overview.</p>
+            ) : sourceRows.length ? (
+              <ol className="operator-rank-list">
+                {sourceRows.map((row) => (
+                  <li key={row.id}>
+                    <span>{row.label}</span>
+                    <strong>{rankedValue(row)}</strong>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="empty">Acquisition evidence is unavailable for this period.</p>
+            )}
+          </article>
+
+          <article className="operator-answer-card">
+            <h3>Human vs machine evidence</h3>
+            <p className="operator-answer-card__note">Separate evidence streams — never blended into a fake visitor ratio.</p>
+            {siteDomain ? (
+              <p className="empty">A safe property-level human/machine comparison is not asserted here.</p>
+            ) : (
+              <div className="evidence-split">
+                <div>
+                  <span className="operator-subhead">Human evidence</span>
+                  {humanEvidence.length ? (
+                    <ul className="operator-plain-list">
+                      {humanEvidence.map((metric) => (
+                        <li key={metric.id}>
+                          <span>{metric.label}</span>
+                          <strong>{metric.display ?? compactNumber(metric.value)}</strong>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="section-note">Unavailable</span>
+                  )}
+                </div>
+                <div>
+                  <span className="operator-subhead">Automation evidence</span>
+                  {machineEvidence.length ? (
+                    <ul className="operator-plain-list">
+                      {machineEvidence.map((row) => (
+                        <li key={row.id}>
+                          <span>{row.label}</span>
+                          <strong>{rankedValue(row)}</strong>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="section-note">Unavailable</span>
+                  )}
+                </div>
+              </div>
+            )}
+          </article>
+        </div>
+
+        <div className="operator-attention">
+          <div>
+            <span className="operator-subhead">What needs attention now</span>
+            {attentionBriefs.length ? (
+              <ul>
+                {attentionBriefs.map((brief) => (
+                  <li key={brief.brief_id}>
+                    <button type="button" className="linkish" onClick={() => openProperty(brief.property_id)}>
+                      {brief.headline}
+                    </button>
+                    <span>{brief.summary}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No act-now or investigate brief is available for this period.</p>
+            )}
+          </div>
+          {estate?.measurement_limitations?.length ? (
+            <div>
+              <span className="operator-subhead">Known measurement limits</span>
+              <ul>
+                {estate.measurement_limitations.slice(0, 3).map((item) => <li key={item}>{item}</li>)}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+
+        <details className="coverage-accounting">
+          <summary>
+            Property coverage — {propertyCoverageRows.length || 0} governed/observed properties accounted for
+          </summary>
+          {propertyCoverageRows.length ? (
+            <div className="table-wrap">
+              <table className="data operator-coverage-table">
+                <thead>
+                  <tr>
+                    <th>Property</th>
+                    <th>Traffic evidence</th>
+                    <th>Requests</th>
+                    <th>Change</th>
+                    <th>Measurement</th>
+                    <th>Estate config</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {propertyCoverageRows.map((row) => (
+                    <tr key={row.propertyId}>
+                      <td>
+                        <button type="button" className="linkish" onClick={() => openProperty(row.propertyId)}>
+                          {row.propertyId}
+                        </button>
+                      </td>
+                      <td>{row.status}</td>
+                      <td>{row.comparison?.available ? compactNumber(row.comparison.current_value) : "—"}</td>
+                      <td>{row.comparison?.available ? signedPercent(row.comparison.percent_delta) : "—"}</td>
+                      <td>{row.propertyHealth?.measurement ?? "unknown"}</td>
+                      <td>{row.config ? ESTATE_CONFIG_STATE_LABEL[row.config.state] : "unobserved"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="empty">Governed estate accounting is unavailable; no properties are silently labeled healthy.</p>
+          )}
+        </details>
       </section>
 
       {funnelMetrics ? (

@@ -58,6 +58,21 @@ describe("human-first traffic intelligence shell", () => {
     expect(screen.queryByRole("button", { name: "Laboratory" })).not.toBeInTheDocument();
   });
 
+  it("puts human traffic answers ahead of queue internals", async () => {
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "What happened across the web estate" })).toBeInTheDocument();
+    expect(screen.getByText("Measured edge requests")).toBeInTheDocument();
+    expect(screen.getByText("Change vs prior period")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Top properties by traffic" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Biggest changes" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Where traffic came from" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Human vs machine evidence" })).toBeInTheDocument();
+
+    const trafficOverview = screen.getByRole("heading", { name: "What happened across the web estate" });
+    const queue = screen.getByRole("heading", { name: "Work funnel metrics" });
+    expect(trafficOverview.compareDocumentPosition(queue) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("renders the decision cockpit from estate_brief before queues of raw findings", async () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Traffic overview" })).toBeInTheDocument();
@@ -74,12 +89,14 @@ describe("human-first traffic intelligence shell", () => {
   it("defaults Top briefs to Act now + Investigate and can expand Watch", async () => {
     const user = userEvent.setup();
     render(<App />);
-    await screen.findByRole("heading", { name: "Top briefs" });
-    expect(screen.getByText(/Measurement gaps block some comparisons/i)).toBeInTheDocument();
-    expect(screen.getByText(/Cache rate deteriorated on example.com/i)).toBeInTheDocument();
-    expect(screen.queryByText(/HTTP requests increased on example.com/i)).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /Show Watch/i }));
-    expect(screen.getByText(/HTTP requests increased on example.com/i)).toBeInTheDocument();
+    const heading = await screen.findByRole("heading", { name: "Top briefs" });
+    // Scope to the section: the overview's attention list repeats brief headlines.
+    const topBriefs = within(heading.closest("section")!);
+    expect(topBriefs.getByText(/Measurement gaps block some comparisons/i)).toBeInTheDocument();
+    expect(topBriefs.getByText(/Cache rate deteriorated on example.com/i)).toBeInTheDocument();
+    expect(topBriefs.queryByText(/HTTP requests increased on example.com/i)).not.toBeInTheDocument();
+    await user.click(topBriefs.getByRole("button", { name: /Show Watch/i }));
+    expect(topBriefs.getByText(/HTTP requests increased on example.com/i)).toBeInTheDocument();
   });
 
   it("opens a property dossier from the health matrix using URL site state", async () => {

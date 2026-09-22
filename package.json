@@ -76,7 +76,8 @@
     "traffic:dev": "npm --prefix traffic-intelligence run dev",
     "traffic:test": "npm --prefix traffic-intelligence test",
     "traffic:build": "npm --prefix traffic-intelligence run build",
-    "traffic:lint": "npm --prefix traffic-intelligence run lint"
+    "traffic:lint": "npm --prefix traffic-intelligence run lint",
+    "estate:validate": "node scripts/validate-estate-registry.mjs"
   },
   "repository": {
     "type": "git",

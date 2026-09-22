@@ -50,6 +50,9 @@ jobs:
           node scripts/compare-audit-baseline.js security/npm-audit-baseline.json "$trusted_baseline" npm-audit-full.json
           echo "npm audit exit status: $audit_status (1 means findings were reported and validated)"
 
+      - name: Validate canonical estate registry
+        run: npm run estate:validate
+
       - name: Lint
         run: npm run lint
 
