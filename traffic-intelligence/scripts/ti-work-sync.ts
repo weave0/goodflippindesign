@@ -299,17 +299,29 @@ async function main(): Promise<void> {
           existing?.labels ?? item.composed.labels,
           item.composed.machine.lifecycle,
         );
-        // Keep eligibility + priority labels fresh
-        const withoutElig = labels.filter(
-          (l) => !l.startsWith("ti-eligibility:") && !l.startsWith("ti-priority:"),
+        // Keep all sync-owned classification labels fresh while preserving
+        // operator-owned lifecycle/snooze and unrelated repository labels.
+        const nextLabels = labels.filter(
+          (l) =>
+            !l.startsWith("ti-eligibility:") &&
+            !l.startsWith("ti-priority:") &&
+            !l.startsWith("ti-impact:") &&
+            l !== TI_GROUP_PRIMARY_LABEL,
         );
-        withoutElig.push(`ti-eligibility:${item.eligibility}`);
+        nextLabels.push(`ti-eligibility:${item.eligibility}`);
         if (item.composed.machine.priority_class) {
-          withoutElig.push(priorityLabelName(item.composed.machine.priority_class));
+          nextLabels.push(priorityLabelName(item.composed.machine.priority_class));
+        }
+        if (item.composed.machine.impact_class) {
+          nextLabels.push(impactLabelName(item.composed.machine.impact_class));
+        }
+        if (item.composed.machine.group_role === "primary") {
+          nextLabels.push(TI_GROUP_PRIMARY_LABEL);
         }
         await updateIssue(repo, auth, item.issue_number, {
+          title: item.composed.title,
           body: item.composed.body,
-          labels: withoutElig,
+          labels: [...new Set(nextLabels)],
         });
         console.log(`updated=#${item.issue_number} action_id=${item.action_id}`);
         break;
