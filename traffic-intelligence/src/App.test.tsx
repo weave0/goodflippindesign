@@ -89,12 +89,14 @@ describe("human-first traffic intelligence shell", () => {
   it("defaults Top briefs to Act now + Investigate and can expand Watch", async () => {
     const user = userEvent.setup();
     render(<App />);
-    await screen.findByRole("heading", { name: "Top briefs" });
-    expect(screen.getByText(/Measurement gaps block some comparisons/i)).toBeInTheDocument();
-    expect(screen.getByText(/Cache rate deteriorated on example.com/i)).toBeInTheDocument();
-    expect(screen.queryByText(/HTTP requests increased on example.com/i)).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /Show Watch/i }));
-    expect(screen.getByText(/HTTP requests increased on example.com/i)).toBeInTheDocument();
+    const heading = await screen.findByRole("heading", { name: "Top briefs" });
+    // Scope to the section: the overview's attention list repeats brief headlines.
+    const topBriefs = within(heading.closest("section")!);
+    expect(topBriefs.getByText(/Measurement gaps block some comparisons/i)).toBeInTheDocument();
+    expect(topBriefs.getByText(/Cache rate deteriorated on example.com/i)).toBeInTheDocument();
+    expect(topBriefs.queryByText(/HTTP requests increased on example.com/i)).not.toBeInTheDocument();
+    await user.click(topBriefs.getByRole("button", { name: /Show Watch/i }));
+    expect(topBriefs.getByText(/HTTP requests increased on example.com/i)).toBeInTheDocument();
   });
 
   it("opens a property dossier from the health matrix using URL site state", async () => {
