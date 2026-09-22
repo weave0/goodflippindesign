@@ -28,6 +28,7 @@ export function WorkActionControls({
   insights,
   workItem,
   onViewEvidence,
+  compact = false,
 }: {
   action: InsightAction;
   brief?: OperationalBrief | null;
@@ -35,6 +36,7 @@ export function WorkActionControls({
   insights: TrafficInsightDocument | null;
   workItem: WorkQueueItem | null | undefined;
   onViewEvidence: (propertyId: string | null) => void;
+  compact?: boolean;
 }) {
   const eligibility =
     workItem?.eligibility ??
@@ -82,6 +84,30 @@ export function WorkActionControls({
     : null;
 
   const assignUrl = existingUrl ? issueCommentIntentUrl(existingUrl, "assign") : null;
+  const primaryLabel = existingUrl
+    ? workItem?.issue_number != null
+      ? `Open #${workItem.issue_number}`
+      : "Open work item"
+    : eligibility === "recommend"
+      ? "Promote to work"
+      : "Create work item";
+
+  if (compact) {
+    return (
+      <div
+        className="work-action-controls work-action-controls--compact"
+        role="group"
+        aria-label={`Work controls for ${action.action_id}`}
+      >
+        <a className="range-button work-link work-link--primary" href={openUrl} target="_blank" rel="noreferrer">
+          {primaryLabel}
+        </a>
+        <button type="button" className="range-button" onClick={() => onViewEvidence(action.property_id)}>
+          Evidence
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="work-action-controls" role="group" aria-label={`Work controls for ${action.action_id}`}>
