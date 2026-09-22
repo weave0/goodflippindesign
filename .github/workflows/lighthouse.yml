@@ -59,16 +59,20 @@ jobs:
             try {
               const results = JSON.parse(fs.readFileSync('.lighthouseci/manifest.json', 'utf8'));
               const summary = results[0].summary;
+              const score = (value) =>
+                typeof value === 'number' && Number.isFinite(value)
+                  ? `${Math.round(value * 100)}%`
+                  : 'N/A';
 
               const body = `## 🚦 Lighthouse Audit Results
 
               | Category | Score |
               |----------|-------|
-              | 🎭 Performance | ${summary.performance}% |
-              | ♿ Accessibility | ${summary.accessibility}% |
-              | 🔍 Best Practices | ${summary['best-practices']}% |
-              | 📊 SEO | ${summary.seo}% |
-              | ⚡ PWA | ${summary.pwa}% |
+              | 🎭 Performance | ${score(summary.performance)} |
+              | ♿ Accessibility | ${score(summary.accessibility)} |
+              | 🔍 Best Practices | ${score(summary['best-practices'])} |
+              | 📊 SEO | ${score(summary.seo)} |
+              | ⚡ PWA | ${score(summary.pwa)} |
 
               [View Full Report](${results[0].url})`;
 
