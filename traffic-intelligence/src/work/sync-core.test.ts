@@ -446,6 +446,149 @@ describe("TI-010 consolidation + reopen", () => {
     expect(roles).toContain("member");
   });
 
+  it("migrates live property-scoped Cloudflare legacy issues to one primary in a single sync", () => {
+    const properties = ["agentkagent.com", "fwomp.us", "fwomps.com"];
+    const findings = properties.map((property) => ({
+      finding_id: `cloudflare.${property}.90d.daily-coverage-gap`,
+      kind: "data_gap" as const,
+      severity: "medium" as const,
+      scope: "property" as const,
+      property_id: property,
+      source_id: `cloudflare.zone.${property}`,
+      title: "Cloudflare daily series has missing dates",
+      explanation: "missing dates",
+      why_it_matters: "comparison incomplete",
+      recommended_action: "Determine gap cause",
+      verification_condition: "Dates present",
+      action_class: "research" as const,
+      source_metric_ids: [],
+      source_snapshots: [],
+      evidence_state: "unavailable" as const,
+      exactness: "exact",
+      coverage_state: "partial",
+      comparison: null,
+      limitations: [],
+      created_at: "2026-09-15T12:00:00.000Z",
+    }));
+    const actions = findings.map((f) => ({
+      action_id: `action.brief.${f.property_id}.measurement`,
+      finding_id: f.finding_id,
+      finding_ids: [f.finding_id],
+      brief_id: `brief.${f.property_id}.measurement`,
+      priority: 3,
+      priority_class: "measurement_blocked" as const,
+      severity: "medium" as const,
+      scope: "property" as const,
+      property_id: f.property_id,
+      action_class: "research" as const,
+      recommended_action: "Determine gap cause",
+      verification_condition: "Dates present",
+      evidence_refs: [],
+      status: "new" as const,
+    }));
+    const insights = baseInsights(actions);
+    insights.findings = findings;
+    insights.briefs = findings.map((f) => ({
+      brief_id: `brief.${f.property_id}.measurement`,
+      property_id: f.property_id!,
+      category: "measurement" as const,
+      headline: `${f.property_id} measurement gap: Cloudflare daily series has missing dates`,
+      summary: "gap",
+      severity: "medium" as const,
+      priority: "measurement_blocked" as const,
+      direction: "unknown" as const,
+      materiality: { absolute_delta_requests: null, absolute_delta_pageviews: null, percent_delta: null },
+      persistence: [],
+      finding_ids: [f.finding_id],
+      corroborating_signals: [],
+      contradictory_signals: [],
+      confidence: "low" as const,
+      recommended_action: "Determine gap cause",
+      verification_condition: "Dates present",
+      action_class: "research" as const,
+      limitations: [],
+    }));
+
+    const issues: ExistingIssue[] = actions.map((action, idx) => ({
+      number: 285 + idx,
+      html_url: `https://github.com/weave0/goodflippindesign/issues/${285 + idx}`,
+      title: `legacy ${action.property_id}`,
+      body: composeIssue({
+        action,
+        brief: insights.briefs[idx],
+        findings: [findings[idx]!],
+        eligibility: "recommend",
+        lifecycle: "detected",
+        root_cause_key: `cloudflare.zone.${action.property_id}.daily-coverage-gap`,
+      }).body,
+      state: "open",
+      labels: ["ti-work", "ti-lifecycle:detected", "ti-eligibility:recommend"],
+      updated_at: "2026-09-15T12:00:00.000Z",
+    }));
+
+    const plan = planWorkSync({ insights, issues, createCap: 15 });
+    const primary = plan.plans.find(
+      (p) => p.kind === "update_body" && p.composed?.machine.group_role === "primary",
+    );
+    expect(primary?.issue_number).toBe(285);
+    expect(primary?.composed?.machine.root_cause_key).toBe("cloudflare.daily-coverage-gap");
+    expect(primary?.composed?.body).toContain("Consolidated members");
+    const superseded = plan.plans.filter((p) => p.kind === "supersede_duplicate");
+    expect(superseded).toHaveLength(2);
+    expect(superseded.every((p) => p.primary_issue_number === 285)).toBe(true);
+    expect(plan.metrics.consolidated_groups).toBe(1);
+    expect(plan.metrics.superseded_duplicates).toBe(2);
+    for (const action of actions) {
+      expect(plan.queueItems[action.action_id]?.issue_number).toBe(285);
+    }
+  });
+
+  it("refreshes the human-readable issue body when current insight text changes", () => {
+    const action = act("a-refresh", "healthy");
+    const oldInsights = baseInsights([action]);
+    oldInsights.briefs[0] = {
+      ...oldInsights.briefs[0]!,
+      brief_id: "b-act",
+      headline: "traffic rose 79.9% (28d)",
+      summary: "old summary",
+      priority: "healthy",
+      confidence: "high",
+    };
+    const oldBody = composeIssue({
+      action,
+      brief: oldInsights.briefs[0],
+      findings: oldInsights.findings,
+      eligibility: "recommend",
+      insights: oldInsights,
+    }).body;
+    const issue: ExistingIssue = {
+      number: 294,
+      html_url: "https://github.com/weave0/goodflippindesign/issues/294",
+      title: "old title",
+      body: oldBody,
+      state: "open",
+      labels: ["ti-work", "ti-lifecycle:detected", "ti-eligibility:recommend"],
+      updated_at: "2026-09-15T12:00:00.000Z",
+    };
+    const current = baseInsights([action]);
+    current.generated_at = "2026-09-22T23:25:24.000Z";
+    current.briefs[0] = {
+      ...current.briefs[0]!,
+      brief_id: "b-act",
+      headline: "traffic rose 142.0% (28d)",
+      summary: "current summary",
+      priority: "healthy",
+      confidence: "medium",
+    };
+    const plan = planWorkSync({ insights: current, issues: [issue] });
+    const update = plan.plans.find((p) => p.kind === "update_body");
+    expect(update?.composed?.title).toContain("traffic rose 142.0% (28d)");
+    expect(update?.composed?.body).toContain("traffic rose 142.0% (28d)");
+    expect(update?.composed?.body).toContain("current summary");
+    expect(update?.composed?.body).not.toContain("old summary");
+    expect(update?.composed?.body).toContain("### Evidence (closed-loop)");
+  });
+
   it("reopens closed issue when action_id returns (regressed)", () => {
     const action = act("a-reopen");
     const composed = composeIssue({ action, eligibility: "auto", lifecycle: "resolved" });
