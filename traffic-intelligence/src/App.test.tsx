@@ -83,7 +83,11 @@ describe("human-first traffic intelligence shell", () => {
     expect(screen.getByText(/25 governed domains · 0 represented in traffic accounting/)).toBeInTheDocument();
 
     const gap = within(screen.getByRole("region", { name: "Estate traffic accounting gap" }));
-    expect(gap.getByText(/25.*25.*governed domains/)).toBeInTheDocument();
+    expect(
+      gap.getByText((_, element) =>
+        element?.tagName === "P" && element.textContent?.includes("25 of the 25 governed domains") === true,
+      ),
+    ).toBeInTheDocument();
     expect(gap.getByText(/aiaimate\.com/)).toBeInTheDocument();
     expect(gap.getByText(/goodflippindesign\.com/)).toBeInTheDocument();
     expect(gap.getByText(/redleopardofstpaul\.com/)).toBeInTheDocument();
