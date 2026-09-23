@@ -61,7 +61,7 @@ describe("human-first traffic intelligence shell", () => {
   it("puts human traffic answers ahead of queue internals", async () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "What happened across the web estate" })).toBeInTheDocument();
-    expect(screen.getByText("Measured edge requests")).toBeInTheDocument();
+    expect(screen.getByText("Edge requests · last 28 days")).toBeInTheDocument();
     expect(screen.getByText("Change vs prior period")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Top properties by traffic" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Biggest changes" })).toBeInTheDocument();
@@ -72,6 +72,23 @@ describe("human-first traffic intelligence shell", () => {
     const trafficOverview = screen.getByRole("heading", { name: "What happened across the web estate" });
     const queue = screen.getByRole("heading", { name: "Work funnel metrics" });
     expect(trafficOverview.compareDocumentPosition(queue) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("headline traffic uses one comparison window instead of summing overlapping windows", async () => {
+    render(<App />);
+    await screen.findByRole("heading", { name: "What happened across the web estate" });
+    // Fixture 28d requests: example.com 2,800 + shop.example.com 2,100. The 7d rows overlap and must not be added.
+    expect(screen.getByTestId("overview-measured-requests")).toHaveTextContent("4.9K");
+    expect(screen.getByText(/Current 28 days vs prior 28 days/)).toBeInTheDocument();
+    // Producer percent_delta is a fraction: shop.example.com 28d is -0.34375 → -34.4%.
+    const changes = within(screen.getByRole("heading", { name: "Biggest changes" }).closest("article")!);
+    expect(changes.getByText("-34.4%")).toBeInTheDocument();
+    expect(changes.getByText("+16.7%")).toBeInTheDocument();
+    for (const name of ["Top properties by traffic", "Biggest changes"]) {
+      const card = within(screen.getByRole("heading", { name }).closest("article")!);
+      const properties = card.getAllByRole("button").map((button) => button.textContent);
+      expect(properties).toEqual([...new Set(properties)]);
+    }
   });
 
   it("makes ranked next work actionable where the operator makes the decision", async () => {
