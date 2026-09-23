@@ -54,11 +54,26 @@ function AdminGate() {
   );
 }
 
+/**
+ * Local Traffic preview only (`npm run traffic:dev` from repo root, or `npm run dev` here):
+ * render committed fixtures without Clerk so the product can be developed and reviewed locally.
+ * Vite compiles import.meta.env.DEV to false in production builds, removing this branch;
+ * scripts/check-no-dev-auth-bypass.mjs fails the build if the marker below survives into dist/.
+ */
+function LocalDevPreview() {
+  return (
+    <>
+      <p className="local-dev-preview" data-ti-local-dev-auth-bypass="">
+        Local dev preview · admin gate bypassed · committed fixture data
+      </p>
+      <App />
+    </>
+  );
+}
+
 const root = document.getElementById("root");
 if (!root) throw new Error("Missing #root");
 
 createRoot(root).render(
-  <StrictMode>
-    <AdminGate />
-  </StrictMode>,
+  <StrictMode>{import.meta.env.DEV ? <LocalDevPreview /> : <AdminGate />}</StrictMode>,
 );
