@@ -193,6 +193,34 @@ export function briefsForProperty(
   return rankedBriefs(insights, propertyId, ["act_now", "investigate", "watch", "healthy", "measurement_blocked"]);
 }
 
+const HEADLINE_PERIOD_PREFERENCE = [28, 7, 90] as const;
+
+/**
+ * The single equal-window comparison the headline numbers use. Rows for different
+ * period_days overlap in time, so summing across them double-counts traffic.
+ * A "Nd" reporting range pins N; any other range falls back to the first period
+ * (28 → 7 → 90) with at least one available comparison.
+ */
+export function headlineComparisonDays(
+  windowId: string,
+  rows: readonly Pick<TrendComparison, "period_days" | "available" | "property_id">[],
+  siteDomain: string | null = null,
+): TrendComparison["period_days"] | null {
+  const match = /^(\d+)d$/.exec(windowId);
+  if (match) {
+    const days = Number(match[1]);
+    return HEADLINE_PERIOD_PREFERENCE.find((period) => period === days) ?? null;
+  }
+  const scopedRows = siteDomain
+    ? rows.filter((row) => matchesProperty(row.property_id, siteDomain))
+    : rows;
+  return (
+    HEADLINE_PERIOD_PREFERENCE.find((period) =>
+      scopedRows.some((row) => row.period_days === period && row.available),
+    ) ?? null
+  );
+}
+
 function windowDayCount(payload: WindowPayload): number | null {
   const match = /^(\d+)d$/.exec(payload.window.id);
   if (match) return Number(match[1]);
