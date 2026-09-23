@@ -12,7 +12,8 @@ export default defineConfig({
     strictPort: true,
   },
   build: {
-    sourcemap: true,
+    // Production sourcemaps would publish LocalDevPreview source even though DEV code is dead-stripped.
+    sourcemap: false,
     target: "es2022",
   },
 });
