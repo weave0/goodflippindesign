@@ -815,6 +815,7 @@ table.data tr:hover td {
   align-items: center;
 }
 .work-action-controls--compact .range-button {
+  min-height: 44px;
   white-space: nowrap;
 }
 .work-link--primary {

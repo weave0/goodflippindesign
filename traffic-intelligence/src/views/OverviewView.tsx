@@ -832,7 +832,7 @@ export function OverviewView({
                             }}
                           />
                         ) : item.html_url ? (
-                          <a className="range-button work-link" href={item.html_url} target="_blank" rel="noreferrer">
+                          <a className="range-button work-link" href={item.html_url} target="_blank" rel="noopener noreferrer">
                             Open #{item.issue_number}
                           </a>
                         ) : (

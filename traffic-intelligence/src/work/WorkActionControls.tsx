@@ -99,7 +99,7 @@ export function WorkActionControls({
         role="group"
         aria-label={`Work controls for ${action.action_id}`}
       >
-        <a className="range-button work-link work-link--primary" href={openUrl} target="_blank" rel="noreferrer">
+        <a className="range-button work-link work-link--primary" href={openUrl} target="_blank" rel="noopener noreferrer">
           {primaryLabel}
         </a>
         {action.property_id ? (
