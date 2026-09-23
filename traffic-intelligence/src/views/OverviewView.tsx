@@ -37,6 +37,12 @@ import { WorkActionControls, workItemFor } from "../work/WorkActionControls";
 import { eligibilityFor } from "../work/eligibility";
 import { rankNextWork } from "../work/ranking";
 import { Section } from "./common";
+import estateRegistry from "../../../estate/registry.json";
+
+const GOVERNED_ESTATE_DOMAINS = estateRegistry.properties
+  .filter((property) => property.governed)
+  .map((property) => property.domain)
+  .sort();
 
 function statusTone(status: string): "ok" | "watch" | "action" | "blocked" {
   if (
@@ -373,16 +379,10 @@ export function OverviewView({
       ? ((currentRequests - priorRequests) / priorRequests) * 100
       : null;
 
-  const governedZones = useMemo(() => {
-    if (siteDomain) return [siteDomain];
-    if (estateConfig?.governed_zones?.length) return estateConfig.governed_zones;
-    const observed = [
-      ...health.map((row) => row.property_id),
-      ...payload.sites.map((row) => row.domain),
-      ...requestComparisonRows.map((row) => row.property_id),
-    ];
-    return observed.filter((id, index, all) => all.indexOf(id) === index).sort();
-  }, [estateConfig, health, payload.sites, requestComparisonRows, siteDomain]);
+  const governedZones = useMemo(
+    () => (siteDomain ? [siteDomain] : GOVERNED_ESTATE_DOMAINS),
+    [siteDomain],
+  );
 
   const propertyCoverageRows = useMemo(
     () =>
@@ -401,6 +401,12 @@ export function OverviewView({
     [allHealth, estateConfig, governedZones, requestComparisonRows],
   );
   const comparablePropertyCount = propertyCoverageRows.filter((row) => row.comparison?.available).length;
+  const trafficAccountedPropertyCount = propertyCoverageRows.filter(
+    (row) => row.comparison != null || row.propertyHealth != null,
+  ).length;
+  const missingTrafficPropertyIds = propertyCoverageRows
+    .filter((row) => row.comparison == null && row.propertyHealth == null)
+    .map((row) => row.propertyId);
   const limitedPropertyCount = Math.max(0, propertyCoverageRows.length - comparablePropertyCount);
 
   const topTrafficProperties = useMemo(
@@ -522,7 +528,11 @@ export function OverviewView({
           ) : (
             <span>Insights freshness unavailable</span>
           )}
-          <span>{payload.sites.length} properties in Gold topology</span>
+          <span>
+            {siteDomain
+              ? `Focused property: ${siteDomain}`
+              : `${GOVERNED_ESTATE_DOMAINS.length} governed domains · ${trafficAccountedPropertyCount} represented in traffic accounting`}
+          </span>
         </aside>
       </section>
 
@@ -559,11 +569,11 @@ export function OverviewView({
             </small>
           </article>
           <article className="operator-kpi">
-            <span>Coverage limitations</span>
-            <strong>{limitedPropertyCount}</strong>
+            <span>Estate traffic coverage</span>
+            <strong>{propertyCoverageRows.length ? `${comparablePropertyCount}/${propertyCoverageRows.length}` : "Unavailable"}</strong>
             <small>
               {propertyCoverageRows.length
-                ? `${comparablePropertyCount} comparable · ${limitedPropertyCount} limited/unavailable`
+                ? `${trafficAccountedPropertyCount} represented · ${limitedPropertyCount} without an equal-window comparison`
                 : "Governed property accounting unavailable"}
             </small>
           </article>
@@ -573,6 +583,22 @@ export function OverviewView({
             <small>Act-now or investigate briefs in the current scope.</small>
           </article>
         </div>
+
+        {!siteDomain && missingTrafficPropertyIds.length ? (
+          <section className="operator-attention" aria-label="Estate traffic accounting gap">
+            <div>
+              <span className="operator-subhead">Estate accountability gap</span>
+              <p>
+                Traffic Intelligence currently has no traffic record or property-health record for{" "}
+                <strong>{missingTrafficPropertyIds.length}</strong> of the{" "}
+                <strong>{GOVERNED_ESTATE_DOMAINS.length}</strong> governed domains. They remain visible by design.
+              </p>
+              <p className="section-note">
+                Missing from traffic accounting: {missingTrafficPropertyIds.join(", ")}
+              </p>
+            </div>
+          </section>
+        ) : null}
 
         <div className="operator-answer-grid">
           <article className="operator-answer-card">
@@ -723,7 +749,7 @@ export function OverviewView({
 
         <details className="coverage-accounting">
           <summary>
-            Property coverage — {propertyCoverageRows.length || 0} governed/observed properties accounted for
+            Property coverage — {propertyCoverageRows.length || 0} governed properties · {trafficAccountedPropertyCount} represented in traffic accounting
           </summary>
           {propertyCoverageRows.length ? (
             <div className="table-wrap">

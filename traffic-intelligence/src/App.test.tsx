@@ -74,6 +74,28 @@ describe("human-first traffic intelligence shell", () => {
     expect(trafficOverview.compareDocumentPosition(queue) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it("keeps the full governed estate visible when traffic accounting is incomplete", async () => {
+    render(<App />);
+    await screen.findByRole("heading", { name: "What happened across the web estate" });
+
+    expect(screen.getByText("Estate traffic coverage")).toBeInTheDocument();
+    expect(screen.getByText("0/25")).toBeInTheDocument();
+    expect(screen.getByText(/25 governed domains · 0 represented in traffic accounting/)).toBeInTheDocument();
+
+    const gap = within(screen.getByRole("region", { name: "Estate traffic accounting gap" }));
+    expect(
+      gap.getByText((_, element) =>
+        element?.tagName === "P" && element.textContent?.includes("25 of the 25 governed domains") === true,
+      ),
+    ).toBeInTheDocument();
+    expect(gap.getByText(/aiaimate\.com/)).toBeInTheDocument();
+    expect(gap.getByText(/goodflippindesign\.com/)).toBeInTheDocument();
+    expect(gap.getByText(/redleopardofstpaul\.com/)).toBeInTheDocument();
+
+    const coverage = screen.getByText(/Property coverage — 25 governed properties · 0 represented in traffic accounting/);
+    expect(coverage).toBeInTheDocument();
+  });
+
   it("headline traffic uses one comparison window instead of summing overlapping windows", async () => {
     render(<App />);
     await screen.findByRole("heading", { name: "What happened across the web estate" });
