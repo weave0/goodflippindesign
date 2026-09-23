@@ -61,4 +61,22 @@ describe("rankNextWork", () => {
     expect(rows[0]?.item.action_id).toBe("p");
     expect(rows[0]?.members.map((m) => m.action_id)).toEqual(["m"]);
   });
+
+  it("attaches members to an unpromoted primary from its roster", () => {
+    const shared = { issue_number: null, html_url: null, root_cause_key: "cloudflare.daily-coverage-gap" };
+    const rows = rankNextWork({
+      p: item({
+        ...shared,
+        action_id: "p",
+        impact_score: 50,
+        property_id: "a.com",
+        group_role: "primary",
+        group_member_action_ids: ["p", "m1", "m2"],
+      }),
+      m1: item({ ...shared, action_id: "m1", impact_score: 20, property_id: "b.com", group_role: "member" }),
+      m2: item({ ...shared, action_id: "m2", impact_score: 30, property_id: "c.com", group_role: "member" }),
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.members.map((m) => m.property_id)).toEqual(["c.com", "b.com"]);
+  });
 });

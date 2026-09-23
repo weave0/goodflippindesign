@@ -43,9 +43,15 @@ export function rankNextWork(items: Record<string, WorkQueueItem> | WorkQueueIte
     rows.push({ item: primary, members });
   }
 
+  const noIssueById = new Map(noIssue.map((item) => [item.action_id, item]));
   for (const item of noIssue) {
     if (item.group_role === "member") continue; // wait for primary create
-    rows.push({ item, members: [] });
+    // Unpromoted groups have no shared issue number; members come from the primary's roster.
+    const members = (item.group_member_action_ids ?? [])
+      .map((id) => noIssueById.get(id))
+      .filter((member): member is WorkQueueItem => member != null && member.action_id !== item.action_id)
+      .sort((a, b) => b.impact_score - a.impact_score || a.action_id.localeCompare(b.action_id));
+    rows.push({ item, members });
   }
 
   return rows.sort(
