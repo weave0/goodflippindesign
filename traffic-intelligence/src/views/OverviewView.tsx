@@ -20,6 +20,7 @@ import {
   estateProvenanceLines,
   estateStatusLabel,
   focusedTrendSeries,
+  headlineComparisonDays,
   priorityLabel,
   prioritizedActions,
   propertyHealthRows,
@@ -121,6 +122,11 @@ function signedPercent(value: number | null): string {
   if (value == null || !Number.isFinite(value)) return "Not comparable";
   const sign = value > 0 ? "+" : "";
   return `${sign}${value.toFixed(1)}%`;
+}
+
+/** Producer percent_delta is a fraction (0.25 = +25%). */
+function signedFractionPercent(value: number | null): string {
+  return signedPercent(value == null ? null : value * 100);
 }
 
 function rankedValue(row: { value: number | null; display?: string; shareDisplay?: string }): string {
@@ -332,17 +338,17 @@ export function OverviewView({
     insights?.schema_version === "1.1.0" && (!insights.estate_brief || !insights.briefs);
   const metricOption = TREND_METRIC_OPTIONS.find((o) => o.id === trendMetric);
 
-  const periodDaysMatch = /^(\\d+)d$/.exec(payload.window.id);
-  const periodDays = periodDaysMatch ? Number(periodDaysMatch[1]) : null;
+  const allRequestComparisons = useMemo(
+    () => (insights?.trend_comparisons ?? []).filter((row) => row.metric_name === "requests"),
+    [insights],
+  );
+  const periodDays = headlineComparisonDays(payload.window.id, allRequestComparisons, siteDomain);
   const requestComparisonRows = useMemo(
     () =>
-      (insights?.trend_comparisons ?? []).filter(
-        (row) =>
-          row.metric_name === "requests" &&
-          (periodDays == null || row.period_days === periodDays) &&
-          (!siteDomain || row.property_id === siteDomain),
+      allRequestComparisons.filter(
+        (row) => row.period_days === periodDays && (!siteDomain || row.property_id === siteDomain),
       ),
-    [insights, periodDays, siteDomain],
+    [allRequestComparisons, periodDays, siteDomain],
   );
   const comparableRequestRows = useMemo(
     () =>
@@ -539,7 +545,7 @@ export function OverviewView({
 
         <div className="operator-kpis" role="group" aria-label="Traffic summary">
           <article className="operator-kpi">
-            <span>Measured edge requests</span>
+            <span>{periodDays ? `Edge requests · last ${periodDays} days` : "Measured edge requests"}</span>
             <strong data-testid="overview-measured-requests">{compactNumber(currentRequests)}</strong>
             <small>
               {comparablePropertyCount} of {propertyCoverageRows.length || "—"} properties have an equal-window comparison.
@@ -598,7 +604,7 @@ export function OverviewView({
                     <button type="button" className="linkish" onClick={() => openProperty(row.property_id)}>
                       {row.property_id}
                     </button>
-                    <strong>{signedPercent(row.percent_delta)}</strong>
+                    <strong>{signedFractionPercent(row.percent_delta)}</strong>
                   </li>
                 ))}
               </ol>
@@ -742,7 +748,7 @@ export function OverviewView({
                       </td>
                       <td>{row.status}</td>
                       <td>{row.comparison?.available ? compactNumber(row.comparison.current_value) : "—"}</td>
-                      <td>{row.comparison?.available ? signedPercent(row.comparison.percent_delta) : "—"}</td>
+                      <td>{row.comparison?.available ? signedFractionPercent(row.comparison.percent_delta) : "—"}</td>
                       <td>{row.propertyHealth?.measurement ?? "unknown"}</td>
                       <td>{row.config ? ESTATE_CONFIG_STATE_LABEL[row.config.state] : "unobserved"}</td>
                     </tr>

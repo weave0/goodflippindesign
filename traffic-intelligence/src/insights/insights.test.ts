@@ -6,6 +6,7 @@ import { assertTrafficInsights } from "./assert";
 import {
   estateBriefOf,
   focusedTrendSeries,
+  headlineComparisonDays,
   insightTrendSeries,
   matchesProperty,
   materialityScore,
@@ -383,5 +384,35 @@ describe("producer trend_comparisons authority", () => {
       expect(row.absolute_delta).toBe(producer.available ? producer.absolute_delta : null);
       expect(row.percent_delta).toBe(producer.available ? producer.percent_delta : null);
     }
+  });
+});
+describe("headlineComparisonDays", () => {
+  const row = (period_days: 7 | 28 | 90, available: boolean, property_id = "estate.example") =>
+    ({ period_days, available, property_id }) as Parameters<typeof headlineComparisonDays>[1][number];
+
+  it("pins the reporting range's day count", () => {
+    expect(headlineComparisonDays("7d", [row(7, true), row(28, true)])).toBe(7);
+    expect(headlineComparisonDays("28d", [row(7, true), row(28, true)])).toBe(28);
+  });
+
+  it("falls back to one available window (28 → 7 → 90) for non-day ranges", () => {
+    expect(headlineComparisonDays("canonical", [row(7, true), row(28, true), row(90, false)])).toBe(28);
+    expect(headlineComparisonDays("canonical", [row(7, true), row(28, false)])).toBe(7);
+    expect(headlineComparisonDays("canonical", [row(90, true)])).toBe(90);
+    expect(headlineComparisonDays("canonical", [row(28, false)])).toBeNull();
+  });
+
+  it("scopes fallback availability to the selected property", () => {
+    const rows = [
+      row(28, true, "other.example"),
+      row(7, true, "selected.example"),
+      row(90, false, "selected.example"),
+    ];
+    expect(headlineComparisonDays("canonical", rows, "selected.example")).toBe(7);
+    expect(headlineComparisonDays("canonical", rows, null)).toBe(28);
+  });
+
+  it("never picks an unsupported day count", () => {
+    expect(headlineComparisonDays("14d", [row(7, true)])).toBeNull();
   });
 });
