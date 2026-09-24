@@ -60,6 +60,7 @@ async function digestEventId(propertyId, eventId) {
 
 /** Constant-time string comparison (both sides hashed so lengths never leak). */
 async function tokensMatch(presented, expected) {
+  if (typeof presented !== 'string' || typeof expected !== 'string') return false;
   if (!presented || !expected) return false;
   const encoder = new TextEncoder();
   const [a, b] = await Promise.all([crypto.subtle.digest('SHA-256', encoder.encode(presented)), crypto.subtle.digest('SHA-256', encoder.encode(expected))]);
@@ -78,7 +79,8 @@ function bearer(request) {
 function parseIngestTokens(env) {
   try {
     const parsed = JSON.parse(env.INGEST_TOKENS || '{}');
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    return Object.fromEntries(Object.entries(parsed).filter(([, token]) => typeof token === 'string' && token.length > 0));
   } catch {
     return {};
   }

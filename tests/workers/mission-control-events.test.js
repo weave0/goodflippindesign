@@ -66,6 +66,11 @@ describe('producer authentication', () => {
     const res = await worker.fetch(new Request(BASE + '/v1/event', { method: 'POST', headers: { authorization: 'Bearer anything' }, body: JSON.stringify({ propertyId: 'aiaimate.com', eventType: 'signup' }) }), { DB: env.DB, FEED_TOKEN: 'feed-secret' });
     expect(res.status).toBe(401);
   });
+
+  it('fails closed when a producer token is not a string', async () => {
+    const res = await worker.fetch(new Request(BASE + '/v1/event', { method: 'POST', headers: { authorization: 'Bearer 12345' }, body: JSON.stringify({ propertyId: 'aiaimate.com', eventType: 'signup' }) }), { DB: env.DB, INGEST_TOKENS: JSON.stringify({ 'aiaimate.com': 12345 }), FEED_TOKEN: 'feed-secret' });
+    expect(res.status).toBe(401);
+  });
 });
 
 describe('instrumentation honesty', () => {

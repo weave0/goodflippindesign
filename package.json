@@ -72,6 +72,7 @@
     "analytics": "node scripts/cf-analytics.js",
     "analytics:open": "node scripts/cf-analytics.js && start analytics/dashboard.html",
     "test:workers": "vitest run --config vitest.workers.config.mjs",
+    "test:workers:mission-control-events": "vitest run --config vitest.workers.config.mjs tests/workers/mission-control-events.test.js",
     "test:security": "node tests/security/audit-policy.test.js",
     "test:workers:payments": "vitest run --config vitest.stripe-payments.config.mjs",
     "test:all": "npm test && npm run test:workers && npm run test:workers:payments",
