@@ -9,7 +9,7 @@
  *
  * Routes
  *   POST /v1/event      Bearer <property token>  {propertyId, eventType, eventId?}        -> 202
- *                       eventId (e.g. a Stripe event/invoice id) makes the count idempotent: a replay is ignored.
+ *                       eventId is hashed before storage and makes the count idempotent.
  *   POST /v1/heartbeat  Bearer <property token>  {propertyId, eventTypes:[...]}          -> 200
  *   GET  /v1/feed       Bearer <feed token>                                              -> feed document
  *   GET  /health                                                                         -> 200
@@ -35,7 +35,6 @@ export const EVENT_TYPES = Object.freeze(['visit', 'engagement', 'cta', 'lead', 
 const DAY_MS = 86400000;
 const MAX_BODY_BYTES = 2048;
 const MAX_EVENT_ID_CHARS = 128;
-const DEDUPE_RETENTION_DAYS = 7;
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
 
 function json(body, status = 200) {
@@ -48,6 +47,15 @@ function utcMidnight(ms) {
 
 function utcDay(ms) {
   return new Date(ms).toISOString().slice(0, 10);
+}
+
+function hex(bytes) {
+  return [...new Uint8Array(bytes)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function digestEventId(propertyId, eventId) {
+  const encoder = new TextEncoder();
+  return hex(await crypto.subtle.digest('SHA-256', encoder.encode(`${propertyId}\0${eventId}`)));
 }
 
 /** Constant-time string comparison (both sides hashed so lengths never leak). */
@@ -121,11 +129,11 @@ async function handleEvent(request, env, now) {
     await env.DB.batch([producerUpsert(env, propertyId, eventType, nowIso), counter]);
     return json({ accepted: true }, 202);
   }
-  // Idempotent path: the counter runs only if this (property, eventId) was not seen before. `changes()` reads the
-  // dedupe insert, so the counter statement must directly follow it.
+  const eventIdHash = await digestEventId(propertyId, eventId);
+  // Idempotent path: the counter runs only if this property-scoped eventId digest was not seen before. `changes()`
+  // reads the dedupe insert, so the counter statement must directly follow it.
   await env.DB.batch([
-    env.DB.prepare('DELETE FROM mc_event_dedupe WHERE day < ?1').bind(utcDay(now - DEDUPE_RETENTION_DAYS * DAY_MS)),
-    env.DB.prepare('INSERT OR IGNORE INTO mc_event_dedupe (property_id, event_id, day) VALUES (?1, ?2, ?3)').bind(propertyId, eventId, day),
+    env.DB.prepare('INSERT OR IGNORE INTO mc_event_dedupe (property_id, event_id_hash, day) VALUES (?1, ?2, ?3)').bind(propertyId, eventIdHash, day),
     env.DB.prepare(
       `INSERT INTO mc_event_daily (property_id, event_type, day, count) SELECT ?1, ?2, ?3, 1 WHERE changes() > 0
        ON CONFLICT(property_id, event_type, day) DO UPDATE SET count = count + 1`
