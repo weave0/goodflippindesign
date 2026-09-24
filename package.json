@@ -32,6 +32,8 @@
     "health-sweep:secret:sweep": "wrangler secret put SWEEP_SECRET --config workers/wrangler-health-sweep.toml",
     "health-sweep:trigger": "node -e \"const h=process.env.SWEEP_SECRET||''; fetch('https://gfd-health-sweep.weave0.workers.dev/trigger',{method:'GET',headers:{'x-sweep-secret':h}}).then(r=>r.json()).then(console.log)\"",
     "health-sweep:last": "node -e \"fetch('https://gfd-health-sweep.weave0.workers.dev/last').then(r=>r.json()).then(d=>console.table(d))\"",
+    "deploy:mission-control-events": "wrangler deploy --config workers/wrangler-mission-control-events.toml",
+    "mission-control-events:schema": "wrangler d1 execute gfd_community --remote --file=db/d1-schema-mission-control-events.sql",
     "deploy:social": "wrangler deploy --config wrangler-social.toml",
     "deploy:cron": "wrangler deploy --config wrangler-cron.toml",
     "cron:apply-schema": "wrangler d1 execute gfd_community --remote --file=db/d1-schema-studio.sql",

@@ -1,0 +1,21 @@
+# wrangler-mission-control-events.toml — Standalone Worker: governed business-event feed for Mission Control
+#
+# Deploy (in order; nothing here is deployed by CI):
+#   1. wrangler d1 execute gfd_community --remote --file=db/d1-schema-mission-control-events.sql
+#   2. wrangler secret put INGEST_TOKENS --config workers/wrangler-mission-control-events.toml
+#        value: {"aiaimate.com":"<token>","cyancanoe.com":"<token>","goodflippindesign.com":"<token>"}
+#   3. wrangler secret put FEED_TOKEN    --config workers/wrangler-mission-control-events.toml
+#   4. wrangler deploy --config workers/wrangler-mission-control-events.toml
+#   5. In weave0/globaldeets set the Actions secrets
+#        MISSION_CONTROL_EVENTS_SOURCE = https://<worker-host>/v1/feed
+#        MISSION_CONTROL_EVENTS_TOKEN  = <the FEED_TOKEN value>
+#   6. Give each producing repo its own token as EVENTS_INGEST_TOKEN (plus EVENTS_INGEST_URL).
+
+name = "gfd-mission-control-events"
+main = "mission-control-events.js"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gfd_community"
+database_id = "a46ec9df-31b8-4285-845b-1fd3a62bd1b5"
