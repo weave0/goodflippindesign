@@ -56,6 +56,7 @@ describe('producer authentication', () => {
     expect((await call('/v1/event', { method: 'POST', token: 'tok-aia', body: '{not json' })).status).toBe(400);
     expect((await call('/v1/event', { method: 'POST', token: 'tok-aia', body: '[]' })).status).toBe(400);
     expect((await call('/v1/event', { method: 'POST', token: 'tok-aia', body: 'x'.repeat(5000) })).status).toBe(413);
+    expect((await call('/v1/event', { method: 'POST', token: 'tok-aia', body: JSON.stringify('😀'.repeat(800)) })).status).toBe(413);
   });
 
   it('requires the feed token', async () => {

@@ -93,8 +93,29 @@ function parseIngestTokens(env) {
 }
 
 async function readJsonBody(request) {
-  const text = await request.text();
-  if (text.length > MAX_BODY_BYTES) return { error: 'Body too large.', status: 413 };
+  const length = Number(request.headers.get('content-length') || 0);
+  if (length > MAX_BODY_BYTES) return { error: 'Body too large.', status: 413 };
+  if (!request.body) return { error: 'Body must be valid JSON.', status: 400 };
+  const reader = request.body.getReader();
+  const chunks = [];
+  let bytes = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    bytes += value.byteLength;
+    if (bytes > MAX_BODY_BYTES) {
+      await reader.cancel();
+      return { error: 'Body too large.', status: 413 };
+    }
+    chunks.push(value);
+  }
+  const buffer = new Uint8Array(bytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    buffer.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  const text = new TextDecoder().decode(buffer);
   try {
     const body = JSON.parse(text);
     return body && typeof body === 'object' && !Array.isArray(body) ? { body } : { error: 'Body must be a JSON object.', status: 400 };
