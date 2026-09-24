@@ -27,9 +27,13 @@ CREATE INDEX IF NOT EXISTS idx_mc_event_daily_day ON mc_event_daily (day);
 
 -- Idempotency keys (e.g. Stripe event ids) so a retried or replayed delivery is counted once.
 -- Raw keys are never stored; the Worker writes a property-scoped SHA-256 digest only.
+-- Retained for 400 days, then pruned by the Worker on subsequent idempotent ingests.
 CREATE TABLE IF NOT EXISTS mc_event_dedupe (
   property_id    TEXT NOT NULL,
+  event_type     TEXT NOT NULL,
   event_id_hash  TEXT NOT NULL,
   day            TEXT NOT NULL,          -- YYYY-MM-DD (UTC) first seen
-  PRIMARY KEY (property_id, event_id_hash)
+  PRIMARY KEY (property_id, event_type, event_id_hash)
 );
+
+CREATE INDEX IF NOT EXISTS idx_mc_event_dedupe_day ON mc_event_dedupe (day);

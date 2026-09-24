@@ -27,8 +27,9 @@ const feed = async () => (await call('/v1/feed', { token: 'feed-secret' })).json
 
 beforeAll(async () => {
   await env.DB.batch([
+    env.DB.prepare('DROP TABLE IF EXISTS mc_event_dedupe'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS mc_event_producers (property_id TEXT NOT NULL, event_type TEXT NOT NULL, first_seen TEXT NOT NULL, last_seen TEXT NOT NULL, PRIMARY KEY (property_id, event_type))'),
-    env.DB.prepare('CREATE TABLE IF NOT EXISTS mc_event_dedupe (property_id TEXT NOT NULL, event_id_hash TEXT NOT NULL, day TEXT NOT NULL, PRIMARY KEY (property_id, event_id_hash))'),
+    env.DB.prepare('CREATE TABLE IF NOT EXISTS mc_event_dedupe (property_id TEXT NOT NULL, event_type TEXT NOT NULL, event_id_hash TEXT NOT NULL, day TEXT NOT NULL, PRIMARY KEY (property_id, event_type, event_id_hash))'),
     env.DB.prepare('CREATE TABLE IF NOT EXISTS mc_event_daily (property_id TEXT NOT NULL, event_type TEXT NOT NULL, day TEXT NOT NULL, count INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (property_id, event_type, day))'),
   ]);
 });
@@ -154,26 +155,30 @@ describe('end to end with the D1 counters', () => {
 
   it('scopes eventIds to the property and event type is recorded as instrumented', async () => {
     await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'shared-id');
+    await postEvent('aiaimate.com', 'lead', 'tok-aia', 'shared-id');
     await postEvent('goodflippindesign.com', 'purchase', 'tok-gfd', 'shared-id');
     expect(await dailyCount('aiaimate.com', 'purchase')).toBe(1);
+    expect(await dailyCount('aiaimate.com', 'lead')).toBe(1);
     expect(await dailyCount('goodflippindesign.com', 'purchase')).toBe(1);
     expect((await feed()).instrumentedProperties).toEqual(['aiaimate.com', 'goodflippindesign.com']);
   });
 
   it('does not count when the eventId is invalid', async () => {
     expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', '')).status).toBe(400);
+    expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'brett@example.com')).status).toBe(400);
+    expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'https://example.com/id/1')).status).toBe(400);
     expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'x'.repeat(200))).status).toBe(400);
     expect(await dailyCount('aiaimate.com', 'purchase')).toBe(0);
   });
 
-  it('stores only a digest of the eventId and keeps it for replay idempotency', async () => {
-    await env.DB.prepare("INSERT INTO mc_event_dedupe (property_id, event_id_hash, day) VALUES ('aiaimate.com', 'old-digest', '2020-01-01')").run();
-    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'brett@example.com');
-    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'brett@example.com');
+  it('stores only a digest of the eventId and prunes keys outside the replay horizon', async () => {
+    await env.DB.prepare("INSERT INTO mc_event_dedupe (property_id, event_type, event_id_hash, day) VALUES ('aiaimate.com', 'purchase', 'old-digest', '2020-01-01')").run();
+    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'cs_live_123');
+    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'cs_live_123');
     const { results } = await env.DB.prepare('SELECT event_id_hash FROM mc_event_dedupe ORDER BY day, event_id_hash').all();
-    expect(results).toHaveLength(2);
-    expect(results.map(r => r.event_id_hash)).toContain('old-digest');
-    expect(results.some(r => r.event_id_hash === 'brett@example.com')).toBe(false);
+    expect(results).toHaveLength(1);
+    expect(results.map(r => r.event_id_hash)).not.toContain('old-digest');
+    expect(results.some(r => r.event_id_hash === 'cs_live_123')).toBe(false);
     expect(await dailyCount('aiaimate.com', 'purchase')).toBe(1);
   });
 
@@ -181,6 +186,6 @@ describe('end to end with the D1 counters', () => {
     const { results } = await env.DB.prepare("SELECT name FROM pragma_table_info('mc_event_daily')").all();
     expect(results.map(r => r.name).sort()).toEqual(['count', 'day', 'event_type', 'property_id']);
     const dedupe = await env.DB.prepare("SELECT name FROM pragma_table_info('mc_event_dedupe')").all();
-    expect(dedupe.results.map(r => r.name).sort()).toEqual(['day', 'event_id_hash', 'property_id']);
+    expect(dedupe.results.map(r => r.name).sort()).toEqual(['day', 'event_id_hash', 'event_type', 'property_id']);
   });
 });

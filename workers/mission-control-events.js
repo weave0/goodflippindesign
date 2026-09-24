@@ -35,6 +35,8 @@ export const EVENT_TYPES = Object.freeze(['visit', 'engagement', 'cta', 'lead', 
 const DAY_MS = 86400000;
 const MAX_BODY_BYTES = 2048;
 const MAX_EVENT_ID_CHARS = 128;
+const DEDUPE_RETENTION_DAYS = 400;
+const EVENT_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.:-]{2,127}$/;
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
 
 function json(body, status = 200) {
@@ -56,6 +58,10 @@ function hex(bytes) {
 async function digestEventId(propertyId, eventId) {
   const encoder = new TextEncoder();
   return hex(await crypto.subtle.digest('SHA-256', encoder.encode(`${propertyId}\0${eventId}`)));
+}
+
+function validEventId(eventId) {
+  return typeof eventId === 'string' && EVENT_ID_PATTERN.test(eventId) && !eventId.includes('@');
 }
 
 /** Constant-time string comparison (both sides hashed so lengths never leak). */
@@ -120,7 +126,7 @@ async function handleEvent(request, env, now) {
   const denied = await authenticateProducer(request, env, propertyId);
   if (denied) return denied;
   if (!EVENT_TYPES.includes(eventType)) return json({ error: 'eventType is outside the common vocabulary.' }, 400);
-  if (eventId !== undefined && (typeof eventId !== 'string' || eventId.length === 0 || eventId.length > MAX_EVENT_ID_CHARS)) return json({ error: 'eventId must be a short string.' }, 400);
+  if (eventId !== undefined && (eventId.length === 0 || eventId.length > MAX_EVENT_ID_CHARS || !validEventId(eventId))) return json({ error: 'eventId must be a non-personal opaque identifier.' }, 400);
   const nowIso = new Date(now).toISOString();
   const day = utcDay(now);
   const counter = env.DB.prepare(
@@ -132,10 +138,11 @@ async function handleEvent(request, env, now) {
     return json({ accepted: true }, 202);
   }
   const eventIdHash = await digestEventId(propertyId, eventId);
-  // Idempotent path: the counter runs only if this property-scoped eventId digest was not seen before. `changes()`
-  // reads the dedupe insert, so the counter statement must directly follow it.
+  // Idempotent path: the counter runs only if this property/type-scoped eventId digest was not seen before.
+  // `changes()` reads the dedupe insert, so the counter statement must directly follow it.
   await env.DB.batch([
-    env.DB.prepare('INSERT OR IGNORE INTO mc_event_dedupe (property_id, event_id_hash, day) VALUES (?1, ?2, ?3)').bind(propertyId, eventIdHash, day),
+    env.DB.prepare('DELETE FROM mc_event_dedupe WHERE day < ?1').bind(utcDay(now - DEDUPE_RETENTION_DAYS * DAY_MS)),
+    env.DB.prepare('INSERT OR IGNORE INTO mc_event_dedupe (property_id, event_type, event_id_hash, day) VALUES (?1, ?2, ?3, ?4)').bind(propertyId, eventType, eventIdHash, day),
     env.DB.prepare(
       `INSERT INTO mc_event_daily (property_id, event_type, day, count) SELECT ?1, ?2, ?3, 1 WHERE changes() > 0
        ON CONFLICT(property_id, event_type, day) DO UPDATE SET count = count + 1`
