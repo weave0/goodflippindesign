@@ -36,7 +36,7 @@ const DAY_MS = 86400000;
 const MAX_BODY_BYTES = 2048;
 const MAX_EVENT_ID_CHARS = 128;
 const DEDUPE_RETENTION_DAYS = 400;
-const EVENT_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.:-]{2,127}$/;
+const EVENT_ID_PATTERN = /^[A-Za-z][A-Za-z0-9]{1,31}_[A-Za-z0-9][A-Za-z0-9_.:-]{2,95}$/;
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
 
 function json(body, status = 200) {
@@ -61,7 +61,7 @@ async function digestEventId(propertyId, eventId) {
 }
 
 function validEventId(eventId) {
-  return typeof eventId === 'string' && EVENT_ID_PATTERN.test(eventId) && !eventId.includes('@');
+  return typeof eventId === 'string' && eventId.length > 0 && eventId.length <= MAX_EVENT_ID_CHARS && EVENT_ID_PATTERN.test(eventId) && !eventId.includes('@');
 }
 
 /** Constant-time string comparison (both sides hashed so lengths never leak). */
@@ -147,7 +147,7 @@ async function handleEvent(request, env, now) {
   const denied = await authenticateProducer(request, env, propertyId);
   if (denied) return denied;
   if (!EVENT_TYPES.includes(eventType)) return json({ error: 'eventType is outside the common vocabulary.' }, 400);
-  if (eventId !== undefined && (eventId.length === 0 || eventId.length > MAX_EVENT_ID_CHARS || !validEventId(eventId))) return json({ error: 'eventId must be a non-personal opaque identifier.' }, 400);
+  if (eventId !== undefined && !validEventId(eventId)) return json({ error: 'eventId must be a non-personal opaque identifier.' }, 400);
   const nowIso = new Date(now).toISOString();
   const day = utcDay(now);
   const counter = env.DB.prepare(

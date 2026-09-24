@@ -148,16 +148,16 @@ describe('end to end with the D1 counters', () => {
     (await env.DB.prepare('SELECT COALESCE(SUM(count), 0) AS n FROM mc_event_daily WHERE property_id = ? AND event_type = ?').bind(propertyId, eventType).first()).n;
 
   it('counts an event with an eventId once, however many times it is delivered', async () => {
-    for (let i = 0; i < 3; i++) expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'evt_1')).status).toBe(202);
+    for (let i = 0; i < 3; i++) expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'evt_123')).status).toBe(202);
     expect(await dailyCount('aiaimate.com', 'purchase')).toBe(1);
-    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'evt_2');
+    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'evt_456');
     expect(await dailyCount('aiaimate.com', 'purchase')).toBe(2);
   });
 
   it('scopes eventIds to the property and event type is recorded as instrumented', async () => {
-    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'shared-id');
-    await postEvent('aiaimate.com', 'lead', 'tok-aia', 'shared-id');
-    await postEvent('goodflippindesign.com', 'purchase', 'tok-gfd', 'shared-id');
+    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'evt_shared-id');
+    await postEvent('aiaimate.com', 'lead', 'tok-aia', 'evt_shared-id');
+    await postEvent('goodflippindesign.com', 'purchase', 'tok-gfd', 'evt_shared-id');
     expect(await dailyCount('aiaimate.com', 'purchase')).toBe(1);
     expect(await dailyCount('aiaimate.com', 'lead')).toBe(1);
     expect(await dailyCount('goodflippindesign.com', 'purchase')).toBe(1);
@@ -166,7 +166,9 @@ describe('end to end with the D1 counters', () => {
 
   it('does not count when the eventId is invalid', async () => {
     expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', '')).status).toBe(400);
+    expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', null)).status).toBe(400);
     expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'brett@example.com')).status).toBe(400);
+    expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', '555-123-4567')).status).toBe(400);
     expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'https://example.com/id/1')).status).toBe(400);
     expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'x'.repeat(200))).status).toBe(400);
     expect(await dailyCount('aiaimate.com', 'purchase')).toBe(0);
