@@ -89,6 +89,9 @@ jobs:
       - name: Run Tests
         run: npm test
 
+      - name: Run Mission Control events Worker tests
+        run: npm run test:workers:mission-control-events
+
       - name: Install Traffic Intelligence
         run: npm ci --prefix traffic-intelligence --no-audit
 
