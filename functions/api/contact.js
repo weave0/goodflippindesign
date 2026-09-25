@@ -7,6 +7,36 @@
  * Route: /api/contact
  */
 
+const EVENTS_PROPERTY_ID = 'goodflippindesign.com';
+const EVENTS_TIMEOUT_MS = 2000;
+
+async function emitLead(env) {
+  const base = typeof env.EVENTS_INGEST_URL === 'string' ? env.EVENTS_INGEST_URL.trim() : '';
+  const token = typeof env.EVENTS_INGEST_TOKEN === 'string' ? env.EVENTS_INGEST_TOKEN.trim() : '';
+  if (!base || !token) return false;
+  let url;
+  try {
+    const parsed = new URL(base);
+    if (parsed.protocol !== 'https:') return false;
+    url = new URL('/v1/event', parsed).toString();
+  } catch {
+    return false;
+  }
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ propertyId: EVENTS_PROPERTY_ID, eventType: 'lead' }),
+      signal: AbortSignal.timeout(EVENTS_TIMEOUT_MS),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+export { emitLead };
+
 export default {
   async fetch(request, env) {
     // CORS headers
@@ -60,6 +90,10 @@ export default {
           <p><strong>Submitted:</strong> ${data.timestamp}</p>
         `,
       });
+
+      // Count the lead only after the owning inbox accepted the inquiry.
+      // Measurement is count-only and must never change the visitor response.
+      void emitLead(env);
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
