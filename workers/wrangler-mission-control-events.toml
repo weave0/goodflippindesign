@@ -3,13 +3,18 @@
 # Deploy (in order; nothing here is deployed by CI):
 #   1. wrangler d1 execute gfd_community --remote --file=db/d1-schema-mission-control-events.sql
 #   2. wrangler secret put INGEST_TOKENS --config workers/wrangler-mission-control-events.toml
-#        value: {"aiaimate.com":"<token>","cyancanoe.com":"<token>","goodflippindesign.com":"<token>"}
-#   3. wrangler secret put FEED_TOKEN    --config workers/wrangler-mission-control-events.toml
-#   4. wrangler deploy --config workers/wrangler-mission-control-events.toml
-#   5. In weave0/globaldeets set the Actions secrets
+#        value: {"cyancanoe.com":"<token>","goodflippindesign.com":"<token>"}
+#   3. wrangler secret put AIAIMATE_INGEST_TOKEN --config workers/wrangler-mission-control-events.toml
+#        AIAIMate has its own dedicated secret (a leak of the aggregate map must not expose it, and vice versa).
+#        Precedence: when AIAIMATE_INGEST_TOKEN is set it is the only token accepted for aiaimate.com and any
+#        "aiaimate.com" entry in INGEST_TOKENS is ignored; the entry is a fallback only while the secret is unset.
+#        Provision AIAIMate as AIAIMATE_INGEST_TOKEN and keep it out of INGEST_TOKENS.
+#   4. wrangler secret put FEED_TOKEN    --config workers/wrangler-mission-control-events.toml
+#   5. wrangler deploy --config workers/wrangler-mission-control-events.toml
+#   6. In weave0/globaldeets set the Actions secrets
 #        MISSION_CONTROL_EVENTS_SOURCE = https://<worker-host>/v1/feed
 #        MISSION_CONTROL_EVENTS_TOKEN  = <the FEED_TOKEN value>
-#   6. Give each producing repo its own token as EVENTS_INGEST_TOKEN (plus EVENTS_INGEST_URL).
+#   7. Give each producing repo its own token as EVENTS_INGEST_TOKEN (plus EVENTS_INGEST_URL).
 
 name = "gfd-mission-control-events"
 main = "mission-control-events.js"

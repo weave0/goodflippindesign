@@ -77,6 +77,26 @@ describe('producer authentication', () => {
     expect((await feed()).instrumentedProperties).toContain('aiaimate.com');
   });
 
+  it('a dedicated AIAIMate secret is the only token accepted for aiaimate.com and is accepted for no other property', async () => {
+    const dedicated = { AIAIMATE_INGEST_TOKEN: 'tok-aia-dedicated' };
+    const aia = { method: 'POST', body: { propertyId: 'aiaimate.com', eventTypes: ['signup'] } };
+    // The aggregate-map entry is ignored once the dedicated secret exists.
+    expect((await call('/v1/heartbeat', { ...aia, token: 'tok-aia', envOverrides: dedicated })).status).toBe(401);
+    expect((await feed()).instrumentedProperties).toEqual([]);
+    // The dedicated secret cannot authenticate a different property, including one that has its own aggregate token.
+    const gfd = { method: 'POST', body: { propertyId: 'goodflippindesign.com', eventTypes: ['lead'] } };
+    expect((await call('/v1/heartbeat', { ...gfd, token: 'tok-aia-dedicated', envOverrides: dedicated })).status).toBe(401);
+    // Other producers keep authenticating with the aggregate map while the dedicated secret is set.
+    expect((await call('/v1/heartbeat', { ...gfd, token: 'tok-gfd', envOverrides: dedicated })).status).toBe(200);
+    expect((await feed()).instrumentedProperties).toEqual(['goodflippindesign.com']);
+  });
+
+  it('falls back to the aggregate AIAIMate entry only while the dedicated secret is unset or empty', async () => {
+    const aia = { method: 'POST', body: { propertyId: 'aiaimate.com', eventTypes: ['signup'] }, token: 'tok-aia' };
+    expect((await call('/v1/heartbeat', { ...aia, envOverrides: { AIAIMATE_INGEST_TOKEN: '' } })).status).toBe(200);
+    expect((await call('/v1/heartbeat', aia)).status).toBe(200);
+  });
+
   it('requires the feed token', async () => {
     expect((await call('/v1/feed')).status).toBe(401);
     expect((await call('/v1/feed', { token: 'tok-aia' })).status).toBe(401);
