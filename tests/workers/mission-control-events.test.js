@@ -65,6 +65,18 @@ describe('producer authentication', () => {
     expect((await feed()).instrumentedProperties).toEqual([]);
   });
 
+
+  it('accepts the dedicated AIAIMate producer secret without changing the aggregate token map', async () => {
+    env.AIAIMATE_INGEST_TOKEN = 'tok-aia-dedicated';
+    const response = await call('/v1/heartbeat', {
+      method: 'POST',
+      token: 'tok-aia-dedicated',
+      body: { propertyId: 'aiaimate.com', eventTypes: ['signup', 'purchase'] },
+    });
+    expect(response.status).toBe(200);
+    expect((await feed()).instrumentedProperties).toContain('aiaimate.com');
+  });
+
   it('requires the feed token', async () => {
     expect((await call('/v1/feed')).status).toBe(401);
     expect((await call('/v1/feed', { token: 'tok-aia' })).status).toBe(401);
