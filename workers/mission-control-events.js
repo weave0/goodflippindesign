@@ -23,6 +23,7 @@
  *
  * Secrets (wrangler secret put …, see wrangler-mission-control-events.toml):
  *   INGEST_TOKENS  JSON object {"<propertyId>":"<token>", …} — one bearer token per producing property
+ *   AIAIMATE_INGEST_TOKEN dedicated bearer token for aiaimate.com
  *   FEED_TOKEN     bearer token given to Mission Control as MISSION_CONTROL_EVENTS_TOKEN
  */
 
@@ -132,7 +133,8 @@ async function readJsonBody(request) {
 /** Authenticates a producer for the property named in its body; returns an error Response or null. */
 async function authenticateProducer(request, env, propertyId) {
   const tokens = parseIngestTokens(env);
-  const expected = typeof propertyId === 'string' && Object.hasOwn(tokens, propertyId) ? tokens[propertyId] : '';
+  const dedicated = propertyId === 'aiaimate.com' && typeof env.AIAIMATE_INGEST_TOKEN === 'string' ? env.AIAIMATE_INGEST_TOKEN : '';
+  const expected = dedicated || (typeof propertyId === 'string' && Object.hasOwn(tokens, propertyId) ? tokens[propertyId] : '');
   // An unknown property and a wrong token are indistinguishable to the caller.
   if (!(await tokensMatch(bearer(request), expected))) return json({ error: 'Unauthorized.' }, 401);
   return null;
