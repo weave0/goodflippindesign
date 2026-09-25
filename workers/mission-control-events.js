@@ -36,7 +36,7 @@ const DAY_MS = 86400000;
 const MAX_BODY_BYTES = 2048;
 const MAX_EVENT_ID_CHARS = 128;
 const DEDUPE_RETENTION_DAYS = 400;
-const EVENT_ID_PATTERN = /^[A-Za-z][A-Za-z0-9]{1,31}_[A-Za-z0-9][A-Za-z0-9_.:-]{2,95}$/;
+const EVENT_ID_PATTERN = /^(?:cs_(?:live|test)_[A-Za-z0-9]+|in_[A-Za-z0-9]+)$/;
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
 
 function json(body, status = 200) {
@@ -61,7 +61,12 @@ async function digestEventId(propertyId, eventId) {
 }
 
 function validEventId(eventId) {
-  return typeof eventId === 'string' && eventId.length > 0 && eventId.length <= MAX_EVENT_ID_CHARS && EVENT_ID_PATTERN.test(eventId) && !eventId.includes('@');
+  return typeof eventId === 'string' && eventId.length > 0 && eventId.length <= MAX_EVENT_ID_CHARS && EVENT_ID_PATTERN.test(eventId);
+}
+
+function hasOnlyKeys(body, allowed) {
+  const keys = new Set(allowed);
+  return Object.keys(body).every(key => keys.has(key));
 }
 
 /** Constant-time string comparison (both sides hashed so lengths never leak). */
@@ -146,6 +151,7 @@ async function handleEvent(request, env, now) {
   const { propertyId, eventType, eventId } = parsed.body;
   const denied = await authenticateProducer(request, env, propertyId);
   if (denied) return denied;
+  if (!hasOnlyKeys(parsed.body, ['propertyId', 'eventType', 'eventId'])) return json({ error: 'Unsupported event fields.' }, 400);
   if (!EVENT_TYPES.includes(eventType)) return json({ error: 'eventType is outside the common vocabulary.' }, 400);
   if (eventId !== undefined && !validEventId(eventId)) return json({ error: 'eventId must be a non-personal opaque identifier.' }, 400);
   const nowIso = new Date(now).toISOString();
@@ -179,6 +185,7 @@ async function handleHeartbeat(request, env, now) {
   const { propertyId, eventTypes } = parsed.body;
   const denied = await authenticateProducer(request, env, propertyId);
   if (denied) return denied;
+  if (!hasOnlyKeys(parsed.body, ['propertyId', 'eventTypes'])) return json({ error: 'Unsupported heartbeat fields.' }, 400);
   if (!Array.isArray(eventTypes) || eventTypes.length === 0 || eventTypes.length > EVENT_TYPES.length || !eventTypes.every(type => EVENT_TYPES.includes(type))) {
     return json({ error: 'eventTypes must be a non-empty list from the common vocabulary.' }, 400);
   }
