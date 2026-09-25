@@ -70,12 +70,21 @@ describe("Gold wall: Mission Control service credential", () => {
   });
 
   it("rejects a wrong, truncated, extended, or differently-cased token", async () => {
-    for (const bad of ["mcf_wrong", FEED_SECRET.slice(0, -1), FEED_SECRET + "x", FEED_SECRET.toLowerCase(), "mcf_", FEED_SECRET.slice(4)]) {
+    for (const bad of ["mcf_wrong", FEED_SECRET.slice(0, -1), FEED_SECRET + "x", FEED_SECRET.toLowerCase(), "mcf_"]) {
       const env = envWith();
       const response = await call(GOLD, { token: bad, env });
       expect(response.status, bad).toBe(401);
       expect(env.ASSETS.fetch).not.toHaveBeenCalled();
     }
+  });
+
+  it("does not treat the bare secret (without its prefix) as a feed credential; it is just an unverified admin session", async () => {
+    const spy = profileFetch(401);
+    const env = envWith();
+    const response = await call(GOLD, { token: FEED_SECRET.slice(4), env });
+    expect(response.status).toBe(401);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled();
   });
 
   it("fails closed when the secret is unset, empty, or too weak, even if the caller presents the same string", async () => {
