@@ -8,16 +8,16 @@ import worker, { buildFeed, EVENT_WINDOWS } from '../../workers/mission-control-
 
 const BASE = 'https://events.example.com';
 const TOKENS = { 'aiaimate.com': 'tok-aia', 'goodflippindesign.com': 'tok-gfd' };
-const testEnv = () => ({ DB: env.DB, INGEST_TOKENS: JSON.stringify(TOKENS), FEED_TOKEN: 'feed-secret' });
+const testEnv = (overrides = {}) => ({ DB: env.DB, INGEST_TOKENS: JSON.stringify(TOKENS), FEED_TOKEN: 'feed-secret', ...overrides });
 
-function call(path, { method = 'GET', token, body } = {}) {
+function call(path, { method = 'GET', token, body, envOverrides } = {}) {
   return worker.fetch(
     new Request(BASE + path, {
       method,
       headers: { ...(token ? { authorization: 'Bearer ' + token } : {}), 'content-type': 'application/json' },
       body: body === undefined ? undefined : typeof body === 'string' ? body : JSON.stringify(body),
     }),
-    testEnv()
+    testEnv(envOverrides)
   );
 }
 
@@ -67,10 +67,10 @@ describe('producer authentication', () => {
 
 
   it('accepts the dedicated AIAIMate producer secret without changing the aggregate token map', async () => {
-    env.AIAIMATE_INGEST_TOKEN = 'tok-aia-dedicated';
     const response = await call('/v1/heartbeat', {
       method: 'POST',
       token: 'tok-aia-dedicated',
+      envOverrides: { AIAIMATE_INGEST_TOKEN: 'tok-aia-dedicated' },
       body: { propertyId: 'aiaimate.com', eventTypes: ['signup', 'purchase'] },
     });
     expect(response.status).toBe(200);
