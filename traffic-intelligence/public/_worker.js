@@ -10,7 +10,8 @@ const ADMIN_EMAILS = new Set([
 // the governed Gold documents listed below and nothing else: it is not an admin identity, never reaches the Clerk
 // profile lookup, and never passes /api/admin-session.
 const FEED_TOKEN_PREFIX = "mcf_";
-const FEED_MIN_SECRET_LENGTH = 32;
+// mcf_ + 32 characters, matching the deploy workflow's gate so a secret one accepts is never rejected by the other.
+const FEED_MIN_SECRET_LENGTH = 36;
 const FEED_READABLE_PATHS = new Set([
   "/gold/canonical-gold-m1.2.json",
   // The filename is stable for consumers; the contents are schema 1.1.0.
@@ -43,7 +44,7 @@ async function timingSafeMatch(presented, expected) {
 async function authorizeFeed(token, env) {
   const expected = env?.MISSION_CONTROL_FEED_TOKEN;
   // Fail closed: an unset or weak secret disables the feed path entirely.
-  if (typeof expected !== "string" || expected.length < FEED_MIN_SECRET_LENGTH) return false;
+  if (typeof expected !== "string" || expected.length < FEED_MIN_SECRET_LENGTH || !isFeedShaped(expected)) return false;
   if (!isFeedShaped(token)) return false;
   return timingSafeMatch(token, expected);
 }

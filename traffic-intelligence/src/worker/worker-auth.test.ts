@@ -19,7 +19,7 @@ beforeAll(async () => {
 });
 
 const assets = () => ({
-  fetch: vi.fn(async (request: Request) => new Response(JSON.stringify({ path: new URL(request.url).pathname, contract_name: "gfd-canonical-gold" }), { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" } })),
+  fetch: vi.fn(async (request: Request) => new Response(JSON.stringify({ path: new URL(request.url).pathname, contract_name: new URL(request.url).pathname.includes("insights") ? "gfd-traffic-insights" : "gfd-canonical-gold" }), { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" } })),
 });
 
 const envWith = (overrides: Partial<Env> = {}): Env & { ASSETS: ReturnType<typeof assets> } => ({ ASSETS: assets(), MISSION_CONTROL_FEED_TOKEN: FEED_SECRET, ...overrides }) as Env & { ASSETS: ReturnType<typeof assets> };
@@ -58,7 +58,7 @@ describe("Gold wall: Mission Control service credential", () => {
       expect(response.headers.get("Cache-Control")).toBe("private, no-store, max-age=0");
       expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow, noarchive");
       expect(response.headers.get("Vary")).toBe("Authorization");
-      expect((await response.json()).contract_name).toBe("gfd-canonical-gold");
+      expect((await response.json()).contract_name).toBe(url === INSIGHTS ? "gfd-traffic-insights" : "gfd-canonical-gold");
     }
   });
 
@@ -88,9 +88,9 @@ describe("Gold wall: Mission Control service credential", () => {
   });
 
   it("fails closed when the secret is unset, empty, or too weak, even if the caller presents the same string", async () => {
-    for (const secret of [undefined, "", "mcf_short"]) {
+    for (const secret of [undefined, "", "mcf_short", "mcf_" + "x".repeat(31), "x".repeat(40)]) {
       const env = envWith({ MISSION_CONTROL_FEED_TOKEN: secret });
-      const response = await call(GOLD, { token: secret ?? "mcf_", env });
+      const response = await call(GOLD, { token: secret ? (secret.startsWith("mcf_") ? secret : "mcf_" + secret) : "mcf_", env });
       expect(response.status).toBe(401);
       expect(env.ASSETS.fetch).not.toHaveBeenCalled();
     }
