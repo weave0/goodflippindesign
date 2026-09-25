@@ -59,6 +59,12 @@ describe('producer authentication', () => {
     expect((await call('/v1/event', { method: 'POST', token: 'tok-aia', body: JSON.stringify('😀'.repeat(800)) })).status).toBe(413);
   });
 
+  it('rejects unsupported payload fields after producer authentication', async () => {
+    expect((await call('/v1/event', { method: 'POST', token: 'tok-aia', body: { propertyId: 'aiaimate.com', eventType: 'signup', email: 'reader@example.org' } })).status).toBe(400);
+    expect((await call('/v1/heartbeat', { method: 'POST', token: 'tok-aia', body: { propertyId: 'aiaimate.com', eventTypes: ['signup'], note: 'private' } })).status).toBe(400);
+    expect((await feed()).instrumentedProperties).toEqual([]);
+  });
+
   it('requires the feed token', async () => {
     expect((await call('/v1/feed')).status).toBe(401);
     expect((await call('/v1/feed', { token: 'tok-aia' })).status).toBe(401);
@@ -148,16 +154,16 @@ describe('end to end with the D1 counters', () => {
     (await env.DB.prepare('SELECT COALESCE(SUM(count), 0) AS n FROM mc_event_daily WHERE property_id = ? AND event_type = ?').bind(propertyId, eventType).first()).n;
 
   it('counts an event with an eventId once, however many times it is delivered', async () => {
-    for (let i = 0; i < 3; i++) expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'evt_123')).status).toBe(202);
+    for (let i = 0; i < 3; i++) expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'cs_live_123')).status).toBe(202);
     expect(await dailyCount('aiaimate.com', 'purchase')).toBe(1);
-    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'evt_456');
+    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'cs_live_456');
     expect(await dailyCount('aiaimate.com', 'purchase')).toBe(2);
   });
 
   it('scopes eventIds to the property and event type is recorded as instrumented', async () => {
-    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'evt_shared-id');
-    await postEvent('aiaimate.com', 'lead', 'tok-aia', 'evt_shared-id');
-    await postEvent('goodflippindesign.com', 'purchase', 'tok-gfd', 'evt_shared-id');
+    await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'cs_live_shared1');
+    await postEvent('aiaimate.com', 'lead', 'tok-aia', 'cs_live_shared1');
+    await postEvent('goodflippindesign.com', 'purchase', 'tok-gfd', 'cs_live_shared1');
     expect(await dailyCount('aiaimate.com', 'purchase')).toBe(1);
     expect(await dailyCount('aiaimate.com', 'lead')).toBe(1);
     expect(await dailyCount('goodflippindesign.com', 'purchase')).toBe(1);
@@ -169,6 +175,8 @@ describe('end to end with the D1 counters', () => {
     expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', null)).status).toBe(400);
     expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'brett@example.com')).status).toBe(400);
     expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', '555-123-4567')).status).toBe(400);
+    expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'id_brett_weaver')).status).toBe(400);
+    expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'id_5551234567')).status).toBe(400);
     expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'https://example.com/id/1')).status).toBe(400);
     expect((await postEvent('aiaimate.com', 'purchase', 'tok-aia', 'x'.repeat(200))).status).toBe(400);
     expect(await dailyCount('aiaimate.com', 'purchase')).toBe(0);
