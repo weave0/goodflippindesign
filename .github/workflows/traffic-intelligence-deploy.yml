@@ -142,9 +142,19 @@ jobs:
           PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
           ANALYTICS_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
           DEPLOY_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
+          FEED_TOKEN: ${{ secrets.MISSION_CONTROL_FEED_TOKEN }}
         run: |
           set -euo pipefail
           test -n "$PRODUCER_READ_TOKEN" || { echo "GFD_TI_READ_TOKEN is not available"; exit 1; }
+          # Mission Control feed credential: an application secret (not a Cloudflare token) that only unlocks the
+          # read-only Gold feed. Its format is enforced so the worker can tell it apart from a Clerk admin session.
+          test -n "$FEED_TOKEN" || { echo "MISSION_CONTROL_FEED_TOKEN is not available"; exit 1; }
+          case "$FEED_TOKEN" in mcf_*) ;; *) echo "MISSION_CONTROL_FEED_TOKEN must start with mcf_"; exit 1 ;; esac
+          test "${#FEED_TOKEN}" -ge 36 || { echo "MISSION_CONTROL_FEED_TOKEN is too short"; exit 1; }
+          if [ "$FEED_TOKEN" = "$ANALYTICS_TOKEN" ] || [ "$FEED_TOKEN" = "$DEPLOY_TOKEN" ] || [ "$FEED_TOKEN" = "$PRODUCER_READ_TOKEN" ]; then
+            echo "MISSION_CONTROL_FEED_TOKEN must be its own secret, never a reused credential"
+            exit 1
+          fi
           test -n "$ANALYTICS_TOKEN" || { echo "CF_GFD_TI_ANALYTICS_TOKEN is not available"; exit 1; }
           test -n "$DEPLOY_TOKEN" || { echo "CF_GFD_TI_DEPLOY_TOKEN is not available"; exit 1; }
           test "$ANALYTICS_TOKEN" != "$DEPLOY_TOKEN" || {
@@ -438,13 +448,14 @@ jobs:
           PRODUCER_READ_TOKEN: ${{ secrets.GFD_TI_READ_TOKEN }}
           ANALYTICS_TOKEN: ${{ secrets.CF_GFD_TI_ANALYTICS_TOKEN }}
           DEPLOY_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
+          FEED_TOKEN: ${{ secrets.MISSION_CONTROL_FEED_TOKEN }}
         run: |
           set -euo pipefail
           for artifact in \
             "$RUNNER_TEMP/gfdti-live/canonical-gold-1.2.production.json" \
             "$RUNNER_TEMP/gfdti-live/traffic-insights-1.1.production.json"
           do
-            for secret_name in PRODUCER_READ_TOKEN ANALYTICS_TOKEN DEPLOY_TOKEN; do
+            for secret_name in PRODUCER_READ_TOKEN ANALYTICS_TOKEN DEPLOY_TOKEN FEED_TOKEN; do
               secret="${!secret_name}"
               if grep -Fq -- "$secret" "$artifact"; then
                 echo "secret $secret_name was serialized into $artifact"
@@ -523,6 +534,18 @@ jobs:
           console.log("live_build_gold_and_insights_verified=true");
           NODE
 
+      - name: Assert the feed secret is absent from the deployable artifact
+        shell: bash
+        env:
+          FEED_TOKEN: ${{ secrets.MISSION_CONTROL_FEED_TOKEN }}
+        run: |
+          set -euo pipefail
+          if grep -rFq -- "$FEED_TOKEN" traffic-intelligence/dist; then
+            echo "MISSION_CONTROL_FEED_TOKEN was serialized into the deployable artifact"
+            exit 1
+          fi
+          echo "feed_secret_absent_from_artifact=verified"
+
       - name: Verify Cloudflare deploy credential is available
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
@@ -555,6 +578,20 @@ jobs:
 
           jq '.' <<<"$create_response"
           test "$(jq -r '.success' <<<"$create_response")" = "true"
+
+      # The feed credential is an application secret bound to the Pages project. Secret bindings attach to a
+      # deployment, so it is provisioned before the deploy below using the existing Pages deploy authority;
+      # no additional Cloudflare token is needed.
+      - name: Provision Mission Control feed secret on the Pages project
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_GFD_TI_DEPLOY_TOKEN }}
+          MISSION_CONTROL_FEED_TOKEN: ${{ secrets.MISSION_CONTROL_FEED_TOKEN }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$MISSION_CONTROL_FEED_TOKEN" | npx --yes "wrangler@$WRANGLER_VERSION" pages secret put MISSION_CONTROL_FEED_TOKEN \
+            --project-name="$CF_PROJECT_NAME" > /dev/null
+          echo "mission_control_feed_secret_provisioned=true"
 
       - name: Deploy exact production artifact
         env:
@@ -669,6 +706,54 @@ jobs:
           work_status="$(curl -sS -o /tmp/pages-work-denied.txt -w '%{http_code}' "$pages_url/gold/ti-work-queue-1.0.json")"
           test "$work_status" = "401" || test "$work_status" = "403"
           echo "Verified production Gold + insights + work-queue admin wall: $pages_url"
+
+      - name: Verify Mission Control feed credential on the live deployment
+        shell: bash
+        env:
+          MISSION_CONTROL_FEED_TOKEN: ${{ secrets.MISSION_CONTROL_FEED_TOKEN }}
+        run: |
+          set -euo pipefail
+          pages_url="https://$CF_PROJECT_NAME.pages.dev"
+          umask 077
+          header_file="$(mktemp)"
+          trap 'rm -f "$header_file"' EXIT
+          printf 'Authorization: Bearer %s\n' "$MISSION_CONTROL_FEED_TOKEN" > "$header_file"
+          # usage: status_of <path> <body-file> [curl args...]
+          status_of() {
+            local path="$1" out="$2"
+            shift 2
+            curl -sS -o "$out" -w '%{http_code}' "$@" "$pages_url$path"
+          }
+
+          # The new deployment must be the one serving; give the edge a moment to switch over.
+          gold_status="000"
+          for attempt in $(seq 1 12); do
+            gold_status="$(status_of /gold/canonical-gold-m1.2.json /tmp/feed-gold.json -H @"$header_file" || true)"
+            [ "$gold_status" = "200" ] && break
+            sleep 5
+          done
+          test "$gold_status" = "200" || { echo "feed credential did not unlock Gold (HTTP $gold_status)"; exit 1; }
+          jq -e '.contract_name == "gfd-canonical-gold" and .fixture == false' /tmp/feed-gold.json > /dev/null
+          insights_status="$(status_of /gold/traffic-insights-1.0.json /tmp/feed-insights.json -H @"$header_file")"
+          test "$insights_status" = "200" || { echo "feed credential did not unlock insights (HTTP $insights_status)"; exit 1; }
+          jq -e '.contract_name == "gfd-traffic-insights" and .fixture == false' /tmp/feed-insights.json > /dev/null
+
+          # Least privilege: no other Gold artifact, no admin session, no writes, no guessing.
+          test "$(status_of /gold/ti-work-queue-1.0.json /tmp/feed-work.txt -H @"$header_file")" = "403"
+          test "$(status_of /gold/fixture.v1.json /tmp/feed-fixture.txt -H @"$header_file")" = "403"
+          test "$(status_of /api/admin-session /tmp/feed-admin.txt -H @"$header_file")" = "401"
+          test "$(status_of /gold/canonical-gold-m1.2.json /tmp/feed-post.txt -H @"$header_file" -X POST)" = "405"
+          test "$(status_of /gold/canonical-gold-m1.2.json /tmp/feed-bad.txt -H 'Authorization: Bearer mcf_not-the-real-token')" = "401"
+
+          # Feed responses stay private, and nothing reflects the credential.
+          curl -sS -D /tmp/feed-headers.txt -o /dev/null -H @"$header_file" "$pages_url/gold/canonical-gold-m1.2.json"
+          grep -qi '^cache-control: private, no-store' /tmp/feed-headers.txt
+          grep -qi '^x-robots-tag: noindex' /tmp/feed-headers.txt
+          if grep -Fq -- "$MISSION_CONTROL_FEED_TOKEN" /tmp/feed-gold.json /tmp/feed-insights.json /tmp/feed-headers.txt /tmp/feed-work.txt /tmp/feed-fixture.txt /tmp/feed-admin.txt /tmp/feed-post.txt /tmp/feed-bad.txt; then
+            echo "the feed credential was reflected in a response"
+            exit 1
+          fi
+          echo "mission_control_feed_verified=true"
 
       - name: Verify custom-domain activation
         shell: bash

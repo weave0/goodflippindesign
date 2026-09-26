@@ -44,3 +44,16 @@ Meaningful insights become GitHub work items in `weave0/goodflippindesign` (cent
 - Docs: [`docs/ti-work-funnel.md`](docs/ti-work-funnel.md)
 - Work queue sidecar: `public/gold/ti-work-queue-1.0.json` (fixture in PRs; live inject on deploy)
 - Sync: `npm run sync:work -- --insights <path> --out public/gold/ti-work-queue-1.0.json`
+
+## Gold access: administrators and the Mission Control feed
+
+`public/_worker.js` gates `/gold/*` with two independent paths:
+
+| Caller | Credential | Reach |
+|---|---|---|
+| Human administrator | Clerk session (`Authorization: Bearer <session JWT>`), verified against `/api/profile` and the admin allow-list | All of `/gold/*`, plus `/api/admin-session` |
+| Mission Control collector | `MISSION_CONTROL_FEED_TOKEN` (an `mcf_…` application secret, **not** a Cloudflare token) | `GET`/`HEAD` of `canonical-gold-m1.2.json` and `traffic-insights-1.0.json` only |
+
+The feed token is not an admin identity: it never reaches the profile lookup, never passes `/api/admin-session`, is compared by SHA-256 digest (timing-safe), and the worker fails closed when the secret is unset or weak. Responses stay `private, no-store, noindex`.
+
+The deploy workflow owns the secret end to end: the GitHub Actions secret `MISSION_CONTROL_FEED_TOKEN` is bound to the Pages project (`wrangler pages secret put`, using the existing Pages deploy authority) before each deploy and the live deployment is then probed for least privilege. The same value is the GlobalDeets Actions secret `MISSION_CONTROL_GOLD_TOKEN`. To rotate, set both secrets to a new `mcf_` + 43 base64url characters and re-run the deploy; nothing in Cloudflare needs to be edited by hand.
