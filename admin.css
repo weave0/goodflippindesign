@@ -7461,6 +7461,24 @@
     color: var(--error);
     border-color: rgba(248,113,113,0.35);
 }
+/* Confirmed to serve nothing (evidenceState: measured) — a fact, not
+   necessarily an outage, so it gets its own tone rather than sharing
+   "unavailable"'s error color. */
+.mc-state[data-state="no-service-published"] {
+    color: var(--accent-cyan);
+    border-color: var(--border);
+}
+/* Probe could not reach a verdict (bot/WAF challenge, etc.) — distinct from
+   both a confirmed no-service domain and a never-checked unknown. */
+.mc-state[data-state="blocked"] {
+    color: var(--warning, #f59e0b);
+    border-color: rgba(245,158,11,0.35);
+    font-style: italic;
+}
+.mc-state[data-state="unknown"] {
+    color: var(--text-muted);
+    border-style: dashed;
+}
 
 @media (max-width: 1100px) {
     .mc-summary-grid {

@@ -1902,6 +1902,14 @@ export default {
           'Vary': 'Origin',
         };
 
+        // Mission Control is a same-origin-only admin surface — it must never
+        // participate in the shared cross-ecosystem CORS allowlist below,
+        // even for a preflight, so no sibling estate property can be granted
+        // an origin match against an admin-token-bearing endpoint.
+        if (url.pathname === '/api/mission-control' && request.method === 'OPTIONS') {
+          return new Response(null, { status: 204 });
+        }
+
         if (request.method === 'OPTIONS') {
           return new Response(null, { headers: corsHeaders });
         }

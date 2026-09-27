@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { handleMissionControlRequest, loadMissionControlEvidence, EVIDENCE_FILES } from '../../workers/mission-control-api.js';
+import authWorker from '../../workers/auth.js';
 
 function request(method = 'GET') {
   return new Request('https://goodflippindesign.com/api/mission-control', { method });
@@ -58,5 +59,21 @@ describe('Mission Control evidence broker', () => {
   it('rejects non-GET methods', async () => {
     const res = await handleMissionControlRequest(request('POST'), { MISSION_CONTROL_GITHUB_TOKEN: 'secret' }, admin, upstreamFetch());
     expect(res.status).toBe(405);
+  });
+});
+
+describe('Mission Control routing through the real auth boundary', () => {
+  it('rejects an unauthenticated request before it ever reaches the broker', async () => {
+    const res = await authWorker.fetch(request(), {}, {});
+    expect(res.status).toBe(401);
+  });
+
+  it('never grants cross-origin CORS access to this admin-only endpoint, even on preflight', async () => {
+    const preflight = new Request('https://goodflippindesign.com/api/mission-control', {
+      method: 'OPTIONS',
+      headers: { Origin: 'https://globaldeets.com' },
+    });
+    const res = await authWorker.fetch(preflight, {}, {});
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBeNull();
   });
 });

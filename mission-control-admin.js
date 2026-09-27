@@ -30,14 +30,48 @@
     return `${Math.round(hours / 24)}d ago`;
   }
 
-  function collectionState(payload) {
-    const generatedAt = payload?.source?.generatedAt;
-    if (!generatedAt) return { label: 'Unknown', tone: 'unknown' };
+  const FRESHNESS_TONE = { fresh: 'ok', stale: 'warn', expired: 'bad' };
+
+  // Prefer each evidence plane's own governed freshness signal over a locally
+  // guessed timestamp age — the producer already knows its own cadence
+  // (audience/business-events refresh far slower than probes) and publishes
+  // freshnessPolicy thresholds for planes that don't precompute a state.
+  function planeFreshness(policy, generatedAt) {
+    if (!generatedAt || !policy) return null;
     const hours = (Date.now() - Date.parse(generatedAt)) / 3600000;
-    if (!Number.isFinite(hours)) return { label: 'Unknown', tone: 'unknown' };
-    if (hours <= 8) return { label: 'Fresh', tone: 'ok' };
-    if (hours <= 24) return { label: 'Stale', tone: 'warn' };
-    return { label: 'Expired', tone: 'bad' };
+    if (!Number.isFinite(hours)) return null;
+    if (hours <= policy.freshWithinHours) return 'fresh';
+    if (hours <= policy.expiredAfterHours) return 'stale';
+    return 'expired';
+  }
+
+  function collectionState(payload) {
+    const evidence = payload?.evidence || {};
+    const policy = evidence.estateHealth?.freshnessPolicy || {};
+    const states = [];
+
+    const probeState = evidence.probes?.latestAttempt?.at
+      ? planeFreshness(policy.probe, evidence.probes.latestAttempt.at)
+      : planeFreshness(policy.probe, evidence.estateHealth?.generatedAt);
+    if (probeState) states.push(['Estate/probe evidence', probeState]);
+
+    const audienceState = evidence.audience?.source?.freshness?.state
+      || planeFreshness(policy.audience, evidence.audience?.generatedAt);
+    if (audienceState) states.push(['Audience evidence', audienceState]);
+
+    const eventsState = evidence.businessEvents?.source?.freshness?.state
+      || planeFreshness(policy.businessEvents, evidence.businessEvents?.generatedAt);
+    if (eventsState) states.push(['Business-event evidence', eventsState]);
+
+    if (!states.length) return { label: 'Unknown', tone: 'unknown' };
+
+    const severity = { expired: 2, stale: 1, fresh: 0 };
+    const worst = states.reduce((a, b) => (severity[b[1]] > severity[a[1]] ? b : a));
+    const label = worst[1].charAt(0).toUpperCase() + worst[1].slice(1);
+    return {
+      label: states.length > 1 && worst[1] !== 'fresh' ? `${label} (${worst[0]})` : label,
+      tone: FRESHNESS_TONE[worst[1]] || 'unknown',
+    };
   }
 
   function propertyRows(estate) {
@@ -54,6 +88,25 @@
     return ({ critical: 0, high: 1, medium: 2, warning: 2, low: 3, info: 4 })[String(sev || '').toLowerCase()] ?? 5;
   }
 
+  // The producer publishes a deterministic `priority` (rank) and `priorityScore`
+  // per item, weighted by investor-criticality, business impact, escalation,
+  // actionability and age — not just severity. Preserve that ordering; only
+  // fall back to a severity-based guess for items an older/partial evidence
+  // snapshot didn't rank.
+  function findingRank(item) {
+    if (Number.isFinite(item?.priority)) return [0, item.priority];
+    if (Number.isFinite(item?.priorityScore)) return [1, -item.priorityScore];
+    return [2, severityRank(item?.severity)];
+  }
+
+  function compareFindings(a, b) {
+    const [tierA, rankA] = findingRank(a);
+    const [tierB, rankB] = findingRank(b);
+    if (tierA !== tierB) return tierA - tierB;
+    if (rankA !== rankB) return rankA - rankB;
+    return severityRank(a?.severity) - severityRank(b?.severity);
+  }
+
   function render(payload) {
     const evidence = payload.evidence || {};
     const estate = evidence.estateHealth || {};
@@ -65,7 +118,7 @@
     const properties = propertyRows(estate);
     const findings = findingRows(diagnostics)
       .filter((item) => item?.status !== 'closed')
-      .sort((a, b) => severityRank(a?.severity) - severityRank(b?.severity));
+      .sort(compareFindings);
 
     const estateSummary = estate?.summary || {};
     const propertyCount = estate?.propertyCount ?? properties.length;
@@ -108,7 +161,9 @@
     table.innerHTML = properties.length
       ? properties.map((p) => {
           const domain = p?.domain || p?.hostname || p?.propertyId || p?.id || 'Unknown';
-          const state = p?.availability?.state || p?.state || 'unknown';
+          // A blocked probe means "we could not check" — distinct from a
+          // confirmed no-service domain or a never-checked unknown state.
+          const state = p?.availability?.blocked ? 'blocked' : (p?.availability?.state || p?.state || 'unknown');
           const criticalPath = p?.criticalPath?.state || p?.criticalPathState || p?.facets?.criticalPath?.status || 'unknown';
           const evidenceAge = p?.availability?.observedAt || p?.observedAt || estate?.generatedAt || payload.source?.generatedAt;
           return `<tr>
