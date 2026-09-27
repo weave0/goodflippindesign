@@ -67,17 +67,17 @@
       .filter((item) => item?.status !== 'closed')
       .sort((a, b) => severityRank(a?.severity) - severityRank(b?.severity));
 
-    const availability = properties.map((p) => p?.availability?.state || p?.state || 'unknown');
-    const healthy = availability.filter((s) => s === 'available' || s === 'healthy').length;
-    const degraded = availability.filter((s) => s === 'degraded').length;
-    const unavailable = availability.filter((s) => s === 'unavailable').length;
-    const unknown = Math.max(0, properties.length - healthy - degraded - unavailable);
-    const critical = findings.filter((f) => String(f?.severity).toLowerCase() === 'critical').length;
+    const estateSummary = estate?.summary || {};
+    const propertyCount = estate?.propertyCount ?? properties.length;
+    const available = estateSummary.availableZones ?? properties.filter((p) => p?.availability?.state === 'available').length;
+    const attention = diagnostics?.summary?.open ?? findings.length;
+    const knownAvailability = estateSummary.availabilityKnownZones ?? properties.filter((p) => p?.availability?.state && p?.availability?.state !== 'unknown').length;
+    const unknown = Math.max(0, propertyCount - knownAvailability);
     const stale = collectionState(payload);
 
-    $('mc-kpi-properties').textContent = properties.length || '—';
-    $('mc-kpi-healthy').textContent = healthy;
-    $('mc-kpi-attention').textContent = degraded + unavailable + critical;
+    $('mc-kpi-properties').textContent = propertyCount || '—';
+    $('mc-kpi-healthy').textContent = available;
+    $('mc-kpi-attention').textContent = attention;
     $('mc-kpi-unknown').textContent = unknown;
     $('mc-kpi-freshness').textContent = stale.label;
     $('mc-kpi-freshness').dataset.tone = stale.tone;
@@ -120,13 +120,13 @@
         }).join('')
       : '<tr><td colspan="4">No estate rows supplied by the current evidence plane.</td></tr>';
 
-    const execItems = executive?.priorities || executive?.items || executive?.briefs || [];
+    const execItems = executive?.headline?.statements || executive?.priorities || executive?.items || executive?.briefs || [];
     $('mc-executive-list').innerHTML = Array.isArray(execItems) && execItems.length
-      ? execItems.slice(0, 8).map((item) => `<li><strong>${esc(item?.title || item?.label || 'Priority')}</strong><span>${esc(item?.why || item?.statement || item?.action || '')}</span></li>`).join('')
-      : '<li><strong>Evidence loaded</strong><span>No executive priority array was supplied in this snapshot.</span></li>';
+      ? execItems.slice(0, 8).map((item) => `<li><strong>${esc(item?.title || item?.label || item?.id || 'Executive signal')}</strong><span>${esc(item?.text || item?.why || item?.statement || item?.action || '')}</span></li>`).join('')
+      : '<li><strong>Evidence loaded</strong><span>No executive headline statements were supplied in this snapshot.</span></li>';
 
-    const audienceState = audience?.state || audience?.status || audience?.measurementState || 'unknown';
-    const eventState = events?.state || events?.status || events?.measurementState || 'unknown';
+    const audienceState = audience?.source?.status || audience?.state || audience?.status || audience?.measurementState || 'unknown';
+    const eventState = events?.source?.status || events?.state || events?.status || events?.measurementState || 'unknown';
     $('mc-audience-state').textContent = audienceState;
     $('mc-events-state').textContent = eventState;
 
