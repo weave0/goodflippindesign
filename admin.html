@@ -1415,57 +1415,92 @@
                 <section class="view" id="view-mission-control">
                     <div class="section-head">
                         <div>
-                            <p class="mono text-muted" style="font-size:0.72rem;margin:0 0 0.25rem">GFD ADMIN · PRIVATE ESTATE INTELLIGENCE</p>
+                            <p class="mono text-muted mc-eyebrow">GFD ADMIN · PRIVATE ESTATE INTELLIGENCE</p>
                             <h2 class="section-title">Mission Control</h2>
+                            <p class="subheading">Live governed evidence from the GlobalDeets collector, brokered through this authenticated GFD admin boundary.</p>
                         </div>
                         <div class="inline-actions">
+                            <span class="pill" id="mc-load-status">Not loaded</span>
+                            <button class="btn btn-secondary" id="mc-refresh-btn" type="button">Refresh evidence</button>
                             <a class="btn btn-secondary" href="https://traffic.goodflippindesign.com" target="_blank" rel="noopener">Traffic Intelligence ↗</a>
                         </div>
                     </div>
-                    <p class="subheading mb-08">The authenticated home for estate-wide health, audience, business outcomes, diagnostics, investor readiness and operator priorities. This surface is intentionally inside the GFD Command Center and is not a public GlobalDeets feature.</p>
 
-                    <div class="panel-kpis">
-                        <div class="panel-kpi">
-                            <div class="panel-kpi-label">Security boundary</div>
-                            <div class="panel-kpi-value emerald" style="font-size:1rem">Admin gated</div>
-                        </div>
-                        <div class="panel-kpi">
-                            <div class="panel-kpi-label">Evidence plane</div>
-                            <div class="panel-kpi-value gold" style="font-size:1rem">Migrating</div>
-                        </div>
-                        <div class="panel-kpi">
-                            <div class="panel-kpi-label">Public exposure</div>
-                            <div class="panel-kpi-value emerald" style="font-size:1rem">Being retired</div>
-                        </div>
-                    </div>
-
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0.85rem;margin-top:0.85rem">
-                        <article class="panel">
-                            <h3 class="panel-subtitle">Executive cockpit</h3>
-                            <p class="text-muted">Portfolio health, meaningful business signals, investor blockers, wins, unknowns and trend context will render here from governed evidence.</p>
+                    <div class="mc-summary-grid" aria-label="Mission Control summary">
+                        <article class="panel mc-kpi-card">
+                            <div class="panel-kpi-label">Governed properties</div>
+                            <div class="mc-kpi-value" id="mc-kpi-properties">—</div>
                         </article>
-                        <article class="panel">
-                            <h3 class="panel-subtitle">Operator queue</h3>
-                            <p class="text-muted">Prioritized diagnostics, severity, impact, owner lane, evidence age, next action and escalation will live behind this admin boundary.</p>
+                        <article class="panel mc-kpi-card">
+                            <div class="panel-kpi-label">Available</div>
+                            <div class="mc-kpi-value emerald" id="mc-kpi-healthy">—</div>
                         </article>
-                        <article class="panel">
-                            <h3 class="panel-subtitle">Evidence &amp; telemetry</h3>
-                            <p class="text-muted">Audience, instrumentation, business events, probes and historical snapshots remain source-governed; the browser will receive them only through authenticated GFD backend routes.</p>
+                        <article class="panel mc-kpi-card">
+                            <div class="panel-kpi-label">Needs attention</div>
+                            <div class="mc-kpi-value gold" id="mc-kpi-attention">—</div>
+                        </article>
+                        <article class="panel mc-kpi-card">
+                            <div class="panel-kpi-label">Unknown / unmeasured</div>
+                            <div class="mc-kpi-value" id="mc-kpi-unknown">—</div>
+                        </article>
+                        <article class="panel mc-kpi-card">
+                            <div class="panel-kpi-label">Evidence freshness</div>
+                            <div class="mc-kpi-value" id="mc-kpi-freshness">—</div>
+                            <div class="mc-kpi-meta" id="mc-generated-at">No evidence loaded</div>
                         </article>
                     </div>
 
-                    <article class="panel mt-085">
-                        <div class="section-head">
-                            <h3 class="panel-subtitle">Migration status</h3>
+                    <div class="mc-layout">
+                        <article class="panel mc-panel mc-panel--queue">
+                            <div class="mc-panel-head">
+                                <div>
+                                    <div class="mc-panel-kicker">Operator queue</div>
+                                    <h3 class="panel-subtitle">What needs attention</h3>
+                                </div>
+                            </div>
+                            <div id="mc-diagnostics-list" class="mc-diagnostics">
+                                <div class="mc-empty">Open Mission Control to load governed diagnostics.</div>
+                            </div>
+                        </article>
+
+                        <article class="panel mc-panel">
+                            <div class="mc-panel-head">
+                                <div>
+                                    <div class="mc-panel-kicker">Executive cockpit</div>
+                                    <h3 class="panel-subtitle">Priorities and investor context</h3>
+                                </div>
+                            </div>
+                            <ul class="mc-executive-list" id="mc-executive-list">
+                                <li><strong>Awaiting evidence</strong><span>Live priorities will appear here after authenticated load.</span></li>
+                            </ul>
+                            <div class="mc-measurement-grid">
+                                <div>
+                                    <span>Certified audience</span>
+                                    <strong id="mc-audience-state">unknown</strong>
+                                </div>
+                                <div>
+                                    <span>Business outcomes</span>
+                                    <strong id="mc-events-state">unknown</strong>
+                                </div>
+                            </div>
+                            <p class="mc-policy-note">Unknown is never treated as zero. Edge traffic is not presented as human audience.</p>
+                        </article>
+                    </div>
+
+                    <article class="panel mc-panel mc-estate-panel">
+                        <div class="mc-panel-head">
+                            <div>
+                                <div class="mc-panel-kicker">Estate health</div>
+                                <h3 class="panel-subtitle">Property-by-property evidence</h3>
+                            </div>
                         </div>
-                        <div class="table-wrap">
-                            <table>
-                                <thead><tr><th>Lane</th><th>State</th><th>Target</th></tr></thead>
-                                <tbody>
-                                    <tr><td>Human-facing Mission Control</td><td><span class="pill">Moved here</span></td><td>GFD Command Center</td></tr>
-                                    <tr><td>GlobalDeets public presentation</td><td><span class="pill">Retiring</span></td><td>Not deployed publicly</td></tr>
-                                    <tr><td>Governed evidence transport</td><td><span class="pill">Next</span></td><td>Authenticated GFD API</td></tr>
-                                    <tr><td>Executive + operator rendering</td><td><span class="pill">Next</span></td><td>Native Mission Control panel</td></tr>
+                        <div class="table-wrap mc-table-wrap">
+                            <table class="mc-estate-table">
+                                <thead>
+                                    <tr><th>Property</th><th>Availability</th><th>Critical path</th><th>Evidence age</th></tr>
+                                </thead>
+                                <tbody id="mc-estate-body">
+                                    <tr><td colspan="4">Live estate evidence has not been loaded yet.</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -4221,6 +4256,7 @@
             </div>
 
             <script src="admin-panels.js"></script>
+            <script src="mission-control-admin.js"></script>
 </body>
 
 </html>
