@@ -36,6 +36,9 @@ NODE_ENV = "production"
 #                           Events to subscribe: payment_intent.succeeded, payment_intent.payment_failed, charge.refunded
 # SENTRY_DSN              — Error tracking (get from sentry.io dashboard)
 # CLERK_SECRET_KEY        — Auth (get from dashboard.clerk.com)
+# MISSION_CONTROL_GITHUB_TOKEN — Server-only fine-grained GitHub token; Contents: Read on weave0/globaldeets
+# MISSION_CONTROL_GITHUB_REPO  — Optional override; defaults to weave0/globaldeets
+# MISSION_CONTROL_GITHUB_REF   — Optional override; defaults to mission-control-evidence
 # TOKEN_ENCRYPTION_KEY    — 32+ char random string for AES-GCM token/state encryption
 # OPENAI_API_KEY          — Required for Content Studio DALL-E 3 image generation
 #
