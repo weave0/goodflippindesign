@@ -11,6 +11,7 @@
  */
 
 import { handleCMSRequest } from './cms.js';
+import { handleMissionControlRequest } from './mission-control-api.js';
 import * as Sentry from '@sentry/cloudflare';
 
 /**
@@ -2069,6 +2070,9 @@ export default {
 
     // Protected routes
     switch (url.pathname) {
+      case '/api/mission-control':
+        return handleMissionControlRequest(request, env, user);
+
       case '/api/comments':
         if (request.method === 'POST') {
           const response = await handleCreateComment(request, user, env);
