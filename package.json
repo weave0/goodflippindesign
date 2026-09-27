@@ -80,7 +80,8 @@
     "traffic:test": "npm --prefix traffic-intelligence test",
     "traffic:build": "npm --prefix traffic-intelligence run build",
     "traffic:lint": "npm --prefix traffic-intelligence run lint",
-    "estate:validate": "node scripts/validate-estate-registry.mjs"
+    "estate:validate": "node scripts/validate-estate-registry.mjs",
+    "test:workers:mission-control": "vitest run --config vitest.workers.config.mjs tests/workers/mission-control-api.test.js tests/workers/mission-control-events.test.js tests/workers/contact-business-events.test.js"
   },
   "repository": {
     "type": "git",
