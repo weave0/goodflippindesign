@@ -37,6 +37,14 @@ export const EFFECT_STATUSES = Object.freeze([
   'FAILED',
 ]);
 
+export const VERIFICATION_SCOPES = Object.freeze([
+  'production',
+  'control-plane',
+  'repository',
+  'configuration',
+  'deployment',
+]);
+
 const ACTIVE_PRIMARY = new Set([
   'OBSERVED',
   'QUALIFIED',
@@ -167,6 +175,8 @@ export async function createObservedWorkItem(observation) {
     findingKey: observation.findingKey,
     repository: null,
     investigationProfile: null,
+    verificationProfile: null,
+    verificationScope: null,
     verificationPredicate: null,
     firstSeen: observation.observedAt,
     lastSeen: observation.observedAt,
@@ -233,13 +243,25 @@ export function applyObservation(existing, observation) {
 function requireQualifiedBindings(item, context) {
   const repository = context.repository ?? item.repository;
   const investigationProfile = context.investigationProfile ?? item.investigationProfile;
+  const verificationProfile = context.verificationProfile ?? item.verificationProfile;
+  const verificationScope = context.verificationScope ?? item.verificationScope;
   const verificationPredicate = context.verificationPredicate ?? item.verificationPredicate;
 
   requireString(repository, 'repository', 256);
   requireString(investigationProfile, 'investigationProfile', 128);
+  requireString(verificationProfile, 'verificationProfile', 128);
+  if (!VERIFICATION_SCOPES.includes(verificationScope)) {
+    throw new Error(`unsupported verificationScope: ${verificationScope}`);
+  }
   requireString(verificationPredicate, 'verificationPredicate', 1024);
 
-  return { repository, investigationProfile, verificationPredicate };
+  return {
+    repository,
+    investigationProfile,
+    verificationProfile,
+    verificationScope,
+    verificationPredicate,
+  };
 }
 
 function validateLease(lease, now) {
@@ -285,19 +307,24 @@ export function releaseLease(item, leaseId) {
   };
 }
 
-function requireProductionVerification(item, verification) {
+function requireResolutionVerification(item, verification) {
   if (!verification || typeof verification !== 'object' || Array.isArray(verification)) {
-    throw new Error('fresh production verification is required for resolution');
+    throw new Error('fresh resolution verification is required');
   }
-  if (verification.environment !== 'production') throw new Error('resolution verification must be production evidence');
   if (verification.result !== 'pass') throw new Error('resolution verification must pass');
-  requireString(verification.predicate, 'productionVerification.predicate', 1024);
-  canonicalDigest(verification.evidenceDigest, 'productionVerification.evidenceDigest');
-  const observedAt = parseInstant(verification.observedAt, 'productionVerification.observedAt');
+  if (verification.scope !== item.verificationScope) {
+    throw new Error('resolution verification scope does not match the work item');
+  }
+  if (verification.profile !== item.verificationProfile) {
+    throw new Error('resolution verification profile does not match the work item');
+  }
+  requireString(verification.predicate, 'resolutionVerification.predicate', 1024);
+  canonicalDigest(verification.evidenceDigest, 'resolutionVerification.evidenceDigest');
+  const observedAt = parseInstant(verification.observedAt, 'resolutionVerification.observedAt');
   if (observedAt < parseInstant(item.lastSeen, 'lastSeen')) {
     throw new Error('resolution verification must be at least as fresh as the last failing observation');
   }
-  if (item.verificationPredicate && verification.predicate !== item.verificationPredicate) {
+  if (verification.predicate !== item.verificationPredicate) {
     throw new Error('resolution verification predicate does not match the work item');
   }
   return verification;
@@ -409,7 +436,7 @@ export function transitionWorkItem(item, toState, context = {}) {
   }
 
   if (toState === 'RESOLVED') {
-    const verification = requireProductionVerification(item, context.productionVerification);
+    const verification = requireResolutionVerification(item, context.resolutionVerification);
     next.resolutionEvidenceDigest = verification.evidenceDigest;
     next.resolvedAt = verification.observedAt;
     next.activeLease = null;
