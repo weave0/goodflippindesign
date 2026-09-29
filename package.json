@@ -82,7 +82,7 @@
     "traffic:build": "npm --prefix traffic-intelligence run build",
     "traffic:lint": "npm --prefix traffic-intelligence run lint",
     "estate:validate": "node scripts/validate-estate-registry.mjs",
-    "test:workers:mission-control": "vitest run --config vitest.workers.config.mjs --no-file-parallelism tests/workers/mission-control-api.test.js tests/workers/mission-control-result-bridge.test.js tests/workers/fwomps-investigation-adapter.test.js tests/workers/fwomps-wire-conformance.test.js tests/workers/health-sweep.test.js && node tests/mission-control-surface.test.js"
+    "test:workers:mission-control": "vitest run --config vitest.workers.config.mjs --no-file-parallelism tests/workers/mission-control-api.test.js tests/workers/mission-control-result-bridge.test.js tests/workers/mission-control-writer-races.test.js tests/workers/fwomps-investigation-adapter.test.js tests/workers/fwomps-wire-conformance.test.js tests/workers/health-sweep.test.js && node tests/mission-control-surface.test.js"
   },
   "repository": {
     "type": "git",

@@ -18,6 +18,7 @@ import {
 import { resolveEstateBinding } from './estate-bindings.js';
 import {
   WorkItemError,
+  abandonExpiredInvestigation,
   acceptInvestigationResult,
   associateLease,
   createD1WorkItemStore,
@@ -329,7 +330,7 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-async function mutate(store, id, producer) {
+async function mutate(store, id, producer, { onVersionConflict = null } = {}) {
   const current = await store.get(id);
   if (!current) throw new WorkItemError('not_found', 'Work item was not found', 404);
   const at = nowIso();
@@ -345,7 +346,18 @@ async function mutate(store, id, producer) {
   };
   delete next.pendingEvent;
   // Durable compare-and-swap: a stale or reordered request changes nothing.
-  return store.save(next, event, { expectedVersion: current.lifecycleVersion });
+  try {
+    return await store.save(next, event, { expectedVersion: current.lifecycleVersion });
+  } catch (error) {
+    // Only a caller that can prove idempotence may reconcile a lost swap. Lease creation and every
+    // other state-changing action never retry (a retry could mint a second lease token).
+    if (error?.code === 'version_conflict' && onVersionConflict) {
+      const fresh = await store.get(id);
+      const resolved = await onVersionConflict(fresh, error);
+      if (resolved) return resolved;
+    }
+    throw error;
+  }
 }
 
 export async function handleMissionControlRequest(request, env, user, fetchImpl = fetch) {
@@ -395,6 +407,21 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       const store = await workItemStore(env);
       const body = await readJson(request);
       const dispatch = {};
+      const conflictHooks = {};
+      if (action === 'result') {
+        // A concurrent identical delivery loses the swap to its twin. Reload: if the item is now
+        // DIAGNOSED with exactly this authenticated result digest, it is the same delivery.
+        conflictHooks.onVersionConflict = async (fresh) => {
+          if (fresh?.state === 'DIAGNOSED' && dispatch.resultDigest
+            && fresh.diagnosis?.resultDigest === dispatch.resultDigest) {
+            return fresh;
+          }
+          if (fresh?.state === 'DIAGNOSED') {
+            throw new WorkItemError('result_conflict', 'A different result is already recorded for this investigation', 409);
+          }
+          return null;
+        };
+      }
       const saved = await mutate(store, id, async (current, at) => {
         if (action === 'transition') {
           if (body.to === 'QUALIFIED') {
@@ -484,6 +511,7 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
         }
         if (action === 'result') {
           const result = await readInvestigationResult(body, resolveResultKey(env, body?.authentication?.key_id));
+          dispatch.resultDigest = result.resultDigest;
           const next = acceptInvestigationResult(current, result, at);
           if (next.skipEvent) return next;
           next.pendingEvent = {
@@ -502,8 +530,32 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
           };
           return next;
         }
+        if (action === 'expire') {
+          const investigation = current.investigation;
+          const lease = current.activeLease;
+          const next = abandonExpiredInvestigation(current, at);
+          next.pendingEvent = {
+            at,
+            from: current.state,
+            to: next.state,
+            reason: 'lease expired; the single attempt is abandoned and a fresh signed contract is required',
+            actor: user.id,
+            detail: {
+              abandonment: {
+                reason: 'lease_expired',
+                requestId: investigation?.requestId ?? null,
+                leaseTokenDigest: lease.leaseId,
+                workerId: lease.workerId,
+                attempt: lease.attempt ?? null,
+                leaseExpiredAt: lease.expiresAt,
+                abandonedAt: at,
+              },
+            },
+          };
+          return next;
+        }
         throw new WorkItemError('not_found', 'Unknown work-item action', 404);
-      });
+      }, conflictHooks);
       return jsonResponse({
         workItem: saved,
         ...(dispatch.contract ? { contract: dispatch.contract } : {}),

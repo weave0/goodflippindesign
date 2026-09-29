@@ -271,15 +271,27 @@ semantics. Concretely:
 - GFD issues at most one lease per request (`attempt_exhausted`, HTTP 409, even after the first lease expires);
   a retry requires a fresh signed contract with a new request id.
 - A result that arrives after its lease expired is refused (`lease_expired`); FWOMPS never uploads one either.
+- **Expiry is recovered explicitly, never silently.** An operator calls `POST .../expire`. It succeeds only when the
+  active lease has provably expired (`lease_not_expired` otherwise) on an `INVESTIGATING` item; it releases exactly
+  that lease durably (`released_at` / `release_reason = lease_expired`), journals an `abandonment` event (request id,
+  lease digest, worker, expiry), and returns the item to `QUALIFIED` -- the state from which a *fresh* signed contract
+  can be issued. It never reuses the old contract or request and never creates an attempt 2. Attempts are counted per
+  signed contract, so the fresh contract's first lease is attempt 1; the expired contract's result stays refused.
 - The raw lease token is 32 random bytes returned once to the authorized worker transport as `leaseTokenHex`.
   Only its SHA-256 digest is signed into the grant and stored. A lost response cannot be replayed into a second
   token; the lease simply runs out.
 - The worker id, attempt, and token are chosen by GFD; a lease request that supplies any of them is refused.
 - Redelivering a byte-equivalent result is idempotent (same result digest, one diagnosis event). A different
   signed result for the same attempt identity is refused (`result_conflict`).
-- Every Mission Control mutation is a durable compare-and-swap on `lifecycle_version`: of two racing writers
-  exactly one commits and the other gets `version_conflict`, and the event and lease rows are written only if
-  the swap applied. Retries are normal; this does not claim exactly-once delivery.
+- **Every** write to an existing work item is a durable compare-and-swap on `lifecycle_version`, for the health
+  writer as well as the API. Items read from the store carry the version they were loaded at (surviving object
+  spread through any lifecycle function); an item that was never loaded can only insert. Of two racing writers
+  exactly one commits and the other gets `version_conflict`; the event, lease-release and lease rows are written
+  only if the swap applied. The health writer, whose observation is idempotent evidence, deliberately reloads and
+  re-applies (bounded, then surfaces the conflict); lease creation and other state-changing actions never retry,
+  because a retry could mint a second lease token. On a lost *result* swap only, GFD reloads: if the item is now
+  `DIAGNOSED` with exactly the incoming authenticated result digest it is the same delivery and succeeds; a
+  different digest is `result_conflict`. Retries are normal; this does not claim exactly-once delivery.
 - The result is evidence only. `repairability` must be `not_indicated` with an empty `advisory_repair_scope`;
   anything else is refused and no repair, mutation, PR, or deployment authority is ever derived from it.
 
