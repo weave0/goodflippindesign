@@ -221,7 +221,8 @@
             "cloudflareSweep": true,
             "githubWorkflow": true,
             "localScript": true,
-            "cloudflareSweepUrl": "https://gfd-stripe.weave0.workers.dev/health"
+            "cloudflareSweepUrl": "https://gfd-stripe.internal/health",
+            "cloudflareServiceBinding": "STRIPE_WORKER"
         }
     ]
 }
