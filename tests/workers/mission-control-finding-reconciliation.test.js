@@ -234,6 +234,55 @@ describe('hostile reconciliation inputs', () => {
     })).rejects.toThrow(/same-time active finding/);
   });
 
+  it('binds deterministic event ids to lifecycle state as well as observation evidence', async () => {
+    const observed = await createObservedWorkItem(finding());
+    const qualified = transitionWorkItem(observed, 'QUALIFIED', {
+      repository: 'weave0/goodflippindesign',
+      investigationProfile: 'estate-authority-readonly-v1',
+      verificationProfile: 'estate-registry-authority-v1',
+      verificationScope: 'control-plane',
+      verificationPredicate: 'canonical estate registry contains verified repository authority',
+    });
+    const laterFinding = finding({
+      observedAt: '2026-09-29T12:00:00.000Z',
+      evidenceDigest: D2,
+    });
+    const laterSnapshot = snapshot([laterFinding], { generatedAt: laterFinding.observedAt });
+
+    const fromObserved = await reconcileCompleteFindingSnapshot({
+      workItems: [observed],
+      snapshot: laterSnapshot,
+    });
+    const fromQualified = await reconcileCompleteFindingSnapshot({
+      workItems: [qualified],
+      snapshot: laterSnapshot,
+    });
+
+    expect(fromObserved.events[0].fromState).toBe('OBSERVED');
+    expect(fromQualified.events[0].fromState).toBe('QUALIFIED');
+    expect(fromObserved.events[0].eventId).not.toBe(fromQualified.events[0].eventId);
+  });
+
+  it('rejects lifecycle states whose required projection invariants are missing', async () => {
+    const observed = await createObservedWorkItem(finding());
+    await expect(reconcileCompleteFindingSnapshot({
+      workItems: [{ ...observed, state: 'QUALIFIED' }],
+      snapshot: snapshot([finding()]),
+    })).rejects.toThrow(/repository|investigationProfile|verificationProfile/);
+
+    const qualified = transitionWorkItem(observed, 'QUALIFIED', {
+      repository: 'weave0/goodflippindesign',
+      investigationProfile: 'estate-authority-readonly-v1',
+      verificationProfile: 'estate-registry-authority-v1',
+      verificationScope: 'control-plane',
+      verificationPredicate: 'canonical estate registry contains verified repository authority',
+    });
+    await expect(reconcileCompleteFindingSnapshot({
+      workItems: [{ ...qualified, state: 'INVESTIGATING', activeLease: null }],
+      snapshot: snapshot([finding()]),
+    })).rejects.toThrow(/active lease/);
+  });
+
   it('rejects corrupt or duplicate prior projection state instead of repairing it silently', async () => {
     const item = await createObservedWorkItem(finding());
     await expect(reconcileCompleteFindingSnapshot({
