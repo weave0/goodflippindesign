@@ -69,6 +69,14 @@ describe('machine health contracts', () => {
 });
 
 describe('durable health incident identity', () => {
+
+  it('keeps distinct failure classes separate for the same property', () => {
+    const base = { target };
+    expect(healthFindingKey({ ...base, finding_kind: 'timeout' }))
+      .toBe('health:aiaimate:timeout');
+    expect(healthFindingKey({ ...base, finding_kind: 'machine_contract_mismatch' }))
+      .toBe('health:aiaimate:machine_contract_mismatch');
+  });
   it('round-trips the stable finding key and occurrence state', () => {
     const check = {
       target,
