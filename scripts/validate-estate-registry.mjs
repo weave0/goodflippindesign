@@ -60,8 +60,13 @@ if (!match) {
         if (brand.domain !== property.domain) problems.push(`${property.domain}: brand_id ${property.brand_id} is not supported by brands.json primary domain ${brand.domain}`);
         const operatingRepo = property.operating?.repository ?? null;
         const brandRepo = typeof brand.repo === "string" && brand.repo.trim() ? brand.repo.trim() : null;
-        if (operatingRepo && brandRepo && operatingRepo.toLowerCase() !== brandRepo.toLowerCase()) {
-          problems.push(`${property.domain}: operating repository ${operatingRepo} conflicts with brands.json repo ${brandRepo}`);
+        if (
+          (operatingRepo || brandRepo) &&
+          (operatingRepo || "").toLowerCase() !== (brandRepo || "").toLowerCase()
+        ) {
+          problems.push(
+            `${property.domain}: repository authority drift between estate registry (${operatingRepo ?? "missing"}) and brands.json (${brandRepo ?? "missing"})`
+          );
         }
       }
     }
