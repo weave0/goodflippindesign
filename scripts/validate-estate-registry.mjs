@@ -56,7 +56,52 @@ if (!match) {
     if (property.brand_id != null) {
       const brand = publicBrands[property.brand_id];
       if (!brand) problems.push(`${property.domain}: unknown brand_id ${property.brand_id}`);
-      else if (brand.domain !== property.domain) problems.push(`${property.domain}: brand_id ${property.brand_id} is not supported by brands.json primary domain ${brand.domain}`);
+      else {
+        if (brand.domain !== property.domain) problems.push(`${property.domain}: brand_id ${property.brand_id} is not supported by brands.json primary domain ${brand.domain}`);
+        const operatingRepo = property.operating?.repository ?? null;
+        const brandRepo = typeof brand.repo === "string" && brand.repo.trim() ? brand.repo.trim() : null;
+        if (operatingRepo && brandRepo && operatingRepo.toLowerCase() !== brandRepo.toLowerCase()) {
+          problems.push(`${property.domain}: operating repository ${operatingRepo} conflicts with brands.json repo ${brandRepo}`);
+        }
+      }
+    }
+
+    if (property.operating != null) {
+      if (typeof property.operating !== "object" || Array.isArray(property.operating)) {
+        problems.push(`${property.domain}: operating must be an object when present`);
+      } else {
+        const repo = property.operating.repository;
+        if (repo != null) {
+          if (typeof repo !== "string" || !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo)) {
+            problems.push(`${property.domain}: operating.repository must be owner/repo`);
+          }
+          if (typeof property.operating.default_branch !== "string" || !property.operating.default_branch.trim()) {
+            problems.push(`${property.domain}: operating.default_branch is required when operating.repository is declared`);
+          }
+          if (typeof property.operating.repository_source !== "string" || !property.operating.repository_source.trim()) {
+            problems.push(`${property.domain}: operating.repository_source is required when operating.repository is declared`);
+          }
+        }
+        for (const field of ["investigation_profile", "verification_profile"]) {
+          const value = property.operating[field];
+          if (value != null && (typeof value !== "string" || !value.trim())) {
+            problems.push(`${property.domain}: operating.${field} must be a non-empty string or null`);
+          }
+        }
+        const deploy = property.operating.deploy_identity;
+        if (deploy != null) {
+          if (typeof deploy !== "object" || Array.isArray(deploy)) {
+            problems.push(`${property.domain}: operating.deploy_identity must be an object when present`);
+          } else {
+            if (typeof deploy.provider !== "string" || !deploy.provider.trim()) {
+              problems.push(`${property.domain}: operating.deploy_identity.provider must be a non-empty string`);
+            }
+            if (deploy.project != null && (typeof deploy.project !== "string" || !deploy.project.trim())) {
+              problems.push(`${property.domain}: operating.deploy_identity.project must be a non-empty string or null`);
+            }
+          }
+        }
+      }
     }
   }
 
