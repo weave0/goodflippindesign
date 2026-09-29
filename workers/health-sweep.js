@@ -165,7 +165,8 @@ export async function checkTarget(target) {
       redirect: 'follow',
       signal: controller.signal,
       headers: {
-        'User-Agent': 'GFD-HealthSweep/1.0 (+https://goodflippindesign.com)',
+        'User-Agent': 'Mozilla/5.0 (compatible; GFDHealthCheck/1.0; +https://goodflippindesign.com)',
+        'Accept': 'text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8',
         ...extraHeaders,
       },
     });
