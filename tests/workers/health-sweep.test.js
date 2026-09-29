@@ -6,6 +6,7 @@ import {
   checkTarget,
   healthFindingKey,
   parseHealthIncidentMarker,
+  reportToGitHub,
 } from '../../workers/health-sweep.js';
 
 const target = {
@@ -111,5 +112,89 @@ describe('durable health incident identity', () => {
       occurrences: 4,
       lifecycle: 'detected',
     });
+  });
+});
+
+
+describe('GitHub incident convergence', () => {
+  const degraded = {
+    target,
+    overall_status: 'warn',
+    finding_kind: 'machine_contract_mismatch',
+    status_code: 200,
+    response_time_ms: 180,
+    keyword_found: 0,
+    content_keyword: 'machine:gfd-property-health',
+    content_detail: 'propertyId expected "aiaimate.com", got "wrong.example"',
+    error: null,
+  };
+
+  it('updates the same managed issue on repeat observation instead of creating another', async () => {
+    const existingBody = buildHealthIncidentBody(degraded, {
+      findingKey: 'health:aiaimate:machine_contract_mismatch',
+      firstSeen: '2026-09-28T06:00:00.000Z',
+      lastSeen: '2026-09-28T06:00:00.000Z',
+      occurrences: 3,
+      lifecycle: 'detected',
+    });
+
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify([
+        { number: 338, body: existingBody, title: 'old title' },
+      ]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ number: 338 }), { status: 200 }));
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await reportToGitHub([degraded], '2026-09-29T06:00:00.000Z', { GITHUB_TOKEN: 'test-token' });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const updateCall = fetchMock.mock.calls[1];
+    expect(updateCall[0]).toContain('/issues/338');
+    expect(updateCall[1].method).toBe('PATCH');
+    const patch = JSON.parse(updateCall[1].body);
+    expect(patch.title).toContain('machine_contract_mismatch');
+    const marker = parseHealthIncidentMarker(patch.body);
+    expect(marker.occurrences).toBe(4);
+    expect(marker.firstSeen).toBe('2026-09-28T06:00:00.000Z');
+    expect(marker.lastSeen).toBe('2026-09-29T06:00:00.000Z');
+    expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'POST')).toBe(false);
+  });
+
+  it('closes a managed incident when a fresh probe is healthy', async () => {
+    const existingBody = buildHealthIncidentBody(degraded, {
+      findingKey: 'health:aiaimate:machine_contract_mismatch',
+      firstSeen: '2026-09-28T06:00:00.000Z',
+      lastSeen: '2026-09-28T06:00:00.000Z',
+      occurrences: 3,
+      lifecycle: 'detected',
+    });
+    const healthy = {
+      ...degraded,
+      overall_status: 'pass',
+      finding_kind: null,
+      keyword_found: 1,
+      content_detail: null,
+    };
+
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify([
+        { number: 338, body: existingBody, title: 'old title' },
+      ]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ number: 338 }), { status: 200 }));
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await reportToGitHub([healthy], '2026-09-29T06:00:00.000Z', { GITHUB_TOKEN: 'test-token' });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const closeCall = fetchMock.mock.calls[1];
+    expect(closeCall[0]).toContain('/issues/338');
+    expect(closeCall[1].method).toBe('PATCH');
+    const patch = JSON.parse(closeCall[1].body);
+    expect(patch.state).toBe('closed');
+    expect(patch.state_reason).toBe('completed');
+    expect(patch.body).toContain('lifecycle: resolved');
+    expect(patch.body).toContain('resolved-at: 2026-09-29T06:00:00.000Z');
   });
 });
