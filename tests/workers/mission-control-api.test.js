@@ -153,6 +153,14 @@ describe('mission control route authentication', () => {
     expect(workerRead.status).toBe(401);
 
     const fakeId = 'gfdwi_v1_' + 'a'.repeat(64);
+    vi.stubGlobal('fetch', vi.fn(async (url) => {
+      if (String(url).includes('/sessions/')) {
+        return new Response(JSON.stringify({
+          user: { id: 'user_admin', emailAddress: 'ops@example.com', publicMetadata: { role: 'admin' } },
+        }), { status: 200 });
+      }
+      throw new Error(`unexpected fetch ${url}`);
+    }));
     const adminWorkerAction = await call(`/api/mission-control/work-items/${fakeId}/lease`, {
       method: 'POST',
       auth: liveToken('user_admin'),
