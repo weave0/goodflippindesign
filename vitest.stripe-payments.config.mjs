@@ -5,9 +5,12 @@ export default defineConfig({
   plugins: [
     cloudflareTest({
       // Points at the gfd-stripe worker (stripe-payments.js), not gfd-auth.
-      // STRIPE_SECRET_KEY is declared in [vars] as a placeholder so the test env
-      // gets a truthy value; outbound Stripe API calls are intercepted with fetchMock.
+      // The fake Stripe key exists only inside Miniflare; production Wrangler
+      // config never contains a placeholder for the live secret binding.
       wrangler: { configPath: './workers/wrangler-stripe.toml' },
+      miniflare: {
+        bindings: { STRIPE_SECRET_KEY: 'sk_test_placeholder' },
+      },
     }),
   ],
   test: {
