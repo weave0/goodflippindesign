@@ -19,6 +19,7 @@ foreach ($target in $config.targets) {
     if ($target.localScript) {
         $sites[$target.id] = @{
             "url"             = $target.url
+            "probeUrl"        = if ($target.sweepUrl) { $target.sweepUrl } else { $target.url }
             "name"            = $target.name
             "critical"        = [bool]$target.critical
             "cookie"          = $target.cookie
@@ -31,14 +32,18 @@ foreach ($target in $config.targets) {
 function Test-SiteHealth {
     param(
         [string]$Url,
+        [string]$ProbeUrl = '',
         [string]$Name,
         [string]$Cookie,
         [string]$CheckType = 'page',
         [string]$ExpectedKeyword = ''
     )
 
+    if (-not $ProbeUrl) { $ProbeUrl = $Url }
+
     $result = @{
         "url"             = $Url
+        "probeUrl"        = $ProbeUrl
         "name"            = $Name
         "checkType"       = $CheckType
         "timestamp"       = (Get-Date -Format "o")
@@ -57,13 +62,13 @@ function Test-SiteHealth {
         $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
         $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
         if ($Cookie) {
-            $uri = [System.Uri]$Url
+            $uri = [System.Uri]$ProbeUrl
             $parts = $Cookie -split '='
             $cookieObj = New-Object System.Net.Cookie($parts[0], ($parts[1..($parts.Length - 1)] -join '='), '/', $uri.Host)
             $session.Cookies.Add($cookieObj)
         }
         # MaximumRedirection handles 308 Permanent Redirects (Cloudflare Pages clean-URL redirects)
-        $response = Invoke-WebRequest -Uri $Url -Method Get -WebSession $session -UseBasicParsing -TimeoutSec 15 -MaximumRedirection 5 -ErrorAction Stop
+        $response = Invoke-WebRequest -Uri $ProbeUrl -Method Get -WebSession $session -UseBasicParsing -TimeoutSec 15 -MaximumRedirection 5 -ErrorAction Stop
         $stopwatch.Stop()
 
         $result.httpCode = $response.StatusCode
@@ -101,7 +106,7 @@ function Test-SiteHealth {
 
         # Check SSL certificate
         try {
-            $uri = [System.Uri]$Url
+            $uri = [System.Uri]$ProbeUrl
             $tcpClient = New-Object System.Net.Sockets.TcpClient($uri.Host, 443)
             $sslStream = New-Object System.Net.Security.SslStream($tcpClient.GetStream(), $false, { $true })
             $sslStream.AuthenticateAsClient($uri.Host)
@@ -235,13 +240,13 @@ if ($Site -eq "all") {
     Write-Host "Checking all sites..." -ForegroundColor Cyan
     foreach ($key in $sites.Keys) {
         $siteInfo = $sites[$key]
-        $result = Test-SiteHealth -Url $siteInfo.url -Name $siteInfo.name -Cookie $siteInfo.cookie -CheckType $siteInfo.checkType -ExpectedKeyword $siteInfo.expectedKeyword
+        $result = Test-SiteHealth -Url $siteInfo.url -ProbeUrl $siteInfo.probeUrl -Name $siteInfo.name -Cookie $siteInfo.cookie -CheckType $siteInfo.checkType -ExpectedKeyword $siteInfo.expectedKeyword
         $results += $result
     }
 }
 elseif ($sites.Contains($Site)) {
     Write-Host "Checking $($sites[$Site].name)..." -ForegroundColor Cyan
-    $result = Test-SiteHealth -Url $sites[$Site].url -Name $sites[$Site].name -Cookie $sites[$Site].cookie -CheckType $sites[$Site].checkType -ExpectedKeyword $sites[$Site].expectedKeyword
+    $result = Test-SiteHealth -Url $sites[$Site].url -ProbeUrl $sites[$Site].probeUrl -Name $sites[$Site].name -Cookie $sites[$Site].cookie -CheckType $sites[$Site].checkType -ExpectedKeyword $sites[$Site].expectedKeyword
     $results += $result
 }
 else {

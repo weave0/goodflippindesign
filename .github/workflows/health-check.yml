@@ -22,7 +22,7 @@ jobs:
         id: run-health
         shell: bash
         run: |
-          node -e "const fs=require('fs'); const cfg=JSON.parse(fs.readFileSync('config/health-targets.json','utf8')); for (const t of cfg.targets.filter((target) => target.githubWorkflow)) { console.log([t.name, t.url, t.critical ? 'critical' : 'warning', t.cookie || '', t.checkType || 'page', t.expectedKeyword || ''].join('\t')); }" > /tmp/health-targets.tsv
+          node -e "const fs=require('fs'); const cfg=JSON.parse(fs.readFileSync('config/health-targets.json','utf8')); for (const t of cfg.targets.filter((target) => target.githubWorkflow)) { console.log([t.name, t.sweepUrl || t.url, t.critical ? 'critical' : 'warning', t.cookie || '', t.checkType || 'page', t.expectedKeyword || ''].join('\t')); }" > /tmp/health-targets.tsv
 
           failure_count=0
           critical_failure=0
