@@ -32,6 +32,55 @@ afterEach(() => {
 
 describe('machine health contracts', () => {
 
+  it('uses the native Stripe Worker service binding for internal health', async () => {
+    const stripeTarget = {
+      id: 'gfd-stripe-worker',
+      brand: 'gfd',
+      name: 'GFD Stripe Worker',
+      url: 'https://gfd-stripe.weave0.workers.dev/health',
+      cloudflareSweepUrl: 'https://gfd-stripe.internal/health',
+      cloudflareServiceBinding: 'STRIPE_WORKER',
+      expectedKeyword: 'gfd-stripe-payments',
+    };
+    const serviceFetch = vi.fn(async () => new Response(
+      JSON.stringify({ ok: true, service: 'gfd-stripe-payments' }),
+      { status: 200 }
+    ));
+    const publicFetch = vi.fn(() => {
+      throw new Error('public fetch must not be used for a service-bound probe');
+    });
+    vi.stubGlobal('fetch', publicFetch);
+
+    const result = await checkTarget(stripeTarget, {
+      STRIPE_WORKER: { fetch: serviceFetch },
+    });
+
+    expect(serviceFetch).toHaveBeenCalledTimes(1);
+    expect(serviceFetch.mock.calls[0][0]).toBe('https://gfd-stripe.internal/health');
+    expect(publicFetch).not.toHaveBeenCalled();
+    expect(result.status_code).toBe(200);
+    expect(result.keyword_found).toBe(1);
+    expect(result.overall_status).toBe('pass');
+  });
+
+  it('fails closed when a configured Worker service binding is absent', async () => {
+    const stripeTarget = {
+      id: 'gfd-stripe-worker',
+      brand: 'gfd',
+      name: 'GFD Stripe Worker',
+      url: 'https://gfd-stripe.weave0.workers.dev/health',
+      cloudflareSweepUrl: 'https://gfd-stripe.internal/health',
+      cloudflareServiceBinding: 'STRIPE_WORKER',
+      expectedKeyword: 'gfd-stripe-payments',
+    };
+
+    const result = await checkTarget(stripeTarget, {});
+
+    expect(result.overall_status).toBe('fail');
+    expect(result.finding_kind).toBe('network_failure');
+    expect(result.error).toContain('Missing Cloudflare service binding');
+  });
+
   it('prefers the Worker-specific origin vantage without changing the public target identity', async () => {
     const gfdTarget = {
       id: 'goodflippindesign',
