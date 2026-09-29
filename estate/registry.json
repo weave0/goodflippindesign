@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "contract_name": "gfd-estate-registry",
-  "updated_at": "2026-09-22",
+  "updated_at": "2026-09-29",
   "purpose": "Authoritative inventory boundary for GFD operator products. A governed property may be unknown, but it may not be silently absent.",
   "source_notes": [
     "The governed zone inventory is reconciled against CF_EXPECTED_ZONES in .github/workflows/traffic-intelligence-deploy.yml.",
@@ -39,7 +39,18 @@
       "deployment_status": "live",
       "metadata_authority": "brands.json",
       "traffic_accounting": "required",
-      "operator_visibility": "required"
+      "operator_visibility": "required",
+      "operating": {
+        "repository": "weave0/aiaimate",
+        "default_branch": "main",
+        "repository_source": "github-repository-verified-2026-09-29",
+        "investigation_profile": null,
+        "verification_profile": null,
+        "deploy_identity": {
+          "provider": "vercel",
+          "project": "aiaimate"
+        }
+      }
     },
     {
       "id": "artificelligance.com",
@@ -91,7 +102,18 @@
       "deployment_status": "live",
       "metadata_authority": "brands.json",
       "traffic_accounting": "required",
-      "operator_visibility": "required"
+      "operator_visibility": "required",
+      "operating": {
+        "repository": "weave0/CitizenApproved",
+        "default_branch": "main",
+        "repository_source": "github-repository-verified-2026-09-29",
+        "investigation_profile": null,
+        "verification_profile": null,
+        "deploy_identity": {
+          "provider": "cloudflare-pages",
+          "project": "citizenapproved"
+        }
+      }
     },
     {
       "id": "culturesherpa.com",
@@ -117,7 +139,18 @@
       "deployment_status": "live",
       "metadata_authority": "brands.json",
       "traffic_accounting": "required",
-      "operator_visibility": "required"
+      "operator_visibility": "required",
+      "operating": {
+        "repository": "weave0/CultureSherpa",
+        "default_branch": "main",
+        "repository_source": "github-repository-verified-2026-09-29",
+        "investigation_profile": null,
+        "verification_profile": null,
+        "deploy_identity": {
+          "provider": "unknown",
+          "project": null
+        }
+      }
     },
     {
       "id": "cyancanoe.com",
@@ -221,7 +254,18 @@
       "deployment_status": "live",
       "metadata_authority": "brands.json",
       "traffic_accounting": "required",
-      "operator_visibility": "required"
+      "operator_visibility": "required",
+      "operating": {
+        "repository": "weave0/globaldeets",
+        "default_branch": "main",
+        "repository_source": "github-repository-verified-2026-09-29",
+        "investigation_profile": null,
+        "verification_profile": null,
+        "deploy_identity": {
+          "provider": "cloudflare-pages",
+          "project": "globaldeets"
+        }
+      }
     },
     {
       "id": "goodflippindesign.com",
@@ -234,7 +278,18 @@
       "deployment_status": "live",
       "metadata_authority": "brands.json",
       "traffic_accounting": "required",
-      "operator_visibility": "required"
+      "operator_visibility": "required",
+      "operating": {
+        "repository": "weave0/goodflippindesign",
+        "default_branch": "main",
+        "repository_source": "github-repository-verified-2026-09-29",
+        "investigation_profile": null,
+        "verification_profile": null,
+        "deploy_identity": {
+          "provider": "cloudflare-pages",
+          "project": "goodflippindesign"
+        }
+      }
     },
     {
       "id": "goodflippinluck.com",
@@ -247,7 +302,18 @@
       "deployment_status": "not-live",
       "metadata_authority": "brands.json",
       "traffic_accounting": "required",
-      "operator_visibility": "required"
+      "operator_visibility": "required",
+      "operating": {
+        "repository": "weave0/goodflippindesign",
+        "default_branch": "main",
+        "repository_source": "github-repository-verified-2026-09-29",
+        "investigation_profile": null,
+        "verification_profile": null,
+        "deploy_identity": {
+          "provider": "unknown",
+          "project": null
+        }
+      }
     },
     {
       "id": "goodflippinnews.com",
@@ -260,7 +326,18 @@
       "deployment_status": "not-live",
       "metadata_authority": "brands.json",
       "traffic_accounting": "required",
-      "operator_visibility": "required"
+      "operator_visibility": "required",
+      "operating": {
+        "repository": "weave0/goodflippindesign",
+        "default_branch": "main",
+        "repository_source": "github-repository-verified-2026-09-29",
+        "investigation_profile": null,
+        "verification_profile": null,
+        "deploy_identity": {
+          "provider": "unknown",
+          "project": null
+        }
+      }
     },
     {
       "id": "goodflippinvibes.com",
@@ -273,7 +350,18 @@
       "deployment_status": "live",
       "metadata_authority": "brands.json",
       "traffic_accounting": "required",
-      "operator_visibility": "required"
+      "operator_visibility": "required",
+      "operating": {
+        "repository": "weave0/good-flippin-vibes",
+        "default_branch": "main",
+        "repository_source": "github-repository-verified-2026-09-29",
+        "investigation_profile": null,
+        "verification_profile": null,
+        "deploy_identity": {
+          "provider": "unknown",
+          "project": null
+        }
+      }
     },
     {
       "id": "goodflippinyikes.com",
