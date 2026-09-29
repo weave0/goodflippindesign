@@ -22,7 +22,7 @@ jobs:
   deploy:
     name: Deploy gfd-health-sweep
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -96,9 +96,10 @@ jobs:
 
           if (trigger.status === 429) {
             const retryAfter = Number(trigger.headers.get('retry-after') || triggerBody?.retry_after_seconds || 0);
-            if (retryAfter > 90) {
-              throw new Error(`health sweep is rate-limited for too long to verify this deploy: ${retryAfter}s`);
+            if (retryAfter > 300) {
+              throw new Error(`health sweep returned an unexpected rate limit: ${retryAfter}s`);
             }
+            console.log(`waiting_for_health_trigger_rate_limit_seconds=${retryAfter}`);
             await new Promise(resolve => setTimeout(resolve, Math.max(retryAfter, 1) * 1000));
             const retry = await fetch(triggerUrl);
             if (!retry.ok) throw new Error(`health sweep retrigger failed: ${retry.status}`);
