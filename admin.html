@@ -1415,60 +1415,54 @@
                 <section class="view" id="view-mission-control">
                     <div class="section-head">
                         <div>
-                            <p class="mono text-muted" style="font-size:0.72rem;margin:0 0 0.25rem">GFD ADMIN · PRIVATE ESTATE INTELLIGENCE</p>
+                            <p class="mono text-muted" style="font-size:0.72rem;margin:0 0 0.25rem">GFD ADMIN · PRIVATE CONTROL PLANE</p>
                             <h2 class="section-title">Mission Control</h2>
                         </div>
                         <div class="inline-actions">
-                            <a class="btn btn-secondary" href="https://traffic.goodflippindesign.com" target="_blank" rel="noopener">Traffic Intelligence ↗</a>
+                            <button class="btn btn-secondary" id="mc-refresh-btn" type="button">Refresh</button>
+                            <a class="btn btn-ghost" href="https://traffic.goodflippindesign.com" target="_blank" rel="noopener">Traffic Intelligence</a>
                         </div>
                     </div>
-                    <p class="subheading mb-08">The authenticated home for estate-wide health, audience, business outcomes, diagnostics, investor readiness and operator priorities. This surface is intentionally inside the GFD Command Center and is not a public GlobalDeets feature.</p>
+                    <p class="mc-status" id="mc-status-line">Loading the estate work queue…</p>
+                    <div class="mc-headline" id="mc-headline"></div>
+                    <p class="mc-evidence-note" id="mc-evidence-note"></p>
 
-                    <div class="panel-kpis">
-                        <div class="panel-kpi">
-                            <div class="panel-kpi-label">Security boundary</div>
-                            <div class="panel-kpi-value emerald" style="font-size:1rem">Admin gated</div>
+                    <article class="panel mb-08" aria-labelledby="mc-diagnostics-heading">
+                        <div class="section-head">
+                            <h3 class="panel-subtitle" id="mc-diagnostics-heading">Prioritized diagnostics</h3>
                         </div>
-                        <div class="panel-kpi">
-                            <div class="panel-kpi-label">Evidence plane</div>
-                            <div class="panel-kpi-value gold" style="font-size:1rem">Migrating</div>
-                        </div>
-                        <div class="panel-kpi">
-                            <div class="panel-kpi-label">Public exposure</div>
-                            <div class="panel-kpi-value emerald" style="font-size:1rem">Being retired</div>
-                        </div>
-                    </div>
+                        <div id="mc-diagnostics"></div>
+                    </article>
 
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0.85rem;margin-top:0.85rem">
-                        <article class="panel">
-                            <h3 class="panel-subtitle">Executive cockpit</h3>
-                            <p class="text-muted">Portfolio health, meaningful business signals, investor blockers, wins, unknowns and trend context will render here from governed evidence.</p>
-                        </article>
-                        <article class="panel">
-                            <h3 class="panel-subtitle">Operator queue</h3>
-                            <p class="text-muted">Prioritized diagnostics, severity, impact, owner lane, evidence age, next action and escalation will live behind this admin boundary.</p>
-                        </article>
-                        <article class="panel">
-                            <h3 class="panel-subtitle">Evidence &amp; telemetry</h3>
-                            <p class="text-muted">Audience, instrumentation, business events, probes and historical snapshots remain source-governed; the browser will receive them only through authenticated GFD backend routes.</p>
-                        </article>
+                    <div class="mc-board">
+                        <section class="mc-lane" aria-labelledby="mc-needs-heading">
+                            <h3 id="mc-needs-heading">Needs you</h3>
+                            <div id="mc-needs-you"></div>
+                        </section>
+                        <section class="mc-lane" aria-labelledby="mc-active-heading">
+                            <h3 id="mc-active-heading">In investigation</h3>
+                            <div id="mc-investigating"></div>
+                        </section>
+                        <section class="mc-lane" aria-labelledby="mc-diagnosed-heading">
+                            <h3 id="mc-diagnosed-heading">FWOMPS diagnosis</h3>
+                            <div id="mc-diagnosed"></div>
+                        </section>
+                        <section class="mc-lane" aria-labelledby="mc-open-heading">
+                            <h3 id="mc-open-heading">Still open</h3>
+                            <div id="mc-open"></div>
+                        </section>
+                        <section class="mc-lane" aria-labelledby="mc-resolved-heading">
+                            <h3 id="mc-resolved-heading">Disappeared in production</h3>
+                            <div id="mc-resolved"></div>
+                        </section>
                     </div>
 
                     <article class="panel mt-085">
                         <div class="section-head">
-                            <h3 class="panel-subtitle">Migration status</h3>
+                            <h3 class="panel-subtitle">Estate right now</h3>
+                            <span class="text-muted" id="mc-generated-at"></span>
                         </div>
-                        <div class="table-wrap">
-                            <table>
-                                <thead><tr><th>Lane</th><th>State</th><th>Target</th></tr></thead>
-                                <tbody>
-                                    <tr><td>Human-facing Mission Control</td><td><span class="pill">Moved here</span></td><td>GFD Command Center</td></tr>
-                                    <tr><td>GlobalDeets public presentation</td><td><span class="pill">Retiring</span></td><td>Not deployed publicly</td></tr>
-                                    <tr><td>Governed evidence transport</td><td><span class="pill">Next</span></td><td>Authenticated GFD API</td></tr>
-                                    <tr><td>Executive + operator rendering</td><td><span class="pill">Next</span></td><td>Native Mission Control panel</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <div class="mc-estate" id="mc-estate"></div>
                     </article>
                 </section>
 
@@ -4221,6 +4215,7 @@
             </div>
 
             <script src="admin-panels.js"></script>
+            <script src="mission-control-admin.js"></script>
 </body>
 
 </html>
