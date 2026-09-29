@@ -61,3 +61,13 @@ jobs:
             node scripts/estate-readiness-findings.mjs --summary
             echo '~~~'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Retain Mission Control readiness evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: mission-control-readiness-${{ github.run_id }}
+          path: |
+            estate-operating-readiness.json
+            estate-readiness-findings.json
+          if-no-files-found: error
+          retention-days: 30
