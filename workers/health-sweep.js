@@ -158,7 +158,7 @@ export async function checkTarget(target) {
   try {
     const extraHeaders = target.cookie ? { Cookie: target.cookie } : {};
 
-    const fetchUrl = target.sweepUrl || target.url;
+    const fetchUrl = target.cloudflareSweepUrl || target.sweepUrl || target.url;
 
     const resp = await fetch(fetchUrl, {
       method: 'GET',
