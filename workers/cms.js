@@ -272,7 +272,7 @@ async function handleAssetAnalytics(env) {
 async function handleAutomationCenter(env) {
   const db = env.DB;
 
-  const [queueRes, sweepRunsRes, retryRes, failedBrandRes] = await Promise.all([
+  const [queueRes, sweepRunsRes, retryRes, ambiguousRes, failedBrandRes] = await Promise.all([
     // Queue snapshot: counts by status
     db.prepare(`
       SELECT status, COUNT(*) AS count
@@ -303,6 +303,18 @@ async function handleAutomationCenter(env) {
       WHERE v.status = 'failed' AND v.retry_count < 3
       ORDER BY v.updated_at DESC
       LIMIT 10
+    `).all(),
+
+    // Ambiguous variants require manual reconciliation, never ordinary retry
+    db.prepare(`
+      SELECT v.id, v.post_id, v.platform, v.status, v.retry_count, v.error_message,
+             v.external_id, v.external_url, v.scheduled_at,
+             sp.brand, sp.content
+      FROM cms_post_variants v
+      JOIN cms_social_posts sp ON sp.id = v.post_id
+      WHERE v.status = 'ambiguous'
+      ORDER BY v.updated_at DESC
+      LIMIT 25
     `).all(),
 
     // Failed variants grouped by brand — surface alert if any brand has 5+
@@ -337,6 +349,12 @@ async function handleAutomationCenter(env) {
     last_sweep:          lastSweep,
     minutes_since_sweep: minutesSinceLastSweep,
     retry_candidates:    retryRes.results  || [],
+    ambiguous_variants:  (ambiguousRes.results || []).map(row => ({
+      ...row,
+      effect_state: 'ambiguous',
+      last_error: row.error_message || '',
+      manual_reconciliation_required: true,
+    })),
     failed_by_brand:     failedBrandRes.results || [],
   });
 }
@@ -1232,7 +1250,9 @@ async function handleListSocialVariants(request, env) {
     SELECT
       v.id, v.post_id, v.platform, v.content, v.media_asset_id, v.format,
       v.char_count, v.hashtags, v.scheduled_at, v.status,
-      v.external_url, v.error_message, v.published_at,
+      v.retry_count, v.external_id, v.external_url,
+      v.error_message, v.error_message as last_error, v.published_at,
+      CASE WHEN v.status = 'ambiguous' THEN 1 ELSE 0 END as manual_reconciliation_required,
       sp.brand, sp.campaign_id,
       c.name as campaign_name,
       a.title as asset_title, a.thumbnail_path, a.file_path
@@ -1252,13 +1272,18 @@ async function handleListSocialVariants(request, env) {
   bindings.push(limit);
 
   const { results } = await env.DB.prepare(query).bind(...bindings).all();
-  return jsonResponse(results || []);
+  return jsonResponse((results || []).map(row => ({
+    ...row,
+    effect_state: row.status,
+    manual_reconciliation_required: row.status === 'ambiguous',
+  })));
 }
 
 /**
  * PUT /api/cms/variants/:id/retry — Reset a failed variant back to pending for re-delivery
  * Increments retry_count, clears error_message, sets status = 'pending'.
  * Fails if variant is not in 'failed' status or retry_count >= 3.
+ * Ambiguous variants require operator reconciliation and cannot be retried here.
  */
 async function handleRetryVariant(user, env, variantId) {
   if (!env.DB) return errorResponse('DB not configured', 503);
@@ -1266,6 +1291,7 @@ async function handleRetryVariant(user, env, variantId) {
     .prepare('SELECT v.id, v.status, v.retry_count, sp.brand FROM cms_post_variants v JOIN cms_social_posts sp ON sp.id = v.post_id WHERE v.id = ?')
     .bind(variantId).first();
   if (!variant) return errorResponse('Variant not found', 404);
+  if (variant.status === 'ambiguous') return errorResponse('Ambiguous variants require manual reconciliation before retry', 409);
   if (variant.status !== 'failed') return errorResponse('Only failed variants can be retried', 409);
   if ((variant.retry_count || 0) >= 3) return errorResponse('Max retry attempts reached', 409);
 
