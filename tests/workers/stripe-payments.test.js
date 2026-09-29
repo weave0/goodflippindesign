@@ -13,9 +13,9 @@
  * intercepts the worker's outbound calls while leaving SELF.fetch() (miniflare
  * internal dispatcher) untouched.
  *
- * STRIPE_SECRET_KEY is set to "sk_test_placeholder" in workers/wrangler-stripe.toml
- * [vars] so the test env sees a truthy value.  To test the 503 "unconfigured"
- * guard, set STRIPE_SECRET_KEY = "" in that file and re-run.
+ * STRIPE_SECRET_KEY is injected only by vitest.stripe-payments.config.mjs via
+ * a Miniflare test binding. Production Wrangler config never contains a fake
+ * Stripe secret.
  *
  * Run: npm run test:workers:payments
  */
