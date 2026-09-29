@@ -20,6 +20,7 @@ import {
   deriveWorkItemId,
   releaseLease,
   transitionWorkItem,
+  validateWorkItemProjection,
 } from './lib/mission-control-work-items.js';
 
 const REPAIR_STATES = new Set([
@@ -440,6 +441,26 @@ const UPSERT = `
     updated_at = excluded.updated_at
 `;
 
+const VERSIONED_UPSERT = `${UPSERT.trimEnd()}
+    WHERE mc_work_items.lifecycle_version = ?
+`;
+
+const RECONCILIATION_EVENT_INSERT = `
+  INSERT OR IGNORE INTO mc_work_item_events (
+    event_id, work_item_id, event_type, from_state, to_state, occurred_at,
+    actor_type, actor_id, evidence_digest, detail_json
+  )
+  SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+  WHERE EXISTS (
+    SELECT 1
+    FROM mc_work_items
+    WHERE work_item_id = ?
+      AND lifecycle_version = ?
+      AND lifecycle_state = ?
+      AND evidence_digest = ?
+  )
+`;
+
 function columnValues(columns) {
   return [
     columns.work_item_id, columns.schema_version, columns.stable_key, columns.producer, columns.property_id, columns.finding_key,
@@ -454,6 +475,68 @@ function columnValues(columns) {
     columns.resolution_evidence_digest, columns.resolved_at,
     columns.lifecycle_version, columns.created_at, columns.updated_at,
   ];
+}
+
+function projectionMatchesPersisted(current, intended) {
+  if (!current) return false;
+  const scalarFields = [
+    'schemaVersion', 'workItemId', 'stableKey', 'producer', 'propertyId', 'findingKey',
+    'repository', 'investigationProfile', 'verificationProfile', 'verificationScope',
+    'verificationPredicate', 'firstSeen', 'lastSeen', 'occurrenceCount', 'recurrenceCount',
+    'severity', 'confidence', 'evidenceRevision', 'evidenceDigest', 'state', 'resumeState',
+    'repairAuthorityRef', 'candidateDigest', 'verificationEvidenceDigest',
+    'publishedEffectRef', 'deployedEffectRef', 'resolutionEvidenceDigest', 'resolvedAt',
+    'lifecycleVersion',
+  ];
+  if (!scalarFields.every((field) => (current[field] ?? null) === (intended[field] ?? null))) return false;
+
+  const currentLease = current.activeLease || null;
+  const intendedLease = intended.activeLease || null;
+  if (Boolean(currentLease) !== Boolean(intendedLease)) return false;
+  if (currentLease && (
+    currentLease.leaseId !== intendedLease.leaseId
+    || currentLease.workerId !== intendedLease.workerId
+    || currentLease.expiresAt !== intendedLease.expiresAt
+  )) return false;
+
+  const currentDiagnosis = current.diagnosis || null;
+  const intendedDiagnosis = intended.diagnosis || null;
+  if (Boolean(currentDiagnosis) !== Boolean(intendedDiagnosis)) return false;
+  if (currentDiagnosis && (
+    currentDiagnosis.resultDigest !== intendedDiagnosis.resultDigest
+    || currentDiagnosis.signatureRef !== intendedDiagnosis.signatureRef
+  )) return false;
+
+  return true;
+}
+
+function reconciliationEventStatement(db, item, event) {
+  if (!event?.eventId || event.workItemId !== item.workItemId) {
+    throw new WorkItemError('malformed_reconciliation_event', 'Reconciliation event identity does not match its work item', 400);
+  }
+  const detail = event.detail && typeof event.detail === 'object' ? event.detail : {};
+  return db.prepare(RECONCILIATION_EVENT_INSERT).bind(
+    event.eventId,
+    event.workItemId,
+    event.eventType,
+    event.fromState ?? null,
+    event.toState ?? null,
+    event.occurredAt,
+    'reconciler',
+    event.producer || item.producer,
+    event.evidenceDigest || null,
+    JSON.stringify(detail),
+    item.workItemId,
+    item.lifecycleVersion,
+    item.state,
+    item.evidenceDigest,
+  );
+}
+
+async function eventExists(db, eventId) {
+  return Boolean(await db.prepare(
+    'SELECT event_id FROM mc_work_item_events WHERE event_id = ?',
+  ).bind(eventId).first());
 }
 
 async function loadEvents(db, workItemId = null) {
@@ -529,6 +612,71 @@ export function createD1WorkItemStore(db) {
       }
       await db.batch(statements);
       return this.get(item.workItemId);
+    },
+
+    async persistReconciliationProjection(item, event, { expectedLifecycleVersion } = {}) {
+      validateWorkItemProjection(item);
+      if (!Number.isInteger(expectedLifecycleVersion) || expectedLifecycleVersion < 0) {
+        throw new WorkItemError('malformed_expected_version', 'expectedLifecycleVersion must be a non-negative integer', 400);
+      }
+      if (item.lifecycleVersion !== expectedLifecycleVersion + 1) {
+        throw new WorkItemError(
+          'version_mismatch',
+          'Reconciliation projection must advance lifecycleVersion by exactly one',
+          409,
+        );
+      }
+
+      const at = event?.occurredAt || item.lastSeen;
+      const columns = itemToColumns(item, at);
+      const rowStatement = db.prepare(VERSIONED_UPSERT).bind(
+        ...columnValues(columns),
+        expectedLifecycleVersion,
+      );
+      const eventStatement = reconciliationEventStatement(db, item, event);
+      const results = await db.batch([rowStatement, eventStatement]);
+      const rowChanges = Number(results?.[0]?.meta?.changes || 0);
+      const eventChanges = Number(results?.[1]?.meta?.changes || 0);
+      const current = await this.get(item.workItemId);
+
+      if (rowChanges === 0 && !projectionMatchesPersisted(current, item)) {
+        throw new WorkItemError(
+          'version_conflict',
+          `Work item ${item.workItemId} changed after reconciliation was planned`,
+          409,
+        );
+      }
+      if (eventChanges === 0 && !(await eventExists(db, event.eventId))) {
+        throw new WorkItemError(
+          'version_conflict',
+          `Event ${event.eventId} no longer matches the durable work-item projection`,
+          409,
+        );
+      }
+
+      return {
+        workItem: current,
+        applied: rowChanges > 0,
+        replayed: rowChanges === 0,
+        eventApplied: eventChanges > 0,
+      };
+    },
+
+    async appendReconciliationEvent(item, event) {
+      validateWorkItemProjection(item);
+      const results = await db.batch([reconciliationEventStatement(db, item, event)]);
+      const eventChanges = Number(results?.[0]?.meta?.changes || 0);
+      if (eventChanges === 0 && !(await eventExists(db, event.eventId))) {
+        throw new WorkItemError(
+          'version_conflict',
+          `Event ${event.eventId} no longer matches the durable work-item projection`,
+          409,
+        );
+      }
+      return {
+        applied: eventChanges > 0,
+        replayed: eventChanges === 0,
+      };
     },
   };
 }
