@@ -1,0 +1,77 @@
+name: Deploy Health Sweep Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "workers/health-sweep.js"
+      - "workers/wrangler-health-sweep.toml"
+      - "config/health-targets.json"
+      - ".github/workflows/deploy-health-sweep-worker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-health-sweep-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy gfd-health-sweep
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install
+        run: npm ci --no-audit --ignore-scripts
+
+      - name: Validate health worker tests
+        run: npx vitest run --config vitest.workers.config.mjs tests/workers/health-sweep.test.js
+
+      - name: Require Cloudflare deploy token
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN is not configured for this repository."
+            exit 1
+          fi
+
+      - name: Deploy health sweep Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 3253d907ea85a18eb442283d7308b193
+          command: deploy --config workers/wrangler-health-sweep.toml
+
+      - name: Verify deployed Worker metadata
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node - <<'NODE'
+          const token = process.env.CLOUDFLARE_API_TOKEN;
+          const account = '3253d907ea85a18eb442283d7308b193';
+          const url = `https://api.cloudflare.com/client/v4/accounts/${account}/workers/scripts/gfd-health-sweep/settings`;
+          const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+          if (!res.ok) throw new Error(`Cloudflare settings lookup failed: ${res.status}`);
+          const body = await res.json();
+          if (!body.success) throw new Error(`Cloudflare settings lookup failed: ${JSON.stringify(body.errors)}`);
+          const bindings = new Map((body.result?.bindings || []).map(b => [b.name, b.type]));
+          if (bindings.get('DB') !== 'd1') throw new Error('DB D1 binding missing after deploy');
+          if (bindings.get('GITHUB_TOKEN') !== 'secret_text') throw new Error('GITHUB_TOKEN secret binding missing after deploy');
+          console.log('health_worker_bindings_verified=true');
+          console.log('compatibility_date=' + body.result?.compatibility_date);
+          NODE
