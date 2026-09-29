@@ -73,7 +73,7 @@
     "analytics:open": "node scripts/cf-analytics.js && start analytics/dashboard.html",
     "test:workers": "vitest run --config vitest.workers.config.mjs",
     "test:workers:mission-control-events": "vitest run --config vitest.workers.config.mjs tests/workers/mission-control-events.test.js tests/workers/contact-business-events.test.js",
-    "test:workers:mission-control-core": "vitest run --config vitest.workers.config.mjs tests/workers/mission-control-work-items.test.js tests/workers/mission-control-finding-reconciliation.test.js",
+    "test:workers:mission-control-core": "vitest run --config vitest.workers.config.mjs tests/workers/mission-control-work-items.test.js tests/workers/mission-control-finding-reconciliation.test.js tests/workers/mission-control-operations.test.js",
     "test:security": "node tests/security/audit-policy.test.js",
     "test:workers:payments": "vitest run --config vitest.stripe-payments.config.mjs",
     "test:all": "npm test && npm run test:workers && npm run test:workers:payments",
