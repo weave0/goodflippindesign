@@ -109,22 +109,29 @@ jobs:
             const response = await fetch(lastUrl, { headers: { 'cache-control': 'no-cache' } });
             if (!response.ok) throw new Error(`health sweep evidence read failed: ${response.status}`);
             const rows = await response.json();
-            const aia = rows.find(row =>
+            const fresh = rows.filter(row => Date.parse(row.checked_at) >= started - 5000);
+            const aia = fresh.find(row =>
               row.brand === 'aiaimate' &&
-              row.content_keyword === 'machine:gfd-property-health' &&
-              Date.parse(row.checked_at) >= started - 5000
+              row.content_keyword === 'machine:gfd-property-health'
             );
-            if (!aia) continue;
+            const gfd = fresh.find(row =>
+              row.brand === 'gfd' &&
+              row.name === 'Good Flippin Design'
+            );
+            if (!aia || !gfd) continue;
 
             console.log('aiaimate_checked_at=' + aia.checked_at);
             console.log('aiaimate_keyword_found=' + aia.keyword_found);
             console.log('aiaimate_overall_status=' + aia.overall_status);
+            console.log('gfd_checked_at=' + gfd.checked_at);
+            console.log('gfd_status_code=' + gfd.status_code);
+            console.log('gfd_overall_status=' + gfd.overall_status);
 
-            if (Number(aia.keyword_found) !== 1) {
-              throw new Error(`AIAIMate machine health contract did not match: ${JSON.stringify(aia)}`);
+            if (Number(aia.keyword_found) !== 1 || aia.overall_status !== 'pass') {
+              throw new Error(`AIAIMate fresh production health failed: ${JSON.stringify(aia)}`);
             }
-            if (aia.overall_status !== 'pass') {
-              throw new Error(`AIAIMate fresh production health is not pass: ${JSON.stringify(aia)}`);
+            if (Number(gfd.status_code) !== 200 || gfd.overall_status !== 'pass') {
+              throw new Error(`GFD fresh production health failed: ${JSON.stringify(gfd)}`);
             }
 
             console.log('fresh_production_health_verified=true');

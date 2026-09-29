@@ -31,6 +31,24 @@ afterEach(() => {
 });
 
 describe('machine health contracts', () => {
+
+  it('uses the browser-compatible estate probe identity required by Cloudflare Bot Fight Mode', async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
+      contract: 'gfd-property-health',
+      contractVersion: 1,
+      propertyId: 'aiaimate.com',
+      productId: 'aiaimate',
+      status: 'ok',
+    }), { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await checkTarget(target);
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.headers['User-Agent']).toContain('Mozilla/5.0');
+    expect(init.headers['User-Agent']).toContain('GFDHealthCheck/1.0');
+    expect(init.headers.Accept).toContain('text/html');
+  });
   it('passes when the structured contract matches even though homepage branding is irrelevant', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
       contract: 'gfd-property-health',
