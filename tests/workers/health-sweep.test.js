@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { env } from 'cloudflare:test';
 
 import {
   buildHealthIncidentBody,
@@ -8,6 +9,7 @@ import {
   parseHealthIncidentMarker,
   reportToGitHub,
 } from '../../workers/health-sweep.js';
+import { createD1WorkItemStore, ensureWorkItemSchema } from '../../workers/mission-control-work-items.js';
 
 const target = {
   id: 'aiaimate',
@@ -282,5 +284,45 @@ describe('GitHub incident convergence', () => {
     expect(patch.state_reason).toBe('completed');
     expect(patch.body).toContain('lifecycle: resolved');
     expect(patch.body).toContain('resolved-at: 2026-09-29T06:00:00.000Z');
+  });
+
+  it('writes the repeated GitHub observation onto one durable work item', async () => {
+    await ensureWorkItemSchema(env.DB);
+    const findingKey = 'health:aiaimate:machine_contract_mismatch';
+    await env.DB.prepare('DELETE FROM mc_work_item_events WHERE work_item_id IN (SELECT work_item_id FROM mc_work_items WHERE finding_key = ?)').bind(findingKey).run();
+    await env.DB.prepare('DELETE FROM mc_work_item_leases WHERE work_item_id IN (SELECT work_item_id FROM mc_work_items WHERE finding_key = ?)').bind(findingKey).run();
+    await env.DB.prepare('DELETE FROM mc_work_items WHERE finding_key = ?').bind(findingKey).run();
+
+    const created = buildHealthIncidentBody(degraded, {
+      findingKey,
+      firstSeen: '2026-09-28T06:00:00.000Z',
+      lastSeen: '2026-09-28T06:00:00.000Z',
+      occurrences: 1,
+      lifecycle: 'detected',
+    });
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ number: 353 }), { status: 201 })));
+    await reportToGitHub([degraded], '2026-09-28T06:00:00.000Z', { GITHUB_TOKEN: 'test-token', DB: env.DB });
+
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify([
+        { number: 353, body: created, title: 'old' },
+      ]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ number: 353 }), { status: 200 })));
+    await reportToGitHub([degraded], '2026-09-29T07:24:48.137Z', { GITHUB_TOKEN: 'test-token', DB: env.DB });
+
+    const items = (await createD1WorkItemStore(env.DB).list())
+      .filter((item) => item.findingKey === findingKey);
+    expect(items).toHaveLength(1);
+    expect(items[0].state).toBe('OBSERVED');
+    expect(items[0].propertyId).toBe('aiaimate.com');
+    expect(items[0].workItemId.startsWith('gfdwi_v1_')).toBe(true);
+    expect(items[0].occurrenceCount).toBe(2);
+    expect(items[0].firstSeen).toBe('2026-09-28T06:00:00.000Z');
+    expect(items[0].lastSeen).toBe('2026-09-29T07:24:48.137Z');
+    expect(items[0].repository).toBeNull();
+    expect(items[0].availableBinding.repository).toBe('weave0/aiaimate');
+    expect(items[0].qualificationGaps.length).toBeGreaterThan(0);
   });
 });

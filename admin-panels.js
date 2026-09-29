@@ -381,6 +381,7 @@
                         }
                         return data;
                     }
+                    window.__adminApi = api;
 
                     async function initAuth() {
                         try {
@@ -3164,6 +3165,7 @@
                         galleries: { name: 'Gallery Manager', title: 'Gallery Manager', sub: 'Curate and publish image galleries to your ecosystem sites.' },
                         'content-studio': { name: 'Story Studio', title: 'Story & Culture Post Studio', sub: 'Manage CultureSherpa culture-post registries, prompt scenes, and scheduled story assets across brands.' },
                         ecosystem: { name: 'Ecosystem Health', title: 'Ecosystem Health', sub: 'Monitor CI/CD status, uptime, and cross-brand site health across all properties.' },
+                        'mission-control': { name: 'Mission Control', title: 'Mission Control', sub: 'What is wrong, what is stale, what is under investigation, and which conditions disappeared in production.' },
                         'blog-manager': { name: 'Blog Manager', title: 'Blog Manager', sub: 'Create and publish blog posts with live markdown preview and full CMS control.' },
                         storage: { name: 'Storage Intel', title: 'Storage Intelligence', sub: 'Analyze local disk usage, identify hot spots, and track cleanup actions.' },
                         donations: { name: 'Donations', title: 'Donations', sub: 'View Stripe donation transactions and configure webhook delivery to D1.' },

@@ -50,6 +50,7 @@ export default {
       "/sitemap.xml",
       "/ads.txt",
       "/admin-panels.js",
+      "/mission-control-admin.js",
     ]);
 
     const blockedPrefixes = [

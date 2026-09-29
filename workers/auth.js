@@ -11,6 +11,7 @@
  */
 
 import { handleCMSRequest } from './cms.js';
+import { handleMissionControlRequest } from './mission-control-api.js';
 import * as Sentry from '@sentry/cloudflare';
 
 /**
@@ -126,6 +127,68 @@ function getClerkSecretKey(hostname, env) {
  * @param {string} secretKey - Clerk secret key for this app
  * @returns {object} - User object or null
  */
+/**
+ * Verify a Clerk session for a high-sensitivity route.
+ * A failed session verification returns null. This path never fetches
+ * `/users/{sub}` from an unverified token payload.
+ */
+export async function verifyClerkSessionStrict(token, secretKey) {
+  try {
+    const parts = String(token || '').split('.');
+    if (parts.length !== 3 || !secretKey) return null;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+    const sessionId = payload.sid;
+    if (!sessionId || typeof sessionId !== 'string') return null;
+
+    const response = await fetch(`https://api.clerk.com/v1/sessions/${encodeURIComponent(sessionId)}/verify`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${secretKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
+    });
+    if (!response.ok) return null;
+
+    const session = await response.json();
+    const user = session?.user;
+    if (!user?.id) return null;
+    return {
+      id: user.id,
+      emailAddress: user.emailAddress || user.email_addresses?.[0]?.email_address || '',
+      publicMetadata: user.publicMetadata || user.public_metadata || {},
+      createdAt: user.createdAt || user.created_at || null,
+    };
+  } catch (error) {
+    console.error('Strict token verification failed:', error);
+    return null;
+  }
+}
+
+function missionControlDenied(status) {
+  return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    status,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'private, no-store',
+      'X-Robots-Tag': 'noindex, nofollow',
+    },
+  });
+}
+
+function isMissionControlWorkerRoute(request) {
+  if (request.method !== 'POST') return false;
+  const path = new URL(request.url).pathname;
+  return /^\/api\/mission-control\/work-items\/[^/]+\/(lease|result)$/.test(path);
+}
+
+function hasMissionControlWorkerAuth(request, env) {
+  const secret = env.MISSION_CONTROL_WORKER_TOKEN;
+  if (typeof secret !== 'string' || secret.length < 16) return false;
+  return request.headers.get('Authorization') === `Bearer ${secret}`;
+}
+
 async function verifyClerkToken(token, secretKey) {
   try {
     // Decode JWT payload to extract session ID and user ID
@@ -1877,6 +1940,33 @@ export default {
       async () => {
         const url = new URL(request.url);
         const clerkSecretKey = getClerkSecretKey(url.hostname, env);
+
+        // Mission Control is admin-only. It fails closed before the shared
+        // CORS allowlist and before the unverified-sub user lookup.
+        if (url.pathname === '/api/mission-control' || url.pathname.startsWith('/api/mission-control/')) {
+          if (request.method === 'OPTIONS') {
+            return new Response(null, {
+              status: 204,
+              headers: { Allow: 'GET, POST', 'Cache-Control': 'private, no-store' },
+            });
+          }
+
+          // This transport credential can reach only FWOMPS lease/result intake.
+          // It grants no operator, repair, publication, deployment, or lease-grant authority.
+          if (isMissionControlWorkerRoute(request) && hasMissionControlWorkerAuth(request, env)) {
+            return handleMissionControlRequest(request, env, {
+              id: 'fwomps-machine',
+              publicMetadata: { role: 'mission-control-worker' },
+            });
+          }
+
+          const missionAuth = request.headers.get('Authorization');
+          if (!missionAuth?.startsWith('Bearer ')) return missionControlDenied(401);
+          let missionUser = await verifyClerkSessionStrict(missionAuth.slice('Bearer '.length), clerkSecretKey);
+          if (!missionUser) return missionControlDenied(401);
+          missionUser = await ensureAdminRole(missionUser, clerkSecretKey);
+          return handleMissionControlRequest(request, env, missionUser);
+        }
 
         // CORS allowlist — only our own ecosystem origins
         const ALLOWED_ORIGINS = [
