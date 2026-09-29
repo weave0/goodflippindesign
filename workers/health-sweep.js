@@ -97,7 +97,7 @@ async function runSweep(env) {
   const checkedAt = new Date().toISOString();
 
   // Run all checks concurrently — a single slow/dead site won't block others
-  const settled = await Promise.allSettled(TARGETS.map(t => checkTarget(t)));
+  const settled = await Promise.allSettled(TARGETS.map(t => checkTarget(t, env)));
 
   const checks = settled.map((r, i) => {
     if (r.status === 'fulfilled') {
@@ -150,7 +150,7 @@ async function runSweep(env) {
 }
 
 // ── Individual URL check ──────────────────────────────────────────────────────
-export async function checkTarget(target) {
+export async function checkTarget(target, env = {}) {
   const start      = Date.now();
   const controller = new AbortController();
   const timer      = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -160,7 +160,7 @@ export async function checkTarget(target) {
 
     const fetchUrl = target.cloudflareSweepUrl || target.sweepUrl || target.url;
 
-    const resp = await fetch(fetchUrl, {
+    const requestInit = {
       method: 'GET',
       redirect: 'follow',
       signal: controller.signal,
@@ -169,7 +169,18 @@ export async function checkTarget(target) {
         'Accept': 'text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8',
         ...extraHeaders,
       },
-    });
+    };
+
+    let resp;
+    if (target.cloudflareServiceBinding) {
+      const service = env?.[target.cloudflareServiceBinding];
+      if (!service || typeof service.fetch !== 'function') {
+        throw new Error(`Missing Cloudflare service binding: ${target.cloudflareServiceBinding}`);
+      }
+      resp = await service.fetch(fetchUrl, requestInit);
+    } else {
+      resp = await fetch(fetchUrl, requestInit);
+    }
     clearTimeout(timer);
 
     const elapsed = Date.now() - start;
