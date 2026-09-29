@@ -93,7 +93,7 @@ jobs:
         run: |
           npm run test:workers:mission-control-events
           npm run test:workers:mission-control-core
-          npx vitest run --config vitest.workers.config.mjs tests/workers/health-sweep.test.js
+          npm run test:workers:mission-control
           npm run test:workers:payments
 
       - name: Install Traffic Intelligence
