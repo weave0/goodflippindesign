@@ -201,6 +201,99 @@ export async function createObservedWorkItem(observation) {
   };
 }
 
+
+export function validateWorkItemProjection(item, { now = null } = {}) {
+  if (!item || typeof item !== 'object' || Array.isArray(item)) {
+    throw new Error('work item projection must be an object');
+  }
+  if (item.schemaVersion !== WORK_ITEM_SCHEMA_VERSION) {
+    throw new Error(`unsupported work item schemaVersion: ${item.schemaVersion}`);
+  }
+  requireString(item.workItemId, 'workItemId', 96);
+  requireString(item.stableKey, 'stableKey', 1024);
+  const identity = stableIdentity(item);
+  if (item.stableKey !== identity) throw new Error('stableKey does not match work item identity');
+  requireState(item.state);
+  const firstSeen = parseInstant(item.firstSeen, 'firstSeen');
+  const lastSeen = parseInstant(item.lastSeen, 'lastSeen');
+  if (lastSeen < firstSeen) throw new Error('lastSeen cannot precede firstSeen');
+  canonicalDigest(item.evidenceDigest, 'evidenceDigest');
+  if (!Number.isInteger(item.occurrenceCount) || item.occurrenceCount < 1) {
+    throw new Error('occurrenceCount must be a positive integer');
+  }
+  if (!Number.isInteger(item.recurrenceCount) || item.recurrenceCount < 0) {
+    throw new Error('recurrenceCount must be a non-negative integer');
+  }
+  if (!Number.isInteger(item.lifecycleVersion) || item.lifecycleVersion < 1) {
+    throw new Error('lifecycleVersion must be a positive integer');
+  }
+
+  const interruptedState = (item.state === 'BLOCKED' || item.state === 'NEEDS_HUMAN')
+    ? requireState(item.resumeState, 'resume state')
+    : item.state;
+  if (item.state !== 'BLOCKED' && item.state !== 'NEEDS_HUMAN' && item.resumeState != null) {
+    throw new Error('resumeState is only valid for BLOCKED or NEEDS_HUMAN');
+  }
+
+  const qualifiedStates = new Set([
+    'QUALIFIED', 'INVESTIGATION_READY', 'INVESTIGATING', 'DIAGNOSED',
+    'REPAIR_READY', 'REPAIRING', 'CANDIDATE_READY', 'VERIFIED',
+    'CHANGE_PUBLISHED', 'DEPLOYED', 'REVERIFYING', 'RESOLVED', 'RECURRENT',
+  ]);
+  if (qualifiedStates.has(interruptedState)) requireQualifiedBindings(item, {});
+
+  if (item.activeLease != null) {
+    if (!item.activeLease || typeof item.activeLease !== 'object' || Array.isArray(item.activeLease)) {
+      throw new Error('activeLease must be an object');
+    }
+    requireString(item.activeLease.leaseId, 'activeLease.leaseId', 128);
+    requireString(item.activeLease.workerId, 'activeLease.workerId', 128);
+    parseInstant(item.activeLease.expiresAt, 'activeLease.expiresAt');
+  }
+  if (interruptedState === 'INVESTIGATING') {
+    if (!item.activeLease) throw new Error('INVESTIGATING requires an active lease');
+    if (now != null && parseInstant(item.activeLease.expiresAt, 'activeLease.expiresAt') <= parseInstant(now, 'now')) {
+      throw new Error('INVESTIGATING requires an unexpired active lease');
+    }
+  }
+
+  const diagnosisStates = new Set([
+    'DIAGNOSED', 'REPAIR_READY', 'REPAIRING', 'CANDIDATE_READY', 'VERIFIED',
+    'CHANGE_PUBLISHED', 'DEPLOYED', 'REVERIFYING', 'RESOLVED',
+  ]);
+  if (diagnosisStates.has(interruptedState)) {
+    if (!item.diagnosis || typeof item.diagnosis !== 'object' || Array.isArray(item.diagnosis)) {
+      throw new Error(`${interruptedState} requires diagnosis evidence`);
+    }
+    canonicalDigest(item.diagnosis.resultDigest, 'diagnosis.resultDigest');
+    requireString(item.diagnosis.signatureRef, 'diagnosis.signatureRef', 512);
+  }
+
+  const repairStates = new Set(['REPAIR_READY', 'REPAIRING', 'CANDIDATE_READY', 'VERIFIED', 'CHANGE_PUBLISHED', 'DEPLOYED']);
+  if (repairStates.has(interruptedState)) requireString(item.repairAuthorityRef, 'repairAuthorityRef', 512);
+  if (['CANDIDATE_READY', 'VERIFIED', 'CHANGE_PUBLISHED', 'DEPLOYED'].includes(interruptedState)) {
+    canonicalDigest(item.candidateDigest, 'candidateDigest');
+  }
+  if (['VERIFIED', 'CHANGE_PUBLISHED', 'DEPLOYED'].includes(interruptedState)) {
+    canonicalDigest(item.verificationEvidenceDigest, 'verificationEvidenceDigest');
+  }
+  if (['CHANGE_PUBLISHED', 'DEPLOYED'].includes(interruptedState)) {
+    requireString(item.publishedEffectRef, 'publishedEffectRef', 256);
+  }
+  if (interruptedState === 'DEPLOYED') requireString(item.deployedEffectRef, 'deployedEffectRef', 256);
+
+  if (item.state === 'RESOLVED') {
+    const resolvedAt = parseInstant(item.resolvedAt, 'resolvedAt');
+    if (resolvedAt < lastSeen) throw new Error('resolvedAt cannot precede lastSeen');
+    canonicalDigest(item.resolutionEvidenceDigest, 'resolutionEvidenceDigest');
+    if (item.activeLease != null) throw new Error('RESOLVED cannot retain an active lease');
+  } else if (item.resolvedAt != null || item.resolutionEvidenceDigest != null) {
+    throw new Error('non-resolved state cannot retain resolution fields');
+  }
+
+  return item;
+}
+
 export function applyObservation(existing, observation) {
   validateObservation(observation);
   if (!existing) throw new Error('existing work item is required; use createObservedWorkItem for first observation');

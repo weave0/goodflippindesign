@@ -191,6 +191,37 @@ Before retrying an external effect, the caller must first check the durable `mc_
 
 The current row is optimized for operator reads. It must not replace the event/effect history.
 
+## Complete finding-snapshot reconciliation
+
+`workers/lib/mission-control-finding-reconciliation.js` is the pure boundary
+between a complete producer snapshot and the canonical work-item projection.
+
+It accepts:
+
+- the current set of canonical work-item projections;
+- one `gfd-mission-control-finding-feed` document;
+- an explicit producer/property/finding-prefix scope;
+- `snapshotComplete: true`.
+
+It deterministically returns:
+
+- an OBSERVED work item for each new stable finding identity;
+- an updated occurrence for a later observation of an existing identity;
+- RECURRENT state when a finding reappears after resolution;
+- a candidate resolution event when an active scoped finding is absent from a
+  strictly later complete snapshot;
+- stable event and snapshot digests suitable for an idempotent future store.
+
+Exact snapshot replay is a no-op. Stale snapshots, duplicate identities,
+out-of-scope findings, conflicting same-time observations and corrupt prior
+projections fail closed.
+
+Absence does not directly set RESOLVED. It produces only a candidate event.
+The normal verification profile, scope, predicate, freshness and evidence
+requirements still govern the lifecycle transition. The reducer performs no
+D1 writes and grants no investigation, repair, merge, deploy or external-effect
+authority.
+
 ## Relationship to GitHub issues
 
 GitHub issues are useful operator surfaces and may remain mirrors/references.
