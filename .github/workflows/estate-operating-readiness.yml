@@ -8,7 +8,9 @@ on:
       - "brands.json"
       - "config/health-targets.json"
       - "scripts/estate-operating-readiness.mjs"
+      - "scripts/estate-readiness-findings.mjs"
       - "tests/estate-operating-readiness.test.mjs"
+      - "tests/estate-readiness-findings.test.mjs"
       - ".github/workflows/estate-operating-readiness.yml"
   schedule:
     - cron: "23 12 * * *"
@@ -32,7 +34,9 @@ jobs:
           node-version: "24"
 
       - name: Test readiness semantics
-        run: node tests/estate-operating-readiness.test.mjs
+        run: |
+          node tests/estate-operating-readiness.test.mjs
+          node tests/estate-readiness-findings.test.mjs
 
       - name: Measure current estate readiness
         run: |
@@ -45,5 +49,15 @@ jobs:
             echo '~~~'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Emit machine-readable report
-        run: node scripts/estate-operating-readiness.mjs --json > estate-operating-readiness.json
+      - name: Emit machine-readable reports
+        run: |
+          node scripts/estate-operating-readiness.mjs --json > estate-operating-readiness.json
+          node scripts/estate-readiness-findings.mjs > estate-readiness-findings.json
+          {
+            echo
+            echo "## Active Mission Control readiness findings"
+            echo
+            echo '~~~text'
+            node scripts/estate-readiness-findings.mjs --summary
+            echo '~~~'
+          } >> "$GITHUB_STEP_SUMMARY"
