@@ -303,7 +303,7 @@ async function persistChecks(db, checkedAt, checks) {
 }
 
 // ── GitHub Issue reporter ─────────────────────────────────────────────────────
-async function reportToGitHub(checks, checkedAt, env) {
+export async function reportToGitHub(checks, checkedAt, env) {
   const openIssuesResp = await fetch(
     `https://api.github.com/repos/${GH_REPO}/issues?state=open&labels=health-sweep&per_page=100`,
     { headers: ghHeaders(env.GITHUB_TOKEN) }
