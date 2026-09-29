@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import vector from '../fixtures/mc-fw-investigation-result-1.json';
+import vector from '../fixtures/mc-fw001-result-vector.json';
 
 import {
   RESULT_SCHEMA,
