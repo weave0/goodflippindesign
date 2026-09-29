@@ -100,3 +100,45 @@ jobs:
           }
           throw new Error(`Stripe Worker health verification failed: ${JSON.stringify(last)}`);
           NODE
+
+
+      - name: Reverify Stripe through estate health lifecycle
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const triggerUrl = 'https://gfd-health-sweep.weave0.workers.dev/trigger';
+          const lastUrl = 'https://gfd-health-sweep.weave0.workers.dev/last';
+          const started = Date.now();
+
+          let trigger = await fetch(triggerUrl);
+          let triggerBody = null;
+          try { triggerBody = await trigger.json(); } catch {}
+
+          if (trigger.status === 429) {
+            const retryAfter = Number(trigger.headers.get('retry-after') || triggerBody?.retry_after_seconds || 0);
+            if (retryAfter > 300) throw new Error(`unexpected health sweep rate limit: ${retryAfter}s`);
+            await new Promise(resolve => setTimeout(resolve, Math.max(retryAfter, 1) * 1000));
+            trigger = await fetch(triggerUrl);
+          }
+          if (!trigger.ok) throw new Error(`health sweep trigger failed after Stripe deploy: ${trigger.status}`);
+
+          const deadline = Date.now() + 90_000;
+          while (Date.now() < deadline) {
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            const response = await fetch(lastUrl, { headers: { 'cache-control': 'no-cache' } });
+            if (!response.ok) throw new Error(`health evidence read failed: ${response.status}`);
+            const rows = await response.json();
+            const stripe = rows.find(row =>
+              row.name === 'GFD Stripe Worker' &&
+              Date.parse(row.checked_at) >= started - 5000
+            );
+            if (!stripe) continue;
+            if (Number(stripe.status_code) !== 200 || Number(stripe.keyword_found) !== 1 || stripe.overall_status !== 'pass') {
+              throw new Error(`estate health still rejects Stripe Worker: ${JSON.stringify(stripe)}`);
+            }
+            console.log('stripe_estate_health_verified=true');
+            process.exit(0);
+          }
+
+          throw new Error('Timed out waiting for fresh Stripe estate-health evidence');
+          NODE
