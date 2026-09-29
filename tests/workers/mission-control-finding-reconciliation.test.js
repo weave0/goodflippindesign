@@ -52,7 +52,14 @@ async function resolvedItem(overrides = {}) {
     verificationScope: 'control-plane',
     verificationPredicate: 'canonical estate registry contains verified repository authority',
   });
-  item = { ...item, state: 'REVERIFYING' };
+  item = {
+    ...item,
+    state: 'REVERIFYING',
+    diagnosis: {
+      resultDigest: D2,
+      signatureRef: 'fwomps://investigation/result/test',
+    },
+  };
   return transitionWorkItem(item, 'RESOLVED', {
     resolutionVerification: {
       scope: item.verificationScope,
