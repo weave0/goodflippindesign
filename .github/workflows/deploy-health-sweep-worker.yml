@@ -75,3 +75,61 @@ jobs:
           console.log('health_worker_bindings_verified=true');
           console.log('compatibility_date=' + body.result?.compatibility_date);
           NODE
+
+
+      - name: Trigger and verify fresh production sweep
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const triggerUrl = 'https://gfd-health-sweep.weave0.workers.dev/trigger';
+          const lastUrl = 'https://gfd-health-sweep.weave0.workers.dev/last';
+          const started = Date.now();
+
+          const trigger = await fetch(triggerUrl);
+          let triggerBody = null;
+          try { triggerBody = await trigger.json(); } catch {}
+
+          if (!(trigger.ok || trigger.status === 429)) {
+            throw new Error(`health sweep trigger failed: ${trigger.status} ${JSON.stringify(triggerBody)}`);
+          }
+
+          if (trigger.status === 429) {
+            const retryAfter = Number(trigger.headers.get('retry-after') || triggerBody?.retry_after_seconds || 0);
+            if (retryAfter > 90) {
+              throw new Error(`health sweep is rate-limited for too long to verify this deploy: ${retryAfter}s`);
+            }
+            await new Promise(resolve => setTimeout(resolve, Math.max(retryAfter, 1) * 1000));
+            const retry = await fetch(triggerUrl);
+            if (!retry.ok) throw new Error(`health sweep retrigger failed: ${retry.status}`);
+          }
+
+          const deadline = Date.now() + 90_000;
+          while (Date.now() < deadline) {
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            const response = await fetch(lastUrl, { headers: { 'cache-control': 'no-cache' } });
+            if (!response.ok) throw new Error(`health sweep evidence read failed: ${response.status}`);
+            const rows = await response.json();
+            const aia = rows.find(row =>
+              row.brand === 'aiaimate' &&
+              row.content_keyword === 'machine:gfd-property-health' &&
+              Date.parse(row.checked_at) >= started - 5000
+            );
+            if (!aia) continue;
+
+            console.log('aiaimate_checked_at=' + aia.checked_at);
+            console.log('aiaimate_keyword_found=' + aia.keyword_found);
+            console.log('aiaimate_overall_status=' + aia.overall_status);
+
+            if (Number(aia.keyword_found) !== 1) {
+              throw new Error(`AIAIMate machine health contract did not match: ${JSON.stringify(aia)}`);
+            }
+            if (aia.overall_status !== 'pass') {
+              throw new Error(`AIAIMate fresh production health is not pass: ${JSON.stringify(aia)}`);
+            }
+
+            console.log('fresh_production_health_verified=true');
+            process.exit(0);
+          }
+
+          throw new Error('Timed out waiting for fresh post-deploy health evidence in D1');
+          NODE
