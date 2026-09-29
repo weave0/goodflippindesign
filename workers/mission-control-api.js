@@ -7,9 +7,13 @@
  */
 
 import {
+  LEASE_PURPOSE,
   buildSignedInvestigationContract,
+  buildSignedLeaseGrant,
   keyBytesFromEnv,
   readInvestigationResult,
+  resolveResultKey,
+  verifySignedEnvelope,
 } from './fwomps-investigation-adapter.js';
 import { resolveEstateBinding } from './estate-bindings.js';
 import {
@@ -330,6 +334,7 @@ async function mutate(store, id, producer) {
   if (!current) throw new WorkItemError('not_found', 'Work item was not found', 404);
   const at = nowIso();
   const next = await producer(current, at);
+  if (next.skipEvent) return current;
   const event = next.pendingEvent || {
     at,
     from: current.state,
@@ -339,7 +344,8 @@ async function mutate(store, id, producer) {
     detail: {},
   };
   delete next.pendingEvent;
-  return store.save(next, event);
+  // Durable compare-and-swap: a stale or reordered request changes nothing.
+  return store.save(next, event, { expectedVersion: current.lifecycleVersion });
 }
 
 export async function handleMissionControlRequest(request, env, user, fetchImpl = fetch) {
@@ -388,6 +394,7 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       const action = parts[4];
       const store = await workItemStore(env);
       const body = await readJson(request);
+      const dispatch = {};
       const saved = await mutate(store, id, async (current, at) => {
         if (action === 'transition') {
           if (body.to === 'QUALIFIED') {
@@ -418,45 +425,93 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
                 repairAuthority: false,
                 schemaVersion: contract.schemaVersion,
                 expiresAt: contract.payload.contract.expires_at,
+                diagnosticDigest: contract.payload.diagnostic.digest,
+                snapshotDigest: contract.payload.evidence.snapshot_digest,
+                signedContract: contract.payload,
               },
             },
           };
+          dispatch.contract = contract.payload;
           return next;
         }
         if (action === 'lease') {
+          if (Object.keys(body).length > 0) {
+            throw new WorkItemError('malformed_lease', 'The worker does not choose lease identity or authority', 400);
+          }
+          const investigation = current.investigation;
+          if (!investigation?.signedContract || !investigation.expiresAt || !investigation.digest || !investigation.requestId) {
+            throw new WorkItemError('unsigned_contract', 'Investigation contract is not available to lease', 409);
+          }
+          const key = keyBytesFromEnv(env.MISSION_CONTROL_CONTRACT_KEY);
+          const workerId = env.MISSION_CONTROL_RESULT_WORKER_ID;
+          const grant = await buildSignedLeaseGrant({
+            requestId: investigation.requestId,
+            contractDigest: investigation.digest,
+            workerId,
+            attempt: 1,
+            maxAttempts: 1,
+            expiresAt: investigation.expiresAt,
+            key,
+            keyId: env.MISSION_CONTROL_CONTRACT_KEY_ID || '',
+            now: new Date(at),
+          });
+          const verified = await verifySignedEnvelope(grant.payload, key, LEASE_PURPOSE, ['mac']);
+          if (!verified) {
+            throw new WorkItemError('unsigned_contract', 'Lease grant did not verify', 409);
+          }
           const next = associateLease(current, {
-            workerId: body.workerId,
-            attempt: body.attempt,
-            leaseTokenDigest: body.leaseTokenDigest,
-            expiresAt: body.expiresAt,
-            requestId: body.requestId,
+            workerId: grant.workerId,
+            attempt: grant.attempt,
+            leaseTokenDigest: grant.leaseTokenDigest,
+            expiresAt: grant.expiresAt,
+            requestId: investigation.requestId,
           }, at);
           next.pendingEvent = {
             at,
             from: current.state,
             to: next.state,
-            reason: `leased to ${body.workerId}`,
-            actor: body.workerId || user.id,
-            detail: { requestId: body.requestId },
+            reason: `leased to ${grant.workerId}`,
+            actor: grant.workerId,
+            detail: {
+              requestId: investigation.requestId,
+              lease: { attempt: grant.attempt, leaseTokenDigest: grant.leaseTokenDigest },
+            },
           };
+          dispatch.contract = investigation.signedContract;
+          dispatch.leaseGrant = grant.payload;
+          dispatch.leaseTokenHex = grant.leaseTokenHex;
           return next;
         }
         if (action === 'result') {
-          const result = await readInvestigationResult(body, keyBytesFromEnv(env.MISSION_CONTROL_RESULT_KEY));
-          const next = acceptInvestigationResult(current, result);
+          const result = await readInvestigationResult(body, resolveResultKey(env, body?.authentication?.key_id));
+          const next = acceptInvestigationResult(current, result, at);
+          if (next.skipEvent) return next;
           next.pendingEvent = {
             at,
             from: current.state,
             to: next.state,
             reason: result.summary,
             actor: result.workerId,
-            detail: { summary: result.summary },
+            detail: {
+              summary: result.summary,
+              outcome: result.outcome,
+              stopReason: result.stopReason,
+              attempt: result.attempt,
+              leaseTokenDigest: result.leaseTokenDigest,
+            },
           };
           return next;
         }
         throw new WorkItemError('not_found', 'Unknown work-item action', 404);
       });
-      return jsonResponse({ workItem: saved });
+      return jsonResponse({
+        workItem: saved,
+        ...(dispatch.contract ? { contract: dispatch.contract } : {}),
+        ...(dispatch.leaseGrant ? {
+          leaseGrant: dispatch.leaseGrant,
+          leaseTokenHex: dispatch.leaseTokenHex,
+        } : {}),
+      });
     }
 
     if (request.method !== 'GET' && request.method !== 'POST') {

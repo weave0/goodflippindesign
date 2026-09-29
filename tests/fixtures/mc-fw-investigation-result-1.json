@@ -1,0 +1,127 @@
+{
+  "description": "MC-FW-001 investigation-result golden vector (JCS RFC 8785 + HMAC-SHA256 with purpose).",
+  "envelope": {
+    "attempt": 1,
+    "authentication": {
+      "key_id": "mcwk_vector01",
+      "mac": "4ad34c46017958f5b4e74f8972bf8af215ec51fc1a41879f147656aafaf17d6f"
+    },
+    "contract_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "evidence": {
+      "diagnostic_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "diagnostic_id": "diag-001",
+      "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "snapshot_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+    },
+    "execution_receipts": [
+      {
+        "authoritative_sandbox": true,
+        "exit_code": 0,
+        "index": 0,
+        "output_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "output_truncated": false,
+        "profile": "vector",
+        "status": "pass",
+        "stderr_excerpt": "",
+        "stdout_excerpt": "ok \u00e9\u4e2d\ud83d\ude00",
+        "timed_out": false
+      },
+      {
+        "authoritative_sandbox": true,
+        "exit_code": 3,
+        "index": 1,
+        "output_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "output_truncated": false,
+        "profile": "vector",
+        "status": "fail",
+        "stderr_excerpt": "line1\nline2 \"quoted\" \\ backslash",
+        "stdout_excerpt": "",
+        "timed_out": false
+      }
+    ],
+    "lease_token_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "observations": [
+      "command 1: pass (exit 0)",
+      "command 2: fail (exit 3)"
+    ],
+    "outcome": "reproduced",
+    "repairability": {
+      "advisory_repair_scope": [],
+      "state": "not_indicated"
+    },
+    "request_id": "mci_vector000000001",
+    "schema_version": "mc-fw-investigation-result-1",
+    "source": {
+      "inspected_head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "property_id": "aiaimate.example",
+      "repository": "weave0/aiaimate",
+      "source_state": "accepted_by_host_policy",
+      "workspace_name": "aiaimate"
+    },
+    "stop_reason": null,
+    "summary": "profile vector: reproduced",
+    "worker": {
+      "completed_at": "2026-09-29T12:00:00Z",
+      "fwomps_version": "0.1.0",
+      "id": "worker-vector-1"
+    }
+  },
+  "expected": {
+    "jcs_without_mac": "{\"attempt\":1,\"authentication\":{\"key_id\":\"mcwk_vector01\"},\"contract_digest\":\"sha256:1111111111111111111111111111111111111111111111111111111111111111\",\"evidence\":{\"diagnostic_digest\":\"sha256:4444444444444444444444444444444444444444444444444444444444444444\",\"diagnostic_id\":\"diag-001\",\"revision\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"snapshot_digest\":\"sha256:3333333333333333333333333333333333333333333333333333333333333333\"},\"execution_receipts\":[{\"authoritative_sandbox\":true,\"exit_code\":0,\"index\":0,\"output_digest\":\"sha256:5555555555555555555555555555555555555555555555555555555555555555\",\"output_truncated\":false,\"profile\":\"vector\",\"status\":\"pass\",\"stderr_excerpt\":\"\",\"stdout_excerpt\":\"ok \u00e9\u4e2d\ud83d\ude00\",\"timed_out\":false},{\"authoritative_sandbox\":true,\"exit_code\":3,\"index\":1,\"output_digest\":\"sha256:6666666666666666666666666666666666666666666666666666666666666666\",\"output_truncated\":false,\"profile\":\"vector\",\"status\":\"fail\",\"stderr_excerpt\":\"line1\\nline2 \\\"quoted\\\" \\\\ backslash\",\"stdout_excerpt\":\"\",\"timed_out\":false}],\"lease_token_digest\":\"sha256:2222222222222222222222222222222222222222222222222222222222222222\",\"observations\":[\"command 1: pass (exit 0)\",\"command 2: fail (exit 3)\"],\"outcome\":\"reproduced\",\"repairability\":{\"advisory_repair_scope\":[],\"state\":\"not_indicated\"},\"request_id\":\"mci_vector000000001\",\"schema_version\":\"mc-fw-investigation-result-1\",\"source\":{\"inspected_head_sha\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"property_id\":\"aiaimate.example\",\"repository\":\"weave0/aiaimate\",\"source_state\":\"accepted_by_host_policy\",\"workspace_name\":\"aiaimate\"},\"stop_reason\":null,\"summary\":\"profile vector: reproduced\",\"worker\":{\"completed_at\":\"2026-09-29T12:00:00Z\",\"fwomps_version\":\"0.1.0\",\"id\":\"worker-vector-1\"}}",
+    "mac": "4ad34c46017958f5b4e74f8972bf8af215ec51fc1a41879f147656aafaf17d6f",
+    "result_digest": "sha256:46a2415a54484f81b47edbb06a87133a2b44f2026f48a84409ec5a9f718b1f06"
+  },
+  "key_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "mac_path": [
+    "authentication",
+    "mac"
+  ],
+  "negative": [
+    {
+      "name": "outcome tampered",
+      "path": [
+        "outcome"
+      ],
+      "value": "not_reproduced"
+    },
+    {
+      "name": "attempt tampered",
+      "path": [
+        "attempt"
+      ],
+      "value": 2
+    },
+    {
+      "name": "receipt status tampered",
+      "path": [
+        "execution_receipts",
+        1,
+        "status"
+      ],
+      "value": "pass"
+    },
+    {
+      "name": "worker id tampered",
+      "path": [
+        "worker",
+        "id"
+      ],
+      "value": "worker-evil"
+    },
+    {
+      "name": "key id tampered",
+      "path": [
+        "authentication",
+        "key_id"
+      ],
+      "value": "mcwk_other"
+    }
+  ],
+  "procedure": [
+    "1. Remove authentication.mac from the envelope.",
+    "2. digest = SHA-256(UTF-8(JCS(envelope_without_mac))); JCS = RFC 8785, integers only, keys sorted by UTF-16 code units.",
+    "3. mac = HMAC-SHA256(key, UTF-8(purpose) || 0x00 || digest_bytes), hex lowercase.",
+    "4. result_digest = 'sha256:' + hex(digest)."
+  ],
+  "purpose": "fwomps->gfd:investigation-result:v1"
+}

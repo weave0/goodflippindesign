@@ -13,7 +13,7 @@ import {
 } from '../../workers/mission-control-work-items.js';
 import {
   keyBytesFromEnv,
-  signResultHolding,
+  signResultEnvelope,
 } from '../../workers/fwomps-investigation-adapter.js';
 
 const SECRET = 'sk_test_mission_control';
@@ -118,6 +118,7 @@ function testEnv(overrides = {}) {
     MISSION_CONTROL_CONTRACT_KEY_ID: 'gfd-mission-control-test',
     MISSION_CONTROL_RESULT_KEY: RESULT_KEY,
     MISSION_CONTROL_RESULT_KEY_ID: 'gfd-result-test',
+    MISSION_CONTROL_RESULT_WORKER_ID: 'fwomps-worker-a',
     MISSION_CONTROL_WORKER_TOKEN: WORKER_TOKEN,
     ...overrides,
   };
@@ -324,51 +325,87 @@ describe('investigation seam', () => {
       },
     );
     expect(issued.status).toBe(200);
-    const ready = (await issued.json()).workItem;
-    expect(ready.state).toBe('INVESTIGATION_READY');
-    expect(ready.investigation.repairAuthority).toBe(false);
+    const issuedBody = await issued.json();
+    const ready = issuedBody.workItem;
 
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-    const leased = await call(
+    const invented = await call(
       `/api/mission-control/work-items/${encodeURIComponent(qualified.workItemId)}/lease`,
       {
         method: 'POST',
         workerAuth: WORKER_TOKEN,
-        body: {
-          workerId: 'fwomps-worker-a',
-          attempt: 1,
-          leaseTokenDigest: 'sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-          expiresAt,
-          requestId: ready.investigation.requestId,
-        },
+        body: { workerId: 'fwomps-worker-b', attempt: 1 },
       },
     );
+    expect(invented.status).toBe(400);
+
+    expect(ready.state).toBe('INVESTIGATION_READY');
+    expect(ready.investigation.repairAuthority).toBe(false);
+    expect(issuedBody.contract.schema_version).toBe('mc-fw-investigation-request-1');
+    expect(issuedBody.contract.operation).toBe('investigate');
+    expect(issuedBody.contract.contract.requested_mode).toBe('read_only');
+
+    const leased = await call(
+      `/api/mission-control/work-items/${encodeURIComponent(qualified.workItemId)}/lease`,
+      { method: 'POST', workerAuth: WORKER_TOKEN, body: {} },
+    );
     expect(leased.status).toBe(200);
-    expect((await leased.json()).workItem.state).toBe('INVESTIGATING');
+    const leaseBody = await leased.json();
+    expect(leaseBody.workItem.state).toBe('INVESTIGATING');
+    expect(leaseBody.leaseGrant.schema_version).toBe('mc-fw-lease-grant-1');
+    expect(leaseBody.leaseGrant.worker_id).toBe('fwomps-worker-a');
+    expect(leaseBody.leaseGrant.request_id).toBe(ready.investigation.requestId);
+    expect(leaseBody.leaseGrant.contract_digest).toBe(ready.investigation.digest);
+    expect(leaseBody.contract.authentication.mac).toBe(issuedBody.contract.authentication.mac);
+    expect(leaseBody.leaseTokenHex).toMatch(/^[0-9a-f]{64}$/);
 
     const conflict = await call(
       `/api/mission-control/work-items/${encodeURIComponent(qualified.workItemId)}/lease`,
-      {
-        method: 'POST',
-        workerAuth: WORKER_TOKEN,
-        body: {
-          workerId: 'fwomps-worker-b',
-          attempt: 1,
-          leaseTokenDigest: 'sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
-          expiresAt,
-          requestId: ready.investigation.requestId,
-        },
-      },
+      { method: 'POST', workerAuth: WORKER_TOKEN, body: {} },
     );
     expect(conflict.status).toBe(409);
 
-    const signedResult = await signResultHolding({
-      schema_version: 'gfd-investigation-result-holding-1',
-      work_item_id: qualified.workItemId,
+    const revision = issuedBody.contract.evidence.revision;
+    const signedResult = await signResultEnvelope({
+      schema_version: 'mc-fw-investigation-result-1',
       request_id: ready.investigation.requestId,
       contract_digest: ready.investigation.digest,
-      worker_id: 'fwomps-worker-a',
-      diagnosis: { summary: 'The published property id does not match the machine contract.', evidence: ['propertyId'] },
+      attempt: leaseBody.leaseGrant.attempt,
+      lease_token_digest: leaseBody.leaseGrant.lease_token_digest,
+      worker: {
+        id: 'fwomps-worker-a',
+        fwomps_version: '0.1.0',
+        completed_at: '2026-09-29T12:00:01Z',
+      },
+      source: {
+        property_id: qualified.propertyId,
+        repository: qualified.repository,
+        workspace_name: 'aiaimate',
+        inspected_head_sha: revision,
+        source_state: 'accepted_by_host_policy',
+      },
+      evidence: {
+        revision,
+        snapshot_digest: issuedBody.contract.evidence.snapshot_digest,
+        diagnostic_id: qualified.workItemId,
+        diagnostic_digest: issuedBody.contract.diagnostic.digest,
+      },
+      outcome: 'reproduced',
+      summary: 'profile gfd-property-health: reproduced',
+      observations: ['command 1: fail (exit 1)'],
+      execution_receipts: [{
+        profile: 'gfd-property-health',
+        index: 0,
+        status: 'fail',
+        exit_code: 1,
+        output_digest: 'sha256:5555555555555555555555555555555555555555555555555555555555555555',
+        stdout_excerpt: '',
+        stderr_excerpt: 'property id mismatch',
+        output_truncated: false,
+        timed_out: false,
+        authoritative_sandbox: true,
+      }],
+      repairability: { state: 'not_indicated', advisory_repair_scope: [] },
+      stop_reason: null,
       authentication: { key_id: 'gfd-result-test' },
     }, keyBytesFromEnv(RESULT_KEY));
     const accepted = await call(
@@ -378,8 +415,30 @@ describe('investigation seam', () => {
     expect(accepted.status).toBe(200);
     const body = await accepted.json();
     expect(body.workItem.state).toBe('DIAGNOSED');
-    expect(body.workItem.diagnosis.summary).toContain('property id');
+    expect(body.workItem.diagnosis.summary).toContain('reproduced');
+    expect(body.workItem.diagnosis.outcome).toBe('reproduced');
     expect(body.workItem.repairAuthorityRef).toBeNull();
+    expect(body.leaseTokenHex).toBeUndefined();
+
+    const replay = await call(
+      `/api/mission-control/work-items/${encodeURIComponent(qualified.workItemId)}/result`,
+      { method: 'POST', workerAuth: WORKER_TOKEN, body: signedResult },
+    );
+    expect(replay.status).toBe(200);
+    expect((await replay.json()).workItem.diagnosis.resultDigest).toBe(body.workItem.diagnosis.resultDigest);
+
+    const conflicting = await signResultEnvelope({
+      ...signedResult,
+      outcome: 'not_reproduced',
+      summary: 'profile gfd-property-health: not_reproduced',
+      authentication: { key_id: 'gfd-result-test' },
+    }, keyBytesFromEnv(RESULT_KEY));
+    const rejected = await call(
+      `/api/mission-control/work-items/${encodeURIComponent(qualified.workItemId)}/result`,
+      { method: 'POST', workerAuth: WORKER_TOKEN, body: conflicting },
+    );
+    expect(rejected.status).toBe(409);
+    expect((await rejected.json()).code).toBe('result_conflict');
 
     const repair = await call(
       `/api/mission-control/work-items/${encodeURIComponent(qualified.workItemId)}/transition`,

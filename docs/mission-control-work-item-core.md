@@ -246,11 +246,45 @@ The bridge is:
 
 ```
 GFD work item
-  -> separately signed InvestigationContract
+  -> signed mc-fw-investigation-request-1
+  -> signed mc-fw-lease-grant-1 (GFD chooses the worker, attempt, and token)
   -> FWOMPS bounded read-only execution
-  -> authenticated diagnosis/result
+  -> authenticated mc-fw-investigation-result-1
   -> same GFD work item
 ```
+
+GFD resolves `authentication.key_id` to the enrolled worker and accepts the result only when that worker, the request, the contract digest, the evidence echoes, and the lease attempt all match. The same result digest is idempotent. A different envelope for that investigation is refused. `repairability.advisory_repair_scope` is not stored and is not repair authority.
+
+### Attempt, lease, and result semantics (first bridge: one attempt per contract)
+
+A result's identity is `(request_id, attempt, lease_token_digest)`. GFD accepts a result only when all of the
+following hold: the work item, request id, signed contract digest, diagnostic id/digest, evidence revision,
+snapshot digest, property and repository all match the issued investigation; the worker is the one bound to
+`authentication.key_id` (never looked up from `worker.id`); the MAC verifies under the result purpose;
+`result.attempt` and `result.lease_token_digest` equal the active lease's; and the lease has not expired.
+
+**This bridge is bounded to a single attempt per signed contract.** GFD does not yet persist enough attempt
+state to distinguish a resume of the same admitted attempt, an expired or abandoned attempt, a greater attempt
+after durable abandonment, or a stale prior-attempt result, so it does not claim FWOMPS retry or recovery
+semantics. Concretely:
+
+- GFD issues at most one lease per request (`attempt_exhausted`, HTTP 409, even after the first lease expires);
+  a retry requires a fresh signed contract with a new request id.
+- A result that arrives after its lease expired is refused (`lease_expired`); FWOMPS never uploads one either.
+- The raw lease token is 32 random bytes returned once to the authorized worker transport as `leaseTokenHex`.
+  Only its SHA-256 digest is signed into the grant and stored. A lost response cannot be replayed into a second
+  token; the lease simply runs out.
+- The worker id, attempt, and token are chosen by GFD; a lease request that supplies any of them is refused.
+- Redelivering a byte-equivalent result is idempotent (same result digest, one diagnosis event). A different
+  signed result for the same attempt identity is refused (`result_conflict`).
+- Every Mission Control mutation is a durable compare-and-swap on `lifecycle_version`: of two racing writers
+  exactly one commits and the other gets `version_conflict`, and the event and lease rows are written only if
+  the swap applied. Retries are normal; this does not claim exactly-once delivery.
+- The result is evidence only. `repairability` must be `not_indicated` with an empty `advisory_repair_scope`;
+  anything else is refused and no repair, mutation, PR, or deployment authority is ever derived from it.
+
+Multi-attempt support is a schema change (a durable attempt column plus an abandonment record) and is
+deliberately not simulated here.
 
 Only after separate repair authority:
 
