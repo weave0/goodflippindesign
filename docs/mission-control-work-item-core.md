@@ -81,9 +81,13 @@ OBSERVED does not imply that the system knows enough to dispatch work.
 
 QUALIFIED requires all of:
 
-- canonical repository identity;
+- canonical execution repository identity;
 - registered investigation profile;
-- production verification predicate.
+- registered verification profile;
+- explicit verification scope;
+- verification predicate.
+
+The execution repository is the repository in which the bounded investigation/repair work is authorized. It need not always be the affected property's application repository. For example, a finding that the estate registry is missing repository authority can legitimately dispatch a read-only investigation against the GFD control-plane repository.
 
 The current GFD estate registry does not yet carry those bindings for the whole estate. The system must therefore leave a finding OBSERVED/BLOCKED rather than invent repository or execution authority.
 
@@ -96,6 +100,7 @@ Recommended property additions:
   "repository": "weave0/aiaimate",
   "investigation_profile": "aiaimate-health-readonly-v1",
   "verification_profile": "aiaimate-health-production-v1",
+  "verification_scope": "production",
   "deploy_identity": {
     "provider": "vercel",
     "project": "..."
@@ -136,13 +141,22 @@ A diagnosis cannot implicitly cross this boundary.
 
 RESOLVED is accepted only from REVERIFYING and only with:
 
-- production environment evidence;
-- a passing result;
+- a passing verification result;
+- the exact registered verification profile;
+- the exact registered verification scope;
 - the exact registered verification predicate;
 - a canonical evidence digest;
 - an observation at least as fresh as the last failing observation.
 
-An agent statement such as "fixed" is never resolution evidence.
+Verification scope is deliberately explicit. Current closed vocabulary:
+
+- `production` — live property/service behavior;
+- `control-plane` — GFD Mission Control / estate source-of-truth state;
+- `repository` — repository/source state;
+- `configuration` — governed desired-state configuration;
+- `deployment` — provider/deploy state.
+
+A health defect may require a fresh production probe. A registry-authority defect may require fresh control-plane evidence. A source-state defect may require repository verification. An agent statement such as "fixed" is never resolution evidence in any scope.
 
 ## Durable effects
 

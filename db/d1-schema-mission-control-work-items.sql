@@ -15,6 +15,16 @@ CREATE TABLE IF NOT EXISTS mc_work_items (
 
   repository TEXT,
   investigation_profile TEXT,
+  verification_profile TEXT,
+  verification_scope TEXT CHECK (
+    verification_scope IS NULL OR verification_scope IN (
+      'production',
+      'control-plane',
+      'repository',
+      'configuration',
+      'deployment'
+    )
+  ),
   verification_predicate TEXT,
 
   first_seen TEXT NOT NULL,

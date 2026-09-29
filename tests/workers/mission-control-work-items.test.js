@@ -35,6 +35,8 @@ function qualify(item) {
   return transitionWorkItem(item, 'QUALIFIED', {
     repository: 'weave0/aiaimate',
     investigationProfile: 'aiaimate-health-readonly-v1',
+    verificationProfile: 'aiaimate-health-production-v1',
+    verificationScope: 'production',
     verificationPredicate: 'health:aiaimate:machine_contract_mismatch is absent on a fresh production probe',
   });
 }
@@ -80,6 +82,8 @@ describe('qualification and authority separation', () => {
     expect(item.state).toBe('QUALIFIED');
     expect(item.repository).toBe('weave0/aiaimate');
     expect(item.investigationProfile).toBe('aiaimate-health-readonly-v1');
+    expect(item.verificationProfile).toBe('aiaimate-health-production-v1');
+    expect(item.verificationScope).toBe('production');
     expect(item.verificationPredicate).toContain('fresh production probe');
   });
 
@@ -159,22 +163,34 @@ describe('lifecycle guards', () => {
     expect(item.verificationEvidenceDigest).toBe(D3);
   });
 
-  it('requires fresh passing production evidence to resolve', async () => {
+  it('requires fresh passing evidence from the exact verification scope/profile to resolve', async () => {
     let item = qualify(await observed());
     item = { ...item, state: 'REVERIFYING' };
-    expect(() => transitionWorkItem(item, 'RESOLVED')).toThrow(/production verification/);
+    expect(() => transitionWorkItem(item, 'RESOLVED')).toThrow(/resolution verification/);
     expect(() => transitionWorkItem(item, 'RESOLVED', {
-      productionVerification: {
-        environment: 'staging',
+      resolutionVerification: {
+        scope: 'control-plane',
+        profile: item.verificationProfile,
         result: 'pass',
         predicate: item.verificationPredicate,
         evidenceDigest: D4,
         observedAt: '2026-09-29T11:00:00.000Z',
       },
-    })).toThrow(/production evidence/);
+    })).toThrow(/scope/);
+    expect(() => transitionWorkItem(item, 'RESOLVED', {
+      resolutionVerification: {
+        scope: 'production',
+        profile: 'wrong-profile',
+        result: 'pass',
+        predicate: item.verificationPredicate,
+        evidenceDigest: D4,
+        observedAt: '2026-09-29T11:00:00.000Z',
+      },
+    })).toThrow(/profile/);
     item = transitionWorkItem(item, 'RESOLVED', {
-      productionVerification: {
-        environment: 'production',
+      resolutionVerification: {
+        scope: 'production',
+        profile: item.verificationProfile,
         result: 'pass',
         predicate: item.verificationPredicate,
         evidenceDigest: D4,
@@ -185,12 +201,40 @@ describe('lifecycle guards', () => {
     expect(item.resolutionEvidenceDigest).toBe(D4);
   });
 
+  it('can resolve control-plane confluence debt without pretending it is a production probe', async () => {
+    let item = await createObservedWorkItem(observation({
+      producer: 'estate-operating-readiness',
+      propertyId: 'aiaimate.com',
+      findingKey: 'operating:missing_repository_authority',
+    }));
+    item = transitionWorkItem(item, 'QUALIFIED', {
+      repository: 'weave0/goodflippindesign',
+      investigationProfile: 'estate-authority-readonly-v1',
+      verificationProfile: 'estate-registry-authority-v1',
+      verificationScope: 'control-plane',
+      verificationPredicate: 'canonical estate registry contains verified repository authority for aiaimate.com',
+    });
+    item = { ...item, state: 'REVERIFYING' };
+    item = transitionWorkItem(item, 'RESOLVED', {
+      resolutionVerification: {
+        scope: 'control-plane',
+        profile: 'estate-registry-authority-v1',
+        result: 'pass',
+        predicate: item.verificationPredicate,
+        evidenceDigest: D4,
+        observedAt: '2026-09-29T11:00:00.000Z',
+      },
+    });
+    expect(item.state).toBe('RESOLVED');
+  });
+
   it('does not let a stale observation reopen a resolved item, but a fresh recurrence preserves lineage', async () => {
     let item = qualify(await observed());
     item = { ...item, state: 'REVERIFYING' };
     item = transitionWorkItem(item, 'RESOLVED', {
-      productionVerification: {
-        environment: 'production',
+      resolutionVerification: {
+        scope: item.verificationScope,
+        profile: item.verificationProfile,
         result: 'pass',
         predicate: item.verificationPredicate,
         evidenceDigest: D3,
