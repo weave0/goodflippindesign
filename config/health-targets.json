@@ -66,11 +66,19 @@
             "name": "AI Aimate",
             "url": "https://aiaimate.com",
             "checkType": "page",
-            "expectedKeyword": "AI Aimate",
+            "expectedKeyword": "gfd-property-health",
             "critical": true,
             "cloudflareSweep": true,
             "githubWorkflow": true,
-            "localScript": true
+            "localScript": true,
+            "sweepUrl": "https://aiaimate.com/api/health",
+            "machineContract": {
+                "contract": "gfd-property-health",
+                "contractVersion": 1,
+                "propertyId": "aiaimate.com",
+                "productId": "aiaimate",
+                "status": "ok"
+            }
         },
         {
             "id": "culturesherpa",
