@@ -203,14 +203,15 @@ export function applyObservation(existing, observation) {
 
   const observedAt = parseInstant(observation.observedAt, 'observedAt');
   const currentLastSeen = parseInstant(existing.lastSeen, 'lastSeen');
+  const isFresh = observedAt > currentLastSeen;
   const next = {
     ...existing,
-    lastSeen: observedAt > currentLastSeen ? observation.observedAt : existing.lastSeen,
+    lastSeen: isFresh ? observation.observedAt : existing.lastSeen,
     occurrenceCount: Number(existing.occurrenceCount || 0) + 1,
-    severity: observation.severity ?? existing.severity ?? null,
-    confidence: observation.confidence ?? existing.confidence ?? null,
-    evidenceRevision: observation.evidenceRevision ?? existing.evidenceRevision ?? null,
-    evidenceDigest: observation.evidenceDigest,
+    severity: isFresh ? (observation.severity ?? existing.severity ?? null) : existing.severity,
+    confidence: isFresh ? (observation.confidence ?? existing.confidence ?? null) : existing.confidence,
+    evidenceRevision: isFresh ? (observation.evidenceRevision ?? existing.evidenceRevision ?? null) : existing.evidenceRevision,
+    evidenceDigest: isFresh ? observation.evidenceDigest : existing.evidenceDigest,
     lifecycleVersion: Number(existing.lifecycleVersion || 0) + 1,
   };
 
@@ -437,7 +438,7 @@ export function registerEffect(existing, proposed) {
   const immutable = ['workItemId', 'effectType', 'target', 'candidateDigest'];
   for (const field of immutable) {
     if ((existing[field] ?? null) !== (proposed[field] ?? null)) {
-      throw new Error(`effect ${effect.effectId} immutable field changed: ${field}`);
+      throw new Error(`effect ${existing.effectId} immutable field changed: ${field}`);
     }
   }
   return existing;
