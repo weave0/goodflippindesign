@@ -170,4 +170,25 @@ const observedAt = '2026-09-29T17:00:00.000Z';
   );
 }
 
+
+{
+  const missingProperties = {
+    contractName: 'gfd-estate-operating-readiness',
+    schemaVersion: '1.0.0',
+  };
+  assert.throws(
+    () => readinessFindingsFromReport(missingProperties, { observedAt }),
+    /properties array/,
+    'a truncated complete snapshot must fail closed instead of clearing findings',
+  );
+
+  const missingDebt = structuredClone(report);
+  delete missingDebt.properties[0].debt;
+  assert.throws(
+    () => readinessFindingsFromReport(missingDebt, { observedAt }),
+    /debt must be an array/,
+    'missing per-property debt must fail closed',
+  );
+}
+
 console.log('Estate readiness finding-feed hostile tests passed.');
