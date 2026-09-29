@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
+import { VERIFICATION_SCOPES } from '../workers/lib/mission-control-work-items.js';
+
 function normalizeProvider(value) {
   return typeof value === 'string' && value.trim() ? value.trim().toLowerCase() : null;
 }
@@ -101,6 +103,15 @@ export function analyzeEstateOperatingReadiness({ registry, brands, healthTarget
       typeof operating.verification_profile === 'string' && operating.verification_profile.trim()
         ? operating.verification_profile.trim()
         : null;
+    const verificationScope =
+      typeof operating.verification_scope === 'string' && operating.verification_scope.trim()
+        ? operating.verification_scope.trim()
+        : null;
+    const verificationPredicate =
+      typeof operating.verification_predicate === 'string' && operating.verification_predicate.trim()
+        ? operating.verification_predicate.trim()
+        : null;
+    const verificationScopeSupported = VERIFICATION_SCOPES.includes(verificationScope);
     const machineHealthTargets = healthTargetsForProperty.filter(target => target?.machineContract);
 
     const debts = [];
@@ -133,8 +144,22 @@ export function analyzeEstateOperatingReadiness({ registry, brands, healthTarget
     if (!verificationProfile) {
       debts.push(debt('missing_verification_profile', 'blocker', 'No production verification profile is declared for closed-loop resolution.'));
     }
+    if (!verificationScope) {
+      debts.push(debt('missing_verification_scope', 'blocker', 'No canonical verification scope is declared for closed-loop resolution.'));
+    } else if (!verificationScopeSupported) {
+      debts.push(debt('invalid_verification_scope', 'blocker', `Verification scope is not supported by Mission Control: ${verificationScope}.`));
+    }
+    if (!verificationPredicate) {
+      debts.push(debt('missing_verification_predicate', 'blocker', 'No deterministic verification predicate is declared for closed-loop resolution.'));
+    }
 
-    const dispatchReady = Boolean(repository.repository && investigationProfile && verificationProfile);
+    const dispatchReady = Boolean(
+      repository.repository &&
+      investigationProfile &&
+      verificationProfile &&
+      verificationScopeSupported &&
+      verificationPredicate
+    );
     const monitorReady = healthTargetsForProperty.length > 0;
     const machineHealthReady = machineHealthTargets.length > 0;
     const deployIdentityReady = Boolean(deployment.provider && deployment.provider !== 'unknown');
@@ -155,6 +180,8 @@ export function analyzeEstateOperatingReadiness({ registry, brands, healthTarget
       machineHealthTargetIds: machineHealthTargets.map(target => target.id).filter(Boolean).sort(),
       investigationProfile,
       verificationProfile,
+      verificationScope,
+      verificationPredicate,
       dispatchReady,
       monitorReady,
       machineHealthReady,
