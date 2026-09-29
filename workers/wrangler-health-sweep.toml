@@ -10,6 +10,12 @@ binding = "DB"
 database_name = "gfd_community"
 database_id = "a46ec9df-31b8-4285-845b-1fd3a62bd1b5"
 
+# Native Worker-to-Worker health probe. Avoids routing an internal probe
+# through workers.dev, which is an external hostname rather than a service edge.
+[[services]]
+binding = "STRIPE_WORKER"
+service = "gfd-stripe"
+
 # Cron: daily at 6:00 AM UTC
 # Add more entries for more frequent checks, e.g. "0 */6 * * *" for every 6h
 [triggers]

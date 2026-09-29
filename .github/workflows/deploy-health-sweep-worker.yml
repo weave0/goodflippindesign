@@ -73,6 +73,7 @@ jobs:
           const bindings = new Map((body.result?.bindings || []).map(b => [b.name, b.type]));
           if (bindings.get('DB') !== 'd1') throw new Error('DB D1 binding missing after deploy');
           if (bindings.get('GITHUB_TOKEN') !== 'secret_text') throw new Error('GITHUB_TOKEN secret binding missing after deploy');
+          if (bindings.get('STRIPE_WORKER') !== 'service') throw new Error('STRIPE_WORKER service binding missing after deploy');
           console.log('health_worker_bindings_verified=true');
           console.log('compatibility_date=' + body.result?.compatibility_date);
           NODE
