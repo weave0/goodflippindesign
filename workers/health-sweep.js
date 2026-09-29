@@ -148,7 +148,7 @@ async function runSweep(env) {
 }
 
 // ── Individual URL check ──────────────────────────────────────────────────────
-async function checkTarget(target) {
+export async function checkTarget(target) {
   const start      = Date.now();
   const controller = new AbortController();
   const timer      = setTimeout(() => controller.abort(), TIMEOUT_MS);
