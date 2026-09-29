@@ -1,3 +1,4 @@
+# deployment proof revision: 2026-09-29-a35a79f
 name: Deploy Health Sweep Worker
 
 on:
