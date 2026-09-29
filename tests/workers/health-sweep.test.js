@@ -32,6 +32,25 @@ afterEach(() => {
 
 describe('machine health contracts', () => {
 
+  it('prefers the Worker-specific origin vantage without changing the public target identity', async () => {
+    const gfdTarget = {
+      id: 'goodflippindesign',
+      brand: 'gfd',
+      name: 'Good Flippin Design',
+      url: 'https://goodflippindesign.com',
+      cloudflareSweepUrl: 'https://goodflippindesign.pages.dev',
+      expectedKeyword: 'Good Flippin Design',
+    };
+    const fetchMock = vi.fn(async () => new Response('<title>Good Flippin Design</title>', { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await checkTarget(gfdTarget);
+
+    expect(fetchMock.mock.calls[0][0]).toBe('https://goodflippindesign.pages.dev');
+    expect(result.overall_status).toBe('pass');
+    expect(result.keyword_found).toBe(1);
+  });
+
   it('uses the browser-compatible estate probe identity required by Cloudflare Bot Fight Mode', async () => {
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({
       contract: 'gfd-property-health',
