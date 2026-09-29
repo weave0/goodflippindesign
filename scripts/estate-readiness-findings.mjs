@@ -91,10 +91,30 @@ export function readinessFindingsFromReport(report, { observedAt }) {
   if (!report || report.contractName !== 'gfd-estate-operating-readiness') {
     throw new Error('report must be a gfd-estate-operating-readiness document');
   }
+  if (typeof report.schemaVersion !== 'string' || !report.schemaVersion) {
+    throw new Error('readiness report schemaVersion is required');
+  }
+  if (!Array.isArray(report.properties)) {
+    throw new Error('complete readiness snapshot requires a properties array');
+  }
+  for (const [index, row] of report.properties.entries()) {
+    if (!row || typeof row !== 'object' || Array.isArray(row)) {
+      throw new Error(`readiness properties[${index}] must be an object`);
+    }
+    if (typeof row.propertyId !== 'string' || !row.propertyId) {
+      throw new Error(`readiness properties[${index}].propertyId is required`);
+    }
+    if (typeof row.governed !== 'boolean') {
+      throw new Error(`readiness properties[${index}].governed must be boolean`);
+    }
+    if (!Array.isArray(row.debt)) {
+      throw new Error(`readiness properties[${index}].debt must be an array`);
+    }
+  }
   requireUtcInstant(observedAt);
 
-  const governed = (report.properties || [])
-    .filter(row => row?.governed === true)
+  const governed = report.properties
+    .filter(row => row.governed === true)
     .sort((a, b) => String(a.propertyId).localeCompare(String(b.propertyId)));
 
   const findings = [];
