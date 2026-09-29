@@ -1,0 +1,49 @@
+name: Estate Operating Readiness
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "estate/registry.json"
+      - "brands.json"
+      - "config/health-targets.json"
+      - "scripts/estate-operating-readiness.mjs"
+      - "tests/estate-operating-readiness.test.mjs"
+      - ".github/workflows/estate-operating-readiness.yml"
+  schedule:
+    - cron: "23 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readiness:
+    name: Measure Confluence Debt
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+
+      - name: Test readiness semantics
+        run: node tests/estate-operating-readiness.test.mjs
+
+      - name: Measure current estate readiness
+        run: |
+          node scripts/estate-operating-readiness.mjs
+          {
+            echo "## Estate operating readiness"
+            echo
+            echo '~~~text'
+            node scripts/estate-operating-readiness.mjs
+            echo '~~~'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Emit machine-readable report
+        run: node scripts/estate-operating-readiness.mjs --json > estate-operating-readiness.json
