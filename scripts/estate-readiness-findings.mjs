@@ -36,6 +36,12 @@ const NEXT_ACTION = Object.freeze({
     'Define and register a bounded read-only FWOMPS investigation profile, then bind its canonical name in the estate registry.',
   missing_verification_profile:
     'Define the production verification profile/predicate required for closed-loop resolution, then bind it in the estate registry.',
+  missing_verification_scope:
+    'Bind one canonical Mission Control verification scope in the estate registry: production, control-plane, repository, configuration, or deployment.',
+  invalid_verification_scope:
+    'Replace the unsupported verification scope with one of the canonical Mission Control verification scopes.',
+  missing_verification_predicate:
+    'Declare the deterministic predicate that fresh verification evidence must satisfy before this work can resolve.',
 });
 
 function canonicalize(value) {
@@ -84,7 +90,48 @@ function findingEvidence(report, row, item) {
     machineHealthTargetIds: row.machineHealthTargetIds,
     investigationProfile: row.investigationProfile,
     verificationProfile: row.verificationProfile,
+    verificationScope: row.verificationScope,
+    verificationPredicate: row.verificationPredicate,
   };
+}
+
+function debtCountsFor(rows) {
+  const counts = {};
+  for (const row of rows) {
+    for (const item of row.debt) counts[item.code] = (counts[item.code] || 0) + 1;
+  }
+  return counts;
+}
+
+function sortedEntries(value) {
+  return Object.entries(value).sort(([left], [right]) => left.localeCompare(right));
+}
+
+function requireCompleteSnapshotManifest(report, governed) {
+  if (!report.summary || typeof report.summary !== 'object' || Array.isArray(report.summary)) {
+    throw new Error('complete readiness snapshot requires a summary manifest');
+  }
+  if (!Number.isInteger(report.summary.governedProperties) || report.summary.governedProperties < 0) {
+    throw new Error('summary.governedProperties must be a non-negative integer');
+  }
+  if (report.summary.governedProperties !== governed.length) {
+    throw new Error('governed property count does not match the summary manifest');
+  }
+
+  const declaredCounts = report.summary.debtCounts;
+  if (!declaredCounts || typeof declaredCounts !== 'object' || Array.isArray(declaredCounts)) {
+    throw new Error('complete readiness snapshot requires summary.debtCounts');
+  }
+  for (const [code, count] of Object.entries(declaredCounts)) {
+    if (!code || !Number.isInteger(count) || count < 0) {
+      throw new Error('summary.debtCounts must contain non-negative integer counts');
+    }
+  }
+
+  const actualCounts = debtCountsFor(governed);
+  if (JSON.stringify(sortedEntries(declaredCounts)) !== JSON.stringify(sortedEntries(actualCounts))) {
+    throw new Error('property debt does not match the summary debt-count manifest');
+  }
 }
 
 export function readinessFindingsFromReport(report, { observedAt }) {
@@ -110,12 +157,33 @@ export function readinessFindingsFromReport(report, { observedAt }) {
     if (!Array.isArray(row.debt)) {
       throw new Error(`readiness properties[${index}].debt must be an array`);
     }
+    const debtCodes = new Set();
+    for (const [debtIndex, item] of row.debt.entries()) {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) {
+        throw new Error(`readiness properties[${index}].debt[${debtIndex}] must be an object`);
+      }
+      if (typeof item.code !== 'string' || !item.code) {
+        throw new Error(`readiness properties[${index}].debt[${debtIndex}].code is required`);
+      }
+      if (debtCodes.has(item.code)) {
+        throw new Error(`readiness properties[${index}] contains duplicate debt code ${item.code}`);
+      }
+      debtCodes.add(item.code);
+      if (typeof item.detail !== 'string' || !item.detail) {
+        throw new Error(`readiness properties[${index}].debt[${debtIndex}].detail is required`);
+      }
+    }
   }
   requireUtcInstant(observedAt);
 
   const governed = report.properties
     .filter(row => row.governed === true)
     .sort((a, b) => String(a.propertyId).localeCompare(String(b.propertyId)));
+  const governedPropertyIds = new Set(governed.map(row => row.propertyId));
+  if (governedPropertyIds.size !== governed.length) {
+    throw new Error('complete readiness snapshot contains duplicate governed propertyId values');
+  }
+  requireCompleteSnapshotManifest(report, governed);
 
   const findings = [];
   for (const row of governed) {

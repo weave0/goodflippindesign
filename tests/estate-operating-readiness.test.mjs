@@ -79,6 +79,8 @@ function fixture(overrides = {}) {
   assert.deepEqual(aia.machineHealthTargetIds, ['aiaimate']);
   assert(aia.debt.some(item => item.code === 'missing_investigation_profile'));
   assert(aia.debt.some(item => item.code === 'missing_verification_profile'));
+  assert(aia.debt.some(item => item.code === 'missing_verification_scope'));
+  assert(aia.debt.some(item => item.code === 'missing_verification_predicate'));
   assert(!aia.debt.some(item => item.code === 'missing_repository_authority'));
 
   const mystery = report.properties.find(row => row.domain === 'mystery.example');
@@ -93,6 +95,8 @@ function fixture(overrides = {}) {
     repository: 'weave0/aiaimate-authoritative',
     investigation_profile: 'aiaimate-readonly-v1',
     verification_profile: 'aiaimate-production-v1',
+    verification_scope: 'production',
+    verification_predicate: 'aiaimate machine health contract passes on a fresh production probe',
     deploy_identity: { provider: 'cloudflare-pages', project: 'aiaimate-edge' },
   };
   const report = analyzeEstateOperatingReadiness(f);
@@ -103,7 +107,26 @@ function fixture(overrides = {}) {
   assert.equal(aia.deploymentProvider, 'cloudflare-pages');
   assert.equal(aia.deploymentProject, 'aiaimate-edge');
   assert.equal(aia.dispatchReady, true);
+  assert.equal(aia.verificationScope, 'production');
+  assert.match(aia.verificationPredicate, /fresh production probe/);
   assert.equal(report.summary.dispatchReady, 1);
+}
+
+{
+  const f = fixture();
+  f.registry.properties[0].operating = {
+    repository: 'weave0/aiaimate-authoritative',
+    investigation_profile: 'aiaimate-readonly-v1',
+    verification_profile: 'aiaimate-production-v1',
+    verification_scope: 'planetary',
+    verification_predicate: 'aiaimate machine health contract passes on a fresh production probe',
+  };
+  const report = analyzeEstateOperatingReadiness(f);
+  const aia = report.properties.find(row => row.domain === 'aiaimate.com');
+
+  assert.equal(aia.dispatchReady, false);
+  assert(aia.debt.some(item => item.code === 'invalid_verification_scope'));
+  assert(!aia.debt.some(item => item.code === 'missing_verification_scope'));
 }
 
 {

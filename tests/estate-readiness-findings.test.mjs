@@ -9,6 +9,16 @@ const report = {
   contractName: 'gfd-estate-operating-readiness',
   schemaVersion: '1.0.0',
   sourceRegistryVersion: '1.0.0',
+  summary: {
+    governedProperties: 2,
+    debtCounts: {
+      missing_investigation_profile: 1,
+      missing_repository_authority: 1,
+      missing_verification_predicate: 1,
+      missing_verification_profile: 1,
+      missing_verification_scope: 1,
+    },
+  },
   properties: [
     {
       propertyId: 'aiaimate.com',
@@ -23,6 +33,8 @@ const report = {
       machineHealthTargetIds: ['aiaimate'],
       investigationProfile: null,
       verificationProfile: null,
+      verificationScope: null,
+      verificationPredicate: null,
       debt: [
         {
           code: 'missing_investigation_profile',
@@ -33,6 +45,16 @@ const report = {
           code: 'missing_verification_profile',
           severity: 'blocker',
           detail: 'No production verification profile is declared for closed-loop resolution.',
+        },
+        {
+          code: 'missing_verification_scope',
+          severity: 'blocker',
+          detail: 'No canonical verification scope is declared for closed-loop resolution.',
+        },
+        {
+          code: 'missing_verification_predicate',
+          severity: 'blocker',
+          detail: 'No deterministic verification predicate is declared for closed-loop resolution.',
         },
       ],
     },
@@ -49,6 +71,8 @@ const report = {
       machineHealthTargetIds: [],
       investigationProfile: null,
       verificationProfile: null,
+      verificationScope: null,
+      verificationPredicate: null,
       debt: [
         {
           code: 'missing_repository_authority',
@@ -82,7 +106,7 @@ const observedAt = '2026-09-29T17:00:00.000Z';
   assert.equal(feed.snapshotComplete, true);
   assert.deepEqual(feed.scope.propertyIds, ['aiaimate.com', 'mystery.example']);
   assert.equal(feed.scope.findingKeyPrefix, 'operating:');
-  assert.equal(feed.findings.length, 3);
+  assert.equal(feed.findings.length, 5);
 
   const investigation = feed.findings.find(
     finding => finding.propertyId === 'aiaimate.com' &&
@@ -94,6 +118,12 @@ const observedAt = '2026-09-29T17:00:00.000Z';
   assert.equal(investigation.observedAt, observedAt);
   assert.match(investigation.evidenceDigest, /^sha256:[0-9a-f]{64}$/);
   assert.match(investigation.suggestedNextAction, /bounded read-only FWOMPS investigation profile/);
+
+  const predicate = feed.findings.find(
+    finding => finding.propertyId === 'aiaimate.com' &&
+      finding.findingKey === 'operating:missing_verification_predicate',
+  );
+  assert.match(predicate.suggestedNextAction, /deterministic predicate/);
 
   assert.equal(feed.findings.some(finding => finding.propertyId === 'outside.example'), false);
 }
@@ -133,6 +163,7 @@ const observedAt = '2026-09-29T17:00:00.000Z';
 {
   const resolved = structuredClone(report);
   resolved.properties[1].debt = [];
+  delete resolved.summary.debtCounts.missing_repository_authority;
   const feed = readinessFindingsFromReport(resolved, { observedAt });
 
   assert.equal(
@@ -151,7 +182,7 @@ const observedAt = '2026-09-29T17:00:00.000Z';
   const summary = summarizeReadinessFindings(
     readinessFindingsFromReport(report, { observedAt }),
   );
-  assert.match(summary, /3 active findings across 2 governed properties/);
+  assert.match(summary, /5 active findings across 2 governed properties/);
   assert.match(summary, /operating:missing_investigation_profile: 1/);
   assert.match(summary, /operating:missing_repository_authority: 1/);
 }
@@ -175,6 +206,7 @@ const observedAt = '2026-09-29T17:00:00.000Z';
   const missingProperties = {
     contractName: 'gfd-estate-operating-readiness',
     schemaVersion: '1.0.0',
+    summary: { governedProperties: 0, debtCounts: {} },
   };
   assert.throws(
     () => readinessFindingsFromReport(missingProperties, { observedAt }),
@@ -188,6 +220,22 @@ const observedAt = '2026-09-29T17:00:00.000Z';
     () => readinessFindingsFromReport(missingDebt, { observedAt }),
     /debt must be an array/,
     'missing per-property debt must fail closed',
+  );
+
+  const truncatedDebt = structuredClone(report);
+  truncatedDebt.properties[1].debt = [];
+  assert.throws(
+    () => readinessFindingsFromReport(truncatedDebt, { observedAt }),
+    /summary debt-count manifest/,
+    'a present-but-truncated debt array must not publish destructive absence',
+  );
+
+  const duplicateProperty = structuredClone(report);
+  duplicateProperty.properties[1].propertyId = duplicateProperty.properties[0].propertyId;
+  assert.throws(
+    () => readinessFindingsFromReport(duplicateProperty, { observedAt }),
+    /duplicate governed propertyId/,
+    'duplicate property identity must not be accepted as a complete snapshot',
   );
 }
 
