@@ -114,6 +114,8 @@ async function runSweep(env) {
       has_x_frame: 0,
       has_hsts: 0,
       has_xcto: 0,
+      content_detail: null,
+      finding_kind: 'probe_exception',
       error: String(r.reason),
       overall_status: 'fail',
     };
@@ -458,8 +460,13 @@ export function parseHealthIncidentMarker(body) {
   const values = Object.fromEntries(
     block[1]
       .split('\n')
-      .map(line => line.split(/:\s*/, 2))
-      .filter(parts => parts.length === 2)
+      .map(line => {
+        const separator = line.indexOf(': ');
+        return separator < 0
+          ? null
+          : [line.slice(0, separator), line.slice(separator + 2)];
+      })
+      .filter(Boolean)
   );
 
   const occurrences = Number.parseInt(values['occurrences'] || '0', 10);
