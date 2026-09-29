@@ -89,10 +89,11 @@ jobs:
       - name: Run Tests
         run: npm test
 
-      - name: Run Mission Control and health Worker tests
+      - name: Run governed Worker tests
         run: |
           npm run test:workers:mission-control-events
           npx vitest run --config vitest.workers.config.mjs tests/workers/health-sweep.test.js
+          npm run test:workers:payments
 
       - name: Install Traffic Intelligence
         run: npm ci --prefix traffic-intelligence --no-audit

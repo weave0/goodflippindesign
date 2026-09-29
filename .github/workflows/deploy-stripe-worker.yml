@@ -1,0 +1,144 @@
+name: Deploy Stripe Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "workers/stripe-payments.js"
+      - "workers/wrangler-stripe.toml"
+      - "vitest.stripe-payments.config.mjs"
+      - "tests/workers/stripe-payments.test.js"
+      - ".github/workflows/deploy-stripe-worker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-stripe-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy gfd-stripe
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install
+        run: npm ci --no-audit --ignore-scripts
+
+      - name: Validate Stripe Worker tests
+        run: npm run test:workers:payments
+
+      - name: Require Cloudflare deploy token
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN is not configured for this repository."
+            exit 1
+          fi
+
+      - name: Deploy Stripe Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 3253d907ea85a18eb442283d7308b193
+          command: deploy --config workers/wrangler-stripe.toml
+
+      - name: Verify secret binding and compatibility
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node - <<'NODE'
+          const token = process.env.CLOUDFLARE_API_TOKEN;
+          const account = '3253d907ea85a18eb442283d7308b193';
+          const url = `https://api.cloudflare.com/client/v4/accounts/${account}/workers/scripts/gfd-stripe/settings`;
+          const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+          if (!res.ok) throw new Error(`Cloudflare settings lookup failed: ${res.status}`);
+          const body = await res.json();
+          if (!body.success) throw new Error(`Cloudflare settings lookup failed: ${JSON.stringify(body.errors)}`);
+          const bindings = new Map((body.result?.bindings || []).map(b => [b.name, b.type]));
+          if (bindings.get('STRIPE_SECRET_KEY') !== 'secret_text') {
+            throw new Error('STRIPE_SECRET_KEY secret binding missing after deploy');
+          }
+          if (body.result?.compatibility_date !== '2025-01-01') {
+            throw new Error(`Unexpected compatibility date: ${body.result?.compatibility_date}`);
+          }
+          console.log('stripe_secret_binding_verified=true');
+          console.log('compatibility_date=' + body.result.compatibility_date);
+          NODE
+
+      - name: Verify live Stripe Worker health
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const url = 'https://gfd-stripe.weave0.workers.dev/health';
+          let last = null;
+          for (let attempt = 1; attempt <= 12; attempt++) {
+            const res = await fetch(url, { headers: { 'cache-control': 'no-cache' } });
+            let body = null;
+            try { body = await res.json(); } catch {}
+            last = { status: res.status, body };
+            if (res.status === 200 && body?.ok === true && body?.service === 'gfd-stripe-payments') {
+              console.log('stripe_worker_health_verified=true');
+              process.exit(0);
+            }
+            await new Promise(resolve => setTimeout(resolve, 5000));
+          }
+          throw new Error(`Stripe Worker health verification failed: ${JSON.stringify(last)}`);
+          NODE
+
+
+      - name: Reverify Stripe through estate health lifecycle
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const triggerUrl = 'https://gfd-health-sweep.weave0.workers.dev/trigger';
+          const lastUrl = 'https://gfd-health-sweep.weave0.workers.dev/last';
+          const started = Date.now();
+
+          let trigger = await fetch(triggerUrl);
+          let triggerBody = null;
+          try { triggerBody = await trigger.json(); } catch {}
+
+          if (trigger.status === 429) {
+            const retryAfter = Number(trigger.headers.get('retry-after') || triggerBody?.retry_after_seconds || 0);
+            if (retryAfter > 300) throw new Error(`unexpected health sweep rate limit: ${retryAfter}s`);
+            await new Promise(resolve => setTimeout(resolve, Math.max(retryAfter, 1) * 1000));
+            trigger = await fetch(triggerUrl);
+          }
+          if (!trigger.ok) throw new Error(`health sweep trigger failed after Stripe deploy: ${trigger.status}`);
+
+          const deadline = Date.now() + 90_000;
+          while (Date.now() < deadline) {
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            const response = await fetch(lastUrl, { headers: { 'cache-control': 'no-cache' } });
+            if (!response.ok) throw new Error(`health evidence read failed: ${response.status}`);
+            const rows = await response.json();
+            const stripe = rows.find(row =>
+              row.name === 'GFD Stripe Worker' &&
+              Date.parse(row.checked_at) >= started - 5000
+            );
+            if (!stripe) continue;
+            if (Number(stripe.status_code) !== 200 || Number(stripe.keyword_found) !== 1 || stripe.overall_status !== 'pass') {
+              throw new Error(`estate health still rejects Stripe Worker: ${JSON.stringify(stripe)}`);
+            }
+            console.log('stripe_estate_health_verified=true');
+            process.exit(0);
+          }
+
+          throw new Error('Timed out waiting for fresh Stripe estate-health evidence');
+          NODE
