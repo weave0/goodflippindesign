@@ -172,28 +172,50 @@ async function checkTarget(target) {
     const elapsed = Date.now() - start;
     const h       = resp.headers;
 
-    // Content validation — read a limited slice of the body for keyword matching
+    // Content validation. Prefer a versioned machine contract when one is
+    // configured; fall back to a bounded keyword check for legacy properties.
     let keyword_found = null;
+    let content_detail = null;
     const keyword = target.expectedKeyword || null;
-    if (keyword && resp.ok) {
+    const machineContract = target.machineContract || null;
+
+    if (machineContract && resp.ok) {
+      try {
+        const payload = await resp.json();
+        const mismatches = Object.entries(machineContract)
+          .filter(([key, expected]) => payload?.[key] !== expected)
+          .map(([key, expected]) => `${key} expected ${JSON.stringify(expected)}, got ${JSON.stringify(payload?.[key])}`);
+        keyword_found = mismatches.length === 0 ? 1 : 0;
+        content_detail = mismatches.length === 0 ? null : mismatches.join('; ');
+      } catch (err) {
+        keyword_found = 0;
+        content_detail = `invalid machine-health JSON: ${err.message}`;
+      }
+    } else if (keyword && resp.ok) {
       try {
         const text = await resp.text();
-        // Only scan first 50KB to avoid memory issues on large pages
+        // Only scan first 50KB to avoid memory issues on large pages.
         const slice = text.substring(0, 51200);
         keyword_found = slice.includes(keyword) ? 1 : 0;
-      } catch { keyword_found = null; }
+      } catch {
+        keyword_found = null;
+      }
     }
 
     let overall_status;
+    let finding_kind = null;
     if (!resp.ok) {
       overall_status = 'fail';
+      finding_kind = 'http_failure';
     } else if (keyword_found === 0) {
-      // 200 but missing expected content — degraded
       overall_status = 'warn';
+      finding_kind = machineContract ? 'machine_contract_mismatch' : 'content_mismatch';
     } else if (elapsed >= FAIL_MS) {
       overall_status = 'fail';
+      finding_kind = 'latency_failure';
     } else if (elapsed >= WARN_MS) {
       overall_status = 'warn';
+      finding_kind = 'latency_warning';
     } else {
       overall_status = 'pass';
     }
@@ -210,8 +232,10 @@ async function checkTarget(target) {
       has_x_frame:       h.has('x-frame-options') ? 1 : 0,
       has_hsts:          h.has('strict-transport-security') ? 1 : 0,
       has_xcto:          h.has('x-content-type-options') ? 1 : 0,
-      content_keyword:   keyword,
+      content_keyword:   machineContract ? `machine:${machineContract.contract || 'health'}` : keyword,
       keyword_found,
+      content_detail,
+      finding_kind,
       error:             null,
       overall_status,
     };
@@ -229,8 +253,10 @@ async function checkTarget(target) {
       has_x_frame:       0,
       has_hsts:          0,
       has_xcto:          0,
-      content_keyword:   target.expectedKeyword || null,
+      content_keyword:   target.machineContract ? `machine:${target.machineContract.contract || 'health'}` : (target.expectedKeyword || null),
       keyword_found:     null,
+      content_detail:    null,
+      finding_kind:      err.name === 'AbortError' ? 'timeout' : 'network_failure',
       error:             err.name === 'AbortError' ? `Timeout after ${TIMEOUT_MS}ms` : err.message,
       overall_status:    'fail',
     };
@@ -276,89 +302,178 @@ async function persistChecks(db, checkedAt, checks) {
 
 // ── GitHub Issue reporter ─────────────────────────────────────────────────────
 async function reportToGitHub(checks, checkedAt, env) {
-  const date    = checkedAt.split('T')[0];
-  const failing = checks.filter(c => c.overall_status === 'fail');
-  const warning = checks.filter(c => c.overall_status === 'warn');
-  const passing = checks.filter(c => c.overall_status === 'pass');
-  const allClear = failing.length === 0 && warning.length === 0;
-
-  const icon = failing.length > 0 ? '🚨' : warning.length > 0 ? '⚠️' : '✅';
-
-  // ── Results table ──────────────────────────────────────────────────────────
-  const table = [
-    '| Status | Type | Brand | Page | HTTP | Time | Content | CSP | HSTS | X-Frame | XCTO |',
-    '|--------|------|-------|------|------|------|---------|-----|------|---------|------|',
-    ...checks.map(c => {
-      const si = c.overall_status === 'pass' ? '✅' : c.overall_status === 'warn' ? '⚠️' : '❌';
-      const sc = c.status_code != null ? String(c.status_code) : 'ERR';
-      const rt = c.response_time_ms != null ? `${c.response_time_ms}ms` : '—';
-      const yn = v => (v ? '✅' : '❌');
-      const ct = c.target.checkType || 'page';
-      const kw = c.keyword_found === 1 ? '✅' : c.keyword_found === 0 ? '❌' : '—';
-      return `| ${si} | ${ct} | \`${c.target.brand}\` | [${c.target.name}](${c.target.url}) | ${sc} | ${rt} | ${kw} | ${yn(c.has_csp)} | ${yn(c.has_hsts)} | ${yn(c.has_x_frame)} | ${yn(c.has_xcto)} |`;
-    }),
-  ].join('\n');
-
-  // ── Failure detail block ───────────────────────────────────────────────────
-  const failDetail = failing.length > 0
-    ? '\n\n### ❌ Failing Endpoints\n' +
-      failing.map(c =>
-        `- **${c.target.name}** (${c.target.checkType || 'page'}) — \`${c.target.url}\`\n  > ${c.error || `HTTP ${c.status_code}`}`
-      ).join('\n')
-    : '';
-
-  const warnDetail = warning.length > 0
-    ? '\n\n### ⚠️ Degraded Endpoints\n' +
-      warning.map(c => {
-        const reasons = [];
-        if (c.keyword_found === 0) reasons.push(`missing expected keyword "${c.content_keyword}"`);
-        if (c.response_time_ms >= WARN_MS) reasons.push(`slow ${c.response_time_ms}ms`);
-        return `- **${c.target.name}** (${c.target.checkType || 'page'}) — ${reasons.join(', ') || 'degraded'}`;
-      }).join('\n')
-    : '';
-
-  // ── Issue body ─────────────────────────────────────────────────────────────
-  const title = `${icon} Health Sweep — ${date}` +
-    (failing.length > 0 ? ` · ${failing.length} failing` : '') +
-    (warning.length > 0 ? ` · ${warning.length} slow` : '');
-
-  const body =
-    `## ${icon} Ecosystem Health — ${date}\n\n` +
-    `**${passing.length}** passing · **${warning.length}** slow · **${failing.length}** failing · ${checks.length} endpoints checked\n\n` +
-    table +
-    failDetail +
-    warnDetail +
-    `\n\n---\n<sub>🤖 Automated by [gfd-health-sweep](https://github.com/${GH_REPO}/blob/main/workers/health-sweep.js) · ${checkedAt}</sub>`;
-
-  // Labels: all-clear issues get auto-closed; failures stay open as action items
-  const labels = allClear
-    ? ['health-sweep', 'automated']
-    : ['health-sweep', 'automated', 'needs-attention'];
-
-  // ── Create issue ───────────────────────────────────────────────────────────
-  const createResp = await fetch(`https://api.github.com/repos/${GH_REPO}/issues`, {
-    method: 'POST',
-    headers: ghHeaders(env.GITHUB_TOKEN),
-    body: JSON.stringify({ title, body, labels }),
-  });
-
-  if (!createResp.ok) {
-    const err = await createResp.text();
-    throw new Error(`GitHub issue creation failed (${createResp.status}): ${err}`);
+  const openIssuesResp = await fetch(
+    `https://api.github.com/repos/${GH_REPO}/issues?state=open&labels=health-sweep&per_page=100`,
+    { headers: ghHeaders(env.GITHUB_TOKEN) }
+  );
+  if (!openIssuesResp.ok) {
+    throw new Error(`GitHub issue listing failed (${openIssuesResp.status}): ${await openIssuesResp.text()}`);
   }
 
-  const issue = await createResp.json();
-  console.log(`[health-sweep] Created issue #${issue.number}: ${title}`);
+  const openIssues = (await openIssuesResp.json()).filter(issue => !issue.pull_request);
+  const managed = openIssues
+    .map(issue => ({ issue, marker: parseHealthIncidentMarker(issue.body || '') }))
+    .filter(entry => entry.marker);
 
-  // Auto-close all-clear sweeps — only failures should linger in the queue
-  if (allClear) {
-    await fetch(`https://api.github.com/repos/${GH_REPO}/issues/${issue.number}`, {
+  const activeKeys = new Set();
+
+  for (const check of checks) {
+    if (check.overall_status === 'pass') continue;
+
+    const findingKey = healthFindingKey(check);
+    activeKeys.add(findingKey);
+    const existing = managed.find(entry => entry.marker.findingKey === findingKey);
+    const occurrence = existing ? existing.marker.occurrences + 1 : 1;
+    const firstSeen = existing?.marker.firstSeen || checkedAt;
+    const body = buildHealthIncidentBody(check, {
+      findingKey,
+      firstSeen,
+      lastSeen: checkedAt,
+      occurrences: occurrence,
+      lifecycle: 'detected',
+    });
+    const title = buildHealthIncidentTitle(check);
+
+    if (existing) {
+      const response = await fetch(`https://api.github.com/repos/${GH_REPO}/issues/${existing.issue.number}`, {
+        method: 'PATCH',
+        headers: ghHeaders(env.GITHUB_TOKEN),
+        body: JSON.stringify({ title, body }),
+      });
+      if (!response.ok) {
+        throw new Error(`GitHub incident update failed (${response.status}): ${await response.text()}`);
+      }
+      console.log(`[health-sweep] Updated incident #${existing.issue.number}: ${findingKey}`);
+    } else {
+      const response = await fetch(`https://api.github.com/repos/${GH_REPO}/issues`, {
+        method: 'POST',
+        headers: ghHeaders(env.GITHUB_TOKEN),
+        body: JSON.stringify({
+          title,
+          body,
+          labels: ['health-sweep', 'automated', 'needs-attention'],
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`GitHub incident creation failed (${response.status}): ${await response.text()}`);
+      }
+      const issue = await response.json();
+      console.log(`[health-sweep] Created incident #${issue.number}: ${findingKey}`);
+    }
+  }
+
+  // A target that is currently healthy closes any managed incident previously
+  // opened for that target. If the target is still degraded for a different
+  // reason, only superseded finding kinds are closed.
+  for (const entry of managed) {
+    const targetCheck = checks.find(check => check.target.id === entry.marker.targetId);
+    if (!targetCheck) continue;
+
+    const stillActive = activeKeys.has(entry.marker.findingKey);
+    if (stillActive) continue;
+
+    const targetHasActiveFinding = targetCheck.overall_status !== 'pass';
+    const resolvedAt = checkedAt;
+    const resolvedBody = (entry.issue.body || '')
+      .replace(/lifecycle: [^\n]+/, 'lifecycle: resolved')
+      .replace(/resolved-at: [^\n]+/, `resolved-at: ${resolvedAt}`);
+
+    const response = await fetch(`https://api.github.com/repos/${GH_REPO}/issues/${entry.issue.number}`, {
       method: 'PATCH',
       headers: ghHeaders(env.GITHUB_TOKEN),
-      body: JSON.stringify({ state: 'closed', state_reason: 'completed' }),
+      body: JSON.stringify({
+        state: 'closed',
+        state_reason: 'completed',
+        body: resolvedBody.includes('resolved-at:')
+          ? resolvedBody
+          : `${resolvedBody}\nresolved-at: ${resolvedAt}\n`,
+      }),
     });
-    console.log(`[health-sweep] Auto-closed issue #${issue.number} (all clear)`);
+    if (!response.ok) {
+      throw new Error(`GitHub incident resolution failed (${response.status}): ${await response.text()}`);
+    }
+    console.log(
+      `[health-sweep] Resolved incident #${entry.issue.number}: ${entry.marker.findingKey}` +
+      (targetHasActiveFinding ? ' (superseded by another active finding)' : '')
+    );
   }
+
+  const failing = checks.filter(c => c.overall_status === 'fail').length;
+  const warning = checks.filter(c => c.overall_status === 'warn').length;
+  const passing = checks.length - failing - warning;
+  console.log(`[health-sweep] ${checkedAt} — ${passing} pass, ${warning} warn, ${failing} fail`);
+}
+
+export function healthFindingKey(check) {
+  const targetId = check?.target?.id;
+  const kind = check?.finding_kind;
+  if (!targetId || !kind) throw new Error('health finding requires target.id and finding_kind');
+  return `health:${targetId}:${kind}`;
+}
+
+export function buildHealthIncidentTitle(check) {
+  const severity = check.overall_status === 'fail' ? 'FAIL' : 'WARN';
+  return `[health:${check.target.id}] ${severity} · ${check.target.name} · ${check.finding_kind}`;
+}
+
+export function buildHealthIncidentBody(check, state) {
+  const evidence = [];
+  if (check.status_code != null) evidence.push(`HTTP ${check.status_code}`);
+  if (check.response_time_ms != null) evidence.push(`${check.response_time_ms}ms`);
+  if (check.error) evidence.push(check.error);
+  if (check.content_detail) evidence.push(check.content_detail);
+  if (check.keyword_found === 0 && !check.content_detail) {
+    evidence.push(`missing expected content ${JSON.stringify(check.content_keyword)}`);
+  }
+
+  return [
+    '## Estate health incident',
+    '',
+    `**Property:** \`${check.target.id}\``,
+    `**Target:** [${check.target.name}](${check.target.url})`,
+    `**Condition:** \`${check.finding_kind}\``,
+    `**Current status:** \`${check.overall_status}\``,
+    `**Evidence:** ${evidence.join(' · ') || 'degraded health contract'}`,
+    '',
+    '### Verification condition',
+    'Run the same configured health probe again and require this finding key to be absent.',
+    '',
+    '<!-- gfd-health-incident',
+    `health-finding-key: ${state.findingKey}`,
+    `target-id: ${check.target.id}`,
+    `finding-kind: ${check.finding_kind}`,
+    `first-seen: ${state.firstSeen}`,
+    `last-seen: ${state.lastSeen}`,
+    `occurrences: ${state.occurrences}`,
+    `lifecycle: ${state.lifecycle}`,
+    'resolved-at: null',
+    '-->',
+  ].join('\n');
+}
+
+export function parseHealthIncidentMarker(body) {
+  const block = body.match(/<!-- gfd-health-incident\n([\s\S]*?)\n-->/);
+  if (!block) return null;
+
+  const values = Object.fromEntries(
+    block[1]
+      .split('\n')
+      .map(line => line.split(/:\s*/, 2))
+      .filter(parts => parts.length === 2)
+  );
+
+  const occurrences = Number.parseInt(values['occurrences'] || '0', 10);
+  if (!values['health-finding-key'] || !values['target-id'] || !Number.isFinite(occurrences)) return null;
+
+  return {
+    findingKey: values['health-finding-key'],
+    targetId: values['target-id'],
+    findingKind: values['finding-kind'] || null,
+    firstSeen: values['first-seen'] || null,
+    lastSeen: values['last-seen'] || null,
+    occurrences,
+    lifecycle: values['lifecycle'] || null,
+  };
 }
 
 // ── Shared GitHub API headers ─────────────────────────────────────────────────
