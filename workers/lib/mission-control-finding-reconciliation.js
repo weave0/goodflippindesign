@@ -12,6 +12,7 @@ import {
   createObservedWorkItem,
   deriveWorkItemId,
   validateObservation,
+  validateWorkItemProjection as validateCanonicalWorkItemProjection,
 } from './mission-control-work-items.js';
 
 export const FINDING_FEED_CONTRACT = 'gfd-mission-control-finding-feed';
@@ -82,9 +83,8 @@ async function digestDocument(value) {
   return `sha256:${await sha256Hex(JSON.stringify(canonicalize(value)))}`;
 }
 
-async function deriveEventId({ eventType, workItemId, occurredAt, evidenceDigest }) {
-  const material = [eventType, workItemId, occurredAt, evidenceDigest].join('\0');
-  return `gfdwievent_v1_${await sha256Hex(material)}`;
+async function deriveEventId(event) {
+  return `gfdwievent_v1_${await sha256Hex(JSON.stringify(canonicalize(event)))}`;
 }
 
 function sameObservation(existing, observation) {
@@ -221,6 +221,7 @@ async function validateWorkItemProjection(workItems) {
     if (!WORK_ITEM_STATES.includes(item.state)) {
       throw new Error(`workItems[${index}] has unsupported state: ${item.state}`);
     }
+    validateCanonicalWorkItemProjection(item);
     instantMillis(item.firstSeen, `workItems[${index}].firstSeen`);
     const lastSeen = instantMillis(item.lastSeen, `workItems[${index}].lastSeen`);
     if (lastSeen < instantMillis(item.firstSeen, `workItems[${index}].firstSeen`)) {
