@@ -169,7 +169,7 @@
             "activePlatforms": [
                 "x"
             ],
-            "repo": null,
+            "repo": "weave0/aiaimate",
             "dir": "GFD Dev Projects/AI",
             "deployment": {
                 "provider": "vercel",
@@ -221,7 +221,7 @@
             "activePlatforms": [
                 "x"
             ],
-            "repo": null,
+            "repo": "weave0/CultureSherpa",
             "dir": "GFD Dev Projects/CultureSherpa",
             "deployment": {
                 "provider": "unknown",
@@ -271,7 +271,7 @@
                 }
             },
             "activePlatforms": [],
-            "repo": null,
+            "repo": "weave0/CitizenApproved",
             "dir": "GFD Dev Projects/CitizenApproved",
             "deployment": {
                 "provider": "cloudflare-pages",
@@ -312,7 +312,7 @@
                 }
             },
             "activePlatforms": [],
-            "repo": null,
+            "repo": "weave0/globaldeets",
             "dir": "GFD Dev Projects/Globaldeets",
             "deployment": {
                 "provider": "cloudflare-pages",
