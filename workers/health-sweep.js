@@ -1,4 +1,9 @@
 import healthTargetsConfig from '../config/health-targets.json';
+import {
+  createD1WorkItemStore,
+  ensureWorkItemSchema,
+  recordHealthObservation,
+} from './mission-control-work-items.js';
 
 /**
  * gfd-health-sweep
@@ -315,6 +320,13 @@ async function persistChecks(db, checkedAt, checks) {
 }
 
 // ── GitHub Issue reporter ─────────────────────────────────────────────────────
+async function rememberHealthWorkItem(env, marker, options) {
+  if (!env?.DB) return;
+  await ensureWorkItemSchema(env.DB);
+  const store = createD1WorkItemStore(env.DB);
+  await recordHealthObservation(store, marker, options);
+}
+
 export async function reportToGitHub(checks, checkedAt, env) {
   const openIssuesResp = await fetch(
     `https://api.github.com/repos/${GH_REPO}/issues?state=open&labels=health-sweep&per_page=100`,
@@ -347,6 +359,7 @@ export async function reportToGitHub(checks, checkedAt, env) {
       lifecycle: 'detected',
     });
     const title = buildHealthIncidentTitle(check);
+    let issueNumber = existing?.issue.number || null;
 
     if (existing) {
       const response = await fetch(`https://api.github.com/repos/${GH_REPO}/issues/${existing.issue.number}`, {
@@ -372,8 +385,18 @@ export async function reportToGitHub(checks, checkedAt, env) {
         throw new Error(`GitHub incident creation failed (${response.status}): ${await response.text()}`);
       }
       const issue = await response.json();
+      issueNumber = issue.number;
       console.log(`[health-sweep] Created incident #${issue.number}: ${findingKey}`);
     }
+    await rememberHealthWorkItem(env, {
+      findingKey,
+      targetId: check.target.id,
+      findingKind: check.finding_kind,
+    }, {
+      issueNumber,
+      status: 'degraded',
+      checkedAt,
+    });
   }
 
   // A target that is currently healthy closes any managed incident previously
@@ -410,6 +433,11 @@ export async function reportToGitHub(checks, checkedAt, env) {
       `[health-sweep] Resolved incident #${entry.issue.number}: ${entry.marker.findingKey}` +
       (targetHasActiveFinding ? ' (superseded by another active finding)' : '')
     );
+    await rememberHealthWorkItem(env, entry.marker, {
+      issueNumber: entry.issue.number,
+      status: 'pass',
+      checkedAt: resolvedAt,
+    });
   }
 
   const failing = checks.filter(c => c.overall_status === 'fail').length;
