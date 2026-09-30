@@ -323,6 +323,14 @@ describe('GitHub incident convergence', () => {
     expect(items[0].lastSeen).toBe('2026-09-29T07:24:48.137Z');
     expect(items[0].repository).toBeNull();
     expect(items[0].availableBinding.repository).toBe('weave0/aiaimate');
-    expect(items[0].qualificationGaps.length).toBeGreaterThan(0);
+    // AIAIMate is the one dispatch-ready specimen: its registry declarations close every gap, but the
+    // observation itself must never self-qualify (repository stays null until an operator qualifies).
+    expect(items[0].qualificationGaps).toEqual([]);
+    expect(items[0].availableBinding).toMatchObject({
+      investigationProfile: 'web-health-readonly-v1',
+      verificationProfile: 'gfd-property-health-production',
+      verificationScope: 'production',
+    });
+    expect(items[0].availableBinding.verificationPredicate).toMatch(/same configured health probe/);
   });
 });

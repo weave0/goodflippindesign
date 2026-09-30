@@ -87,6 +87,12 @@ if (!match) {
             problems.push(`${property.domain}: operating.repository_source is required when operating.repository is declared`);
           }
         }
+        for (const field of ["verification_scope", "verification_predicate"]) {
+          const value = property.operating[field];
+          if (value !== undefined && (typeof value !== "string" || !value.trim())) {
+            problems.push(`${property.domain}: operating.${field} must be a non-empty string when declared`);
+          }
+        }
         for (const field of ["investigation_profile", "verification_profile"]) {
           const value = property.operating[field];
           if (value != null && (typeof value !== "string" || !value.trim())) {

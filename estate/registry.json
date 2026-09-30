@@ -44,8 +44,10 @@
         "repository": "weave0/aiaimate",
         "default_branch": "main",
         "repository_source": "github-repository-verified-2026-09-29",
-        "investigation_profile": null,
-        "verification_profile": null,
+        "investigation_profile": "web-health-readonly-v1",
+        "verification_profile": "gfd-property-health-production",
+        "verification_scope": "production",
+        "verification_predicate": "Run the same configured health probe again and require this finding key to be absent.",
         "deploy_identity": {
           "provider": "vercel",
           "project": "aiaimate"
