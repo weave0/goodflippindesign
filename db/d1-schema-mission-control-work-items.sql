@@ -109,9 +109,11 @@ CREATE TABLE IF NOT EXISTS mc_work_item_events (
 CREATE INDEX IF NOT EXISTS idx_mc_work_item_events_item_time
   ON mc_work_item_events (work_item_id, occurred_at);
 
--- Durable consequence ledger.
--- The deterministic effect_id is the retry boundary: the same consequence
--- must resolve to the same row before an agent is allowed to repeat it.
+-- Durable consequence ledger / transactional outbox (contract gfd-effect-1).
+-- The deterministic effect_id is the idempotency key. Intent is committed
+-- here before any remote call. Delivery is at-least-once; a receipt is
+-- accepted once for the fenced attempt. See d1-migration-mission-control-outbox.sql
+-- for databases created before these columns existed.
 CREATE TABLE IF NOT EXISTS mc_effects (
   effect_id TEXT PRIMARY KEY,
   work_item_id TEXT NOT NULL,
@@ -124,11 +126,24 @@ CREATE TABLE IF NOT EXISTS mc_effects (
   committed_at TEXT,
   verified_at TEXT,
   last_error TEXT,
+  schema_version TEXT,
+  requested_lifecycle_version INTEGER,
+  payload_digest TEXT,
+  payload_json TEXT,
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  last_attempt_at TEXT,
+  idempotency_key TEXT,
+  causal_event_id TEXT,
+  receipt_ref TEXT,
+  terminal_reason TEXT,
   FOREIGN KEY (work_item_id) REFERENCES mc_work_items(work_item_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_mc_effects_work_item
   ON mc_effects (work_item_id, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_mc_effects_dispatch
+  ON mc_effects (status, last_attempt_at);
 
 -- An active lease is represented on mc_work_items for fast operator reads.
 -- This historical table preserves claims/releases and makes lease contention
