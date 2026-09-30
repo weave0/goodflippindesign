@@ -471,4 +471,39 @@ describe('mission control operations projection', () => {
     expect(view.queues.needsHuman).toEqual([]);
     expect(view.queues.activeAutomation.map((card) => card.workItemId)).toEqual(['wi-held']);
   });
+
+  it('puts a DIAGNOSED item with no automation on the human queue as lifecycle_waiting', () => {
+    const view = project({ workItems: [item('wi-idle', { state: 'DIAGNOSED' })] });
+    const card = view.queues.needsHuman.find((entry) => entry.workItemId === 'wi-idle');
+    expect(card.reasons).toContain('lifecycle_waiting');
+    expect(view.queues.attention.map((entry) => entry.workItemId)).toContain('wi-idle');
+  });
+
+  it('applies the visibility timeout to an orphaned planned effect', () => {
+    const beyond = new Date(Date.parse(NOW) - EFFECT_VISIBILITY_MS).toISOString();
+    const inside = new Date(Date.parse(NOW) - EFFECT_VISIBILITY_MS + 1).toISOString();
+    const view = project({
+      effects: [
+        effect('fx-orphan-old', 'wi-gone', { attemptCount: 1, lastAttemptAt: beyond }),
+        effect('fx-orphan-live', 'wi-gone', { attemptCount: 1, lastAttemptAt: inside }),
+      ],
+    });
+    const stale = view.queues.stale.find((card) => card.effectIds.includes('fx-orphan-old'));
+    expect(stale.reasons).toContain('effect_beyond_visibility');
+    expect(view.queues.attention.map((card) => card.effectIds).flat()).toContain('fx-orphan-old');
+    expect(view.queues.stale.map((card) => card.effectIds).flat()).not.toContain('fx-orphan-live');
+    expect(view.queues.activeAutomation.map((card) => card.effectIds).flat()).toEqual(
+      expect.arrayContaining(['fx-orphan-old', 'fx-orphan-live']),
+    );
+  });
+
+  it('counts malformed event and lease rows as excluded source rows', () => {
+    const view = project({
+      workItems: [item('wi-ok', { state: 'NEEDS_HUMAN' })],
+      events: [{ garbage: true }, null],
+      leases: [{ garbage: true }],
+    });
+    expect(view.source.events).toMatchObject({ supplied: true, included: 0, excluded: 2 });
+    expect(view.source.leases).toMatchObject({ supplied: true, included: 0, excluded: 1 });
+  });
 });

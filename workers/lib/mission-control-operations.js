@@ -68,6 +68,7 @@ const HUMAN_REASONS = new Set([
   'awaiting_qualification',
   'awaiting_investigation',
   'awaiting_dispatch',
+  'lifecycle_waiting',
 ]);
 const STALE_REASONS = new Set([
   'expired_lease',
@@ -449,6 +450,19 @@ function liveClaim(effect, nowMs) {
     && (nowMs - effect.lastAttemptAt.millis) < EFFECT_VISIBILITY_MS;
 }
 
+// Same visibility and planning-window rules as an effect attached to an accepted item.
+function orphanReasons(effect, nowMs) {
+  if (effect.status === 'FAILED') return ['failed_effect'];
+  const reasons = [];
+  if (effect.lastAttemptAt && (nowMs - effect.lastAttemptAt.millis) >= EFFECT_VISIBILITY_MS) {
+    reasons.push('effect_beyond_visibility');
+  }
+  if (!effect.lastAttemptAt && effect.createdAt && (nowMs - effect.createdAt.millis) >= EFFECT_PLANNED_STALE_AFTER_MS) {
+    reasons.push('effect_planned_too_long');
+  }
+  return reasons;
+}
+
 function classifyItem(item, effects, leases, nowMs) {
   const reasons = [];
   const own = effects.filter((effect) => effect.workItemId === item.workItemId);
@@ -796,9 +810,7 @@ export function projectMissionControlOperations(input) {
         findingKey: null,
         state: null,
         severity: null,
-        reasons: [effect.status === 'FAILED' ? 'failed_effect' : 'effect_planned_too_long'].filter((reason) => (
-          effect.status === 'FAILED' || (effect.createdAt && (now.millis - effect.createdAt.millis) >= EFFECT_PLANNED_STALE_AFTER_MS)
-        )),
+        reasons: orphanReasons(effect, now.millis),
         ageMs: effect.createdAt ? now.millis - effect.createdAt.millis : null,
         recurrenceCount: null,
         maxAttemptCount: effect.attemptCount,
@@ -894,9 +906,9 @@ export function projectMissionControlOperations(input) {
     },
     source: {
       workItems: { supplied: workSource.supplied, included: items.length, excluded: excludedWorkItems.length },
-      events: { supplied: eventSource.supplied, included: events.length, excluded: eventDeduped.excluded.length },
+      events: { supplied: eventSource.supplied, included: events.length, excluded: eventDeduped.excluded.length + malformedEvents },
       effects: { supplied: effectSource.supplied, included: effects.length, excluded: excludedEffects.length },
-      leases: { supplied: leaseSource.supplied, included: leases.length, excluded: leaseDeduped.excluded.length },
+      leases: { supplied: leaseSource.supplied, included: leases.length, excluded: leaseDeduped.excluded.length + malformedLeases },
       readiness: input.readiness == null ? null : {
         contractName: input.readiness.contractName ?? null,
         schemaVersion: input.readiness.schemaVersion ?? null,
