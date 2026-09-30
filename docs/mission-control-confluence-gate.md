@@ -127,3 +127,31 @@ concurrent duplicate requests, smuggled authority, the positive path, retry afte
 (no identity collision), the store-level structural refusal, and the check-then-write race for every predicate.
 **Requires the attested operator specimen** (tier 2): that the real FWOMPS still runs end to end under the
 invariant (42/42 on the recorded run), including the two real-wire refusals that must precede the claim.
+
+## Registering the real FWOMPS host binding (host-owner action)
+
+`~/.fwomps` currently registers only a `fwomps` workspace. `scripts/fwomps-aiaimate-host-binding.py` plans,
+applies and verifies `aiaimate.com → workspace aiaimate → weave0/aiaimate → web-health-readonly-v1` using only
+FWOMPS's published host-config and key-store classes. It is **read-only unless `--apply`**, takes the two shared
+keys from environment variables (never arguments, never printed), backs up `config.json` before writing, refuses
+to overwrite any conflicting workspace/binding/profile/Mission Control block, and is idempotent.
+
+```bash
+# 0. a dedicated CLEAN clone (FWOMPS verifies a clean tree at the contract's evidence revision)
+git clone https://github.com/weave0/aiaimate.git <workspace-root>
+
+# 1. plan (read-only): shows exactly what would change, key ids enrolled, which env vars are missing
+FWOMPS_REPO=<fwomps checkout> python scripts/fwomps-aiaimate-host-binding.py \
+  --workspace-root <workspace-root> --result-origin https://<gfd origin> --worker-id <MISSION_CONTROL_RESULT_WORKER_ID>
+
+# 2. apply, with GFD's own keys exported in THIS shell only (they must equal GFD's secrets):
+#    FWOMPS_MC_CONTRACT_KEY_ID/_HEX == MISSION_CONTROL_CONTRACT_KEY_ID/_KEY
+#    FWOMPS_MC_WORKER_KEY_ID/_HEX   == MISSION_CONTROL_RESULT_KEY_ID/_KEY
+... same arguments ... --apply
+
+# 3. verify (read-only). Also export the GFD worker bearer under the env NAME the config records (default GFD_MC_WORKER_TOKEN)
+... same arguments ... --revision <evidence revision> --verify
+```
+
+The tool's apply/verify/conflict/no-secret-output behaviour was exercised against an isolated throwaway home; the
+real host was only ever planned against (its `config.json` was byte-identical afterwards).
