@@ -362,6 +362,39 @@ describe('mission control effect outbox', () => {
     })).rejects.toThrow(/fence/);
   });
 
+  it('refuses a claim when the lifecycle advances between the read and the claim update', async () => {
+    const item = await workItem('outbox:claim-race');
+    const planned = await planEffect(env.DB, intent(item));
+    let armed = false;
+    const racing = {
+      prepare: (sql) => {
+        const statement = env.DB.prepare(sql);
+        if (!sql.includes('SET attempt_count = attempt_count + 1')) return statement;
+        armed = true;
+        return {
+          bind: (...args) => {
+            const bound = statement.bind(...args);
+            return {
+              run: async () => {
+                if (armed) {
+                  armed = false;
+                  await env.DB.prepare('UPDATE mc_work_items SET lifecycle_version = lifecycle_version + 1 WHERE work_item_id = ?')
+                    .bind(item.workItemId).run();
+                }
+                return bound.run();
+              },
+            };
+          },
+        };
+      },
+      batch: (statements) => env.DB.batch(statements),
+    };
+    const claim = await claimDispatch(racing, planned.effect.effectId, { now: T0 });
+    expect(claim.permit).toBeNull();
+    expect(claim.reason).toBe('stale_lifecycle');
+    expect((await loadEffect(env.DB, planned.effect.effectId)).attemptCount).toBe(0);
+  });
+
   it('survives concurrent first use of the schema', async () => {
     await Promise.all([1, 2, 3, 4].map(() => ensureOutboxSchema(env.DB)));
   });
