@@ -8,15 +8,17 @@
  *   digest  SHA-256(JCS(envelope without authentication.mac))
  *   mac     HMAC-SHA256(key, UTF8(purpose) || 0x00 || raw digest)
  *
- * FWOMPS has not published a result wire schema yet (the lease slice calls
- * that a later envelope). Result intake therefore stays behind
- * gfd-investigation-result-holding-1. The operator UI reads the holding
- * diagnosis, never raw FWOMPS result fields.
+ * Lease grants and results use the published MC-FW-001 wire formats.
+ * GFD signs `mc-fw-lease-grant-1`. FWOMPS signs `mc-fw-investigation-result-1`.
+ * Result `key_id` selects the worker key. The envelope's worker id is checked
+ * against that binding afterwards, and repair scope is never returned.
  */
 
 export const INVESTIGATION_SCHEMA = 'mc-fw-investigation-request-1';
 export const INVESTIGATION_PURPOSE = 'gfd->fwomps:investigation-request:v1';
-export const RESULT_SCHEMA = 'gfd-investigation-result-holding-1';
+export const LEASE_SCHEMA = 'mc-fw-lease-grant-1';
+export const LEASE_PURPOSE = 'gfd->fwomps:lease-grant:v1';
+export const RESULT_SCHEMA = 'mc-fw-investigation-result-1';
 export const RESULT_PURPOSE = 'fwomps->gfd:investigation-result:v1';
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
@@ -310,18 +312,69 @@ export async function buildSignedInvestigationContract(workItem, options) {
   };
 }
 
-const RESULT_TOP_FIELDS = [
-  'schema_version', 'work_item_id', 'request_id', 'contract_digest',
-  'worker_id', 'diagnosis', 'authentication',
-];
+function canonicalUtc(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) {
+    throw new InvestigationAdapterError('malformed_timestamp', 'timestamp is not a UTC instant');
+  }
+  return date.toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
 
-export async function signResultHolding(holding, key) {
-  requireObject(holding, 'result');
-  const unsigned = JSON.parse(JSON.stringify(holding));
-  unsigned.authentication = { key_id: holding.authentication?.key_id };
-  const mac = await macFor(unsigned, key, RESULT_PURPOSE);
-  unsigned.authentication = { key_id: holding.authentication?.key_id, mac };
-  return unsigned;
+export async function buildSignedLeaseGrant(options) {
+  const key = options?.key;
+  const keyId = options?.keyId;
+  if (!(key instanceof Uint8Array) || !key.byteLength || typeof keyId !== 'string' || !keyId) {
+    throw new InvestigationAdapterError('signing_key_unavailable', 'lease signing key is not configured');
+  }
+  if (!REQUEST_ID.test(options?.requestId || '')) {
+    throw new InvestigationAdapterError('malformed_request_id', 'lease request id is not canonical');
+  }
+  if (!DIGEST_TEXT.test(options?.contractDigest || '')) {
+    throw new InvestigationAdapterError('malformed_digest', 'lease contract digest is not canonical');
+  }
+  const workerId = options?.workerId;
+  if (typeof workerId !== 'string' || !workerId.trim() || workerId.length > 128) {
+    throw new InvestigationAdapterError('malformed_worker', 'enrolled worker id is required');
+  }
+  const attempt = options?.attempt;
+  const maxAttempts = options?.maxAttempts;
+  if (!Number.isInteger(attempt) || attempt < 1
+    || !Number.isInteger(maxAttempts) || maxAttempts < 1
+    || attempt > maxAttempts) {
+    throw new InvestigationAdapterError('malformed_attempt', 'lease attempt is outside the allowed range');
+  }
+  const issuedAt = canonicalUtc(options.now);
+  const expiresAt = canonicalUtc(options.expiresAt);
+  if (Date.parse(expiresAt) <= Date.parse(issuedAt)) {
+    throw new InvestigationAdapterError('malformed_lease_lifetime', 'lease expires at or before it is issued');
+  }
+  const token = new Uint8Array(32);
+  crypto.getRandomValues(token);
+  const leaseTokenDigest = `sha256:${hex(await sha256(token))}`;
+  const unsigned = {
+    schema_version: LEASE_SCHEMA,
+    purpose: LEASE_PURPOSE,
+    request_id: options.requestId,
+    contract_digest: options.contractDigest,
+    worker_id: workerId,
+    attempt,
+    lease_token_digest: leaseTokenDigest,
+    lease_issued_at: issuedAt,
+    lease_expires_at: expiresAt,
+    max_attempts: maxAttempts,
+    key_id: keyId,
+  };
+  const payload = { ...unsigned, mac: await macFor(unsigned, key, LEASE_PURPOSE) };
+  return {
+    schemaVersion: LEASE_SCHEMA,
+    purpose: LEASE_PURPOSE,
+    payload,
+    leaseTokenHex: hex(token),
+    leaseTokenDigest,
+    attempt,
+    workerId,
+    expiresAt,
+  };
 }
 
 export async function verifySignedEnvelope(envelope, key, purpose, macPath) {
@@ -339,60 +392,248 @@ export async function verifySignedEnvelope(envelope, key, purpose, macPath) {
   return diff === 0;
 }
 
-export async function readInvestigationResult(envelope, key) {
-  requireObject(envelope, 'result');
-  const present = Object.keys(envelope);
-  const missing = RESULT_TOP_FIELDS.filter((field) => !present.includes(field));
-  const extra = present.filter((field) => !RESULT_TOP_FIELDS.includes(field));
+const OUTCOMES = new Set(['reproduced', 'not_reproduced', 'inconclusive', 'blocked']);
+const STOP_REASONS = new Set([
+  'repository_identity',
+  'sandbox_unavailable',
+  'worktree_not_accepted',
+  'worktree_changed_during_run',
+  'sandbox_authority_lost',
+  'source_materialization_failed',
+  'profile_unavailable',
+  'runtime_budget_exhausted',
+  'internal_error',
+]);
+const RECEIPT_STATUSES = new Set(['pass', 'fail', 'error']);
+const SOURCE_STATES = new Set(['accepted_by_host_policy', 'not_accepted']);
+const RESULT_TOP_KEYS = [
+  'schema_version', 'request_id', 'contract_digest', 'attempt', 'lease_token_digest', 'worker',
+  'source', 'evidence', 'outcome', 'summary', 'observations', 'execution_receipts',
+  'repairability', 'stop_reason', 'authentication',
+];
+const WORKER_KEYS = ['id', 'fwomps_version', 'completed_at'];
+const SOURCE_KEYS = ['property_id', 'repository', 'workspace_name', 'inspected_head_sha', 'source_state'];
+const EVIDENCE_KEYS = ['revision', 'snapshot_digest', 'diagnostic_id', 'diagnostic_digest'];
+const RECEIPT_KEYS = [
+  'profile', 'index', 'status', 'exit_code', 'output_digest', 'stdout_excerpt', 'stderr_excerpt',
+  'output_truncated', 'timed_out', 'authoritative_sandbox',
+];
+const REPAIRABILITY_KEYS = ['state', 'advisory_repair_scope'];
+const TIMESTAMP_TEXT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z$/;
+const REPOSITORY_TEXT = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
+const WORKSPACE_TEXT = /^[A-Za-z0-9_.-]{1,128}$/;
+const VERSION_TEXT = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+const MAX_EXCERPT_CHARS = 2014;
+const MAX_RECEIPTS = 16;
+
+function exactKeys(value, keys, where) {
+  requireObject(value, where);
+  const present = Object.keys(value);
+  const missing = keys.filter((key) => !present.includes(key));
+  const extra = present.filter((key) => !keys.includes(key));
   if (missing.length || extra.length) {
-    throw new InvestigationAdapterError(
-      'malformed_result',
-      'investigation result does not match the holding contract',
-    );
+    throw new InvestigationAdapterError('malformed_result', `${where} does not match the result contract`);
   }
+}
+
+function boundedText(value, where, max) {
+  if (typeof value !== 'string' || value.length > max) {
+    throw new InvestigationAdapterError('malformed_result', `${where} is outside the result contract`);
+  }
+  return value;
+}
+
+function requireSha(value, where) {
+  if (typeof value !== 'string' || !SHA.test(value)) {
+    throw new InvestigationAdapterError('malformed_result', `${where} must be a 40-character commit SHA`);
+  }
+}
+
+export function resolveResultKey(env, keyId) {
+  if (typeof keyId !== 'string' || !keyId) {
+    throw new InvestigationAdapterError('unknown_key', 'result authentication.key_id is required');
+  }
+  const configuredId = env?.MISSION_CONTROL_RESULT_KEY_ID;
+  if (typeof configuredId !== 'string' || !configuredId || keyId !== configuredId) {
+    throw new InvestigationAdapterError('unknown_key', 'result key_id is not a known worker key');
+  }
+  const key = keyBytesFromEnv(env?.MISSION_CONTROL_RESULT_KEY);
+  const workerId = env?.MISSION_CONTROL_RESULT_WORKER_ID;
+  if (!(key instanceof Uint8Array) || !key.byteLength || typeof workerId !== 'string' || !workerId.trim()) {
+    throw new InvestigationAdapterError('signing_key_unavailable', 'result verification key is not configured');
+  }
+  return { key, keyId, workerId };
+}
+
+export async function signResultEnvelope(unsigned, key) {
+  requireObject(unsigned, 'result');
+  if (!(key instanceof Uint8Array) || !key.byteLength) {
+    throw new InvestigationAdapterError('signing_key_unavailable', 'result signing key is not configured');
+  }
+  const mac = await macFor(unsigned, key, RESULT_PURPOSE);
+  return {
+    ...unsigned,
+    authentication: { ...unsigned.authentication, mac },
+  };
+}
+
+function validateReceipt(receipt, index) {
+  exactKeys(receipt, RECEIPT_KEYS, `execution_receipts[${index}]`);
+  boundedText(receipt.profile, `execution_receipts[${index}].profile`, 128);
+  if (receipt.profile.length < 1) {
+    throw new InvestigationAdapterError('malformed_result', 'receipt profile is required');
+  }
+  if (receipt.index !== index) {
+    throw new InvestigationAdapterError('malformed_result', 'receipt index does not match its position');
+  }
+  if (!RECEIPT_STATUSES.has(receipt.status)) {
+    throw new InvestigationAdapterError('malformed_result', 'receipt status is outside the closed vocabulary');
+  }
+  if (receipt.exit_code !== null && !Number.isInteger(receipt.exit_code)) {
+    throw new InvestigationAdapterError('malformed_result', 'receipt exit_code must be an integer or null');
+  }
+  if (!DIGEST_TEXT.test(receipt.output_digest || '')) {
+    throw new InvestigationAdapterError('malformed_digest', 'receipt output digest is not canonical');
+  }
+  boundedText(receipt.stdout_excerpt, `execution_receipts[${index}].stdout_excerpt`, MAX_EXCERPT_CHARS);
+  boundedText(receipt.stderr_excerpt, `execution_receipts[${index}].stderr_excerpt`, MAX_EXCERPT_CHARS);
+  if (typeof receipt.output_truncated !== 'boolean' || typeof receipt.timed_out !== 'boolean'
+    || typeof receipt.authoritative_sandbox !== 'boolean') {
+    throw new InvestigationAdapterError('malformed_result', 'receipt flags must be JSON booleans');
+  }
+}
+
+function validateResultShape(envelope) {
+  exactKeys(envelope, RESULT_TOP_KEYS, 'result');
   if (envelope.schema_version !== RESULT_SCHEMA) {
     throw new InvestigationAdapterError('schema_version_mismatch', 'unsupported investigation result schema');
   }
   if (!REQUEST_ID.test(envelope.request_id || '')) {
     throw new InvestigationAdapterError('malformed_request_id', 'result request id is not canonical');
   }
-  if (!DIGEST_TEXT.test(envelope.contract_digest || '')) {
-    throw new InvestigationAdapterError('malformed_digest', 'result contract digest is not canonical');
+  if (!DIGEST_TEXT.test(envelope.contract_digest || '') || !DIGEST_TEXT.test(envelope.lease_token_digest || '')) {
+    throw new InvestigationAdapterError('malformed_digest', 'result digest is not canonical');
   }
-  if (typeof envelope.work_item_id !== 'string' || !envelope.work_item_id) {
-    throw new InvestigationAdapterError('malformed_work_item', 'result work item id is required');
+  if (!Number.isInteger(envelope.attempt) || envelope.attempt < 1) {
+    throw new InvestigationAdapterError('malformed_attempt', 'result attempt must be a positive integer');
   }
-  if (typeof envelope.worker_id !== 'string' || !envelope.worker_id) {
-    throw new InvestigationAdapterError('malformed_worker', 'result worker id is required');
+  exactKeys(envelope.worker, WORKER_KEYS, 'result.worker');
+  boundedText(envelope.worker.id, 'result.worker.id', 128);
+  if (!envelope.worker.id || !VERSION_TEXT.test(envelope.worker.fwomps_version)
+    || !TIMESTAMP_TEXT.test(envelope.worker.completed_at)) {
+    throw new InvestigationAdapterError('malformed_worker', 'result worker identity is not canonical');
   }
-  requireObject(envelope.diagnosis, 'result.diagnosis');
-  const diagnosisFields = Object.keys(envelope.diagnosis);
-  if (diagnosisFields.some((field) => !['summary', 'evidence'].includes(field))) {
-    throw new InvestigationAdapterError('malformed_result', 'diagnosis contains fields outside the holding contract');
+  exactKeys(envelope.source, SOURCE_KEYS, 'result.source');
+  boundedText(envelope.source.property_id, 'result.source.property_id', 253);
+  if (!envelope.source.property_id || !REPOSITORY_TEXT.test(envelope.source.repository)
+    || !WORKSPACE_TEXT.test(envelope.source.workspace_name)
+    || !SOURCE_STATES.has(envelope.source.source_state)) {
+    throw new InvestigationAdapterError('malformed_result', 'result source is outside the contract');
   }
-  if (typeof envelope.diagnosis.summary !== 'string' || !envelope.diagnosis.summary.trim()) {
-    throw new InvestigationAdapterError('malformed_diagnosis', 'diagnosis summary is required');
+  requireSha(envelope.source.inspected_head_sha, 'result.source.inspected_head_sha');
+  exactKeys(envelope.evidence, EVIDENCE_KEYS, 'result.evidence');
+  requireSha(envelope.evidence.revision, 'result.evidence.revision');
+  if (!DIGEST_TEXT.test(envelope.evidence.snapshot_digest || '')
+    || !DIGEST_TEXT.test(envelope.evidence.diagnostic_digest || '')
+    || typeof envelope.evidence.diagnostic_id !== 'string'
+    || !envelope.evidence.diagnostic_id
+    || envelope.evidence.diagnostic_id.length > 256) {
+    throw new InvestigationAdapterError('malformed_result', 'result evidence identity is not canonical');
   }
-  if (envelope.diagnosis.evidence !== undefined && !Array.isArray(envelope.diagnosis.evidence)) {
-    throw new InvestigationAdapterError('malformed_diagnosis', 'diagnosis evidence must be a list of statements');
+  if (!OUTCOMES.has(envelope.outcome)) {
+    throw new InvestigationAdapterError('malformed_result', 'result outcome is outside the closed vocabulary');
   }
-  scanForbidden(envelope.diagnosis, 'diagnosis');
-  requireObject(envelope.authentication, 'result.authentication');
-  if (!(key instanceof Uint8Array) || !key.byteLength) {
+  if (envelope.stop_reason !== null && !STOP_REASONS.has(envelope.stop_reason)) {
+    throw new InvestigationAdapterError('malformed_result', 'result stop_reason is outside the closed vocabulary');
+  }
+  const summary = boundedText(envelope.summary, 'result.summary', 2000);
+  if (!summary.trim()) {
+    throw new InvestigationAdapterError('malformed_result', 'result summary is required');
+  }
+  if (!Array.isArray(envelope.observations) || envelope.observations.length > MAX_RECEIPTS) {
+    throw new InvestigationAdapterError('malformed_result', 'result observations are outside the contract');
+  }
+  envelope.observations.forEach((line, index) => boundedText(line, `observations[${index}]`, 500));
+  if (!Array.isArray(envelope.execution_receipts) || envelope.execution_receipts.length > MAX_RECEIPTS) {
+    throw new InvestigationAdapterError('malformed_result', 'result receipts are outside the contract');
+  }
+  envelope.execution_receipts.forEach(validateReceipt);
+  exactKeys(envelope.repairability, REPAIRABILITY_KEYS, 'result.repairability');
+  if (envelope.repairability.state !== 'not_indicated'
+    || !Array.isArray(envelope.repairability.advisory_repair_scope)
+    || envelope.repairability.advisory_repair_scope.length !== 0) {
+    throw new InvestigationAdapterError(
+      'repair_authority_denied',
+      'investigation result repairability is evidence only and carries no repair scope',
+    );
+  }
+  exactKeys(envelope.authentication, ['key_id', 'mac'], 'result.authentication');
+  if (typeof envelope.authentication.key_id !== 'string' || !envelope.authentication.key_id
+    || envelope.authentication.key_id.length > 128) {
+    throw new InvestigationAdapterError('malformed_key_id', 'result key_id is not canonical');
+  }
+  if (envelope.source.source_state === 'accepted_by_host_policy'
+    && envelope.source.inspected_head_sha !== envelope.evidence.revision) {
+    throw new InvestigationAdapterError('malformed_result', 'accepted source head does not match the evidence revision');
+  }
+  const executed = envelope.outcome === 'reproduced' || envelope.outcome === 'not_reproduced';
+  if (executed) {
+    if (envelope.stop_reason !== null || envelope.source.source_state !== 'accepted_by_host_policy'
+      || envelope.execution_receipts.length < 1
+      || envelope.execution_receipts.some((receipt) => receipt.status === 'error' || !receipt.authoritative_sandbox)) {
+      throw new InvestigationAdapterError('malformed_result', 'an executed outcome lacks an authoritative receipt');
+    }
+  }
+  if (envelope.stop_reason === 'runtime_budget_exhausted' && envelope.outcome !== 'inconclusive') {
+    throw new InvestigationAdapterError('malformed_result', 'a budget stop is inconclusive');
+  }
+  if (envelope.outcome === 'blocked') {
+    if (!envelope.stop_reason || envelope.stop_reason === 'runtime_budget_exhausted'
+      || envelope.execution_receipts.length !== 0) {
+      throw new InvestigationAdapterError('malformed_result', 'a blocked result has no receipts and a closed stop_reason');
+    }
+  }
+  if (envelope.stop_reason && envelope.stop_reason !== 'runtime_budget_exhausted' && envelope.outcome !== 'blocked') {
+    throw new InvestigationAdapterError('malformed_result', 'an authority stop yields a blocked result');
+  }
+}
+
+export async function readInvestigationResult(envelope, binding) {
+  requireObject(envelope, 'result');
+  validateResultShape(envelope);
+  if (!(binding?.key instanceof Uint8Array) || !binding.key.byteLength || typeof binding.keyId !== 'string'
+    || typeof binding.workerId !== 'string' || !binding.workerId) {
     throw new InvestigationAdapterError('signing_key_unavailable', 'result verification key is not configured');
   }
-  const verified = await verifySignedEnvelope(envelope, key, RESULT_PURPOSE, ['authentication', 'mac']);
+  if (envelope.authentication.key_id !== binding.keyId) {
+    throw new InvestigationAdapterError('unknown_key', 'result key_id does not match the resolved worker key');
+  }
+  const verified = await verifySignedEnvelope(envelope, binding.key, RESULT_PURPOSE, ['authentication', 'mac']);
   if (!verified) {
     throw new InvestigationAdapterError('mac_invalid', 'investigation result signature did not verify');
   }
+  if (envelope.worker.id !== binding.workerId) {
+    throw new InvestigationAdapterError('worker_mismatch', 'result worker does not match the key_id binding');
+  }
   return {
     schemaVersion: RESULT_SCHEMA,
-    workItemId: envelope.work_item_id,
+    workItemId: envelope.evidence.diagnostic_id,
     requestId: envelope.request_id,
     contractDigest: envelope.contract_digest,
-    workerId: envelope.worker_id,
-    summary: envelope.diagnosis.summary.trim(),
-    evidence: (envelope.diagnosis.evidence || []).map((item) => String(item)),
+    attempt: envelope.attempt,
+    leaseTokenDigest: envelope.lease_token_digest,
+    workerId: envelope.worker.id,
+    keyId: envelope.authentication.key_id,
+    summary: envelope.summary.trim(),
+    outcome: envelope.outcome,
+    stopReason: envelope.stop_reason,
+    evidenceRevision: envelope.evidence.revision,
+    snapshotDigest: envelope.evidence.snapshot_digest,
+    diagnosticDigest: envelope.evidence.diagnostic_digest,
+    propertyId: envelope.source.property_id,
+    repository: envelope.source.repository,
+    sourceState: envelope.source.source_state,
     resultDigest: await envelopeDigest(envelope, ['authentication', 'mac']),
+    repairAuthority: false,
   };
 }
