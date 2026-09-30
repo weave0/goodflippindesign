@@ -205,6 +205,16 @@ function fwompsResult(chain, patch = {}) {
 
 const postResult = (chain, envelope) => workerCall(chain.item, 'result', envelope);
 
+/**
+ * Every hostile delivery must be refused by its OWN named fence. A generic 4xx is not evidence: it
+ * would also pass if the intended fence were removed and some earlier validation layer caught the case.
+ */
+async function expectRefusedBy(response, code, label) {
+  const body = await response.json().catch(() => ({}));
+  expect({ label, status: response.status, code: body.code }).toEqual({ label, status: response.status, code });
+  expect(response.status, label).toBeGreaterThanOrEqual(400);
+}
+
 // Times are relative to the start of the run: the lease route checks the claim window against the real clock.
 const BASE = Date.now();
 const at = (offsetMs) => new Date(BASE + offsetMs).toISOString();
@@ -452,8 +462,26 @@ describe('hostile delivery', () => {
       summary: `profile ${PROFILE}: not_reproduced`,
       execution_receipts: [{ ...fwompsResult(chain).execution_receipts[0], status: 'pass', exit_code: 0 }],
     }));
-    const statuses = (await Promise.all([postResult(chain, a), postResult(chain, b)])).map((r) => r.status).sort();
-    expect(statuses).toEqual([200, 409]);
+    const responses = await Promise.all([postResult(chain, a), postResult(chain, b)]);
+    expect(responses.map((r) => r.status).sort()).toEqual([200, 409]);
+    await expectRefusedBy(responses.find((r) => r.status === 409), 'result_conflict', 'losing concurrent different result');
+    expect(await eventCount(chain.item.workItemId, 'DIAGNOSED')).toBe(1);
+  });
+
+  it('a different validly signed result after acceptance fails closed as result_conflict and changes nothing', async () => {
+    const chain = await readyWithIntent();
+    chain.leaseGrant = await claimAndLease(chain);
+    const first = await postResult(chain, await sign(fwompsResult(chain)));
+    expect(first.status).toBe(200);
+    const accepted = await currentItem();
+    const different = await sign(fwompsResult(chain, {
+      outcome: 'not_reproduced',
+      summary: `profile ${PROFILE}: not_reproduced`,
+      execution_receipts: [{ ...fwompsResult(chain).execution_receipts[0], status: 'pass', exit_code: 0 }],
+    }));
+    await expectRefusedBy(await postResult(chain, different), 'result_conflict', 'different result after acceptance');
+    const after = await currentItem();
+    expect(after.diagnosis).toEqual(accepted.diagnosis);
     expect(await eventCount(chain.item.workItemId, 'DIAGNOSED')).toBe(1);
   });
 
@@ -461,21 +489,24 @@ describe('hostile delivery', () => {
     const chain = await readyWithIntent();
     chain.leaseGrant = await claimAndLease(chain);
     const good = fwompsResult(chain);
+    const WRONG_SHA = 'b'.repeat(40);
+    // Each mutation keeps the envelope valid through every EARLIER layer (signature, closed schema,
+    // source/evidence consistency) so it reaches, and is refused by, the fence it is named for.
     const cases = {
-      wrongLeaseToken: { lease_token_digest: `sha256:${'9'.repeat(64)}` },
-      wrongAttempt: { attempt: 2 },
-      wrongRequest: { request_id: 'mci_someone_elses_request' },
-      wrongContract: { contract_digest: `sha256:${'7'.repeat(64)}` },
-      wrongEvidenceRevision: { evidence: { ...good.evidence, revision: 'b'.repeat(40) } },
-      wrongSnapshot: { evidence: { ...good.evidence, snapshot_digest: `sha256:${'8'.repeat(64)}` } },
-      wrongDiagnosticDigest: { evidence: { ...good.evidence, diagnostic_digest: `sha256:${'6'.repeat(64)}` } },
-      wrongWorkItem: { evidence: { ...good.evidence, diagnostic_id: 'gfdwi_v1_someone_else' } },
-      wrongRepository: { source: { ...good.source, repository: 'weave0/other' } },
-      wrongProperty: { source: { ...good.source, property_id: 'other.com' } },
+      wrongLeaseToken: [{ lease_token_digest: `sha256:${'9'.repeat(64)}` }, 'lease_mismatch'],
+      wrongAttempt: [{ attempt: 2 }, 'attempt_mismatch'],
+      wrongRequest: [{ request_id: 'mci_someone_elses_request' }, 'request_mismatch'],
+      wrongContract: [{ contract_digest: `sha256:${'7'.repeat(64)}` }, 'digest_mismatch'],
+      // BOTH fields move to the same wrong SHA: internally consistent, so only the signed-contract binding can refuse it.
+      wrongEvidenceRevision: [{ evidence: { ...good.evidence, revision: WRONG_SHA }, source: { ...good.source, inspected_head_sha: WRONG_SHA } }, 'digest_mismatch'],
+      wrongSnapshot: [{ evidence: { ...good.evidence, snapshot_digest: `sha256:${'8'.repeat(64)}` } }, 'digest_mismatch'],
+      wrongDiagnosticDigest: [{ evidence: { ...good.evidence, diagnostic_digest: `sha256:${'6'.repeat(64)}` } }, 'digest_mismatch'],
+      wrongWorkItem: [{ evidence: { ...good.evidence, diagnostic_id: 'gfdwi_v1_someone_else' } }, 'identity_mismatch'],
+      wrongRepository: [{ source: { ...good.source, repository: 'weave0/other' } }, 'identity_mismatch'],
+      wrongProperty: [{ source: { ...good.source, property_id: 'other.com' } }, 'identity_mismatch'],
     };
-    for (const [name, patch] of Object.entries(cases)) {
-      const response = await postResult(chain, await sign(fwompsResult(chain, patch)));
-      expect(response.status, name).toBeGreaterThanOrEqual(400);
+    for (const [name, [patch, code]] of Object.entries(cases)) {
+      await expectRefusedBy(await postResult(chain, await sign(fwompsResult(chain, patch))), code, name);
     }
     const after = await currentItem();
     expect(after.state).toBe('INVESTIGATING');
@@ -496,8 +527,9 @@ describe('hostile delivery', () => {
       await sign(fwompsResult(chain), 'a-different-worker-key'),
       { ...signed, authentication: { ...signed.authentication, key_id: 'unknown-key' } },
     ];
-    for (const envelope of tampered) {
-      expect((await postResult(chain, envelope)).status).toBeGreaterThanOrEqual(400);
+    const expected = ['mac_invalid', 'mac_invalid', 'mac_invalid', 'mac_invalid', 'unknown_key'];
+    for (const [index, envelope] of tampered.entries()) {
+      await expectRefusedBy(await postResult(chain, envelope), expected[index], `tampered[${index}]`);
     }
     expect((await currentItem()).state).toBe('INVESTIGATING');
   });
@@ -506,7 +538,7 @@ describe('hostile delivery', () => {
     const chain = await readyWithIntent();
     chain.leaseGrant = await claimAndLease(chain);
     const future = await sign(fwompsResult(chain, { schema_version: 'mc-fw-investigation-result-9' }));
-    expect((await postResult(chain, future)).status).toBeGreaterThanOrEqual(400);
+    await expectRefusedBy(await postResult(chain, future), 'schema_version_mismatch', 'unsupported result schema');
     expect((await currentItem()).state).toBe('INVESTIGATING');
   });
 
@@ -538,7 +570,7 @@ describe('hostile delivery', () => {
       { promotion: { approved: true } },
       { repairability: { state: 'not_indicated', advisory_repair_scope: [], permitted_paths: ['src'] } },
     ]) {
-      expect((await postResult(chain, await sign(fwompsResult(chain, patch)))).status, JSON.stringify(patch)).toBeGreaterThanOrEqual(400);
+      await expectRefusedBy(await postResult(chain, await sign(fwompsResult(chain, patch))), 'malformed_result', JSON.stringify(Object.keys(patch)));
     }
     expect((await currentItem()).state).toBe('INVESTIGATING');
   });
@@ -551,7 +583,7 @@ describe('hostile lifecycle: expiry, abandonment, replay', () => {
     expect(first.outcome).toMatchObject({ dispatched: false, reason: 'executor_failed' });
     const oldEnvelope = await sign(fwompsResult(chain));
     await expireLeaseNow(chain);
-    expect((await postResult(chain, oldEnvelope)).status).toBe(409); // expired, not yet abandoned
+    await expectRefusedBy(await postResult(chain, oldEnvelope), 'lease_expired', 'result after expiry'); // expired, not yet abandoned
     // single attempt: no second lease, even presenting the very intent that authorized the first
     const relet = await workerCall(chain.item, 'lease', { effect_id: chain.effectId, attempt: 1 });
     expect(relet.status).toBe(409);
@@ -577,7 +609,7 @@ describe('hostile lifecycle: expiry, abandonment, replay', () => {
 
     // The first attempt's result can never land now (replay after a newer attempt), even though it
     // is validly signed and the old lease digest was real.
-    expect((await postResult(chain, oldEnvelope)).status).toBeGreaterThanOrEqual(400);
+    await expectRefusedBy(await postResult(chain, oldEnvelope), 'request_mismatch', 'replay after a newer attempt');
     expect(await eventCount(done.workItemId, 'DIAGNOSED')).toBe(1);
   });
 
@@ -606,7 +638,7 @@ describe('hostile lifecycle: expiry, abandonment, replay', () => {
     await env.DB.prepare("UPDATE mc_work_items SET lifecycle_state = 'REVERIFYING', lifecycle_version = lifecycle_version + 1 WHERE work_item_id = ?")
       .bind(chain.item.workItemId).run();
     const replay = await postResult(chain, chain.envelope);
-    expect(replay.status).toBe(409);
+    await expectRefusedBy(replay, 'illegal_transition', 'result after the item advanced');
     const after = await currentItem();
     expect(after.state).toBe('REVERIFYING');
     expect(after.activeLease).toBeNull();

@@ -14,7 +14,7 @@ import { env } from 'cloudflare:test';
 
 import worker from '../../workers/auth.js';
 import { createObservedWorkItem, transitionWorkItem } from '../../workers/lib/mission-control-work-items.js';
-import { createD1WorkItemStore, ensureWorkItemSchema, associateLease } from '../../workers/mission-control-work-items.js';
+import { LOADED_VERSION, createD1WorkItemStore, ensureWorkItemSchema, associateLease } from '../../workers/mission-control-work-items.js';
 import {
   abandonEffect,
   claimDispatch,
@@ -290,46 +290,189 @@ describe('a committed, eligible intent authorizes the lease', () => {
   });
 });
 
-describe('the invariant is structural and atomic, not only a route check', () => {
-  async function pendingLease(ctx) {
+describe('the invariant is structural and atomic: the STORE proves it at write time', () => {
+  /** A saved-but-unwritten lease for an INVESTIGATION_READY item, exactly as the API route builds it. */
+  async function pendingLease(ctx, leaseTokenDigest = `sha256:${'a'.repeat(64)}`) {
     const current = await store().get(ctx.workItemId);
     const at = new Date().toISOString();
     const next = associateLease(current, {
       workerId: 'fwomps-worker-a',
       attempt: 1,
-      leaseTokenDigest: `sha256:${'a'.repeat(64)}`,
+      leaseTokenDigest,
       expiresAt: current.investigation.expiresAt,
       requestId: current.investigation.requestId,
     }, at);
     const event = { at, from: current.state, to: next.state, reason: 'direct store write', actor: 'test', detail: {} };
     return { current, next, event };
   }
+  const authorityFor = (auth, ctx) => ({ effectId: auth.effectId, attempt: auth.attempt, contractDigest: ctx.ready.investigation.digest });
+  const untouched = async (ctx) => {
+    const after = await stateOf(ctx);
+    expect(after.state).toBe('INVESTIGATION_READY');
+    expect(after.activeLease).toBeNull();
+    expect(after.lifecycleVersion).toBe(ctx.ready.lifecycleVersion);
+    expect(await leaseRows(ctx.workItemId)).toBe(0);
+  };
 
-  it('the store refuses to record any new lease that carries no authority guard', async () => {
+  it('legitimate typed authority still succeeds and records the lease', async () => {
+    const ctx = await readyItem();
+    const auth = await authorizeDispatch(env.DB, ctx.ready);
+    const { current, next, event } = await pendingLease(ctx);
+    const saved = await store().save(next, event, { expectedVersion: current.lifecycleVersion, leaseAuthority: authorityFor(auth, ctx) });
+    expect(saved.state).toBe('INVESTIGATING');
+    expect(saved.activeLease.leaseId).toBe(`sha256:${'a'.repeat(64)}`);
+    expect(await leaseRows(ctx.workItemId)).toBe(1);
+  });
+
+  it('refuses a new lease with no authority at all, however the caller reaches the store', async () => {
     const ctx = await readyItem();
     const { current, next, event } = await pendingLease(ctx);
     await expect(store().save(next, event)).rejects.toMatchObject({ code: 'dispatch_intent_required' });
     await expect(store().save(next, event, { expectedVersion: current.lifecycleVersion })).rejects.toMatchObject({ code: 'dispatch_intent_required' });
-    expect((await stateOf(ctx)).state).toBe('INVESTIGATION_READY');
-    expect(await leaseRows(ctx.workItemId)).toBe(0);
+    await expect(store().save(next, event, { expectedVersion: current.lifecycleVersion, leaseAuthority: undefined })).rejects.toMatchObject({ code: 'dispatch_intent_required' });
+    await expect(store().save(next, event, { expectedVersion: current.lifecycleVersion, leaseAuthority: null })).rejects.toMatchObject({ code: 'dispatch_intent_required' });
+    await untouched(ctx);
   });
 
-  it('a guard cannot be attached to a save that issues no lease', async () => {
+  it('refuses a forged clause, a permissive predicate, bind arrays and every non-data authority', async () => {
     const ctx = await readyItem();
     const auth = await authorizeDispatch(env.DB, ctx.ready);
-    const { guard } = await resolveLeaseAuthority(env.DB, await store().get(ctx.workItemId), auth.body, new Date().toISOString());
-    const current = await store().get(ctx.workItemId);
-    await expect(store().save(current, null, { expectedVersion: current.lifecycleVersion, leaseAuthority: guard }))
-      .rejects.toMatchObject({ code: 'malformed_lease' });
+    const good = authorityFor(auth, ctx);
+    const { current, next, event } = await pendingLease(ctx);
+    class Forged { constructor() { Object.assign(this, good); } }
+    const forgeries = [
+      { clause: ' AND 1 = 1', binds: [] },                                   // the reviewer's permissive predicate
+      { clause: ' OR 1 = 1', binds: [] },
+      { ...good, clause: ' OR 1 = 1' },                                      // valid data plus a smuggled clause
+      { ...good, binds: [1] },
+      { ...good, sql: '1=1' },
+      { ...good, previousLease: null },                                      // a claim about the previous lease
+      { ...good, loadedLease: `sha256:${'a'.repeat(64)}` },
+      { effectId: auth.effectId, attempt: auth.attempt },                    // missing contractDigest
+      { attempt: auth.attempt, contractDigest: good.contractDigest },        // missing effectId
+      { ...good, effectId: "gfdeffect_v1_' OR '1'='1" },                     // injection-shaped identity
+      { ...good, effectId: `${auth.effectId} OR 1=1` },
+      { ...good, contractDigest: "sha256:' OR 1=1 --" },
+      { ...good, attempt: '1 OR 1=1' },
+      { ...good, attempt: 0 }, { ...good, attempt: -1 }, { ...good, attempt: 1.5 }, { ...good, attempt: Number.NaN },
+      { ...good, attempt: Number.MAX_SAFE_INTEGER + 2 },
+      new Forged(),                                                          // class instance with the right fields
+      Object.assign(() => {}, good),                                         // function with the right fields
+      [good],
+      'AND 1=1',
+      1,
+      {},
+    ];
+    for (const leaseAuthority of forgeries) {
+      await expect(store().save(next, event, { expectedVersion: current.lifecycleVersion, leaseAuthority }), JSON.stringify(leaseAuthority)).rejects.toMatchObject({ code: 'malformed_lease' });
+    }
+    await untouched(ctx);
+    // and the well-formed version of the same data is what works
+    expect((await store().save(next, event, { expectedVersion: current.lifecycleVersion, leaseAuthority: good })).state).toBe('INVESTIGATING');
   });
 
-  it('an intent abandoned, consumed or reclaimed between the check and the write still fails closed', async () => {
+  it('cannot be fooled by spoofed previous-lease state: there is no marker to overwrite', async () => {
+    const ctx = await readyItem();
+    const { current, next, event } = await pendingLease(ctx);
+    // The old design trusted a symbol on the item. Every spelling of it is now inert.
+    for (const name of ['gfd.mc.workItem.loadedLease', 'gfd.mc.workItem.loadedVersion', 'loadedLease', 'previousLease']) {
+      next[Symbol.for(name)] = next.activeLease.leaseId;
+      next[name] = next.activeLease.leaseId;
+    }
+    next[LOADED_VERSION] = current.lifecycleVersion;
+    await expect(store().save(next, event)).rejects.toMatchObject({ code: 'dispatch_intent_required' });
+    await expect(store().save(next, event, { expectedVersion: current.lifecycleVersion })).rejects.toMatchObject({ code: 'dispatch_intent_required' });
+    await untouched(ctx);
+  });
+
+  it('refuses a hand-built item that was never loaded, and a brand-new row that already holds a lease', async () => {
+    const ctx = await readyItem();
+    const { next } = await pendingLease(ctx);
+    // a never-loaded copy cannot update the existing row at all, lease or not
+    const forgedCopy = { ...next };
+    delete forgedCopy[LOADED_VERSION];
+    await expect(store().save(forgedCopy, null)).rejects.toMatchObject({ code: 'version_conflict' }); // a never-loaded copy can only INSERT
+    await untouched(ctx);
+
+    // a brand-new row born holding a lease is refused even when its version is forged
+    const observed = await createObservedWorkItem({
+      producer: 'health-sweep', propertyId: 'aiaimate.com', findingKey: 'health:aiaimate:born_leased',
+      observedAt: '2026-09-29T07:24:48.137Z', evidenceDigest: `sha256:${'9'.repeat(64)}`, severity: 'high',
+    });
+    const born = { ...observed, activeLease: { leaseId: `sha256:${'b'.repeat(64)}`, workerId: 'fwomps-worker-a', expiresAt: '2099-01-01T00:00:00.000Z', attempt: 1 } };
+    for (const variant of [born, { ...born, [LOADED_VERSION]: born.lifecycleVersion }]) {
+      await expect(store().save(variant, null)).rejects.toMatchObject({ code: 'dispatch_intent_required' });
+    }
+    const row = await env.DB.prepare('SELECT COUNT(*) AS n FROM mc_work_items WHERE work_item_id = ?').bind(observed.workItemId).first();
+    expect(Number(row.n)).toBe(0);
+    expect(await leaseRows(observed.workItemId)).toBe(0);
+  });
+
+  it('refuses mismatched authority fields: another item, another attempt, another digest, a digest the journal never issued', async () => {
+    const a = await readyItem();
+    const b = await readyItem();
+    const forA = await authorizeDispatch(env.DB, a.ready);
+    const forB = await authorizeDispatch(env.DB, b.ready);
+    const { current, next, event } = await pendingLease(a);
+    const save = (leaseAuthority) => store().save(next, event, { expectedVersion: current.lifecycleVersion, leaseAuthority });
+    const goodA = authorityFor(forA, a);
+    await expect(save({ ...goodA, effectId: forB.effectId })).rejects.toMatchObject({ code: 'dispatch_intent_ineligible' }); // another work item's intent
+    await expect(save({ ...goodA, attempt: goodA.attempt + 1 })).rejects.toMatchObject({ code: 'dispatch_intent_ineligible' });
+    await expect(save({ ...goodA, contractDigest: b.ready.investigation.digest })).rejects.toMatchObject({ code: 'dispatch_intent_ineligible' });
+    await expect(save({ ...goodA, contractDigest: `sha256:${'f'.repeat(64)}` })).rejects.toMatchObject({ code: 'dispatch_intent_ineligible' });
+    await untouched(a);
+
+    // A forged intent row bound to a digest the item's persisted issuance journal never produced
+    // cannot authorize a lease, even though every other predicate holds.
+    const forgedDigest = `sha256:${'e'.repeat(64)}`;
+    const forgedId = `gfdeffect_v1_${'c'.repeat(64)}`;
+    await env.DB.prepare(`
+      INSERT INTO mc_effects (effect_id, work_item_id, effect_type, target, candidate_digest, status, created_at, schema_version,
+        requested_lifecycle_version, attempt_count, last_attempt_at, idempotency_key)
+      VALUES (?, ?, 'investigation_dispatch', 'fwomps:aiaimate.com', ?, 'PLANNED', ?, 'gfd-effect-1', ?, 1, ?, ?)
+    `).bind(forgedId, a.workItemId, forgedDigest, new Date().toISOString(), a.ready.lifecycleVersion, new Date().toISOString(), forgedId).run();
+    await expect(save({ effectId: forgedId, attempt: 1, contractDigest: forgedDigest })).rejects.toMatchObject({ code: 'dispatch_intent_ineligible' });
+    await untouched(a);
+    // the legitimate pair still works
+    expect((await save(goodA)).state).toBe('INVESTIGATING');
+  });
+
+  it('an old contract digest cannot authorize a lease after the item was re-issued a newer contract', async () => {
+    const ctx = await readyItem();
+    const auth = await authorizeDispatch(env.DB, ctx.ready);
+    const { current, next, event } = await pendingLease(ctx);
+    // A later issuance event for the same item: the persisted journal now names a different current contract.
+    await env.DB.prepare(`
+      INSERT INTO mc_work_item_events (event_id, work_item_id, event_type, from_state, to_state, occurred_at, actor_type, actor_id, evidence_digest, detail_json)
+      VALUES ('evt_reissued', ?, 'transition', 'QUALIFIED', 'INVESTIGATION_READY', '2099-01-01T00:00:00.000Z', 'runtime', 'test', ?, ?)
+    `).bind(ctx.workItemId, current.evidenceDigest, JSON.stringify({ investigation: { digest: `sha256:${'d'.repeat(64)}` } })).run();
+    await expect(store().save(next, event, { expectedVersion: current.lifecycleVersion, leaseAuthority: authorityFor(auth, ctx) }))
+      .rejects.toMatchObject({ code: 'dispatch_intent_ineligible' });
+    await untouched(ctx);
+  });
+
+  it('replacing an active lease is also an issuance: it needs authority, while clearing or keeping one does not', async () => {
+    const ctx = await readyItem();
+    const auth = await authorizeDispatch(env.DB, ctx.ready);
+    expect((await lease(ctx, auth.body)).status).toBe(200);
+    const leased = await store().get(ctx.workItemId);
+    const replaced = { ...leased, activeLease: { ...leased.activeLease, leaseId: `sha256:${'7'.repeat(64)}` } };
+    await expect(store().save(replaced, null)).rejects.toMatchObject({ code: 'dispatch_intent_required' });
+    expect((await store().get(ctx.workItemId)).activeLease.leaseId).toBe(leased.activeLease.leaseId);
+    // keeping the stored lease (an ordinary observation write) is unaffected, and inert authority changes nothing
+    const kept = await store().save({ ...leased, occurrenceCount: (leased.occurrenceCount ?? 0) + 1 }, null,
+      { leaseAuthority: { effectId: auth.effectId, attempt: auth.attempt, contractDigest: ctx.ready.investigation.digest } });
+    expect(kept.activeLease.leaseId).toBe(leased.activeLease.leaseId);
+    expect(await leaseRows(ctx.workItemId)).toBe(1);
+  });
+
+  it('an intent abandoned, consumed, reclaimed, re-issued or flipped between the check and the write still fails closed', async () => {
     for (const interfere of [
       (effectId) => env.DB.prepare("UPDATE mc_effects SET status = 'FAILED', terminal_reason = 'abandoned mid-flight' WHERE effect_id = ?").bind(effectId).run(),
       (effectId) => env.DB.prepare("UPDATE mc_effects SET status = 'COMMITTED', receipt_ref = 'elsewhere' WHERE effect_id = ?").bind(effectId).run(),
       (effectId) => env.DB.prepare('UPDATE mc_effects SET attempt_count = attempt_count + 1 WHERE effect_id = ?').bind(effectId).run(),
       (effectId) => env.DB.prepare("UPDATE mc_effects SET last_attempt_at = '2020-01-01T00:00:00.000Z' WHERE effect_id = ?").bind(effectId).run(),
-      // each remaining predicate, flipped after the read-path check passed (so only the SQL guard can catch it)
+      // each remaining predicate, flipped after the read-path check passed (so only the store's SQL can catch it)
       (effectId) => env.DB.prepare('UPDATE mc_effects SET candidate_digest = ? WHERE effect_id = ?').bind(`sha256:${'f'.repeat(64)}`, effectId).run(),
       (effectId) => env.DB.prepare("UPDATE mc_effects SET schema_version = 'gfd-effect-99' WHERE effect_id = ?").bind(effectId).run(),
       (effectId) => env.DB.prepare("UPDATE mc_effects SET work_item_id = 'gfdwi_v1_someone_else' WHERE effect_id = ?").bind(effectId).run(),
@@ -342,13 +485,59 @@ describe('the invariant is structural and atomic, not only a route check', () =>
       const { current, next, event } = await pendingLease(ctx);
       const proven = await resolveLeaseAuthority(env.DB, current, auth.body, event.at); // eligible right now
       await interfere(auth.effectId); // ...and not by the time the lease is recorded
-      await expect(store().save(next, event, { expectedVersion: current.lifecycleVersion, leaseAuthority: proven.guard }))
+      await expect(store().save(next, event, { expectedVersion: current.lifecycleVersion, leaseAuthority: proven }))
         .rejects.toMatchObject({ code: 'dispatch_intent_ineligible' });
-      const after = await stateOf(ctx);
-      expect(after.state).toBe('INVESTIGATION_READY');
-      expect(after.activeLease).toBeNull();
-      expect(await leaseRows(ctx.workItemId)).toBe(0);
+      await untouched(ctx);
     }
+  });
+
+  it('CLOCK BOUNDARY: authority valid when read, real elapsed time crosses the 60 s window before the write, nothing persists', async () => {
+    const sleep = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
+    const prepare = async () => {
+      const ctx = await readyItem();
+      // a claim made 58.5 s ago: comfortably inside the window when it is read
+      const planned = await planDispatch(env.DB, ctx.ready, { now: ago(59_000) });
+      const claimed = await claimDispatch(env.DB, planned.effect.effectId, { now: ago(58_500) });
+      const { current, next, event } = await pendingLease(ctx);
+      const proven = await resolveLeaseAuthority(env.DB, current, { effect_id: planned.effect.effectId, attempt: claimed.permit.attempt }, new Date().toISOString());
+      return { ctx, current, next, event, proven };
+    };
+
+    // control: the very same setup, written immediately, succeeds
+    const control = await prepare();
+    expect((await store().save(control.next, control.event, { expectedVersion: control.current.lifecycleVersion, leaseAuthority: control.proven })).state).toBe('INVESTIGATING');
+
+    // the subject: identical setup, but real time passes 58.5 s -> 60.5 s between the read and the write
+    const stalled = await prepare();
+    await sleep(2_000);
+    await expect(store().save(stalled.next, stalled.event, { expectedVersion: stalled.current.lifecycleVersion, leaseAuthority: stalled.proven }))
+      .rejects.toMatchObject({ code: 'dispatch_intent_ineligible' });
+    await untouched(stalled.ctx);
+    expect((await loadEffect(env.DB, stalled.proven.effectId)).status).toBe('PLANNED'); // the intent itself is untouched
+  }, 20_000);
+});
+
+describe('the store owns the schema its predicate reads', () => {
+  it('a database that predates the outbox gains the effect-contract columns, even under concurrent first use, and ordinary saves keep working', async () => {
+    const contractColumns = ['schema_version', 'requested_lifecycle_version', 'payload_digest', 'payload_json', 'attempt_count',
+      'last_attempt_at', 'idempotency_key', 'causal_event_id', 'receipt_ref', 'terminal_reason'];
+    await env.DB.prepare('DROP INDEX IF EXISTS idx_mc_effects_dispatch').run();
+    for (const column of contractColumns) await env.DB.prepare(`ALTER TABLE mc_effects DROP COLUMN ${column}`).run();
+    const before = (await env.DB.prepare('PRAGMA table_info(mc_effects)').all()).results.map((c) => c.name);
+    expect(before).not.toContain('schema_version');
+
+    await Promise.all([1, 2, 3].map(() => ensureWorkItemSchema(env.DB)));
+    const after = (await env.DB.prepare('PRAGMA table_info(mc_effects)').all()).results.map((c) => c.name);
+    for (const column of contractColumns) expect(after).toContain(column);
+
+    // every guarded write evaluates the predicate, so an ordinary save proves the columns are really usable
+    const observed = await createObservedWorkItem({
+      producer: 'health-sweep', propertyId: 'aiaimate.com', findingKey: 'health:aiaimate:pre_outbox_db',
+      observedAt: '2026-09-29T07:24:48.137Z', evidenceDigest: `sha256:${'8'.repeat(64)}`, severity: 'high',
+    });
+    const saved = await store().save(observed, { at: observed.lastSeen, from: null, to: 'OBSERVED', reason: 'test', actor: 'test', detail: {} });
+    const again = await store().save({ ...saved, occurrenceCount: (saved.occurrenceCount ?? 0) + 1 }, null);
+    expect(again.occurrenceCount).toBe((saved.occurrenceCount ?? 0) + 1);
   });
 });
 

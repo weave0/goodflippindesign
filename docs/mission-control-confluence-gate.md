@@ -55,7 +55,7 @@ refusal codes), and dumps of the D1 work-item, event, lease and effect tables.
 | expired lease/result + recovery path | `refuses a result after expiry, then recovers through an explicit, fresh, bounded attempt` | — |
 | tampered payload / digest / signature | `rejects tampered payloads, tampered MACs, a foreign key and an unknown key id` | `mac_invalid` ×3, `unknown_key` |
 | wrong repository / property / work item | identity-echo test | `identity_mismatch` ×3 (validly signed) |
-| wrong evidence revision | identity-echo test | refused (`malformed_result`) |
+| wrong evidence revision (both `evidence.revision` and `source.inspected_head_sha`, internally consistent) | identity-echo test (`digest_mismatch`) | `digest_mismatch` |
 | unsupported schema/version | `rejects an unsupported result schema…`, unsupported effect row test | `schema_version_mismatch` (signed and unsigned) |
 | replay after a newer attempt | recovery test (old envelope after the fresh attempt) | — |
 | authority smuggled in payload | `rejects authority smuggled into the result, the lease request and the dispatch intent` | `malformed_result` (signed and unsigned) |
@@ -102,29 +102,39 @@ only thing that lets FWOMPS act on a work item, so it is issued only under a com
 | fenced to the work item's **current lifecycle version** | `stale for the current lifecycle version` |
 | under a **live claim**: presented attempt = the effect's current attempt, inside the visibility window | `not been claimed` / `presented attempt is not the current claim` / `claim expired` |
 
-How it is enforced:
-- `workers/lib/mission-control-lease-authority.js` proves the above from durable state and explains any refusal.
-- The **store refuses to record any new lease** (`store.save`) unless the save carries an authority guard
-  (`dispatch_intent_required`), so no caller, present or future, can attach a lease any other way.
-- The guard re-asserts the **same predicate inside the compare-and-swap** that writes the lease, so an intent
-  abandoned, consumed, reclaimed or expired between the check and the write still fails closed
-  (`dispatch_intent_ineligible`), leaving no lease row and no state change.
-- One intent authorizes at most one lease: the lease advances the lifecycle version, and concurrent duplicate
-  requests still resolve through the existing one-active-lease CAS (exactly one 200).
-- `planEffect` applies the same identity rules: a dispatch intent requires the contract digest, the canonical
-  target, and an `INVESTIGATION_READY` work item.
-- The lease event journals `dispatchIntent: {effectId, attempt, candidateDigest}` so every lease is traceable
-  to the intent that authorized it.
+How it is enforced (the store proves it, at write time):
+- `workers/lib/mission-control-lease-authority.js` explains a refusal precisely at request time. It returns only
+  three inert values, `{effectId, attempt, contractDigest}`, and supplies **no SQL**.
+- `store.save` accepts exactly those three values, validated as data (exact keys, canonical shapes, plain object).
+  Any other shape (a clause, bind array, extra key, class instance, string, …) is refused with `malformed_lease`.
+- **Whether a save creates or replaces an active lease is decided by the database from the stored row, inside the
+  write itself**: a new non-null `active_lease_id` that differs from the stored one applies only if the store's
+  *fixed* `EXISTS` predicate holds at that moment. There is no caller-visible marker, flag, clause or previous-lease
+  claim to forge. A brand-new row can never be created holding a lease.
+- The predicate is built solely from persisted rows: the intent belongs to that work item, is a known-schema
+  `investigation_dispatch` still `PLANNED`, targets `fwomps:<that row's property>`, is fenced to that row's
+  lifecycle version, is bound to the supplied contract digest **and that digest is the item's current signed contract
+  per its persisted issuance journal**, carries the presented attempt, and its claim is fresh per the **database clock
+  evaluated at the write** (not a cutoff computed earlier in the request).
+- One intent authorizes at most one lease (the lease advances the lifecycle version); concurrent duplicates still
+  resolve to exactly one 200; an intent abandoned, consumed, reclaimed, re-issued or expired between the check and the
+  write fails closed (`dispatch_intent_ineligible`) leaving no lease row and no state change.
+- `planEffect` applies the same identity rules: a dispatch intent requires the contract digest, the canonical target
+  and an `INVESTIGATION_READY` work item.
+- The lease event journals `dispatchIntent: {effectId, attempt, candidateDigest}` so every lease is traceable.
 
 Nothing here adds execution authority: GFD records and authorizes intent; FWOMPS remains the isolated
 read-only executor. The outbox executes nothing.
 
-**Proven in CI** (`tests/workers/mission-control-lease-authority.test.js`, real worker entry + D1, 16 tests; 24/24
+**Proven in CI** (`tests/workers/mission-control-lease-authority.test.js`, real worker entry + D1, 23 tests; 34/34
 deliberate weakenings of the guards are each caught): no intent / unknown intent / half an intent, another work
 item's intent, wrong attempt (unclaimed, expired claim, stale claimant after a reclaim), wrong contract digest,
 target and effect type, abandoned, consumed/committed, unknown and legacy schema, stale lifecycle version,
 concurrent duplicate requests, smuggled authority, the positive path, retry after abandonment with a new digest
-(no identity collision), the store-level structural refusal, and the check-then-write race for every predicate.
+(no identity collision), and at the **store** directly: forged clauses / permissive predicates / non-data authority,
+spoofed previous-lease state, hand-built and born-leased rows, missing or mismatched typed authority, a digest the
+journal never issued, lease replacement, the check-then-write race for every predicate, and a real elapsed-time
+clock-boundary regression (valid when read, the 60 s window crosses before the write, nothing persists).
 **Requires the attested operator specimen** (tier 2): that the real FWOMPS still runs end to end under the
 invariant (42/42 on the recorded run), including the two real-wire refusals that must precede the claim.
 

@@ -11,8 +11,14 @@
 
 import { deriveEffectId } from './mission-control-work-items.js';
 import { ensureWorkItemSchema } from '../mission-control-work-items.js';
+import {
+  DEFAULT_VISIBILITY_MS,
+  DISPATCH_EFFECT_TYPE,
+  EFFECT_SCHEMA_VERSION,
+  dispatchTarget,
+} from './mission-control-effect-contract.js';
 
-export const EFFECT_SCHEMA_VERSION = 'gfd-effect-1';
+export { DEFAULT_VISIBILITY_MS, DISPATCH_EFFECT_TYPE, EFFECT_SCHEMA_VERSION, dispatchTarget };
 export const EFFECT_TYPES = Object.freeze([
   'investigation_dispatch',
   'github_issue',
@@ -21,7 +27,6 @@ export const EFFECT_TYPES = Object.freeze([
   'notification',
   'reverification_request',
 ]);
-export const DEFAULT_VISIBILITY_MS = 60_000;
 
 /**
  * Identity of an investigation_dispatch intent: work item + type + canonical target + the exact signed
@@ -30,8 +35,6 @@ export const DEFAULT_VISIBILITY_MS = 60_000;
  * the same contract always maps to the same intent (idempotent planning). Only such an intent, under a
  * live claim, can authorize a lease (workers/lib/mission-control-lease-authority.js).
  */
-export const DISPATCH_EFFECT_TYPE = 'investigation_dispatch';
-export const dispatchTarget = (propertyId) => `fwomps:${propertyId}`;
 export const MAX_PAYLOAD_CHARS = 4096;
 
 // Authority-bearing material never travels in an effect payload. Keys are
@@ -53,19 +56,6 @@ const PAYLOAD_KEYS_BY_TYPE = Object.freeze({
   notification: [...BASE_PAYLOAD_KEYS, 'channel'],
   reverification_request: [...BASE_PAYLOAD_KEYS, 'predicateId'],
 });
-
-const ADD_COLUMNS = [
-  ['schema_version', 'TEXT'],
-  ['requested_lifecycle_version', 'INTEGER'],
-  ['payload_digest', 'TEXT'],
-  ['payload_json', 'TEXT'],
-  ['attempt_count', 'INTEGER NOT NULL DEFAULT 0'],
-  ['last_attempt_at', 'TEXT'],
-  ['idempotency_key', 'TEXT'],
-  ['causal_event_id', 'TEXT'],
-  ['receipt_ref', 'TEXT'],
-  ['terminal_reason', 'TEXT'],
-];
 
 const textEncoder = new TextEncoder();
 
@@ -187,23 +177,8 @@ function present(row) {
   };
 }
 
-async function columnSet(db) {
-  const { results } = await db.prepare('PRAGMA table_info(mc_effects)').all();
-  return new Set((results || []).map((column) => column.name));
-}
-
 export async function ensureOutboxSchema(db) {
-  await ensureWorkItemSchema(db);
-  const existing = await columnSet(db);
-  for (const [name, type] of ADD_COLUMNS) {
-    if (existing.has(name)) continue;
-    try {
-      await db.prepare(`ALTER TABLE mc_effects ADD COLUMN ${name} ${type}`).run();
-    } catch (error) {
-      // A concurrent first use may have added the column; only that is benign.
-      if (!(await columnSet(db)).has(name)) throw error;
-    }
-  }
+  await ensureWorkItemSchema(db); // also ensures the effect-contract columns the store itself reads
   await db.prepare(`
     CREATE INDEX IF NOT EXISTS idx_mc_effects_dispatch
     ON mc_effects (status, last_attempt_at)

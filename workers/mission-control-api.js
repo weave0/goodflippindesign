@@ -506,10 +506,10 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
             detail: {
               requestId: investigation.requestId,
               lease: { attempt: grant.attempt, leaseTokenDigest: grant.leaseTokenDigest },
-              dispatchIntent: { effectId: authority.effectId, attempt: authority.attempt, candidateDigest: authority.candidateDigest },
+              dispatchIntent: { effectId: authority.effectId, attempt: authority.attempt, candidateDigest: authority.contractDigest },
             },
           };
-          next.leaseAuthority = authority.guard;
+          next.leaseAuthority = { effectId: authority.effectId, attempt: authority.attempt, contractDigest: authority.contractDigest };
           dispatch.contract = investigation.signedContract;
           dispatch.leaseGrant = grant.payload;
           dispatch.leaseTokenHex = grant.leaseTokenHex;

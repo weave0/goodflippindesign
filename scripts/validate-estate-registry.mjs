@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFile } from "node:fs/promises";
+import { verificationDeclarationProblems } from "./lib/estate-operating-validation.mjs";
 
 const ROOT = new URL("../", import.meta.url);
 const readJson = async (path) => JSON.parse(await readFile(new URL(path, ROOT), "utf8"));
@@ -9,7 +10,11 @@ const fail = (problems) => {
   process.exitCode = 1;
 };
 
-const registry = await readJson("estate/registry.json");
+const registryFlag = process.argv.indexOf("--registry");
+// `--registry <file>` validates an alternate registry (used by the hostile tests); the default is the canonical one.
+const registry = registryFlag > 0
+  ? JSON.parse(await readFile(process.argv[registryFlag + 1], "utf8"))
+  : await readJson("estate/registry.json");
 const brands = await readJson("brands.json");
 const workflow = await readFile(new URL(".github/workflows/traffic-intelligence-deploy.yml", ROOT), "utf8");
 
@@ -87,12 +92,7 @@ if (!match) {
             problems.push(`${property.domain}: operating.repository_source is required when operating.repository is declared`);
           }
         }
-        for (const field of ["verification_scope", "verification_predicate"]) {
-          const value = property.operating[field];
-          if (value !== undefined && (typeof value !== "string" || !value.trim())) {
-            problems.push(`${property.domain}: operating.${field} must be a non-empty string when declared`);
-          }
-        }
+        problems.push(...verificationDeclarationProblems(property.domain, property.operating));
         for (const field of ["investigation_profile", "verification_profile"]) {
           const value = property.operating[field];
           if (value != null && (typeof value !== "string" || !value.trim())) {

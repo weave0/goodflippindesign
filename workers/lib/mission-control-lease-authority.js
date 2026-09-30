@@ -17,9 +17,9 @@
  *     equal the effect's current attempt_count, and the claim must still be inside its visibility
  *     window, so a stale claimant cannot lease.
  *
- * `resolveLeaseAuthority` explains a refusal precisely; `guard.clause` re-asserts the very same
- * predicate inside the compare-and-swap that writes the lease, so an intent abandoned or consumed
- * between the check and the write still fails closed. Nothing here executes anything: GFD records and
+ * `resolveLeaseAuthority` explains a refusal precisely at request time. The AUTHORITATIVE decision is
+ * the store's: it re-evaluates a fixed predicate inside the write itself, against the database clock, so an
+ * intent abandoned, consumed or expired between this check and the write still fails closed. Nothing here executes anything: GFD records and
  * authorizes intent; FWOMPS remains the isolated read-only executor.
  */
 
@@ -29,7 +29,7 @@ import {
   DISPATCH_EFFECT_TYPE,
   EFFECT_SCHEMA_VERSION,
   dispatchTarget,
-} from './mission-control-outbox.js';
+} from './mission-control-effect-contract.js';
 
 const DIGEST = /^sha256:[0-9a-f]{64}$/;
 
@@ -79,27 +79,7 @@ export async function resolveLeaseAuthority(db, item, body, at) {
   if (Number(row.attempt_count) !== attempt) throw refuse('the presented attempt is not the current claim');
   if (row.last_attempt_at <= visibleAfter) throw refuse('its claim expired');
 
-  return {
-    effectId,
-    attempt,
-    candidateDigest: contractDigest,
-    // The identical predicate, evaluated inside the CAS that records the lease.
-    guard: {
-      clause: ` AND EXISTS (
-        SELECT 1 FROM mc_effects AS e
-        WHERE e.effect_id = ?
-          AND e.work_item_id = mc_work_items.work_item_id
-          AND e.effect_type = '${DISPATCH_EFFECT_TYPE}'
-          AND e.schema_version = ?
-          AND e.status = 'PLANNED'
-          AND e.target = ?
-          AND e.candidate_digest = ?
-          AND e.requested_lifecycle_version = mc_work_items.lifecycle_version
-          AND e.attempt_count = ?
-          AND e.last_attempt_at IS NOT NULL
-          AND e.last_attempt_at > ?
-      )`,
-      binds: [effectId, EFFECT_SCHEMA_VERSION, target, contractDigest, attempt, visibleAfter],
-    },
-  };
+  // Typed, inert identity only. The store itself builds and evaluates the fixed authority predicate at
+  // write time (workers/mission-control-work-items.js, LEASE_AUTHORITY_PREDICATE); this module supplies no SQL.
+  return { effectId, attempt, contractDigest };
 }
