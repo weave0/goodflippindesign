@@ -33,7 +33,7 @@ real sweep path); it is not a production incident. Operator identity comes from 
 ## Running tier 2
 
 ```bash
-# FWOMPS checkout at a merged main, Python 3 on PATH, node, network access to clone weave0/aiaimate
+# prerequisites: `npm ci` in this repo; FWOMPS checkout at a merged main; Python 3; node; network access to clone weave0/aiaimate
 FWOMPS_REPO=/path/to/fwomps node --no-warnings --import ./tests/acceptance/node-json-hook.mjs \
   tests/acceptance/mc-confluence-specimen.mjs --dir <run dir>
 ```
