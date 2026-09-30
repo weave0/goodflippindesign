@@ -70,14 +70,12 @@ Also pinned: diagnosis alone cannot resolve (`RESOLVED`/`REVERIFYING` refused wi
 
 ## Findings this gate surfaced (recorded, not hidden)
 
-1. **Dispatch intents must bind to the signed contract.** The effect id is derived from
-   `work item + effect type + target + candidateDigest`. A second attempt after an abandoned first one
-   collides (`effect_conflict`) unless the intent carries the signed contract digest as `candidateDigest`.
-   The gate's dispatcher does this; any production dispatcher must too.
-2. **The API does not yet require an intent before a lease.** `investigate`/`lease` work without a
-   `investigation_dispatch` effect. The gate proves the durable-intent-first ordering and the fences when
-   the intent exists, but nothing structurally forces a caller to create one. Enforcing it is a decision
-   for the production dispatcher, not assumed here.
+1. **Dispatch intents must bind to the signed contract. — now an enforced invariant** (see "The lease/intent
+   invariant" below). The effect id derives from `work item + type + canonical target + contract digest`;
+   the digest is required at plan time, so a legitimate retry after abandonment (new contract, new digest)
+   is a different intent and never collides, while the same contract always maps to the same intent.
+2. **The API did not require an intent before a lease. — closed in production.** No lease can now be
+   recorded without a committed, eligible intent; see below.
 3. **Every result rejection is HTTP 409** (including MAC/unknown-key failures). It fails closed, and the
    `code` field is specific (`mac_invalid`, `lease_mismatch`, …); the status code is just coarse.
 4. **A crash after the lease is recoverable only through expiry.** The claim is lifecycle-fenced, so a
@@ -86,3 +84,46 @@ Also pinned: diagnosis alone cannot resolve (`RESOLVED`/`REVERIFYING` refused wi
 5. **The FWOMPS host has no AIAIMate binding yet.** `~/.fwomps` registers only a `fwomps` workspace.
    Registering `aiaimate.com → workspace aiaimate → web-health-readonly-v1` (host-owned) is an operator
    action; tier 2 proves the binding works in an isolated home.
+
+## The lease/intent invariant (production, not just the harness)
+
+**There is no production lease path unless durable prior intent authority can be proven.** A lease is the
+only thing that lets FWOMPS act on a work item, so it is issued only under a committed
+`investigation_dispatch` effect that is, all at once:
+
+| condition | refusal if violated |
+|---|---|
+| a request naming the intent (`{effect_id, attempt}`, closed body) | `dispatch_intent_required` / `malformed_lease` (400 for extra keys) |
+| belongs to the **same canonical work item** | `different work item` |
+| type `investigation_dispatch`, canonical target `fwomps:<propertyId>` | `not an investigation_dispatch` / `canonical dispatch target` |
+| known schema `gfd-effect-1` (legacy/unknown cannot prove eligibility) | `schema is unknown or pre-contract` |
+| still `PLANNED` (not abandoned, failed, committed or verified) | `abandoned or failed` / `already consumed` |
+| `candidate_digest` = the **exact signed contract digest** | `not bound to this signed contract digest` |
+| fenced to the work item's **current lifecycle version** | `stale for the current lifecycle version` |
+| under a **live claim**: presented attempt = the effect's current attempt, inside the visibility window | `not been claimed` / `presented attempt is not the current claim` / `claim expired` |
+
+How it is enforced:
+- `workers/lib/mission-control-lease-authority.js` proves the above from durable state and explains any refusal.
+- The **store refuses to record any new lease** (`store.save`) unless the save carries an authority guard
+  (`dispatch_intent_required`), so no caller, present or future, can attach a lease any other way.
+- The guard re-asserts the **same predicate inside the compare-and-swap** that writes the lease, so an intent
+  abandoned, consumed, reclaimed or expired between the check and the write still fails closed
+  (`dispatch_intent_ineligible`), leaving no lease row and no state change.
+- One intent authorizes at most one lease: the lease advances the lifecycle version, and concurrent duplicate
+  requests still resolve through the existing one-active-lease CAS (exactly one 200).
+- `planEffect` applies the same identity rules: a dispatch intent requires the contract digest, the canonical
+  target, and an `INVESTIGATION_READY` work item.
+- The lease event journals `dispatchIntent: {effectId, attempt, candidateDigest}` so every lease is traceable
+  to the intent that authorized it.
+
+Nothing here adds execution authority: GFD records and authorizes intent; FWOMPS remains the isolated
+read-only executor. The outbox executes nothing.
+
+**Proven in CI** (`tests/workers/mission-control-lease-authority.test.js`, real worker entry + D1, 16 tests; 24/24
+deliberate weakenings of the guards are each caught): no intent / unknown intent / half an intent, another work
+item's intent, wrong attempt (unclaimed, expired claim, stale claimant after a reclaim), wrong contract digest,
+target and effect type, abandoned, consumed/committed, unknown and legacy schema, stale lifecycle version,
+concurrent duplicate requests, smuggled authority, the positive path, retry after abandonment with a new digest
+(no identity collision), the store-level structural refusal, and the check-then-write race for every predicate.
+**Requires the attested operator specimen** (tier 2): that the real FWOMPS still runs end to end under the
+invariant (42/42 on the recorded run), including the two real-wire refusals that must precede the claim.

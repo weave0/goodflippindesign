@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { env } from 'cloudflare:test';
+import { authorizeDispatch } from './dispatch-intent.js';
 
 import worker from '../../workers/auth.js';
 import { normalizeOperatorView } from '../../workers/mission-control-api.js';
@@ -344,9 +345,10 @@ describe('investigation seam', () => {
     expect(issuedBody.contract.operation).toBe('investigate');
     expect(issuedBody.contract.contract.requested_mode).toBe('read_only');
 
+    const authority = await authorizeDispatch(env.DB, ready);
     const leased = await call(
       `/api/mission-control/work-items/${encodeURIComponent(qualified.workItemId)}/lease`,
-      { method: 'POST', workerAuth: WORKER_TOKEN, body: {} },
+      { method: 'POST', workerAuth: WORKER_TOKEN, body: authority.body },
     );
     expect(leased.status).toBe(200);
     const leaseBody = await leased.json();
@@ -360,7 +362,7 @@ describe('investigation seam', () => {
 
     const conflict = await call(
       `/api/mission-control/work-items/${encodeURIComponent(qualified.workItemId)}/lease`,
-      { method: 'POST', workerAuth: WORKER_TOKEN, body: {} },
+      { method: 'POST', workerAuth: WORKER_TOKEN, body: authority.body },
     );
     expect(conflict.status).toBe(409);
 

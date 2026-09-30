@@ -191,9 +191,17 @@ try {
   check('durable investigation_dispatch intent recorded before execution', intent.created && intent.effect.status === 'PLANNED' && intent.effect.attemptCount === 0, { effectId: intent.effect.effectId, requestedLifecycleVersion: intent.effect.requestedLifecycleVersion });
 
   // --- 4. claim -> signed lease -> artifacts handed to FWOMPS -----------------------------------
+  // No production lease path exists without durable prior intent authority: before the claim, the real
+  // route refuses a lease that names no intent, and one that names the planned-but-unclaimed intent.
+  const noIntent = await api(itemPath(ready, 'lease'), { auth: ids.workerToken });
+  check('lease with no dispatch intent is refused (dispatch_intent_required)', noIntent.status === 409 && (await noIntent.json()).code === 'dispatch_intent_required');
+  const unclaimed = await api(itemPath(ready, 'lease'), { auth: ids.workerToken, body: { effect_id: intent.effect.effectId, attempt: 1 } });
+  const unclaimedBody = await unclaimed.json();
+  check('lease under a planned but unclaimed intent is refused', unclaimed.status === 409 && unclaimedBody.code === 'dispatch_intent_ineligible' && /not been claimed/.test(unclaimedBody.error), unclaimedBody);
+  check('the refusals changed nothing: item still INVESTIGATION_READY, no lease minted', (await findItem())[0].state === 'INVESTIGATION_READY' && (await DB.prepare('SELECT COUNT(*) AS n FROM mc_work_item_leases').first()).n === 0);
   const claim = await claimDispatch(DB, intent.effect.effectId);
   check('claim permits exactly attempt 1', claim.permit?.attempt === 1, { reason: claim.reason });
-  const leased = await (await api(itemPath(ready, 'lease'), { auth: ids.workerToken })).json();
+  const leased = await (await api(itemPath(ready, 'lease'), { auth: ids.workerToken, body: { effect_id: intent.effect.effectId, attempt: claim.permit.attempt } })).json();
   check('one signed lease minted, item INVESTIGATING', leased.workItem?.state === 'INVESTIGATING' && Boolean(leased.leaseGrant), { attempt: leased.leaseGrant?.attempt });
   const issueDir = join(RUN_DIR, 'issued');
   mkdirSync(issueDir, { recursive: true });

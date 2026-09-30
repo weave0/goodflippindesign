@@ -319,6 +319,12 @@ export const BRIDGE_MAX_ATTEMPTS = 1;
  * An item that was never loaded can only INSERT. There is no unguarded update path.
  */
 export const LOADED_VERSION = Symbol.for('gfd.mc.workItem.loadedVersion');
+/**
+ * The lease id the item held when it was loaded (null for none). A save whose active lease differs
+ * from it is issuing a NEW lease, and the store refuses that unless the save carries a lease-authority
+ * guard (workers/lib/mission-control-lease-authority.js). No caller can attach a lease any other way.
+ */
+export const LOADED_LEASE = Symbol.for('gfd.mc.workItem.loadedLease');
 
 export function acceptInvestigationResult(item, result, at = new Date().toISOString()) {
   if (result?.repairAuthority !== false) {
@@ -456,6 +462,7 @@ function rowToItem(row, events = []) {
     qualificationGaps: qualificationGaps(binding),
   };
   item[LOADED_VERSION] = Number(row.lifecycle_version);
+  item[LOADED_LEASE] = row.active_lease_id || null;
   return item;
 }
 
@@ -605,10 +612,22 @@ export function createD1WorkItemStore(db) {
       const expected = Number.isInteger(options?.expectedVersion)
         ? options.expectedVersion
         : (Number.isInteger(item[LOADED_VERSION]) ? item[LOADED_VERSION] : null);
+      const authority = options?.leaseAuthority || null;
+      const issuingLease = Boolean(item.activeLease) && item.activeLease.leaseId !== (item[LOADED_LEASE] ?? null);
+      if (issuingLease && (expected === null || !authority?.clause)) {
+        throw new WorkItemError(
+          'dispatch_intent_required',
+          'A lease can be recorded only under a durable, eligible investigation_dispatch intent',
+          409,
+        );
+      }
+      if (authority && !issuingLease) {
+        throw new WorkItemError('malformed_lease', 'A lease-authority guard applies only to a save that issues a lease', 400);
+      }
       const statements = [
         expected === null
           ? db.prepare(UPSERT_INSERT_ONLY).bind(...columnValues(columns))
-          : db.prepare(UPSERT_CAS).bind(...columnValues(columns), expected),
+          : db.prepare(`${UPSERT_CAS}${authority?.clause || ''}`).bind(...columnValues(columns), expected, ...(authority?.binds || [])),
       ];
       if (event) {
         const eventId = `evt_${item.workItemId}_${item.lifecycleVersion}_${event.to || 'note'}_${at}`;
@@ -674,6 +693,19 @@ export function createD1WorkItemStore(db) {
       ));
       const results = await db.batch(statements);
       if (Number(results?.[0]?.meta?.changes ?? 0) !== 1) {
+        if (authority) {
+          // The item still stands at the loaded version, so it was the intent that stopped being
+          // eligible between the check and the write (abandoned, consumed, reclaimed, expired).
+          const stored = await db.prepare('SELECT lifecycle_version FROM mc_work_items WHERE work_item_id = ?')
+            .bind(item.workItemId).first();
+          if (Number(stored?.lifecycle_version) === expected) {
+            throw new WorkItemError(
+              'dispatch_intent_ineligible',
+              'dispatch intent is not eligible: it stopped being eligible before the lease could be recorded',
+              409,
+            );
+          }
+        }
         throw new WorkItemError(
           'version_conflict',
           'The work item changed concurrently; reload and retry',
