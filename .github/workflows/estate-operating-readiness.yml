@@ -11,6 +11,9 @@ on:
       - "scripts/estate-readiness-findings.mjs"
       - "tests/estate-operating-readiness.test.mjs"
       - "tests/estate-readiness-findings.test.mjs"
+      - "tests/estate-registry-validation.test.mjs"
+      - "scripts/validate-estate-registry.mjs"
+      - "scripts/lib/estate-operating-validation.mjs"
       - ".github/workflows/estate-operating-readiness.yml"
   schedule:
     - cron: "23 12 * * *"
@@ -37,6 +40,7 @@ jobs:
         run: |
           node tests/estate-operating-readiness.test.mjs
           node tests/estate-readiness-findings.test.mjs
+          node tests/estate-registry-validation.test.mjs
 
       - name: Measure current estate readiness
         run: |

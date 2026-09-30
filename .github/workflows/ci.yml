@@ -53,6 +53,9 @@ jobs:
       - name: Validate canonical estate registry
         run: npm run estate:validate
 
+      - name: Estate registry hostile validation tests
+        run: node tests/estate-registry-validation.test.mjs
+
       - name: Validate TI work-sync live authority contract
         run: |
           node - <<'NODE'
