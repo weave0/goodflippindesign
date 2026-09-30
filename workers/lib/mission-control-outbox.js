@@ -24,23 +24,25 @@ export const EFFECT_TYPES = Object.freeze([
 export const DEFAULT_VISIBILITY_MS = 60_000;
 export const MAX_PAYLOAD_CHARS = 4096;
 
-const FORBIDDEN_PAYLOAD_KEYS = new Set([
-  'permitted_paths',
-  'protected_paths',
-  'repairAuthority',
-  'repair_authority',
-  'command',
-  'argv',
-  'shell',
-  'credentials',
-  'env',
-  'environment',
-  'promotion',
-  'approval',
-  'deployment_token',
-  'secret',
-  'password',
-]);
+// Authority-bearing material never travels in an effect payload. Keys are
+// normalized (lowercase, alphanumerics only) and matched by fragment so casing
+// and separators cannot smuggle it past the check.
+const FORBIDDEN_KEY_FRAGMENTS = [
+  'path', 'command', 'argv', 'shell', 'credential', 'secret', 'password',
+  'token', 'apikey', 'env', 'promotion', 'approval', 'authority', 'scope',
+];
+
+// The payload is a closed, flat schema per effect type: only these keys, only
+// scalar values. Anything else fails closed before any write.
+const BASE_PAYLOAD_KEYS = ['summary', 'propertyId', 'findingKey', 'evidenceDigest', 'severity', 'confidenceBps'];
+const PAYLOAD_KEYS_BY_TYPE = Object.freeze({
+  investigation_dispatch: [...BASE_PAYLOAD_KEYS, 'profileId'],
+  github_issue: [...BASE_PAYLOAD_KEYS, 'title', 'repository'],
+  pull_request: [...BASE_PAYLOAD_KEYS, 'title', 'repository', 'baseRef', 'headRef'],
+  deployment: [...BASE_PAYLOAD_KEYS, 'repository', 'ref', 'service'],
+  notification: [...BASE_PAYLOAD_KEYS, 'channel'],
+  reverification_request: [...BASE_PAYLOAD_KEYS, 'predicateId'],
+});
 
 const ADD_COLUMNS = [
   ['schema_version', 'TEXT'],
@@ -95,25 +97,27 @@ function encode(value, path) {
   throw new OutboxError('malformed_payload', `unsupported payload value at ${path}`);
 }
 
-function scanForbidden(value, path) {
-  if (Array.isArray(value)) {
-    value.forEach((item, index) => scanForbidden(item, `${path}[${index}]`));
-    return;
-  }
-  if (!value || typeof value !== 'object') return;
-  for (const [key, child] of Object.entries(value)) {
-    if (FORBIDDEN_PAYLOAD_KEYS.has(key)) {
-      throw new OutboxError('forbidden_payload', `${path}.${key} cannot travel in an effect payload`);
+function assertClosedPayload(payload, effectType) {
+  const allowed = effectType ? new Set(PAYLOAD_KEYS_BY_TYPE[effectType] || []) : null;
+  for (const [key, child] of Object.entries(payload)) {
+    const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (FORBIDDEN_KEY_FRAGMENTS.some((fragment) => normalized.includes(fragment))) {
+      throw new OutboxError('forbidden_payload', `payload.${key} cannot travel in an effect payload`);
     }
-    scanForbidden(child, `${path}.${key}`);
+    if (allowed && !allowed.has(key)) {
+      throw new OutboxError('forbidden_payload', `payload.${key} is not part of the ${effectType} payload schema`);
+    }
+    if (child !== null && typeof child === 'object') {
+      throw new OutboxError('forbidden_payload', `payload.${key} must be a scalar value`);
+    }
   }
 }
 
-export function canonicalPayload(payload) {
+export function canonicalPayload(payload, effectType = null) {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
     throw new OutboxError('malformed_payload', 'effect payload must be an object');
   }
-  scanForbidden(payload, 'payload');
+  assertClosedPayload(payload, effectType);
   const text = encode(payload, 'payload');
   if (text.length > MAX_PAYLOAD_CHARS) {
     throw new OutboxError('malformed_payload', 'effect payload exceeds the outbox bound');
@@ -181,9 +185,14 @@ async function columnSet(db) {
 export async function ensureOutboxSchema(db) {
   await ensureWorkItemSchema(db);
   const existing = await columnSet(db);
-  const pending = ADD_COLUMNS.filter(([name]) => !existing.has(name));
-  if (pending.length) {
-    await db.batch(pending.map(([name, type]) => db.prepare(`ALTER TABLE mc_effects ADD COLUMN ${name} ${type}`)));
+  for (const [name, type] of ADD_COLUMNS) {
+    if (existing.has(name)) continue;
+    try {
+      await db.prepare(`ALTER TABLE mc_effects ADD COLUMN ${name} ${type}`).run();
+    } catch (error) {
+      // A concurrent first use may have added the column; only that is benign.
+      if (!(await columnSet(db)).has(name)) throw error;
+    }
   }
   await db.prepare(`
     CREATE INDEX IF NOT EXISTS idx_mc_effects_dispatch
@@ -227,7 +236,7 @@ export async function planEffect(db, input) {
   if (candidateDigest != null && !/^sha256:[0-9a-f]{64}$/.test(candidateDigest)) {
     throw new OutboxError('malformed_effect', 'candidateDigest must be sha256:<64 lowercase hex>');
   }
-  const canonical = canonicalPayload(input.payload);
+  const canonical = canonicalPayload(input.payload, input.effectType);
   const payloadDigest = await digestPayload(canonical);
   const effectId = await deriveEffectId({
     workItemId,
@@ -248,6 +257,13 @@ export async function planEffect(db, input) {
     if (!sameIntent(existing, proposed)) {
       throw new OutboxError('effect_conflict', 'this consequence id is already bound to a different intent');
     }
+    if (Number(existing.requested_lifecycle_version) !== input.requestedLifecycleVersion) {
+      throw new OutboxError('stale_version', 'effect plan does not match the lifecycle version this effect was fenced to');
+    }
+    const current = await readWorkItem(db, workItemId);
+    if (Number(current.lifecycle_version) !== input.requestedLifecycleVersion) {
+      throw new OutboxError('stale_version', 'effect plan does not match the work item lifecycle version');
+    }
     return { effect: present(existing), created: false };
   }
 
@@ -264,22 +280,20 @@ export async function planEffect(db, input) {
     requestedLifecycleVersion: input.requestedLifecycleVersion,
     schemaVersion: EFFECT_SCHEMA_VERSION,
   });
+  // Both inserts are conditional on the lifecycle version inside the batch
+  // transaction, so a concurrent transition cannot slip between check and write.
+  let results;
   try {
-    await db.batch([
+    results = await db.batch([
       db.prepare(`
         INSERT INTO mc_work_item_events (
           event_id, work_item_id, event_type, from_state, to_state, occurred_at,
           actor_type, actor_id, evidence_digest, detail_json
-        ) VALUES (?, ?, 'effect_intent', ?, ?, ?, 'outbox', 'mission-control', ?, ?)
-      `).bind(
-        causalEventId,
-        workItemId,
-        workItem.lifecycle_state,
-        workItem.lifecycle_state,
-        now,
-        workItem.evidence_digest,
-        detail,
-      ),
+        )
+        SELECT ?, work_item_id, 'effect_intent', lifecycle_state, lifecycle_state, ?,
+               'outbox', 'mission-control', evidence_digest, ?
+        FROM mc_work_items WHERE work_item_id = ? AND lifecycle_version = ?
+      `).bind(causalEventId, now, detail, workItemId, input.requestedLifecycleVersion),
       db.prepare(`
         INSERT INTO mc_effects (
           effect_id, work_item_id, effect_type, target, candidate_digest, status,
@@ -287,10 +301,11 @@ export async function planEffect(db, input) {
           schema_version, requested_lifecycle_version, payload_digest, payload_json,
           attempt_count, last_attempt_at, idempotency_key, causal_event_id,
           receipt_ref, terminal_reason
-        ) VALUES (?, ?, ?, ?, ?, 'PLANNED', NULL, ?, NULL, NULL, NULL, ?, ?, ?, ?, 0, NULL, ?, ?, NULL, NULL)
+        )
+        SELECT ?, work_item_id, ?, ?, ?, 'PLANNED', NULL, ?, NULL, NULL, NULL, ?, ?, ?, ?, 0, NULL, ?, ?, NULL, NULL
+        FROM mc_work_items WHERE work_item_id = ? AND lifecycle_version = ?
       `).bind(
         effectId,
-        workItemId,
         input.effectType,
         target,
         candidateDigest,
@@ -301,6 +316,8 @@ export async function planEffect(db, input) {
         canonical,
         effectId,
         causalEventId,
+        workItemId,
+        input.requestedLifecycleVersion,
       ),
     ]);
   } catch (error) {
@@ -308,6 +325,9 @@ export async function planEffect(db, input) {
     if (raced && sameIntent(raced, proposed)) return { effect: present(raced), created: false };
     if (raced) throw new OutboxError('effect_conflict', 'this consequence id is already bound to a different intent');
     throw error;
+  }
+  if (!results?.[0]?.meta?.changes || !results?.[1]?.meta?.changes) {
+    throw new OutboxError('stale_version', 'work item lifecycle advanced before the effect could be recorded');
   }
   return { effect: present(await readEffectRow(db, effectId)), created: true };
 }
@@ -322,6 +342,14 @@ function assertDispatchContract(effect) {
   }
 }
 
+function visibilityWindow(value) {
+  if (value === undefined) return DEFAULT_VISIBILITY_MS;
+  if (!Number.isInteger(value) || value < 1) {
+    throw new OutboxError('malformed_effect', 'visibilityMs must be a positive integer');
+  }
+  return value;
+}
+
 export async function claimDispatch(db, effectId, options = {}) {
   await ensureOutboxSchema(db);
   const effect = present(await readEffectRow(db, effectId));
@@ -334,7 +362,7 @@ export async function claimDispatch(db, effectId, options = {}) {
     return { permit: null, reason: 'stale_lifecycle', effect };
   }
   const now = iso(options.now || new Date());
-  const visibilityMs = Number.isInteger(options.visibilityMs) ? options.visibilityMs : DEFAULT_VISIBILITY_MS;
+  const visibilityMs = visibilityWindow(options.visibilityMs);
   const visibleBefore = new Date(Date.parse(now) - visibilityMs).toISOString();
   if (effect.lastAttemptAt && effect.lastAttemptAt > visibleBefore) {
     return { permit: null, reason: 'in_flight', effect };
@@ -347,9 +375,17 @@ export async function claimDispatch(db, effectId, options = {}) {
       AND schema_version = ?
       AND attempt_count = ?
       AND (last_attempt_at IS NULL OR last_attempt_at <= ?)
+      AND EXISTS (
+        SELECT 1 FROM mc_work_items
+        WHERE work_item_id = mc_effects.work_item_id
+          AND lifecycle_version = mc_effects.requested_lifecycle_version
+      )
   `).bind(now, effect.effectId, EFFECT_SCHEMA_VERSION, effect.attemptCount, visibleBefore).run();
   if (!claimed?.meta?.changes) {
-    return { permit: null, reason: 'in_flight', effect: present(await readEffectRow(db, effectId)) };
+    const lost = present(await readEffectRow(db, effectId));
+    const latest = await readWorkItem(db, effect.workItemId);
+    const stale = Number(latest.lifecycle_version) !== effect.requestedLifecycleVersion;
+    return { permit: null, reason: stale ? 'stale_lifecycle' : 'in_flight', effect: lost };
   }
   const next = present(await readEffectRow(db, effectId));
   return {
@@ -379,6 +415,9 @@ export async function recordReceipt(db, effectId, receipt) {
   }
   const receiptRef = receipt.outcome === 'committed' ? requireText(receipt.receipt, 'receipt', 512) : null;
   const terminalReason = receipt.outcome === 'failed' ? requireText(receipt.reason, 'reason', 512) : null;
+  if (effect.attemptCount !== receipt.attempt) {
+    throw new OutboxError('stale_attempt', 'receipt attempt does not match the current fence');
+  }
   if (effect.status === 'COMMITTED' || effect.status === 'VERIFIED') {
     if (effect.receiptRef === receiptRef && receipt.outcome === 'committed') return { effect, created: false };
     throw new OutboxError('receipt_conflict', 'a different receipt is already recorded for this effect');
@@ -386,9 +425,6 @@ export async function recordReceipt(db, effectId, receipt) {
   if (effect.status === 'FAILED') {
     if (effect.terminalReason === terminalReason && receipt.outcome === 'failed') return { effect, created: false };
     throw new OutboxError('receipt_conflict', 'a different terminal failure is already recorded for this effect');
-  }
-  if (effect.attemptCount !== receipt.attempt) {
-    throw new OutboxError('stale_attempt', 'receipt attempt does not match the current fence');
   }
   const now = iso(receipt.now || new Date());
   const status = receipt.outcome === 'committed' ? 'COMMITTED' : 'FAILED';
@@ -418,7 +454,7 @@ export async function recordReceipt(db, effectId, receipt) {
   return { effect: present(await readEffectRow(db, effectId)), created: true };
 }
 
-export async function abandonEffect(db, effectId, reason, now = new Date()) {
+export async function abandonEffect(db, effectId, reason, now = new Date(), options = {}) {
   await ensureOutboxSchema(db);
   const effect = present(await readEffectRow(db, effectId));
   assertDispatchContract(effect);
@@ -428,13 +464,26 @@ export async function abandonEffect(db, effectId, reason, now = new Date()) {
     throw new OutboxError('terminal', 'only a planned effect can be abandoned');
   }
   const at = iso(now);
+  const visibleBefore = new Date(Date.parse(at) - visibilityWindow(options.visibilityMs)).toISOString();
+  if (effect.lastAttemptAt && effect.lastAttemptAt > visibleBefore) {
+    throw new OutboxError('in_flight', 'an executor may still be running this effect; wait for its visibility window');
+  }
   const eventId = `evt_${effect.effectId}_abandoned_${effect.attemptCount}`;
   const detail = JSON.stringify({
     effectId: effect.effectId,
     terminalReason,
     schemaVersion: EFFECT_SCHEMA_VERSION,
   });
+  // The update is fenced on the attempt and the visibility window; the event is
+  // written only if that same update took effect, so history cannot claim an
+  // abandonment that lost a race to a receipt.
   await db.batch([
+    db.prepare(`
+      UPDATE mc_effects
+      SET status = 'FAILED', terminal_reason = ?, last_error = ?, committed_at = ?
+      WHERE effect_id = ? AND status = 'PLANNED' AND schema_version = ?
+        AND attempt_count = ? AND (last_attempt_at IS NULL OR last_attempt_at <= ?)
+    `).bind(terminalReason, terminalReason, at, effect.effectId, EFFECT_SCHEMA_VERSION, effect.attemptCount, visibleBefore),
     db.prepare(`
       INSERT INTO mc_work_item_events (
         event_id, work_item_id, event_type, from_state, to_state, occurred_at,
@@ -445,14 +494,11 @@ export async function abandonEffect(db, effectId, reason, now = new Date()) {
       WHERE work_item_id = ?
         AND EXISTS (
           SELECT 1 FROM mc_effects
-          WHERE effect_id = ? AND status = 'PLANNED' AND schema_version = ?
+          WHERE effect_id = ? AND status = 'FAILED' AND schema_version = ?
+            AND terminal_reason = ? AND committed_at = ? AND attempt_count = ?
+            AND receipt_ref IS NULL
         )
-    `).bind(eventId, at, detail, effect.workItemId, effect.effectId, EFFECT_SCHEMA_VERSION),
-    db.prepare(`
-      UPDATE mc_effects
-      SET status = 'FAILED', terminal_reason = ?, last_error = ?, committed_at = ?
-      WHERE effect_id = ? AND status = 'PLANNED' AND schema_version = ?
-    `).bind(terminalReason, terminalReason, at, effect.effectId, EFFECT_SCHEMA_VERSION),
+    `).bind(eventId, at, detail, effect.workItemId, effect.effectId, EFFECT_SCHEMA_VERSION, terminalReason, at, effect.attemptCount),
   ]);
   const current = present(await readEffectRow(db, effectId));
   if (current.status !== 'FAILED' || current.terminalReason !== terminalReason) {

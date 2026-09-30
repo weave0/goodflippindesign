@@ -12,6 +12,7 @@ import {
   canonicalPayload,
   claimDispatch,
   dispatchOnce,
+  ensureOutboxSchema,
   loadEffect,
   planEffect,
   recordReceipt,
@@ -66,6 +67,25 @@ async function eventCount(workItemId, eventType) {
     'SELECT COUNT(*) AS n FROM mc_work_item_events WHERE work_item_id = ? AND event_type = ?',
   ).bind(workItemId, eventType).first();
   return Number(row.n);
+}
+
+// Wraps D1 so a test can run a competing write just before the fenced batch
+// whose SQL mentions the marker; schema-setup batches pass straight through.
+function racingDb(marker, beforeBatch) {
+  let armed = false;
+  return {
+    prepare: (sql) => {
+      if (sql.includes(marker)) armed = true;
+      return env.DB.prepare(sql);
+    },
+    batch: async (statements) => {
+      if (armed) {
+        armed = false;
+        await beforeBatch();
+      }
+      return env.DB.batch(statements);
+    },
+  };
 }
 
 describe('mission control effect outbox', () => {
@@ -264,6 +284,86 @@ describe('mission control effect outbox', () => {
     ).bind(unknownId).first();
     expect(stillThere.schema_version).toBe('gfd-effect-99');
     expect(stillThere.status).toBe('PLANNED');
+  });
+
+  it('rejects authority under any key casing and anything outside the closed schema', async () => {
+    const item = await workItem('outbox:closed-schema');
+    for (const payload of [
+      { summary: 'x', apiToken: 't' },
+      { summary: 'x', verification_commands: 'npm test' },
+      { summary: 'x', repairScope: 'src' },
+      { summary: 'x', Command: 'rm' },
+      { summary: 'x', unlisted: 'value' },
+      { summary: 'x', propertyId: { nested: 'object' } },
+    ]) {
+      await expect(planEffect(env.DB, intent(item, { payload }))).rejects.toThrow(/cannot travel|payload schema|scalar/);
+    }
+    expect(await effectCount(item.workItemId)).toBe(0);
+  });
+
+  it('refuses a stale caller replaying an existing effect id', async () => {
+    const item = await workItem('outbox:stale-replay');
+    await planEffect(env.DB, intent(item));
+    await expect(planEffect(env.DB, intent(item, { requestedLifecycleVersion: item.lifecycleVersion + 1 })))
+      .rejects.toThrow(/lifecycle version/);
+    await env.DB.prepare('UPDATE mc_work_items SET lifecycle_version = lifecycle_version + 1 WHERE work_item_id = ?')
+      .bind(item.workItemId).run();
+    await expect(planEffect(env.DB, intent(item))).rejects.toThrow(/lifecycle version/);
+  });
+
+  it('writes nothing when the lifecycle advances between the read and the batch', async () => {
+    const item = await workItem('outbox:plan-race');
+    const racing = racingDb('effect_intent', () => env.DB
+      .prepare('UPDATE mc_work_items SET lifecycle_version = lifecycle_version + 1 WHERE work_item_id = ?')
+      .bind(item.workItemId).run());
+    await expect(planEffect(racing, intent(item))).rejects.toThrow(/advanced/);
+    expect(await effectCount(item.workItemId)).toBe(0);
+    expect(await eventCount(item.workItemId, 'effect_intent')).toBe(0);
+  });
+
+  it('does not record an abandonment that lost the race to a receipt', async () => {
+    const item = await workItem('outbox:abandon-race');
+    const planned = await planEffect(env.DB, intent(item, { effectType: 'pull_request', target: 'weave0/goodflippindesign' }));
+    await claimDispatch(env.DB, planned.effect.effectId, { now: T0 });
+    const racing = racingDb('effect_abandoned', () => recordReceipt(env.DB, planned.effect.effectId, {
+      attempt: 1, outcome: 'committed', receipt: 'pr:opened', now: T_VISIBLE,
+    }));
+    await expect(abandonEffect(racing, planned.effect.effectId, 'operator withdrew', T_VISIBLE))
+      .rejects.toThrow(/changed before/);
+    expect((await loadEffect(env.DB, planned.effect.effectId)).status).toBe('COMMITTED');
+    expect(await eventCount(item.workItemId, 'effect_abandoned')).toBe(0);
+  });
+
+  it('refuses to abandon an effect whose executor may still be running', async () => {
+    const item = await workItem('outbox:abandon-inflight');
+    const planned = await planEffect(env.DB, intent(item));
+    await claimDispatch(env.DB, planned.effect.effectId, { now: T0 });
+    await expect(abandonEffect(env.DB, planned.effect.effectId, 'too eager', T_IN_FLIGHT)).rejects.toThrow(/may still be running/);
+    expect((await loadEffect(env.DB, planned.effect.effectId)).status).toBe('PLANNED');
+  });
+
+  it('rejects a non-positive visibility window instead of disabling the fence', async () => {
+    const item = await workItem('outbox:visibility');
+    const planned = await planEffect(env.DB, intent(item));
+    for (const visibilityMs of [0, -5, 1.5]) {
+      await expect(claimDispatch(env.DB, planned.effect.effectId, { now: T0, visibilityMs })).rejects.toThrow(/positive integer/);
+    }
+    expect((await loadEffect(env.DB, planned.effect.effectId)).attemptCount).toBe(0);
+  });
+
+  it('rejects an older attempt replaying a receipt after a newer attempt committed', async () => {
+    const item = await workItem('outbox:late-replay');
+    const planned = await planEffect(env.DB, intent(item));
+    await claimDispatch(env.DB, planned.effect.effectId, { now: T0 });
+    await claimDispatch(env.DB, planned.effect.effectId, { now: T_VISIBLE });
+    await recordReceipt(env.DB, planned.effect.effectId, { attempt: 2, outcome: 'committed', receipt: 'probe:same', now: T_VISIBLE });
+    await expect(recordReceipt(env.DB, planned.effect.effectId, {
+      attempt: 1, outcome: 'committed', receipt: 'probe:same', now: T_VISIBLE,
+    })).rejects.toThrow(/fence/);
+  });
+
+  it('survives concurrent first use of the schema', async () => {
+    await Promise.all([1, 2, 3, 4].map(() => ensureOutboxSchema(env.DB)));
   });
 
   it('records a terminal executor failure once', async () => {
