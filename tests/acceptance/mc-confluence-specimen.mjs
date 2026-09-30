@@ -232,32 +232,38 @@ try {
   const resign = async (envelope) => { const { authentication, ...unsigned } = envelope; return signResultEnvelope({ ...unsigned, authentication: { key_id: authentication.key_id } }, workerKey); };
 
   // --- 6. hostile delivery of FWOMPS's real bytes WHILE INVESTIGATING: each refused by its own fence ---
-  const STATE_ONLY = new Set(['result_conflict', 'illegal_transition']); // would mean "refused for the wrong reason"
+  // Each hostile delivery must be refused by its OWN named fence (exact machine-readable code). Every
+  // mutation stays valid through all EARLIER layers (signature, closed schema, source/evidence
+  // consistency) unless that earlier layer is the point of the case, so it reaches the fence it is named for.
+  const WRONG_SHA = 'b'.repeat(40);
   const hostileBefore = {
-    'edited summary (MAC no longer matches)': mutate((e) => { e.summary += ' (edited)'; }),
-    'flipped outcome (MAC no longer matches)': mutate((e) => { e.outcome = e.outcome === 'reproduced' ? 'not_reproduced' : 'reproduced'; }),
-    'flipped MAC': mutate((e) => { const m = e.authentication[macKey]; e.authentication[macKey] = `${m.slice(0, -1)}${m.endsWith('0') ? '1' : '0'}`; }),
-    'unknown key id': mutate((e) => { e.authentication.key_id = 'unknown-key'; }),
-    'smuggled authority field (unsigned)': mutate((e) => { e.repair_authority = true; }),
-    'unknown schema (unsigned)': mutate((e) => { e.schema_version = 'mc-fw-investigation-result-9'; }),
-    'VALIDLY SIGNED wrong lease token': await resign(mutate((e) => { e.lease_token_digest = `sha256:${'9'.repeat(64)}`; })),
-    'VALIDLY SIGNED wrong attempt': await resign(mutate((e) => { e.attempt = 2; })),
-    'VALIDLY SIGNED wrong work-item echo': await resign(mutate((e) => { e.evidence.diagnostic_id = 'gfdwi_v1_someone_else'; })),
-    'VALIDLY SIGNED wrong repository': await resign(mutate((e) => { e.source.repository = 'weave0/other'; })),
-    'VALIDLY SIGNED wrong property': await resign(mutate((e) => { e.source.property_id = 'other.com'; })),
-    'VALIDLY SIGNED wrong evidence revision': await resign(mutate((e) => { e.evidence.revision = 'b'.repeat(40); })),
-    'VALIDLY SIGNED wrong request id': await resign(mutate((e) => { e.request_id = 'mci_someone_elses_request'; })),
-    'VALIDLY SIGNED unknown schema': await resign(mutate((e) => { e.schema_version = 'mc-fw-investigation-result-9'; })),
-    'VALIDLY SIGNED smuggled repair authority': await resign(mutate((e) => { e.repair_authority = true; })),
+    'edited summary (MAC no longer matches)': [mutate((e) => { e.summary += ' (edited)'; }), 'mac_invalid'],
+    'flipped outcome (MAC no longer matches)': [mutate((e) => { e.outcome = e.outcome === 'reproduced' ? 'not_reproduced' : 'reproduced'; }), 'mac_invalid'],
+    'flipped MAC': [mutate((e) => { const m = e.authentication[macKey]; e.authentication[macKey] = `${m.slice(0, -1)}${m.endsWith('0') ? '1' : '0'}`; }), 'mac_invalid'],
+    'unknown key id': [mutate((e) => { e.authentication.key_id = 'unknown-key'; }), 'unknown_key'],
+    'smuggled authority field (unsigned)': [mutate((e) => { e.repair_authority = true; }), 'malformed_result'],
+    'unknown schema (unsigned)': [mutate((e) => { e.schema_version = 'mc-fw-investigation-result-9'; }), 'schema_version_mismatch'],
+    'VALIDLY SIGNED wrong lease token': [await resign(mutate((e) => { e.lease_token_digest = `sha256:${'9'.repeat(64)}`; })), 'lease_mismatch'],
+    'VALIDLY SIGNED wrong attempt': [await resign(mutate((e) => { e.attempt = 2; })), 'attempt_mismatch'],
+    'VALIDLY SIGNED wrong work-item echo': [await resign(mutate((e) => { e.evidence.diagnostic_id = 'gfdwi_v1_someone_else'; })), 'identity_mismatch'],
+    'VALIDLY SIGNED wrong repository': [await resign(mutate((e) => { e.source.repository = 'weave0/other'; })), 'identity_mismatch'],
+    'VALIDLY SIGNED wrong property': [await resign(mutate((e) => { e.source.property_id = 'other.com'; })), 'identity_mismatch'],
+    // BOTH evidence.revision and source.inspected_head_sha move to the same wrong SHA: the envelope is
+    // internally consistent, so only the signed-contract binding can refuse it.
+    'VALIDLY SIGNED wrong evidence revision (both fields, consistent)': [await resign(mutate((e) => { e.evidence.revision = WRONG_SHA; e.source.inspected_head_sha = WRONG_SHA; })), 'digest_mismatch'],
+    'VALIDLY SIGNED wrong contract digest': [await resign(mutate((e) => { e.contract_digest = `sha256:${'7'.repeat(64)}`; })), 'digest_mismatch'],
+    'VALIDLY SIGNED wrong request id': [await resign(mutate((e) => { e.request_id = 'mci_someone_elses_request'; })), 'request_mismatch'],
+    'VALIDLY SIGNED unknown schema': [await resign(mutate((e) => { e.schema_version = 'mc-fw-investigation-result-9'; })), 'schema_version_mismatch'],
+    'VALIDLY SIGNED smuggled repair authority': [await resign(mutate((e) => { e.repair_authority = true; })), 'malformed_result'],
   };
   evidence.hostileBeforeAcceptance = {};
-  for (const [name, body] of Object.entries(hostileBefore)) {
+  for (const [name, [body, expectedCode]] of Object.entries(hostileBefore)) {
     const refused = await post(body);
-    evidence.hostileBeforeAcceptance[name] = refused;
-    check(`hostile while INVESTIGATING: ${name}`, refused.status >= 400 && !STATE_ONLY.has(refused.code), refused);
+    evidence.hostileBeforeAcceptance[name] = { ...refused, expectedCode };
+    check(`hostile while INVESTIGATING: ${name} -> ${expectedCode}`, refused.status >= 400 && refused.code === expectedCode, { ...refused, expectedCode });
   }
   const wrongBearer = await post(rawBody, 'wrong-token');
-  check('hostile while INVESTIGATING: wrong bearer refused (401/403)', [401, 403].includes(wrongBearer.status), wrongBearer);
+  check('hostile while INVESTIGATING: wrong bearer refused (401)', wrongBearer.status === 401, wrongBearer);
   const stillInvestigating = (await findItem())[0];
   check('after every hostile delivery the item is still INVESTIGATING with its lease intact, no diagnosis', stillInvestigating.state === 'INVESTIGATING' && Boolean(stillInvestigating.activeLease) && !stillInvestigating.diagnosis);
 

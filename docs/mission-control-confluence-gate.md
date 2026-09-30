@@ -55,7 +55,7 @@ refusal codes), and dumps of the D1 work-item, event, lease and effect tables.
 | expired lease/result + recovery path | `refuses a result after expiry, then recovers through an explicit, fresh, bounded attempt` | — |
 | tampered payload / digest / signature | `rejects tampered payloads, tampered MACs, a foreign key and an unknown key id` | `mac_invalid` ×3, `unknown_key` |
 | wrong repository / property / work item | identity-echo test | `identity_mismatch` ×3 (validly signed) |
-| wrong evidence revision | identity-echo test | refused (`malformed_result`) |
+| wrong evidence revision (both `evidence.revision` and `source.inspected_head_sha`, internally consistent) | identity-echo test (`digest_mismatch`) | `digest_mismatch` |
 | unsupported schema/version | `rejects an unsupported result schema…`, unsupported effect row test | `schema_version_mismatch` (signed and unsigned) |
 | replay after a newer attempt | recovery test (old envelope after the fresh attempt) | — |
 | authority smuggled in payload | `rejects authority smuggled into the result, the lease request and the dispatch intent` | `malformed_result` (signed and unsigned) |
