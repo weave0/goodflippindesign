@@ -20,6 +20,7 @@ import {
   deriveWorkItemId,
   releaseLease,
   transitionWorkItem,
+  validateWorkItemProjection,
 } from './lib/mission-control-work-items.js';
 
 const REPAIR_STATES = new Set([
@@ -113,7 +114,21 @@ export async function healthIdentity(marker) {
   };
 }
 
-export async function recordHealthObservation(store, marker, {
+// A health observation is idempotent evidence, so on a version conflict it is deliberately
+// re-applied onto the freshly loaded item (never onto the stale copy, never last-write-wins).
+export const HEALTH_CONFLICT_RETRIES = 3;
+
+export async function recordHealthObservation(store, marker, options = {}) {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await recordHealthObservationOnce(store, marker, options);
+    } catch (error) {
+      if (error?.code !== 'version_conflict' || attempt >= HEALTH_CONFLICT_RETRIES) throw error;
+    }
+  }
+}
+
+async function recordHealthObservationOnce(store, marker, {
   issueNumber = null,
   status = 'degraded',
   checkedAt,
@@ -223,6 +238,35 @@ export function issueInvestigation(item, contract) {
   return next;
 }
 
+/**
+ * Explicit, proof-gated recovery for the single-attempt bridge. Only an INVESTIGATING item whose
+ * active lease has provably expired (expiresAt <= at) may be abandoned. It releases exactly that
+ * lease and returns the item to QUALIFIED -- the state from which a *fresh* signed contract can
+ * be issued. It never reuses the old contract/request and never creates a second attempt.
+ */
+export function abandonExpiredInvestigation(item, at = new Date().toISOString()) {
+  if (item.state !== 'INVESTIGATING' || !item.activeLease) {
+    throw new WorkItemError('illegal_transition', 'Only an item under investigation with an active lease can be abandoned', 409);
+  }
+  const expiry = Date.parse(item.activeLease.expiresAt);
+  if (!Number.isFinite(expiry) || expiry > Date.parse(at)) {
+    throw new WorkItemError('lease_not_expired', 'The active lease has not expired; it cannot be abandoned yet', 409);
+  }
+  const released = releaseLease(item, item.activeLease.leaseId);
+  const next = {
+    ...released,
+    state: 'QUALIFIED',
+    resumeState: null,
+    lifecycleVersion: Number(released.lifecycleVersion || 0) + 1,
+  };
+  try {
+    validateWorkItemProjection(next, { now: at });
+  } catch (error) {
+    throw new WorkItemError('illegal_transition', error.message, 409);
+  }
+  return next;
+}
+
 export function associateLease(item, lease, at) {
   if (item.state !== 'INVESTIGATION_READY' && item.state !== 'INVESTIGATING') {
     throw new WorkItemError('illegal_transition', 'A lease can attach only after an investigation contract is issued', 409);
@@ -236,6 +280,13 @@ export function associateLease(item, lease, at) {
   const requestId = item.investigation?.requestId;
   if (!requestId || lease.requestId !== requestId) {
     throw new WorkItemError('request_mismatch', 'Lease request does not match the signed investigation contract', 409);
+  }
+  if (lease.attempt > BRIDGE_MAX_ATTEMPTS || (item.attemptsIssued ?? 0) >= BRIDGE_MAX_ATTEMPTS) {
+    throw new WorkItemError(
+      'attempt_exhausted',
+      'This signed contract has already been leased; a retry needs a fresh signed contract',
+      409,
+    );
   }
   let leased;
   try {
@@ -251,29 +302,70 @@ export function associateLease(item, lease, at) {
   return transitionWorkItem(leased, 'INVESTIGATING', { now: at });
 }
 
-export function acceptInvestigationResult(item, result) {
+/**
+ * The first GFD -> FWOMPS bridge is deliberately bounded to ONE attempt per signed
+ * contract. GFD cannot yet distinguish an admitted-attempt resume from an
+ * expired/abandoned attempt, a greater attempt after durable abandonment, or a
+ * stale prior-attempt result, so it does not pretend to: once a lease has been
+ * issued for a request, no second lease is ever issued for it, even after the
+ * first expires. A retry requires a fresh signed contract (new request id).
+ */
+export const BRIDGE_MAX_ATTEMPTS = 1;
+
+/**
+ * Every item read from the store carries the lifecycle version it was loaded at, under this
+ * (enumerable, symbol-keyed) marker. Object spread copies it, so any item derived from a loaded
+ * one -- however many lifecycle functions it passes through -- is saved only against that version.
+ * An item that was never loaded can only INSERT. There is no unguarded update path.
+ */
+export const LOADED_VERSION = Symbol.for('gfd.mc.workItem.loadedVersion');
+
+export function acceptInvestigationResult(item, result, at = new Date().toISOString()) {
+  if (result?.repairAuthority !== false) {
+    throw new WorkItemError('repair_authority_denied', 'An investigation result grants no repair authority', 403);
+  }
+  if (result.workItemId !== item.workItemId || result.propertyId !== item.propertyId
+    || result.repository !== item.repository) {
+    throw new WorkItemError('identity_mismatch', 'Result identity does not match the investigation', 409);
+  }
+  const investigation = item.investigation;
+  if (result.requestId !== investigation?.requestId) {
+    throw new WorkItemError('request_mismatch', 'Result request does not match the signed investigation contract', 409);
+  }
+  if (result.contractDigest !== investigation?.digest
+    || result.diagnosticDigest !== investigation?.diagnosticDigest
+    || result.snapshotDigest !== investigation?.snapshotDigest
+    || result.evidenceRevision !== item.evidenceRevision) {
+    throw new WorkItemError('digest_mismatch', 'Result does not match the signed investigation contract', 409);
+  }
+  if (item.state === 'DIAGNOSED') {
+    if (result.resultDigest === item.diagnosis?.resultDigest) {
+      return { ...item, skipEvent: true };
+    }
+    throw new WorkItemError('result_conflict', 'A different result is already recorded for this investigation', 409);
+  }
   if (item.state !== 'INVESTIGATING') {
     throw new WorkItemError('illegal_transition', 'A diagnosis can be accepted only while the work item is under investigation', 409);
   }
-  if (result.workItemId !== item.workItemId) {
-    throw new WorkItemError('identity_mismatch', 'Result work item does not match the investigation', 409);
-  }
-  if (result.requestId !== item.investigation?.requestId) {
-    throw new WorkItemError('request_mismatch', 'Result request does not match the signed investigation contract', 409);
-  }
-  if (result.contractDigest !== item.investigation?.digest) {
-    throw new WorkItemError('digest_mismatch', 'Result digest does not match the signed investigation contract', 409);
-  }
-  if (item.activeLease?.workerId && result.workerId !== item.activeLease.workerId) {
+  if (!item.activeLease || result.workerId !== item.activeLease.workerId) {
     throw new WorkItemError('worker_mismatch', 'Result worker does not own the active lease', 409);
   }
-  const released = item.activeLease
-    ? releaseLease(item, item.activeLease.leaseId)
-    : item;
+  const leaseExpiry = Date.parse(item.activeLease.expiresAt);
+  if (!Number.isFinite(leaseExpiry) || leaseExpiry <= Date.parse(at)) {
+    // FWOMPS never uploads a result past its lease (abandoned_result_expired); neither does GFD accept one.
+    throw new WorkItemError('lease_expired', 'The lease expired before the result arrived', 409);
+  }
+  if (result.leaseTokenDigest !== item.activeLease.leaseId) {
+    throw new WorkItemError('lease_mismatch', 'Result lease does not match the active lease', 409);
+  }
+  if (!Number.isInteger(item.activeLease.attempt) || result.attempt !== item.activeLease.attempt) {
+    throw new WorkItemError('attempt_mismatch', 'Result attempt does not match the active lease', 409);
+  }
+  const released = releaseLease(item, item.activeLease.leaseId);
   return transitionWorkItem(released, 'DIAGNOSED', {
     diagnosis: {
       resultDigest: result.resultDigest,
-      signatureRef: `${result.schemaVersion}:${result.workerId}`,
+      signatureRef: `${result.schemaVersion}:${result.keyId}`,
     },
   });
 }
@@ -291,10 +383,23 @@ function rowToItem(row, events = []) {
   };
   const latest = [...related].reverse();
   const investigationEvent = latest.find((event) => detailOf(event).investigation);
-  const diagnosisEvent = latest.find((event) => detailOf(event).summary);
+  const diagnosisEvent = latest.find((event) => detailOf(event).summary && detailOf(event).outcome);
+  const leaseDetail = latest.map(detailOf).find((detail) => detail.lease)?.lease;
+  const abandonmentEvent = latest.find((event) => detailOf(event).abandonment);
   const reasonEvent = latest.find((event) => event.to_state === row.lifecycle_state && detailOf(event).reason);
   const githubEvent = latest.find((event) => detailOf(event).githubIssue);
-  const investigation = investigationEvent ? detailOf(investigationEvent).investigation : null;
+  const abandonedAfterIssue = Boolean(
+    abandonmentEvent && investigationEvent
+    && related.indexOf(abandonmentEvent) > related.indexOf(investigationEvent),
+  );
+  // After an abandonment the issued contract is dead history, not a live investigation.
+  const investigation = investigationEvent && !abandonedAfterIssue
+    ? detailOf(investigationEvent).investigation
+    : null;
+  // Attempts are counted per signed contract (request id), never across contracts.
+  const attemptsIssued = investigation
+    ? related.filter((event) => detailOf(event).lease && detailOf(event).requestId === investigation.requestId).length
+    : 0;
   const binding = resolveEstateBinding(row.property_id);
   const item = {
     schemaVersion: row.schema_version,
@@ -322,11 +427,14 @@ function rowToItem(row, events = []) {
       leaseId: row.active_lease_id,
       workerId: row.active_worker_id,
       expiresAt: row.lease_expires_at,
+      attempt: leaseDetail?.leaseTokenDigest === row.active_lease_id ? leaseDetail.attempt : null,
     } : null,
     diagnosis: row.diagnosis_result_digest ? {
       resultDigest: row.diagnosis_result_digest,
       signatureRef: row.diagnosis_signature_ref,
       summary: diagnosisEvent ? detailOf(diagnosisEvent).summary : null,
+      outcome: diagnosisEvent ? detailOf(diagnosisEvent).outcome : null,
+      stopReason: diagnosisEvent ? detailOf(diagnosisEvent).stopReason ?? null : null,
     } : null,
     repairAuthorityRef: row.repair_authority_ref,
     candidateDigest: row.candidate_digest,
@@ -337,6 +445,8 @@ function rowToItem(row, events = []) {
     resolvedAt: row.resolved_at,
     lifecycleVersion: row.lifecycle_version,
     createdAt: row.created_at,
+    attemptsIssued,
+    abandonment: abandonmentEvent ? detailOf(abandonmentEvent).abandonment : null,
     investigation,
     blockerReason: ['BLOCKED', 'NEEDS_HUMAN', 'DISMISSED'].includes(row.lifecycle_state)
       ? (reasonEvent ? detailOf(reasonEvent).reason || null : null)
@@ -345,6 +455,7 @@ function rowToItem(row, events = []) {
     availableBinding: binding,
     qualificationGaps: qualificationGaps(binding),
   };
+  item[LOADED_VERSION] = Number(row.lifecycle_version);
   return item;
 }
 
@@ -440,6 +551,12 @@ const UPSERT = `
     updated_at = excluded.updated_at
 `;
 
+// Compare-and-swap variant: the update applies only if the stored version is the one the
+// caller loaded. Stale or reordered writers change zero rows and write nothing else.
+const UPSERT_CAS = `${UPSERT} WHERE mc_work_items.lifecycle_version = ?`;
+// An item that was never loaded may only create the row; it can never update an existing one.
+const UPSERT_INSERT_ONLY = `${UPSERT} WHERE 0`;
+
 function columnValues(columns) {
   return [
     columns.work_item_id, columns.schema_version, columns.stable_key, columns.producer, columns.property_id, columns.finding_key,
@@ -482,20 +599,27 @@ export function createD1WorkItemStore(db) {
       const events = await loadEvents(db);
       return (results || []).map((row) => rowToItem(row, events));
     },
-    async save(item, event = null) {
+    async save(item, event = null, options = {}) {
       const at = event?.at || item.lastSeen;
       const columns = itemToColumns(item, at);
+      const expected = Number.isInteger(options?.expectedVersion)
+        ? options.expectedVersion
+        : (Number.isInteger(item[LOADED_VERSION]) ? item[LOADED_VERSION] : null);
       const statements = [
-        db.prepare(UPSERT).bind(...columnValues(columns)),
+        expected === null
+          ? db.prepare(UPSERT_INSERT_ONLY).bind(...columnValues(columns))
+          : db.prepare(UPSERT_CAS).bind(...columnValues(columns), expected),
       ];
       if (event) {
         const eventId = `evt_${item.workItemId}_${item.lifecycleVersion}_${event.to || 'note'}_${at}`;
         const detail = { ...(event.detail || {}), reason: event.reason || null };
+        // The event is written only if the compare-and-swap above changed a row.
         statements.push(db.prepare(`
           INSERT INTO mc_work_item_events (
             event_id, work_item_id, event_type, from_state, to_state, occurred_at,
             actor_type, actor_id, evidence_digest, detail_json
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ) SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+          WHERE changes() = 1
           ON CONFLICT(event_id) DO NOTHING
         `).bind(
           eventId,
@@ -511,10 +635,14 @@ export function createD1WorkItemStore(db) {
         ));
       }
       if (item.activeLease) {
+        // The lease row is written only if the stored item really holds this lease now.
         statements.push(db.prepare(`
           INSERT INTO mc_work_item_leases (
             lease_id, work_item_id, worker_id, issued_at, expires_at, released_at, release_reason
-          ) VALUES (?, ?, ?, ?, ?, NULL, NULL)
+          ) SELECT ?, ?, ?, ?, ?, NULL, NULL
+          WHERE EXISTS (
+            SELECT 1 FROM mc_work_items WHERE work_item_id = ? AND active_lease_id = ?
+          )
           ON CONFLICT(lease_id) DO UPDATE SET
             expires_at = excluded.expires_at,
             released_at = NULL,
@@ -525,9 +653,33 @@ export function createD1WorkItemStore(db) {
           item.activeLease.workerId,
           at,
           item.activeLease.expiresAt,
+          item.workItemId,
+          item.activeLease.leaseId,
         ));
       }
-      await db.batch(statements);
+      // Durably release any lease of this item that is no longer its active one (only if the swap applied).
+      statements.push(db.prepare(`
+        UPDATE mc_work_item_leases
+        SET released_at = ?, release_reason = ?
+        WHERE work_item_id = ? AND released_at IS NULL
+          AND lease_id IS NOT (SELECT active_lease_id FROM mc_work_items WHERE work_item_id = ?)
+          AND EXISTS (SELECT 1 FROM mc_work_items WHERE work_item_id = ? AND lifecycle_version = ?)
+      `).bind(
+        at,
+        event?.detail?.abandonment?.reason || (event?.to === 'DIAGNOSED' ? 'result_accepted' : 'released'),
+        item.workItemId,
+        item.workItemId,
+        item.workItemId,
+        item.lifecycleVersion,
+      ));
+      const results = await db.batch(statements);
+      if (Number(results?.[0]?.meta?.changes ?? 0) !== 1) {
+        throw new WorkItemError(
+          'version_conflict',
+          'The work item changed concurrently; reload and retry',
+          409,
+        );
+      }
       return this.get(item.workItemId);
     },
   };

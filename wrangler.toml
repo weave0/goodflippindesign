@@ -37,8 +37,8 @@ NODE_ENV = "production"
 # SENTRY_DSN              — Error tracking (get from sentry.io dashboard)
 # CLERK_SECRET_KEY        — Auth (get from dashboard.clerk.com)
 # MISSION_CONTROL_GITHUB_TOKEN — Contents: Read on weave0/globaldeets only. Never sent to the browser.
-# MISSION_CONTROL_CONTRACT_KEY / MISSION_CONTROL_CONTRACT_KEY_ID — signs investigation requests
-# MISSION_CONTROL_RESULT_KEY / MISSION_CONTROL_RESULT_KEY_ID — verifies worker investigation results
+# MISSION_CONTROL_CONTRACT_KEY / MISSION_CONTROL_CONTRACT_KEY_ID — signs investigation requests and lease grants
+# MISSION_CONTROL_RESULT_KEY / MISSION_CONTROL_RESULT_KEY_ID / MISSION_CONTROL_RESULT_WORKER_ID — verifies worker results by key id
 # TOKEN_ENCRYPTION_KEY    — 32+ char random string for AES-GCM token/state encryption
 # OPENAI_API_KEY          — Required for Content Studio DALL-E 3 image generation
 #
