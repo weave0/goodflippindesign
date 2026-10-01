@@ -61,6 +61,7 @@ npm run cache-bust
 - [x] **AIAimate (Vercel)**: `OPENAI_API_KEY`, `AI_PROVIDER=openai`, `SENTRY_DSN` uploaded via Vercel Dashboard + redeployment triggered (Mar 19)
 - [ ] Pinterest + TikTok developer apps — no apps created; defer until platform needed
 - [x] **STRIPE_WEBHOOK_SECRET** pushed to gfd-auth worker (Mar 19) — endpoint: `https://goodflippindesign.com/api/stripe/webhook`
+  - ⚠️ Correction (2026-10-01): that endpoint is served by the **Pages** project `goodflippindesign` (`_worker.js` → `workers/auth.js`), not standalone `gfd-auth`. The production secret lives in Pages env: `wrangler pages secret put STRIPE_WEBHOOK_SECRET --project-name goodflippindesign`, then redeploy.
 - [x] gfd-auth worker: TOKEN_ENCRYPTION_KEY, INTERNAL_SECRET, SOCIAL_PUBLISHER_URL, STRIPE_WEBHOOK_SECRET pushed — **6/6 secrets complete** (Mar 19)
 - [x] CitizenApproved: SENTRY_DSN pushed to `citizenapproved` CF Pages project (Mar 19)
 - [x] Branch protection: `goodflippindesign` + `minnesotapeace` — `allow_force_pushes: false`, `allow_deletions: false` (Mar 19)
