@@ -25,6 +25,8 @@ import {
   createObservedWorkItem,
   deriveWorkItemId,
   releaseLease,
+  REVERIFIABLE_STATES,
+  reverifyWorkItem,
   transitionWorkItem,
   validateWorkItemProjection,
 } from './lib/mission-control-work-items.js';
@@ -73,37 +75,18 @@ export function mapWorkItemError(error) {
   return null;
 }
 
-function resolutionVerification(item, observation) {
-  return {
-    result: 'pass',
-    scope: item.verificationScope,
-    profile: item.verificationProfile,
-    predicate: item.verificationPredicate,
-    evidenceDigest: observation.evidenceDigest,
-    observedAt: observation.observedAt,
-  };
-}
-
-function canResolve(item) {
-  return Boolean(item.verificationProfile && item.verificationScope && item.verificationPredicate);
-}
-
-export function clearHealthFinding(existing, observation) {
-  if (existing.state === 'REVERIFYING' && canResolve(existing)) {
-    return transitionWorkItem(existing, 'RESOLVED', {
-      resolutionVerification: resolutionVerification(existing, observation),
-    });
-  }
-  if (existing.state === 'DIAGNOSED' && canResolve(existing)) {
-    const reverifying = transitionWorkItem(existing, 'REVERIFYING');
-    return transitionWorkItem(reverifying, 'RESOLVED', {
-      resolutionVerification: resolutionVerification(reverifying, observation),
-    });
-  }
+/**
+ * A healthy observation reaches the item only through the one reverification decision in the lifecycle
+ * core. `since` and `latest` come from the item's own journal (state entry, last accepted verdict).
+ */
+export function reconcileHealthyObservation(existing, observation) {
   if (DISMISSABLE_ON_CLEAR.has(existing.state)) {
-    return transitionWorkItem(existing, 'DISMISSED');
+    return { item: transitionWorkItem(existing, 'DISMISSED'), verdict: null };
   }
-  return existing;
+  return reverifyWorkItem(existing, observation, {
+    since: existing.stateEnteredAt || null,
+    latest: existing.reverification || null,
+  });
 }
 
 export async function healthIdentity(marker) {
@@ -153,12 +136,14 @@ async function recordHealthObservationOnce(store, marker, {
   const existing = await store.getByIdentity(identity);
   let next;
   let reason;
+  let verdict = null;
   if (status === 'pass') {
     if (!existing) return null;
-    next = clearHealthFinding(existing, observation);
-    reason = next.state === 'RESOLVED'
+    ({ item: next, verdict } = reconcileHealthyObservation(existing, observation));
+    if (next === existing && ['already_resolved', 'terminal'].includes(verdict?.result)) return existing;
+    reason = verdict?.result === 'resolved'
       ? 'fresh production verification no longer reports this finding'
-      : 'fresh health probe no longer reports this finding';
+      : (verdict ? `healthy observation not accepted as reverification: ${verdict.result}` : 'fresh health probe no longer reports this finding');
   } else if (!existing) {
     next = await createObservedWorkItem(observation);
     reason = 'health observation';
@@ -167,6 +152,18 @@ async function recordHealthObservationOnce(store, marker, {
     reason = next.state === 'RECURRENT'
       ? 'the same finding key returned after resolution'
       : 'health observation';
+    // A degraded observation weighed against a diagnosed/deployed item is a reverification that failed:
+    // the item stays unresolved and the journal says why.
+    if (REVERIFIABLE_STATES.includes(existing.state)
+      && Date.parse(observation.observedAt) > Date.parse(existing.lastSeen)) {
+      verdict = {
+        result: 'still_failing',
+        reason: 'the finding is still observed after diagnosis',
+        observedAt: observation.observedAt,
+        evidenceDigest: observation.evidenceDigest,
+        floor: existing.lastSeen,
+      };
+    }
   }
   return store.save(next, {
     at: checkedAt,
@@ -178,8 +175,33 @@ async function recordHealthObservationOnce(store, marker, {
       githubIssue: issueNumber,
       status,
       findingKind: marker.findingKind || null,
+      ...(verdict ? { reverification: verdict } : {}),
     },
   });
+}
+
+/**
+ * Healthy-target reconciliation that does not depend on a GitHub incident still being open: every
+ * non-terminal health item of that exact target is weighed against the healthy observation. The item set
+ * is selected by exact producer + property + `health:<target>:` finding prefix, so a healthy observation
+ * of one property or target can never reach another's work item.
+ */
+export async function reverifyHealthyTarget(store, { targetId, checkedAt }) {
+  const target = healthTargetById(targetId);
+  const propertyId = propertyIdForHealthTarget(target);
+  if (!propertyId) return [];
+  const canonical = resolveEstateBinding(propertyId)?.propertyId || propertyId;
+  const results = [];
+  for (const item of await store.listOpenByProperty('health-sweep', canonical)) {
+    if (!item.findingKey.startsWith(`health:${targetId}:`)) continue;
+    const saved = await recordHealthObservation(
+      store,
+      { findingKey: item.findingKey, targetId },
+      { status: 'pass', checkedAt },
+    );
+    results.push({ workItemId: item.workItemId, state: saved?.state ?? item.state });
+  }
+  return results;
 }
 
 export function qualifyFromRegistry(item, binding) {
@@ -395,12 +417,18 @@ function rowToItem(row, events = []) {
   const abandonmentEvent = latest.find((event) => detailOf(event).abandonment);
   const reasonEvent = latest.find((event) => event.to_state === row.lifecycle_state && detailOf(event).reason);
   const githubEvent = latest.find((event) => detailOf(event).githubIssue);
+  // A recurrence opens a new cycle of the same lineage; per-cycle facts (contract, verdicts) never leak across it.
+  const cycleStart = related.map((event) => event.to_state).lastIndexOf('RECURRENT');
+  const cycle = cycleStart >= 0 ? related.slice(cycleStart) : related;
+  const stateEntry = [...cycle].reverse().find((event) => event.event_type === 'transition' && event.to_state === row.lifecycle_state);
+  const verdicts = cycle.map((event) => detailOf(event).reverification).filter(Boolean);
+  const acceptedVerdicts = verdicts.filter((verdict) => verdict.result === 'resolved' || verdict.result === 'still_failing');
   const abandonedAfterIssue = Boolean(
     abandonmentEvent && investigationEvent
     && related.indexOf(abandonmentEvent) > related.indexOf(investigationEvent),
   );
   // After an abandonment the issued contract is dead history, not a live investigation.
-  const investigation = investigationEvent && !abandonedAfterIssue
+  const investigation = investigationEvent && !abandonedAfterIssue && cycle.includes(investigationEvent)
     ? detailOf(investigationEvent).investigation
     : null;
   // Attempts are counted per signed contract (request id), never across contracts.
@@ -455,6 +483,9 @@ function rowToItem(row, events = []) {
     attemptsIssued,
     abandonment: abandonmentEvent ? detailOf(abandonmentEvent).abandonment : null,
     investigation,
+    stateEnteredAt: stateEntry?.occurred_at || null,
+    reverification: acceptedVerdicts.length ? acceptedVerdicts[acceptedVerdicts.length - 1] : null,
+    lastVerdict: verdicts.length ? verdicts[verdicts.length - 1] : null,
     blockerReason: ['BLOCKED', 'NEEDS_HUMAN', 'DISMISSED'].includes(row.lifecycle_state)
       ? (reasonEvent ? detailOf(reasonEvent).reason || null : null)
       : null,
@@ -685,6 +716,16 @@ export function createD1WorkItemStore(db) {
       const events = await loadEvents(db);
       return (results || []).map((row) => rowToItem(row, events));
     },
+    async listOpenByProperty(producer, propertyId) {
+      const { results } = await db.prepare(
+        `SELECT * FROM mc_work_items WHERE producer = ? AND property_id = ?
+           AND lifecycle_state NOT IN ('RESOLVED', 'DISMISSED', 'SUPERSEDED')`,
+      ).bind(producer, propertyId).all();
+      const rows = results || [];
+      if (!rows.length) return [];
+      const events = await loadEvents(db);
+      return rows.map((row) => rowToItem(row, events));
+    },
     async save(item, event = null, options = {}) {
       const at = event?.at || item.lastSeen;
       const columns = itemToColumns(item, at);
@@ -706,7 +747,11 @@ export function createD1WorkItemStore(db) {
           : db.prepare(UPSERT_CAS).bind(...values, ...newRow, expected, ...authorityBinds),
       ];
       if (event) {
-        const eventId = `evt_${item.workItemId}_${item.lifecycleVersion}_${event.to || 'note'}_${at}`;
+        // Same-instant evidence of a different kind (a healthy probe vs a degraded one, a different
+        // reverification verdict) must not be swallowed by the idempotency key of another.
+        const kind = [event.detail?.status === 'pass' ? 'pass' : '', event.detail?.reverification?.result || '']
+          .filter(Boolean).join('_');
+        const eventId = `evt_${item.workItemId}_${item.lifecycleVersion}_${event.to || 'note'}_${at}${kind ? `_${kind}` : ''}`;
         const detail = { ...(event.detail || {}), reason: event.reason || null };
         // The event is written only if the compare-and-swap above changed a row.
         statements.push(db.prepare(`

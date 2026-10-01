@@ -3,6 +3,7 @@ import {
   createD1WorkItemStore,
   ensureWorkItemSchema,
   recordHealthObservation,
+  reverifyHealthyTarget,
 } from './mission-control-work-items.js';
 
 /**
@@ -327,6 +328,12 @@ async function rememberHealthWorkItem(env, marker, options) {
   await recordHealthObservation(store, marker, options);
 }
 
+async function reverifyHealthyTargetFor(env, targetId, checkedAt) {
+  if (!env?.DB) return;
+  await ensureWorkItemSchema(env.DB);
+  await reverifyHealthyTarget(createD1WorkItemStore(env.DB), { targetId, checkedAt });
+}
+
 export async function reportToGitHub(checks, checkedAt, env) {
   const openIssuesResp = await fetch(
     `https://api.github.com/repos/${GH_REPO}/issues?state=open&labels=health-sweep&per_page=100`,
@@ -438,6 +445,13 @@ export async function reportToGitHub(checks, checkedAt, env) {
       status: 'pass',
       checkedAt: resolvedAt,
     });
+  }
+
+  // A healthy target is fresh production evidence for its own work items whether or not a GitHub incident
+  // is still open: reverification belongs to the work item, not to the incident issue.
+  for (const check of checks) {
+    if (check.overall_status !== 'pass') continue;
+    await reverifyHealthyTargetFor(env, check.target.id, checkedAt);
   }
 
   const failing = checks.filter(c => c.overall_status === 'fail').length;
