@@ -101,6 +101,7 @@ jobs:
           npm run test:workers:mission-control-core
           npm run test:workers:mission-control
           npm run test:workers:payments
+          npm run test:workers:stripe-webhook
 
       - name: Install Traffic Intelligence
         run: npm ci --prefix traffic-intelligence --no-audit
