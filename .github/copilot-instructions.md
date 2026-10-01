@@ -323,7 +323,7 @@ emailInput.addEventListener(
 
 | Component                        | Status         | Files                                                                                                     |
 | -------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------- |
-| CI/CD Pipeline                   | ✅ 6 workflows | `ci.yml`, `deploy.yml`, `lighthouse.yml`, `force-deploy.yml`, `health-check.yml`, `connect-github-cf.yml` |
+| CI/CD Pipeline                   | ✅ 5 workflows | `ci.yml`, `deploy.yml`, `lighthouse.yml`, `force-deploy.yml`, `health-check.yml` |
 | Pre-commit hooks                 | ✅ Husky       | `.husky/pre-commit` — syncs temp_review.html, updates cache bust                                          |
 | Cache bust automation            | ✅             | `scripts/update-cache-bust.js`                                                                            |
 | Security headers                 | ✅             | `_headers` + CSP generated from `scripts/csp-config.js`                                                   |
@@ -538,7 +538,7 @@ Every item originally listed as "missing" has been implemented:
 
 | Component             | Status         | Files                                                                                                                                    |
 | --------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| CI/CD Pipeline        | ✅ 5 workflows | `.github/workflows/ci.yml`, `deploy.yml`, `lighthouse.yml`, `force-deploy.yml`, `connect-github-cf.yml`                                  |
+| CI/CD Pipeline        | ✅ 4 workflows | `.github/workflows/ci.yml`, `deploy.yml`, `lighthouse.yml`, `force-deploy.yml`                                  |
 | Pre-commit hooks      | ✅ Husky       | `.husky/pre-commit` — auto-syncs temp_review.html, updates cache bust, blocks node_modules                                               |
 | Cache bust automation | ✅             | `scripts/update-cache-bust.js`, auto-runs in pre-commit                                                                                  |
 | File sync             | ✅             | `scripts/sync-review.js`, `sync-review.sh`, `sync-review.ps1`                                                                            |
