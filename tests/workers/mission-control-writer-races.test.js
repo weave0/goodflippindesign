@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { env } from 'cloudflare:test';
+import { authorizeDispatch } from './dispatch-intent.js';
 
 import worker from '../../workers/auth.js';
 import {
@@ -92,11 +93,17 @@ async function issue(ctx) {
     auth: adminToken(), body: { evidenceRevision: REVISION },
   });
   expect(response.status).toBe(200);
-  return response.json();
+  const issued = await response.json();
+  ctx.ready = issued.workItem; // the lease needs a durable intent bound to THIS contract
+  ctx.authority = null;
+  return issued;
 }
 
 async function lease(ctx) {
-  const response = await call(`/api/mission-control/work-items/${ctx.id}/lease`, { workerAuth: WORKER_TOKEN, body: {} });
+  // One committed + claimed dispatch intent per signed contract; concurrent callers share it.
+  ctx.authority ??= authorizeDispatch(env.DB, ctx.ready);
+  const authority = await ctx.authority;
+  const response = await call(`/api/mission-control/work-items/${ctx.id}/lease`, { workerAuth: WORKER_TOKEN, body: authority.body });
   return { response, body: response.status === 200 ? await response.json() : null };
 }
 

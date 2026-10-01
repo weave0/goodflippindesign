@@ -6,6 +6,7 @@
  * labelled as that evidence.
  */
 
+import { resolveLeaseAuthority } from './lib/mission-control-lease-authority.js';
 import {
   LEASE_PURPOSE,
   buildSignedInvestigationContract,
@@ -345,9 +346,12 @@ async function mutate(store, id, producer, { onVersionConflict = null } = {}) {
     detail: {},
   };
   delete next.pendingEvent;
-  // Durable compare-and-swap: a stale or reordered request changes nothing.
+  const leaseAuthority = next.leaseAuthority || null;
+  delete next.leaseAuthority;
+  // Durable compare-and-swap: a stale or reordered request changes nothing. A save that issues a
+  // lease also carries the dispatch-intent guard, re-asserted atomically inside that swap.
   try {
-    return await store.save(next, event, { expectedVersion: current.lifecycleVersion });
+    return await store.save(next, event, { expectedVersion: current.lifecycleVersion, leaseAuthority });
   } catch (error) {
     // Only a caller that can prove idempotence may reconcile a lost swap. Lease creation and every
     // other state-changing action never retry (a retry could mint a second lease token).
@@ -462,13 +466,13 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
           return next;
         }
         if (action === 'lease') {
-          if (Object.keys(body).length > 0) {
-            throw new WorkItemError('malformed_lease', 'The worker does not choose lease identity or authority', 400);
-          }
           const investigation = current.investigation;
           if (!investigation?.signedContract || !investigation.expiresAt || !investigation.digest || !investigation.requestId) {
             throw new WorkItemError('unsigned_contract', 'Investigation contract is not available to lease', 409);
           }
+          // No lease without durable prior intent authority: a committed, eligible investigation_dispatch
+          // intent for this work item, this attempt and this exact signed contract digest.
+          const authority = await resolveLeaseAuthority(env.DB, current, body, at);
           const key = keyBytesFromEnv(env.MISSION_CONTROL_CONTRACT_KEY);
           const workerId = env.MISSION_CONTROL_RESULT_WORKER_ID;
           const grant = await buildSignedLeaseGrant({
@@ -502,8 +506,10 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
             detail: {
               requestId: investigation.requestId,
               lease: { attempt: grant.attempt, leaseTokenDigest: grant.leaseTokenDigest },
+              dispatchIntent: { effectId: authority.effectId, attempt: authority.attempt, candidateDigest: authority.contractDigest },
             },
           };
+          next.leaseAuthority = { effectId: authority.effectId, attempt: authority.attempt, contractDigest: authority.contractDigest };
           dispatch.contract = investigation.signedContract;
           dispatch.leaseGrant = grant.payload;
           dispatch.leaseTokenHex = grant.leaseTokenHex;

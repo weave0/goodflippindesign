@@ -8,6 +8,12 @@
 
 import { digestOf } from './fwomps-investigation-adapter.js';
 import {
+  DEFAULT_VISIBILITY_MS,
+  DISPATCH_EFFECT_TYPE,
+  EFFECT_CONTRACT_COLUMNS,
+  EFFECT_SCHEMA_VERSION,
+} from './lib/mission-control-effect-contract.js';
+import {
   healthTargetById,
   propertyIdForHealthTarget,
   qualificationGaps,
@@ -320,6 +326,7 @@ export const BRIDGE_MAX_ATTEMPTS = 1;
  */
 export const LOADED_VERSION = Symbol.for('gfd.mc.workItem.loadedVersion');
 
+
 export function acceptInvestigationResult(item, result, at = new Date().toISOString()) {
   if (result?.repairAuthority !== false) {
     throw new WorkItemError('repair_authority_denied', 'An investigation result grants no repair authority', 403);
@@ -513,7 +520,10 @@ const UPSERT = `
     published_effect_ref, deployed_effect_ref,
     resolution_evidence_digest, resolved_at,
     lifecycle_version, created_at, updated_at
-  ) VALUES (${Array.from({ length: 36 }, () => '?').join(', ')})
+  ) SELECT ${Array.from({ length: 36 }, () => '?').join(', ')}
+  -- A brand-new row can never be created holding a lease; leases attach only to an existing row, through
+  -- the guarded update below. (?37 = the new active lease id, ?38 = the work item id.)
+  WHERE (? IS NULL OR EXISTS (SELECT 1 FROM mc_work_items WHERE work_item_id = ?))
   ON CONFLICT(work_item_id) DO UPDATE SET
     schema_version = excluded.schema_version,
     stable_key = excluded.stable_key,
@@ -553,7 +563,56 @@ const UPSERT = `
 
 // Compare-and-swap variant: the update applies only if the stored version is the one the
 // caller loaded. Stale or reordered writers change zero rows and write nothing else.
-const UPSERT_CAS = `${UPSERT} WHERE mc_work_items.lifecycle_version = ?`;
+/**
+ * The lease-authority predicate. It is FIXED SQL: no caller can supply, extend or replace any part of it.
+ * Callers provide only three inert, validated values (effect id, claimed attempt, contract digest); every
+ * other fact is read from persisted rows at the moment of the write:
+ *   - the work item (id, property, lifecycle version) is the row being updated;
+ *   - the intent is a committed investigation_dispatch effect of THAT work item, known schema, still PLANNED,
+ *     targeting fwomps:<that row's property>, fenced to that row's current lifecycle version;
+ *   - it is bound to the supplied contract digest AND that digest is the item's CURRENT signed contract
+ *     according to its persisted issuance journal (the latest transition into INVESTIGATION_READY);
+ *   - the presented attempt is the effect's current attempt and the claim is still fresh according to the
+ *     DATABASE clock evaluated now, not a timestamp computed earlier in the request.
+ */
+const LEASE_AUTHORITY_PREDICATE = `EXISTS (
+    SELECT 1 FROM mc_effects AS e
+    WHERE e.effect_id = ?
+      AND e.work_item_id = mc_work_items.work_item_id
+      AND e.effect_type = '${DISPATCH_EFFECT_TYPE}'
+      AND e.schema_version = '${EFFECT_SCHEMA_VERSION}'
+      AND e.status = 'PLANNED'
+      AND e.target = 'fwomps:' || mc_work_items.property_id
+      AND e.candidate_digest = ?
+      AND e.requested_lifecycle_version = mc_work_items.lifecycle_version
+      AND e.attempt_count = ?
+      AND e.last_attempt_at IS NOT NULL
+      AND e.last_attempt_at > strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-${DEFAULT_VISIBILITY_MS / 1000} seconds')
+      AND EXISTS (
+        SELECT 1 FROM mc_work_item_events AS issued
+        WHERE issued.work_item_id = mc_work_items.work_item_id
+          AND issued.event_type = 'transition'
+          AND issued.to_state = 'INVESTIGATION_READY'
+          AND json_extract(issued.detail_json, '$.investigation.digest') = ?
+          AND NOT EXISTS (
+            SELECT 1 FROM mc_work_item_events AS later
+            WHERE later.work_item_id = issued.work_item_id
+              AND later.event_type = 'transition'
+              AND later.to_state = 'INVESTIGATION_READY'
+              AND (later.occurred_at > issued.occurred_at
+                OR (later.occurred_at = issued.occurred_at AND later.event_id > issued.event_id))
+          )
+      )
+  )`;
+
+// Atomic rule, decided from the STORED row inside the write: the active lease may be cleared, or left
+// exactly as stored, freely; changing the lease identity, worker or expiry requires authority.
+const UPSERT_CAS = `${UPSERT} WHERE mc_work_items.lifecycle_version = ?
+    AND (excluded.active_lease_id IS NULL
+      OR (excluded.active_lease_id IS mc_work_items.active_lease_id
+        AND excluded.active_worker_id IS mc_work_items.active_worker_id
+        AND excluded.lease_expires_at IS mc_work_items.lease_expires_at)
+      OR ${LEASE_AUTHORITY_PREDICATE})`;
 // An item that was never loaded may only create the row; it can never update an existing one.
 const UPSERT_INSERT_ONLY = `${UPSERT} WHERE 0`;
 
@@ -578,6 +637,33 @@ async function loadEvents(db, workItemId = null) {
     ? await db.prepare('SELECT * FROM mc_work_item_events WHERE work_item_id = ? ORDER BY occurred_at, event_id').bind(workItemId).all()
     : await db.prepare('SELECT * FROM mc_work_item_events ORDER BY occurred_at, event_id').all();
   return query.results || [];
+}
+
+const EFFECT_ID_SHAPE = /^gfdeffect_v1_[0-9a-f]{64}$/;
+const DIGEST_SHAPE = /^sha256:[0-9a-f]{64}$/;
+
+/**
+ * Validates caller-provided lease authority as inert data. Anything that is not exactly
+ * { effectId, attempt, contractDigest } with canonical shapes is refused: there is no field through which a
+ * caller could carry SQL, a predicate fragment, bind values, or a claim about the previous lease.
+ */
+function normalizeLeaseAuthority(input) {
+  if (input === undefined || input === null) return null;
+  const plain = typeof input === 'object' && !Array.isArray(input)
+    && (Object.getPrototypeOf(input) === Object.prototype || Object.getPrototypeOf(input) === null);
+  const keys = plain ? Object.keys(input).sort() : [];
+  const exact = keys.length === 3 && keys[0] === 'attempt' && keys[1] === 'contractDigest' && keys[2] === 'effectId';
+  if (!exact
+    || typeof input.effectId !== 'string' || !EFFECT_ID_SHAPE.test(input.effectId)
+    || !Number.isSafeInteger(input.attempt) || input.attempt < 1
+    || typeof input.contractDigest !== 'string' || !DIGEST_SHAPE.test(input.contractDigest)) {
+    throw new WorkItemError(
+      'malformed_lease',
+      'Lease authority must be exactly { effectId, attempt, contractDigest } with canonical values',
+      400,
+    );
+  }
+  return { effectId: input.effectId, attempt: input.attempt, contractDigest: input.contractDigest };
 }
 
 export function createD1WorkItemStore(db) {
@@ -605,10 +691,19 @@ export function createD1WorkItemStore(db) {
       const expected = Number.isInteger(options?.expectedVersion)
         ? options.expectedVersion
         : (Number.isInteger(item[LOADED_VERSION]) ? item[LOADED_VERSION] : null);
+      // Caller-supplied authority is DATA only: three inert, validated values. Whether this save creates or
+      // replaces an active lease is decided by the database from the stored row, inside the write itself
+      // (see LEASE_AUTHORITY_PREDICATE); nothing the caller passes or marks can change that decision.
+      const authority = normalizeLeaseAuthority(options?.leaseAuthority);
+      const values = columnValues(columns);
+      const newRow = [columns.active_lease_id, columns.work_item_id];
+      const authorityBinds = authority
+        ? [authority.effectId, authority.contractDigest, authority.attempt, authority.contractDigest]
+        : [null, null, null, null];
       const statements = [
         expected === null
-          ? db.prepare(UPSERT_INSERT_ONLY).bind(...columnValues(columns))
-          : db.prepare(UPSERT_CAS).bind(...columnValues(columns), expected),
+          ? db.prepare(UPSERT_INSERT_ONLY).bind(...values, ...newRow)
+          : db.prepare(UPSERT_CAS).bind(...values, ...newRow, expected, ...authorityBinds),
       ];
       if (event) {
         const eventId = `evt_${item.workItemId}_${item.lifecycleVersion}_${event.to || 'note'}_${at}`;
@@ -674,6 +769,23 @@ export function createD1WorkItemStore(db) {
       ));
       const results = await db.batch(statements);
       if (Number(results?.[0]?.meta?.changes ?? 0) !== 1) {
+        // The write already failed closed; this read only chooses the most precise refusal to report.
+        const stored = await db.prepare('SELECT lifecycle_version, active_lease_id, active_worker_id, lease_expires_at FROM mc_work_items WHERE work_item_id = ?')
+          .bind(item.workItemId).first();
+        const wantsLease = Boolean(item.activeLease) && (
+          item.activeLease.leaseId !== (stored?.active_lease_id ?? null)
+          || item.activeLease.workerId !== stored?.active_worker_id
+          || item.activeLease.expiresAt !== stored?.lease_expires_at
+        );
+        if (wantsLease && (!stored || Number(stored.lifecycle_version) === expected)) {
+          throw new WorkItemError(
+            authority ? 'dispatch_intent_ineligible' : 'dispatch_intent_required',
+            authority
+              ? 'dispatch intent is not eligible: it does not authorize this lease at the moment of the write'
+              : 'A lease can be recorded only under a durable, eligible investigation_dispatch intent',
+            409,
+          );
+        }
         throw new WorkItemError(
           'version_conflict',
           'The work item changed concurrently; reload and retry',
@@ -760,6 +872,20 @@ export async function ensureWorkItemSchema(db) {
       release_reason TEXT
     )`),
   ]);
+  // The store's lease-authority predicate reads the effect-contract columns on every guarded write, so a
+  // database that predates the outbox must gain them here, not lazily in the outbox.
+  const { results } = await db.prepare('PRAGMA table_info(mc_effects)').all();
+  const existing = new Set((results || []).map((column) => column.name));
+  for (const [name, type] of EFFECT_CONTRACT_COLUMNS) {
+    if (existing.has(name)) continue;
+    try {
+      await db.prepare(`ALTER TABLE mc_effects ADD COLUMN ${name} ${type}`).run();
+    } catch (error) {
+      // A concurrent first use may have added the column; only that is benign.
+      const { results: again } = await db.prepare('PRAGMA table_info(mc_effects)').all();
+      if (!(again || []).some((column) => column.name === name)) throw error;
+    }
+  }
 }
 
 export { deriveWorkItemId };

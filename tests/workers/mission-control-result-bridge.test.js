@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { env } from 'cloudflare:test';
+import { authorizeDispatch } from './dispatch-intent.js';
 
 import worker from '../../workers/auth.js';
 import {
@@ -91,10 +92,11 @@ async function leasedItem() {
   });
   expect(issued.status).toBe(200);
   const issuedBody = await issued.json();
-  const leased = await call(`/api/mission-control/work-items/${id}/lease`, { workerAuth: WORKER_TOKEN, body: {} });
+  const authority = await authorizeDispatch(env.DB, issuedBody.workItem);
+  const leased = await call(`/api/mission-control/work-items/${id}/lease`, { workerAuth: WORKER_TOKEN, body: authority.body });
   expect(leased.status).toBe(200);
   const leaseBody = await leased.json();
-  return { store, qualified, id, issuedBody, leaseBody };
+  return { store, qualified, id, issuedBody, leaseBody, authority };
 }
 
 function baseResult(ctx, patch = {}) {
@@ -199,7 +201,7 @@ describe('result attempt identity (request_id, attempt, lease_token_digest)', ()
       .bind('2020-01-01T00:00:00.000Z', ctx.qualified.workItemId).run();
     const late = await postResult(ctx, await sign(baseResult(ctx)));
     expect(late.status).toBe(409);
-    const relet = await call(`/api/mission-control/work-items/${ctx.id}/lease`, { workerAuth: WORKER_TOKEN, body: {} });
+    const relet = await call(`/api/mission-control/work-items/${ctx.id}/lease`, { workerAuth: WORKER_TOKEN, body: ctx.authority.body });
     expect(relet.status).toBe(409);
     const after = await stateOf(ctx);
     expect(after.state).not.toBe('DIAGNOSED');
@@ -355,9 +357,10 @@ describe('lease token and lease minting', () => {
       auth: adminToken(), body: { evidenceRevision: REVISION },
     })).status).toBe(200);
 
+    const authority = await authorizeDispatch(env.DB, (await store.get(qualified.workItemId)));
     const [one, two] = await Promise.all([
-      call(`/api/mission-control/work-items/${id}/lease`, { workerAuth: WORKER_TOKEN, body: {} }),
-      call(`/api/mission-control/work-items/${id}/lease`, { workerAuth: WORKER_TOKEN, body: {} }),
+      call(`/api/mission-control/work-items/${id}/lease`, { workerAuth: WORKER_TOKEN, body: authority.body }),
+      call(`/api/mission-control/work-items/${id}/lease`, { workerAuth: WORKER_TOKEN, body: authority.body }),
     ]);
     expect([one.status, two.status].sort()).toEqual([200, 409]);
     const winner = await (one.status === 200 ? one : two).json();
@@ -373,8 +376,8 @@ describe('lease token and lease minting', () => {
   it('refuses a lease request that tries to choose worker, attempt, token, or digest', async () => {
     const ctx = await leasedItem();
     for (const body of [
-      { workerId: 'fwomps-worker-b' }, { attempt: 2 }, { leaseTokenDigest: `sha256:${'1'.repeat(64)}` },
-      { leaseTokenHex: '11'.repeat(32) },
+      { workerId: 'fwomps-worker-b' }, { ...ctx.authority.body, attempt: 2, workerId: 'fwomps-worker-b' }, { leaseTokenDigest: `sha256:${'1'.repeat(64)}` },
+      { leaseTokenHex: '11'.repeat(32) }, { ...ctx.authority.body, leaseTokenHex: '11'.repeat(32) },
     ]) {
       const response = await call(`/api/mission-control/work-items/${ctx.id}/lease`, { workerAuth: WORKER_TOKEN, body });
       expect(response.status).toBe(400);

@@ -214,7 +214,7 @@ describe('mission control effect outbox', () => {
 
   it('does not call the executor again after a receipt, and a crash leaves the intent planned', async () => {
     const item = await workItem('outbox:dispatcher');
-    const planned = await planEffect(env.DB, intent(item, { effectType: 'investigation_dispatch', target: 'fwomps:read-only' }));
+    const planned = await planEffect(env.DB, intent(item, { effectType: 'reverification_request', target: 'production:aiaimate.com' }));
     let calls = 0;
     const crashed = await dispatchOnce(env.DB, planned.effect.effectId, async () => {
       calls += 1;
@@ -229,7 +229,7 @@ describe('mission control effect outbox', () => {
     const done = await dispatchOnce(env.DB, planned.effect.effectId, async (permit) => {
       calls += 1;
       expect(permit.attempt).toBe(2);
-      expect(permit.effectType).toBe('investigation_dispatch');
+      expect(permit.effectType).toBe('reverification_request');
       return { outcome: 'committed', receipt: 'intent-only' };
     }, { now: T_VISIBLE });
     expect(done.dispatched).toBe(true);

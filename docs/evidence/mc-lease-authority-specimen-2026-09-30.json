@@ -1,0 +1,849 @@
+{
+  "milestone": "MC-CONFLUENCE-001",
+  "tier": 2,
+  "startedAt": "2026-09-30T23:50:12.274Z",
+  "runDir": "<run dir>",
+  "steps": [
+    {
+      "at": "2026-09-30T23:50:13.448Z",
+      "name": "gfd endpoint up",
+      "baseUrl": "http://127.0.0.1:57106",
+      "d1": "<run dir>\\d1"
+    },
+    {
+      "at": "2026-09-30T23:50:16.328Z",
+      "name": "workspace cloned",
+      "repository": "weave0/aiaimate",
+      "revision": "257210036bff85961a1b9c96c0572aabcaaa9cd4",
+      "clean": true
+    },
+    {
+      "at": "2026-09-30T23:50:18.346Z",
+      "name": "fwomps host registered (isolated home)",
+      "home": "<run dir>\\fwomps-home",
+      "profile": "web-health-readonly-v1",
+      "property": "aiaimate.com"
+    },
+    {
+      "at": "2026-09-30T23:50:22.236Z",
+      "name": "invoking fwomps published CLI: investigate --no-deliver (attested sandbox)"
+    },
+    {
+      "at": "2026-09-30T23:50:40.709Z",
+      "name": "invoking fwomps published CLI: deliver"
+    }
+  ],
+  "checks": [
+    {
+      "name": "one canonical work item from the observation",
+      "pass": true,
+      "detail": {
+        "workItemId": "gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd"
+      }
+    },
+    {
+      "name": "qualified from the real registry binding",
+      "pass": true,
+      "detail": {
+        "profile": "web-health-readonly-v1",
+        "verificationProfile": "gfd-property-health-production",
+        "scope": "production"
+      }
+    },
+    {
+      "name": "signed read-only contract issued, item INVESTIGATION_READY",
+      "pass": true,
+      "detail": {
+        "requestId": "mci_4859f1c3e7088b095bed354ab8aaea9c",
+        "contractDigest": "sha256:db07f81a99325cf294eaf5ec7a2f64df29247bb3194a15656ebc1a4bb6ea4113"
+      }
+    },
+    {
+      "name": "durable investigation_dispatch intent recorded before execution",
+      "pass": true,
+      "detail": {
+        "effectId": "gfdeffect_v1_c9f638956448cf63965d7757ba3d930944faf83171825f8bdb81cc5b6ff4789e",
+        "requestedLifecycleVersion": 3
+      }
+    },
+    {
+      "name": "lease with no dispatch intent is refused (dispatch_intent_required)",
+      "pass": true
+    },
+    {
+      "name": "lease under a planned but unclaimed intent is refused",
+      "pass": true,
+      "detail": {
+        "error": "dispatch intent is not eligible: it has not been claimed for dispatch",
+        "code": "dispatch_intent_ineligible"
+      }
+    },
+    {
+      "name": "the refusals changed nothing: item still INVESTIGATION_READY, no lease minted",
+      "pass": true
+    },
+    {
+      "name": "claim permits exactly attempt 1",
+      "pass": true,
+      "detail": {
+        "reason": "claimed"
+      }
+    },
+    {
+      "name": "one signed lease minted, item INVESTIGATING",
+      "pass": true,
+      "detail": {
+        "attempt": 1
+      }
+    },
+    {
+      "name": "fwomps executed and persisted a result without delivering (result_ready, exit 10)",
+      "pass": true,
+      "detail": {
+        "attempt": 1,
+        "outcome": "not_reproduced",
+        "request_id": "mci_4859f1c3e7088b095bed354ab8aaea9c",
+        "result_digest": "sha256:b8f67aa5b1e71257735b653f33290ddd47854a37fc7afebd2c6833c0364eed0d",
+        "status": "result_ready",
+        "stop_reason": null
+      }
+    },
+    {
+      "name": "nothing has reached GFD yet; item still INVESTIGATING",
+      "pass": true
+    },
+    {
+      "name": "hostile while INVESTIGATING: edited summary (MAC no longer matches) -> mac_invalid",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "mac_invalid",
+        "expectedCode": "mac_invalid"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: flipped outcome (MAC no longer matches) -> mac_invalid",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "mac_invalid",
+        "expectedCode": "mac_invalid"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: flipped MAC -> mac_invalid",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "mac_invalid",
+        "expectedCode": "mac_invalid"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: unknown key id -> unknown_key",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "unknown_key",
+        "expectedCode": "unknown_key"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: smuggled authority field (unsigned) -> malformed_result",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "malformed_result",
+        "expectedCode": "malformed_result"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: unknown schema (unsigned) -> schema_version_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "schema_version_mismatch",
+        "expectedCode": "schema_version_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong lease token -> lease_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "lease_mismatch",
+        "expectedCode": "lease_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong attempt -> attempt_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "attempt_mismatch",
+        "expectedCode": "attempt_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong work-item echo -> identity_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "identity_mismatch",
+        "expectedCode": "identity_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong repository -> identity_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "identity_mismatch",
+        "expectedCode": "identity_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong property -> identity_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "identity_mismatch",
+        "expectedCode": "identity_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong evidence revision (both fields, consistent) -> digest_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "digest_mismatch",
+        "expectedCode": "digest_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong contract digest -> digest_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "digest_mismatch",
+        "expectedCode": "digest_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong request id -> request_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "request_mismatch",
+        "expectedCode": "request_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED unknown schema -> schema_version_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "schema_version_mismatch",
+        "expectedCode": "schema_version_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED smuggled repair authority -> malformed_result",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "malformed_result",
+        "expectedCode": "malformed_result"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: wrong bearer refused (401)",
+      "pass": true,
+      "detail": {
+        "status": 401,
+        "code": null
+      }
+    },
+    {
+      "name": "after every hostile delivery the item is still INVESTIGATING with its lease intact, no diagnosis",
+      "pass": true
+    },
+    {
+      "name": "fwomps delivered and GFD acknowledged (exit 0, acknowledged)",
+      "pass": true,
+      "detail": {
+        "attempt": 1,
+        "delivery": {
+          "attempts": 1,
+          "detail": ""
+        },
+        "request_id": "mci_4859f1c3e7088b095bed354ab8aaea9c",
+        "result_digest": "sha256:b8f67aa5b1e71257735b653f33290ddd47854a37fc7afebd2c6833c0364eed0d",
+        "status": "acknowledged"
+      }
+    },
+    {
+      "name": "same canonical work item is DIAGNOSED",
+      "pass": true,
+      "detail": {
+        "state": "DIAGNOSED",
+        "diagnosisDigest": "sha256:b8f67aa5b1e71257735b653f33290ddd47854a37fc7afebd2c6833c0364eed0d"
+      }
+    },
+    {
+      "name": "diagnosis digest equals the digest FWOMPS reported",
+      "pass": true
+    },
+    {
+      "name": "lease released, no active lease",
+      "pass": true
+    },
+    {
+      "name": "exactly one accepted result delivery, and its content is the FWOMPS-persisted envelope",
+      "pass": true,
+      "detail": [
+        "sha256:2f13ed27ff986033d8d89d90ed594accd363b15bf7e64545a02d2e50dc7439f7"
+      ]
+    },
+    {
+      "name": "envelope is read-only and every receipt is from the authoritative sandbox",
+      "pass": true,
+      "detail": {
+        "outcome": "not_reproduced",
+        "summary": "profile web-health-readonly-v1: not_reproduced",
+        "receipts": [
+          {
+            "status": "pass",
+            "exit": 0,
+            "authoritative": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "dispatch intent receipt committed under the same attempt fence",
+      "pass": true
+    },
+    {
+      "name": "fwomps redelivery after ack never re-sends and never re-executes",
+      "pass": true,
+      "detail": {
+        "attempt": 1,
+        "delivery": {
+          "attempts": 1,
+          "detail": ""
+        },
+        "request_id": "mci_4859f1c3e7088b095bed354ab8aaea9c",
+        "result_digest": "sha256:b8f67aa5b1e71257735b653f33290ddd47854a37fc7afebd2c6833c0364eed0d",
+        "status": "acknowledged"
+      }
+    },
+    {
+      "name": "byte-identical redelivery is idempotent (200)",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "code": null
+      }
+    },
+    {
+      "name": "concurrent identical redelivery all 200",
+      "pass": true,
+      "detail": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "name": "a different VALIDLY SIGNED result for the same attempt fails closed as result_conflict",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "result_conflict"
+      }
+    },
+    {
+      "name": "still one work item, still DIAGNOSED, one DIAGNOSED transition",
+      "pass": true
+    },
+    {
+      "name": "no repair/deploy authority recorded anywhere",
+      "pass": true
+    },
+    {
+      "name": "diagnosis alone cannot resolve (RESOLVED refused)",
+      "pass": true,
+      "detail": 409
+    }
+  ],
+  "wire": [
+    {
+      "at": "2026-09-30T23:50:36.592Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:de9b3f0bca64ba45916c3a89c6ffa0a148e1baf6ca26c1374d8ee66718f9d05e",
+      "requestBytes": 1603,
+      "result": {
+        "bodySha256": "sha256:de9b3f0bca64ba45916c3a89c6ffa0a148e1baf6ca26c1374d8ee66718f9d05e"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:36.857Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:7165dc68f8a77a77d114103df9b6c2cb0849f79b21a5ab5aa1651d1ef3336dae",
+      "requestBytes": 1590,
+      "result": {
+        "bodySha256": "sha256:7165dc68f8a77a77d114103df9b6c2cb0849f79b21a5ab5aa1651d1ef3336dae"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:37.120Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:113c40b09603f7fdd8bf8ecb88381271c2f29c7c352f44c0c49ea7e5eddb21ea",
+      "requestBytes": 1594,
+      "result": {
+        "bodySha256": "sha256:113c40b09603f7fdd8bf8ecb88381271c2f29c7c352f44c0c49ea7e5eddb21ea"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:37.384Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:9ec8c1ea75b1bc0420124ada177bc4ae37dc4bd5f0647a6fd6d0edd946baf9ba",
+      "requestBytes": 1592,
+      "result": {
+        "bodySha256": "sha256:9ec8c1ea75b1bc0420124ada177bc4ae37dc4bd5f0647a6fd6d0edd946baf9ba"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:37.655Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:b722f39700b190410ddbfd2a39a1d42137b1926097150478aa71007bb1c728fd",
+      "requestBytes": 1618,
+      "result": {
+        "bodySha256": "sha256:b722f39700b190410ddbfd2a39a1d42137b1926097150478aa71007bb1c728fd"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:37.918Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:5e7c8e3ef8e8617b48913f113cfcab82140a4ac8844e15bdb3c4e410a77e9715",
+      "requestBytes": 1594,
+      "result": {
+        "bodySha256": "sha256:5e7c8e3ef8e8617b48913f113cfcab82140a4ac8844e15bdb3c4e410a77e9715"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:38.195Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:206f78f8c9c6fac0d8d46fc9542de706b766bc0cb74d97b62d9e74ab0fa43288",
+      "requestBytes": 1594,
+      "result": {
+        "bodySha256": "sha256:206f78f8c9c6fac0d8d46fc9542de706b766bc0cb74d97b62d9e74ab0fa43288"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:38.459Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:2a72f22b2e7af2ec062d76ea3825dad0cfd058d8cde6aae6a81de109bcd4662d",
+      "requestBytes": 1594,
+      "result": {
+        "bodySha256": "sha256:2a72f22b2e7af2ec062d76ea3825dad0cfd058d8cde6aae6a81de109bcd4662d"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:38.736Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:cb1a5a72c92a37e69801b047e546368980a652ebc9141875342a5b24b225770f",
+      "requestBytes": 1542,
+      "result": {
+        "bodySha256": "sha256:cb1a5a72c92a37e69801b047e546368980a652ebc9141875342a5b24b225770f"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:39.004Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:f5f30d6e59d1c9980de80d6d319a5af31b2b49cde69ad8c70695235a52fedbf6",
+      "requestBytes": 1591,
+      "result": {
+        "bodySha256": "sha256:f5f30d6e59d1c9980de80d6d319a5af31b2b49cde69ad8c70695235a52fedbf6"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:39.282Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:ba8ef63a34d0f07aaddbc8676ace2126b0d16ba46f69b66d6f09aa077b1d31a4",
+      "requestBytes": 1591,
+      "result": {
+        "bodySha256": "sha256:ba8ef63a34d0f07aaddbc8676ace2126b0d16ba46f69b66d6f09aa077b1d31a4"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:39.539Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:a78af57ae5a371dca25cf145de846e1d3629f9c5d58c5510d34c46971b113a34",
+      "requestBytes": 1594,
+      "result": {
+        "bodySha256": "sha256:a78af57ae5a371dca25cf145de846e1d3629f9c5d58c5510d34c46971b113a34"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:39.821Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:79dbc66f8a8ef520b8ae453899a186dd89752873c4b034e98856c45b6007a2b0",
+      "requestBytes": 1594,
+      "result": {
+        "bodySha256": "sha256:79dbc66f8a8ef520b8ae453899a186dd89752873c4b034e98856c45b6007a2b0"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:40.101Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:81ba124fc8309ab28e84ff953b7952339ca1d2296fbaf8bd2acf69d43a8033f6",
+      "requestBytes": 1583,
+      "result": {
+        "bodySha256": "sha256:81ba124fc8309ab28e84ff953b7952339ca1d2296fbaf8bd2acf69d43a8033f6"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:40.340Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:afc3004ed119e9f428c15443f1f2cded3d9429a504336f17cdca5c53e2311900",
+      "requestBytes": 1594,
+      "result": {
+        "bodySha256": "sha256:afc3004ed119e9f428c15443f1f2cded3d9429a504336f17cdca5c53e2311900"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:40.601Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:aa552fe9c273ef5c6d0b3877b6ce425f1d99888d5152dfba8b38c380b1a1a896",
+      "requestBytes": 1618,
+      "result": {
+        "bodySha256": "sha256:aa552fe9c273ef5c6d0b3877b6ce425f1d99888d5152dfba8b38c380b1a1a896"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:40.611Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 401,
+      "requestBodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7",
+      "requestBytes": 1867,
+      "result": {
+        "bodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:41.610Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 200,
+      "requestBodySha256": "sha256:2f13ed27ff986033d8d89d90ed594accd363b15bf7e64545a02d2e50dc7439f7",
+      "requestBytes": 1594,
+      "result": {
+        "bodySha256": "sha256:2f13ed27ff986033d8d89d90ed594accd363b15bf7e64545a02d2e50dc7439f7"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:43.710Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 200,
+      "requestBodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7",
+      "requestBytes": 1867,
+      "result": {
+        "bodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:44.735Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 200,
+      "requestBodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7",
+      "requestBytes": 1867,
+      "result": {
+        "bodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:44.735Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 200,
+      "requestBodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7",
+      "requestBytes": 1867,
+      "result": {
+        "bodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:44.736Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 200,
+      "requestBodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7",
+      "requestBytes": 1867,
+      "result": {
+        "bodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:44.736Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 200,
+      "requestBodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7",
+      "requestBytes": 1867,
+      "result": {
+        "bodySha256": "sha256:6187948147f301efe10b5ee5ccf73bc6fbea5d2ff8128bc94e5cdbe233a983a7"
+      }
+    },
+    {
+      "at": "2026-09-30T23:50:44.990Z",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd/result",
+      "status": 409,
+      "requestBodySha256": "sha256:714541785f00670af5d8ecfa7f1adb38b28600950f37fa27609797b547c95b4d",
+      "requestBytes": 1604,
+      "result": {
+        "bodySha256": "sha256:714541785f00670af5d8ecfa7f1adb38b28600950f37fa27609797b547c95b4d"
+      }
+    }
+  ],
+  "d1": {
+    "workItems": [
+      {
+        "work_item_id": "gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd",
+        "lifecycle_state": "DIAGNOSED",
+        "lifecycle_version": 7,
+        "repository": "weave0/aiaimate",
+        "investigation_profile": "web-health-readonly-v1",
+        "verification_profile": "gfd-property-health-production",
+        "verification_scope": "production",
+        "active_lease_id": null,
+        "updated_at": "2026-09-30T23:50:41.331Z"
+      }
+    ],
+    "events": [
+      {
+        "event_type": "transition",
+        "from_state": null,
+        "to_state": "OBSERVED",
+        "occurred_at": "2026-09-30T23:50:18.346Z",
+        "actor_type": "runtime",
+        "actor_id": "health-sweep"
+      },
+      {
+        "event_type": "transition",
+        "from_state": "OBSERVED",
+        "to_state": "QUALIFIED",
+        "occurred_at": "2026-09-30T23:50:19.141Z",
+        "actor_type": "runtime",
+        "actor_id": "operator"
+      },
+      {
+        "event_type": "transition",
+        "from_state": "QUALIFIED",
+        "to_state": "INVESTIGATION_READY",
+        "occurred_at": "2026-09-30T23:50:19.679Z",
+        "actor_type": "runtime",
+        "actor_id": "user_specimen_admin"
+      },
+      {
+        "event_type": "effect_intent",
+        "from_state": "INVESTIGATION_READY",
+        "to_state": "INVESTIGATION_READY",
+        "occurred_at": "2026-09-30T23:50:20.266Z",
+        "actor_type": "outbox",
+        "actor_id": "mission-control"
+      },
+      {
+        "event_type": "transition",
+        "from_state": "INVESTIGATION_READY",
+        "to_state": "INVESTIGATING",
+        "occurred_at": "2026-09-30T23:50:21.832Z",
+        "actor_type": "runtime",
+        "actor_id": "mcw_specimen_worker"
+      },
+      {
+        "event_type": "transition",
+        "from_state": "INVESTIGATING",
+        "to_state": "DIAGNOSED",
+        "occurred_at": "2026-09-30T23:50:41.331Z",
+        "actor_type": "runtime",
+        "actor_id": "mcw_specimen_worker"
+      }
+    ],
+    "leases": [
+      {
+        "lease_id": "sha256:eff5b6bfd57d7103cd2cd56ee9aeccc9b076e0c54a5939addfa04bb5cf3acb9a",
+        "worker_id": "mcw_specimen_worker",
+        "issued_at": "2026-09-30T23:50:21.832Z",
+        "expires_at": "2026-10-01T00:00:19Z",
+        "released_at": "2026-09-30T23:50:41.331Z",
+        "release_reason": "result_accepted"
+      }
+    ],
+    "effects": [
+      {
+        "effect_id": "gfdeffect_v1_c9f638956448cf63965d7757ba3d930944faf83171825f8bdb81cc5b6ff4789e",
+        "effect_type": "investigation_dispatch",
+        "status": "COMMITTED",
+        "schema_version": "gfd-effect-1",
+        "requested_lifecycle_version": 3,
+        "attempt_count": 1,
+        "payload_digest": "sha256:50d9abfacd491e8173a5873f9876e0f8ce1d036693b9793deecedca5255aa75d",
+        "receipt_ref": "sha256:b8f67aa5b1e71257735b653f33290ddd47854a37fc7afebd2c6833c0364eed0d",
+        "candidate_digest": "sha256:db07f81a99325cf294eaf5ec7a2f64df29247bb3194a15656ebc1a4bb6ea4113"
+      }
+    ]
+  },
+  "fwomps": {
+    "executed": {
+      "exitCode": 10,
+      "status": {
+        "attempt": 1,
+        "outcome": "not_reproduced",
+        "request_id": "mci_4859f1c3e7088b095bed354ab8aaea9c",
+        "result_digest": "sha256:b8f67aa5b1e71257735b653f33290ddd47854a37fc7afebd2c6833c0364eed0d",
+        "status": "result_ready",
+        "stop_reason": null
+      }
+    },
+    "delivered": {
+      "exitCode": 0,
+      "status": {
+        "attempt": 1,
+        "delivery": {
+          "attempts": 1,
+          "detail": ""
+        },
+        "request_id": "mci_4859f1c3e7088b095bed354ab8aaea9c",
+        "result_digest": "sha256:b8f67aa5b1e71257735b653f33290ddd47854a37fc7afebd2c6833c0364eed0d",
+        "status": "acknowledged"
+      }
+    }
+  },
+  "hostileBeforeAcceptance": {
+    "edited summary (MAC no longer matches)": {
+      "status": 409,
+      "code": "mac_invalid",
+      "expectedCode": "mac_invalid"
+    },
+    "flipped outcome (MAC no longer matches)": {
+      "status": 409,
+      "code": "mac_invalid",
+      "expectedCode": "mac_invalid"
+    },
+    "flipped MAC": {
+      "status": 409,
+      "code": "mac_invalid",
+      "expectedCode": "mac_invalid"
+    },
+    "unknown key id": {
+      "status": 409,
+      "code": "unknown_key",
+      "expectedCode": "unknown_key"
+    },
+    "smuggled authority field (unsigned)": {
+      "status": 409,
+      "code": "malformed_result",
+      "expectedCode": "malformed_result"
+    },
+    "unknown schema (unsigned)": {
+      "status": 409,
+      "code": "schema_version_mismatch",
+      "expectedCode": "schema_version_mismatch"
+    },
+    "VALIDLY SIGNED wrong lease token": {
+      "status": 409,
+      "code": "lease_mismatch",
+      "expectedCode": "lease_mismatch"
+    },
+    "VALIDLY SIGNED wrong attempt": {
+      "status": 409,
+      "code": "attempt_mismatch",
+      "expectedCode": "attempt_mismatch"
+    },
+    "VALIDLY SIGNED wrong work-item echo": {
+      "status": 409,
+      "code": "identity_mismatch",
+      "expectedCode": "identity_mismatch"
+    },
+    "VALIDLY SIGNED wrong repository": {
+      "status": 409,
+      "code": "identity_mismatch",
+      "expectedCode": "identity_mismatch"
+    },
+    "VALIDLY SIGNED wrong property": {
+      "status": 409,
+      "code": "identity_mismatch",
+      "expectedCode": "identity_mismatch"
+    },
+    "VALIDLY SIGNED wrong evidence revision (both fields, consistent)": {
+      "status": 409,
+      "code": "digest_mismatch",
+      "expectedCode": "digest_mismatch"
+    },
+    "VALIDLY SIGNED wrong contract digest": {
+      "status": 409,
+      "code": "digest_mismatch",
+      "expectedCode": "digest_mismatch"
+    },
+    "VALIDLY SIGNED wrong request id": {
+      "status": 409,
+      "code": "request_mismatch",
+      "expectedCode": "request_mismatch"
+    },
+    "VALIDLY SIGNED unknown schema": {
+      "status": 409,
+      "code": "schema_version_mismatch",
+      "expectedCode": "schema_version_mismatch"
+    },
+    "VALIDLY SIGNED smuggled repair authority": {
+      "status": 409,
+      "code": "malformed_result",
+      "expectedCode": "malformed_result"
+    }
+  },
+  "fwompsRevision": "96832d1d01cf755107e489efd816b2037d21e7a0",
+  "gfdRevision": "7a9d74ec4a985c942e2aa63c7ec37760a8056263",
+  "aiaimateRevision": "257210036bff85961a1b9c96c0572aabcaaa9cd4",
+  "workItemId": "gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd",
+  "finishedAt": "2026-09-30T23:50:45.672Z",
+  "passed": true
+}

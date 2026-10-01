@@ -215,7 +215,8 @@ async function expectRefusedBy(response, code, label) {
   expect(response.status, label).toBeGreaterThanOrEqual(400);
 }
 
-const BASE = Date.parse('2026-09-30T12:00:00.000Z');
+// Times are relative to the start of the run: the lease route checks the claim window against the real clock.
+const BASE = Date.now();
 const at = (offsetMs) => new Date(BASE + offsetMs).toISOString();
 
 /** Observation -> qualified via the real registry -> signed contract -> durable intent. */
@@ -267,9 +268,9 @@ async function readyWithIntent() {
  */
 async function dispatch(chain, { now = at(2_000), fwomps = 'deliver' } = {}) {
   let executions = 0;
-  const outcome = await dispatchOnce(env.DB, chain.effectId, async () => {
+  const outcome = await dispatchOnce(env.DB, chain.effectId, async (permit) => {
     executions += 1;
-    const leased = await workerCall(chain.item, 'lease', {});
+    const leased = await workerCall(chain.item, 'lease', { effect_id: permit.effectId, attempt: permit.attempt });
     if (leased.status !== 200) return { outcome: 'failed', reason: `lease refused (${leased.status})` };
     const body = await leased.json();
     chain.leaseGrant = body.leaseGrant;
@@ -283,6 +284,17 @@ async function dispatch(chain, { now = at(2_000), fwomps = 'deliver' } = {}) {
     return { outcome: 'committed', receipt: accepted.diagnosis.resultDigest };
   }, { now });
   return { outcome, executions };
+}
+
+/** Claims the intent and leases under that claim, exactly as a dispatcher would. Returns the lease grant. */
+async function claimAndLease(chain, now = at(2_000)) {
+  const claim = await claimDispatch(env.DB, chain.effectId, { now });
+  chain.permit = claim.permit;
+  const response = await workerCall(chain.item, 'lease', { effect_id: chain.effectId, attempt: claim.permit.attempt });
+  expect(response.status).toBe(200);
+  const body = await response.json();
+  chain.leaseTokenHex = body.leaseTokenHex;
+  return body.leaseGrant;
 }
 
 /** A second, fully fresh attempt after the first was abandoned (new contract, new intent). */
@@ -387,10 +399,8 @@ describe('one problem, one identity, one closed loop (happy path)', () => {
 
   it('keeps a fresh observation from disturbing a live investigation or a recorded diagnosis', async () => {
     const chain = await readyWithIntent();
-    const claim = await claimDispatch(env.DB, chain.effectId, { now: at(2_000) });
-    expect(claim.permit.attempt).toBe(1);
-    const leased = await workerCall(chain.item, 'lease', {});
-    chain.leaseGrant = (await leased.json()).leaseGrant;
+    chain.leaseGrant = await claimAndLease(chain);
+    expect(chain.permit.attempt).toBe(1);
     const before = await currentItem();
     expect(before.state).toBe('INVESTIGATING');
 
@@ -435,8 +445,7 @@ describe('hostile delivery', () => {
 
   it('concurrent identical deliveries all succeed with exactly one commit', async () => {
     const chain = await readyWithIntent();
-    await claimDispatch(env.DB, chain.effectId, { now: at(2_000) });
-    chain.leaseGrant = (await (await workerCall(chain.item, 'lease', {})).json()).leaseGrant;
+    chain.leaseGrant = await claimAndLease(chain);
     const envelope = await sign(fwompsResult(chain));
     const responses = await Promise.all([1, 2, 3, 4].map(() => postResult(chain, envelope)));
     expect(responses.map((response) => response.status)).toEqual([200, 200, 200, 200]);
@@ -446,8 +455,7 @@ describe('hostile delivery', () => {
 
   it('concurrent different results: exactly one wins, the other fails closed', async () => {
     const chain = await readyWithIntent();
-    await claimDispatch(env.DB, chain.effectId, { now: at(2_000) });
-    chain.leaseGrant = (await (await workerCall(chain.item, 'lease', {})).json()).leaseGrant;
+    chain.leaseGrant = await claimAndLease(chain);
     const a = await sign(fwompsResult(chain));
     const b = await sign(fwompsResult(chain, {
       outcome: 'not_reproduced',
@@ -462,8 +470,7 @@ describe('hostile delivery', () => {
 
   it('a different validly signed result after acceptance fails closed as result_conflict and changes nothing', async () => {
     const chain = await readyWithIntent();
-    await claimDispatch(env.DB, chain.effectId, { now: at(2_000) });
-    chain.leaseGrant = (await (await workerCall(chain.item, 'lease', {})).json()).leaseGrant;
+    chain.leaseGrant = await claimAndLease(chain);
     const first = await postResult(chain, await sign(fwompsResult(chain)));
     expect(first.status).toBe(200);
     const accepted = await currentItem();
@@ -480,8 +487,7 @@ describe('hostile delivery', () => {
 
   it('rejects a wrong lease token, a wrong attempt, and every mismatched identity echo', async () => {
     const chain = await readyWithIntent();
-    await claimDispatch(env.DB, chain.effectId, { now: at(2_000) });
-    chain.leaseGrant = (await (await workerCall(chain.item, 'lease', {})).json()).leaseGrant;
+    chain.leaseGrant = await claimAndLease(chain);
     const good = fwompsResult(chain);
     const WRONG_SHA = 'b'.repeat(40);
     // Each mutation keeps the envelope valid through every EARLIER layer (signature, closed schema,
@@ -510,8 +516,7 @@ describe('hostile delivery', () => {
 
   it('rejects tampered payloads, tampered MACs, a foreign key and an unknown key id', async () => {
     const chain = await readyWithIntent();
-    await claimDispatch(env.DB, chain.effectId, { now: at(2_000) });
-    chain.leaseGrant = (await (await workerCall(chain.item, 'lease', {})).json()).leaseGrant;
+    chain.leaseGrant = await claimAndLease(chain);
     const signed = await sign(fwompsResult(chain));
     const flip = (text) => `${text.slice(0, -1)}${text.endsWith('0') ? '1' : '0'}`;
     const macField = Object.keys(signed.authentication).find((key) => /mac|signature/.test(key));
@@ -531,8 +536,7 @@ describe('hostile delivery', () => {
 
   it('rejects an unsupported result schema even when correctly signed', async () => {
     const chain = await readyWithIntent();
-    await claimDispatch(env.DB, chain.effectId, { now: at(2_000) });
-    chain.leaseGrant = (await (await workerCall(chain.item, 'lease', {})).json()).leaseGrant;
+    chain.leaseGrant = await claimAndLease(chain);
     const future = await sign(fwompsResult(chain, { schema_version: 'mc-fw-investigation-result-9' }));
     await expectRefusedBy(await postResult(chain, future), 'schema_version_mismatch', 'unsupported result schema');
     expect((await currentItem()).state).toBe('INVESTIGATING');
@@ -560,8 +564,7 @@ describe('hostile delivery', () => {
     const smuggledLease = await workerCall(chain.item, 'lease', { worker_id: 'evil', repair_authority: true });
     expect(smuggledLease.status).toBe(400);
     // result: unknown top-level or nested authority fields fail the closed schema
-    await claimDispatch(env.DB, chain.effectId, { now: at(2_000) });
-    chain.leaseGrant = (await (await workerCall(chain.item, 'lease', {})).json()).leaseGrant;
+    chain.leaseGrant = await claimAndLease(chain);
     for (const patch of [
       { repair_authority: true },
       { promotion: { approved: true } },
@@ -581,7 +584,10 @@ describe('hostile lifecycle: expiry, abandonment, replay', () => {
     const oldEnvelope = await sign(fwompsResult(chain));
     await expireLeaseNow(chain);
     await expectRefusedBy(await postResult(chain, oldEnvelope), 'lease_expired', 'result after expiry'); // expired, not yet abandoned
-    expect((await workerCall(chain.item, 'lease', {})).status).toBe(409); // single attempt: no second lease
+    // single attempt: no second lease, even presenting the very intent that authorized the first
+    const relet = await workerCall(chain.item, 'lease', { effect_id: chain.effectId, attempt: 1 });
+    expect(relet.status).toBe(409);
+    expect((await relet.json()).code).toBe('dispatch_intent_ineligible');
     expect((await currentItem()).state).toBe('INVESTIGATING');
 
     const retry = await recoverAndRetry(chain);
@@ -659,18 +665,18 @@ describe('hostile lifecycle: expiry, abandonment, replay', () => {
 describe('hostile outbox fences on the live chain', () => {
   it('a lifecycle transition that beat the claim leaves the intent stale: it cannot dispatch', async () => {
     const chain = await readyWithIntent();
-    // Someone else (not the dispatcher) leases first: the item leaves the version the intent saw.
-    expect((await workerCall(chain.item, 'lease', {})).status).toBe(200);
+    // Another claimant leases under its own live claim first: the item leaves the version the intent saw.
+    await claimAndLease(chain);
     let calls = 0;
     const out = await dispatchOnce(env.DB, chain.effectId, async () => { calls += 1; return { outcome: 'committed', receipt: 'x' }; }, { now: at(2_000) });
     expect(out).toMatchObject({ dispatched: false, reason: 'stale_lifecycle' });
     expect(calls).toBe(0);
-    expect((await loadEffect(env.DB, chain.effectId)).attemptCount).toBe(0);
+    expect((await loadEffect(env.DB, chain.effectId)).attemptCount).toBe(1); // only the other claimant's attempt
   });
 
   it('an intent cannot be planned against a lifecycle version the item already left', async () => {
     const chain = await readyWithIntent();
-    expect((await workerCall(chain.item, 'lease', {})).status).toBe(200);
+    await claimAndLease(chain);
     await expect(planEffect(env.DB, {
       workItemId: chain.item.workItemId,
       requestedLifecycleVersion: chain.item.lifecycleVersion,
@@ -681,21 +687,14 @@ describe('hostile outbox fences on the live chain', () => {
     })).rejects.toThrow(/lifecycle version/);
   });
 
-  it('concurrent claim and out-of-band lease never yield two leases or a second attempt', async () => {
+  it('concurrent duplicate lease requests under one claim mint exactly one lease', async () => {
     const chain = await readyWithIntent();
-    const [claim, lease] = await Promise.all([
-      claimDispatch(env.DB, chain.effectId, { now: at(2_000) }),
-      workerCall(chain.item, 'lease', {}),
-    ]);
-    expect(lease.status).toBe(200);
+    const claim = await claimDispatch(env.DB, chain.effectId, { now: at(2_000) });
+    const body = { effect_id: chain.effectId, attempt: claim.permit.attempt };
+    const responses = await Promise.all([workerCall(chain.item, 'lease', body), workerCall(chain.item, 'lease', body)]);
+    expect(responses.map((response) => response.status).sort()).toEqual([200, 409]);
     expect(await leaseRowCount(chain.item.workItemId)).toBe(1);
-    if (claim.permit) {
-      // The claim won the race; the dispatcher's own lease call must now be refused (single attempt).
-      expect((await workerCall(chain.item, 'lease', {})).status).toBe(409);
-      expect(claim.permit.attempt).toBe(1);
-    } else {
-      expect(claim.reason).toBe('stale_lifecycle');
-    }
+    expect((await currentItem()).attemptsIssued).toBe(1);
   });
 
   it('an active claim cannot be abandoned or reclaimed until its visibility window passes', async () => {

@@ -11,8 +11,14 @@
 
 import { deriveEffectId } from './mission-control-work-items.js';
 import { ensureWorkItemSchema } from '../mission-control-work-items.js';
+import {
+  DEFAULT_VISIBILITY_MS,
+  DISPATCH_EFFECT_TYPE,
+  EFFECT_SCHEMA_VERSION,
+  dispatchTarget,
+} from './mission-control-effect-contract.js';
 
-export const EFFECT_SCHEMA_VERSION = 'gfd-effect-1';
+export { DEFAULT_VISIBILITY_MS, DISPATCH_EFFECT_TYPE, EFFECT_SCHEMA_VERSION, dispatchTarget };
 export const EFFECT_TYPES = Object.freeze([
   'investigation_dispatch',
   'github_issue',
@@ -21,7 +27,14 @@ export const EFFECT_TYPES = Object.freeze([
   'notification',
   'reverification_request',
 ]);
-export const DEFAULT_VISIBILITY_MS = 60_000;
+
+/**
+ * Identity of an investigation_dispatch intent: work item + type + canonical target + the exact signed
+ * contract digest (candidateDigest). The digest is REQUIRED, so an abandoned attempt and a legitimate
+ * later attempt (new signed contract, new digest) are different intents and can never collide, while
+ * the same contract always maps to the same intent (idempotent planning). Only such an intent, under a
+ * live claim, can authorize a lease (workers/lib/mission-control-lease-authority.js).
+ */
 export const MAX_PAYLOAD_CHARS = 4096;
 
 // Authority-bearing material never travels in an effect payload. Keys are
@@ -43,19 +56,6 @@ const PAYLOAD_KEYS_BY_TYPE = Object.freeze({
   notification: [...BASE_PAYLOAD_KEYS, 'channel'],
   reverification_request: [...BASE_PAYLOAD_KEYS, 'predicateId'],
 });
-
-const ADD_COLUMNS = [
-  ['schema_version', 'TEXT'],
-  ['requested_lifecycle_version', 'INTEGER'],
-  ['payload_digest', 'TEXT'],
-  ['payload_json', 'TEXT'],
-  ['attempt_count', 'INTEGER NOT NULL DEFAULT 0'],
-  ['last_attempt_at', 'TEXT'],
-  ['idempotency_key', 'TEXT'],
-  ['causal_event_id', 'TEXT'],
-  ['receipt_ref', 'TEXT'],
-  ['terminal_reason', 'TEXT'],
-];
 
 const textEncoder = new TextEncoder();
 
@@ -177,23 +177,8 @@ function present(row) {
   };
 }
 
-async function columnSet(db) {
-  const { results } = await db.prepare('PRAGMA table_info(mc_effects)').all();
-  return new Set((results || []).map((column) => column.name));
-}
-
 export async function ensureOutboxSchema(db) {
-  await ensureWorkItemSchema(db);
-  const existing = await columnSet(db);
-  for (const [name, type] of ADD_COLUMNS) {
-    if (existing.has(name)) continue;
-    try {
-      await db.prepare(`ALTER TABLE mc_effects ADD COLUMN ${name} ${type}`).run();
-    } catch (error) {
-      // A concurrent first use may have added the column; only that is benign.
-      if (!(await columnSet(db)).has(name)) throw error;
-    }
-  }
+  await ensureWorkItemSchema(db); // also ensures the effect-contract columns the store itself reads
   await db.prepare(`
     CREATE INDEX IF NOT EXISTS idx_mc_effects_dispatch
     ON mc_effects (status, last_attempt_at)
@@ -202,7 +187,7 @@ export async function ensureOutboxSchema(db) {
 
 async function readWorkItem(db, workItemId) {
   const row = await db.prepare(`
-    SELECT work_item_id, lifecycle_state, lifecycle_version, evidence_digest
+    SELECT work_item_id, property_id, lifecycle_state, lifecycle_version, evidence_digest
     FROM mc_work_items WHERE work_item_id = ?
   `).bind(workItemId).first();
   if (!row) throw new OutboxError('not_found', 'work item was not found');
@@ -271,6 +256,19 @@ export async function planEffect(db, input) {
   if (Number(workItem.lifecycle_version) !== input.requestedLifecycleVersion) {
     throw new OutboxError('stale_version', 'effect plan does not match the work item lifecycle version');
   }
+  const isDispatch = input.effectType === DISPATCH_EFFECT_TYPE;
+  if (isDispatch) {
+    if (candidateDigest == null) {
+      throw new OutboxError('malformed_effect', 'an investigation_dispatch intent must bind the signed contract digest (candidateDigest)');
+    }
+    if (target !== dispatchTarget(workItem.property_id)) {
+      throw new OutboxError('malformed_effect', 'an investigation_dispatch intent must use the canonical target for its property');
+    }
+    if (workItem.lifecycle_state !== 'INVESTIGATION_READY') {
+      throw new OutboxError('not_dispatchable', 'an investigation_dispatch intent can be planned only for an INVESTIGATION_READY work item');
+    }
+  }
+  const readyClause = isDispatch ? " AND lifecycle_state = 'INVESTIGATION_READY'" : '';
   const now = iso(input.now || new Date());
   const causalEventId = `evt_${effectId}_intent`;
   const detail = JSON.stringify({
@@ -292,7 +290,7 @@ export async function planEffect(db, input) {
         )
         SELECT ?, work_item_id, 'effect_intent', lifecycle_state, lifecycle_state, ?,
                'outbox', 'mission-control', evidence_digest, ?
-        FROM mc_work_items WHERE work_item_id = ? AND lifecycle_version = ?
+        FROM mc_work_items WHERE work_item_id = ? AND lifecycle_version = ?${readyClause}
       `).bind(causalEventId, now, detail, workItemId, input.requestedLifecycleVersion),
       db.prepare(`
         INSERT INTO mc_effects (
@@ -303,7 +301,7 @@ export async function planEffect(db, input) {
           receipt_ref, terminal_reason
         )
         SELECT ?, work_item_id, ?, ?, ?, 'PLANNED', NULL, ?, NULL, NULL, NULL, ?, ?, ?, ?, 0, NULL, ?, ?, NULL, NULL
-        FROM mc_work_items WHERE work_item_id = ? AND lifecycle_version = ?
+        FROM mc_work_items WHERE work_item_id = ? AND lifecycle_version = ?${readyClause}
       `).bind(
         effectId,
         input.effectType,
