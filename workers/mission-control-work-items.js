@@ -606,11 +606,12 @@ const LEASE_AUTHORITY_PREDICATE = `EXISTS (
   )`;
 
 // Atomic rule, decided from the STORED row inside the write: the active lease may be cleared, or left
-// exactly as stored, freely; setting it to anything else (creating or replacing a lease) applies only if
-// the authority predicate above holds at that moment.
+// exactly as stored, freely; changing the lease identity, worker or expiry requires authority.
 const UPSERT_CAS = `${UPSERT} WHERE mc_work_items.lifecycle_version = ?
     AND (excluded.active_lease_id IS NULL
-      OR excluded.active_lease_id IS mc_work_items.active_lease_id
+      OR (excluded.active_lease_id IS mc_work_items.active_lease_id
+        AND excluded.active_worker_id IS mc_work_items.active_worker_id
+        AND excluded.lease_expires_at IS mc_work_items.lease_expires_at)
       OR ${LEASE_AUTHORITY_PREDICATE})`;
 // An item that was never loaded may only create the row; it can never update an existing one.
 const UPSERT_INSERT_ONLY = `${UPSERT} WHERE 0`;
@@ -769,9 +770,13 @@ export function createD1WorkItemStore(db) {
       const results = await db.batch(statements);
       if (Number(results?.[0]?.meta?.changes ?? 0) !== 1) {
         // The write already failed closed; this read only chooses the most precise refusal to report.
-        const stored = await db.prepare('SELECT lifecycle_version, active_lease_id FROM mc_work_items WHERE work_item_id = ?')
+        const stored = await db.prepare('SELECT lifecycle_version, active_lease_id, active_worker_id, lease_expires_at FROM mc_work_items WHERE work_item_id = ?')
           .bind(item.workItemId).first();
-        const wantsLease = Boolean(item.activeLease) && item.activeLease.leaseId !== (stored?.active_lease_id ?? null);
+        const wantsLease = Boolean(item.activeLease) && (
+          item.activeLease.leaseId !== (stored?.active_lease_id ?? null)
+          || item.activeLease.workerId !== stored?.active_worker_id
+          || item.activeLease.expiresAt !== stored?.lease_expires_at
+        );
         if (wantsLease && (!stored || Number(stored.lifecycle_version) === expected)) {
           throw new WorkItemError(
             authority ? 'dispatch_intent_ineligible' : 'dispatch_intent_required',

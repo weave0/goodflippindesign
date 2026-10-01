@@ -466,6 +466,24 @@ describe('the invariant is structural and atomic: the STORE proves it at write t
     expect(await leaseRows(ctx.workItemId)).toBe(1);
   });
 
+  it('does not renew an expired lease or reassign its worker by keeping the lease id', async () => {
+    const ctx = await readyItem();
+    const auth = await authorizeDispatch(env.DB, ctx.ready);
+    expect((await lease(ctx, auth.body)).status).toBe(200);
+    const leased = await stateOf(ctx);
+    await expect(store().save({ ...leased, activeLease: { ...leased.activeLease, workerId: 'different-worker' } }))
+      .rejects.toMatchObject({ code: 'dispatch_intent_required' });
+
+    const expiredAt = '2020-01-01T00:00:00.000Z';
+    await env.DB.prepare('UPDATE mc_work_items SET lease_expires_at = ? WHERE work_item_id = ?')
+      .bind(expiredAt, ctx.workItemId).run();
+    const expired = await stateOf(ctx);
+    await expect(store().save({ ...expired, activeLease: { ...expired.activeLease, expiresAt: new Date(Date.now() + 60_000).toISOString() } }))
+      .rejects.toMatchObject({ code: 'dispatch_intent_required' });
+    expect((await stateOf(ctx)).activeLease).toMatchObject({ workerId: leased.activeLease.workerId, expiresAt: expiredAt });
+    expect(await leaseRows(ctx.workItemId)).toBe(1);
+  });
+
   it('an intent abandoned, consumed, reclaimed, re-issued or flipped between the check and the write still fails closed', async () => {
     for (const interfere of [
       (effectId) => env.DB.prepare("UPDATE mc_effects SET status = 'FAILED', terminal_reason = 'abandoned mid-flight' WHERE effect_id = ?").bind(effectId).run(),
