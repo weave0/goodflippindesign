@@ -1,0 +1,46 @@
+{
+    "milestone": "MC-CONFLUENCE-001",
+    "scope": "post-merge validation on main",
+    "mainRevision": "e7b14849d6504e90a691d35b13630031d0bf536f",
+    "mergedPullRequests": {
+        "374": "7be8a1f8218f0c29a7d1d2edc952040a9db04af2",
+        "375": "04c85c3e0d7993b523ce045fb371bfa47c49e305",
+        "376": "e7b14849d6504e90a691d35b13630031d0bf536f"
+    },
+    "ci": {
+        "pullRequest": 376,
+        "headRevision": "071565431f994edf9edf58e2ec6224a9af5bc572",
+        "testRun": "https://github.com/weave0/goodflippindesign/actions/runs/36800411349",
+        "tests": "success",
+        "lighthouse": "success",
+        "pages": "success"
+    },
+    "mergedMainChecks": {
+        "missionControlCore": "60/60",
+        "missionControlEvents": "26/26",
+        "missionControlTier1": "105/105",
+        "missionControlSurface": "passed",
+        "estateRegistryValidation": "passed"
+    },
+    "operatorSpecimen": {
+        "startedAt": "2026-10-01T01:22:32Z",
+        "finishedAt": "2026-10-01T01:22:54Z",
+        "gfdRevision": "e7b14849d6504e90a691d35b13630031d0bf536f",
+        "fwompsRevision": "96832d1d01cf755107e489efd816b2037d21e7a0",
+        "aiaimateRevision": "257210036bff85961a1b9c96c0572aabcaaa9cd4",
+        "checksPassed": 43,
+        "checksFailed": 0,
+        "hostileDeliveriesRefusedBeforeAcceptance": 16,
+        "workItemFinalState": "DIAGNOSED",
+        "dispatchEffectFinalStatus": "COMMITTED",
+        "dispatchEffectAttempt": 1,
+        "leaseReleased": true,
+        "repairOrDeployAuthorityRecorded": false
+    },
+    "notProven": [
+        "A real production health incident; the degraded observation was synthetic",
+        "The production FWOMPS host binding; the specimen used an isolated home",
+        "Production Clerk identity; the specimen stubbed the operator response",
+        "End-to-end execution for the other 24 estate properties"
+    ]
+}

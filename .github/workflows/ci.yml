@@ -56,6 +56,9 @@ jobs:
       - name: Estate registry hostile validation tests
         run: node tests/estate-registry-validation.test.mjs
 
+      - name: Property promotion gate tests
+        run: node --no-warnings tests/property-promotion-gate.test.mjs
+
       - name: Validate TI work-sync live authority contract
         run: |
           node - <<'NODE'
