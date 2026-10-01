@@ -988,69 +988,134 @@ describe('Confluence-2 operator projection', () => {
 // Production seams (MC-CONFLUENCE-002): canary observation intake + admin dispatch, over the real routes
 // ---------------------------------------------------------------------------------------------
 
-describe('production dispatch seam and kill-switched canary observation', () => {
+describe('production canary surfaces: authority boundaries (both routes fail closed)', () => {
   const ON = { MISSION_CONTROL_CANARY: 'aiaimate.com' };
-  const observeCanary = (status, envOverrides = ON, token = adminToken()) => call('/api/mission-control/canary-observations', { auth: token, body: { status }, envOverrides });
+  const observeCanary = (status, envOverrides = ON, token = adminToken(), body = { status }) => call('/api/mission-control/canary-observations', { auth: token, body, envOverrides });
+  const dispatchCall = (item, envOverrides = ON, { token = adminToken(), body = {} } = {}) => call(itemPath(item, 'dispatch'), { auth: token, body, envOverrides });
   const canaryItem = async () => (await store().list()).filter((item) => item.producer === 'mc-canary');
+  const currentCanary = async () => (await canaryItem())[0];
+  const effectCount = async () => Number((await env.DB.prepare('SELECT COUNT(*) AS n FROM mc_effects').first()).n);
+  const keysOf = (value, out = []) => { if (value && typeof value === 'object') for (const [k, v] of Object.entries(value)) { out.push(k); keysOf(v, out); } return out; };
 
-  it('is inert unless the operator enables it, and then only ever touches one fixed identity', async () => {
-    expect((await observeCanary('degraded', {})).status).toBe(404);
-    expect((await observeCanary('degraded', { MISSION_CONTROL_CANARY: 'globaldeets.com' })).status).toBe(404);
-    expect(await canaryItem()).toHaveLength(0);
-    // A smuggled property or key is ignored: the identity is fixed in code.
-    const response = await call('/api/mission-control/canary-observations', { auth: adminToken(), body: { status: 'degraded', propertyId: 'globaldeets.com', findingKey: 'x' }, envOverrides: ON });
-    expect(response.status).toBe(200);
-    const items = await canaryItem();
-    expect(items).toHaveLength(1);
-    expect(items[0]).toMatchObject({ propertyId: 'aiaimate.com', findingKey: 'canary:mc-confluence-002:aiaimate-read-only-investigation', state: 'OBSERVED' });
-    expect((await observeCanary('nonsense')).status).toBe(400);
-    expect((await call('/api/mission-control/canary-observations', { workerAuth: WORKER_TOKEN, body: { status: 'degraded' }, envOverrides: ON })).status).toBeGreaterThanOrEqual(401);
+  async function readyCanary() {
+    await observeCanary('degraded');
+    let item = await currentCanary();
+    item = (await (await operator(item, 'transition', { to: 'QUALIFIED' })).json()).workItem;
+    const issued = await (await operator(item, 'investigate', { evidenceRevision: REVISION })).json();
+    return { item: issued.workItem, issued };
+  }
+
+  it('canary absent or wrong: BOTH surfaces are inert, including dispatch of a ready canary item', async () => {
+    const { item } = await readyCanary();
+    for (const off of [{}, { MISSION_CONTROL_CANARY: '' }, { MISSION_CONTROL_CANARY: 'globaldeets.com' }, { MISSION_CONTROL_CANARY: 'true' }, { MISSION_CONTROL_CANARY: 'AIAIMATE.COM' }]) {
+      const observed = await observeCanary('degraded', off);
+      const dispatched = await dispatchCall(item, off);
+      expect([observed.status, (await observed.json()).code]).toEqual([404, 'canary_disabled']);
+      expect([dispatched.status, (await dispatched.json()).code]).toEqual([404, 'canary_disabled']);
+    }
+    expect(await effectCount()).toBe(0);
+    expect((await currentCanary()).state).toBe('INVESTIGATION_READY');
   });
 
-  it('carries the canary through dispatch, lease, result and reverification on the real routes', async () => {
-    await observeCanary('degraded');
-    let item = (await canaryItem())[0];
+  it('only the enabled canary identity is eligible: other items and caller-supplied property/command/worker are refused', async () => {
+    // an ordinary health-sweep item that is investigation-ready is NOT dispatchable through the canary seam
+    await observe(at(0));
+    const health = await currentItem();
+    const qualified = (await (await operator(health, 'transition', { to: 'QUALIFIED' })).json()).workItem;
+    const readyHealth = (await (await operator(qualified, 'investigate', { evidenceRevision: REVISION })).json()).workItem;
+    expect(readyHealth.state).toBe('INVESTIGATION_READY');
+    const refusedGeneral = await dispatchCall(readyHealth);
+    expect([refusedGeneral.status, (await refusedGeneral.json()).code]).toEqual([403, 'canary_ineligible']);
+    expect(await effectCount()).toBe(0);
+
+    const { item } = await readyCanary();
+    for (const smuggled of [{ propertyId: 'globaldeets.com' }, { command: 'rm -rf /' }, { argv: ['x'] }, { workerId: 'attacker' }, { repairAuthority: true }, { effectType: 'deployment' }, { profileId: 'other' }]) {
+      const refused = await dispatchCall(item, ON, { body: smuggled });
+      expect([refused.status, (await refused.json()).code], JSON.stringify(smuggled)).toEqual([400, 'unexpected_fields']);
+    }
+    for (const smuggled of [{ status: 'degraded', propertyId: 'globaldeets.com' }, { status: 'degraded', findingKey: 'x' }, { status: 'degraded', command: 'x' }, { status: 'degraded', workerId: 'x' }]) {
+      const refused = await observeCanary('degraded', ON, adminToken(), smuggled);
+      expect([refused.status, (await refused.json()).code], JSON.stringify(smuggled)).toEqual([400, 'unexpected_fields']);
+    }
+    expect(await effectCount()).toBe(0);
+    expect(await canaryItem()).toHaveLength(1);
+  });
+
+  it('refuses non-admin callers on both routes', async () => {
+    const { item } = await readyCanary();
+    for (const [label, response] of [
+      ['worker bearer observe', await call('/api/mission-control/canary-observations', { workerAuth: WORKER_TOKEN, body: { status: 'degraded' }, envOverrides: ON })],
+      ['anonymous observe', await call('/api/mission-control/canary-observations', { body: { status: 'degraded' }, envOverrides: ON })],
+      ['worker bearer dispatch', await call(itemPath(item, 'dispatch'), { workerAuth: WORKER_TOKEN, body: {}, envOverrides: ON })],
+      ['anonymous dispatch', await call(itemPath(item, 'dispatch'), { body: {}, envOverrides: ON })],
+    ]) {
+      expect(response.status, label).toBeGreaterThanOrEqual(401);
+    }
+    expect(await effectCount()).toBe(0);
+  });
+
+  it('dispatches only from an authorized canonical item, once, bound to the signed contract digest, read-only, no secrets', async () => {
+    const observedBody = JSON.stringify(await (await observeCanary('degraded')).json());
+    let item = await currentCanary();
+    expect((await dispatchCall(item)).status).toBe(409); // OBSERVED: no signed contract yet
     item = (await (await operator(item, 'transition', { to: 'QUALIFIED' })).json()).workItem;
-    // dispatch before a signed contract exists is refused
-    const early = await operator(item, 'dispatch', {});
-    expect(early.status).toBe(409);
+    expect((await dispatchCall(item)).status).toBe(409); // QUALIFIED: still no signed contract
     const issued = await (await operator(item, 'investigate', { evidenceRevision: REVISION })).json();
     item = issued.workItem;
-    expect(issued.contract.contract?.authority?.repair ?? false).not.toBe(true);
 
-    // a worker cannot dispatch; an admin cannot lease
-    expect((await workerCall(item, 'dispatch', {})).status).toBeGreaterThanOrEqual(401);
-    const dispatched = await operator(item, 'dispatch', {});
-    expect(dispatched.status).toBe(200);
-    const { dispatch } = await dispatched.json();
-    expect(dispatch).toMatchObject({ attempt: 1, created: true, contractDigest: item.investigation.digest });
-    // a second dispatch while the claim is live is refused, never a second claim
-    const again = await operator(item, 'dispatch', {});
-    expect(again.status).toBe(409);
-    expect((await again.json()).code).toBe('dispatch_not_claimable');
+    // the contract is read-only and carries no command, repair, deploy or write authority
+    expect(issued.contract.contract.requested_mode).toBe('read_only');
+    expect(issued.contract.operation).toBe('investigate');
+    expect(keysOf(issued.contract).filter((key) => /command|argv|repair|deploy|write|credential|token|secret/i.test(key))).toEqual([]);
 
-    const leased = await (await workerCall(item, 'lease', { effect_id: dispatch.effectId, attempt: dispatch.attempt })).json();
+    const first = await dispatchCall(item);
+    expect(first.status).toBe(200);
+    const body = await first.json();
+    expect(body.dispatch).toMatchObject({ attempt: 1, created: true, contractDigest: item.investigation.digest, requestId: item.investigation.requestId });
+    const effect = await env.DB.prepare('SELECT effect_type, target, candidate_digest, status FROM mc_effects').first();
+    expect(effect).toEqual({ effect_type: 'investigation_dispatch', target: 'fwomps:aiaimate.com', candidate_digest: item.investigation.digest, status: 'PLANNED' });
+
+    // duplicates never produce a second consequential intent or claim
+    for (let n = 0; n < 3; n += 1) {
+      const again = await dispatchCall(item);
+      expect([again.status, (await again.json()).code]).toEqual([409, 'dispatch_not_claimable']);
+    }
+    expect(await effectCount()).toBe(1);
+
+    // no secrets in either route's responses
+    // (a re-observation here would bump the lifecycle version and correctly invalidate the intent's fence)
+    for (const secret of [CONTRACT_KEY, RESULT_KEY, WORKER_TOKEN, SECRET]) {
+      expect(JSON.stringify(body)).not.toContain(secret);
+      expect(observedBody).not.toContain(secret);
+    }
+
+    // lease -> result: a stale/different result cannot mutate the canonical item
+    const leased = await (await workerCall(item, 'lease', { effect_id: body.dispatch.effectId, attempt: 1 })).json();
     expect(leased.workItem.state).toBe('INVESTIGATING');
+    expect((await dispatchCall(item)).status).toBe(409); // a leased item can no longer be dispatched
     const chain = { item, contract: issued.contract, leaseGrant: leased.leaseGrant, issued: { workItem: item } };
-    const envelope = await sign(fwompsResult(chain));
-    const posted = await workerCall(item, 'result', envelope);
-    expect(posted.status).toBe(200);
-    // duplicate delivery is idempotent; the item is diagnosed, not resolved
-    expect((await workerCall(item, 'result', envelope)).status).toBe(200);
-    item = (await canaryItem())[0];
-    expect(item.state).toBe('DIAGNOSED');
-    expect(await eventCount(item.workItemId, 'DIAGNOSED')).toBe(1);
+    expect((await workerCall(item, 'result', await sign(fwompsResult(chain)))).status).toBe(200);
+    const diagnosed = await currentCanary();
+    expect(diagnosed.state).toBe('DIAGNOSED');
+    for (const patch of [{ attempt: 2 }, { outcome: 'not_reproduced', summary: 'conflicting' }]) {
+      const stale = await workerCall(item, 'result', await sign(fwompsResult(chain, patch)));
+      expect(stale.status).toBeGreaterThanOrEqual(409);
+    }
+    expect(await currentCanary()).toMatchObject({ state: 'DIAGNOSED', lifecycleVersion: diagnosed.lifecycleVersion });
+    expect(await effectCount()).toBe(1);
 
-    // a healthy canary observation strictly after the diagnosis resolves the same item; a replay changes nothing
-    const before = item.lifecycleVersion;
-    await new Promise((resolve) => setTimeout(resolve, 5)); // strictly after the diagnosis instant
+    // reverification through the same fixed identity resolves it; no repair/deploy effect ever existed
+    await new Promise((resolve) => setTimeout(resolve, 5));
     expect((await observeCanary('pass')).status).toBe(200);
-    item = (await canaryItem())[0];
-    expect(item).toMatchObject({ state: 'RESOLVED' });
-    expect(item.lifecycleVersion).toBeGreaterThan(before);
-    expect(await canaryItem()).toHaveLength(1);
-    // no repair/deploy intent exists anywhere
-    const rows = await env.DB.prepare("SELECT effect_type FROM mc_effects").all();
-    expect(rows.results.map((row) => row.effect_type)).toEqual(['investigation_dispatch']);
+    expect((await currentCanary()).state).toBe('RESOLVED');
+    expect((await env.DB.prepare('SELECT effect_type FROM mc_effects').all()).results.map((row) => row.effect_type)).toEqual(['investigation_dispatch']);
+  });
+
+  it('switching the canary off makes both surfaces inert again with no code change (environment only)', async () => {
+    const { item } = await readyCanary();
+    expect((await dispatchCall(item, ON)).status).toBe(200);
+    expect((await dispatchCall(item, {})).status).toBe(404);
+    expect((await observeCanary('pass', {})).status).toBe(404);
+    expect((await currentCanary()).state).toBe('INVESTIGATION_READY'); // refusals touched nothing
   });
 });

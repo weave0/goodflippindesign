@@ -20,6 +20,7 @@ import {
 } from './fwomps-investigation-adapter.js';
 import { resolveEstateBinding } from './estate-bindings.js';
 import {
+  CANARY_PRODUCER,
   CANARY_PROPERTY_ID,
   recordCanaryObservation,
   WorkItemError,
@@ -331,6 +332,24 @@ async function workItemStore(env) {
   return createD1WorkItemStore(env.DB);
 }
 
+/**
+ * The canary kill switch, shared by BOTH canary surfaces (canary-observations and dispatch). Absent or any other
+ * value => 404, so nothing here is a general admin dispatcher. The value names the one eligible property.
+ */
+function requireCanary(env) {
+  if (env.MISSION_CONTROL_CANARY !== CANARY_PROPERTY_ID) {
+    throw new WorkItemError('canary_disabled', 'The Mission Control canary is not enabled', 404);
+  }
+}
+
+/** Canary routes accept only the exact keys they document; anything else (property, command, worker, authority) is refused. */
+function requireOnlyKeys(body, allowed) {
+  const extra = Object.keys(body).filter((key) => !allowed.includes(key));
+  if (extra.length) {
+    throw new WorkItemError('unexpected_fields', `unexpected fields: ${extra.join(', ')}`, 400);
+  }
+}
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -412,12 +431,10 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
     }
 
     if (parts[2] === 'canary-observations' && parts.length === 3 && request.method === 'POST') {
-      // Kill-switched: inert unless the operator deliberately sets MISSION_CONTROL_CANARY to the one canary property.
-      if (env.MISSION_CONTROL_CANARY !== CANARY_PROPERTY_ID) {
-        throw new WorkItemError('canary_disabled', 'The Mission Control canary is not enabled', 404);
-      }
+      requireCanary(env);
       const store = await workItemStore(env);
       const body = await readJson(request);
+      requireOnlyKeys(body, ['status']);
       const saved = await recordCanaryObservation(store, { status: body.status, checkedAt: nowIso() });
       return jsonResponse({ workItem: saved });
     }
@@ -425,9 +442,15 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
     if (parts[2] === 'work-items' && parts.length === 5 && parts[4] === 'dispatch' && request.method === 'POST') {
       // Durable intent, then one claim. This authorizes nothing by itself: the lease route still demands this exact
       // intent, the current claim and the signed contract digest, and the dispatch grants no repair or deploy authority.
+      // It is part of the canary, not a general dispatcher: same kill switch, canary-produced items only, no caller input.
+      requireCanary(env);
+      requireOnlyKeys(await readJson(request), []);
       const store = await workItemStore(env);
       const item = await store.get(decodeURIComponent(parts[3]));
       if (!item) throw new WorkItemError('not_found', 'Work item was not found', 404);
+      if (item.producer !== CANARY_PRODUCER || item.propertyId !== env.MISSION_CONTROL_CANARY) {
+        throw new WorkItemError('canary_ineligible', 'Only the canary work item of the enabled property can be dispatched here', 403);
+      }
       if (item.state !== 'INVESTIGATION_READY' || !item.investigation?.digest) {
         throw new WorkItemError('illegal_transition', 'Only an investigation-ready item with a signed contract can be dispatched', 409);
       }
