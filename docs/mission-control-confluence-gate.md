@@ -181,3 +181,67 @@ FWOMPS_REPO=<fwomps checkout> python scripts/fwomps-aiaimate-host-binding.py \
 
 The tool's apply/verify/conflict/no-secret-output behaviour was exercised against an isolated throwaway home; the
 real host was only ever planned against (its `config.json` was byte-identical afterwards).
+
+## Confluence-2 (MC-CONFLUENCE-002): the loop now closes
+
+`… → DIAGNOSED` is no longer the end of the gate. The same canonical work item continues:
+
+`DIAGNOSED → (diagnosis alone changes nothing) → strictly newer healthy production observation → RESOLVED → later degraded observation → RECURRENT (same lineage)`
+
+One decision owns it: `reverifyWorkItem` in `workers/lib/mission-control-work-items.js`, fed by the health sweep
+(`reconcileHealthyObservation`, `reverifyHealthyTarget` in `workers/mission-control-work-items.js`). There is no second
+lifecycle: states, events, evidence and the compare-and-swap store are the existing ones. Verdicts are journaled on the
+event (`detail.reverification`) so the operator projection can say why an item did or did not move.
+
+| fence                                                               | verdict / behaviour                                                        | tier 1 test (`mission-control-reverification.test.js` unit; `mission-control-confluence.test.js` D1/API) |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| evidence not strictly newer than failing evidence / state entry / prior verdict | `stale`, no change                                              | unit matrix; `older than the diagnosis…`; `at the very instant…`                                          |
+| exact replay of weighed evidence                                    | `replayed`, no change                                                      | `labels an exact replay…`                                                                                |
+| another property's / finding's / producer's healthy observation     | identity mismatch throws; sweep selects by exact property + `health:<target>:` | `rejects evidence for a different property…`; `another property's healthy observation…`            |
+| diagnosis result claiming "not reproduced"                          | still only `DIAGNOSED`                                                     | `a diagnosis result that claims the problem is gone…`                                                    |
+| healthy observation while a lease is live                           | `deferred`; lease, attempt and result path untouched                       | `a healthy observation during an active lease…`                                                          |
+| blocked / needs-human                                               | `blocked`, never resolved behind a human                                   | `never resolves behind a human blocker`                                                                  |
+| no registered predicate                                             | `unresolvable`                                                             | `cannot verify an item without a registered predicate`                                                   |
+| repeated healthy observation after resolution                       | `already_resolved`, no write                                               | full-loop test (version unchanged)                                                                       |
+| old signed result replayed after resolution                         | `illegal_transition`, nothing changes                                      | `a replay of the old diagnosis result after resolution…`                                                 |
+| degraded observation older than the resolution                      | stays `RESOLVED`                                                           | full-loop test                                                                                           |
+| recurrence                                                          | same `workItemId`, `recurrenceCount+1`, old diagnosis cleared, history kept | full-loop test                                                                                          |
+| unsupported transitions                                             | operator cannot reach RESOLVED/REVERIFYING/RECURRENT; terminal is terminal | `unsupported transitions fail closed…`                                                                  |
+| GitHub incident closed/removed out of band                          | reverification still happens from the work item                            | `reverifies from the work item itself…`                                                                  |
+
+Hand-mutating each of the new fences (strictness, replay label, deferral, recurrence clear, state-machine strictness)
+fails at least one test.
+
+### Tier 2 modes and the evidence artifact
+
+```bash
+# isolated host (default): throwaway FWOMPS home; also exercises `fwomps deliver`
+FWOMPS_REPO=<fwomps checkout> PYTHON=<python> node --no-warnings --import ./tests/acceptance/node-json-hook.mjs \
+  tests/acceptance/mc-confluence-specimen.mjs --dir <run dir>
+
+# real host: the operator's actual registered FWOMPS home executes the investigation
+FWOMPS_REPO=<fwomps checkout> PYTHON=<python> node --no-warnings --import ./tests/acceptance/node-json-hook.mjs \
+  tests/acceptance/mc-confluence-specimen.mjs --real-home --dir <run dir>
+```
+
+`<run dir>/evidence.json` carries `summary` (`schema: gfd-mc-confluence-evidence-1`): GFD and FWOMPS revision (+ dirty flag,
+FWOMPS branch), property, work item, evidence revisions, request/effect/attempt/lifecycle version, contract/lease/result/
+resolution digests, timestamps, execution receipt, lifecycle path, recurrence count, every hostile case (`name`, `expected`,
+`observed`, `pass`), check totals and a `pass|fail` outcome. No secrets: only key **ids** appear; the shared secrets are never
+written, and `--real-home` reads them in memory only. Compare two runs by diffing `summary` (revisions, outcome, hostile-case
+set, lifecycle path); run-local timestamps/digests are expected to differ.
+
+In `--real-home` mode the registered delivery origin is production, so the specimen POSTs FWOMPS's own persisted, MAC-signed
+envelope to the local GFD instead of `fwomps deliver`; `summary.host.deliverySubstituted` records that. Everything else
+(registered workspace, host profile, enrolled keys, attested sandbox) is the real host.
+
+### Evidence (2026-10-01)
+
+- `docs/evidence/mc-confluence-2-real-host-2026-10-01.json` — real host: 59/59 checks, 24 hostile cases, lifecycle
+  `OBSERVED → QUALIFIED → INVESTIGATION_READY → INVESTIGATING → DIAGNOSED → RESOLVED → RECURRENT` on one work item.
+- `docs/evidence/mc-confluence-2-isolated-host-2026-10-01.json` — isolated host incl. `fwomps deliver`: 57/57.
+
+Honest limits: the observations (degraded and healthy) are synthetic and the GFD side is a local worker over real D1, not
+production; FWOMPS's diagnosis was `not_reproduced` because AIAIMate's source at the pinned revision does declare its health
+contract (production is healthy) — the synthetic degradation was not corroborated, which is itself the correct diagnosis.
+Production has not been provisioned with the shared keys/worker token, so no production round trip has happened.
