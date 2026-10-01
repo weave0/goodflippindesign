@@ -11,6 +11,7 @@
  */
 
 import { handleCMSRequest } from './cms.js';
+import { applyStripeEvent } from './donation-ledger.js';
 import { handleMissionControlRequest } from './mission-control-api.js';
 import * as Sentry from '@sentry/cloudflare';
 
@@ -1806,6 +1807,15 @@ async function handleMemberDirectory(request, env) {
  * No Stripe SDK needed — uses the standard signed-payload scheme.
  * https://stripe.com/docs/webhooks/signatures
  */
+const STRIPE_SIGNATURE_TOLERANCE_SECONDS = 300;
+
+function timingSafeEqualHex(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 async function verifyStripeSignature(payload, sigHeader, secret) {
   if (!sigHeader) return false;
   // Stripe-Signature: t=<timestamp>,v1=<hmac>[,v1=<hmac>]
@@ -1815,6 +1825,8 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
   if (!tPart || !v1Parts.length) return false;
 
   const timestamp = tPart.slice(2);
+  const ts = Number(timestamp);
+  if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > STRIPE_SIGNATURE_TOLERANCE_SECONDS) return false;
   const signedPayload = `${timestamp}.${payload}`;
 
   const keyData = new TextEncoder().encode(secret);
@@ -1825,13 +1837,11 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
   const macHex = Array.from(new Uint8Array(macBuffer))
     .map(b => b.toString(16).padStart(2, '0')).join('');
 
-  // Constant-time comparison across all v1 signatures
-  return v1Parts.some(v1 => v1.slice(3) === macHex);
+  return v1Parts.some(v1 => timingSafeEqualHex(v1.slice(3), macHex));
 }
 
 /**
- * Handle Stripe webhook events.
- * Writes succeeded/failed/refunded payment_intents to cms_donations in D1.
+ * Handle Stripe webhook events (ledger semantics live in donation-ledger.js).
  * Webhook URL to register in Stripe Dashboard:
  *   https://goodflippindesign.com/api/stripe/webhook
  * Required secret (Pages env): STRIPE_WEBHOOK_SECRET
@@ -1865,62 +1875,21 @@ async function handleStripeWebhook(request, env) {
     });
   }
 
-  // Idempotent schema bootstrap
-  if (env.DB) {
-    await env.DB.prepare(`
-      CREATE TABLE IF NOT EXISTS cms_donations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        stripe_payment_id TEXT UNIQUE,
-        amount_cents INTEGER NOT NULL,
-        currency TEXT DEFAULT 'usd',
-        project TEXT,
-        donor_email TEXT,
-        donor_name TEXT,
-        status TEXT DEFAULT 'succeeded',
-        recurring INTEGER DEFAULT 0,
-        created_at TEXT DEFAULT (datetime('now'))
-      )
-    `).run().catch(() => {});
+  if (!env.DB) {
+    console.error('[stripe-webhook] D1 binding missing');
+    return new Response(JSON.stringify({ error: 'Ledger unavailable' }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
+    });
   }
 
-  // Respond 200 quickly — Stripe requires a response within 30s
-  // D1 writes happen synchronously before response since we need to confirm receipt
-  const eventType = event.type;
-  const obj = event.data?.object;
-
   try {
-    if (eventType === 'payment_intent.succeeded' && obj && env.DB) {
-      const metadata = obj.metadata || {};
-      await env.DB.prepare(`
-        INSERT OR IGNORE INTO cms_donations
-          (stripe_payment_id, amount_cents, currency, project, donor_email, donor_name, status, recurring)
-        VALUES (?, ?, ?, ?, ?, ?, 'succeeded', ?)
-      `).bind(
-        obj.id,
-        obj.amount,
-        obj.currency || 'usd',
-        metadata.project || 'Good Flippin Design',
-        obj.receipt_email || null,
-        null,
-        metadata.recurring === 'true' ? 1 : 0,
-      ).run();
-
-    } else if (eventType === 'payment_intent.payment_failed' && obj && env.DB) {
-      await env.DB.prepare(
-        `UPDATE cms_donations SET status = 'failed' WHERE stripe_payment_id = ?`
-      ).bind(obj.id).run();
-
-    } else if (eventType === 'charge.refunded' && obj && env.DB) {
-      const piId = obj.payment_intent;
-      if (piId) {
-        await env.DB.prepare(
-          `UPDATE cms_donations SET status = 'refunded' WHERE stripe_payment_id = ?`
-        ).bind(piId).run();
-      }
-    }
+    await applyStripeEvent(env.DB, event);
   } catch (e) {
-    // Log but still return 200 — the signature was valid, retrying won't fix a D1 error
-    console.error('[stripe-webhook] D1 write error:', e.message);
+    // Non-2xx makes Stripe retry; all ledger writes are idempotent.
+    console.error('[stripe-webhook] ledger write failed', { type: event.type, id: event.id, error: e.message });
+    return new Response(JSON.stringify({ error: 'Ledger write failed' }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   return new Response(JSON.stringify({ received: true }), {

@@ -157,16 +157,10 @@ describe('Stripe webhook — payment_intent.succeeded', () => {
 // ─── payment_intent.payment_failed ───────────────────────────────────────────
 
 describe('Stripe webhook — payment_intent.payment_failed', () => {
-  it('returns 200 and marks existing donation as failed', async () => {
-    // Pre-insert the donation (simulating an earlier succeeded then failed)
-    await env.DB.prepare(
-      `INSERT INTO cms_donations (stripe_payment_id, amount_cents, currency, status, created_at)
-       VALUES ('pi_failed_abc', 750, 'usd', 'succeeded', datetime('now'))`
-    ).run();
-
+  it('returns 200 and records a failed attempt that never succeeded', async () => {
     const event = {
       type: 'payment_intent.payment_failed',
-      data: { object: { id: 'pi_failed_abc' } },
+      data: { object: { id: 'pi_failed_abc', amount: 750, currency: 'usd' } },
     };
     const body = JSON.stringify(event);
     const { sig } = await signStripePayload(body, env.STRIPE_WEBHOOK_SECRET);
@@ -213,7 +207,7 @@ describe('Stripe webhook — charge.refunded', () => {
 
     const event = {
       type: 'charge.refunded',
-      data: { object: { payment_intent: 'pi_refund_xyz' } },
+      data: { object: { payment_intent: 'pi_refund_xyz', amount: 2000, amount_refunded: 2000, refunded: true, currency: 'usd' } },
     };
     const body = JSON.stringify(event);
     const { sig } = await signStripePayload(body, env.STRIPE_WEBHOOK_SECRET);

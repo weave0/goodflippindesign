@@ -6,6 +6,7 @@ export default defineConfig({
     cloudflareTest({
       // workers/.dev.vars provides test-only secrets (STRIPE_WEBHOOK_SECRET, etc.)
       wrangler: { configPath: './workers/wrangler.toml' },
+      miniflare: { bindings: { STRIPE_WEBHOOK_SECRET: 'whsec_test_only_not_a_real_secret' } },
     }),
   ],
   test: {
