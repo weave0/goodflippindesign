@@ -245,3 +245,10 @@ Honest limits: the observations (degraded and healthy) are synthetic and the GFD
 production; FWOMPS's diagnosis was `not_reproduced` because AIAIMate's source at the pinned revision does declare its health
 contract (production is healthy) — the synthetic degradation was not corroborated, which is itself the correct diagnosis.
 Production has not been provisioned with the shared keys/worker token, so no production round trip has happened.
+
+### FWOMPS provenance (2026-10-01)
+
+The first real-host run (`…real-host-2026-10-01.json`) used the host checkout's unmerged branch `agent/mc-fw-001h-cli-contract@cebd846`.
+That delta over merged FWOMPS main `96832d1` is open FWOMPS PR #29 (`status` as a pure read, `recover`, CLI-contract doc; `investigate` differs only
+in the already-admitted refusal payload). It is not needed for acceptance: the same real-host specimen from a clean worktree of merged
+main `96832d1` passed 59/59 with 24 hostile cases (`docs/evidence/mc-confluence-2-real-host-fwomps-main-2026-10-01.json`). Production evidence must record a merged FWOMPS revision.
