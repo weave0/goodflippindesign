@@ -133,6 +133,20 @@ async function recordHealthObservationOnce(store, marker, {
     }),
     severity: marker.findingKind === 'latency_warning' ? 'medium' : 'high',
   };
+  return settleObservation(store, observation, {
+    status,
+    checkedAt,
+    actor: 'health-sweep',
+    detail: { githubIssue: issueNumber, findingKind: marker.findingKind || null },
+  });
+}
+
+/**
+ * The one place an observation (degraded or healthy) is weighed against its canonical work item and stored.
+ * Producers differ only in how they build `observation`; the lifecycle decision is shared.
+ */
+export async function settleObservation(store, observation, { status, checkedAt, actor, detail: baseDetail = {} }) {
+  const identity = { producer: observation.producer, propertyId: observation.propertyId, findingKey: observation.findingKey };
   const existing = await store.getByIdentity(identity);
   let next;
   let reason;
@@ -170,14 +184,53 @@ async function recordHealthObservationOnce(store, marker, {
     from: existing?.state || null,
     to: next.state,
     reason,
-    actor: 'health-sweep',
+    actor,
     detail: {
-      githubIssue: issueNumber,
+      ...baseDetail,
       status,
-      findingKind: marker.findingKind || null,
       ...(verdict ? { reverification: verdict } : {}),
     },
   });
+}
+
+/**
+ * The production canary's observation boundary (MC-CONFLUENCE-002). One fixed identity -- producer `mc-canary`,
+ * property aiaimate.com, one finding key -- so the canary can never create or touch any other work item. It is
+ * operator-asserted and labelled as such; everything downstream of it is the ordinary governed lifecycle.
+ */
+export const CANARY_PRODUCER = 'mc-canary';
+export const CANARY_PROPERTY_ID = 'aiaimate.com';
+export const CANARY_FINDING_KEY = 'canary:mc-confluence-002:aiaimate-read-only-investigation';
+
+export async function recordCanaryObservation(store, { status, checkedAt }) {
+  if (status !== 'degraded' && status !== 'pass') {
+    throw new WorkItemError('malformed_observation', 'canary status must be degraded or pass', 400);
+  }
+  const binding = resolveEstateBinding(CANARY_PROPERTY_ID);
+  const gaps = qualificationGaps(binding);
+  if (gaps.length) {
+    throw new WorkItemError('qualification_unavailable', `canary property is not dispatch-ready: ${gaps.join(', ')}`, 409);
+  }
+  const observation = {
+    producer: CANARY_PRODUCER,
+    propertyId: binding.propertyId,
+    findingKey: CANARY_FINDING_KEY,
+    observedAt: checkedAt,
+    evidenceDigest: await digestOf({ finding_key: CANARY_FINDING_KEY, observed_at: checkedAt, status }),
+    severity: 'low',
+  };
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await settleObservation(store, observation, {
+        status,
+        checkedAt,
+        actor: 'operator-canary',
+        detail: { findingKind: 'canary', operatorAsserted: true },
+      });
+    } catch (error) {
+      if (error?.code !== 'version_conflict' || attempt >= HEALTH_CONFLICT_RETRIES) throw error;
+    }
+  }
 }
 
 /**

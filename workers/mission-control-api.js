@@ -7,7 +7,7 @@
  */
 
 import { projectMissionControlOperations } from './lib/mission-control-operations.js';
-import { ensureOutboxSchema } from './lib/mission-control-outbox.js';
+import { claimDispatch, ensureOutboxSchema, planEffect } from './lib/mission-control-outbox.js';
 import { resolveLeaseAuthority } from './lib/mission-control-lease-authority.js';
 import {
   LEASE_PURPOSE,
@@ -20,6 +20,8 @@ import {
 } from './fwomps-investigation-adapter.js';
 import { resolveEstateBinding } from './estate-bindings.js';
 import {
+  CANARY_PROPERTY_ID,
+  recordCanaryObservation,
   WorkItemError,
   abandonExpiredInvestigation,
   acceptInvestigationResult,
@@ -407,6 +409,55 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
         leases: await rows('SELECT * FROM mc_work_item_leases'),
       });
       return jsonResponse({ operations });
+    }
+
+    if (parts[2] === 'canary-observations' && parts.length === 3 && request.method === 'POST') {
+      // Kill-switched: inert unless the operator deliberately sets MISSION_CONTROL_CANARY to the one canary property.
+      if (env.MISSION_CONTROL_CANARY !== CANARY_PROPERTY_ID) {
+        throw new WorkItemError('canary_disabled', 'The Mission Control canary is not enabled', 404);
+      }
+      const store = await workItemStore(env);
+      const body = await readJson(request);
+      const saved = await recordCanaryObservation(store, { status: body.status, checkedAt: nowIso() });
+      return jsonResponse({ workItem: saved });
+    }
+
+    if (parts[2] === 'work-items' && parts.length === 5 && parts[4] === 'dispatch' && request.method === 'POST') {
+      // Durable intent, then one claim. This authorizes nothing by itself: the lease route still demands this exact
+      // intent, the current claim and the signed contract digest, and the dispatch grants no repair or deploy authority.
+      const store = await workItemStore(env);
+      const item = await store.get(decodeURIComponent(parts[3]));
+      if (!item) throw new WorkItemError('not_found', 'Work item was not found', 404);
+      if (item.state !== 'INVESTIGATION_READY' || !item.investigation?.digest) {
+        throw new WorkItemError('illegal_transition', 'Only an investigation-ready item with a signed contract can be dispatched', 409);
+      }
+      await ensureOutboxSchema(env.DB);
+      const planned = await planEffect(env.DB, {
+        workItemId: item.workItemId,
+        requestedLifecycleVersion: item.lifecycleVersion,
+        effectType: 'investigation_dispatch',
+        target: `fwomps:${item.propertyId}`,
+        candidateDigest: item.investigation.digest,
+        payload: {
+          summary: 'dispatch one bounded read-only investigation',
+          propertyId: item.propertyId,
+          findingKey: item.findingKey,
+          profileId: item.investigationProfile,
+        },
+      });
+      const claim = await claimDispatch(env.DB, planned.effect.effectId);
+      if (!claim.permit) {
+        throw new WorkItemError('dispatch_not_claimable', `dispatch intent cannot be claimed now (${claim.reason || 'unavailable'})`, 409);
+      }
+      return jsonResponse({
+        dispatch: {
+          effectId: planned.effect.effectId,
+          attempt: claim.permit.attempt,
+          created: planned.created,
+          contractDigest: item.investigation.digest,
+          requestId: item.investigation.requestId,
+        },
+      });
     }
 
     if (parts[2] === 'work-items' && parts.length === 3 && request.method === 'GET') {
