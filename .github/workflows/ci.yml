@@ -62,6 +62,9 @@ jobs:
       - name: Estate property readiness report tests
         run: node --no-warnings tests/estate-property-readiness-report.test.mjs
 
+      - name: Estate cohort plan tests
+        run: node --no-warnings tests/estate-cohort-plan.test.mjs
+
       - name: Validate TI work-sync live authority contract
         run: |
           node - <<'NODE'
