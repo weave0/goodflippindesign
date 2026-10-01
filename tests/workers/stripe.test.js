@@ -72,7 +72,7 @@ describe('Stripe webhook — payment_intent.succeeded', () => {
           id: 'pi_test_123',
           amount: 1000,
           currency: 'usd',
-          metadata: { project: 'culturesherpa', recurring: 'false' },
+          metadata: { project: 'culturesherpa', recurring: 'false', source: 'gfd-donate-page' },
           receipt_email: 'donor@test.com',
         },
       },
@@ -108,7 +108,7 @@ describe('Stripe webhook — payment_intent.succeeded', () => {
           id: 'pi_idempotent_456',
           amount: 500,
           currency: 'usd',
-          metadata: {},
+          metadata: { source: 'gfd-donate-page' },
         },
       },
     };
@@ -160,7 +160,7 @@ describe('Stripe webhook — payment_intent.payment_failed', () => {
   it('returns 200 and records a failed attempt that never succeeded', async () => {
     const event = {
       type: 'payment_intent.payment_failed',
-      data: { object: { id: 'pi_failed_abc', amount: 750, currency: 'usd' } },
+      data: { object: { id: 'pi_failed_abc', amount: 750, currency: 'usd', metadata: { source: 'gfd-donate-page' } } },
     };
     const body = JSON.stringify(event);
     const { sig } = await signStripePayload(body, env.STRIPE_WEBHOOK_SECRET);

@@ -22,7 +22,7 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  for (const t of ['cms_donations', 'cms_donation_links', 'stripe_webhook_events']) {
+  for (const t of ['cms_donations', 'cms_donation_links', 'stripe_webhook_events', 'stripe_unclaimed_payments']) {
     await env.DB.prepare(`DELETE FROM ${t}`).run().catch(() => {});
   }
 });
@@ -42,10 +42,10 @@ describe('signature hardening', () => {
 describe('one-time Checkout donation', () => {
   const session = {
     id: 'cs_one', mode: 'payment', payment_intent: 'pi_one', customer: null,
-    metadata: { project: 'CultureSherpa' },
+    metadata: { project: 'CultureSherpa', source: 'gfd-donate-page' },
     customer_details: { email: 'donor@example.com', name: 'Dee Donor' },
   };
-  const pi = { id: 'pi_one', amount: 2500, amount_received: 2500, currency: 'usd', metadata: { project: 'CultureSherpa', recurring: 'false' } };
+  const pi = { id: 'pi_one', amount: 2500, amount_received: 2500, currency: 'usd', metadata: { project: 'CultureSherpa', recurring: 'false', source: 'gfd-donate-page' } };
 
   it('checkout first, then payment: one fact with identity + project', async () => {
     expect((await send('checkout.session.completed', session)).status).toBe(200);
@@ -71,7 +71,7 @@ describe('one-time Checkout donation', () => {
 describe('subscription donations', () => {
   const session = {
     id: 'cs_sub', mode: 'subscription', payment_intent: null, customer: 'cus_s', subscription: 'sub_1', invoice: 'in_1',
-    metadata: { project: 'AI Aimate' }, customer_details: { email: 'patron@example.com', name: 'Pat Ron' },
+    metadata: { project: 'AI Aimate', source: 'gfd-donate-page' }, customer_details: { email: 'patron@example.com', name: 'Pat Ron' },
   };
 
   it('first invoice (pre-2025 payload shape): checkout + invoice.paid + PI = one recurring fact', async () => {
@@ -89,7 +89,7 @@ describe('subscription donations', () => {
     await send('payment_intent.succeeded', { id: 'pi_s2', amount: 500, amount_received: 500, currency: 'usd', customer: 'cus_s' });
     await send('invoice.paid', {
       id: 'in_2', customer: 'cus_s', customer_email: 'patron@example.com',
-      parent: { subscription_details: { subscription: 'sub_1', metadata: { project: 'AI Aimate' } } },
+      parent: { subscription_details: { subscription: 'sub_1', metadata: { project: 'AI Aimate', source: 'gfd-donate-page' } } },
       payments: { data: [{ payment: { type: 'payment_intent', payment_intent: 'pi_s2' } }] },
     });
     const r = await rows();
@@ -104,7 +104,7 @@ describe('subscription donations', () => {
 });
 
 describe('refunds, failures, duplicates', () => {
-  const pi = { id: 'pi_r', amount: 4000, amount_received: 4000, currency: 'usd' };
+  const pi = { id: 'pi_r', amount: 4000, amount_received: 4000, currency: 'usd', metadata: { source: 'gfd-donate-page' } };
 
   it('partial then full refund tracks refunded cents and final status', async () => {
     await send('payment_intent.succeeded', pi);
@@ -123,8 +123,9 @@ describe('refunds, failures, duplicates', () => {
   });
 
   it('failed attempt later succeeding on the same PI ends as one succeeded fact', async () => {
-    await send('payment_intent.payment_failed', { id: 'pi_f', amount: 1500, currency: 'usd' });
-    await send('payment_intent.succeeded', { id: 'pi_f', amount: 1500, amount_received: 1500, currency: 'usd' });
+    const gfd = { source: 'gfd-donate-page' };
+    await send('payment_intent.payment_failed', { id: 'pi_f', amount: 1500, currency: 'usd', metadata: gfd });
+    await send('payment_intent.succeeded', { id: 'pi_f', amount: 1500, amount_received: 1500, currency: 'usd', metadata: gfd });
     const r = await rows();
     expect(r).toHaveLength(1);
     expect(r[0].status).toBe('succeeded');
@@ -138,5 +139,47 @@ describe('refunds, failures, duplicates', () => {
     expect(await rows()).toHaveLength(1);
     const ev = await env.DB.prepare("SELECT COUNT(*) n FROM stripe_webhook_events WHERE event_id='evt_dup'").first();
     expect(ev.n).toBe(1);
+  });
+});
+
+describe('shared Stripe account ownership boundary', () => {
+  const links = async () => (await env.DB.prepare('SELECT COUNT(*) n FROM cms_donation_links').first()).n;
+
+  it('ignores another app\'s checkout, payment, invoice and refund (no facts, no links)', async () => {
+    await send('checkout.session.completed', {
+      id: 'cs_aia', mode: 'payment', payment_intent: 'pi_aia', metadata: { type: 'donation', amount_usd: '5' },
+      customer_details: { email: 'someone@example.com', name: 'Some One' },
+    });
+    await send('payment_intent.succeeded', { id: 'pi_aia', amount: 500, amount_received: 500, currency: 'usd' });
+    await send('invoice.paid', { id: 'in_aia', customer: 'cus_aia', parent: { subscription_details: { subscription: 'sub_aia', metadata: { type: 'subscription', tier: 'pro' } } } });
+    await send('charge.refunded', { payment_intent: 'pi_aia', amount: 500, amount_refunded: 500, refunded: true, currency: 'usd' });
+    expect(await rows()).toHaveLength(0);
+    expect(await links()).toBe(0);
+  });
+
+  it('subscription payment arriving before its GFD checkout (basil shape) is claimed into one recurring fact', async () => {
+    await send('payment_intent.succeeded', { id: 'pi_b1', amount: 100, amount_received: 100, currency: 'usd', customer: 'cus_b' });
+    expect(await rows()).toHaveLength(0);
+    await send('checkout.session.completed', {
+      id: 'cs_b', mode: 'subscription', customer: 'cus_b', subscription: 'sub_b', invoice: 'in_b1',
+      metadata: { project: 'Good Flippin Design', source: 'gfd-donate-page', type: 'monthly' },
+      customer_details: { email: 'm@example.com', name: 'Monthly Donor' },
+    });
+    await send('invoice.paid', { id: 'in_b1', customer: 'cus_b', parent: { subscription_details: { subscription: 'sub_b', metadata: { source: 'gfd-donate-page' } } } });
+    const r = await rows();
+    expect(r).toHaveLength(1);
+    expect(r[0]).toMatchObject({ stripe_payment_id: 'pi_b1', amount_cents: 100, recurring: 1, stripe_subscription_id: 'sub_b',
+      stripe_customer_id: 'cus_b', donor_email: 'm@example.com', project: 'Good Flippin Design' });
+  });
+
+  it('refund delivered before an unattributed payment is claimed carries over', async () => {
+    await send('charge.refunded', { payment_intent: 'pi_c', amount: 100, amount_refunded: 100, refunded: true, currency: 'usd', customer: 'cus_c' });
+    await send('payment_intent.succeeded', { id: 'pi_c', amount: 100, amount_received: 100, currency: 'usd', customer: 'cus_c' });
+    expect(await rows()).toHaveLength(0);
+    await send('checkout.session.completed', { id: 'cs_c', mode: 'subscription', customer: 'cus_c', subscription: 'sub_c', metadata: { source: 'gfd-donate-page' } });
+    const r = await rows();
+    expect(r).toHaveLength(1);
+    expect(r[0]).toMatchObject({ stripe_payment_id: 'pi_c', status: 'refunded', amount_refunded_cents: 100, recurring: 1 });
+    expect((await env.DB.prepare('SELECT COUNT(*) n FROM stripe_unclaimed_payments').first()).n).toBe(0);
   });
 });
