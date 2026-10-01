@@ -14,7 +14,7 @@ jobs:
 
             - name: Delete and Recreate Project with GitHub Integration
               env:
-                  CF_API_TOKEN: ${{ secrets.CF_FULL_ITHINK }}
+                  CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   CF_ACCOUNT_ID: 3253d907ea85a18eb442283d7308b193
                   CF_PROJECT_NAME: goodflippindesign
                   GITHUB_REPO: weave0/goodflippindesign
