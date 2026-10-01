@@ -48,6 +48,8 @@ const SEVERITY_RANK = new Map([
 ]);
 
 const TERMINAL = new Set(['RESOLVED', 'DISMISSED', 'SUPERSEDED']);
+const REVERIFICATION_WAIT = new Set(['DIAGNOSED', 'DEPLOYED']);
+const REVERIFICATION_STATES = new Set(['DIAGNOSED', 'DEPLOYED', 'REVERIFYING']);
 const BINDING_FIELDS = [
   'repository',
   'investigationProfile',
@@ -90,6 +92,7 @@ const NEXT_ACTION = [
   ['effect_planned_too_long', 'A planned effect has had no attempt inside the planning window.'],
   ['stale_evidence', 'The last observation is older than the evidence window.'],
   ['unchanged', 'No lifecycle write has been recorded inside the unchanged window.'],
+  ['awaiting_reverification', 'Diagnosed. It resolves only when a production observation strictly newer than the diagnosis passes its predicate.'],
   ['lifecycle_waiting', 'No durable automation is recorded for this state. Nothing here will execute it.'],
 ];
 
@@ -224,6 +227,8 @@ function normalizeWorkItem(row) {
       resumeState: text(pick(row, 'resumeState', 'resume_state')),
       severity: text(pick(row, 'severity', 'severity')),
       recurrenceCount: recurrenceCount == null ? null : recurrenceCount,
+      occurrenceCount: Number.isInteger(pick(row, 'occurrenceCount', 'occurrence_count')) ? pick(row, 'occurrenceCount', 'occurrence_count') : null,
+      diagnosisResultDigest: text(row.diagnosis?.resultDigest ?? row.diagnosis_result_digest),
       repository: text(pick(row, 'repository', 'repository')),
       investigationProfile: text(pick(row, 'investigationProfile', 'investigation_profile')),
       verificationProfile: text(pick(row, 'verificationProfile', 'verification_profile')),
@@ -275,6 +280,26 @@ function normalizeEffect(row) {
   };
 }
 
+function eventVerdict(row) {
+  const raw = row.detail ?? row.detail_json;
+  let detail = raw;
+  if (typeof raw === 'string') {
+    try {
+      detail = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+  const verdict = detail && typeof detail === 'object' ? detail.reverification : null;
+  if (!verdict || typeof verdict !== 'object' || !text(verdict.result)) return null;
+  return {
+    result: text(verdict.result),
+    reason: text(verdict.reason),
+    observedAt: text(verdict.observedAt),
+    evidenceDigest: text(verdict.evidenceDigest),
+  };
+}
+
 function normalizeEvent(row) {
   if (!row || typeof row !== 'object' || Array.isArray(row)) return { error: 'malformed' };
   const eventId = text(pick(row, 'eventId', 'event_id'));
@@ -291,6 +316,7 @@ function normalizeEvent(row) {
       toState: text(pick(row, 'toState', 'to_state')),
       occurredAt,
       evidenceDigest: text(pick(row, 'evidenceDigest', 'evidence_digest')),
+      verdict: eventVerdict(row),
     },
   };
 }
@@ -499,7 +525,10 @@ function classifyItem(item, effects, leases, nowMs) {
   }
   const unchangedAge = item.updatedAt ? nowMs - item.updatedAt.millis : null;
   if (!TERMINAL.has(item.state) && unchangedAge != null && unchangedAge >= UNCHANGED_AFTER_MS) reasons.push('unchanged');
-  const automation = active.length > 0 || planned.length > 0 || item.state === 'REVERIFYING';
+  // A diagnosed or deployed item waits for the governed sweep to bring strictly newer production evidence.
+  const awaitingReverification = REVERIFICATION_WAIT.has(item.state);
+  if (awaitingReverification) reasons.push('awaiting_reverification');
+  const automation = active.length > 0 || planned.length > 0 || item.state === 'REVERIFYING' || awaitingReverification;
   if (!TERMINAL.has(item.state) && !automation && !reasons.some((reason) => HUMAN_REASONS.has(reason) || STALE_REASONS.has(reason))) {
     reasons.push('lifecycle_waiting');
   }
@@ -523,7 +552,45 @@ function maxAttempt(effects) {
   return known.length ? Math.max(...known) : null;
 }
 
-function cardFor(item, view, nowMs) {
+/** The operator-facing lifecycle facts of one item, derived only from the item and its journaled verdicts. */
+function lifecycleFor(item, view, events, nowMs) {
+  const own = events
+    .filter((event) => event.workItemId === item.workItemId)
+    .sort((left, right) => (left.occurredAt?.millis ?? 0) - (right.occurredAt?.millis ?? 0) || left.eventId.localeCompare(right.eventId));
+  const cycleStart = own.map((event) => event.toState).lastIndexOf('RECURRENT');
+  const verdicts = (cycleStart >= 0 ? own.slice(cycleStart) : own).map((event) => event.verdict).filter(Boolean);
+  const accepted = verdicts.filter((verdict) => verdict.result === 'resolved' || verdict.result === 'still_failing');
+  const reverification = accepted.length ? accepted[accepted.length - 1] : null;
+  const lastVerdict = verdicts.length ? verdicts[verdicts.length - 1] : null;
+  const required = REVERIFICATION_STATES.has(item.state);
+  let blocker = null;
+  if (item.state === 'INVESTIGATING') {
+    blocker = view.active.length ? 'An investigation holds a live lease; reverification waits for its diagnosis.' : 'The investigation lease is not live.';
+  } else if (required) {
+    blocker = lastVerdict && !['resolved', 'still_failing'].includes(lastVerdict.result)
+      ? `Last healthy observation was not accepted: ${lastVerdict.result}${lastVerdict.reason ? ` (${lastVerdict.reason})` : ''}.`
+      : (reverification?.result === 'still_failing'
+        ? 'The finding is still observed after diagnosis.'
+        : 'Waiting for a healthy production observation newer than the diagnosis.');
+  } else if (!TERMINAL.has(item.state) && view.reasons.length) {
+    blocker = nextAction(view.reasons);
+  }
+  return {
+    occurrenceCount: item.occurrenceCount,
+    observationAgeMs: item.lastSeen ? nowMs - item.lastSeen.millis : null,
+    investigationReady: item.state === 'INVESTIGATION_READY' || item.state === 'INVESTIGATING',
+    diagnosisAvailable: Boolean(item.diagnosisResultDigest),
+    reverificationRequired: required,
+    reverification: reverification
+      ? { result: reverification.result, observedAt: reverification.observedAt, evidenceDigest: reverification.evidenceDigest }
+      : null,
+    lastVerdict: lastVerdict ? { result: lastVerdict.result, reason: lastVerdict.reason } : null,
+    recurrenceCount: item.recurrenceCount,
+    blocker,
+  };
+}
+
+function cardFor(item, view, nowMs, events = []) {
   const attempts = maxAttempt([...view.planned, ...view.failed, ...view.otherEffects]);
   const lease = view.active[0] || (view.reasons.includes('expired_lease') ? item.activeLease : null);
   return {
@@ -553,6 +620,7 @@ function cardFor(item, view, nowMs) {
       observedAt: item.lastSeen?.text ?? null,
     },
     nextAction: nextAction(view.reasons),
+    lifecycle: lifecycleFor(item, view, events, nowMs),
   };
 }
 
@@ -762,7 +830,7 @@ export function projectMissionControlOperations(input) {
   const cards = items.map((item) => {
     const view = classifyItem(item, effects, leases, now.millis);
     view.otherEffects = effects.filter((effect) => effect.workItemId === item.workItemId && effect.status !== 'PLANNED' && effect.status !== 'FAILED');
-    return { item, view, card: cardFor(item, view, now.millis) };
+    return { item, view, card: cardFor(item, view, now.millis, events) };
   });
 
   let queues = emptyQueues();
@@ -921,6 +989,15 @@ export function projectMissionControlOperations(input) {
       },
     },
     queues,
+    // Every accepted item's lifecycle facts, including terminal ones that sit in no queue.
+    items: workSource.supplied
+      ? cards.map(({ item, card }) => ({
+        workItemId: item.workItemId,
+        propertyId: item.propertyId,
+        state: item.state,
+        lifecycle: card.lifecycle,
+      })).sort((left, right) => left.workItemId.localeCompare(right.workItemId))
+      : null,
     metrics: {
       workItemsByLifecycle: workSource.supplied
         ? { available: true, counts: lifecycle, reason: null }
