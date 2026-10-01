@@ -5,6 +5,11 @@
  * (cms_donations.stripe_payment_id UNIQUE). Only payment_intent.* and charge.refunded
  * write facts. checkout.session.* and invoice.* only write linkage/identity context
  * (cms_donation_links) that is merged onto facts regardless of delivery order.
+ *
+ * Ownership (fail closed): the Stripe account is shared with other apps, so a payment only
+ * becomes a GFD fact when its metadata.source starts with "gfd-" or a GFD-owned link
+ * (pi:/in:/cus:) reaches it. Unattributed payment state is parked without PII in
+ * stripe_unclaimed_payments and promoted if a GFD link arrives later.
  */
 
 const STATUS_RANK_SQL = (col) =>
@@ -81,6 +86,23 @@ async function migrate(db) {
         created_at TEXT DEFAULT (datetime('now'))
       )
     `),
+    db.prepare(`
+      CREATE TABLE IF NOT EXISTS stripe_unclaimed_payments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        payment_intent TEXT NOT NULL UNIQUE,
+        amount_cents INTEGER DEFAULT 0,
+        currency TEXT,
+        status TEXT,
+        amount_refunded_cents INTEGER DEFAULT 0,
+        customer_id TEXT,
+        invoice_id TEXT,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      )
+    `),
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_unclaimed_customer ON stripe_unclaimed_payments(customer_id)'),
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_unclaimed_invoice ON stripe_unclaimed_payments(invoice_id)'),
+    db.prepare("DELETE FROM stripe_unclaimed_payments WHERE updated_at < datetime('now', '-35 days')"),
   ]);
 }
 
@@ -103,15 +125,21 @@ function invoicePaymentIntents(inv) {
   return [...ids];
 }
 
-function invoiceProject(inv) {
+function invoiceMetadata(inv) {
   return (
-    inv.parent?.subscription_details?.metadata?.project ||
-    inv.subscription_details?.metadata?.project ||
-    inv.metadata?.project ||
-    inv.lines?.data?.find((l) => l?.metadata?.project)?.metadata?.project ||
-    null
+    inv.parent?.subscription_details?.metadata ||
+    inv.subscription_details?.metadata ||
+    inv.lines?.data?.find((l) => l?.metadata?.source || l?.metadata?.project)?.metadata ||
+    inv.metadata ||
+    {}
   );
 }
+
+function invoiceProject(inv) {
+  return invoiceMetadata(inv).project || null;
+}
+
+const isGfdSource = (md) => typeof md?.source === 'string' && md.source.startsWith('gfd-');
 
 // ── Writes ───────────────────────────────────────────────────────────────────
 
@@ -256,6 +284,80 @@ function mergeInto(merged, link) {
   }
 }
 
+// ── Ownership ────────────────────────────────────────────────────────────────
+
+const exists = async (db, sql, ...args) => Boolean(await db.prepare(sql).bind(...args).first());
+
+async function hasLink(db, keys) {
+  for (const key of keys) {
+    if (key && await exists(db, 'SELECT 1 AS x FROM cms_donation_links WHERE link_key = ?', key)) return true;
+  }
+  return false;
+}
+
+async function isOwnedPayment(db, { paymentIntent, customer, invoice, metadata }) {
+  if (isGfdSource(metadata)) return true;
+  if (await exists(db, 'SELECT 1 AS x FROM cms_donations WHERE stripe_payment_id = ?', paymentIntent)) return true;
+  return hasLink(db, [`pi:${paymentIntent}`, invoice && `in:${invoice}`, customer && `cus:${customer}`]);
+}
+
+async function parkUnclaimed(db, f) {
+  await db.prepare(`
+    INSERT INTO stripe_unclaimed_payments
+      (payment_intent, amount_cents, currency, status, amount_refunded_cents, customer_id, invoice_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(payment_intent) DO UPDATE SET
+      amount_cents = CASE WHEN excluded.amount_cents > 0 THEN excluded.amount_cents ELSE stripe_unclaimed_payments.amount_cents END,
+      currency = COALESCE(stripe_unclaimed_payments.currency, excluded.currency),
+      status = CASE WHEN ${STATUS_RANK_SQL('excluded.status')} > ${STATUS_RANK_SQL('stripe_unclaimed_payments.status')}
+                    THEN excluded.status ELSE stripe_unclaimed_payments.status END,
+      amount_refunded_cents = MAX(stripe_unclaimed_payments.amount_refunded_cents, excluded.amount_refunded_cents),
+      customer_id = COALESCE(stripe_unclaimed_payments.customer_id, excluded.customer_id),
+      invoice_id = COALESCE(stripe_unclaimed_payments.invoice_id, excluded.invoice_id),
+      updated_at = datetime('now')
+  `).bind(
+    f.paymentIntent, f.amountCents || 0, (f.currency || 'usd').toLowerCase(), f.status,
+    f.refundedCents || 0, f.customer || null, f.invoice || null,
+  ).run();
+}
+
+async function recordPayment(db, f, metadata) {
+  if (await isOwnedPayment(db, { ...f, metadata })) {
+    await upsertFact(db, f);
+    await claimUnclaimed(db, 'SELECT * FROM stripe_unclaimed_payments WHERE payment_intent = ?', f.paymentIntent);
+  } else {
+    await parkUnclaimed(db, f);
+  }
+}
+
+/** Promote parked payment state into facts once a GFD link proves ownership. */
+async function claimUnclaimed(db, sql, id) {
+  const { results } = await db.prepare(sql).bind(id).all();
+  for (const u of results || []) {
+    await upsertFact(db, {
+      paymentIntent: u.payment_intent,
+      amountCents: u.amount_cents,
+      currency: u.currency,
+      status: u.status,
+      refundedCents: u.amount_refunded_cents,
+      customer: u.customer_id,
+      invoice: u.invoice_id,
+      source: 'payment_intent',
+    });
+    await db.prepare('DELETE FROM stripe_unclaimed_payments WHERE payment_intent = ?').bind(u.payment_intent).run();
+  }
+}
+
+async function claimByLinkKeys(db, keys) {
+  for (const key of keys) {
+    const i = key.indexOf(':');
+    const [kind, id] = [key.slice(0, i), key.slice(i + 1)];
+    if (kind === 'pi') await claimUnclaimed(db, 'SELECT * FROM stripe_unclaimed_payments WHERE payment_intent = ?', id);
+    if (kind === 'in') await claimUnclaimed(db, 'SELECT * FROM stripe_unclaimed_payments WHERE invoice_id = ?', id);
+    if (kind === 'cus') await claimUnclaimed(db, 'SELECT * FROM stripe_unclaimed_payments WHERE customer_id = ?', id);
+  }
+}
+
 // ── Event dispatch ───────────────────────────────────────────────────────────
 
 /**
@@ -290,7 +392,7 @@ async function dispatch(db, type, obj) {
       if (!obj.id) return;
       const md = obj.metadata || {};
       const succeeded = type === 'payment_intent.succeeded';
-      await upsertFact(db, {
+      await recordPayment(db, {
         paymentIntent: obj.id,
         amountCents: succeeded ? (obj.amount_received || obj.amount) : obj.amount,
         currency: obj.currency,
@@ -301,14 +403,14 @@ async function dispatch(db, type, obj) {
         customer: idOf(obj.customer),
         invoice: idOf(obj.invoice),
         source: 'payment_intent',
-      });
+      }, md);
       return;
     }
 
     case 'charge.refunded': {
       const pi = idOf(obj.payment_intent);
       if (!pi) return;
-      await upsertFact(db, {
+      await recordPayment(db, {
         paymentIntent: pi,
         amountCents: obj.amount,
         currency: obj.currency,
@@ -319,12 +421,13 @@ async function dispatch(db, type, obj) {
         customer: idOf(obj.customer),
         invoice: idOf(obj.invoice),
         source: 'charge',
-      });
+      }, obj.metadata);
       return;
     }
 
     case 'checkout.session.completed':
     case 'checkout.session.async_payment_succeeded': {
+      if (!isGfdSource(obj.metadata)) return;
       const isSub = obj.mode === 'subscription';
       const ctx = {
         project: obj.metadata?.project || null,
@@ -344,6 +447,7 @@ async function dispatch(db, type, obj) {
       // Customer context carries identity always, but recurring only for subscriptions.
       if (ctx.customer) keys.push([`cus:${ctx.customer}`, { ...scoped, recurring: isSub ? true : null }]);
       for (const [key, l] of keys) await upsertLink(db, key, l);
+      await claimByLinkKeys(db, keys.map(([k]) => k));
       await reconcileByLinkKeys(db, keys.map(([k]) => k));
       return;
     }
@@ -352,11 +456,15 @@ async function dispatch(db, type, obj) {
     case 'invoice.payment_succeeded': {
       if (!obj.id) return;
       const subscription = invoiceSubscription(obj);
+      const customer = idOf(obj.customer);
+      const owned = isGfdSource(invoiceMetadata(obj)) ||
+        await hasLink(db, [`in:${obj.id}`, subscription && `sub:${subscription}`, customer && `cus:${customer}`]);
+      if (!owned) return;
       const ctx = {
         project: invoiceProject(obj),
         email: obj.customer_email || null,
         name: obj.customer_name || null,
-        customer: idOf(obj.customer),
+        customer,
         subscription,
         invoice: obj.id,
         recurring: subscription ? true : null,
@@ -371,6 +479,7 @@ async function dispatch(db, type, obj) {
         keys.push(`sub:${subscription}`);
         await upsertLink(db, `sub:${subscription}`, { ...ctx, invoice: null });
       }
+      await claimByLinkKeys(db, keys);
       await reconcileByLinkKeys(db, keys);
       return;
     }

@@ -39,3 +39,19 @@ CREATE TABLE IF NOT EXISTS stripe_webhook_events (
   stripe_created INTEGER,
   created_at TEXT DEFAULT (datetime('now'))
 );
+
+-- Payments on the shared Stripe account not (yet) attributable to GFD; no donor PII.
+CREATE TABLE IF NOT EXISTS stripe_unclaimed_payments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  payment_intent TEXT NOT NULL UNIQUE,
+  amount_cents INTEGER DEFAULT 0,
+  currency TEXT,
+  status TEXT,
+  amount_refunded_cents INTEGER DEFAULT 0,
+  customer_id TEXT,
+  invoice_id TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  updated_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_unclaimed_customer ON stripe_unclaimed_payments(customer_id);
+CREATE INDEX IF NOT EXISTS idx_unclaimed_invoice ON stripe_unclaimed_payments(invoice_id);
