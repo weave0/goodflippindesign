@@ -12,18 +12,30 @@
  * (tests/workers/mission-control-confluence.test.js) is the merge-blocking half. See
  * docs/mission-control-confluence-gate.md.
  *
- * usage: FWOMPS_REPO=<fwomps checkout> node --no-warnings --import ./tests/acceptance/node-json-hook.mjs \
- *          tests/acceptance/mc-confluence-specimen.mjs [--dir <run dir>] [--evidence <out.json>]
+ * Confluence-2 (MC-CONFLUENCE-002) continues past DIAGNOSED on the same item: a diagnosis never resolves;
+ * a strictly newer healthy production observation does; a later degraded one recurs the SAME lineage.
  *
- * Isolation: a throwaway FWOMPS_HOME and workspace clone under the run dir. The operator's real
- * ~/.fwomps is never read or written. The synthetic part is the observation (the degraded probe
- * result is constructed, not read from production); everything after it is the real system.
+ * usage: FWOMPS_REPO=<fwomps checkout> node --no-warnings --import ./tests/acceptance/node-json-hook.mjs \
+ *          tests/acceptance/mc-confluence-specimen.mjs [--real-home [--home <fwomps home>]] [--dir <run dir>] [--evidence <out.json>]
+ *
+ * Two modes:
+ *   default      isolated: a throwaway FWOMPS_HOME and workspace clone under the run dir. The operator's real
+ *                ~/.fwomps is never read or written. Exercises FWOMPS's own `deliver` seam too.
+ *   --real-home  the REAL host registration: the operator's actual FWOMPS home (registered workspace, host
+ *                profile, enrolled keys, sandbox attestation) executes the investigation. Only the two shared
+ *                key secrets are read, in memory, from that home's key store so the throwaway local GFD
+ *                verifies what that host signs; nothing secret is printed or written. The home's delivery
+ *                origin is production, so the persisted envelope (FWOMPS's own signed bytes) is POSTed to the
+ *                local GFD by this script instead of `fwomps deliver`; that substitution is recorded.
+ *
+ * The synthetic part is the observation (the degraded and healthy probe results are constructed, not read
+ * from production); everything after the observation boundary is the real system.
  */
 
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
 import { createServer } from 'node:http';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -35,6 +47,8 @@ if (!FWOMPS_REPO) throw new Error('set FWOMPS_REPO to a FWOMPS checkout');
 const PYTHON = process.env.PYTHON || 'python';
 const AIAIMATE_GIT_URL = process.env.AIAIMATE_GIT_URL || 'https://github.com/weave0/aiaimate.git';
 const arg = (name) => { const i = process.argv.indexOf(name); return i > 0 ? process.argv[i + 1] : null; };
+const REAL_HOME = process.argv.includes('--real-home');
+const REAL_HOME_DIR = resolve(arg('--home') || join(process.env.USERPROFILE || process.env.HOME || '', '.fwomps'));
 const RUN_DIR = resolve(arg('--dir') || join(tmpdir(), `mc-confluence-${Date.now()}`));
 const EVIDENCE_PATH = resolve(arg('--evidence') || join(RUN_DIR, 'evidence.json'));
 mkdirSync(RUN_DIR, { recursive: true });
@@ -45,7 +59,8 @@ const FINDING_KEY = 'health:aiaimate:machine_contract_mismatch';
 const BEARER_ENV = 'GFD_MC_WORKER_TOKEN';
 
 const sha256 = (bytes) => `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
-const evidence = { milestone: 'MC-CONFLUENCE-001', tier: 2, startedAt: new Date().toISOString(), runDir: RUN_DIR, steps: [], checks: [], wire: [], d1: {} };
+const evidence = { milestone: 'MC-CONFLUENCE-002', tier: 2, mode: REAL_HOME ? 'real-host' : 'isolated-host', startedAt: new Date().toISOString(), runDir: RUN_DIR, steps: [], checks: [], hostileCases: [], wire: [], d1: {} };
+const hostileCase = (name, expected, observed, pass) => evidence.hostileCases.push({ name, expected, observed, pass: Boolean(pass) });
 const step = (name, detail = {}) => { evidence.steps.push({ at: new Date().toISOString(), name, ...detail }); console.log(`• ${name}`); };
 const check = (name, pass, detail = null) => { evidence.checks.push({ name, pass: Boolean(pass), ...(detail == null ? {} : { detail }) }); console.log(`  ${pass ? 'PASS' : 'FAIL'}  ${name}`); };
 const sh = (cmd, args, options = {}) => {
@@ -63,15 +78,32 @@ const { planEffect, claimDispatch, recordReceipt, ensureOutboxSchema, loadEffect
 const { keyBytesFromEnv, signResultEnvelope } = await load('workers/fwomps-investigation-adapter.js');
 const { Miniflare } = await import('miniflare');
 
-// --- keys and identities (generated per run) ----------------------------------------------------
-const contractKeyHex = randomBytes(32).toString('hex');
-const workerKeyHex = randomBytes(32).toString('hex');
+// --- keys and identities: generated per run, or (real-home) the host's own enrolled keys --------------
+let contractKeyHex = randomBytes(32).toString('hex');
+let workerKeyHex = randomBytes(32).toString('hex');
 const ids = {
   contractKeyId: `gfd-specimen-${randomBytes(3).toString('hex')}`,
   workerKeyId: `mcwk_${randomBytes(4).toString('hex')}`,
   workerId: 'mcw_specimen_worker',
   workerToken: randomBytes(24).toString('hex'),
 };
+let realHost = null;
+if (REAL_HOME) {
+  const hostConfig = JSON.parse(readFileSync(join(REAL_HOME_DIR, 'config.json'), 'utf8'));
+  const mc = hostConfig.mission_control || {};
+  const binding = mc.properties?.[PROPERTY];
+  if (!mc.enabled || !binding) throw new Error(`the real host at ${REAL_HOME_DIR} has no ${PROPERTY} Mission Control binding; run scripts/fwomps-aiaimate-host-binding.py first`);
+  const contractDir = join(REAL_HOME_DIR, 'mission-control', 'contract-keys');
+  const contractIds = readdirSync(contractDir).filter((name) => name.endsWith('.json')).map((name) => name.slice(0, -5));
+  if (contractIds.length !== 1) throw new Error(`expected exactly one enrolled contract key, found ${contractIds.length}`);
+  const secret = (file) => JSON.parse(readFileSync(file, 'utf8')).secret_hex;
+  ids.contractKeyId = contractIds[0];
+  ids.workerKeyId = mc.worker_key_id;
+  ids.workerId = mc.worker_id;
+  contractKeyHex = secret(join(contractDir, `${ids.contractKeyId}.json`));
+  workerKeyHex = secret(join(REAL_HOME_DIR, 'mission-control', 'worker-keys', `${ids.workerKeyId}.json`));
+  realHost = { home: REAL_HOME_DIR, binding, profile: mc.investigation_profiles?.[binding.investigation_profile], workspace: hostConfig.workspaces?.[binding.workspace], deliveryOrigin: mc.delivery?.result_base_url, workerId: ids.workerId, workerKeyId: ids.workerKeyId, contractKeyId: ids.contractKeyId };
+}
 
 // --- real D1 (workerd SQLite), persisted under the run dir -------------------------------------
 const mf = new Miniflare({ modules: true, script: 'export default { fetch() { return new Response("d1") } }', d1Databases: { DB: 'gfd-confluence' }, d1Persist: join(RUN_DIR, 'd1') });
@@ -144,24 +176,36 @@ const findItem = async () => (await store.list()).filter((item) => item.findingK
 
 let exitCode = 1;
 try {
-  // --- the FWOMPS host: isolated home + a real clone of the governed repository ---------------
-  const ws = join(RUN_DIR, 'workspace-aiaimate');
-  sh('git', ['clone', '-q', AIAIMATE_GIT_URL, ws]);
+  // --- the FWOMPS host: isolated home + a real clone, or the operator's real registered host ----
+  let ws; let home;
+  if (REAL_HOME) {
+    ws = realHost.workspace.root;
+    home = REAL_HOME_DIR;
+    const revision0 = sh('git', ['-C', ws, 'rev-parse', 'HEAD']);
+    check('real host: aiaimate.com is bound to weave0/aiaimate with the read-only profile', realHost.binding.repository === 'weave0/aiaimate' && realHost.binding.investigation_profile === PROFILE && Boolean(realHost.profile), { binding: realHost.binding, deliveryOrigin: realHost.deliveryOrigin });
+    check('real host: the registered profile is one fixed read-only argv with the exit_nonzero_reproduces predicate', realHost.profile?.commands?.length === 1 && realHost.profile.predicate === 'exit_nonzero_reproduces', { commands: realHost.profile?.commands?.length, predicate: realHost.profile?.predicate });
+    check('real host: workspace is a clean git checkout', sh('git', ['-C', ws, 'status', '--porcelain']) === '', { revision: revision0 });
+    step('real fwomps host in use (no isolation)', { home, workspace: ws, workerId: ids.workerId, workerKeyId: ids.workerKeyId, contractKeyId: ids.contractKeyId, deliveryOrigin: realHost.deliveryOrigin });
+  } else {
+    ws = join(RUN_DIR, 'workspace-aiaimate');
+    sh('git', ['clone', '-q', AIAIMATE_GIT_URL, ws]);
+    home = join(RUN_DIR, 'fwomps-home');
+  }
   const revision = sh('git', ['-C', ws, 'rev-parse', 'HEAD']);
   const gitStatus = sh('git', ['-C', ws, 'status', '--porcelain']);
-  step('workspace cloned', { repository: 'weave0/aiaimate', revision, clean: gitStatus === '' });
-
-  const home = join(RUN_DIR, 'fwomps-home');
-  const spec = {
-    home, workspace_root: ws, repository: 'weave0/aiaimate', property_id: PROPERTY, workspace_name: 'aiaimate', profile_name: PROFILE,
-    python_exe: sh(PYTHON, ['-c', 'import sys; print(sys.executable)']), contract_key_id: ids.contractKeyId, contract_key_hex: contractKeyHex,
-    worker_id: ids.workerId, worker_key_id: ids.workerKeyId, worker_key_hex: workerKeyHex, result_base_url: BASE, bearer_env: BEARER_ENV,
-  };
-  writeFileSync(join(RUN_DIR, 'host-spec.json'), JSON.stringify({ ...spec, contract_key_hex: '<redacted>', worker_key_hex: '<redacted>' }, null, 2));
-  const specPath = join(RUN_DIR, 'host-spec.private.json');
-  writeFileSync(specPath, JSON.stringify(spec));
-  sh(PYTHON, [join(HERE, 'fwomps_host_setup.py'), specPath], { env: { ...process.env, FWOMPS_REPO } });
-  step('fwomps host registered (isolated home)', { home, profile: PROFILE, property: PROPERTY });
+  step('workspace ready', { repository: 'weave0/aiaimate', revision, clean: gitStatus === '' });
+  if (!REAL_HOME) {
+    const spec = {
+      home, workspace_root: ws, repository: 'weave0/aiaimate', property_id: PROPERTY, workspace_name: 'aiaimate', profile_name: PROFILE,
+      python_exe: sh(PYTHON, ['-c', 'import sys; print(sys.executable)']), contract_key_id: ids.contractKeyId, contract_key_hex: contractKeyHex,
+      worker_id: ids.workerId, worker_key_id: ids.workerKeyId, worker_key_hex: workerKeyHex, result_base_url: BASE, bearer_env: BEARER_ENV,
+    };
+    writeFileSync(join(RUN_DIR, 'host-spec.json'), JSON.stringify({ ...spec, contract_key_hex: '<redacted>', worker_key_hex: '<redacted>' }, null, 2));
+    const specPath = join(RUN_DIR, 'host-spec.private.json');
+    writeFileSync(specPath, JSON.stringify(spec));
+    sh(PYTHON, [join(HERE, 'fwomps_host_setup.py'), specPath], { env: { ...process.env, FWOMPS_REPO } });
+    step('fwomps host registered (isolated home)', { home, profile: PROFILE, property: PROPERTY });
+  }
 
   // --- 1. observation through the real sweep path -> one canonical work item -------------------
   const degraded = {
@@ -269,31 +313,48 @@ try {
     const refused = await post(body);
     evidence.hostileBeforeAcceptance[name] = { ...refused, expectedCode };
     check(`hostile while INVESTIGATING: ${name} -> ${expectedCode}`, refused.status >= 400 && refused.code === expectedCode, { ...refused, expectedCode });
+    hostileCase(`delivery: ${name}`, expectedCode, refused.code, refused.status >= 400 && refused.code === expectedCode);
   }
   const wrongBearer = await post(rawBody, 'wrong-token');
   check('hostile while INVESTIGATING: wrong bearer refused (401)', wrongBearer.status === 401, wrongBearer);
+  hostileCase('delivery: wrong bearer', 401, wrongBearer.status, wrongBearer.status === 401);
   const stillInvestigating = (await findItem())[0];
   check('after every hostile delivery the item is still INVESTIGATING with its lease intact, no diagnosis', stillInvestigating.state === 'INVESTIGATING' && Boolean(stillInvestigating.activeLease) && !stillInvestigating.diagnosis);
 
   // --- 7. FWOMPS delivers through its published seam; GFD accepts ------------------------------
-  step('invoking fwomps published CLI: deliver');
-  const delivery = await fwomps(['deliver', '--request-id', requestId]);
-  evidence.fwomps.delivered = { exitCode: delivery.code, status: delivery.status };
-  check('fwomps delivered and GFD acknowledged (exit 0, acknowledged)', delivery.code === 0 && delivery.status.status === 'acknowledged', delivery.status);
+  let delivery;
+  if (REAL_HOME) {
+    // The real home's delivery origin is production, so `fwomps deliver` would address production. The bytes are
+    // FWOMPS's own persisted, MAC-signed envelope; the specimen POSTs them to the local GFD with the delivery bearer.
+    step('real host: posting the persisted FWOMPS envelope to the local GFD (substitutes for `fwomps deliver`)');
+    const posted = await realFetch(resultUrl, { method: 'POST', headers: { Authorization: `Bearer ${ids.workerToken}`, 'Content-Type': 'application/json' }, body: rawBody });
+    const postedBody = await posted.json().catch(() => ({}));
+    delivery = { code: posted.status === 200 ? 0 : 1, status: { status: posted.status === 200 ? 'acknowledged' : 'refused', result_digest: executed.status.result_digest } };
+    evidence.fwomps.delivered = { substituted: true, httpStatus: posted.status, workItemState: postedBody.workItem?.state };
+    check('GFD accepted FWOMPS\'s own signed envelope (200)', posted.status === 200, { status: posted.status });
+  } else {
+    step('invoking fwomps published CLI: deliver');
+    delivery = await fwomps(['deliver', '--request-id', requestId]);
+    evidence.fwomps.delivered = { exitCode: delivery.code, status: delivery.status };
+    check('fwomps delivered and GFD acknowledged (exit 0, acknowledged)', delivery.code === 0 && delivery.status.status === 'acknowledged', delivery.status);
+  }
 
   items = await findItem();
   const done = items[0];
   check('same canonical work item is DIAGNOSED', items.length === 1 && done.workItemId === workItemId && done.state === 'DIAGNOSED', { state: done.state, diagnosisDigest: done.diagnosis?.resultDigest });
-  check('diagnosis digest equals the digest FWOMPS reported', done.diagnosis?.resultDigest === executed.status.result_digest && done.diagnosis?.resultDigest === delivery.status.result_digest);
+  check('diagnosis digest equals the digest FWOMPS reported', done.diagnosis?.resultDigest === executed.status.result_digest && (REAL_HOME || done.diagnosis?.resultDigest === delivery.status.result_digest));
   check('lease released, no active lease', done.activeLease === null);
   const acceptedWire = evidence.wire.filter((entry) => entry.path.endsWith('/result') && entry.method === 'POST' && entry.status === 200);
   const sortKeys = (v) => (Array.isArray(v) ? v.map(sortKeys) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sortKeys(v[k])])) : v);
   check('exactly one accepted result delivery, and its content is the FWOMPS-persisted envelope', acceptedWire.length === 1 && JSON.stringify(sortKeys(JSON.parse(acceptedWire[0].result.body))) === JSON.stringify(sortKeys(real)), acceptedWire.map((w) => w.requestBodySha256));
   check('envelope is read-only and every receipt is from the authoritative sandbox', real.repairability?.state === 'not_indicated' && real.execution_receipts?.every((r) => r.authoritative_sandbox === true), { outcome: real.outcome, summary: real.summary, receipts: real.execution_receipts?.map((r) => ({ status: r.status, exit: r.exit_code, authoritative: r.authoritative_sandbox })) });
-  const receipt = await recordReceipt(DB, intent.effect.effectId, { attempt: claim.permit.attempt, outcome: 'committed', receipt: delivery.status.result_digest });
+  const receipt = await recordReceipt(DB, intent.effect.effectId, { attempt: claim.permit.attempt, outcome: 'committed', receipt: executed.status.result_digest });
   check('dispatch intent receipt committed under the same attempt fence', receipt.effect.status === 'COMMITTED' && receipt.effect.attemptCount === 1);
-  const lateAgain = await fwomps(['deliver', '--request-id', requestId]);
-  check('fwomps redelivery after ack never re-sends and never re-executes', lateAgain.code === 0 && lateAgain.status.status === 'acknowledged' && evidence.wire.filter((w) => w.status === 200).length === 1, lateAgain.status);
+  evidence.diagnosis = { resultDigest: done.diagnosis?.resultDigest, evidenceRevision: done.evidenceRevision, leaseTokenDigest: real.lease_token_digest, attempt: real.attempt, requestId, contractDigest: ready.investigation.digest, effectId: intent.effect.effectId, lifecycleVersionAtIssue: ready.lifecycleVersion, stateEnteredAt: done.stateEnteredAt, executionReceipt: { outcome: real.outcome, receipts: real.execution_receipts?.map((r) => ({ profile: r.profile, status: r.status, exit_code: r.exit_code, output_digest: r.output_digest, authoritative_sandbox: r.authoritative_sandbox })) } };
+  if (!REAL_HOME) {
+    const lateAgain = await fwomps(['deliver', '--request-id', requestId]);
+    check('fwomps redelivery after ack never re-sends and never re-executes', lateAgain.code === 0 && lateAgain.status.status === 'acknowledged' && evidence.wire.filter((w) => w.status === 200).length === 1, lateAgain.status);
+  }
 
   // --- 7b. after acceptance: idempotent replay, concurrency, conflicting result, late replay -----
   const replay = await post(rawBody);
@@ -302,6 +363,7 @@ try {
   check('concurrent identical redelivery all 200', burst.every((r) => r.status === 200), burst.map((r) => r.status));
   const different = await post(await resign(mutate((e) => { e.outcome = e.outcome === 'reproduced' ? 'not_reproduced' : 'reproduced'; e.summary = `${e.summary} (conflicting)`; })));
   check('a different VALIDLY SIGNED result for the same attempt fails closed as result_conflict', different.status === 409 && different.code === 'result_conflict', different);
+  hostileCase('delivery: different validly signed result after acceptance', 'result_conflict', different.code, different.status === 409 && different.code === 'result_conflict');
 
   // --- 8. invariants after the hostile barrage ---------------------------------------------------
   const finalItems = await findItem();
@@ -310,6 +372,75 @@ try {
   check('no repair/deploy authority recorded anywhere', !JSON.stringify(evidence.wire).match(/"repair_authority":true/) && (await DB.prepare("SELECT COUNT(*) AS n FROM mc_effects WHERE effect_type IN ('pull_request','deployment')").first()).n === 0);
   const resolved = await api(itemPath(finalItems[0], 'transition'), { auth: adminBearer(), body: { to: 'RESOLVED' } });
   check('diagnosis alone cannot resolve (RESOLVED refused)', resolved.status >= 400, resolved.status);
+  hostileCase('operator transition to RESOLVED while DIAGNOSED', '>=400', resolved.status, resolved.status >= 400);
+
+  // --- 9. Confluence-2: fresh reverification on the SAME work item -----------------------------------
+  const sweepAt = (ms) => new Date(Date.now() + ms).toISOString();
+  const healthy = { ...degraded, overall_status: 'pass', finding_kind: null, keyword_found: 1, content_detail: null };
+  const otherProperty = { target: { id: 'globaldeets', brand: 'globaldeets', name: 'GlobalDeets', url: 'https://globaldeets.com', checkType: 'page' }, overall_status: 'pass', finding_kind: null, status_code: 200, response_time_ms: 90, keyword_found: 1, content_keyword: null, content_detail: null, error: null };
+  const sweep = (check, at) => reportToGitHub([check], at, { GITHUB_TOKEN: 'specimen', DB });
+  const current = async () => (await findItem())[0];
+  const operations = async () => {
+    const response = await worker.fetch(new Request('https://goodflippindesign.com/api/mission-control/operations', { headers: { Authorization: `Bearer ${adminBearer()}` } }), env);
+    return (await response.json()).operations?.items?.find((entry) => entry.workItemId === workItemId)?.lifecycle;
+  };
+  const diagnosedItem = await current();
+  const entered = Date.parse(diagnosedItem.stateEnteredAt);
+  const midpoint = new Date(Math.floor((entered + Date.parse(diagnosedItem.lastSeen)) / 2)).toISOString();
+
+  await sweep(healthy, midpoint); // newer than the failing evidence, OLDER than the diagnosis
+  let c2 = await current();
+  check('Confluence-2: a healthy observation older than the diagnosis does not resolve', c2.state === 'DIAGNOSED' && !c2.resolvedAt, { observedAt: midpoint, diagnosedAt: diagnosedItem.stateEnteredAt });
+  hostileCase('reverify: healthy observation older than the diagnosis', 'DIAGNOSED', c2.state, c2.state === 'DIAGNOSED');
+  await sweep(otherProperty, sweepAt(1_500));
+  c2 = await current();
+  check('Confluence-2: another property\'s healthy observation cannot resolve this item', c2.state === 'DIAGNOSED' && c2.lifecycleVersion === diagnosedItem.lifecycleVersion);
+  hostileCase('reverify: different property healthy observation', 'DIAGNOSED unchanged', c2.state, c2.state === 'DIAGNOSED' && c2.lifecycleVersion === diagnosedItem.lifecycleVersion);
+  await sweep(degraded, sweepAt(2_000));
+  c2 = await current();
+  check('Confluence-2: still-failing evidence after diagnosis leaves it unresolved and is journaled', c2.state === 'DIAGNOSED' && c2.reverification?.result === 'still_failing', c2.reverification);
+  const opsBefore = await operations();
+  check('Confluence-2: the operator projection says reverification is required and why', opsBefore?.reverificationRequired === true && opsBefore?.diagnosisAvailable === true && Boolean(opsBefore?.blocker), opsBefore);
+
+  const healthyAt = sweepAt(4_000);
+  await sweep(healthy, healthyAt);
+  const resolvedItem = await current();
+  check('Confluence-2: a strictly newer healthy observation resolves the SAME work item', resolvedItem.workItemId === workItemId && resolvedItem.state === 'RESOLVED' && resolvedItem.resolvedAt === healthyAt, { resolvedAt: resolvedItem.resolvedAt, resolutionEvidenceDigest: resolvedItem.resolutionEvidenceDigest });
+  check('Confluence-2: the diagnosis stays on the resolved item (lineage), lease still released', resolvedItem.diagnosis?.resultDigest === done.diagnosis.resultDigest && resolvedItem.activeLease === null);
+  await sweep(healthy, healthyAt);
+  await sweep(healthy, sweepAt(6_000));
+  const idempotent = await current();
+  check('Confluence-2: repeated and later healthy observations are idempotent', idempotent.state === 'RESOLVED' && idempotent.lifecycleVersion === resolvedItem.lifecycleVersion && idempotent.resolvedAt === healthyAt);
+  hostileCase('reverify: replayed / repeated healthy observation', 'RESOLVED unchanged', idempotent.state, idempotent.lifecycleVersion === resolvedItem.lifecycleVersion);
+  const opsResolved = await operations();
+  check('Confluence-2: the projection shows the resolved reverification', opsResolved?.reverification?.result === 'resolved' && opsResolved?.reverificationRequired === false && opsResolved?.blocker === null, opsResolved);
+  const staleDegraded = sweepAt(-60_000);
+  await sweep(degraded, staleDegraded);
+  check('Confluence-2: a degraded observation older than the resolution does not reopen it', (await current()).state === 'RESOLVED');
+  hostileCase('recurrence: degraded observation older than the resolution', 'RESOLVED', (await current()).state, (await current()).state === 'RESOLVED');
+  const lateResult = await post(rawBody);
+  check('Confluence-2: the old FWOMPS result replayed after resolution is refused and changes nothing', lateResult.status >= 400 && (await current()).state === 'RESOLVED', lateResult);
+  hostileCase('replay: old signed result after resolution', 'refused', lateResult.code, lateResult.status >= 400);
+
+  const recurAt = sweepAt(8_000);
+  await sweep(degraded, recurAt);
+  const recurrent = await current();
+  check('Confluence-2: a later degraded observation recurs the SAME lineage', recurrent.workItemId === workItemId && recurrent.state === 'RECURRENT' && recurrent.recurrenceCount === 1 && recurrent.diagnosis === null, { recurrenceCount: recurrent.recurrenceCount });
+  check('Confluence-2: still exactly one work item for this finding', (await findItem()).length === 1);
+  const lineage = (await DB.prepare("SELECT to_state FROM mc_work_item_events WHERE work_item_id = ? AND event_type = 'transition' ORDER BY occurred_at, rowid").bind(workItemId).all()).results.map((row) => row.to_state);
+  check('Confluence-2: history keeps OBSERVED..DIAGNOSED..RESOLVED..RECURRENT on one item', ['QUALIFIED', 'INVESTIGATION_READY', 'INVESTIGATING', 'DIAGNOSED', 'RESOLVED', 'RECURRENT'].every((state) => lineage.includes(state)), lineage);
+  const noRepair = (await DB.prepare("SELECT COUNT(*) AS n FROM mc_effects WHERE effect_type IN ('pull_request','deployment')").first()).n === 0;
+  check('Confluence-2: no repair or deploy authority anywhere in the loop', noRepair);
+  evidence.confluence2 = {
+    diagnosedAt: diagnosedItem.stateEnteredAt,
+    staleHealthyObservedAt: midpoint,
+    resolvedAt: resolvedItem.resolvedAt,
+    resolutionEvidenceDigest: resolvedItem.resolutionEvidenceDigest,
+    recurrenceObservedAt: recurAt,
+    recurrenceCount: recurrent.recurrenceCount,
+    lineage,
+    projection: { beforeResolution: opsBefore, afterResolution: opsResolved },
+  };
 
   // --- D1 record ---------------------------------------------------------------------------------
   const dump = async (sql) => (await DB.prepare(sql).all()).results;
@@ -324,12 +455,36 @@ try {
   evidence.aiaimateRevision = revision;
   evidence.workItemId = workItemId;
   exitCode = evidence.checks.every((c) => c.pass) ? 0 : 1;
+  const dirty = sh('git', ['-C', GFD_ROOT, 'status', '--porcelain']) !== '';
+  const fwompsDirty = sh('git', ['-C', FWOMPS_REPO, 'status', '--porcelain']) !== '';
+  const failedChecks = evidence.checks.filter((c) => !c.pass).map((c) => c.name);
+  // Stable, secret-free, comparable across runs. Everything not listed here is run-local detail.
+  evidence.summary = {
+    schema: 'gfd-mc-confluence-evidence-1',
+    mode: evidence.mode,
+    outcome: exitCode === 0 ? 'pass' : 'fail',
+    gfd: { revision: evidence.gfdRevision, dirty },
+    fwomps: { revision: evidence.fwompsRevision, branch: sh('git', ['-C', FWOMPS_REPO, 'branch', '--show-current']), dirty: fwompsDirty, home: REAL_HOME ? 'real-host-registration' : 'isolated' },
+    host: REAL_HOME ? { deliveryOrigin: realHost.deliveryOrigin, workerId: realHost.workerId, workerKeyId: realHost.workerKeyId, contractKeyId: realHost.contractKeyId, deliverySubstituted: true } : null,
+    property: PROPERTY,
+    workItemId,
+    evidenceRevisions: { aiaimate: revision, contract: evidence.diagnosis?.evidenceRevision },
+    identifiers: { requestId: evidence.diagnosis?.requestId, effectId: evidence.diagnosis?.effectId, attempt: evidence.diagnosis?.attempt, lifecycleVersionAtIssue: evidence.diagnosis?.lifecycleVersionAtIssue },
+    digests: { contract: evidence.diagnosis?.contractDigest, leaseToken: evidence.diagnosis?.leaseTokenDigest, result: evidence.diagnosis?.resultDigest, resolution: evidence.confluence2?.resolutionEvidenceDigest },
+    timestamps: { startedAt: evidence.startedAt, diagnosedAt: evidence.diagnosis?.stateEnteredAt, resolvedAt: evidence.confluence2?.resolvedAt, recurredObservedAt: evidence.confluence2?.recurrenceObservedAt },
+    executionReceipt: evidence.diagnosis?.executionReceipt,
+    lifecycle: evidence.confluence2?.lineage,
+    recurrenceCount: evidence.confluence2?.recurrenceCount,
+    hostileCases: evidence.hostileCases,
+    checks: { total: evidence.checks.length, failed: failedChecks },
+  };
 } catch (error) {
   evidence.error = String(error?.stack || error);
   console.error(error);
 } finally {
   evidence.finishedAt = new Date().toISOString();
   evidence.passed = exitCode === 0;
+  if (evidence.summary) evidence.summary.timestamps.finishedAt = evidence.finishedAt;
   for (const w of evidence.wire) if (w.result) w.result = { bodySha256: sha256(Buffer.from(w.result.body)) }; // keep evidence small; digests only
   writeFileSync(EVIDENCE_PATH, JSON.stringify(evidence, null, 2));
   server.close();
