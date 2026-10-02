@@ -942,3 +942,44 @@ describe('Confluence-2 hostile reverification', () => {
     expect(await currentItem()).toMatchObject({ state: 'RESOLVED', lifecycleVersion: resolved.lifecycleVersion });
   });
 });
+
+describe('Confluence-2 operator projection', () => {
+  const lifecycleOf = async (workItemId) => {
+    const response = await call('/api/mission-control/operations', { method: 'GET', auth: adminToken() });
+    expect(response.status).toBe(200);
+    const { operations } = await response.json();
+    expect(operations.authority).toEqual({ repair: false, deployment: false, execution: false });
+    return operations.items.find((entry) => entry.workItemId === workItemId).lifecycle;
+  };
+
+  it('shows the lifecycle without reading logs, and only to an operator', async () => {
+    await observe(at(0));
+    const chain = await readyWithIntent();
+    const id = chain.item.workItemId;
+    expect(await lifecycleOf(id)).toMatchObject({ investigationReady: true, diagnosisAvailable: false, reverificationRequired: false });
+
+    await dispatch(chain, { now: at(40_000) });
+    expect(await lifecycleOf(id)).toMatchObject({
+      occurrenceCount: 2, diagnosisAvailable: true, reverificationRequired: true, reverification: null, recurrenceCount: 0,
+      blocker: expect.stringMatching(/healthy production observation newer than the diagnosis/),
+    });
+
+    await observe(at(45_000));
+    expect(await lifecycleOf(id)).toMatchObject({
+      reverification: { result: 'still_failing' }, blocker: expect.stringMatching(/still observed after diagnosis/),
+    });
+
+    await observeHealthy(HEALTHY_LATER);
+    expect(await lifecycleOf(id)).toMatchObject({
+      reverificationRequired: false, blocker: null, reverification: { result: 'resolved', observedAt: at(HEALTHY_LATER) },
+    });
+
+    await observe(at(HEALTHY_LATER + 1_800_000));
+    expect(await lifecycleOf(id)).toMatchObject({ recurrenceCount: 1, reverification: null, diagnosisAvailable: false });
+
+    const worker403 = await call('/api/mission-control/operations', { method: 'GET', workerAuth: WORKER_TOKEN });
+    expect(worker403.status).toBeGreaterThanOrEqual(401);
+    const anonymous = await call('/api/mission-control/operations', { method: 'GET' });
+    expect(anonymous.status).toBeGreaterThanOrEqual(401);
+  });
+});
