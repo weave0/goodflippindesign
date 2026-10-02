@@ -19,6 +19,7 @@ import {
   verifySignedEnvelope,
 } from './fwomps-investigation-adapter.js';
 import { resolveEstateBinding } from './estate-bindings.js';
+import { buildProvenanceReport } from './lib/worker-provenance.js';
 import {
   WorkItemError,
   abandonExpiredInvestigation,
@@ -392,6 +393,12 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
     if (parts.length === 2 && request.method === 'GET') {
       const payload = await loadMissionControlEvidence(env, fetchImpl);
       return jsonResponse(payload);
+    }
+
+    // Operator-only (the worker credential is refused above): which release is running and whether its
+    // Mission Control bindings are usable. Reports presence/fingerprints, never values.
+    if (parts[2] === 'provenance' && parts.length === 3 && request.method === 'GET') {
+      return jsonResponse(await buildProvenanceReport(env, { requestUrl: request.url }));
     }
 
     if (parts[2] === 'operations' && parts.length === 3 && request.method === 'GET') {
