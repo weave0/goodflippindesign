@@ -564,7 +564,7 @@ describe('hostile delivery', () => {
     const chain = await readyWithIntent();
     // intent payload: closed per-effect schema
     for (const payload of [
-      { summary: 'x', command: 'rm -rf /' },
+      { summary: 'x', command: 'forbidden-write-attempt' },
       { summary: 'x', repairScope: 'src' },
       { summary: 'x', verification_commands: 'npm test' },
       { summary: 'x', promotion: true },
@@ -992,6 +992,7 @@ describe('production canary surfaces: authority boundaries (both routes fail clo
   const ON = { MISSION_CONTROL_CANARY: 'aiaimate.com' };
   const observeCanary = (status, envOverrides = ON, token = adminToken(), body = { status }) => call('/api/mission-control/canary-observations', { auth: token, body, envOverrides });
   const dispatchCall = (item, envOverrides = ON, { token = adminToken(), body = {} } = {}) => call(itemPath(item, 'dispatch'), { auth: token, body, envOverrides });
+  const recoverDispatchCall = (item, envOverrides = ON, { token = adminToken(), body = {} } = {}) => call(itemPath(item, 'recover-dispatch'), { auth: token, body, envOverrides });
   const canaryItem = async () => (await store().list()).filter((item) => item.producer === 'mc-canary');
   const currentCanary = async () => (await canaryItem())[0];
   const effectCount = async () => Number((await env.DB.prepare('SELECT COUNT(*) AS n FROM mc_effects').first()).n);
@@ -1010,8 +1011,10 @@ describe('production canary surfaces: authority boundaries (both routes fail clo
     for (const off of [{}, { MISSION_CONTROL_CANARY: '' }, { MISSION_CONTROL_CANARY: 'globaldeets.com' }, { MISSION_CONTROL_CANARY: 'true' }, { MISSION_CONTROL_CANARY: 'AIAIMATE.COM' }]) {
       const observed = await observeCanary('degraded', off);
       const dispatched = await dispatchCall(item, off);
+      const recovered = await recoverDispatchCall(item, off);
       expect([observed.status, (await observed.json()).code]).toEqual([404, 'canary_disabled']);
       expect([dispatched.status, (await dispatched.json()).code]).toEqual([404, 'canary_disabled']);
+      expect([recovered.status, (await recovered.json()).code]).toEqual([404, 'canary_disabled']);
     }
     expect(await effectCount()).toBe(0);
     expect((await currentCanary()).state).toBe('INVESTIGATION_READY');
@@ -1029,7 +1032,7 @@ describe('production canary surfaces: authority boundaries (both routes fail clo
     expect(await effectCount()).toBe(0);
 
     const { item } = await readyCanary();
-    for (const smuggled of [{ propertyId: 'globaldeets.com' }, { command: 'rm -rf /' }, { argv: ['x'] }, { workerId: 'attacker' }, { repairAuthority: true }, { effectType: 'deployment' }, { profileId: 'other' }]) {
+    for (const smuggled of [{ propertyId: 'globaldeets.com' }, { command: 'forbidden-write-attempt' }, { argv: ['x'] }, { workerId: 'attacker' }, { repairAuthority: true }, { effectType: 'deployment' }, { profileId: 'other' }]) {
       const refused = await dispatchCall(item, ON, { body: smuggled });
       expect([refused.status, (await refused.json()).code], JSON.stringify(smuggled)).toEqual([400, 'unexpected_fields']);
     }
@@ -1048,6 +1051,8 @@ describe('production canary surfaces: authority boundaries (both routes fail clo
       ['anonymous observe', await call('/api/mission-control/canary-observations', { body: { status: 'degraded' }, envOverrides: ON })],
       ['worker bearer dispatch', await call(itemPath(item, 'dispatch'), { workerAuth: WORKER_TOKEN, body: {}, envOverrides: ON })],
       ['anonymous dispatch', await call(itemPath(item, 'dispatch'), { body: {}, envOverrides: ON })],
+      ['worker bearer recover', await call(itemPath(item, 'recover-dispatch'), { workerAuth: WORKER_TOKEN, body: {}, envOverrides: ON })],
+      ['anonymous recover', await call(itemPath(item, 'recover-dispatch'), { body: {}, envOverrides: ON })],
     ]) {
       expect(response.status, label).toBeGreaterThanOrEqual(401);
     }
@@ -1071,7 +1076,8 @@ describe('production canary surfaces: authority boundaries (both routes fail clo
     const first = await dispatchCall(item);
     expect(first.status).toBe(200);
     const body = await first.json();
-    expect(body.dispatch).toMatchObject({ attempt: 1, created: true, contractDigest: item.investigation.digest, requestId: item.investigation.requestId });
+    expect(body).toMatchObject({ attempt: 1, created: true, contractDigest: item.investigation.digest, requestId: item.investigation.requestId });
+    expect(body.effectId).toMatch(/^gfdeffect_v1_[0-9a-f]{64}$/);
     const effect = await env.DB.prepare('SELECT effect_type, target, candidate_digest, status FROM mc_effects').first();
     expect(effect).toEqual({ effect_type: 'investigation_dispatch', target: 'fwomps:aiaimate.com', candidate_digest: item.investigation.digest, status: 'PLANNED' });
 
@@ -1090,7 +1096,7 @@ describe('production canary surfaces: authority boundaries (both routes fail clo
     }
 
     // lease -> result: a stale/different result cannot mutate the canonical item
-    const leased = await (await workerCall(item, 'lease', { effect_id: body.dispatch.effectId, attempt: 1 })).json();
+    const leased = await (await workerCall(item, 'lease', { effect_id: body.effectId, attempt: 1 })).json();
     expect(leased.workItem.state).toBe('INVESTIGATING');
     expect((await dispatchCall(item)).status).toBe(409); // a leased item can no longer be dispatched
     const chain = { item, contract: issued.contract, leaseGrant: leased.leaseGrant, issued: { workItem: item } };
@@ -1109,6 +1115,59 @@ describe('production canary surfaces: authority boundaries (both routes fail clo
     expect((await observeCanary('pass')).status).toBe(200);
     expect((await currentCanary()).state).toBe('RESOLVED');
     expect((await env.DB.prepare('SELECT effect_type FROM mc_effects').all()).results.map((row) => row.effect_type)).toEqual(['investigation_dispatch']);
+  });
+
+  it('recovers a stale claimed dispatch after re-observation by requiring a fresh signed contract', async () => {
+    const { item: ready } = await readyCanary();
+    const first = await dispatchCall(ready);
+    expect(first.status).toBe(200);
+    const firstDispatch = await first.json();
+    expect(firstDispatch).toMatchObject({ attempt: 1, contractDigest: ready.investigation.digest });
+
+    // Exact hostile interleaving: claim committed, then a fresh degraded observation lands before /lease.
+    await new Promise((resolve) => setTimeout(resolve, 2));
+    expect((await observeCanary('degraded')).status).toBe(200);
+    const advanced = await currentCanary();
+    expect(advanced.state).toBe('INVESTIGATION_READY');
+    expect(advanced.lifecycleVersion).toBeGreaterThan(ready.lifecycleVersion);
+
+    const staleLease = await workerCall(advanced, 'lease', { effect_id: firstDispatch.effectId, attempt: firstDispatch.attempt });
+    expect([staleLease.status, (await staleLease.json()).code]).toEqual([409, 'dispatch_intent_ineligible']);
+    const staleDispatch = await dispatchCall(advanced);
+    expect([staleDispatch.status, (await staleDispatch.json()).code]).toEqual([409, 'stale_dispatch']);
+
+    // Recovery never kills a claim that may still be running.
+    const tooSoon = await recoverDispatchCall(advanced);
+    expect([tooSoon.status, (await tooSoon.json()).code]).toEqual([409, 'dispatch_recovery_wait']);
+
+    // Once the visibility window has elapsed, the stale intent is abandoned and the item returns to
+    // QUALIFIED. The old signed contract is dead history and cannot be reused.
+    await env.DB.prepare('UPDATE mc_effects SET last_attempt_at = ? WHERE effect_id = ?')
+      .bind('2020-01-01T00:00:00.000Z', firstDispatch.effectId).run();
+    const recoveredResponse = await recoverDispatchCall(advanced);
+    expect(recoveredResponse.status).toBe(200);
+    const recovered = await recoveredResponse.json();
+    expect(recovered).toMatchObject({ reissueRequired: true, abandonedEffectId: firstDispatch.effectId });
+    expect(recovered.workItem.state).toBe('QUALIFIED');
+    expect(recovered.workItem.investigation).toBeNull();
+    const abandoned = await env.DB.prepare('SELECT status, terminal_reason FROM mc_effects WHERE effect_id = ?')
+      .bind(firstDispatch.effectId).first();
+    expect(abandoned).toMatchObject({ status: 'FAILED', terminal_reason: 'stale dispatch invalidated by a newer observation' });
+
+    const reissuedResponse = await operator(recovered.workItem, 'investigate', { evidenceRevision: REVISION });
+    expect(reissuedResponse.status).toBe(200);
+    const reissued = await reissuedResponse.json();
+    expect(reissued.workItem.state).toBe('INVESTIGATION_READY');
+    expect(reissued.workItem.investigation.digest).not.toBe(ready.investigation.digest);
+
+    const second = await dispatchCall(reissued.workItem);
+    expect(second.status).toBe(200);
+    const secondDispatch = await second.json();
+    expect(secondDispatch.attempt).toBe(1);
+    expect(secondDispatch.effectId).not.toBe(firstDispatch.effectId);
+    const leased = await workerCall(reissued.workItem, 'lease', { effect_id: secondDispatch.effectId, attempt: secondDispatch.attempt });
+    expect(leased.status).toBe(200);
+    expect((await leased.json()).workItem.state).toBe('INVESTIGATING');
   });
 
   it('switching the canary off makes both surfaces inert again with no code change (environment only)', async () => {
