@@ -110,7 +110,9 @@ export function auditForSecrets(serialized, knownSecrets = []) {
     const matches = serialized.match(new RegExp(pattern.source, `${pattern.flags.replace('g', '')}g`));
     if (matches?.length) findings.push({ kind, count: matches.length });
   }
-  return { clean: findings.length === 0, scannedBytes: Buffer.byteLength(serialized), patterns: LEAK_PATTERNS.map(([k]) => k), knownValuesChecked: known.length, findings };
+  // Do not persist how many environment-only secret values were supplied. That number is intentionally
+  // ephemeral and cannot be re-derived from the artifact body during later verification.
+  return { clean: findings.length === 0, scannedBytes: Buffer.byteLength(serialized), patterns: LEAK_PATTERNS.map(([k]) => k), findings };
 }
 
 // ------------------------------------------------------------------------------------------------
