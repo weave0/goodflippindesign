@@ -172,3 +172,5 @@ r2-upload-log.txt
 *.avi
 *.wmv
 # -----------------------------------------------------------------------
+# Build output: written by scripts/stamp-pages-release.mjs during `npm run build` (Cloudflare Pages commit stamp)
+release-stamp.json

@@ -1,3 +1,10 @@
+# LEGACY standalone Worker (gfd-auth.weave0.workers.dev, last deployed 2026-05-02). NOT the Mission Control runtime.
+# Production Mission Control is the Cloudflare Pages project `goodflippindesign`:
+#   https://goodflippindesign.com/api/mission-control -> Pages _worker.js -> workers/auth.js -> handleMissionControlRequest
+# Never deploy this config for Mission Control and never put Mission Control secrets on this Worker:
+#   Mission Control secrets belong to the Pages project (wrangler pages secret put ... --project-name goodflippindesign).
+# This file stays only so the worker tests (vitest/miniflare) have bindings. Guarded by tests/mc-topology.test.mjs.
+
 name = "gfd-auth"
 main = "auth.js"
 compatibility_date = "2025-01-01"

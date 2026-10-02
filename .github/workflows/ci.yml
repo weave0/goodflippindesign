@@ -65,6 +65,15 @@ jobs:
       - name: Estate cohort plan tests
         run: node --no-warnings tests/estate-cohort-plan.test.mjs
 
+      - name: Mission Control provenance, topology, evidence and preflight tests
+        run: |
+          node --no-warnings tests/pages-release-stamp.test.mjs
+          node --no-warnings tests/mc-topology.test.mjs
+          node --no-warnings tests/mc-production-preflight.test.mjs
+          node --no-warnings tests/fwomps-host-identity.test.mjs
+          node --no-warnings tests/mc-revision-evidence.test.mjs
+          node --no-warnings tests/property-gap-diagnostics.test.mjs
+
       - name: Validate TI work-sync live authority contract
         run: |
           node - <<'NODE'

@@ -30,7 +30,7 @@ NODE_ENV = "production"
 # Value: https://gfv-social-publisher.weave0.workers.dev
 # Worker deployed with: npm run deploy:social
 
-# Secrets (set via: wrangler secret put <NAME>)
+# Pages secrets (set via: wrangler pages secret put <NAME> --project-name goodflippindesign)
 # STRIPE_WEBHOOK_SECRET   — Stripe webhook signing secret (get from Stripe Dashboard → Webhooks → your endpoint → Signing secret)
 #                           Webhook URL to register: https://goodflippindesign.com/api/stripe/webhook
 #                           Events to subscribe: payment_intent.succeeded, payment_intent.payment_failed, charge.refunded
@@ -39,6 +39,7 @@ NODE_ENV = "production"
 # MISSION_CONTROL_GITHUB_TOKEN — Contents: Read on weave0/globaldeets only. Never sent to the browser.
 # MISSION_CONTROL_CONTRACT_KEY / MISSION_CONTROL_CONTRACT_KEY_ID — signs investigation requests and lease grants
 # MISSION_CONTROL_RESULT_KEY / MISSION_CONTROL_RESULT_KEY_ID / MISSION_CONTROL_RESULT_WORKER_ID — verifies worker results by key id
+# MISSION_CONTROL_WORKER_TOKEN — 128 lowercase hex characters generated from 64 random bytes; FWOMPS delivery bearer
 # TOKEN_ENCRYPTION_KEY    — 32+ char random string for AES-GCM token/state encryption
 # OPENAI_API_KEY          — Required for Content Studio DALL-E 3 image generation
 #
