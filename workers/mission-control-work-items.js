@@ -670,6 +670,16 @@ async function loadEvents(db, workItemId = null) {
   return query.results || [];
 }
 
+async function loadEventsForWorkItemIds(db, workItemIds) {
+  const ids = [...new Set((workItemIds || []).filter(Boolean))];
+  if (!ids.length) return [];
+  const placeholders = ids.map(() => '?').join(', ');
+  const query = await db.prepare(
+    `SELECT * FROM mc_work_item_events WHERE work_item_id IN (${placeholders}) ORDER BY occurred_at, event_id`,
+  ).bind(...ids).all();
+  return query.results || [];
+}
+
 const EFFECT_ID_SHAPE = /^gfdeffect_v1_[0-9a-f]{64}$/;
 const DIGEST_SHAPE = /^sha256:[0-9a-f]{64}$/;
 
@@ -723,7 +733,7 @@ export function createD1WorkItemStore(db) {
       ).bind(producer, propertyId).all();
       const rows = results || [];
       if (!rows.length) return [];
-      const events = await loadEvents(db);
+      const events = await loadEventsForWorkItemIds(db, rows.map((row) => row.work_item_id));
       return rows.map((row) => rowToItem(row, events));
     },
     async save(item, event = null, options = {}) {
