@@ -238,7 +238,7 @@ async function runWeeklyDigest(env) {
     db.prepare(`SELECT COUNT(*) as n FROM admin_ops WHERE completed_at IS NULL`).first().catch(() => ({ n: 0 })),
     db.prepare(`SELECT COUNT(*) as n FROM health_checks WHERE checked_at > datetime('now', '-7 days') AND overall_status = 'fail'`).first().catch(() => ({ n: 0 })),
     db.prepare(`SELECT COUNT(*) as n FROM community_profiles`).first().catch(() => ({ n: 0 })),
-    db.prepare(`SELECT COALESCE(SUM(amount_cents),0) as n FROM cms_donations`).first().catch(() => ({ n: 0 })),
+    db.prepare(`SELECT COALESCE(SUM(amount_cents),0) as n FROM cms_donations WHERE status IN ('succeeded','partially_refunded')`).first().catch(() => ({ n: 0 })),
   ]);
 
   const digest = {

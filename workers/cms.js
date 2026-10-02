@@ -12,6 +12,7 @@
  */
 
 import { handleOAuthRequest } from './oauth.js';
+import { ensureDonationLedgerSchema } from './donation-ledger.js';
 
 // ────────────────────────────────────────────────────────────────
 //  Helpers
@@ -2556,11 +2557,11 @@ async function handleCMSStats(env) {
     env.DB.prepare("SELECT COUNT(*) as total FROM cms_characters").first().catch(() => ({ total: 0 })),
     // Donations totals
     env.DB.prepare(
-      "SELECT COUNT(*) as total, COALESCE(SUM(amount_cents),0) as total_cents FROM cms_donations WHERE status='succeeded'"
+      "SELECT COUNT(*) as total, COALESCE(SUM(amount_cents - COALESCE(amount_refunded_cents,0)),0) as total_cents FROM cms_donations WHERE status IN ('succeeded','partially_refunded')"
     ).first().catch(() => ({ total: 0, total_cents: 0 })),
     // This-month donations
     env.DB.prepare(
-      "SELECT COALESCE(SUM(amount_cents),0) as month_cents FROM cms_donations WHERE status='succeeded' AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')"
+      "SELECT COALESCE(SUM(amount_cents - COALESCE(amount_refunded_cents,0)),0) as month_cents FROM cms_donations WHERE status IN ('succeeded','partially_refunded') AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')"
     ).first().catch(() => ({ month_cents: 0 })),
     // Open ops tasks
     env.DB.prepare("SELECT COUNT(*) as total FROM admin_ops WHERE completed_at IS NULL").first().catch(() => ({ total: 0 })),
@@ -2707,20 +2708,7 @@ async function handlePublicGallery(request, brand, env) {
 // ────────────────────────────────────────────────────────────────
 
 async function ensureDonationsSchema(db) {
-  await db.prepare(`
-    CREATE TABLE IF NOT EXISTS cms_donations (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      stripe_payment_id TEXT UNIQUE,
-      amount_cents INTEGER NOT NULL,
-      currency TEXT DEFAULT 'usd',
-      project TEXT,
-      donor_email TEXT,
-      donor_name TEXT,
-      status TEXT DEFAULT 'succeeded',
-      recurring INTEGER DEFAULT 0,
-      created_at TEXT DEFAULT (datetime('now'))
-    )
-  `).run();
+  await ensureDonationLedgerSchema(db);
 }
 
 async function handleListDonations(request, env) {
@@ -2734,13 +2722,13 @@ async function handleListDonations(request, env) {
       SELECT * FROM cms_donations ORDER BY created_at DESC LIMIT ? OFFSET ?
     `).bind(limit, offset).all(),
     env.DB.prepare(`
-      SELECT COUNT(*) as count, COALESCE(SUM(amount_cents),0) as total_cents
-      FROM cms_donations WHERE status='succeeded'
+      SELECT COUNT(*) as count, COALESCE(SUM(amount_cents - COALESCE(amount_refunded_cents,0)),0) as total_cents
+      FROM cms_donations WHERE status IN ('succeeded','partially_refunded')
     `).first(),
     env.DB.prepare(`
-      SELECT COALESCE(SUM(amount_cents),0) as month_cents
+      SELECT COALESCE(SUM(amount_cents - COALESCE(amount_refunded_cents,0)),0) as month_cents
       FROM cms_donations
-      WHERE status='succeeded'
+      WHERE status IN ('succeeded','partially_refunded')
         AND created_at >= datetime('now','start of month')
     `).first(),
   ]);

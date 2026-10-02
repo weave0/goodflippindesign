@@ -1,3 +1,10 @@
+# LEGACY standalone Worker (gfd-auth.weave0.workers.dev, last deployed 2026-05-02). NOT the Mission Control runtime.
+# Production Mission Control is the Cloudflare Pages project `goodflippindesign`:
+#   https://goodflippindesign.com/api/mission-control -> Pages _worker.js -> workers/auth.js -> handleMissionControlRequest
+# Never deploy this config for Mission Control and never put Mission Control secrets on this Worker:
+#   Mission Control secrets belong to the Pages project (wrangler pages secret put ... --project-name goodflippindesign).
+# This file stays only so the worker tests (vitest/miniflare) have bindings. Guarded by tests/mc-topology.test.mjs.
+
 name = "gfd-auth"
 main = "auth.js"
 compatibility_date = "2025-01-01"
@@ -19,7 +26,7 @@ bucket_name = "gfv-media"
 NODE_ENV = "production"
 # Declare secret names as empty placeholders so miniflare/vitest can override them for tests.
 # Real values are set (and take precedence) via `wrangler secret put <NAME>`.
-STRIPE_WEBHOOK_SECRET   = ""   # wrangler secret put STRIPE_WEBHOOK_SECRET --name gfd-auth
+STRIPE_WEBHOOK_SECRET   = ""   # production webhook runs in Pages: wrangler pages secret put STRIPE_WEBHOOK_SECRET --project-name goodflippindesign
 INTERNAL_SECRET         = ""   # wrangler secret put INTERNAL_SECRET
 CLERK_SECRET_KEY        = ""   # wrangler secret put CLERK_SECRET_KEY
 CLERK_SECRET_KEY_GFD    = ""   # wrangler secret put CLERK_SECRET_KEY_GFD

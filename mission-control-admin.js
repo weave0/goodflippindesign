@@ -34,6 +34,22 @@
     el.dataset.tone = tone;
   }
 
+  // Lifecycle facts come from the read-only operations projection (one source of truth), keyed by work item.
+  let lifecycleById = new Map();
+
+  function lifecycleLine(item) {
+    const life = lifecycleById.get(item.workItemId);
+    if (!life) return '';
+    const parts = [];
+    parts.push(`observed ${life.observationAgeMs == null ? 'unknown' : ageLabel(new Date(Date.now() - life.observationAgeMs).toISOString())} · ${esc(life.occurrenceCount ?? '?')}×`);
+    if (life.investigationReady) parts.push('investigation ready');
+    if (life.diagnosisAvailable) parts.push('diagnosis available');
+    if (life.reverificationRequired) parts.push('reverification required');
+    if (life.reverification) parts.push(`reverification ${esc(life.reverification.result)}${life.reverification.observedAt ? ` ${esc(ageLabel(life.reverification.observedAt))}` : ''}`);
+    if (life.recurrenceCount) parts.push(`recurred ${esc(life.recurrenceCount)}×`);
+    return `<p class="mc-meta">${parts.join(' · ')}</p>${life.blocker ? `<p class="mc-blocker">${esc(life.blocker)}</p>` : ''}`;
+  }
+
   function workCard(item) {
     const state = item.state || item.lifecycle;
     const lease = item.activeLease
@@ -79,7 +95,7 @@
         <div><dt>Profile</dt><dd>${esc(item.investigationProfile || 'none registered')}</dd></div>
       </dl>
       ${item.verificationPredicate ? `<p class="mc-meta">Verify (${esc(item.verificationScope || 'scope unset')}): ${esc(item.verificationPredicate)}</p>` : ''}
-      ${lease}${contract}${diagnosis}${blocker}
+      ${lease}${contract}${diagnosis}${lifecycleLine(item)}${blocker}
       ${item.resolvedAt ? `<p class="mc-meta">Production check ${esc(ageLabel(item.resolvedAt))}</p>` : ''}
       ${actions.length ? `<div class="mc-actions">${actions.join('')}</div>` : ''}
     </article>`;
@@ -124,7 +140,10 @@
       : '<p class="mc-empty">No governed diagnostic finding is currently open.</p>');
   }
 
-  function render(evidenceOutcome, workOutcome) {
+  function render(evidenceOutcome, workOutcome, operationsOutcome = { ok: false }) {
+    lifecycleById = new Map((operationsOutcome.ok ? operationsOutcome.value?.operations?.items || [] : [])
+      .filter((entry) => entry?.workItemId && entry.lifecycle)
+      .map((entry) => [entry.workItemId, entry.lifecycle]));
     const evidence = evidenceOutcome.ok ? evidenceOutcome.value : null;
     const operator = evidence?.operator;
     const workItems = workOutcome.ok ? (workOutcome.value.workItems || []) : [];
@@ -184,7 +203,8 @@
     setStatus([
       ...workStatus,
       evidenceOutcome.ok ? `evidence ${freshLabel.toLowerCase()}` : 'evidence unavailable',
-    ].filter(Boolean).join(' · '), (!evidenceOutcome.ok || !workOutcome.ok) ? 'bad' : '');
+      operationsOutcome.ok ? 'lifecycle projection available' : 'lifecycle projection unavailable',
+    ].filter(Boolean).join(' · '), (!evidenceOutcome.ok || !workOutcome.ok || !operationsOutcome.ok) ? 'bad' : '');
     loaded = true;
   }
 
@@ -196,11 +216,12 @@
       if (typeof window.__adminApi !== 'function') {
         throw new Error('Admin session helper is unavailable');
       }
-      const [evidenceOutcome, workOutcome] = await Promise.all([
+      const [evidenceOutcome, workOutcome, operationsOutcome] = await Promise.all([
         window.__adminApi('/api/mission-control').then((value) => ({ ok: true, value })).catch((error) => ({ ok: false, error })),
         window.__adminApi('/api/mission-control/work-items').then((value) => ({ ok: true, value })).catch((error) => ({ ok: false, error })),
+        window.__adminApi('/api/mission-control/operations').then((value) => ({ ok: true, value })).catch((error) => ({ ok: false, error })),
       ]);
-      render(evidenceOutcome, workOutcome);
+      render(evidenceOutcome, workOutcome, operationsOutcome);
     } catch (error) {
       setStatus(error?.message || 'Mission Control unavailable', 'bad');
     } finally {

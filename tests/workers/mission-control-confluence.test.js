@@ -109,8 +109,10 @@ function call(path, { method = 'POST', auth, workerAuth, body } = {}) {
 // Routes the two outbound services the chain touches: Clerk (operator session) and the GitHub
 // incident issue the sweep manages. The GitHub side is stateful so a repeat observation updates the
 // same issue, exactly like production.
+let ghIssues = [];
 function stubOutbound() {
   const issues = [];
+  ghIssues = issues;
   vi.stubGlobal('fetch', vi.fn(async (input, init = {}) => {
     const url = String(input?.url || input);
     if (url.includes('api.clerk.com')) {
@@ -137,6 +139,22 @@ function stubOutbound() {
 }
 
 const observe = (at) => reportToGitHub([degraded], at, { GITHUB_TOKEN: 'test-token', DB: env.DB });
+
+// A healthy production observation of one target, entering through the same sweep path as a degraded one.
+const healthyCheck = (checkTarget = target) => ({
+  target: checkTarget,
+  overall_status: 'pass',
+  finding_kind: null,
+  status_code: 200,
+  response_time_ms: 120,
+  keyword_found: 1,
+  content_keyword: 'machine:gfd-property-health',
+  content_detail: null,
+  error: null,
+});
+const observeHealthy = (offsetMs, checkTarget = target) => (
+  reportToGitHub([healthyCheck(checkTarget)], at(offsetMs), { GITHUB_TOKEN: 'test-token', DB: env.DB })
+);
 const store = () => createD1WorkItemStore(env.DB);
 async function currentItem() {
   const items = (await store().list()).filter((item) => item.findingKey === FINDING_KEY);
@@ -720,5 +738,248 @@ describe('hostile outbox fences on the live chain', () => {
     expect(calls).toBe(0);
     const row = await env.DB.prepare('SELECT schema_version, status FROM mc_effects WHERE effect_id = ?').bind(chain.effectId).first();
     expect(row).toMatchObject({ schema_version: 'gfd-effect-99', status: 'PLANNED' }); // not rewritten
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// Confluence-2 (#371): fresh reverification closes the loop. Diagnosis never resolves.
+// ---------------------------------------------------------------------------------------------
+
+const OTHER_TARGET = { id: 'globaldeets', brand: 'globaldeets', name: 'GlobalDeets', url: 'https://globaldeets.com', checkType: 'page' };
+const lifecycleEvents = async (workItemId) => (await env.DB.prepare(
+  "SELECT from_state, to_state, occurred_at, detail_json FROM mc_work_item_events WHERE work_item_id = ? AND event_type = 'transition' ORDER BY occurred_at, event_id",
+).bind(workItemId).all()).results.map((row) => ({ ...row, detail: JSON.parse(row.detail_json || '{}') }));
+const HEALTHY_LATER = 600_000;
+
+describe('Confluence-2: observe -> diagnose -> fresh reverification -> resolve -> recur (one lineage)', () => {
+  it('walks the full loop under one canonical work item', async () => {
+    // 1. healthy baseline: nothing to track, nothing created
+    await observeHealthy(-60_000);
+    expect(await store().list()).toHaveLength(0);
+
+    // 2-4. degraded observation creates exactly one item; a repeat does not duplicate it
+    await observe(at(0));
+    await observe(at(30_000));
+    const observed = await currentItem();
+    expect(observed).toMatchObject({ state: 'OBSERVED', occurrenceCount: 2, recurrenceCount: 0 });
+
+    // 5-11. investigation-ready, durable intent, signed lease, FWOMPS result, authenticated diagnosis
+    const chain = await readyWithIntent();
+    const dispatched = await dispatch(chain, { now: at(40_000) });
+    expect(dispatched.outcome.effect.status).toBe('COMMITTED');
+    const diagnosed = await currentItem();
+    expect(diagnosed).toMatchObject({ workItemId: observed.workItemId, state: 'DIAGNOSED' });
+    expect(diagnosed.reverification).toBeNull();
+
+    // 12. diagnosis alone does not resolve, however long it sits; still-failing evidence is journaled
+    await observe(at(45_000));
+    const stillFailing = await currentItem();
+    expect(stillFailing.state).toBe('DIAGNOSED');
+    expect(stillFailing.reverification).toMatchObject({ result: 'still_failing' });
+    expect(stillFailing.resolvedAt).toBeNull();
+
+    // 13-15. a fresh healthy observation reverifies the registered predicate and resolves the SAME item
+    await observeHealthy(HEALTHY_LATER);
+    const resolved = await currentItem();
+    expect(resolved).toMatchObject({
+      workItemId: observed.workItemId,
+      state: 'RESOLVED',
+      resolvedAt: at(HEALTHY_LATER),
+    });
+    expect(resolved.resolutionEvidenceDigest).toMatch(/^sha256:[0-9a-f]{64}$/);
+    expect(resolved.reverification).toMatchObject({ result: 'resolved', observedAt: at(HEALTHY_LATER) });
+    expect(resolved.activeLease).toBeNull();
+    expect(resolved.diagnosis.resultDigest).toBe(diagnosed.diagnosis.resultDigest); // lineage keeps the diagnosis
+    expect(await eventCount(resolved.workItemId, 'RESOLVED')).toBe(1);
+
+    // idempotent: the same healthy evidence again, and later healthy evidence, change nothing
+    const version = resolved.lifecycleVersion;
+    await observeHealthy(HEALTHY_LATER);
+    await observeHealthy(HEALTHY_LATER + 900_000);
+    const again = await currentItem();
+    expect(again).toMatchObject({ state: 'RESOLVED', lifecycleVersion: version, resolvedAt: at(HEALTHY_LATER) });
+    expect(await eventCount(resolved.workItemId, 'RESOLVED')).toBe(1);
+
+    // a degraded observation OLDER than the resolution is stale: it does not reopen the item
+    await observe(at(HEALTHY_LATER - 1_000));
+    expect((await currentItem()).state).toBe('RESOLVED');
+
+    // 16. degraded again afterwards: recurrence of the SAME lineage, not an unrelated incident
+    await observe(at(HEALTHY_LATER + 1_800_000));
+    const recurrent = await currentItem();
+    expect(recurrent).toMatchObject({
+      workItemId: observed.workItemId,
+      state: 'RECURRENT',
+      recurrenceCount: 1,
+      resolvedAt: null,
+      resolutionEvidenceDigest: null,
+      diagnosis: null, // the old diagnosis does not answer the new occurrence
+      investigation: null,
+      reverification: null,
+    });
+    expect(recurrent.firstSeen).toBe(observed.firstSeen);
+    expect((await store().list()).filter((item) => item.findingKey === FINDING_KEY)).toHaveLength(1);
+    // history survives: one diagnosis, one resolution, one recurrence on the same item
+    const history = (await lifecycleEvents(observed.workItemId)).map((event) => event.to_state);
+    expect(history).toEqual(expect.arrayContaining(['QUALIFIED', 'INVESTIGATION_READY', 'INVESTIGATING', 'DIAGNOSED', 'RESOLVED', 'RECURRENT']));
+    expect(history.filter((state) => state === 'DIAGNOSED')).toHaveLength(1);
+    // and the new cycle starts from the same governed path
+    const requalified = await operator(recurrent, 'transition', { to: 'QUALIFIED' });
+    expect(requalified.status).toBe(200);
+    expect((await requalified.json()).workItem.state).toBe('QUALIFIED');
+  });
+});
+
+describe('Confluence-2 hostile reverification', () => {
+  async function diagnosed() {
+    const chain = await readyWithIntent();
+    await dispatch(chain, { now: at(40_000) });
+    const item = await currentItem();
+    expect(item.state).toBe('DIAGNOSED');
+    return { chain, item };
+  }
+
+  it('a healthy observation older than the diagnosis (or the failing evidence) cannot resolve', async () => {
+    const { item } = await diagnosed();
+    await observeHealthy(1_000); // predates the diagnosis
+    await observe(at(120_000)); // fresher failing evidence
+    await observeHealthy(60_000); // older than the latest failing observation
+    const after = await currentItem();
+    expect(after.state).toBe('DIAGNOSED');
+    expect(after.workItemId).toBe(item.workItemId);
+    expect(after.reverification).toMatchObject({ result: 'still_failing' });
+  });
+
+  it('a healthy observation at the very instant of the failing evidence cannot resolve (strictly newer)', async () => {
+    await diagnosed();
+    await observe(at(120_000));
+    await observeHealthy(120_000);
+    const after = await currentItem();
+    expect(after.state).toBe('DIAGNOSED');
+    expect(after.resolvedAt).toBeNull();
+    // the refusal is journaled, even though the degraded probe shares its instant
+    const journaled = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM mc_work_item_events WHERE work_item_id = ? AND detail_json LIKE '%\"result\":\"stale\"%'",
+    ).bind(after.workItemId).first();
+    expect(Number(journaled.n)).toBe(1);
+  });
+
+  it("another property's healthy observation cannot resolve this item", async () => {
+    const { item } = await diagnosed();
+    await observeHealthy(HEALTHY_LATER, OTHER_TARGET);
+    const after = await currentItem();
+    expect(after).toMatchObject({ state: 'DIAGNOSED', lifecycleVersion: item.lifecycleVersion });
+    expect(after.reverification).toBeNull();
+  });
+
+  it('a diagnosis result that claims the problem is gone is still only a diagnosis', async () => {
+    const chain = await readyWithIntent();
+    chain.leaseGrant = await claimAndLease(chain);
+    const posted = await postResult(chain, await sign(fwompsResult(chain, { outcome: 'not_reproduced', summary: 'looks healthy' })));
+    expect(posted.status).toBe(200);
+    const item = await currentItem();
+    expect(item.state).toBe('DIAGNOSED');
+    expect(item.resolvedAt).toBeNull();
+    expect(item.reverification).toBeNull();
+    expect(await eventCount(item.workItemId, 'RESOLVED')).toBe(0);
+  });
+
+  it('a healthy observation during an active lease neither resolves nor disturbs the investigation', async () => {
+    const chain = await readyWithIntent();
+    chain.leaseGrant = await claimAndLease(chain);
+    const before = await currentItem();
+    await observeHealthy(HEALTHY_LATER);
+    const during = await currentItem();
+    expect(during.state).toBe('INVESTIGATING');
+    expect(during.activeLease).toEqual(before.activeLease);
+    expect(during.lifecycleVersion).toBe(before.lifecycleVersion);
+    expect(during.lastVerdict).toMatchObject({ result: 'deferred' });
+
+    // the investigation still lands on the same lease, and only then can fresh evidence resolve
+    const posted = await postResult(chain, await sign(fwompsResult(chain)));
+    expect(posted.status).toBe(200);
+    expect((await currentItem()).state).toBe('DIAGNOSED');
+    await observeHealthy(HEALTHY_LATER + 60_000);
+    expect((await currentItem()).state).toBe('RESOLVED');
+  });
+
+  it('reverifies from the work item itself, not from a still-open GitHub incident', async () => {
+    await diagnosed();
+    ghIssues.length = 0; // the incident issue was closed or removed out of band
+    await observeHealthy(HEALTHY_LATER);
+    expect((await currentItem()).state).toBe('RESOLVED');
+  });
+
+  it('never resolves behind a human blocker', async () => {
+    const { item } = await diagnosed();
+    const blocked = await operator(item, 'transition', { to: 'NEEDS_HUMAN', reason: 'operator hold' });
+    expect(blocked.status).toBe(200);
+    await observeHealthy(HEALTHY_LATER);
+    const after = await currentItem();
+    expect(after.state).toBe('NEEDS_HUMAN');
+    expect(after.lastVerdict).toMatchObject({ result: 'blocked' });
+  });
+
+  it('unsupported transitions fail closed: no operator path resolves, recurs or reopens', async () => {
+    const { item } = await diagnosed();
+    for (const to of ['RESOLVED', 'REVERIFYING', 'RECURRENT']) {
+      expect((await operator(item, 'transition', { to })).status, to).toBe(409);
+    }
+    await observeHealthy(HEALTHY_LATER);
+    const resolved = await currentItem();
+    expect(resolved.state).toBe('RESOLVED');
+    for (const to of ['QUALIFIED', 'DIAGNOSED', 'REVERIFYING', 'RECURRENT']) {
+      expect((await operator(resolved, 'transition', { to })).status, to).toBeGreaterThanOrEqual(400);
+    }
+    expect((await currentItem()).state).toBe('RESOLVED');
+  });
+
+  it('a replay of the old diagnosis result after resolution changes nothing', async () => {
+    const { chain } = await diagnosed();
+    await observeHealthy(HEALTHY_LATER);
+    const resolved = await currentItem();
+    await expectRefusedBy(await postResult(chain, chain.envelope), 'illegal_transition', 'old result after resolution');
+    expect(await currentItem()).toMatchObject({ state: 'RESOLVED', lifecycleVersion: resolved.lifecycleVersion });
+  });
+});
+
+describe('Confluence-2 operator projection', () => {
+  const lifecycleOf = async (workItemId) => {
+    const response = await call('/api/mission-control/operations', { method: 'GET', auth: adminToken() });
+    expect(response.status).toBe(200);
+    const { operations } = await response.json();
+    expect(operations.authority).toEqual({ repair: false, deployment: false, execution: false });
+    return operations.items.find((entry) => entry.workItemId === workItemId).lifecycle;
+  };
+
+  it('shows the lifecycle without reading logs, and only to an operator', async () => {
+    await observe(at(0));
+    const chain = await readyWithIntent();
+    const id = chain.item.workItemId;
+    expect(await lifecycleOf(id)).toMatchObject({ investigationReady: true, diagnosisAvailable: false, reverificationRequired: false });
+
+    await dispatch(chain, { now: at(40_000) });
+    expect(await lifecycleOf(id)).toMatchObject({
+      occurrenceCount: 2, diagnosisAvailable: true, reverificationRequired: true, reverification: null, recurrenceCount: 0,
+      blocker: expect.stringMatching(/healthy production observation newer than the diagnosis/),
+    });
+
+    await observe(at(45_000));
+    expect(await lifecycleOf(id)).toMatchObject({
+      reverification: { result: 'still_failing' }, blocker: expect.stringMatching(/still observed after diagnosis/),
+    });
+
+    await observeHealthy(HEALTHY_LATER);
+    expect(await lifecycleOf(id)).toMatchObject({
+      reverificationRequired: false, blocker: null, reverification: { result: 'resolved', observedAt: at(HEALTHY_LATER) },
+    });
+
+    await observe(at(HEALTHY_LATER + 1_800_000));
+    expect(await lifecycleOf(id)).toMatchObject({ recurrenceCount: 1, reverification: null, diagnosisAvailable: false });
+
+    const worker403 = await call('/api/mission-control/operations', { method: 'GET', workerAuth: WORKER_TOKEN });
+    expect(worker403.status).toBeGreaterThanOrEqual(401);
+    const anonymous = await call('/api/mission-control/operations', { method: 'GET' });
+    expect(anonymous.status).toBeGreaterThanOrEqual(401);
   });
 });

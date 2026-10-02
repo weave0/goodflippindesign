@@ -30,7 +30,7 @@ The following are in scope for security reports:
 ## Secrets Management
 
 - **Stripe & Clerk secrets**: Stored exclusively in Cloudflare Workers via `wrangler secret put` — never in source or `.env` files
-- **GitHub Secrets**: Cloudflare API token only (`CF_FULL_ITHINK`)
+- **GitHub Secrets**: Cloudflare Pages deploy token is `CLOUDFLARE_API_TOKEN` (needs Account → Cloudflare Pages: Edit); traffic-intelligence uses its own `CF_GFD_TI_*` tokens
 - **Client-side keys**: Only publishable/public keys are injected via `window.ENV` from the edge worker
 - **Key rotation**: Via Cloudflare dashboard or `wrangler secret put`
 

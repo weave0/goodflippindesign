@@ -1,0 +1,1869 @@
+{
+  "schema": "gfd-estate-property-readiness-1",
+  "generatedAt": "2026-10-01T21:30:00.000Z",
+  "authority": {
+    "repair": false,
+    "deployment": false,
+    "promotion": false
+  },
+  "hostConfigRead": true,
+  "summary": {
+    "governedProperties": 25,
+    "dispatchReady": [
+      "aiaimate.com"
+    ],
+    "repositoryKnown": 8,
+    "productionUrlKnown": 6,
+    "healthProducer": 8,
+    "machineHealthContract": 1,
+    "verificationDeclared": 1,
+    "hostRegistered": 1
+  },
+  "properties": [
+    {
+      "propertyId": "agentkagent.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "aiaimate.com",
+      "classification": "brand_primary_domain",
+      "canonicalRepository": {
+        "known": true,
+        "value": "weave0/aiaimate",
+        "source": "estate/registry.json",
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": true,
+        "value": "https://aiaimate.com",
+        "deploymentStatus": "live"
+      },
+      "healthEvidenceProducer": {
+        "known": true,
+        "targets": [
+          "aiaimate"
+        ],
+        "machineContract": true
+      },
+      "stableFindingKey": {
+        "known": true,
+        "pattern": [
+          "health:aiaimate:<finding_kind>"
+        ]
+      },
+      "verificationPredicate": {
+        "declared": true,
+        "profile": "gfd-property-health-production",
+        "scope": "production"
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": true,
+        "hostConfigRead": true,
+        "workspace": "aiaimate"
+      },
+      "approvedReadOnlyProfile": {
+        "declared": "web-health-readonly-v1",
+        "registeredOnHost": true
+      },
+      "safeHostCommands": {
+        "count": 1,
+        "reviewedInRepository": true
+      },
+      "dispatchReady": true,
+      "gate": {
+        "promotable": true,
+        "hostVerified": true,
+        "failedChecks": []
+      },
+      "readinessDebt": [],
+      "blockers": []
+    },
+    {
+      "propertyId": "artificelligance.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "artificelligence.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "brettleeweaver.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": true,
+        "targets": [
+          "brettleeweaver"
+        ],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": true,
+        "pattern": [
+          "health:brettleeweaver:<finding_kind>"
+        ]
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "health producer exposes no machine-health contract",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "citizenapproved.org",
+      "classification": "brand_primary_domain",
+      "canonicalRepository": {
+        "known": true,
+        "value": "weave0/CitizenApproved",
+        "source": "estate/registry.json",
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": true,
+        "value": "https://citizenapproved.org",
+        "deploymentStatus": "live"
+      },
+      "healthEvidenceProducer": {
+        "known": true,
+        "targets": [
+          "citizenapproved"
+        ],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": true,
+        "pattern": [
+          "health:citizenapproved:<finding_kind>"
+        ]
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "missing_machine_health_contract",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "health producer exposes no machine-health contract",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "culturesherpa.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "culturesherpa.org",
+      "classification": "brand_primary_domain",
+      "canonicalRepository": {
+        "known": true,
+        "value": "weave0/CultureSherpa",
+        "source": "estate/registry.json",
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": true,
+        "value": "https://culturesherpa.org",
+        "deploymentStatus": "live"
+      },
+      "healthEvidenceProducer": {
+        "known": true,
+        "targets": [
+          "culturesherpa"
+        ],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": true,
+        "pattern": [
+          "health:culturesherpa:<finding_kind>"
+        ]
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "missing_deployment_provider",
+        "missing_machine_health_contract",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "health producer exposes no machine-health contract",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "cyancanoe.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "flipskillet.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "flipskillit.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "foxyana.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "fwomps.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "fwomp.us",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "gflippinv.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "globaldeets.com",
+      "classification": "brand_primary_domain",
+      "canonicalRepository": {
+        "known": true,
+        "value": "weave0/globaldeets",
+        "source": "estate/registry.json",
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": true,
+        "value": "https://globaldeets.com",
+        "deploymentStatus": "live"
+      },
+      "healthEvidenceProducer": {
+        "known": true,
+        "targets": [
+          "globaldeets"
+        ],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": true,
+        "pattern": [
+          "health:globaldeets:<finding_kind>"
+        ]
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "missing_machine_health_contract",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "health producer exposes no machine-health contract",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "goodflippindesign.com",
+      "classification": "brand_primary_domain",
+      "canonicalRepository": {
+        "known": true,
+        "value": "weave0/goodflippindesign",
+        "source": "estate/registry.json",
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": true,
+        "value": "https://goodflippindesign.com",
+        "deploymentStatus": "live"
+      },
+      "healthEvidenceProducer": {
+        "known": true,
+        "targets": [
+          "goodflippindesign",
+          "gfd-community",
+          "gfd-donate",
+          "gfd-404",
+          "gfd-auth-api",
+          "gfd-community-stats",
+          "gfd-community-feed",
+          "gfd-checkout-health"
+        ],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": true,
+        "pattern": [
+          "health:goodflippindesign:<finding_kind>",
+          "health:gfd-community:<finding_kind>",
+          "health:gfd-donate:<finding_kind>",
+          "health:gfd-404:<finding_kind>",
+          "health:gfd-auth-api:<finding_kind>",
+          "health:gfd-community-stats:<finding_kind>",
+          "health:gfd-community-feed:<finding_kind>",
+          "health:gfd-checkout-health:<finding_kind>"
+        ]
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "missing_machine_health_contract",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "health producer exposes no machine-health contract",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "goodflippinluck.com",
+      "classification": "brand_primary_domain",
+      "canonicalRepository": {
+        "known": true,
+        "value": "weave0/goodflippindesign",
+        "source": "estate/registry.json",
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "not-live"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "goodflippinnews.com",
+      "classification": "brand_primary_domain",
+      "canonicalRepository": {
+        "known": true,
+        "value": "weave0/goodflippindesign",
+        "source": "estate/registry.json",
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "not-live"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "goodflippinvibes.com",
+      "classification": "brand_primary_domain",
+      "canonicalRepository": {
+        "known": true,
+        "value": "weave0/good-flippin-vibes",
+        "source": "estate/registry.json",
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": true,
+        "value": "https://goodflippinvibes.com",
+        "deploymentStatus": "live"
+      },
+      "healthEvidenceProducer": {
+        "known": true,
+        "targets": [
+          "gfv"
+        ],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": true,
+        "pattern": [
+          "health:gfv:<finding_kind>"
+        ]
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "missing_deployment_provider",
+        "missing_machine_health_contract",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "health producer exposes no machine-health contract",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "goodflippinyikes.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "heavymoose.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "lowertownstpaul.org",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "minnesotapeace.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": true,
+        "targets": [
+          "minnesotapeace"
+        ],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": true,
+        "pattern": [
+          "health:minnesotapeace:<finding_kind>"
+        ]
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_machine_health_contract",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "health producer exposes no machine-health contract",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    },
+    {
+      "propertyId": "redleopardofstpaul.com",
+      "classification": "unclassified",
+      "canonicalRepository": {
+        "known": false,
+        "value": null,
+        "source": null,
+        "conflict": false
+      },
+      "canonicalProductionUrl": {
+        "known": false,
+        "value": null,
+        "deploymentStatus": "unknown"
+      },
+      "healthEvidenceProducer": {
+        "known": false,
+        "targets": [],
+        "machineContract": false
+      },
+      "stableFindingKey": {
+        "known": false,
+        "pattern": null
+      },
+      "verificationPredicate": {
+        "declared": false,
+        "profile": null,
+        "scope": null
+      },
+      "fwompsRepositoryRegistration": {
+        "registered": false,
+        "hostConfigRead": true,
+        "workspace": null
+      },
+      "approvedReadOnlyProfile": {
+        "declared": null,
+        "registeredOnHost": false
+      },
+      "safeHostCommands": {
+        "count": null,
+        "reviewedInRepository": false
+      },
+      "dispatchReady": false,
+      "gate": {
+        "promotable": false,
+        "hostVerified": false,
+        "failedChecks": [
+          "C1",
+          "C2",
+          "C3",
+          "C6",
+          "C10"
+        ]
+      },
+      "readinessDebt": [
+        "unclassified_property",
+        "missing_repository_authority",
+        "missing_deployment_provider",
+        "missing_health_target",
+        "missing_investigation_profile",
+        "missing_verification_profile",
+        "missing_verification_scope",
+        "missing_verification_predicate"
+      ],
+      "blockers": [
+        "no canonical repository authority",
+        "production URL not established (deployment status is not live)",
+        "no health evidence producer",
+        "verification profile/scope/predicate not declared",
+        "no approved read-only investigation profile declared",
+        "not registered on the FWOMPS host"
+      ]
+    }
+  ],
+  "nextCohort": {
+    "rule": "governed + live + repository known + health evidence present + not dispatch-ready, fewest missing prerequisites first (max 4); declarations only",
+    "properties": [
+      {
+        "propertyId": "citizenapproved.org",
+        "repository": "weave0/CitizenApproved",
+        "missing": [
+          "machine_health_contract",
+          "verification_declaration",
+          "reviewed_read_only_profile",
+          "host_registration"
+        ]
+      },
+      {
+        "propertyId": "culturesherpa.org",
+        "repository": "weave0/CultureSherpa",
+        "missing": [
+          "machine_health_contract",
+          "verification_declaration",
+          "reviewed_read_only_profile",
+          "host_registration"
+        ]
+      },
+      {
+        "propertyId": "globaldeets.com",
+        "repository": "weave0/globaldeets",
+        "missing": [
+          "machine_health_contract",
+          "verification_declaration",
+          "reviewed_read_only_profile",
+          "host_registration"
+        ]
+      },
+      {
+        "propertyId": "goodflippindesign.com",
+        "repository": "weave0/goodflippindesign",
+        "missing": [
+          "machine_health_contract",
+          "verification_declaration",
+          "reviewed_read_only_profile",
+          "host_registration"
+        ]
+      }
+    ],
+    "excludedCandidates": [
+      {
+        "propertyId": "goodflippinvibes.com",
+        "repository": "weave0/good-flippin-vibes",
+        "missing": [
+          "machine_health_contract",
+          "verification_declaration",
+          "reviewed_read_only_profile",
+          "host_registration"
+        ]
+      }
+    ]
+  }
+}

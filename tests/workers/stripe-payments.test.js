@@ -359,4 +359,30 @@ describe('create-checkout-session — Stripe calls', () => {
     const body = await res.json();
     expect(body.error).toMatch(/unable to create checkout session/i);
   });
+
+  it('rejects an unknown project', async () => {
+    const res = await SELF.fetch(`${BASE}/api/create-checkout-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: 25, type: 'one-time', project: 'Sketchy Corp' }),
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it.each([
+    ['one-time', 'payment_intent_data', 'payment', 'false'],
+    ['monthly', 'subscription_data', 'subscription', 'true'],
+  ])('%s checkout propagates project metadata onto %s', async (type, carrier, mode, recurring) => {
+    mockCheckoutSession();
+    await SELF.fetch(`${BASE}/api/create-checkout-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: 25, type, project: 'CultureSherpa' }),
+    });
+    const params = new URLSearchParams(globalThis.fetch.mock.calls[0][1].body);
+    expect(params.get('mode')).toBe(mode);
+    expect(params.get('metadata[project]')).toBe('CultureSherpa');
+    expect(params.get(`${carrier}[metadata][project]`)).toBe('CultureSherpa');
+    expect(params.get(`${carrier}[metadata][recurring]`)).toBe(recurring);
+  });
 });

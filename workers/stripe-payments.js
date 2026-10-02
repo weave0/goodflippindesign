@@ -182,7 +182,12 @@ async function handleCreateCheckoutSession(request, env) {
     return json({ error: 'Invalid JSON body' }, 400, request);
   }
 
-  const { amount, type } = body;
+  const { amount, type, project } = body;
+
+  const projectLabel = String(project || '').trim();
+  if (projectLabel && !ALLOWED_PROJECTS.includes(projectLabel)) {
+    return json({ error: 'Unknown project' }, 400, request);
+  }
 
   // amount from donate.html is in dollars (e.g. 25 for $25)
   const amountDollars = Number(amount);
@@ -200,6 +205,7 @@ async function handleCreateCheckoutSession(request, env) {
     const session = await createCheckoutSession(env.STRIPE_SECRET_KEY, {
       amountCents,
       isMonthly,
+      projectLabel: projectLabel || 'Good Flippin Design',
       successUrl: `${baseUrl}/donate?success=1&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/donate?cancelled=1`,
     });
@@ -210,7 +216,7 @@ async function handleCreateCheckoutSession(request, env) {
   }
 }
 
-async function createCheckoutSession(secretKey, { amountCents, isMonthly, successUrl, cancelUrl }) {
+async function createCheckoutSession(secretKey, { amountCents, isMonthly, projectLabel = 'Good Flippin Design', successUrl, cancelUrl }) {
   const productName = isMonthly
     ? 'Monthly Donation – Good Flippin Design'
     : 'One-Time Donation – Good Flippin Design';
@@ -227,7 +233,15 @@ async function createCheckoutSession(secretKey, { amountCents, isMonthly, succes
     'metadata[source]': 'gfd-donate-page',
     'metadata[type]': isMonthly ? 'monthly' : 'one-time',
     'metadata[amountCents]': String(amountCents),
+    'metadata[project]': projectLabel,
   });
+
+  // Session metadata is not copied to the PaymentIntent/Subscription; the webhook ledger reads those.
+  const carried = isMonthly ? 'subscription_data' : 'payment_intent_data';
+  params.set(`${carried}[metadata][project]`, projectLabel);
+  params.set(`${carried}[metadata][type]`, isMonthly ? 'monthly' : 'one-time');
+  params.set(`${carried}[metadata][recurring]`, isMonthly ? 'true' : 'false');
+  params.set(`${carried}[metadata][source]`, 'gfd-donate-page');
 
   // recurring is only valid in subscription mode
   if (isMonthly) {
