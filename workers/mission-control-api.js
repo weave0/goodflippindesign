@@ -6,6 +6,8 @@
  * labelled as that evidence.
  */
 
+import { projectMissionControlOperations } from './lib/mission-control-operations.js';
+import { ensureOutboxSchema } from './lib/mission-control-outbox.js';
 import { resolveLeaseAuthority } from './lib/mission-control-lease-authority.js';
 import {
   LEASE_PURPOSE,
@@ -397,6 +399,21 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
     // Mission Control bindings are usable. Reports presence/fingerprints, never values.
     if (parts[2] === 'provenance' && parts.length === 3 && request.method === 'GET') {
       return jsonResponse(await buildProvenanceReport(env, { requestUrl: request.url }));
+    }
+
+    if (parts[2] === 'operations' && parts.length === 3 && request.method === 'GET') {
+      // Read-only projection of the durable records. It grants no authority and writes nothing.
+      await workItemStore(env);
+      await ensureOutboxSchema(env.DB);
+      const rows = async (sql) => (await env.DB.prepare(sql).all()).results || [];
+      const operations = projectMissionControlOperations({
+        now: nowIso(),
+        workItems: await rows('SELECT * FROM mc_work_items'),
+        events: await rows('SELECT event_id, work_item_id, event_type, from_state, to_state, occurred_at, evidence_digest, detail_json FROM mc_work_item_events'),
+        effects: await rows('SELECT * FROM mc_effects'),
+        leases: await rows('SELECT * FROM mc_work_item_leases'),
+      });
+      return jsonResponse({ operations });
     }
 
     if (parts[2] === 'work-items' && parts.length === 3 && request.method === 'GET') {
