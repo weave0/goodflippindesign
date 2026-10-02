@@ -55,4 +55,28 @@ for (const entry of cohort) {
   assert.ok(row.canonicalRepository.known && row.canonicalProductionUrl.known && row.healthEvidenceProducer.known, entry.propertyId);
   assert.equal(row.dispatchReady, false);
 }
+
+// A declared machineContract.propertyId is authoritative even when the URL hostname points elsewhere.
+// The URL fallback applies only when no machine property declaration exists.
+const attributionInputs = {
+  registry: {
+    properties: [
+      { id: 'aiaimate.com', domain: 'aiaimate.com', deployment_status: 'live', operating: {} },
+      { id: 'globaldeets.com', domain: 'globaldeets.com', deployment_status: 'live', operating: {} },
+    ],
+  },
+  brands: { public: {} },
+  healthTargets: {
+    targets: [{
+      id: 'declared-aiaimate',
+      url: 'https://globaldeets.com/health',
+      checkType: 'page',
+      machineContract: { propertyId: 'aiaimate.com' },
+    }],
+  },
+};
+const attributed = await buildReadinessReport({ ...attributionInputs, generatedAt: AT });
+assert.deepEqual(attributed.properties.find((row) => row.propertyId === 'aiaimate.com').healthEvidenceProducer.targets, ['declared-aiaimate']);
+assert.deepEqual(attributed.properties.find((row) => row.propertyId === 'globaldeets.com').healthEvidenceProducer.targets, []);
+
 console.log('estate property readiness report checks passed');
