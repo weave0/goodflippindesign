@@ -1,0 +1,89 @@
+{
+  "schema": "gfd-estate-cohort-repo-facts-1",
+  "gatheredAt": "2026-10-01",
+  "source": "gh api repos/<repo> + git/trees/<default branch>?recursive=1 (read-only)",
+  "repositories": {
+    "weave0/CitizenApproved": {
+      "defaultBranch": "main",
+      "private": false,
+      "archived": false,
+      "markers": {
+        "functionsDir": false,
+        "workerJs": false,
+        "wranglerToml": true,
+        "nextConfig": true,
+        "dockerfile": false,
+        "publicDir": true,
+        "packageJson": true,
+        "srcDir": true,
+        "nextStaticExport": true
+      },
+      "existingHealthRoutes": []
+    },
+    "weave0/CultureSherpa": {
+      "defaultBranch": "main",
+      "private": true,
+      "archived": false,
+      "markers": {
+        "functionsDir": false,
+        "workerJs": false,
+        "wranglerToml": false,
+        "nextConfig": false,
+        "dockerfile": true,
+        "publicDir": false,
+        "packageJson": true,
+        "srcDir": false
+      },
+      "existingHealthRoutes": []
+    },
+    "weave0/globaldeets": {
+      "defaultBranch": "main",
+      "private": false,
+      "archived": false,
+      "markers": {
+        "functionsDir": true,
+        "workerJs": false,
+        "wranglerToml": true,
+        "nextConfig": false,
+        "dockerfile": false,
+        "publicDir": false,
+        "packageJson": true,
+        "srcDir": false
+      },
+      "existingHealthRoutes": []
+    },
+    "weave0/goodflippindesign": {
+      "defaultBranch": "main",
+      "private": false,
+      "archived": false,
+      "markers": {
+        "functionsDir": true,
+        "workerJs": true,
+        "wranglerToml": true,
+        "nextConfig": false,
+        "dockerfile": false,
+        "publicDir": false,
+        "packageJson": true,
+        "srcDir": false
+      },
+      "existingHealthRoutes": []
+    },
+    "weave0/good-flippin-vibes": {
+      "defaultBranch": "main",
+      "private": true,
+      "archived": false,
+      "markers": {
+        "functionsDir": true,
+        "workerJs": false,
+        "wranglerToml": true,
+        "nextConfig": false,
+        "dockerfile": false,
+        "publicDir": true,
+        "packageJson": true,
+        "srcDir": true
+      },
+      "existingHealthRoutes": []
+    }
+  },
+  "notes": "nextStaticExport read from next.config.js (output: export). CultureSherpa is a multi-surface monorepo (python/lambda/astro) with no Pages/Workers markers."
+}
