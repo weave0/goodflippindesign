@@ -57,26 +57,33 @@ for (const entry of cohort) {
 }
 
 // A declared machineContract.propertyId is authoritative even when the URL hostname points elsewhere.
-// The URL fallback applies only when no machine property declaration exists.
-const attributionInputs = {
-  registry: {
-    properties: [
-      { id: 'aiaimate.com', domain: 'aiaimate.com', deployment_status: 'live', operating: {} },
-      { id: 'globaldeets.com', domain: 'globaldeets.com', deployment_status: 'live', operating: {} },
-    ],
-  },
-  brands: { public: {} },
-  healthTargets: {
-    targets: [{
-      id: 'declared-aiaimate',
+// Use the canonical registry/brands/target contract so the real promotion gate remains in the test.
+const attributionInputs = inputs();
+const machineTemplate = attributionInputs.healthTargets.targets.find((target) => target.machineContract);
+assert.ok(machineTemplate, 'canonical health config has a machine-contract target');
+const mismatchedId = 'declared-aiaimate-mismatch';
+const healthTargetsWithMismatch = {
+  ...attributionInputs.healthTargets,
+  targets: [
+    ...attributionInputs.healthTargets.targets,
+    {
+      ...machineTemplate,
+      id: mismatchedId,
+      name: 'Declared AIAIMate mismatch fixture',
       url: 'https://globaldeets.com/health',
-      checkType: 'page',
-      machineContract: { propertyId: 'aiaimate.com' },
-    }],
-  },
+      sweepUrl: 'https://globaldeets.com/health',
+      machineContract: { ...machineTemplate.machineContract, propertyId: 'aiaimate.com' },
+    },
+  ],
 };
-const attributed = await buildReadinessReport({ ...attributionInputs, generatedAt: AT });
-assert.deepEqual(attributed.properties.find((row) => row.propertyId === 'aiaimate.com').healthEvidenceProducer.targets, ['declared-aiaimate']);
-assert.deepEqual(attributed.properties.find((row) => row.propertyId === 'globaldeets.com').healthEvidenceProducer.targets, []);
+const attributed = await buildReadinessReport({
+  ...attributionInputs,
+  healthTargets: healthTargetsWithMismatch,
+  generatedAt: AT,
+});
+const attributedAia = attributed.properties.find((row) => row.propertyId === 'aiaimate.com');
+const attributedGd = attributed.properties.find((row) => row.propertyId === 'globaldeets.com');
+assert.ok(attributedAia.healthEvidenceProducer.targets.includes(mismatchedId));
+assert.ok(!attributedGd.healthEvidenceProducer.targets.includes(mismatchedId));
 
 console.log('estate property readiness report checks passed');
