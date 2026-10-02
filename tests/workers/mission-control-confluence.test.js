@@ -117,6 +117,7 @@ function stubOutbound() {
     const url = String(input?.url || input);
     if (url.includes('api.clerk.com')) {
       return new Response(JSON.stringify({
+        id: 'sess_admin', status: 'active', user_id: 'user_admin',
         user: { id: 'user_admin', emailAddress: 'ops@example.com', publicMetadata: { role: 'admin' } },
       }), { status: 200 });
     }

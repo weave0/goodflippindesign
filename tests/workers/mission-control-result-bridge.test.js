@@ -84,6 +84,7 @@ async function leasedItem() {
     at: qualified.lastSeen, from: 'OBSERVED', to: 'QUALIFIED', reason: 'test', actor: 'test', detail: {},
   });
   vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+    id: 'sess_admin', status: 'active', user_id: 'user_admin',
     user: { id: 'user_admin', emailAddress: 'ops@example.com', publicMetadata: { role: 'admin' } },
   }), { status: 200 })));
   const id = encodeURIComponent(qualified.workItemId);
@@ -350,6 +351,7 @@ describe('lease token and lease minting', () => {
       at: qualified.lastSeen, from: 'OBSERVED', to: 'QUALIFIED', reason: 'test', actor: 'test', detail: {},
     });
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      id: 'sess_admin', status: 'active', user_id: 'user_admin',
       user: { id: 'user_admin', emailAddress: 'ops@example.com', publicMetadata: { role: 'admin' } },
     }), { status: 200 })));
     const id = encodeURIComponent(qualified.workItemId);

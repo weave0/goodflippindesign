@@ -1426,6 +1426,13 @@
                     <p class="mc-status" id="mc-status-line">Loading the estate work queue…</p>
                     <div class="mc-headline" id="mc-headline"></div>
                     <p class="mc-evidence-note" id="mc-evidence-note"></p>
+                    <details class="panel mb-08">
+                        <summary>Production readiness</summary>
+                        <p class="mc-evidence-note">Inspect the running release, connection readiness, and blockers. This check grants no investigation or deployment authority.</p>
+                        <button class="btn btn-secondary" id="mc-readiness-btn" type="button">Check production readiness</button>
+                        <p id="mc-readiness-status" role="status">Not checked this session.</p>
+                        <pre id="mc-readiness-report" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+                    </details>
 
                     <article class="panel mb-08" aria-labelledby="mc-diagnostics-heading">
                         <div class="section-head">
