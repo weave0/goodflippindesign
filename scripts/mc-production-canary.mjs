@@ -111,8 +111,8 @@ try {
 
   // ---- 3. durable intent + claim, 4. signed lease --------------------------------------------------------------------------------
   const dispatched = await admin('POST', itemRoute(workItemId, 'dispatch'), {});
-  if (!check('durable dispatch intent committed and claimed (attempt 1)', dispatched.status === 200 && dispatched.json.dispatch.attempt === 1, { status: dispatched.status, code: dispatched.json?.code })) throw new Error('dispatch failed');
-  const { dispatch } = dispatched.json;
+  if (!check('durable dispatch intent committed and claimed (attempt 1)', dispatched.status === 200 && dispatched.json.attempt === 1, { status: dispatched.status, code: dispatched.json?.code })) throw new Error('dispatch failed');
+  const dispatch = dispatched.json;
   evidence.investigation.effectId = dispatch.effectId;
   evidence.investigation.attempt = dispatch.attempt;
   const leased = await http('POST', itemRoute(workItemId, 'lease'), { token: WORKER, body: { effect_id: dispatch.effectId, attempt: dispatch.attempt } });
