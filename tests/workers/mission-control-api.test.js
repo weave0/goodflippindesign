@@ -22,6 +22,32 @@ const CONTRACT_KEY = 'mission-control-test-key';
 const RESULT_KEY = 'mission-control-result-key';
 const WORKER_TOKEN = 'mission-control-worker-token-test';
 
+const TEST_JWT_KID = 'clerk-test-kid';
+let testJwtPrivateKey;
+let testJwtPublicJwk;
+
+function base64UrlText(value) {
+  return btoa(value).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '');
+}
+
+function base64UrlBytes(bytes) {
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '');
+}
+
+async function signedToken(payload) {
+  const header = base64UrlText(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: TEST_JWT_KID }));
+  const body = base64UrlText(JSON.stringify(payload));
+  const signingInput = `${header}.${body}`;
+  const signature = new Uint8Array(await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    testJwtPrivateKey,
+    new TextEncoder().encode(signingInput)
+  ));
+  return `${signingInput}.${base64UrlBytes(signature)}`;
+}
+
 function token(payload) {
   const body = btoa(JSON.stringify(payload)).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '');
   return `header.${body}.signature`;
@@ -137,6 +163,20 @@ function call(path, { method = 'GET', auth, workerAuth, body, envOverrides } = {
 }
 
 beforeAll(async () => {
+  const pair = await crypto.subtle.generateKey({
+    name: 'RSASSA-PKCS1-v1_5',
+    modulusLength: 2048,
+    publicExponent: new Uint8Array([1, 0, 1]),
+    hash: 'SHA-256',
+  }, true, ['sign', 'verify']);
+  testJwtPrivateKey = pair.privateKey;
+  testJwtPublicJwk = {
+    ...await crypto.subtle.exportKey('jwk', pair.publicKey),
+    kid: TEST_JWT_KID,
+    alg: 'RS256',
+    use: 'sig',
+  };
+
   await ensureWorkItemSchema(env.DB);
   await env.DB.prepare('DELETE FROM mc_work_item_events').run();
   await env.DB.prepare('DELETE FROM mc_work_item_leases').run();
@@ -150,17 +190,74 @@ afterEach(() => {
 });
 
 describe('mission control route authentication', () => {
-  it('loads the user from a verified Clerk Backend API Session', async () => {
-    const fetchMock = vi.fn(async (url) => {
-      if (String(url).includes('/sessions/')) return Response.json({
-        id: 'sess_test', status: 'active', user_id: 'user_admin',
-      });
-      expect(String(url)).toBe('https://api.clerk.com/v1/users/user_admin');
+  it('verifies a Clerk JWT through JWKS, then confirms the active Backend API Session', async () => {
+    const jwt = await signedToken({
+      sid: 'sess_test',
+      sub: 'user_admin',
+      exp: Math.floor(Date.now() / 1000) + 60,
+      azp: 'https://goodflippindesign.com',
+    });
+    const fetchMock = vi.fn(async (url, init = {}) => {
+      const href = String(url);
+      if (href === 'https://api.clerk.com/v1/jwks') {
+        expect(init.headers?.Authorization).toBe(`Bearer ${SECRET}`);
+        return Response.json({ keys: [testJwtPublicJwk] });
+      }
+      if (href === 'https://api.clerk.com/v1/sessions/sess_test') {
+        expect(init.method).toBeUndefined();
+        return Response.json({ id: 'sess_test', status: 'active', user_id: 'user_admin' });
+      }
+      expect(href).toBe('https://api.clerk.com/v1/users/user_admin');
       return Response.json({ id: 'user_admin', public_metadata: { role: 'admin' } });
     });
     vi.stubGlobal('fetch', fetchMock);
-    const verified = await verifyClerkSessionStrict(token({ sid: 'sess_test', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 60 }), SECRET);
+
+    const verified = await verifyClerkSessionStrict(jwt, SECRET, {
+      authorizedParties: ['https://goodflippindesign.com'],
+    });
+
     expect(verified?.publicMetadata.role).toBe('admin');
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/verify'))).toBe(false);
+  });
+
+  it('rejects a cryptographically invalid Clerk JWT without falling back to session verification', async () => {
+    const payload = {
+      sid: 'sess_test',
+      sub: 'user_admin',
+      exp: Math.floor(Date.now() / 1000) + 60,
+    };
+    const valid = await signedToken(payload);
+    const [header, _body, signature] = valid.split('.');
+    const tamperedBody = base64UrlText(JSON.stringify({ ...payload, sub: 'user_attacker' }));
+    const tampered = `${header}.${tamperedBody}.${signature}`;
+    const fetchMock = vi.fn(async (url) => {
+      expect(String(url)).toBe('https://api.clerk.com/v1/jwks');
+      return Response.json({ keys: [testJwtPublicJwk] });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    expect(await verifyClerkSessionStrict(tampered, SECRET)).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps revoked sessions fail-closed after successful JWT signature verification', async () => {
+    const jwt = await signedToken({
+      sid: 'sess_test',
+      sub: 'user_admin',
+      exp: Math.floor(Date.now() / 1000) + 60,
+    });
+    const fetchMock = vi.fn(async (url) => {
+      const href = String(url);
+      if (href === 'https://api.clerk.com/v1/jwks') return Response.json({ keys: [testJwtPublicJwk] });
+      if (href === 'https://api.clerk.com/v1/sessions/sess_test') {
+        return Response.json({ id: 'sess_test', status: 'revoked', user_id: 'user_admin' });
+      }
+      throw new Error(`unexpected fetch ${href}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    expect(await verifyClerkSessionStrict(jwt, SECRET)).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
