@@ -63,8 +63,7 @@ function idState(value) {
 }
 
 function tokenState(value) {
-  if (!nonBlank(value)) return 'missing';
-  return strongTokenBytes(value) ? 'present' : 'invalid';
+  return nonBlank(value) ? 'present' : 'missing';
 }
 
 export async function bindingReadiness(env) {
