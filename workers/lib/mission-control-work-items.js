@@ -320,7 +320,10 @@ export function applyObservation(existing, observation) {
 
   if (existing.state === 'RESOLVED') {
     const resolvedAt = parseInstant(existing.resolvedAt, 'resolvedAt');
-    if (observedAt > resolvedAt) {
+    // Resolution is valid only when healthy evidence is strictly newer than every failing observation.
+    // Therefore a degraded observation at the exact resolution instant invalidates that resolution too.
+    // This makes equal-time healthy/degraded races converge regardless of which writer wins the CAS first.
+    if (observedAt >= resolvedAt) {
       next.state = 'RECURRENT';
       next.recurrenceCount = Number(existing.recurrenceCount || 0) + 1;
       next.resolvedAt = null;
