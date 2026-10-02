@@ -174,6 +174,12 @@ describe('mission control route authentication', () => {
     vi.stubGlobal('fetch', fetchMock);
     expect(await verifyClerkSessionStrict(token({ sid: 'sess_test', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 60 }), SECRET)).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    fetchMock.mockClear();
+    fetchMock.mockImplementation(async () => Response.json({ ...session,
+      user: { id: 'user_admin', public_metadata: { role: 'admin' } },
+    }));
+    expect(await verifyClerkSessionStrict(token({ sid: 'sess_test', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 60 }), SECRET)).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it.each([403, 200])('rejects a failed or mismatched user lookup (HTTP %i)', async (status) => {
@@ -191,6 +197,7 @@ describe('mission control route authentication', () => {
     vi.stubGlobal('fetch', vi.fn(async (url) => {
       if (String(url).includes('/sessions/')) {
         return new Response(JSON.stringify({
+          id: 'sess_user_admin', status: 'active', user_id: 'user_admin',
           user: { id: 'user_admin', emailAddress: 'ops@example.com', publicMetadata: { role: 'admin' } },
         }), { status: 200 });
       }
@@ -221,6 +228,7 @@ describe('mission control route authentication', () => {
     vi.stubGlobal('fetch', vi.fn(async (url) => {
       expect(String(url)).not.toContain('/users/');
       return new Response(JSON.stringify({
+        id: 'sess_user_member', status: 'active', user_id: 'user_member',
         user: { id: 'user_member', emailAddress: 'member@example.com', publicMetadata: { role: 'member' } },
       }), { status: 200 });
     }));
@@ -251,6 +259,7 @@ describe('mission control route authentication', () => {
       const target = String(url);
       if (target.includes('/sessions/')) {
         return new Response(JSON.stringify({
+          id: 'sess_user_admin', status: 'active', user_id: 'user_admin',
           user: { id: 'user_admin', emailAddress: 'ops@example.com', publicMetadata: { role: 'admin' } },
         }), { status: 200 });
       }
@@ -283,6 +292,7 @@ describe('mission control route authentication', () => {
       const target = String(url);
       if (target.includes('/sessions/')) {
         return new Response(JSON.stringify({
+          id: 'sess_user_admin', status: 'active', user_id: 'user_admin',
           user: { id: 'user_admin', emailAddress: 'ops@example.com', publicMetadata: { role: 'admin' } },
         }), { status: 200 });
       }
@@ -347,6 +357,7 @@ describe('investigation seam', () => {
     });
 
     vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+      id: 'sess_user_admin', status: 'active', user_id: 'user_admin',
       user: { id: 'user_admin', emailAddress: 'ops@example.com', publicMetadata: { role: 'admin' } },
     }), { status: 200 })));
 

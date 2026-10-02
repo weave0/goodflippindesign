@@ -83,6 +83,7 @@ async function qualifiedHealthItem() {
 
 function adminFetchStub() {
   vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+    id: 'sess_admin', status: 'active', user_id: 'user_admin',
     user: { id: 'user_admin', emailAddress: 'ops@example.com', publicMetadata: { role: 'admin' } },
   }), { status: 200 })));
 }

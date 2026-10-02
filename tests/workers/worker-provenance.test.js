@@ -61,6 +61,7 @@ function stubClerk(role) {
   vi.stubGlobal('fetch', vi.fn(async (url) => {
     if (String(url).includes('/sessions/')) {
       return new Response(JSON.stringify({
+        id: 'sess_user_x', status: 'active', user_id: 'user_x',
         user: { id: 'user_x', emailAddress: 'ops@example.com', publicMetadata: { role } },
       }), { status: 200 });
     }

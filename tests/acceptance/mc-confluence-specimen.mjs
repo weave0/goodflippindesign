@@ -143,7 +143,7 @@ const issues = [];
 globalThis.fetch = async (input, init = {}) => {
   const url = String(input?.url || input);
   if (url.includes('api.clerk.com')) {
-    return new Response(JSON.stringify({ user: { id: 'user_specimen_admin', emailAddress: 'ops@example.com', publicMetadata: { role: 'admin' } } }), { status: 200 });
+    return new Response(JSON.stringify({ id: 'sess_specimen', status: 'active', user_id: 'user_specimen_admin', user: { id: 'user_specimen_admin', emailAddress: 'ops@example.com', publicMetadata: { role: 'admin' } } }), { status: 200 });
   }
   if (url.includes('api.github.com')) {
     const method = init.method || 'GET';
