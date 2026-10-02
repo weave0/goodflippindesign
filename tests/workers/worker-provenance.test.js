@@ -26,7 +26,7 @@ const BINDINGS = [
 ];
 
 function liveToken(sub) {
-  const body = btoa(JSON.stringify({ sid: `sess_${sub}`, sub, exp: Math.floor(Date.now() / 1000) + 3600 }))
+  const body = btoa(JSON.stringify({ sid: `sess_${sub}`, sub, azp: 'https://goodflippindesign.com', exp: Math.floor(Date.now() / 1000) + 3600 }))
     .replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '');
   return `header.${body}.signature`;
 }

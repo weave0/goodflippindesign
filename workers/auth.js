@@ -123,12 +123,6 @@ function getClerkSecretKey(hostname, env) {
 }
 
 /**
- * Verify Clerk session token
- * @param {string} token - JWT from Clerk
- * @param {string} secretKey - Clerk secret key for this app
- * @returns {object} - User object or null
- */
-/**
  * Decode one base64url JWT segment.
  */
 function decodeBase64UrlBytes(value) {
@@ -173,7 +167,10 @@ async function verifyClerkJwtSignature(token, secretKey, authorizedParties = [])
         || Number(payload.nbf) > now + CLERK_CLOCK_SKEW_SECONDS))) {
     return { state: 'invalid' };
   }
-  if (payload.azp && authorizedParties.length > 0 && !authorizedParties.includes(payload.azp)) {
+  // With an allowlist configured a missing/non-string azp is rejected, matching
+  // Clerk's own verifier; an absent claim must not bypass the origin restriction.
+  if (authorizedParties.length > 0
+      && (typeof payload.azp !== 'string' || !authorizedParties.includes(payload.azp))) {
     return { state: 'invalid' };
   }
 
@@ -215,14 +212,23 @@ async function verifyClerkJwtSignature(token, secretKey, authorizedParties = [])
   );
   if (!jwk) return { state: 'fallback', payload };
 
+  let key;
   try {
-    const key = await crypto.subtle.importKey(
+    key = await crypto.subtle.importKey(
       'jwk',
       jwk,
       { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
       false,
       ['verify']
     );
+  } catch {
+    // A malformed/unimportable key is an operational JWKS failure. Clerk can
+    // still authoritatively verify the token through the compatibility path.
+    return { state: 'fallback', payload };
+  }
+
+  // Everything from here on is cryptographic: any failure is terminal.
+  try {
     const verified = await crypto.subtle.verify(
       'RSASSA-PKCS1-v1_5',
       key,
@@ -231,9 +237,7 @@ async function verifyClerkJwtSignature(token, secretKey, authorizedParties = [])
     );
     return verified ? { state: 'verified', payload } : { state: 'invalid' };
   } catch {
-    // A malformed/unimportable key is an operational JWKS failure. Clerk can
-    // still authoritatively verify the token through the compatibility path.
-    return { state: 'fallback', payload };
+    return { state: 'invalid' };
   }
 }
 

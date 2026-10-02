@@ -27,7 +27,7 @@ function bearer(payload) {
   return `header.${body}.signature`;
 }
 
-const adminToken = () => bearer({ sid: 'sess_admin', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 3600 });
+const adminToken = () => bearer({ sid: 'sess_admin', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 3600, azp: 'https://goodflippindesign.com' });
 
 function testEnv(overrides = {}) {
   return {
