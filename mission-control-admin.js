@@ -271,4 +271,24 @@
   window.__adminPanels = window.__adminPanels || {};
   window.__adminPanels['mission-control'] = () => loadMissionControl(false);
   $('mc-refresh-btn')?.addEventListener('click', () => loadMissionControl(true));
+  $('mc-readiness-btn')?.addEventListener('click', async () => {
+    const button = $('mc-readiness-btn');
+    const status = $('mc-readiness-status');
+    const report = $('mc-readiness-report');
+    button.disabled = true;
+    status.textContent = 'Checking the running production runtime…';
+    report.textContent = '';
+    try {
+      if (typeof window.__adminApi !== 'function') throw new Error('Admin session helper is unavailable');
+      const value = await window.__adminApi('/api/mission-control/provenance');
+      status.textContent = value.ready === true
+        ? 'Runtime bindings are ready. The full production preflight is still required before investigation.'
+        : 'Runtime readiness is blocked. See the reported blockers below.';
+      report.textContent = JSON.stringify(value, null, 2);
+    } catch (error) {
+      status.textContent = `Readiness unavailable: ${error?.message || 'request failed'}. No all-clear is implied.`;
+    } finally {
+      button.disabled = false;
+    }
+  });
 })();
