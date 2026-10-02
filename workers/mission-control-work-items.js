@@ -320,6 +320,34 @@ export function issueInvestigation(item, contract) {
 }
 
 /**
+ * Explicit recovery for an INVESTIGATION_READY item whose durable dispatch intent was invalidated
+ * by a later observation before any lease was minted. The outbox must already have abandoned the
+ * stale intent before this is called. Recovery never reuses the signed contract: it returns the
+ * item to QUALIFIED so the operator must issue a fresh contract (new request/digest) and intent.
+ */
+export function recoverStaleDispatch(item, at = new Date().toISOString()) {
+  if (item.state !== 'INVESTIGATION_READY' || item.activeLease) {
+    throw new WorkItemError(
+      'illegal_transition',
+      'Only an investigation-ready item without a lease can recover a stale dispatch',
+      409,
+    );
+  }
+  const next = {
+    ...item,
+    state: 'QUALIFIED',
+    resumeState: null,
+    lifecycleVersion: Number(item.lifecycleVersion || 0) + 1,
+  };
+  try {
+    validateWorkItemProjection(next, { now: at });
+  } catch (error) {
+    throw new WorkItemError('illegal_transition', error.message, 409);
+  }
+  return next;
+}
+
+/**
  * Explicit, proof-gated recovery for the single-attempt bridge. Only an INVESTIGATING item whose
  * active lease has provably expired (expiresAt <= at) may be abandoned. It releases exactly that
  * lease and returns the item to QUALIFIED -- the state from which a *fresh* signed contract can
