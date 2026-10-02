@@ -7,7 +7,7 @@
  */
 
 import { projectMissionControlOperations } from './lib/mission-control-operations.js';
-import { claimDispatch, ensureOutboxSchema, planEffect } from './lib/mission-control-outbox.js';
+import { abandonEffect, claimDispatch, ensureOutboxSchema, planEffect } from './lib/mission-control-outbox.js';
 import { resolveLeaseAuthority } from './lib/mission-control-lease-authority.js';
 import {
   LEASE_PURPOSE,
@@ -30,6 +30,7 @@ import {
   createD1WorkItemStore,
   ensureWorkItemSchema,
   issueInvestigation,
+  recoverStaleDispatch,
   mapWorkItemError,
   operatorTransition,
   qualifyFromRegistry,
@@ -455,31 +456,120 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
         throw new WorkItemError('illegal_transition', 'Only an investigation-ready item with a signed contract can be dispatched', 409);
       }
       await ensureOutboxSchema(env.DB);
-      const planned = await planEffect(env.DB, {
-        workItemId: item.workItemId,
-        requestedLifecycleVersion: item.lifecycleVersion,
-        effectType: 'investigation_dispatch',
-        target: `fwomps:${item.propertyId}`,
-        candidateDigest: item.investigation.digest,
-        payload: {
-          summary: 'dispatch one bounded read-only investigation',
-          propertyId: item.propertyId,
-          findingKey: item.findingKey,
-          profileId: item.investigationProfile,
-        },
-      });
+      let planned;
+      try {
+        planned = await planEffect(env.DB, {
+          workItemId: item.workItemId,
+          requestedLifecycleVersion: item.lifecycleVersion,
+          effectType: 'investigation_dispatch',
+          target: `fwomps:${item.propertyId}`,
+          candidateDigest: item.investigation.digest,
+          payload: {
+            summary: 'dispatch one bounded read-only investigation',
+            propertyId: item.propertyId,
+            findingKey: item.findingKey,
+            profileId: item.investigationProfile,
+          },
+        });
+      } catch (error) {
+        if (error?.code === 'stale_version') {
+          throw new WorkItemError(
+            'stale_dispatch',
+            'A newer observation invalidated this dispatch intent; recover it, then issue a fresh signed investigation',
+            409,
+          );
+        }
+        throw error;
+      }
       const claim = await claimDispatch(env.DB, planned.effect.effectId);
       if (!claim.permit) {
+        if (claim.reason === 'stale_lifecycle') {
+          throw new WorkItemError(
+            'stale_dispatch',
+            'A newer observation invalidated this dispatch intent; recover it, then issue a fresh signed investigation',
+            409,
+          );
+        }
         throw new WorkItemError('dispatch_not_claimable', `dispatch intent cannot be claimed now (${claim.reason || 'unavailable'})`, 409);
       }
       return jsonResponse({
-        dispatch: {
-          effectId: planned.effect.effectId,
-          attempt: claim.permit.attempt,
-          created: planned.created,
-          contractDigest: item.investigation.digest,
-          requestId: item.investigation.requestId,
-        },
+        effectId: planned.effect.effectId,
+        attempt: claim.permit.attempt,
+        created: planned.created,
+        contractDigest: item.investigation.digest,
+        requestId: item.investigation.requestId,
+      });
+    }
+
+    if (parts[2] === 'work-items' && parts.length === 5 && parts[4] === 'recover-dispatch' && request.method === 'POST') {
+      // A newer observation may advance the lifecycle after a dispatch claim but before /lease. Never
+      // weaken that fence. Once the abandoned claim is outside its visibility window, kill the stale
+      // intent and return to QUALIFIED so a fresh signed contract/new effect must be issued.
+      requireCanary(env);
+      requireOnlyKeys(await readJson(request), []);
+      const store = await workItemStore(env);
+      const id = decodeURIComponent(parts[3]);
+      const item = await store.get(id);
+      if (!item) throw new WorkItemError('not_found', 'Work item was not found', 404);
+      if (item.producer !== CANARY_PRODUCER || item.propertyId !== env.MISSION_CONTROL_CANARY) {
+        throw new WorkItemError('canary_ineligible', 'Only the canary work item of the enabled property can be recovered here', 403);
+      }
+      if (item.state !== 'INVESTIGATION_READY' || item.activeLease || !item.investigation?.digest) {
+        throw new WorkItemError('illegal_transition', 'Only a stale investigation-ready canary dispatch can be recovered', 409);
+      }
+      await ensureOutboxSchema(env.DB);
+      const effect = await env.DB.prepare(`
+        SELECT effect_id, status, requested_lifecycle_version, attempt_count, last_attempt_at, candidate_digest
+        FROM mc_effects
+        WHERE work_item_id = ? AND effect_type = 'investigation_dispatch' AND candidate_digest = ?
+        ORDER BY created_at DESC LIMIT 1
+      `).bind(item.workItemId, item.investigation.digest).first();
+      if (!effect || Number(effect.requested_lifecycle_version) === Number(item.lifecycleVersion)) {
+        throw new WorkItemError('dispatch_recovery_unavailable', 'No stale dispatch intent is recorded for this investigation', 409);
+      }
+      if (effect.status === 'COMMITTED' || effect.status === 'VERIFIED') {
+        throw new WorkItemError('dispatch_recovery_unavailable', 'A consumed dispatch intent cannot be recovered', 409);
+      }
+      const reason = 'stale dispatch invalidated by a newer observation';
+      if (effect.status === 'PLANNED') {
+        try {
+          await abandonEffect(env.DB, effect.effect_id, reason);
+        } catch (error) {
+          if (error?.code === 'in_flight') {
+            throw new WorkItemError(
+              'dispatch_recovery_wait',
+              'The stale dispatch claim may still be running; retry recovery after its visibility window',
+              409,
+            );
+          }
+          throw error;
+        }
+      }
+      const recovered = await mutate(store, id, async (current, at) => {
+        if (current.state !== 'INVESTIGATION_READY' || current.activeLease || current.investigation?.digest !== item.investigation.digest) {
+          throw new WorkItemError('version_conflict', 'The work item changed while stale dispatch recovery was running', 409);
+        }
+        const next = recoverStaleDispatch(current, at);
+        next.pendingEvent = {
+          at,
+          from: current.state,
+          to: next.state,
+          reason: 'stale dispatch abandoned; a fresh signed investigation is required',
+          actor: user.id,
+          detail: {
+            abandonment: {
+              reason: 'stale_dispatch',
+              effectId: effect.effect_id,
+              attempt: Number(effect.attempt_count || 0),
+            },
+          },
+        };
+        return next;
+      });
+      return jsonResponse({
+        workItem: recovered,
+        abandonedEffectId: effect.effect_id,
+        reissueRequired: true,
       });
     }
 
