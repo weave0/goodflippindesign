@@ -20,6 +20,9 @@ const hex = (bytes) => [...bytes].map((b) => b.toString(16).padStart(2, '0')).jo
 
 export async function keyCheckValue(keyBytes, role) {
   if (!KCV_ROLES.includes(role)) throw new Error('unknown KCV role');
+  // strong*Bytes returns null deliberately when material is not strong enough to publish a KCV.
+  // Treat that explicit marker as "no KCV"; malformed byte arrays still throw.
+  if (keyBytes == null) return undefined;
   if (!(keyBytes instanceof Uint8Array) || keyBytes.byteLength < 16) throw new Error('key too short for a check value');
   const key = await crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   const mac = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${KCV_LABEL_PREFIX}${role}`)));
