@@ -63,7 +63,8 @@ function idState(value) {
 }
 
 function tokenState(value) {
-  return nonBlank(value) ? 'present' : 'missing';
+  if (!nonBlank(value)) return 'missing';
+  return value.trim().length >= 16 ? 'present' : 'invalid';
 }
 
 export async function bindingReadiness(env) {
