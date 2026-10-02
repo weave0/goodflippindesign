@@ -352,7 +352,15 @@ function semanticEvents(events, limitations) {
   );
   const groups = new Map();
   for (const event of byId.kept) {
-    const key = [event.workItemId, event.eventType, event.fromState, event.toState, event.occurredAt?.text ?? ''].join('\0');
+    const key = [
+      event.workItemId,
+      event.eventType,
+      event.fromState,
+      event.toState,
+      event.occurredAt?.text ?? '',
+      event.evidenceDigest ?? '',
+      event.verdict ? signature(event.verdict) : '',
+    ].join('\0');
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(event);
   }
@@ -553,10 +561,7 @@ function maxAttempt(effects) {
 }
 
 /** The operator-facing lifecycle facts of one item, derived only from the item and its journaled verdicts. */
-function lifecycleFor(item, view, events, nowMs) {
-  const own = events
-    .filter((event) => event.workItemId === item.workItemId)
-    .sort((left, right) => (left.occurredAt?.millis ?? 0) - (right.occurredAt?.millis ?? 0) || left.eventId.localeCompare(right.eventId));
+function lifecycleFor(item, view, own, nowMs) {
   const cycleStart = own.map((event) => event.toState).lastIndexOf('RECURRENT');
   const verdicts = (cycleStart >= 0 ? own.slice(cycleStart) : own).map((event) => event.verdict).filter(Boolean);
   const accepted = verdicts.filter((verdict) => verdict.result === 'resolved' || verdict.result === 'still_failing');
@@ -827,10 +832,22 @@ export function projectMissionControlOperations(input) {
   const events = eventDeduped.kept;
   const leases = leaseDeduped.kept;
 
+  // Group/sort the durable event journal once. Passing the whole journal into every lifecycle card would
+  // make cockpit projection O(work items x events) as both tables grow.
+  const eventsByWorkItem = new Map();
+  for (const event of events) {
+    if (!eventsByWorkItem.has(event.workItemId)) eventsByWorkItem.set(event.workItemId, []);
+    eventsByWorkItem.get(event.workItemId).push(event);
+  }
+  for (const own of eventsByWorkItem.values()) {
+    own.sort((left, right) => (left.occurredAt?.millis ?? 0) - (right.occurredAt?.millis ?? 0) || left.eventId.localeCompare(right.eventId));
+  }
+
   const cards = items.map((item) => {
     const view = classifyItem(item, effects, leases, now.millis);
     view.otherEffects = effects.filter((effect) => effect.workItemId === item.workItemId && effect.status !== 'PLANNED' && effect.status !== 'FAILED');
-    return { item, view, card: cardFor(item, view, now.millis, events) };
+    const ownEvents = eventsByWorkItem.get(item.workItemId) || [];
+    return { item, view, ownEvents, card: cardFor(item, view, now.millis, ownEvents) };
   });
 
   let queues = emptyQueues();
@@ -844,12 +861,12 @@ export function projectMissionControlOperations(input) {
     let resolvedOutsideWindow = 0;
     let resolvedWithoutTimestamp = 0;
     for (const entry of cards) {
-      const { item, view, card } = entry;
+      const { item, view, card, ownEvents } = entry;
       if (view.reasons.some((reason) => HUMAN_REASONS.has(reason))) needsHuman.push(card);
       if (view.automation) activeAutomation.push(card);
       if (view.reasons.some((reason) => STALE_REASONS.has(reason))) stale.push(card);
       if (TERMINAL.has(item.state)) {
-        const stamp = terminalStamp(item, events);
+        const stamp = terminalStamp(item, ownEvents);
         if (!stamp) {
           resolvedWithoutTimestamp += 1;
           limitations.push(`work item ${item.workItemId} is ${item.state} without a terminal timestamp`);
@@ -858,7 +875,7 @@ export function projectMissionControlOperations(input) {
             ...card,
             terminalState: item.state,
             terminalAt: stamp.text,
-            causalEvidence: terminalEvidence(item, events),
+            causalEvidence: terminalEvidence(item, ownEvents),
             ageMs: now.millis - stamp.millis,
           });
         } else {

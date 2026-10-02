@@ -1,0 +1,73 @@
+{
+  "schema": "gfd-mc-host-binding-evidence-1",
+  "recordedAt": "2026-10-01",
+  "property": "aiaimate.com",
+  "repository": "weave0/aiaimate",
+  "profile": "web-health-readonly-v1",
+  "workspace": {
+    "name": "aiaimate",
+    "root": "C:\\Users\\brett\\fwomps-workspaces\\aiaimate",
+    "revision": "257210036bff85961a1b9c96c0572aabcaaa9cd4",
+    "clean": true
+  },
+  "host": {
+    "workerId": "fwomps-host-weave0-01",
+    "workerKeyId": "gfd-mc-result-2026-10",
+    "contractKeyIds": [
+      "gfd-mc-contract-2026-10"
+    ],
+    "deliveryOrigin": "https://goodflippindesign.com",
+    "deliveryBearerEnv": "GFD_MC_WORKER_TOKEN"
+  },
+  "configChange": {
+    "backup": "config.json.bak-20261001-155335",
+    "beforeDigest": "sha256:10b421de10de0c7dcf109d90605efba1a87da9f6a4d2597d98c80d72240eeaf9",
+    "afterDigest": "sha256:4aa885bdb67bc8f3015a81478b00fc3a86d9686884f743fb74e2b8ecc54973db",
+    "addedKeys": [
+      "mission_control.delivery.backoff_seconds",
+      "mission_control.delivery.bearer_env",
+      "mission_control.delivery.max_attempts",
+      "mission_control.delivery.result_base_url",
+      "mission_control.delivery.timeout_seconds",
+      "mission_control.enabled",
+      "mission_control.investigation_profiles.web-health-readonly-v1.commands",
+      "mission_control.investigation_profiles.web-health-readonly-v1.description",
+      "mission_control.investigation_profiles.web-health-readonly-v1.name",
+      "mission_control.investigation_profiles.web-health-readonly-v1.predicate",
+      "mission_control.max_attempts_cap",
+      "mission_control.max_contract_lifetime_seconds",
+      "mission_control.max_runtime_seconds_cap",
+      "mission_control.properties.aiaimate.com.investigation_profile",
+      "mission_control.properties.aiaimate.com.repository",
+      "mission_control.properties.aiaimate.com.workspace",
+      "mission_control.worker_id",
+      "mission_control.worker_key_id",
+      "workspaces.aiaimate.allow",
+      "workspaces.aiaimate.default_profile",
+      "workspaces.aiaimate.deny",
+      "workspaces.aiaimate.name",
+      "workspaces.aiaimate.root"
+    ],
+    "removedKeys": [],
+    "changedKeys": [],
+    "otherWorkspacesUntouched": [
+      "fwomps"
+    ]
+  },
+  "authority": {
+    "repairCommands": 0,
+    "registeredCommands": 1,
+    "predicate": "exit_nonzero_reproduces",
+    "otherPropertiesBound": [],
+    "deployCredentialsInProfile": false
+  },
+  "verification": {
+    "tool": "scripts/fwomps-aiaimate-host-binding.py --verify",
+    "passed": 14,
+    "total": 15,
+    "expectedFailure": "delivery bearer GFD_MC_WORKER_TOKEN absent from the verifying shell: production worker token not provisioned yet",
+    "promotionGate": "node scripts/property-promotion-gate.mjs --property aiaimate.com --fwomps-home ~/.fwomps => C1-C10 PASS, promotable=true, hostVerified=true"
+  },
+  "secrets": "The two shared 32-byte keys were generated locally, enrolled in the FWOMPS key store (key ids above) and never printed or committed. Production GFD does not hold them yet.",
+  "rollback": "cp ~/.fwomps/config.json.bak-20261001-155335 ~/.fwomps/config.json; remove mission-control/contract-keys/gfd-mc-contract-2026-10.json and mission-control/worker-keys/gfd-mc-result-2026-10.json"
+}

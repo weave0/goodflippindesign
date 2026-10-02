@@ -59,6 +59,9 @@ jobs:
       - name: Property promotion gate tests
         run: node --no-warnings tests/property-promotion-gate.test.mjs
 
+      - name: Estate property readiness report tests
+        run: node --no-warnings tests/estate-property-readiness-report.test.mjs
+
       - name: Validate TI work-sync live authority contract
         run: |
           node - <<'NODE'

@@ -128,4 +128,26 @@ describe('reverifyWorkItem', () => {
       state: 'RECURRENT', recurrenceCount: 1, workItemId: item.workItemId, firstSeen: item.firstSeen, diagnosis: null, resolvedAt: null,
     });
   });
+
+  it('equal-time degraded evidence invalidates a same-instant resolution regardless of writer order', async () => {
+    const item = await diagnosedItem();
+
+    // Healthy writer wins first: the equal-time degraded writer must reopen the lineage.
+    const { item: resolved } = reverifyWorkItem(item, healthy(10, D(3)), { since: t(5) });
+    const degradedSameInstant = { ...IDENTITY, observedAt: t(10), evidenceDigest: D(8) };
+    const recurrent = applyObservation(resolved, degradedSameInstant);
+    expect(recurrent).toMatchObject({
+      state: 'RECURRENT',
+      recurrenceCount: 1,
+      resolvedAt: null,
+      resolutionEvidenceDigest: null,
+      diagnosis: null,
+    });
+
+    // Degraded writer wins first: a healthy observation at that same instant is stale by the strict freshness fence.
+    const failingFirst = applyObservation(item, degradedSameInstant);
+    const retriedHealthy = reverifyWorkItem(failingFirst, healthy(10, D(9)), { since: t(5) });
+    expect(retriedHealthy.verdict.result).toBe('stale');
+    expect(retriedHealthy.item.state).toBe('DIAGNOSED');
+  });
 });
