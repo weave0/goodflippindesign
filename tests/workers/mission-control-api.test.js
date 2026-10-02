@@ -2,7 +2,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { env } from 'cloudflare:test';
 import { authorizeDispatch } from './dispatch-intent.js';
 
-import worker from '../../workers/auth.js';
+import worker, { verifyClerkSessionStrict } from '../../workers/auth.js';
 import { normalizeOperatorView } from '../../workers/mission-control-api.js';
 import {
   createObservedWorkItem,
@@ -150,6 +150,39 @@ afterEach(() => {
 });
 
 describe('mission control route authentication', () => {
+  it('loads the user from a verified Clerk Backend API Session', async () => {
+    const fetchMock = vi.fn(async (url) => {
+      if (String(url).includes('/sessions/')) return Response.json({
+        id: 'sess_test', status: 'active', user_id: 'user_admin',
+      });
+      expect(String(url)).toBe('https://api.clerk.com/v1/users/user_admin');
+      return Response.json({ id: 'user_admin', public_metadata: { role: 'admin' } });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const verified = await verifyClerkSessionStrict(token({ sid: 'sess_test', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 60 }), SECRET);
+    expect(verified?.publicMetadata.role).toBe('admin');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    { id: 'sess_other', status: 'active', user_id: 'user_admin' },
+    { id: 'sess_test', status: 'revoked', user_id: 'user_admin' },
+    { id: 'sess_test', status: 'active', user_id: 'user_other' },
+    { id: 'sess_test', status: 'active' },
+  ])('rejects an inconsistent verified session without fetching a user: %j', async (session) => {
+    const fetchMock = vi.fn(async () => Response.json(session));
+    vi.stubGlobal('fetch', fetchMock);
+    expect(await verifyClerkSessionStrict(token({ sid: 'sess_test', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 60 }), SECRET)).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([403, 200])('rejects a failed or mismatched user lookup (HTTP %i)', async (status) => {
+    vi.stubGlobal('fetch', vi.fn(async (url) => String(url).includes('/sessions/')
+      ? Response.json({ id: 'sess_test', status: 'active', user_id: 'user_admin' })
+      : Response.json({ id: 'user_other' }, { status })));
+    expect(await verifyClerkSessionStrict(token({ sid: 'sess_test', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 60 }), SECRET)).toBeNull();
+  });
+
   it('limits the machine bearer to worker-only intake routes', async () => {
     const workerRead = await call('/api/mission-control', { workerAuth: WORKER_TOKEN });
     expect(workerRead.status).toBe(401);

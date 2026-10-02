@@ -153,7 +153,20 @@ export async function verifyClerkSessionStrict(token, secretKey) {
     if (!response.ok) return null;
 
     const session = await response.json();
-    const user = session?.user;
+    // Clerk's Backend API returns a Session with user_id, not an embedded User.
+    // Fetch metadata only after the token has been verified, using the identity
+    // returned by Clerk rather than an unverified JWT subject.
+    let user = session?.user;
+    if (!user) {
+      if (session?.id !== sessionId || session?.status !== 'active'
+          || typeof session?.user_id !== 'string' || session.user_id !== payload.sub) return null;
+      const userResponse = await fetch(`https://api.clerk.com/v1/users/${encodeURIComponent(session.user_id)}`, {
+        headers: { 'Authorization': `Bearer ${secretKey}` },
+      });
+      if (!userResponse.ok) return null;
+      user = await userResponse.json();
+      if (user?.id !== session.user_id) return null;
+    }
     if (!user?.id) return null;
     return {
       id: user.id,
