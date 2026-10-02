@@ -1,0 +1,101 @@
+{
+  "contractName": "gfd-mc-production-preflight",
+  "schemaVersion": "2.0.0",
+  "runtimeTarget": {
+    "kind": "cloudflare-pages-advanced-worker",
+    "project": "goodflippindesign",
+    "origin": "https://goodflippindesign.com"
+  },
+  "expectedSha": "4f98eb537488e16bf96a5a00218333a225f19198",
+  "cloudflare": {
+    "deploymentId": "044893ec-f144-4eab-8ac3-0a4ba5958e9a",
+    "environment": "production",
+    "branch": "main",
+    "commitHash": "4f98eb537488e16bf96a5a00218333a225f19198",
+    "stage": "deploy:success",
+    "completedOn": "2026-10-02T04:07:22.372Z",
+    "createdOn": "2026-10-02T04:06:16.384Z",
+    "url": "https://044893ec.goodflippindesign.pages.dev"
+  },
+  "runtimeRelease": null,
+  "hostIdentity": null,
+  "checks": {
+    "P0": {
+      "name": "local_checkout_is_expected",
+      "status": "PASS",
+      "reason": "checkout == expected == 4f98eb537488e16bf96a5a00218333a225f19198, reachable from origin/main"
+    },
+    "P1": {
+      "name": "cloudflare_deployment_healthy",
+      "status": "PASS",
+      "reason": "Pages project goodflippindesign: canonical production deployment 044893ec-f144-4eab-8ac3-0a4ba5958e9a (main) deployed 2026-10-02T04:07:22.372Z; weave0/goodflippindesign; domain goodflippindesign.com"
+    },
+    "P2": {
+      "name": "cloudflare_commit_matches",
+      "status": "PASS",
+      "reason": "canonical deployment 044893ec-f144-4eab-8ac3-0a4ba5958e9a commit == expected"
+    },
+    "P3": {
+      "name": "runtime_endpoint_reachable",
+      "status": "FAIL",
+      "reason": "provenance endpoint unreachable: GFD_OPERATOR_TOKEN is not set"
+    },
+    "P4": {
+      "name": "runtime_stamp_matches",
+      "status": "BLOCKED",
+      "reason": "blocked by P3"
+    },
+    "P5": {
+      "name": "mission_control_bindings",
+      "status": "BLOCKED",
+      "reason": "blocked by P3"
+    },
+    "P6": {
+      "name": "worker_identity_matches",
+      "status": "BLOCKED",
+      "reason": "blocked by P3"
+    },
+    "P7": {
+      "name": "fwomps_host_verified",
+      "status": "PASS",
+      "reason": "C1-C10 all PASS with the real host read (workspace, repository and read-only profile bound)"
+    },
+    "P8": {
+      "name": "sole_dispatch_ready",
+      "status": "PASS",
+      "reason": "aiaimate.com is the sole dispatch-ready property; the other 24 remain blocked"
+    },
+    "P9": {
+      "name": "protocol_versions_match",
+      "status": "BLOCKED",
+      "reason": "blocked by P3"
+    },
+    "P10": {
+      "name": "read_only_authority",
+      "status": "BLOCKED",
+      "reason": "blocked by P3"
+    },
+    "P11": {
+      "name": "canonical_d1",
+      "status": "BLOCKED",
+      "reason": "blocked by P3"
+    }
+  },
+  "canStartInvestigation": false,
+  "failing": [
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P9",
+    "P10",
+    "P11"
+  ],
+  "authority": {
+    "mutates": false,
+    "repair": false,
+    "deploy": false,
+    "repositoryWrite": false
+  },
+  "observedAt": "2026-10-02T04:08:24.045Z"
+}

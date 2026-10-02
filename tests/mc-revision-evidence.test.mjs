@@ -152,6 +152,13 @@ assert.ok(failed(mut(canary, (f) => { delete f.repositoryMutation; })).includes(
   assert.ok(JSON.stringify(clean).includes(RESULT_DIGEST));
   assert.equal(auditForSecrets(`sha256:${'a'.repeat(64)} ${GFD}`).clean, true);
   assert.equal(auditForSecrets(`${'a'.repeat(64)}`).clean, false);
+  for (const namespace of ['gfdwi_v1_', 'gfdeffect_v1_']) {
+    assert.equal(auditForSecrets(`${namespace}${'a'.repeat(64)}`).clean, true, 'canonical content digest ID');
+    assert.equal(auditForSecrets(`${namespace}${'a'.repeat(64)}`, ['a'.repeat(64)]).clean, false, 'known secrets cannot hide as identifiers');
+  }
+  for (const prefix of ['secret_', 'gfdwi_v2_', 'gfdeffect_v2_', 'gfdwi_', 'gfdeffect_']) {
+    assert.equal(auditForSecrets(`${prefix}${'a'.repeat(64)}`).clean, false, 'unrecognized prefixes do not exempt key-shaped data');
+  }
 }
 
 // --- tamper evidence ----------------------------------------------------------------------------------------------
