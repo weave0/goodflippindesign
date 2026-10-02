@@ -32,7 +32,7 @@ const WORKER_TOKEN = 'mission-control-worker-token-test';
 const REVISION = '257210036bff85961a1b9c96c0572aabcaaa9cd4';
 
 const bearer = (payload) => `header.${btoa(JSON.stringify(payload)).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '')}.signature`;
-const adminToken = () => bearer({ sid: 'sess_admin', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 3600 });
+const adminToken = () => bearer({ sid: 'sess_admin', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 3600, azp: 'https://goodflippindesign.com' });
 
 function testEnv() {
   return {

@@ -22,6 +22,32 @@ const CONTRACT_KEY = 'mission-control-test-key';
 const RESULT_KEY = 'mission-control-result-key';
 const WORKER_TOKEN = 'mission-control-worker-token-test';
 
+const TEST_JWT_KID = 'clerk-test-kid';
+let testJwtPrivateKey;
+let testJwtPublicJwk;
+
+function base64UrlText(value) {
+  return btoa(value).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '');
+}
+
+function base64UrlBytes(bytes) {
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '');
+}
+
+async function signedToken(payload, headerClaims = {}) {
+  const header = base64UrlText(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: TEST_JWT_KID, ...headerClaims }));
+  const body = base64UrlText(JSON.stringify(payload));
+  const signingInput = `${header}.${body}`;
+  const signature = new Uint8Array(await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    testJwtPrivateKey,
+    new TextEncoder().encode(signingInput)
+  ));
+  return `${signingInput}.${base64UrlBytes(signature)}`;
+}
+
 function token(payload) {
   const body = btoa(JSON.stringify(payload)).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '');
   return `header.${body}.signature`;
@@ -32,6 +58,7 @@ function liveToken(sub) {
     sid: `sess_${sub}`,
     sub,
     exp: Math.floor(Date.now() / 1000) + 3600,
+    azp: 'https://goodflippindesign.com',
   });
 }
 
@@ -137,6 +164,20 @@ function call(path, { method = 'GET', auth, workerAuth, body, envOverrides } = {
 }
 
 beforeAll(async () => {
+  const pair = await crypto.subtle.generateKey({
+    name: 'RSASSA-PKCS1-v1_5',
+    modulusLength: 2048,
+    publicExponent: new Uint8Array([1, 0, 1]),
+    hash: 'SHA-256',
+  }, true, ['sign', 'verify']);
+  testJwtPrivateKey = pair.privateKey;
+  testJwtPublicJwk = {
+    ...await crypto.subtle.exportKey('jwk', pair.publicKey),
+    kid: TEST_JWT_KID,
+    alg: 'RS256',
+    use: 'sig',
+  };
+
   await ensureWorkItemSchema(env.DB);
   await env.DB.prepare('DELETE FROM mc_work_item_events').run();
   await env.DB.prepare('DELETE FROM mc_work_item_leases').run();
@@ -150,18 +191,207 @@ afterEach(() => {
 });
 
 describe('mission control route authentication', () => {
-  it('loads the user from a verified Clerk Backend API Session', async () => {
-    const fetchMock = vi.fn(async (url) => {
-      if (String(url).includes('/sessions/')) return Response.json({
-        id: 'sess_test', status: 'active', user_id: 'user_admin',
-      });
-      expect(String(url)).toBe('https://api.clerk.com/v1/users/user_admin');
+  it('verifies a Clerk JWT through JWKS, then confirms the active Backend API Session', async () => {
+    const jwt = await signedToken({
+      sid: 'sess_test',
+      sub: 'user_admin',
+      exp: Math.floor(Date.now() / 1000) + 60,
+      azp: 'https://goodflippindesign.com',
+    });
+    const fetchMock = vi.fn(async (url, init = {}) => {
+      const href = String(url);
+      if (href === 'https://api.clerk.com/v1/jwks') {
+        expect(init.headers?.Authorization).toBe(`Bearer ${SECRET}`);
+        return Response.json({ keys: [testJwtPublicJwk] });
+      }
+      if (href === 'https://api.clerk.com/v1/sessions/sess_test') {
+        expect(init.method).toBeUndefined();
+        return Response.json({ id: 'sess_test', status: 'active', user_id: 'user_admin' });
+      }
+      expect(href).toBe('https://api.clerk.com/v1/users/user_admin');
       return Response.json({ id: 'user_admin', public_metadata: { role: 'admin' } });
     });
     vi.stubGlobal('fetch', fetchMock);
-    const verified = await verifyClerkSessionStrict(token({ sid: 'sess_test', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 60 }), SECRET);
+
+    const verified = await verifyClerkSessionStrict(jwt, SECRET, {
+      authorizedParties: ['https://goodflippindesign.com'],
+    });
+
     expect(verified?.publicMetadata.role).toBe('admin');
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/verify'))).toBe(false);
+  });
+
+  it('rejects a cryptographically invalid Clerk JWT without falling back to session verification', async () => {
+    const payload = {
+      sid: 'sess_test',
+      sub: 'user_admin',
+      exp: Math.floor(Date.now() / 1000) + 60,
+    };
+    const valid = await signedToken(payload);
+    const [header, _body, signature] = valid.split('.');
+    const tamperedBody = base64UrlText(JSON.stringify({ ...payload, sub: 'user_attacker' }));
+    const tampered = `${header}.${tamperedBody}.${signature}`;
+    const fetchMock = vi.fn(async (url) => {
+      expect(String(url)).toBe('https://api.clerk.com/v1/jwks');
+      return Response.json({ keys: [testJwtPublicJwk] });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    expect(await verifyClerkSessionStrict(tampered, SECRET)).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps revoked sessions fail-closed after successful JWT signature verification', async () => {
+    const jwt = await signedToken({
+      sid: 'sess_test',
+      sub: 'user_admin',
+      exp: Math.floor(Date.now() / 1000) + 60,
+    });
+    const fetchMock = vi.fn(async (url) => {
+      const href = String(url);
+      if (href === 'https://api.clerk.com/v1/jwks') return Response.json({ keys: [testJwtPublicJwk] });
+      if (href === 'https://api.clerk.com/v1/sessions/sess_test') {
+        return Response.json({ id: 'sess_test', status: 'revoked', user_id: 'user_admin' });
+      }
+      throw new Error(`unexpected fetch ${href}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    expect(await verifyClerkSessionStrict(jwt, SECRET)).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  describe('Clerk JWT verification matrix', () => {
+    const ORIGIN = 'https://goodflippindesign.com';
+    const claims = (extra = {}) => ({
+      sid: 'sess_test', sub: 'user_admin', azp: ORIGIN,
+      exp: Math.floor(Date.now() / 1000) + 60, ...extra,
+    });
+    const verify = (jwt) => verifyClerkSessionStrict(jwt, SECRET, { authorizedParties: [ORIGIN] });
+    const newKeyPair = () => crypto.subtle.generateKey({
+      name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256',
+    }, true, ['sign', 'verify']);
+    const stub = ({ jwks, session, user } = {}) => {
+      const fetchMock = vi.fn(async (url) => {
+        const href = String(url);
+        if (href === 'https://api.clerk.com/v1/jwks') {
+          if (jwks instanceof Error) throw jwks;
+          return jwks ?? Response.json({ keys: [testJwtPublicJwk] });
+        }
+        if (href.endsWith('/verify')) {
+          return Response.json({ id: 'sess_test', status: 'active', user_id: 'user_admin', user: { id: 'user_admin', public_metadata: { role: 'admin' } } });
+        }
+        if (href.includes('/sessions/')) {
+          return session ?? Response.json({ id: 'sess_test', status: 'active', user_id: 'user_admin' });
+        }
+        return user ?? Response.json({ id: 'user_admin', public_metadata: { role: 'admin' } });
+      });
+      vi.stubGlobal('fetch', fetchMock);
+      return fetchMock;
+    };
+    const verifyCalls = (m) => m.mock.calls.filter(([u]) => String(u).endsWith('/verify')).length;
+
+    it('accepts a valid token', async () => {
+      stub();
+      expect((await verify(await signedToken(claims())))?.id).toBe('user_admin');
+    });
+
+    it.each([
+      ['wrong signature (other key)', async () => {
+        const other = await newKeyPair();
+        const input = `${base64UrlText(JSON.stringify({ alg: 'RS256', kid: TEST_JWT_KID }))}.${base64UrlText(JSON.stringify(claims()))}`;
+        const sig = new Uint8Array(await crypto.subtle.sign('RSASSA-PKCS1-v1_5', other.privateKey, new TextEncoder().encode(input)));
+        return `${input}.${base64UrlBytes(sig)}`;
+      }],
+      ['payload tampered after signing', async () => {
+        const [h, , sig] = (await signedToken(claims())).split('.');
+        return `${h}.${base64UrlText(JSON.stringify(claims({ sub: 'user_attacker' })))}.${sig}`;
+      }],
+      ['malformed signature segment', async () => {
+        const [h, b] = (await signedToken(claims())).split('.');
+        return `${h}.${b}.!!!not-base64url!!!`;
+      }],
+      ['empty signature segment', async () => {
+        const [h, b] = (await signedToken(claims())).split('.');
+        return `${h}.${b}.`;
+      }],
+      ['truncated signature', async () => (await signedToken(claims())).slice(0, -40)],
+      ['wrong algorithm (HS256)', () => signedToken(claims(), { alg: 'HS256' })],
+      ['alg none', () => signedToken(claims(), { alg: 'none' })],
+    ])('refuses %s and never reaches the legacy verifier', async (_name, build) => {
+      const fetchMock = stub();
+      expect(await verify(await build())).toBeNull();
+      expect(verifyCalls(fetchMock)).toBe(0);
+      expect(fetchMock.mock.calls.some(([u]) => String(u).includes('/users/'))).toBe(false);
+    });
+
+    it('refuses a known kid mapped to a different key (wrong kid) without fallback', async () => {
+      const other = await newKeyPair();
+      const otherJwk = { ...(await crypto.subtle.exportKey('jwk', other.publicKey)), kid: TEST_JWT_KID, alg: 'RS256', use: 'sig' };
+      const fetchMock = stub({ jwks: Response.json({ keys: [otherJwk] }) });
+      expect(await verify(await signedToken(claims()))).toBeNull();
+      expect(verifyCalls(fetchMock)).toBe(0);
+    });
+
+    it.each([
+      ['expired', { exp: Math.floor(Date.now() / 1000) - 60 }],
+      ['future nbf', { nbf: Math.floor(Date.now() / 1000) + 600 }],
+      ['wrong azp', { azp: 'https://evil.example' }],
+      ['missing azp', { azp: undefined }],
+      ['empty azp', { azp: '' }],
+      ['non-string azp', { azp: ['https://goodflippindesign.com'] }],
+      ['missing sid', { sid: undefined }],
+      ['missing sub', { sub: undefined }],
+    ])('refuses %s before any network call', async (_name, extra) => {
+      const fetchMock = stub();
+      expect(await verify(await signedToken(claims(extra)))).toBeNull();
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['inactive (ended) session', { id: 'sess_test', status: 'ended', user_id: 'user_admin' }],
+      ['revoked session', { id: 'sess_test', status: 'revoked', user_id: 'user_admin' }],
+      ['mismatched session id', { id: 'sess_other', status: 'active', user_id: 'user_admin' }],
+      ['mismatched session user vs verified sub', { id: 'sess_test', status: 'active', user_id: 'user_other' }],
+    ])('refuses %s', async (_name, session) => {
+      stub({ session: Response.json(session) });
+      expect(await verify(await signedToken(claims()))).toBeNull();
+    });
+
+    it('refuses a failed or wrong-ID user lookup', async () => {
+      stub({ user: new Response('no', { status: 500 }) });
+      expect(await verify(await signedToken(claims()))).toBeNull();
+      stub({ user: Response.json({ id: 'user_other' }) });
+      expect(await verify(await signedToken(claims()))).toBeNull();
+    });
+
+    it.each([
+      ['JWKS network failure', () => ({ jwks: new Error('network') })],
+      ['JWKS HTTP error', () => ({ jwks: new Response('x', { status: 503 }) })],
+      ['malformed JWKS JSON', () => ({ jwks: new Response('{not json') })],
+      ['JWKS without keys array', () => ({ jwks: Response.json({ keys: 'nope' }) })],
+      ['unknown kid', () => ({ jwks: Response.json({ keys: [{ ...testJwtPublicJwk, kid: 'other-kid' }] }) })],
+    ])('%s defers to the authoritative Clerk verifier, never trusting the payload alone', async (_name, opts) => {
+      const fetchMock = stub(opts());
+      expect((await verify(await signedToken(claims())))?.id).toBe('user_admin');
+      expect(verifyCalls(fetchMock)).toBe(1);
+    });
+
+    it('compat path still fails closed when Clerk refuses the token', async () => {
+      const fetchMock = vi.fn(async (url) => String(url).endsWith('/jwks')
+        ? new Response('x', { status: 503 })
+        : new Response('{}', { status: 401 }));
+      vi.stubGlobal('fetch', fetchMock);
+      expect(await verify(await signedToken(claims()))).toBeNull();
+      expect(fetchMock.mock.calls.some(([u]) => String(u).includes('/users/'))).toBe(false);
+    });
+
+    it.each(['', 'abc', 'a.b', 'a.b.c.d', 'a.!!.c'])('refuses malformed JWT %j', async (jwt) => {
+      const fetchMock = stub();
+      expect(await verify(jwt)).toBeNull();
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
   });
 
   it.each([

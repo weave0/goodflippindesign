@@ -26,7 +26,7 @@ const LATER = '2026-09-29T13:00:00.000Z';
 const EVEN_LATER = '2026-09-29T14:00:00.000Z';
 
 const bearer = (payload) => `header.${btoa(JSON.stringify(payload)).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '')}.signature`;
-const adminToken = () => bearer({ sid: 'sess_admin', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 3600 });
+const adminToken = () => bearer({ sid: 'sess_admin', sub: 'user_admin', exp: Math.floor(Date.now() / 1000) + 3600, azp: 'https://goodflippindesign.com' });
 
 const testEnv = () => ({
   ...env,
