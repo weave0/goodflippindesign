@@ -472,11 +472,60 @@ describe('mission control operations projection', () => {
     expect(view.queues.activeAutomation.map((card) => card.workItemId)).toEqual(['wi-held']);
   });
 
-  it('puts a DIAGNOSED item with no automation on the human queue as lifecycle_waiting', () => {
+  it('shows a DIAGNOSED item as awaiting reverification by the governed sweep, not as human work', () => {
     const view = project({ workItems: [item('wi-idle', { state: 'DIAGNOSED' })] });
-    const card = view.queues.needsHuman.find((entry) => entry.workItemId === 'wi-idle');
-    expect(card.reasons).toContain('lifecycle_waiting');
-    expect(view.queues.attention.map((entry) => entry.workItemId)).toContain('wi-idle');
+    const card = view.queues.activeAutomation.find((entry) => entry.workItemId === 'wi-idle');
+    expect(card.reasons).toContain('awaiting_reverification');
+    expect(card.reasons).not.toContain('lifecycle_waiting');
+    expect(view.queues.needsHuman.map((entry) => entry.workItemId)).not.toContain('wi-idle');
+  });
+
+  it('exposes lifecycle facts for every item, scoped to the current recurrence cycle', () => {
+    const verdict = (result, at) => JSON.stringify({ reverification: { result, observedAt: at, evidenceDigest: 'sha256:' + 'a'.repeat(64) } });
+    const view = project({
+      workItems: [item('wi-a', { state: 'DIAGNOSED', occurrenceCount: 3, diagnosis: { resultDigest: 'sha256:' + 'b'.repeat(64) } }), item('wi-b', { state: 'RECURRENT', recurrenceCount: 1 })],
+      events: [
+        { eventId: 'a-1', workItemId: 'wi-a', eventType: 'observation', toState: 'DIAGNOSED', occurredAt: '2026-09-29T11:00:00.000Z', detail_json: verdict('still_failing', '2026-09-29T11:00:00.000Z') },
+        { eventId: 'b-1', workItemId: 'wi-b', eventType: 'observation', toState: 'RESOLVED', occurredAt: '2026-09-28T11:00:00.000Z', detail_json: verdict('resolved', '2026-09-28T11:00:00.000Z') },
+        { eventId: 'b-2', workItemId: 'wi-b', eventType: 'transition', fromState: 'RESOLVED', toState: 'RECURRENT', occurredAt: '2026-09-29T09:00:00.000Z' },
+      ],
+    });
+    const byId = Object.fromEntries(view.items.map((entry) => [entry.workItemId, entry.lifecycle]));
+    expect(byId['wi-a']).toMatchObject({ occurrenceCount: 3, diagnosisAvailable: true, reverificationRequired: true, reverification: { result: 'still_failing' } });
+    expect(byId['wi-b']).toMatchObject({ recurrenceCount: 1, reverification: null, reverificationRequired: false });
+  });
+
+  it('preserves same-instant distinct reverification verdicts during semantic event deduplication', () => {
+    const at = '2026-09-29T11:00:00.000Z';
+    const verdict = (result, digest) => JSON.stringify({
+      reverification: { result, observedAt: at, evidenceDigest: digest },
+    });
+    const view = project({
+      workItems: [item('wi-race', { state: 'DIAGNOSED', occurrenceCount: 3, diagnosis: { resultDigest: 'sha256:' + 'b'.repeat(64) } })],
+      events: [
+        {
+          eventId: 'race-stale',
+          workItemId: 'wi-race',
+          eventType: 'observation',
+          toState: 'DIAGNOSED',
+          occurredAt: at,
+          evidenceDigest: 'sha256:' + '1'.repeat(64),
+          detail_json: verdict('stale', 'sha256:' + '1'.repeat(64)),
+        },
+        {
+          eventId: 'race-failing',
+          workItemId: 'wi-race',
+          eventType: 'observation',
+          toState: 'DIAGNOSED',
+          occurredAt: at,
+          evidenceDigest: 'sha256:' + '2'.repeat(64),
+          detail_json: verdict('still_failing', 'sha256:' + '2'.repeat(64)),
+        },
+      ],
+    });
+    const life = view.items.find((entry) => entry.workItemId === 'wi-race').lifecycle;
+    expect(life.reverification).toMatchObject({ result: 'still_failing', evidenceDigest: 'sha256:' + '2'.repeat(64) });
+    expect(life.lastVerdict).toMatchObject({ result: 'stale' });
   });
 
   it('applies the visibility timeout to an orphaned planned effect', () => {

@@ -55,4 +55,35 @@ for (const entry of cohort) {
   assert.ok(row.canonicalRepository.known && row.canonicalProductionUrl.known && row.healthEvidenceProducer.known, entry.propertyId);
   assert.equal(row.dispatchReady, false);
 }
+
+// A declared machineContract.propertyId is authoritative even when the URL hostname points elsewhere.
+// Use the canonical registry/brands/target contract so the real promotion gate remains in the test.
+const attributionInputs = inputs();
+const machineTemplate = attributionInputs.healthTargets.targets.find((target) => target.machineContract);
+assert.ok(machineTemplate, 'canonical health config has a machine-contract target');
+const mismatchedId = 'declared-aiaimate-mismatch';
+const healthTargetsWithMismatch = {
+  ...attributionInputs.healthTargets,
+  targets: [
+    ...attributionInputs.healthTargets.targets,
+    {
+      ...machineTemplate,
+      id: mismatchedId,
+      name: 'Declared AIAIMate mismatch fixture',
+      url: 'https://globaldeets.com/health',
+      sweepUrl: 'https://globaldeets.com/health',
+      machineContract: { ...machineTemplate.machineContract, propertyId: 'aiaimate.com' },
+    },
+  ],
+};
+const attributed = await buildReadinessReport({
+  ...attributionInputs,
+  healthTargets: healthTargetsWithMismatch,
+  generatedAt: AT,
+});
+const attributedAia = attributed.properties.find((row) => row.propertyId === 'aiaimate.com');
+const attributedGd = attributed.properties.find((row) => row.propertyId === 'globaldeets.com');
+assert.ok(attributedAia.healthEvidenceProducer.targets.includes(mismatchedId));
+assert.ok(!attributedGd.healthEvidenceProducer.targets.includes(mismatchedId));
+
 console.log('estate property readiness report checks passed');

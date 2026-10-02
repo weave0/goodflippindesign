@@ -31,8 +31,10 @@ function hostnameOf(url) {
 function targetsFor(propertyId, healthTargets) {
   return (healthTargets?.targets || []).filter((target) => {
     const declared = target.machineContract?.propertyId;
-    return normalize(declared || hostnameOf(target.url)) === normalize(propertyId)
-      || normalize(hostnameOf(target.url)) === normalize(propertyId);
+    // A declared machine-contract property is authoritative. Only targets without that declaration
+    // fall back to URL-host attribution, matching workers/estate-bindings.js.
+    const attributed = declared || hostnameOf(target.url);
+    return normalize(attributed) === normalize(propertyId);
   });
 }
 

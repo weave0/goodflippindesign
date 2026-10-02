@@ -320,17 +320,95 @@ export function applyObservation(existing, observation) {
 
   if (existing.state === 'RESOLVED') {
     const resolvedAt = parseInstant(existing.resolvedAt, 'resolvedAt');
-    if (observedAt > resolvedAt) {
+    // Resolution is valid only when healthy evidence is strictly newer than every failing observation.
+    // Therefore a degraded observation at the exact resolution instant invalidates that resolution too.
+    // This makes equal-time healthy/degraded races converge regardless of which writer wins the CAS first.
+    if (observedAt >= resolvedAt) {
       next.state = 'RECURRENT';
       next.recurrenceCount = Number(existing.recurrenceCount || 0) + 1;
       next.resolvedAt = null;
       next.resolutionEvidenceDigest = null;
       next.activeLease = null;
       next.resumeState = null;
+      // A recurrence is a new cycle of the same lineage: the earlier diagnosis explained the earlier
+      // occurrence and must not read as an answer to this one. It stays in the event history.
+      next.diagnosis = null;
     }
   }
 
   return next;
+}
+
+/** States from which a fresh production observation may be weighed as reverification. */
+export const REVERIFIABLE_STATES = Object.freeze(['DIAGNOSED', 'DEPLOYED', 'REVERIFYING']);
+
+/**
+ * The single decision for a *passing* production observation against an existing work item.
+ *
+ * Diagnosis never resolves anything: only an observation of the item's own registered predicate that is
+ * strictly newer than every piece of evidence the item already holds can. Returns the (possibly
+ * unchanged) item and a verdict that is journaled so an operator can see why an item did or did not move.
+ *
+ *   resolved      the predicate passed on strictly fresher evidence
+ *   replayed      the exact evidence was already weighed
+ *   stale         not strictly newer than the failing evidence, the state entry, or a prior verdict
+ *   deferred      an investigation owns the item; its lease and result are left untouched
+ *   blocked       a human/blocked item is never resolved behind its blocker
+ *   unresolvable  no registered predicate to verify against
+ *   not_diagnosed no diagnosis exists yet, so there is nothing to reverify
+ *   already_resolved / terminal  idempotent no-ops
+ */
+export function reverifyWorkItem(item, observation, { since = null, latest = null } = {}) {
+  validateObservation(observation);
+  requireState(item.state);
+  if (stableIdentity(observation) !== item.stableKey) {
+    throw new Error('observation identity does not match the durable work item');
+  }
+  const observedAt = parseInstant(observation.observedAt, 'observedAt');
+  const verdict = (result, reason, floor = null) => ({
+    item,
+    verdict: {
+      result,
+      reason,
+      observedAt: observation.observedAt,
+      evidenceDigest: observation.evidenceDigest,
+      floor,
+    },
+  });
+
+  if (item.state === 'RESOLVED') return verdict('already_resolved', 'the item is already resolved by earlier evidence');
+  if (item.state === 'DISMISSED' || item.state === 'SUPERSEDED') return verdict('terminal', `${item.state} is terminal`);
+  if (item.state === 'INVESTIGATING') {
+    return verdict('deferred', 'an investigation holds this item; reverification waits for its diagnosis');
+  }
+  if (item.state === 'BLOCKED' || item.state === 'NEEDS_HUMAN') {
+    return verdict('blocked', `${item.state} work resumes only by human decision`);
+  }
+  if (!REVERIFIABLE_STATES.includes(item.state)) {
+    return verdict('not_diagnosed', `${item.state} has no diagnosis to reverify`);
+  }
+  if (latest?.evidenceDigest === observation.evidenceDigest) {
+    return verdict('replayed', 'this exact evidence was already weighed');
+  }
+  const floors = [item.lastSeen, since, latest?.observedAt].filter(Boolean);
+  const floor = new Date(Math.max(...floors.map((value) => parseInstant(value, 'floor')))).toISOString();
+  if (observedAt <= Date.parse(floor)) {
+    return verdict('stale', `evidence is not strictly newer than ${floor}`, floor);
+  }
+  if (!item.verificationProfile || !item.verificationScope || !item.verificationPredicate) {
+    return verdict('unresolvable', 'the item has no registered verification predicate', floor);
+  }
+  const verification = {
+    result: 'pass',
+    scope: item.verificationScope,
+    profile: item.verificationProfile,
+    predicate: item.verificationPredicate,
+    evidenceDigest: observation.evidenceDigest,
+    observedAt: observation.observedAt,
+  };
+  const reverifying = item.state === 'REVERIFYING' ? item : transitionWorkItem(item, 'REVERIFYING');
+  const resolved = transitionWorkItem(reverifying, 'RESOLVED', { resolutionVerification: verification });
+  return { item: resolved, verdict: { result: 'resolved', reason: 'registered predicate passed on strictly fresher evidence', observedAt: observation.observedAt, evidenceDigest: observation.evidenceDigest, floor } };
 }
 
 function requireQualifiedBindings(item, context) {
@@ -414,8 +492,8 @@ function requireResolutionVerification(item, verification) {
   requireString(verification.predicate, 'resolutionVerification.predicate', 1024);
   canonicalDigest(verification.evidenceDigest, 'resolutionVerification.evidenceDigest');
   const observedAt = parseInstant(verification.observedAt, 'resolutionVerification.observedAt');
-  if (observedAt < parseInstant(item.lastSeen, 'lastSeen')) {
-    throw new Error('resolution verification must be at least as fresh as the last failing observation');
+  if (observedAt <= parseInstant(item.lastSeen, 'lastSeen')) {
+    throw new Error('resolution verification must be strictly newer than the last failing observation');
   }
   if (verification.predicate !== item.verificationPredicate) {
     throw new Error('resolution verification predicate does not match the work item');

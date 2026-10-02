@@ -179,5 +179,7 @@ FWOMPS_REPO=<fwomps checkout> python scripts/fwomps-aiaimate-host-binding.py \
 ... same arguments ... --revision <evidence revision> --verify
 ```
 
-The tool's apply/verify/conflict/no-secret-output behaviour was exercised against an isolated throwaway home; the
-real host was only ever planned against (its `config.json` was byte-identical afterwards).
+The tool's apply/verify/conflict/no-secret-output behaviour was exercised against an isolated throwaway home.
+The real AIAIMate binding has now also been **applied and verified on the operator FWOMPS host**; see
+`docs/mission-control-property-promotion-gate.md` for the revision-bound evidence. This is an applied host binding,
+not production provisioning: Pages Mission Control secrets/deployment/canary remain separately gated.
