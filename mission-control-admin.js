@@ -203,7 +203,8 @@
     setStatus([
       ...workStatus,
       evidenceOutcome.ok ? `evidence ${freshLabel.toLowerCase()}` : 'evidence unavailable',
-    ].filter(Boolean).join(' · '), (!evidenceOutcome.ok || !workOutcome.ok) ? 'bad' : '');
+      operationsOutcome.ok ? 'lifecycle projection available' : 'lifecycle projection unavailable',
+    ].filter(Boolean).join(' · '), (!evidenceOutcome.ok || !workOutcome.ok || !operationsOutcome.ok) ? 'bad' : '');
     loaded = true;
   }
 

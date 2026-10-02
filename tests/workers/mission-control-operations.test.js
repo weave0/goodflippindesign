@@ -495,6 +495,39 @@ describe('mission control operations projection', () => {
     expect(byId['wi-b']).toMatchObject({ recurrenceCount: 1, reverification: null, reverificationRequired: false });
   });
 
+  it('preserves same-instant distinct reverification verdicts during semantic event deduplication', () => {
+    const at = '2026-09-29T11:00:00.000Z';
+    const verdict = (result, digest) => JSON.stringify({
+      reverification: { result, observedAt: at, evidenceDigest: digest },
+    });
+    const view = project({
+      workItems: [item('wi-race', { state: 'DIAGNOSED', occurrenceCount: 3, diagnosis: { resultDigest: 'sha256:' + 'b'.repeat(64) } })],
+      events: [
+        {
+          eventId: 'race-stale',
+          workItemId: 'wi-race',
+          eventType: 'observation',
+          toState: 'DIAGNOSED',
+          occurredAt: at,
+          evidenceDigest: 'sha256:' + '1'.repeat(64),
+          detail_json: verdict('stale', 'sha256:' + '1'.repeat(64)),
+        },
+        {
+          eventId: 'race-failing',
+          workItemId: 'wi-race',
+          eventType: 'observation',
+          toState: 'DIAGNOSED',
+          occurredAt: at,
+          evidenceDigest: 'sha256:' + '2'.repeat(64),
+          detail_json: verdict('still_failing', 'sha256:' + '2'.repeat(64)),
+        },
+      ],
+    });
+    const life = view.items.find((entry) => entry.workItemId === 'wi-race').lifecycle;
+    expect(life.reverification).toMatchObject({ result: 'still_failing', evidenceDigest: 'sha256:' + '2'.repeat(64) });
+    expect(life.lastVerdict).toMatchObject({ result: 'stale' });
+  });
+
   it('applies the visibility timeout to an orphaned planned effect', () => {
     const beyond = new Date(Date.parse(NOW) - EFFECT_VISIBILITY_MS).toISOString();
     const inside = new Date(Date.parse(NOW) - EFFECT_VISIBILITY_MS + 1).toISOString();

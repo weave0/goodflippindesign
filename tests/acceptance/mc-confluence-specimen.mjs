@@ -57,6 +57,8 @@ const PROFILE = 'web-health-readonly-v1';
 const PROPERTY = 'aiaimate.com';
 const FINDING_KEY = 'health:aiaimate:machine_contract_mismatch';
 const BEARER_ENV = 'GFD_MC_WORKER_TOKEN';
+const CONTRACT_CHECK = "import sys, pathlib;p = pathlib.Path(sys.argv[1]) / 'portal' / 'app' / 'api' / 'health' / 'route.ts';t = p.read_text(encoding='utf-8');ok = \"contract: 'gfd-property-health'\" in t and \"propertyId: 'aiaimate.com'\" in t;sys.exit(0 if ok else 1)";
+const EXPECTED_PROFILE_TAIL = ['-B', '-c', CONTRACT_CHECK, '{repository_root}'];
 
 const sha256 = (bytes) => `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
 const evidence = { milestone: 'MC-CONFLUENCE-002', tier: 2, mode: REAL_HOME ? 'real-host' : 'isolated-host', startedAt: new Date().toISOString(), runDir: RUN_DIR, steps: [], checks: [], hostileCases: [], wire: [], d1: {} };
@@ -67,6 +69,16 @@ const sh = (cmd, args, options = {}) => {
   const done = spawnSync(cmd, args, { encoding: 'utf8', ...options });
   if (done.status !== 0) throw new Error(`${cmd} ${args.join(' ')} failed: ${done.stderr || done.stdout}`);
   return done.stdout.trim();
+};
+const shMaybe = (cmd, args, options = {}) => {
+  const done = spawnSync(cmd, args, { encoding: 'utf8', ...options });
+  return done.status === 0 ? done.stdout.trim() : null;
+};
+const wallClockAfter = async (...instants) => {
+  const floor = Math.max(...instants.filter(Boolean).map((value) => Date.parse(value)).filter(Number.isFinite), Date.now() - 1);
+  const delay = Math.max(0, floor + 2 - Date.now());
+  if (delay) await new Promise((resolveDelay) => setTimeout(resolveDelay, delay));
+  return new Date().toISOString();
 };
 
 // --- modules under test: the real GFD code, loaded unmodified ---------------------------------
@@ -182,8 +194,14 @@ try {
     ws = realHost.workspace.root;
     home = REAL_HOME_DIR;
     const revision0 = sh('git', ['-C', ws, 'rev-parse', 'HEAD']);
+    const origin0 = sh('git', ['-C', ws, 'remote', 'get-url', 'origin']);
+    const profileCommand = realHost.profile?.commands?.[0];
+    const profileTailMatches = Array.isArray(profileCommand)
+      && profileCommand.length === EXPECTED_PROFILE_TAIL.length + 1
+      && profileCommand.slice(1).every((part, index) => part === EXPECTED_PROFILE_TAIL[index]);
     check('real host: aiaimate.com is bound to weave0/aiaimate with the read-only profile', realHost.binding.repository === 'weave0/aiaimate' && realHost.binding.investigation_profile === PROFILE && Boolean(realHost.profile), { binding: realHost.binding, deliveryOrigin: realHost.deliveryOrigin });
-    check('real host: the registered profile is one fixed read-only argv with the exit_nonzero_reproduces predicate', realHost.profile?.commands?.length === 1 && realHost.profile.predicate === 'exit_nonzero_reproduces', { commands: realHost.profile?.commands?.length, predicate: realHost.profile?.predicate });
+    check('real host: registered workspace origin is weave0/aiaimate', /github\.com[:/]weave0\/aiaimate(?:\.git)?$/i.test(origin0), { origin: origin0 });
+    check('real host: the registered profile is the canonical fixed read-only argv with the exit_nonzero_reproduces predicate', realHost.profile?.commands?.length === 1 && profileTailMatches && realHost.profile.predicate === 'exit_nonzero_reproduces', { commands: realHost.profile?.commands?.length, predicate: realHost.profile?.predicate, canonicalArgv: profileTailMatches });
     check('real host: workspace is a clean git checkout', sh('git', ['-C', ws, 'status', '--porcelain']) === '', { revision: revision0 });
     step('real fwomps host in use (no isolation)', { home, workspace: ws, workerId: ids.workerId, workerKeyId: ids.workerKeyId, contractKeyId: ids.contractKeyId, deliveryOrigin: realHost.deliveryOrigin });
   } else {
@@ -375,7 +393,6 @@ try {
   hostileCase('operator transition to RESOLVED while DIAGNOSED', '>=400', resolved.status, resolved.status >= 400);
 
   // --- 9. Confluence-2: fresh reverification on the SAME work item -----------------------------------
-  const sweepAt = (ms) => new Date(Date.now() + ms).toISOString();
   const healthy = { ...degraded, overall_status: 'pass', finding_kind: null, keyword_found: 1, content_detail: null };
   const otherProperty = { target: { id: 'globaldeets', brand: 'globaldeets', name: 'GlobalDeets', url: 'https://globaldeets.com', checkType: 'page' }, overall_status: 'pass', finding_kind: null, status_code: 200, response_time_ms: 90, keyword_found: 1, content_keyword: null, content_detail: null, error: null };
   const sweep = (check, at) => reportToGitHub([check], at, { GITHUB_TOKEN: 'specimen', DB });
@@ -392,29 +409,29 @@ try {
   let c2 = await current();
   check('Confluence-2: a healthy observation older than the diagnosis does not resolve', c2.state === 'DIAGNOSED' && !c2.resolvedAt, { observedAt: midpoint, diagnosedAt: diagnosedItem.stateEnteredAt });
   hostileCase('reverify: healthy observation older than the diagnosis', 'DIAGNOSED', c2.state, c2.state === 'DIAGNOSED');
-  await sweep(otherProperty, sweepAt(1_500));
+  await sweep(otherProperty, await wallClockAfter(diagnosedItem.stateEnteredAt, c2.lastSeen));
   c2 = await current();
   check('Confluence-2: another property\'s healthy observation cannot resolve this item', c2.state === 'DIAGNOSED' && c2.lifecycleVersion === diagnosedItem.lifecycleVersion);
   hostileCase('reverify: different property healthy observation', 'DIAGNOSED unchanged', c2.state, c2.state === 'DIAGNOSED' && c2.lifecycleVersion === diagnosedItem.lifecycleVersion);
-  await sweep(degraded, sweepAt(2_000));
+  await sweep(degraded, await wallClockAfter(diagnosedItem.stateEnteredAt, (await current()).lastSeen));
   c2 = await current();
   check('Confluence-2: still-failing evidence after diagnosis leaves it unresolved and is journaled', c2.state === 'DIAGNOSED' && c2.reverification?.result === 'still_failing', c2.reverification);
   const opsBefore = await operations();
   check('Confluence-2: the operator projection says reverification is required and why', opsBefore?.reverificationRequired === true && opsBefore?.diagnosisAvailable === true && Boolean(opsBefore?.blocker), opsBefore);
 
-  const healthyAt = sweepAt(4_000);
+  const healthyAt = await wallClockAfter((await current()).stateEnteredAt, (await current()).lastSeen);
   await sweep(healthy, healthyAt);
   const resolvedItem = await current();
   check('Confluence-2: a strictly newer healthy observation resolves the SAME work item', resolvedItem.workItemId === workItemId && resolvedItem.state === 'RESOLVED' && resolvedItem.resolvedAt === healthyAt, { resolvedAt: resolvedItem.resolvedAt, resolutionEvidenceDigest: resolvedItem.resolutionEvidenceDigest });
   check('Confluence-2: the diagnosis stays on the resolved item (lineage), lease still released', resolvedItem.diagnosis?.resultDigest === done.diagnosis.resultDigest && resolvedItem.activeLease === null);
   await sweep(healthy, healthyAt);
-  await sweep(healthy, sweepAt(6_000));
+  await sweep(healthy, await wallClockAfter(healthyAt));
   const idempotent = await current();
   check('Confluence-2: repeated and later healthy observations are idempotent', idempotent.state === 'RESOLVED' && idempotent.lifecycleVersion === resolvedItem.lifecycleVersion && idempotent.resolvedAt === healthyAt);
   hostileCase('reverify: replayed / repeated healthy observation', 'RESOLVED unchanged', idempotent.state, idempotent.lifecycleVersion === resolvedItem.lifecycleVersion);
   const opsResolved = await operations();
   check('Confluence-2: the projection shows the resolved reverification', opsResolved?.reverification?.result === 'resolved' && opsResolved?.reverificationRequired === false && opsResolved?.blocker === null, opsResolved);
-  const staleDegraded = sweepAt(-60_000);
+  const staleDegraded = new Date(Date.parse(resolvedItem.resolvedAt) - 60_000).toISOString();
   await sweep(degraded, staleDegraded);
   check('Confluence-2: a degraded observation older than the resolution does not reopen it', (await current()).state === 'RESOLVED');
   hostileCase('recurrence: degraded observation older than the resolution', 'RESOLVED', (await current()).state, (await current()).state === 'RESOLVED');
@@ -422,11 +439,13 @@ try {
   check('Confluence-2: the old FWOMPS result replayed after resolution is refused and changes nothing', lateResult.status >= 400 && (await current()).state === 'RESOLVED', lateResult);
   hostileCase('replay: old signed result after resolution', 'refused', lateResult.code, lateResult.status >= 400);
 
-  const recurAt = sweepAt(8_000);
+  const recurAt = await wallClockAfter(resolvedItem.resolvedAt, (await current()).lastSeen);
   await sweep(degraded, recurAt);
   const recurrent = await current();
   check('Confluence-2: a later degraded observation recurs the SAME lineage', recurrent.workItemId === workItemId && recurrent.state === 'RECURRENT' && recurrent.recurrenceCount === 1 && recurrent.diagnosis === null, { recurrenceCount: recurrent.recurrenceCount });
   check('Confluence-2: still exactly one work item for this finding', (await findItem()).length === 1);
+  const opsRecurrent = await operations();
+  check('Confluence-2: recurrence projection is scoped to the new cycle', opsRecurrent?.recurrenceCount === 1 && opsRecurrent?.diagnosisAvailable === false && opsRecurrent?.reverification === null, opsRecurrent);
   const lineage = (await DB.prepare("SELECT to_state FROM mc_work_item_events WHERE work_item_id = ? AND event_type = 'transition' ORDER BY occurred_at, rowid").bind(workItemId).all()).results.map((row) => row.to_state);
   check('Confluence-2: history keeps OBSERVED..DIAGNOSED..RESOLVED..RECURRENT on one item', ['QUALIFIED', 'INVESTIGATION_READY', 'INVESTIGATING', 'DIAGNOSED', 'RESOLVED', 'RECURRENT'].every((state) => lineage.includes(state)), lineage);
   const noRepair = (await DB.prepare("SELECT COUNT(*) AS n FROM mc_effects WHERE effect_type IN ('pull_request','deployment')").first()).n === 0;
@@ -439,7 +458,7 @@ try {
     recurrenceObservedAt: recurAt,
     recurrenceCount: recurrent.recurrenceCount,
     lineage,
-    projection: { beforeResolution: opsBefore, afterResolution: opsResolved },
+    projection: { beforeResolution: opsBefore, afterResolution: opsResolved, afterRecurrence: opsRecurrent },
   };
 
   // --- D1 record ---------------------------------------------------------------------------------
@@ -455,36 +474,37 @@ try {
   evidence.aiaimateRevision = revision;
   evidence.workItemId = workItemId;
   exitCode = evidence.checks.every((c) => c.pass) ? 0 : 1;
-  const dirty = sh('git', ['-C', GFD_ROOT, 'status', '--porcelain']) !== '';
-  const fwompsDirty = sh('git', ['-C', FWOMPS_REPO, 'status', '--porcelain']) !== '';
-  const failedChecks = evidence.checks.filter((c) => !c.pass).map((c) => c.name);
-  // Stable, secret-free, comparable across runs. Everything not listed here is run-local detail.
-  evidence.summary = {
-    schema: 'gfd-mc-confluence-evidence-1',
-    mode: evidence.mode,
-    outcome: exitCode === 0 ? 'pass' : 'fail',
-    gfd: { revision: evidence.gfdRevision, dirty },
-    fwomps: { revision: evidence.fwompsRevision, branch: sh('git', ['-C', FWOMPS_REPO, 'branch', '--show-current']), dirty: fwompsDirty, home: REAL_HOME ? 'real-host-registration' : 'isolated' },
-    host: REAL_HOME ? { deliveryOrigin: realHost.deliveryOrigin, workerId: realHost.workerId, workerKeyId: realHost.workerKeyId, contractKeyId: realHost.contractKeyId, deliverySubstituted: true } : null,
-    property: PROPERTY,
-    workItemId,
-    evidenceRevisions: { aiaimate: revision, contract: evidence.diagnosis?.evidenceRevision },
-    identifiers: { requestId: evidence.diagnosis?.requestId, effectId: evidence.diagnosis?.effectId, attempt: evidence.diagnosis?.attempt, lifecycleVersionAtIssue: evidence.diagnosis?.lifecycleVersionAtIssue },
-    digests: { contract: evidence.diagnosis?.contractDigest, leaseToken: evidence.diagnosis?.leaseTokenDigest, result: evidence.diagnosis?.resultDigest, resolution: evidence.confluence2?.resolutionEvidenceDigest },
-    timestamps: { startedAt: evidence.startedAt, diagnosedAt: evidence.diagnosis?.stateEnteredAt, resolvedAt: evidence.confluence2?.resolvedAt, recurredObservedAt: evidence.confluence2?.recurrenceObservedAt },
-    executionReceipt: evidence.diagnosis?.executionReceipt,
-    lifecycle: evidence.confluence2?.lineage,
-    recurrenceCount: evidence.confluence2?.recurrenceCount,
-    hostileCases: evidence.hostileCases,
-    checks: { total: evidence.checks.length, failed: failedChecks },
-  };
+
 } catch (error) {
   evidence.error = String(error?.stack || error);
   console.error(error);
 } finally {
   evidence.finishedAt = new Date().toISOString();
   evidence.passed = exitCode === 0;
-  if (evidence.summary) evidence.summary.timestamps.finishedAt = evidence.finishedAt;
+  // Failed runs are evidence too. Build the stable comparable summary from whatever was captured before
+  // the failure, rather than omitting the schema/outcome when an intermediate operation throws.
+  const failedChecks = evidence.checks.filter((c) => !c.pass).map((c) => c.name);
+  const gfdRevision = evidence.gfdRevision || shMaybe('git', ['-C', GFD_ROOT, 'rev-parse', 'HEAD']);
+  const fwompsRevision = evidence.fwompsRevision || shMaybe('git', ['-C', FWOMPS_REPO, 'rev-parse', 'HEAD']);
+  evidence.summary = {
+    schema: 'gfd-mc-confluence-evidence-1',
+    mode: evidence.mode,
+    outcome: exitCode === 0 ? 'pass' : 'fail',
+    gfd: { revision: gfdRevision, dirty: shMaybe('git', ['-C', GFD_ROOT, 'status', '--porcelain']) !== '' },
+    fwomps: { revision: fwompsRevision, branch: shMaybe('git', ['-C', FWOMPS_REPO, 'branch', '--show-current']), dirty: shMaybe('git', ['-C', FWOMPS_REPO, 'status', '--porcelain']) !== '', home: REAL_HOME ? 'real-host-registration' : 'isolated' },
+    host: REAL_HOME && realHost ? { deliveryOrigin: realHost.deliveryOrigin, workerId: realHost.workerId, workerKeyId: realHost.workerKeyId, contractKeyId: realHost.contractKeyId, deliverySubstituted: true } : null,
+    property: PROPERTY,
+    workItemId: evidence.workItemId ?? null,
+    evidenceRevisions: { aiaimate: evidence.aiaimateRevision ?? null, contract: evidence.diagnosis?.evidenceRevision ?? null },
+    identifiers: { requestId: evidence.diagnosis?.requestId ?? null, effectId: evidence.diagnosis?.effectId ?? null, attempt: evidence.diagnosis?.attempt ?? null, lifecycleVersionAtIssue: evidence.diagnosis?.lifecycleVersionAtIssue ?? null },
+    digests: { contract: evidence.diagnosis?.contractDigest ?? null, leaseToken: evidence.diagnosis?.leaseTokenDigest ?? null, result: evidence.diagnosis?.resultDigest ?? null, resolution: evidence.confluence2?.resolutionEvidenceDigest ?? null },
+    timestamps: { startedAt: evidence.startedAt, diagnosedAt: evidence.diagnosis?.stateEnteredAt ?? null, resolvedAt: evidence.confluence2?.resolvedAt ?? null, recurredObservedAt: evidence.confluence2?.recurrenceObservedAt ?? null, finishedAt: evidence.finishedAt },
+    executionReceipt: evidence.diagnosis?.executionReceipt ?? null,
+    lifecycle: evidence.confluence2?.lineage ?? null,
+    recurrenceCount: evidence.confluence2?.recurrenceCount ?? null,
+    hostileCases: evidence.hostileCases,
+    checks: { total: evidence.checks.length, failed: failedChecks },
+  };
   for (const w of evidence.wire) if (w.result) w.result = { bodySha256: sha256(Buffer.from(w.result.body)) }; // keep evidence small; digests only
   writeFileSync(EVIDENCE_PATH, JSON.stringify(evidence, null, 2));
   server.close();

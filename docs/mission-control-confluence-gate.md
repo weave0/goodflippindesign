@@ -179,8 +179,10 @@ FWOMPS_REPO=<fwomps checkout> python scripts/fwomps-aiaimate-host-binding.py \
 ... same arguments ... --revision <evidence revision> --verify
 ```
 
-The tool's apply/verify/conflict/no-secret-output behaviour was exercised against an isolated throwaway home; the
-real host was only ever planned against (its `config.json` was byte-identical afterwards).
+The tool's apply/verify/conflict/no-secret-output behaviour was exercised against an isolated throwaway home.
+The real AIAIMate binding has now also been **applied and verified on the operator FWOMPS host**; see
+`docs/mission-control-property-promotion-gate.md` for the revision-bound evidence. This is an applied host binding,
+not production provisioning: Pages Mission Control secrets/deployment/canary remain separately gated.
 
 ## Confluence-2 (MC-CONFLUENCE-002): the loop now closes
 
@@ -235,20 +237,28 @@ In `--real-home` mode the registered delivery origin is production, so the speci
 envelope to the local GFD instead of `fwomps deliver`; `summary.host.deliverySubstituted` records that. Everything else
 (registered workspace, host profile, enrolled keys, attested sandbox) is the real host.
 
-### Evidence (2026-10-01)
+### Historical specimen artifacts (2026-10-01) — superseded as acceptance proof
 
-- `docs/evidence/mc-confluence-2-real-host-2026-10-01.json` — real host: 59/59 checks, 24 hostile cases, lifecycle
-  `OBSERVED → QUALIFIED → INVESTIGATION_READY → INVESTIGATING → DIAGNOSED → RESOLVED → RECURRENT` on one work item.
-- `docs/evidence/mc-confluence-2-isolated-host-2026-10-01.json` — isolated host incl. `fwomps deliver`: 57/57.
+The three committed JSON specimens below are retained as historical debugging records, **not** as current acceptance evidence:
 
-Honest limits: the observations (degraded and healthy) are synthetic and the GFD side is a local worker over real D1, not
-production; FWOMPS's diagnosis was `not_reproduced` because AIAIMate's source at the pinned revision does declare its health
-contract (production is healthy) — the synthetic degradation was not corroborated, which is itself the correct diagnosis.
+- `docs/evidence/mc-confluence-2-real-host-2026-10-01.json`
+- `docs/evidence/mc-confluence-2-isolated-host-2026-10-01.json`
+- `docs/evidence/mc-confluence-2-real-host-fwomps-main-2026-10-01.json`
+
+Review found that those pre-hardening runs generated later observation timestamps ahead of wall clock. Their summaries can therefore
+show `finishedAt` before `recurredObservedAt`, and their operator projection can contain negative observation ages. Editing those
+artifacts would falsify evidence, so they remain byte-for-byte historical. They do **not** satisfy the Confluence-2 Tier-2 acceptance gate.
+
+The specimen harness now waits for real monotonically later wall-clock instants, verifies the real workspace's Git origin and exact
+canonical read-only argv, projects the recurrent cycle, and writes the comparable summary even on a failed run. A **fresh** isolated
+and real-host run from the merged GFD/FWOMPS revisions is required before Tier-2 can be called passing again.
+
+Honest limits remain: the degraded/healthy observations are synthetic and the GFD side is a local worker over real D1, not production.
 Production has not been provisioned with the shared keys/worker token, so no production round trip has happened.
 
-### FWOMPS provenance (2026-10-01)
+### FWOMPS provenance (2026-10-01 historical runs)
 
-The first real-host run (`…real-host-2026-10-01.json`) used the host checkout's unmerged branch `agent/mc-fw-001h-cli-contract@cebd846`.
-That delta over merged FWOMPS main `96832d1` is open FWOMPS PR #29 (`status` as a pure read, `recover`, CLI-contract doc; `investigate` differs only
-in the already-admitted refusal payload). It is not needed for acceptance: the same real-host specimen from a clean worktree of merged
-main `96832d1` passed 59/59 with 24 hostile cases (`docs/evidence/mc-confluence-2-real-host-fwomps-main-2026-10-01.json`). Production evidence must record a merged FWOMPS revision.
+The first historical real-host run used `agent/mc-fw-001h-cli-contract@cebd846`; the later historical run used clean merged FWOMPS
+main `96832d1`. That closes the earlier FWOMPS-revision provenance question for what those runs exercised, but neither historical JSON
+is current Confluence-2 acceptance proof because of the timestamp/projection defect above. The required fresh rerun must record a merged
+FWOMPS revision.

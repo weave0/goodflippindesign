@@ -81,6 +81,14 @@ This inventory is read-only analysis; nothing was promoted.
 
 ## Applying the real AIAIMate host binding (operator sequence)
 
+**Status (2026-10-01): applied on the operator's FWOMPS host** — evidence in `docs/evidence/mc-aiaimate-host-binding-2026-10-01.json`
+(additive config diff only, 0 removed/changed keys, prior config kept as `config.json.bak-20261001-155335`, one fixed read-only
+profile command, only `aiaimate.com` bound). `--verify` is 14/15: the single failure is the delivery bearer
+(`GFD_MC_WORKER_TOKEN`) not being present in the verifying shell because production has not been provisioned with the shared
+keys/worker token yet. The promotion gate against the real home reports C1–C10 PASS, `promotable=true`, `hostVerified=true`.
+Registered worker id `fwomps-host-weave0-01`; key ids `gfd-mc-contract-2026-10` / `gfd-mc-result-2026-10`. Production must be given
+the SAME two secrets (and a worker bearer) before any production round trip; that is a separate, deliberate step.
+
 Host-owned and not applied by anyone but the operator. Tool: `scripts/fwomps-aiaimate-host-binding.py` (read-only by
 default). Secrets are only ever passed as environment variables and are never printed.
 
