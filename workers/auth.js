@@ -129,44 +129,163 @@ function getClerkSecretKey(hostname, env) {
  * @returns {object} - User object or null
  */
 /**
+ * Decode one base64url JWT segment.
+ */
+function decodeBase64UrlBytes(value) {
+  if (typeof value !== 'string' || !/^[A-Za-z0-9_-]+$/u.test(value) || value.length % 4 === 1) {
+    throw new Error('invalid base64url');
+  }
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+  const binary = atob(padded);
+  return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+}
+
+function decodeJwtJson(value) {
+  return JSON.parse(new TextDecoder().decode(decodeBase64UrlBytes(value)));
+}
+
+const CLERK_API_BASE = 'https://api.clerk.com/v1';
+const CLERK_CLOCK_SKEW_SECONDS = 5;
+
+/**
+ * Prefer Clerk's supported JWT verification path. A legacy/fallback result means
+ * the token still requires authoritative verification by Clerk's Backend API.
+ * A cryptographic failure is terminal and must never fall back.
+ */
+async function verifyClerkJwtSignature(token, secretKey, authorizedParties = []) {
+  const parts = String(token || '').split('.');
+  if (parts.length !== 3 || !secretKey) return { state: 'invalid' };
+
+  let payload;
+  try {
+    payload = decodeJwtJson(parts[1]);
+  } catch {
+    return { state: 'invalid' };
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  if (typeof payload?.sid !== 'string' || !payload.sid
+      || typeof payload?.sub !== 'string' || !payload.sub
+      || !Number.isFinite(Number(payload.exp))
+      || Number(payload.exp) < now - CLERK_CLOCK_SKEW_SECONDS
+      || (payload.nbf != null && (!Number.isFinite(Number(payload.nbf))
+        || Number(payload.nbf) > now + CLERK_CLOCK_SKEW_SECONDS))) {
+    return { state: 'invalid' };
+  }
+  if (payload.azp && authorizedParties.length > 0 && !authorizedParties.includes(payload.azp)) {
+    return { state: 'invalid' };
+  }
+
+  let header;
+  try {
+    header = decodeJwtJson(parts[0]);
+  } catch {
+    // Older/opaque token headers can still be verified by Clerk itself.
+    return { state: 'fallback', payload };
+  }
+  if (header?.alg && header.alg !== 'RS256') return { state: 'invalid' };
+  if (header?.alg !== 'RS256' || typeof header?.kid !== 'string' || !header.kid) {
+    return { state: 'fallback', payload };
+  }
+
+  let jwksResponse;
+  try {
+    jwksResponse = await fetch(`${CLERK_API_BASE}/jwks`, {
+      headers: { 'Authorization': `Bearer ${secretKey}` },
+    });
+  } catch {
+    return { state: 'fallback', payload };
+  }
+  if (!jwksResponse.ok) return { state: 'fallback', payload };
+
+  let jwks;
+  try {
+    jwks = await jwksResponse.json();
+  } catch {
+    return { state: 'fallback', payload };
+  }
+  if (!Array.isArray(jwks?.keys)) return { state: 'fallback', payload };
+
+  const jwk = jwks.keys.find((candidate) =>
+    candidate?.kid === header.kid
+    && candidate?.kty === 'RSA'
+    && (!candidate.alg || candidate.alg === 'RS256')
+    && (!candidate.use || candidate.use === 'sig')
+  );
+  if (!jwk) return { state: 'fallback', payload };
+
+  try {
+    const key = await crypto.subtle.importKey(
+      'jwk',
+      jwk,
+      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+      false,
+      ['verify']
+    );
+    const verified = await crypto.subtle.verify(
+      'RSASSA-PKCS1-v1_5',
+      key,
+      decodeBase64UrlBytes(parts[2]),
+      new TextEncoder().encode(`${parts[0]}.${parts[1]}`)
+    );
+    return verified ? { state: 'verified', payload } : { state: 'invalid' };
+  } catch {
+    // A malformed/unimportable key is an operational JWKS failure. Clerk can
+    // still authoritatively verify the token through the compatibility path.
+    return { state: 'fallback', payload };
+  }
+}
+
+/**
  * Verify a Clerk session for a high-sensitivity route.
  * A failed session verification returns null. This path never fetches
  * `/users/{sub}` from an unverified token payload.
  */
-export async function verifyClerkSessionStrict(token, secretKey) {
+export async function verifyClerkSessionStrict(token, secretKey, { authorizedParties = [] } = {}) {
   try {
-    const parts = String(token || '').split('.');
-    if (parts.length !== 3 || !secretKey) return null;
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
+    const verification = await verifyClerkJwtSignature(token, secretKey, authorizedParties);
+    if (verification.state === 'invalid') return null;
+
+    const payload = verification.payload;
     const sessionId = payload.sid;
-    if (!sessionId || typeof sessionId !== 'string') return null;
+    let sessionResponse;
 
-    const response = await fetch(`https://api.clerk.com/v1/sessions/${encodeURIComponent(sessionId)}/verify`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${secretKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ token }),
-    });
-    if (!response.ok) return null;
+    if (verification.state === 'verified') {
+      // Signature is verified; use Clerk's supported session lookup only to
+      // preserve the stricter "revoked sessions fail closed" behavior.
+      sessionResponse = await fetch(`${CLERK_API_BASE}/sessions/${encodeURIComponent(sessionId)}`, {
+        headers: { 'Authorization': `Bearer ${secretKey}` },
+      });
+    } else {
+      // Compatibility path while legacy/opaque headers still exist. Clerk's
+      // deprecated verifier remains authoritative here; never trust the
+      // decoded subject if this request fails.
+      sessionResponse = await fetch(`${CLERK_API_BASE}/sessions/${encodeURIComponent(sessionId)}/verify`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${secretKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
+    }
+    if (!sessionResponse.ok) return null;
 
-    const session = await response.json();
-    // Clerk's Backend API returns a Session with user_id, not an embedded User.
-    // Fetch metadata only after the token has been verified, using the identity
-    // returned by Clerk rather than an unverified JWT subject.
+    const session = await sessionResponse.json();
     if (session?.id !== sessionId || session?.status !== 'active'
         || typeof session?.user_id !== 'string' || session.user_id !== payload.sub) return null;
+
     let user = session?.user;
     if (!user) {
-      const userResponse = await fetch(`https://api.clerk.com/v1/users/${encodeURIComponent(session.user_id)}`, {
+      const userResponse = await fetch(`${CLERK_API_BASE}/users/${encodeURIComponent(session.user_id)}`, {
         headers: { 'Authorization': `Bearer ${secretKey}` },
       });
       if (!userResponse.ok) return null;
       user = await userResponse.json();
     }
     if (user?.id !== session.user_id) return null;
+
     return {
       id: user.id,
       emailAddress: user.emailAddress || user.email_addresses?.[0]?.email_address || '',
@@ -1943,7 +2062,7 @@ export default {
 
           const missionAuth = request.headers.get('Authorization');
           if (!missionAuth?.startsWith('Bearer ')) return missionControlDenied(401);
-          let missionUser = await verifyClerkSessionStrict(missionAuth.slice('Bearer '.length), clerkSecretKey);
+          let missionUser = await verifyClerkSessionStrict(missionAuth.slice('Bearer '.length), clerkSecretKey, { authorizedParties: [url.origin] });
           if (!missionUser) return missionControlDenied(401);
           missionUser = await ensureAdminRole(missionUser, clerkSecretKey);
           return handleMissionControlRequest(request, env, missionUser);
