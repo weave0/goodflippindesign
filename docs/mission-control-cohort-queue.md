@@ -10,7 +10,7 @@ All four already have **repository authority** (registry `operating.repository`,
 | --- | --- | --- |
 | machine-health contract | route template per platform + health-target patch (`machineHealthContract`) | merge the route in the property repo; confirm the sweep passes it |
 | verification declaration | registry patch (`verificationDeclaration.registryPatch`) | review and merge in this repo (validator + gate enforce shape) |
-| reviewed read-only profile | per-property profile name + route path + argv digest (`readOnlyProfile`); `scripts/fwomps-property-host-binding.py` builds the fixed argv | review the digest once |
+| reviewed read-only profile | canonical command argv + its digest (`readOnlyProfile`); the binder checks `--expected-argv-digest` before applying and verifies the installed command | review the argv/digest once; the interpreter slot is host-owned and must equal the binder's Python executable |
 | host registration | exact commands (`hostRegistration.steps`) | operator runs `--apply`; gate must show C1–C10 PASS, `hostVerified` |
 
 | property | platform (from repo markers) | generated route | specific blockers |
@@ -26,3 +26,7 @@ with a repo and a health target, is the next candidate — its facts are already
 
 Reusable machinery added: `scripts/lib/estate-cohort-plan.mjs` (generator), `scripts/fwomps-property-host-binding.py` (the AIAIMate
 binding script generalised; with AIAIMate's arguments its plan against the real host shows every line `=`, i.e. a byte-identical profile).
+
+The generated registration instructions now contain separate `--apply` and `--verify` commands. Both carry the reviewed
+argv digest; applying refuses a differing configured worker key ID instead of rotating shared credentials. Regenerating
+the plan preserves each readiness row's current `missing` list, so completed prerequisites are not declared missing again.

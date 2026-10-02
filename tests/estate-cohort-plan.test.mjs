@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
-import { buildCohortPlan, detectPlatform } from '../scripts/lib/estate-cohort-plan.mjs';
+import { buildCohortPlan, detectPlatform, profileArgvDigest } from '../scripts/lib/estate-cohort-plan.mjs';
 
 const read = (rel) => JSON.parse(readFileSync(fileURLToPath(new URL(`../${rel}`, import.meta.url)), 'utf8'));
 const inputs = () => ({
@@ -26,6 +28,14 @@ for (const entry of plan.properties) {
   assert.match(entry.readOnlyProfile.name, /^web-health-readonly-[a-z0-9-]+-v1$/);
   const route = entry.machineHealthContract.route;
   if (route) {
+    const digest = `sha256:${createHash('sha256').update(JSON.stringify(entry.readOnlyProfile.argv)).digest('hex')}`;
+    assert.equal(entry.readOnlyProfile.argvDigest, digest);
+    assert.ok(entry.hostRegistration.steps.some((step) => step.endsWith('--apply')));
+    assert.ok(entry.hostRegistration.steps.some((step) => step.endsWith('--verify')));
+    assert.ok(entry.hostRegistration.steps.every((step) => !step.includes('[--apply | --verify]')));
+    for (const step of entry.hostRegistration.steps.filter((step) => step.includes('host-binding.py'))) {
+      assert.ok(step.includes(`--expected-argv-digest ${digest}`));
+    }
     // The generated route contains exactly what the host profile's fixed argv searches for.
     assert.ok(route.source.includes("contract: 'gfd-property-health'"), entry.propertyId);
     assert.ok(route.source.includes(`propertyId: '${entry.propertyId}'`), entry.propertyId);
@@ -43,4 +53,13 @@ assert.equal(byId['culturesherpa.org'].platform, 'unknown');
 assert.equal(byId['culturesherpa.org'].machineHealthContract.route, null, 'no route is invented for an unknown platform');
 assert.ok(byId['culturesherpa.org'].blockers.some((b) => /deploy identity is unknown/.test(b)));
 assert.equal(detectPlatform(null), 'unknown');
+const partial = inputs();
+partial.readinessReport.nextCohort.properties[0].missing = ['host_registration'];
+assert.deepEqual(buildCohortPlan(partial).properties[0].missing, ['host_registration'], 'completed prerequisites stay completed');
+const route = 'portal/app/api/health/route.ts';
+const property = 'aiaimate.com';
+const pythonTest = spawnSync(process.env.PYTHON || 'python', [
+  fileURLToPath(new URL('./fwomps-property-host-binding.test.py', import.meta.url)), route, property, profileArgvDigest(route, property),
+], { encoding: 'utf8' });
+assert.equal(pythonTest.status, 0, pythonTest.stdout + pythonTest.stderr);
 console.log('estate cohort plan checks passed');

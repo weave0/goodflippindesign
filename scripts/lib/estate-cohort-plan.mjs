@@ -90,14 +90,24 @@ function platformBlockers(platform, operating) {
   return blockers;
 }
 
+export function profileArgv(routePath, propertyId) {
+  const parts = routePath.split('/').map((part) => `'${part}'`).join(' / ');
+  const check = 'import sys, pathlib;'
+    + `p = pathlib.Path(sys.argv[1]) / ${parts};`
+    + "t = p.read_text(encoding='utf-8');"
+    + `ok = "contract: 'gfd-property-health'" in t and "propertyId: '${propertyId}'" in t;`
+    + 'sys.exit(0 if ok else 1)';
+  // The host selects its Python interpreter; the binder verifies that executable separately.
+  return ['{python_executable}', '-B', '-c', check, '{repository_root}'];
+}
+
 export function profileArgvDigest(routePath, propertyId) {
-  const needles = ["contract: 'gfd-property-health'", `propertyId: '${propertyId}'`];
-  return `sha256:${createHash('sha256').update(JSON.stringify({ routePath, propertyId, needles })).digest('hex')}`;
+  return `sha256:${createHash('sha256').update(JSON.stringify(profileArgv(routePath, propertyId))).digest('hex')}`;
 }
 
 export function buildCohortPlan({ registry, healthTargets, repoFacts, readinessReport, generatedAt }) {
-  const cohortIds = readinessReport.nextCohort.properties.map((entry) => entry.propertyId);
-  const plans = cohortIds.map((propertyId) => {
+  const plans = readinessReport.nextCohort.properties.map((readiness) => {
+    const { propertyId } = readiness;
     const property = registry.properties.find((entry) => entry.id === propertyId);
     const operating = property.operating || {};
     const repository = operating.repository;
@@ -141,6 +151,7 @@ export function buildCohortPlan({ registry, healthTargets, repoFacts, readinessR
       readOnlyProfile: {
         name: profile,
         routePath: route?.file || null,
+        argv: route ? profileArgv(route.file, propertyId) : null,
         argvDigest: route ? profileArgvDigest(route.file, propertyId) : null,
         shape: 'one fixed read-only argv, exit_nonzero_reproduces; no repair command, no credentials',
       },
@@ -149,12 +160,12 @@ export function buildCohortPlan({ registry, healthTargets, repoFacts, readinessR
           operator: true,
           steps: [
             `git clone https://github.com/${repository}.git <workspace-root>   # clean clone; merge the generated route first`,
-            `python scripts/fwomps-property-host-binding.py --property ${propertyId} --repository ${repository} --workspace ${slug(propertyId)} --profile ${profile} --route-path ${route.file} --workspace-root <workspace-root> --result-origin https://goodflippindesign.com --worker-id fwomps-host-weave0-01 [--apply | --verify]`,
+            ...['--apply', '--verify'].map((mode) => `python scripts/fwomps-property-host-binding.py --property ${propertyId} --repository ${repository} --workspace ${slug(propertyId)} --profile ${profile} --route-path ${route.file} --expected-argv-digest ${profileArgvDigest(route.file, propertyId)} --workspace-root <workspace-root> --result-origin https://goodflippindesign.com --worker-id fwomps-host-weave0-01 ${mode}`),
             `node --no-warnings scripts/property-promotion-gate.mjs --property ${propertyId} --fwomps-home ~/.fwomps`,
           ],
         }
         : null,
-      missing: ['machine_health_contract', 'verification_declaration', 'reviewed_read_only_profile', 'host_registration'],
+      missing: [...readiness.missing],
       blockers,
       order: [
         'merge the generated health route in the property repository',

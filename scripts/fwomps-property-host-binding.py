@@ -18,6 +18,7 @@ usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -64,6 +65,15 @@ HEX64 = re.compile(r"^[0-9a-fA-F]{64}$")
 KEY_ENVS = ("FWOMPS_MC_CONTRACT_KEY_ID", "FWOMPS_MC_CONTRACT_KEY_HEX", "FWOMPS_MC_WORKER_KEY_ID", "FWOMPS_MC_WORKER_KEY_HEX")
 
 
+def argv_digest(command: tuple[str, ...]) -> str | None:
+    # Only the current host Python may occupy the template's interpreter slot.
+    if not command or command[0] != sys.executable:
+        return None
+    canonical = ["{python_executable}", *command[1:]]
+    encoded = json.dumps(canonical, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
 def git(root: Path, *args: str) -> str:
     done = subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True, encoding="utf-8")
     return done.stdout.strip() if done.returncode == 0 else ""
@@ -90,6 +100,9 @@ def conflicts(host: HostConfig, want: dict, args: argparse.Namespace) -> list[st
     if have_ws and Path(have_ws.root).resolve() != Path(want["workspace"].root):
         problems.append(f"workspace {WORKSPACE_NAME!r} is already registered at a different root: {have_ws.root}")
     mc = host.mission_control
+    requested_key = os.environ.get("FWOMPS_MC_WORKER_KEY_ID")
+    if mc.worker_key_id and requested_key and mc.worker_key_id != requested_key:
+        problems.append("mission_control.worker_key_id differs from the requested key; property registration cannot rotate shared credentials")
     binding = mc.properties.get(PROPERTY_ID)
     if binding and binding != want["binding"]:
         problems.append(f"{PROPERTY_ID} already has a different binding: {binding.to_dict()}")
@@ -140,6 +153,9 @@ def cmd_plan(args: argparse.Namespace, store: HostConfigStore) -> int:
 
 
 def cmd_apply(args: argparse.Namespace, store: HostConfigStore) -> int:
+    if not args.expected_argv_digest or args.expected_argv_digest != argv_digest(desired(args)["profile"].commands[0]):
+        print("refusing: --expected-argv-digest must match the reviewed canonical command argv")
+        return 2
     missing = [name for name in KEY_ENVS if not os.environ.get(name)]
     if missing:
         print(f"refusing: set {', '.join(missing)} (values are never printed)")
@@ -229,7 +245,8 @@ def cmd_verify(args: argparse.Namespace, store: HostConfigStore) -> int:
     checks.append(("mission_control enabled with worker id", mc.enabled and mc.worker_id == args.worker_id, mc.worker_id))
     checks.append((f"{PROPERTY_ID} binding", mc.properties.get(PROPERTY_ID) == want["binding"], json.dumps(mc.properties[PROPERTY_ID].to_dict()) if PROPERTY_ID in mc.properties else "missing"))
     profile = mc.investigation_profiles.get(PROFILE_NAME)
-    checks.append((f"profile {PROFILE_NAME} is the expected read-only argv", bool(profile) and profile.commands[0][1:] == want["profile"].commands[0][1:] and profile.predicate == "exit_nonzero_reproduces", ""))
+    checks.append((f"profile {PROFILE_NAME} is the expected read-only argv", bool(profile) and profile.commands == want["profile"].commands and profile.predicate == "exit_nonzero_reproduces", ""))
+    checks.append(("reviewed argv digest matches installed command", bool(profile) and len(profile.commands) == 1 and bool(args.expected_argv_digest) and argv_digest(profile.commands[0]) == args.expected_argv_digest, ""))
     checks.append(("profile interpreter exists", bool(profile) and Path(profile.commands[0][0]).is_file(), profile.commands[0][0] if profile else ""))
     checks.append(("delivery origin + bearer env name", mc.delivery.configured and mc.delivery.result_base_url == args.result_origin and mc.delivery.bearer_env == args.bearer_env, f"{mc.delivery.result_base_url} ${mc.delivery.bearer_env}"))
     checks.append(("delivery bearer is present in THIS shell (value not shown)", bool(os.environ.get(args.bearer_env)), f"${args.bearer_env}"))
@@ -254,6 +271,7 @@ def main() -> int:
     parser.add_argument("--workspace", required=True, help="FWOMPS workspace name to register")
     parser.add_argument("--profile", required=True, help="investigation profile name to register")
     parser.add_argument("--route-path", required=True, help="repo-relative file that must declare the gfd-property-health contract")
+    parser.add_argument("--expected-argv-digest", help="reviewed sha256 digest of canonical argv (required for apply/verify)")
     parser.add_argument("--workspace-root", required=True, help="a CLEAN clone of the repository on this machine")
     parser.add_argument("--result-origin", required=True, help="GFD origin that receives results, e.g. https://goodflippindesign.com (origin only)")
     parser.add_argument("--worker-id", required=True, help="must equal GFD MISSION_CONTROL_RESULT_WORKER_ID")
