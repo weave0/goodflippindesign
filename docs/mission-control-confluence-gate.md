@@ -250,8 +250,10 @@ show `finishedAt` before `recurredObservedAt`, and their operator projection can
 artifacts would falsify evidence, so they remain byte-for-byte historical. They do **not** satisfy the Confluence-2 Tier-2 acceptance gate.
 
 The specimen harness now waits for real monotonically later wall-clock instants, verifies the real workspace's Git origin and exact
-canonical read-only argv, projects the recurrent cycle, and writes the comparable summary even on a failed run. A **fresh** isolated
-and real-host run from the merged GFD/FWOMPS revisions is required before Tier-2 can be called passing again.
+canonical read-only argv, projects the recurrent cycle, and writes the comparable summary even on a failed run.
+Fresh isolated (58/58) and real-host (61/61) specimens from clean merged GFD `4f98eb5` and FWOMPS `96832d1`
+now pass, including all 24 hostile cases, monotonic wall-clock timelines and nonnegative projection ages.
+The audited publications and limits are indexed in `docs/evidence/mc-confluence-integration-2026-10-01.md`.
 
 Honest limits remain: the degraded/healthy observations are synthetic and the GFD side is a local worker over real D1, not production.
 Production has not been provisioned with the shared keys/worker token, so no production round trip has happened.
@@ -260,5 +262,5 @@ Production has not been provisioned with the shared keys/worker token, so no pro
 
 The first historical real-host run used `agent/mc-fw-001h-cli-contract@cebd846`; the later historical run used clean merged FWOMPS
 main `96832d1`. That closes the earlier FWOMPS-revision provenance question for what those runs exercised, but neither historical JSON
-is current Confluence-2 acceptance proof because of the timestamp/projection defect above. The required fresh rerun must record a merged
-FWOMPS revision.
+is current Confluence-2 acceptance proof because of the timestamp/projection defect above. The fresh runs indexed above
+record clean merged FWOMPS `96832d1` and supersede these historical records as acceptance proof.

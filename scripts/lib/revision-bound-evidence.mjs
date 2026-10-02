@@ -68,8 +68,9 @@ const LEAK_PATTERNS = Object.freeze([
   ['github_token', /\b(?:ghp|gho|ghs|ghu|github_pat)_[A-Za-z0-9_]{16,}/],
   ['stripe_or_secret_key', /\b(?:sk|rk|whsec)_[A-Za-z0-9_]{12,}/],
   ['private_key_block', /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
-  // A bare 64-hex run is the shape of a Mission Control key/token. Digests are always written `sha256:<hex>`.
-  ['bare_64_hex', /(?<![A-Za-z0-9:])[0-9a-fA-F]{64}(?![A-Za-z0-9])/],
+  // Canonical work/effect IDs contain content digests, not key material. Exempt only their exact namespace,
+  // as with sha256:<hex>; known-secret matching still catches a credential masquerading as an identifier.
+  ['bare_64_hex', /(?<![A-Za-z0-9:])(?<!gfdwi_v1_)(?<!gfdeffect_v1_)[0-9a-fA-F]{64}(?![A-Za-z0-9])/],
 ]);
 
 /** Environment variables that may legitimately hold credentials in the operator's shell. Values are read in memory only. */

@@ -1,0 +1,786 @@
+{
+  "schema": "gfd-mc-confluence-publication-1",
+  "sourceTraceDigest": "sha256:339d56a272f09d8e8a04b3d0017673baee9417cf2e0dc12967dcf94f8fc27c6d",
+  "summary": {
+    "schema": "gfd-mc-confluence-evidence-1",
+    "mode": "real-host",
+    "outcome": "pass",
+    "gfd": {
+      "revision": "4f98eb537488e16bf96a5a00218333a225f19198",
+      "dirty": false
+    },
+    "fwomps": {
+      "revision": "96832d1d01cf755107e489efd816b2037d21e7a0",
+      "branch": "",
+      "dirty": false,
+      "home": "real-host-registration"
+    },
+    "host": {
+      "deliveryOrigin": "https://goodflippindesign.com",
+      "workerId": "fwomps-host-weave0-01",
+      "workerKeyId": "gfd-mc-result-2026-10",
+      "contractKeyId": "gfd-mc-contract-2026-10",
+      "deliverySubstituted": true
+    },
+    "property": "aiaimate.com",
+    "workItemId": "gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd",
+    "evidenceRevisions": {
+      "aiaimate": "257210036bff85961a1b9c96c0572aabcaaa9cd4",
+      "contract": "257210036bff85961a1b9c96c0572aabcaaa9cd4"
+    },
+    "identifiers": {
+      "requestId": "mci_8f08448541923e9f6eba714094de080a",
+      "effectId": "gfdeffect_v1_4bd7e727465b5e8399d72c4f966e2c39702da45383be770ae8311b4eb4eb4f15",
+      "attempt": 1,
+      "lifecycleVersionAtIssue": 3
+    },
+    "digests": {
+      "contract": "sha256:ed821ccfcc55c98e73262e034ac5cee168578013056f499afc1b4900955f27ab",
+      "leaseToken": "sha256:865af1bd37f80e3e6bf19d2e045978e1ae4ab2d0c28c80b0fd32e5681585fcaa",
+      "result": "sha256:6bcc3988f26c8b5a192df79d60d535a10502530a2b074bd75196c7f58f440e28",
+      "resolution": "sha256:ad28efcaca3fb38e9f249c586e714762623b120a31567d7dd6a15c30979cfecd"
+    },
+    "timestamps": {
+      "startedAt": "2026-10-02T04:08:28.495Z",
+      "diagnosedAt": "2026-10-02T04:08:40.895Z",
+      "resolvedAt": "2026-10-02T04:08:41.529Z",
+      "recurredObservedAt": "2026-10-02T04:08:41.892Z",
+      "finishedAt": "2026-10-02T04:08:42.114Z"
+    },
+    "executionReceipt": {
+      "outcome": "not_reproduced",
+      "receipts": [
+        {
+          "profile": "web-health-readonly-v1",
+          "status": "pass",
+          "exit_code": 0,
+          "output_digest": "sha256:6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+          "authoritative_sandbox": true
+        }
+      ]
+    },
+    "lifecycle": [
+      "OBSERVED",
+      "QUALIFIED",
+      "INVESTIGATION_READY",
+      "INVESTIGATING",
+      "DIAGNOSED",
+      "RESOLVED",
+      "RECURRENT"
+    ],
+    "recurrenceCount": 1,
+    "hostileCases": [
+      {
+        "name": "delivery: edited summary (MAC no longer matches)",
+        "expected": "mac_invalid",
+        "observed": "mac_invalid",
+        "pass": true
+      },
+      {
+        "name": "delivery: flipped outcome (MAC no longer matches)",
+        "expected": "mac_invalid",
+        "observed": "mac_invalid",
+        "pass": true
+      },
+      {
+        "name": "delivery: flipped MAC",
+        "expected": "mac_invalid",
+        "observed": "mac_invalid",
+        "pass": true
+      },
+      {
+        "name": "delivery: unknown key id",
+        "expected": "unknown_key",
+        "observed": "unknown_key",
+        "pass": true
+      },
+      {
+        "name": "delivery: smuggled authority field (unsigned)",
+        "expected": "malformed_result",
+        "observed": "malformed_result",
+        "pass": true
+      },
+      {
+        "name": "delivery: unknown schema (unsigned)",
+        "expected": "schema_version_mismatch",
+        "observed": "schema_version_mismatch",
+        "pass": true
+      },
+      {
+        "name": "delivery: VALIDLY SIGNED wrong lease token",
+        "expected": "lease_mismatch",
+        "observed": "lease_mismatch",
+        "pass": true
+      },
+      {
+        "name": "delivery: VALIDLY SIGNED wrong attempt",
+        "expected": "attempt_mismatch",
+        "observed": "attempt_mismatch",
+        "pass": true
+      },
+      {
+        "name": "delivery: VALIDLY SIGNED wrong work-item echo",
+        "expected": "identity_mismatch",
+        "observed": "identity_mismatch",
+        "pass": true
+      },
+      {
+        "name": "delivery: VALIDLY SIGNED wrong repository",
+        "expected": "identity_mismatch",
+        "observed": "identity_mismatch",
+        "pass": true
+      },
+      {
+        "name": "delivery: VALIDLY SIGNED wrong property",
+        "expected": "identity_mismatch",
+        "observed": "identity_mismatch",
+        "pass": true
+      },
+      {
+        "name": "delivery: VALIDLY SIGNED wrong evidence revision (both fields, consistent)",
+        "expected": "digest_mismatch",
+        "observed": "digest_mismatch",
+        "pass": true
+      },
+      {
+        "name": "delivery: VALIDLY SIGNED wrong contract digest",
+        "expected": "digest_mismatch",
+        "observed": "digest_mismatch",
+        "pass": true
+      },
+      {
+        "name": "delivery: VALIDLY SIGNED wrong request id",
+        "expected": "request_mismatch",
+        "observed": "request_mismatch",
+        "pass": true
+      },
+      {
+        "name": "delivery: VALIDLY SIGNED unknown schema",
+        "expected": "schema_version_mismatch",
+        "observed": "schema_version_mismatch",
+        "pass": true
+      },
+      {
+        "name": "delivery: VALIDLY SIGNED smuggled repair authority",
+        "expected": "malformed_result",
+        "observed": "malformed_result",
+        "pass": true
+      },
+      {
+        "name": "delivery: wrong bearer",
+        "expected": 401,
+        "observed": 401,
+        "pass": true
+      },
+      {
+        "name": "delivery: different validly signed result after acceptance",
+        "expected": "result_conflict",
+        "observed": "result_conflict",
+        "pass": true
+      },
+      {
+        "name": "operator transition to RESOLVED while DIAGNOSED",
+        "expected": ">=400",
+        "observed": 409,
+        "pass": true
+      },
+      {
+        "name": "reverify: healthy observation older than the diagnosis",
+        "expected": "DIAGNOSED",
+        "observed": "DIAGNOSED",
+        "pass": true
+      },
+      {
+        "name": "reverify: different property healthy observation",
+        "expected": "DIAGNOSED unchanged",
+        "observed": "DIAGNOSED",
+        "pass": true
+      },
+      {
+        "name": "reverify: replayed / repeated healthy observation",
+        "expected": "RESOLVED unchanged",
+        "observed": "RESOLVED",
+        "pass": true
+      },
+      {
+        "name": "recurrence: degraded observation older than the resolution",
+        "expected": "RESOLVED",
+        "observed": "RESOLVED",
+        "pass": true
+      },
+      {
+        "name": "replay: old signed result after resolution",
+        "expected": "refused",
+        "observed": "illegal_transition",
+        "pass": true
+      }
+    ],
+    "checks": {
+      "total": 61,
+      "failed": []
+    }
+  },
+  "checks": [
+    {
+      "name": "real host: aiaimate.com is bound to weave0/aiaimate with the read-only profile",
+      "pass": true,
+      "detail": {
+        "binding": {
+          "investigation_profile": "web-health-readonly-v1",
+          "repository": "weave0/aiaimate",
+          "workspace": "aiaimate"
+        },
+        "deliveryOrigin": "https://goodflippindesign.com"
+      }
+    },
+    {
+      "name": "real host: registered workspace origin is weave0/aiaimate",
+      "pass": true,
+      "detail": {
+        "origin": "https://github.com/weave0/aiaimate.git"
+      }
+    },
+    {
+      "name": "real host: the registered profile is the canonical fixed read-only argv with the exit_nonzero_reproduces predicate",
+      "pass": true,
+      "detail": {
+        "commands": 1,
+        "predicate": "exit_nonzero_reproduces",
+        "canonicalArgv": true
+      }
+    },
+    {
+      "name": "real host: workspace is a clean git checkout",
+      "pass": true,
+      "detail": {
+        "revision": "257210036bff85961a1b9c96c0572aabcaaa9cd4"
+      }
+    },
+    {
+      "name": "one canonical work item from the observation",
+      "pass": true,
+      "detail": {
+        "workItemId": "gfdwi_v1_758cbd7690431d4e669e0b309cfd1a9029c7861e6edcf2c0c81490be2e2b42dd"
+      }
+    },
+    {
+      "name": "qualified from the real registry binding",
+      "pass": true,
+      "detail": {
+        "profile": "web-health-readonly-v1",
+        "verificationProfile": "gfd-property-health-production",
+        "scope": "production"
+      }
+    },
+    {
+      "name": "signed read-only contract issued, item INVESTIGATION_READY",
+      "pass": true,
+      "detail": {
+        "requestId": "mci_8f08448541923e9f6eba714094de080a",
+        "contractDigest": "sha256:ed821ccfcc55c98e73262e034ac5cee168578013056f499afc1b4900955f27ab"
+      }
+    },
+    {
+      "name": "durable investigation_dispatch intent recorded before execution",
+      "pass": true,
+      "detail": {
+        "effectId": "gfdeffect_v1_4bd7e727465b5e8399d72c4f966e2c39702da45383be770ae8311b4eb4eb4f15",
+        "requestedLifecycleVersion": 3
+      }
+    },
+    {
+      "name": "lease with no dispatch intent is refused (dispatch_intent_required)",
+      "pass": true
+    },
+    {
+      "name": "lease under a planned but unclaimed intent is refused",
+      "pass": true,
+      "detail": {
+        "error": "dispatch intent is not eligible: it has not been claimed for dispatch",
+        "code": "dispatch_intent_ineligible"
+      }
+    },
+    {
+      "name": "the refusals changed nothing: item still INVESTIGATION_READY, no lease minted",
+      "pass": true
+    },
+    {
+      "name": "claim permits exactly attempt 1",
+      "pass": true,
+      "detail": {
+        "reason": "claimed"
+      }
+    },
+    {
+      "name": "one signed lease minted, item INVESTIGATING",
+      "pass": true,
+      "detail": {
+        "attempt": 1
+      }
+    },
+    {
+      "name": "fwomps executed and persisted a result without delivering (result_ready, exit 10)",
+      "pass": true,
+      "detail": {
+        "attempt": 1,
+        "outcome": "not_reproduced",
+        "request_id": "mci_8f08448541923e9f6eba714094de080a",
+        "result_digest": "sha256:6bcc3988f26c8b5a192df79d60d535a10502530a2b074bd75196c7f58f440e28",
+        "status": "result_ready",
+        "stop_reason": null
+      }
+    },
+    {
+      "name": "nothing has reached GFD yet; item still INVESTIGATING",
+      "pass": true
+    },
+    {
+      "name": "hostile while INVESTIGATING: edited summary (MAC no longer matches) -> mac_invalid",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "mac_invalid",
+        "expectedCode": "mac_invalid"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: flipped outcome (MAC no longer matches) -> mac_invalid",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "mac_invalid",
+        "expectedCode": "mac_invalid"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: flipped MAC -> mac_invalid",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "mac_invalid",
+        "expectedCode": "mac_invalid"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: unknown key id -> unknown_key",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "unknown_key",
+        "expectedCode": "unknown_key"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: smuggled authority field (unsigned) -> malformed_result",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "malformed_result",
+        "expectedCode": "malformed_result"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: unknown schema (unsigned) -> schema_version_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "schema_version_mismatch",
+        "expectedCode": "schema_version_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong lease token -> lease_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "lease_mismatch",
+        "expectedCode": "lease_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong attempt -> attempt_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "attempt_mismatch",
+        "expectedCode": "attempt_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong work-item echo -> identity_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "identity_mismatch",
+        "expectedCode": "identity_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong repository -> identity_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "identity_mismatch",
+        "expectedCode": "identity_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong property -> identity_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "identity_mismatch",
+        "expectedCode": "identity_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong evidence revision (both fields, consistent) -> digest_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "digest_mismatch",
+        "expectedCode": "digest_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong contract digest -> digest_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "digest_mismatch",
+        "expectedCode": "digest_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED wrong request id -> request_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "request_mismatch",
+        "expectedCode": "request_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED unknown schema -> schema_version_mismatch",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "schema_version_mismatch",
+        "expectedCode": "schema_version_mismatch"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: VALIDLY SIGNED smuggled repair authority -> malformed_result",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "malformed_result",
+        "expectedCode": "malformed_result"
+      }
+    },
+    {
+      "name": "hostile while INVESTIGATING: wrong bearer refused (401)",
+      "pass": true,
+      "detail": {
+        "status": 401,
+        "code": null
+      }
+    },
+    {
+      "name": "after every hostile delivery the item is still INVESTIGATING with its lease intact, no diagnosis",
+      "pass": true
+    },
+    {
+      "name": "GFD accepted FWOMPS's own signed envelope (200)",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "same canonical work item is DIAGNOSED",
+      "pass": true,
+      "detail": {
+        "state": "DIAGNOSED",
+        "diagnosisDigest": "sha256:6bcc3988f26c8b5a192df79d60d535a10502530a2b074bd75196c7f58f440e28"
+      }
+    },
+    {
+      "name": "diagnosis digest equals the digest FWOMPS reported",
+      "pass": true
+    },
+    {
+      "name": "lease released, no active lease",
+      "pass": true
+    },
+    {
+      "name": "exactly one accepted result delivery, and its content is the FWOMPS-persisted envelope",
+      "pass": true,
+      "detail": [
+        "sha256:d8915c117a50fb2811d04d4eb41df91b6f191522009ae1deced002924a168e75"
+      ]
+    },
+    {
+      "name": "envelope is read-only and every receipt is from the authoritative sandbox",
+      "pass": true,
+      "detail": {
+        "outcome": "not_reproduced",
+        "summary": "profile web-health-readonly-v1: not_reproduced",
+        "receipts": [
+          {
+            "status": "pass",
+            "exit": 0,
+            "authoritative": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "dispatch intent receipt committed under the same attempt fence",
+      "pass": true
+    },
+    {
+      "name": "byte-identical redelivery is idempotent (200)",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "code": null
+      }
+    },
+    {
+      "name": "concurrent identical redelivery all 200",
+      "pass": true,
+      "detail": [
+        200,
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "name": "a different VALIDLY SIGNED result for the same attempt fails closed as result_conflict",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "result_conflict"
+      }
+    },
+    {
+      "name": "still one work item, still DIAGNOSED, one DIAGNOSED transition",
+      "pass": true
+    },
+    {
+      "name": "no repair/deploy authority recorded anywhere",
+      "pass": true
+    },
+    {
+      "name": "diagnosis alone cannot resolve (RESOLVED refused)",
+      "pass": true,
+      "detail": 409
+    },
+    {
+      "name": "Confluence-2: a healthy observation older than the diagnosis does not resolve",
+      "pass": true,
+      "detail": {
+        "observedAt": "2026-10-02T04:08:35.193Z",
+        "diagnosedAt": "2026-10-02T04:08:40.895Z"
+      }
+    },
+    {
+      "name": "Confluence-2: another property's healthy observation cannot resolve this item",
+      "pass": true
+    },
+    {
+      "name": "Confluence-2: still-failing evidence after diagnosis leaves it unresolved and is journaled",
+      "pass": true,
+      "detail": {
+        "result": "still_failing",
+        "reason": "the finding is still observed after diagnosis",
+        "observedAt": "2026-10-02T04:08:41.383Z",
+        "evidenceDigest": "sha256:aaba2e380ba11a7a0187c72e105c122569d53f6430760054f74dc71442e899c0",
+        "floor": "2026-10-02T04:08:29.491Z"
+      }
+    },
+    {
+      "name": "Confluence-2: the operator projection says reverification is required and why",
+      "pass": true,
+      "detail": {
+        "occurrenceCount": 2,
+        "observationAgeMs": 96,
+        "investigationReady": false,
+        "diagnosisAvailable": true,
+        "reverificationRequired": true,
+        "reverification": {
+          "result": "still_failing",
+          "observedAt": "2026-10-02T04:08:41.383Z",
+          "evidenceDigest": "sha256:aaba2e380ba11a7a0187c72e105c122569d53f6430760054f74dc71442e899c0"
+        },
+        "lastVerdict": {
+          "result": "still_failing",
+          "reason": "the finding is still observed after diagnosis"
+        },
+        "recurrenceCount": 0,
+        "blocker": "The finding is still observed after diagnosis."
+      }
+    },
+    {
+      "name": "Confluence-2: a strictly newer healthy observation resolves the SAME work item",
+      "pass": true,
+      "detail": {
+        "resolvedAt": "2026-10-02T04:08:41.529Z",
+        "resolutionEvidenceDigest": "sha256:ad28efcaca3fb38e9f249c586e714762623b120a31567d7dd6a15c30979cfecd"
+      }
+    },
+    {
+      "name": "Confluence-2: the diagnosis stays on the resolved item (lineage), lease still released",
+      "pass": true
+    },
+    {
+      "name": "Confluence-2: repeated and later healthy observations are idempotent",
+      "pass": true
+    },
+    {
+      "name": "Confluence-2: the projection shows the resolved reverification",
+      "pass": true,
+      "detail": {
+        "occurrenceCount": 2,
+        "observationAgeMs": 363,
+        "investigationReady": false,
+        "diagnosisAvailable": true,
+        "reverificationRequired": false,
+        "reverification": {
+          "result": "resolved",
+          "observedAt": "2026-10-02T04:08:41.529Z",
+          "evidenceDigest": "sha256:ad28efcaca3fb38e9f249c586e714762623b120a31567d7dd6a15c30979cfecd"
+        },
+        "lastVerdict": {
+          "result": "resolved",
+          "reason": "registered predicate passed on strictly fresher evidence"
+        },
+        "recurrenceCount": 0,
+        "blocker": null
+      }
+    },
+    {
+      "name": "Confluence-2: a degraded observation older than the resolution does not reopen it",
+      "pass": true
+    },
+    {
+      "name": "Confluence-2: the old FWOMPS result replayed after resolution is refused and changes nothing",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "illegal_transition"
+      }
+    },
+    {
+      "name": "Confluence-2: a later degraded observation recurs the SAME lineage",
+      "pass": true,
+      "detail": {
+        "recurrenceCount": 1
+      }
+    },
+    {
+      "name": "Confluence-2: still exactly one work item for this finding",
+      "pass": true
+    },
+    {
+      "name": "Confluence-2: recurrence projection is scoped to the new cycle",
+      "pass": true,
+      "detail": {
+        "occurrenceCount": 4,
+        "observationAgeMs": 97,
+        "investigationReady": false,
+        "diagnosisAvailable": false,
+        "reverificationRequired": false,
+        "reverification": null,
+        "lastVerdict": null,
+        "recurrenceCount": 1,
+        "blocker": "Observed work is waiting for an operator to qualify it."
+      }
+    },
+    {
+      "name": "Confluence-2: history keeps OBSERVED..DIAGNOSED..RESOLVED..RECURRENT on one item",
+      "pass": true,
+      "detail": [
+        "OBSERVED",
+        "QUALIFIED",
+        "INVESTIGATION_READY",
+        "INVESTIGATING",
+        "DIAGNOSED",
+        "RESOLVED",
+        "RECURRENT"
+      ]
+    },
+    {
+      "name": "Confluence-2: no repair or deploy authority anywhere in the loop",
+      "pass": true
+    }
+  ],
+  "confluence2": {
+    "diagnosedAt": "2026-10-02T04:08:40.895Z",
+    "staleHealthyObservedAt": "2026-10-02T04:08:35.193Z",
+    "resolvedAt": "2026-10-02T04:08:41.529Z",
+    "resolutionEvidenceDigest": "sha256:ad28efcaca3fb38e9f249c586e714762623b120a31567d7dd6a15c30979cfecd",
+    "recurrenceObservedAt": "2026-10-02T04:08:41.892Z",
+    "recurrenceCount": 1,
+    "lineage": [
+      "OBSERVED",
+      "QUALIFIED",
+      "INVESTIGATION_READY",
+      "INVESTIGATING",
+      "DIAGNOSED",
+      "RESOLVED",
+      "RECURRENT"
+    ],
+    "projection": {
+      "beforeResolution": {
+        "occurrenceCount": 2,
+        "observationAgeMs": 96,
+        "investigationReady": false,
+        "diagnosisAvailable": true,
+        "reverificationRequired": true,
+        "reverification": {
+          "result": "still_failing",
+          "observedAt": "2026-10-02T04:08:41.383Z",
+          "evidenceDigest": "sha256:aaba2e380ba11a7a0187c72e105c122569d53f6430760054f74dc71442e899c0"
+        },
+        "lastVerdict": {
+          "result": "still_failing",
+          "reason": "the finding is still observed after diagnosis"
+        },
+        "recurrenceCount": 0,
+        "blocker": "The finding is still observed after diagnosis."
+      },
+      "afterResolution": {
+        "occurrenceCount": 2,
+        "observationAgeMs": 363,
+        "investigationReady": false,
+        "diagnosisAvailable": true,
+        "reverificationRequired": false,
+        "reverification": {
+          "result": "resolved",
+          "observedAt": "2026-10-02T04:08:41.529Z",
+          "evidenceDigest": "sha256:ad28efcaca3fb38e9f249c586e714762623b120a31567d7dd6a15c30979cfecd"
+        },
+        "lastVerdict": {
+          "result": "resolved",
+          "reason": "registered predicate passed on strictly fresher evidence"
+        },
+        "recurrenceCount": 0,
+        "blocker": null
+      },
+      "afterRecurrence": {
+        "occurrenceCount": 4,
+        "observationAgeMs": 97,
+        "investigationReady": false,
+        "diagnosisAvailable": false,
+        "reverificationRequired": false,
+        "reverification": null,
+        "lastVerdict": null,
+        "recurrenceCount": 1,
+        "blocker": "Observed work is waiting for an operator to qualify it."
+      }
+    }
+  }
+}
