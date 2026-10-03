@@ -48,7 +48,7 @@ for (const bad of ['https://127.0.0.1:1/t', 'http://example.com/t', 'http://10.0
 }
 for (const ok of ['http://127.0.0.1:9/t', 'http://localhost:9/t', 'http://[::1]:9/t']) assert.doesNotThrow(() => assertLoopbackFeed(ok), ok);
 
-// unavailable / non-200 / malformed / empty / redirecting feed fails closed
+// unavailable / non-200 / malformed / empty feed fails closed
 {
   const dead = createOperatorTokenSource({ feedUrl: 'http://127.0.0.1:1/t' });
   await rejects(() => dead(), 'unreachable feed');
@@ -57,12 +57,29 @@ for (const ok of ['http://127.0.0.1:9/t', 'http://localhost:9/t', 'http://[::1]:
     ['garbage', (req, res) => res.end('not-a-jwt')],
     ['empty', (req, res) => res.end('')],
     ['json wrapper', (req, res) => res.end(JSON.stringify({ token: SECRET_A }))],
-    ['redirect', (req, res) => { res.statusCode = 302; res.setHeader('Location', 'http://example.com/'); res.end(); }],
   ]) {
     const server = await feed(handler);
     await rejects(() => createOperatorTokenSource({ feedUrl: server.url })(), name);
     await server.close();
   }
+}
+
+// redirect fails closed on the first response and is never retried or followed
+{
+  let calls = 0;
+  const server = await feed((req, res) => {
+    calls += 1;
+    if (calls === 1) {
+      res.statusCode = 302;
+      res.setHeader('Location', '/token');
+      res.end();
+      return;
+    }
+    res.end(SECRET_A);
+  });
+  await rejects(() => createOperatorTokenSource({ feedUrl: server.url })(), 'redirect');
+  assert.equal(calls, 1, 'redirect response must be final: no retry and no follow');
+  await server.close();
 }
 
 // a server response (even 401) is returned once and never retried; only a connection-level failure is retried once
