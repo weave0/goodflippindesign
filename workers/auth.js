@@ -13,6 +13,7 @@
 import { handleCMSRequest } from './cms.js';
 import { applyStripeEvent } from './donation-ledger.js';
 import { handleMissionControlRequest } from './mission-control-api.js';
+import { CANARY_PROPERTY_ID } from './mission-control-work-items.js';
 import * as Sentry from '@sentry/cloudflare';
 
 /**
@@ -323,6 +324,32 @@ function hasMissionControlWorkerAuth(request, env) {
   const secret = env.MISSION_CONTROL_WORKER_TOKEN;
   if (typeof secret !== 'string' || secret.length < 16) return false;
   return request.headers.get('Authorization') === `Bearer ${secret}`;
+}
+
+const CANARY_RUNNER_ID = 'gfd-production-canary-runner';
+const CANARY_RUNNER_TOKEN_SHAPE = /^[0-9a-f]{128}$/;
+
+/** Constant-time string comparison: time depends on the longer length, never on where the first difference is. */
+function timingSafeEqualStrings(left, right) {
+  const a = new TextEncoder().encode(String(left));
+  const b = new TextEncoder().encode(String(right));
+  let diff = a.length ^ b.length;
+  const length = Math.max(a.length, b.length);
+  for (let i = 0; i < length; i += 1) diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
+  return diff === 0;
+}
+
+/**
+ * The canary-runner credential is its own secret: canonical 128 lowercase hex, never the worker bearer, never Clerk.
+ * A malformed, absent or worker-colliding secret makes the identity unusable (fail closed), not a weaker comparison.
+ */
+function hasMissionControlCanaryRunnerAuth(request, env) {
+  const secret = env.MISSION_CONTROL_CANARY_RUNNER_TOKEN;
+  if (typeof secret !== 'string' || !CANARY_RUNNER_TOKEN_SHAPE.test(secret)) return false;
+  if (secret === env.MISSION_CONTROL_WORKER_TOKEN) return false;
+  const header = request.headers.get('Authorization') || '';
+  if (!header.startsWith('Bearer ')) return false;
+  return timingSafeEqualStrings(header.slice('Bearer '.length), secret);
 }
 
 async function verifyClerkToken(token, secretKey) {
@@ -2061,6 +2088,21 @@ export default {
             return handleMissionControlRequest(request, env, {
               id: 'fwomps-machine',
               publicMetadata: { role: 'mission-control-worker' },
+            });
+          }
+
+          // The canary-runner identity exists only while the kill switch names exactly the one canary property.
+          // With the switch off it is inert (the canary's own 404), so a valid runner token confers nothing.
+          if (hasMissionControlCanaryRunnerAuth(request, env)) {
+            if (env.MISSION_CONTROL_CANARY !== CANARY_PROPERTY_ID) {
+              return new Response(JSON.stringify({ error: 'The Mission Control canary is not enabled', code: 'canary_disabled' }), {
+                status: 404,
+                headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' },
+              });
+            }
+            return handleMissionControlRequest(request, env, {
+              id: CANARY_RUNNER_ID,
+              publicMetadata: { role: 'mission-control-canary-runner' },
             });
           }
 
