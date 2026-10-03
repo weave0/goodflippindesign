@@ -20,10 +20,11 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { randomBytes } from 'node:crypto';
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+
+import { resolveDeliveryBearer } from './lib/mc-delivery-bearer.mjs';
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
@@ -121,6 +122,7 @@ const existing = Object.keys(names).filter((name) => before.includes(name));
 console.log(`project ${PROJECT} production secrets today: ${before.length} (${before.filter((n) => n.startsWith('MISSION_CONTROL_')).join(', ') || 'no MISSION_CONTROL_*'})`);
 console.log(`host identity: worker ${mc.worker_id}, contract key id ${contractIds[0]}, result key id ${mc.worker_key_id}, bearer env ${bearerEnv}`);
 const hostBearer = userEnv(bearerEnv);
+resolveDeliveryBearer(hostBearer, bearerEnv); // a present-but-malformed host bearer stops the plan, not just the apply
 for (const name of Object.keys(names)) {
   const action = existing.includes(name) ? (REPLACE ? 'REPLACE' : 'keep (exists)') : 'create';
   console.log(`  ${action.padEnd(14)} ${name}${name === 'MISSION_CONTROL_WORKER_TOKEN' ? (hostBearer ? ' (reusing the host user bearer)' : ' (a new bearer will be generated and persisted)') : ''}`);
@@ -128,8 +130,8 @@ for (const name of Object.keys(names)) {
 if (!APPLY) { console.log('plan only: re-run with --apply'); process.exit(0); }
 
 // ---- apply -----------------------------------------------------------------------------------------------------------
-let bearer = hostBearer;
-if (!bearer) { bearer = randomBytes(32).toString('hex'); persistUserEnv(bearerEnv, bearer); console.log(`persisted ${bearerEnv} as a Windows user environment variable (new shells only)`); }
+const { bearer, generated } = resolveDeliveryBearer(hostBearer, bearerEnv);
+if (generated) { persistUserEnv(bearerEnv, bearer); console.log(`persisted ${bearerEnv} as a Windows user environment variable (new shells only)`); }
 names.MISSION_CONTROL_WORKER_TOKEN = () => bearer;
 const created = [];
 const replaced = [];
