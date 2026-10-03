@@ -29,9 +29,10 @@ export function createOperatorTokenSource({ staticToken, feedUrl, fetchImpl = fe
       let response;
       try {
         // A fresh connection per request: the blocking FWOMPS run leaves pooled sockets dead. Only a connection-level
-        // failure (no response at all) is retried, once; any server response is final.
+        // failure (no response at all) is retried, once; any server response is final. Redirects are surfaced as a
+        // response and rejected below so they can never be mistaken for a connection failure and retried.
         response = await sendWithConnectionRetry(() => fetchImpl(url, {
-          cache: 'no-store', redirect: 'error', headers: { Connection: 'close' }, signal: AbortSignal.timeout(5000),
+          cache: 'no-store', redirect: 'manual', headers: { Connection: 'close' }, signal: AbortSignal.timeout(5000),
         }));
       } catch {
         throw new Error('operator token feed unavailable');
@@ -48,7 +49,7 @@ export function createOperatorTokenSource({ staticToken, feedUrl, fetchImpl = fe
 
 /**
  * Sends once; if (and only if) the request never produced a server response (connection-level failure), sends once
- * more. A server response of ANY status, including 401/403, is returned as-is and never retried.
+ * more. A server response of ANY status, including 3xx/401/403, is returned as-is and never retried.
  */
 export async function sendWithConnectionRetry(send) {
   try { return await send(); } catch { return send(); }
