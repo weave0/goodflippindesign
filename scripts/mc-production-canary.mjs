@@ -5,6 +5,8 @@
  * item, the host's fixed registered read-only profile, no repair or deploy authority anywhere.
  *
  *   GFD_OPERATOR_TOKEN=<admin Clerk session bearer>   (admin steps; read from env only, never printed or recorded)
+ *   GFD_OPERATOR_TOKEN_FEED=<http://127.0.0.1:port/path>  (optional, loopback only; instead of the static token: GET returns one
+ *                                                        fresh bearer per admin request, because Clerk session tokens live ~60s)
  *   GFD_MC_WORKER_TOKEN=<delivery bearer>             (worker steps; the same variable the FWOMPS host delivers with)
  *   FWOMPS_REPO=<merged FWOMPS checkout> PYTHON=<python with fwomps deps>
  *   node --no-warnings --import ./tests/acceptance/node-json-hook.mjs scripts/mc-production-canary.mjs \
@@ -23,6 +25,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { createOperatorTokenSource, sendWithConnectionRetry } from './lib/canary-operator-auth.mjs';
+
 const args = process.argv.slice(2);
 const value = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] ?? null : null; };
 const values = (name) => args.flatMap((arg, i) => (arg === name && args[i + 1] ? [args[i + 1]] : []));
@@ -33,10 +37,10 @@ const OUT = path.resolve(value('--out') || path.join(os.tmpdir(), `mc-production
 const FWOMPS_REPO = process.env.FWOMPS_REPO;
 const PYTHON = process.env.PYTHON || 'python';
 const BEARER_ENV = 'GFD_MC_WORKER_TOKEN';
-const OPERATOR = process.env.GFD_OPERATOR_TOKEN;
+const operatorToken = createOperatorTokenSource({ staticToken: process.env.GFD_OPERATOR_TOKEN, feedUrl: process.env.GFD_OPERATOR_TOKEN_FEED });
 const WORKER = process.env[BEARER_ENV];
 const PROPERTY = 'aiaimate.com';
-for (const [name, ok] of [['FWOMPS_REPO', FWOMPS_REPO], ['GFD_OPERATOR_TOKEN', OPERATOR], [BEARER_ENV, WORKER]]) {
+for (const [name, ok] of [['FWOMPS_REPO', FWOMPS_REPO], [BEARER_ENV, WORKER]]) {
   if (!ok) throw new Error(`${name} must be set in the environment`);
 }
 
@@ -58,13 +62,12 @@ async function http(method, route, { token, body, raw } = {}) {
   });
   // The blocking FWOMPS run can leave a pooled keep-alive socket dead; a request that never reached the server
   // (connection-level failure, no response) is safe to send once more. Server responses are never retried.
-  let response;
-  try { response = await send(); } catch { response = await send(); }
+  const response = await sendWithConnectionRetry(send);
   let json = null;
   try { json = await response.clone().json(); } catch { /* not json */ }
   return { status: response.status, json };
 }
-const admin = (method, route, body) => http(method, route, { token: OPERATOR, body });
+const admin = async (method, route, body) => http(method, route, { token: await operatorToken(), body });
 const itemRoute = (id, action) => `/api/mission-control/work-items/${encodeURIComponent(id)}${action ? `/${action}` : ''}`;
 
 let exitCode = 1;
@@ -85,7 +88,7 @@ try {
   check('host workspace is clean', !dirty, { revision });
 
   // ---- deployed identity ------------------------------------------------------------------------------------------------
-  const provenance = await http('GET', '/api/mission-control/provenance', { token: OPERATOR });
+  const provenance = await http('GET', '/api/mission-control/provenance', { token: await operatorToken() });
   evidence.deployment = provenance.status === 200 ? provenance.json : { status: provenance.status, note: 'provenance route unavailable' };
 
   // ---- 1. observation boundary (operator-asserted, canary identity) -------------------------------------------------------------
