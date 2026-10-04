@@ -40,6 +40,15 @@ const rejects = async (fn, message) => {
   assert.throws(() => createOperatorTokenSource({}), /must be set/);
 }
 
+// the dedicated canary-runner token is preferred, must be canonical, and is never mixed with other sources
+{
+  const runner = 'ab'.repeat(64);
+  assert.equal(await createOperatorTokenSource({ runnerToken: runner, staticToken: 'static-token-value', feedUrl: 'http://127.0.0.1:1/t' })(), runner);
+  for (const bad of ['ab'.repeat(32), 'AB'.repeat(64), 'zz'.repeat(64), `${'ab'.repeat(64)}0`]) {
+    assert.throws(() => createOperatorTokenSource({ runnerToken: bad, staticToken: 'static-token-value' }), /canonical 128-lowercase-hex/);
+  }
+}
+
 // non-loopback / non-http / credentialed / malformed feed URLs are refused before any request
 for (const bad of ['https://127.0.0.1:1/t', 'http://example.com/t', 'http://10.0.0.5:80/t', 'http://127.0.0.1.evil.example/t', 'http://user:pw@127.0.0.1:1/t', 'not a url', 'file:///etc/passwd']) {
   let called = false;
