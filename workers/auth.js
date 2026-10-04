@@ -325,6 +325,32 @@ function hasMissionControlWorkerAuth(request, env) {
   return request.headers.get('Authorization') === `Bearer ${secret}`;
 }
 
+const CANARY_RUNNER_ID = 'gfd-production-canary-runner';
+const CANARY_RUNNER_TOKEN_SHAPE = /^[0-9a-f]{128}$/;
+
+/** Constant-time string comparison: time depends on the longer length, never on where the first difference is. */
+function timingSafeEqualStrings(left, right) {
+  const a = new TextEncoder().encode(String(left));
+  const b = new TextEncoder().encode(String(right));
+  let diff = a.length ^ b.length;
+  const length = Math.max(a.length, b.length);
+  for (let i = 0; i < length; i += 1) diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
+  return diff === 0;
+}
+
+/**
+ * The canary-runner credential is its own secret: canonical 128 lowercase hex, never the worker bearer, never Clerk.
+ * A malformed, absent or worker-colliding secret makes the identity unusable (fail closed), not a weaker comparison.
+ */
+function hasMissionControlCanaryRunnerAuth(request, env) {
+  const secret = env.MISSION_CONTROL_CANARY_RUNNER_TOKEN;
+  if (typeof secret !== 'string' || !CANARY_RUNNER_TOKEN_SHAPE.test(secret)) return false;
+  if (secret === env.MISSION_CONTROL_WORKER_TOKEN) return false;
+  const header = request.headers.get('Authorization') || '';
+  if (!header.startsWith('Bearer ')) return false;
+  return timingSafeEqualStrings(header.slice('Bearer '.length), secret);
+}
+
 async function verifyClerkToken(token, secretKey) {
   try {
     // Decode JWT payload to extract session ID and user ID
@@ -2061,6 +2087,15 @@ export default {
             return handleMissionControlRequest(request, env, {
               id: 'fwomps-machine',
               publicMetadata: { role: 'mission-control-worker' },
+            });
+          }
+
+          // Authenticate the runner here, but enforce its kill switch and bounded surface in Mission Control itself so
+          // every valid runner request — including canary-disabled refusals — receives the same structured audit record.
+          if (hasMissionControlCanaryRunnerAuth(request, env)) {
+            return handleMissionControlRequest(request, env, {
+              id: CANARY_RUNNER_ID,
+              publicMetadata: { role: 'mission-control-canary-runner' },
             });
           }
 
