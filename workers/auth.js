@@ -13,7 +13,6 @@
 import { handleCMSRequest } from './cms.js';
 import { applyStripeEvent } from './donation-ledger.js';
 import { handleMissionControlRequest } from './mission-control-api.js';
-import { CANARY_PROPERTY_ID } from './mission-control-work-items.js';
 import * as Sentry from '@sentry/cloudflare';
 
 /**
@@ -2091,15 +2090,9 @@ export default {
             });
           }
 
-          // The canary-runner identity exists only while the kill switch names exactly the one canary property.
-          // With the switch off it is inert (the canary's own 404), so a valid runner token confers nothing.
+          // Authenticate the runner here, but enforce its kill switch and bounded surface in Mission Control itself so
+          // every valid runner request — including canary-disabled refusals — receives the same structured audit record.
           if (hasMissionControlCanaryRunnerAuth(request, env)) {
-            if (env.MISSION_CONTROL_CANARY !== CANARY_PROPERTY_ID) {
-              return new Response(JSON.stringify({ error: 'The Mission Control canary is not enabled', code: 'canary_disabled' }), {
-                status: 404,
-                headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow' },
-              });
-            }
             return handleMissionControlRequest(request, env, {
               id: CANARY_RUNNER_ID,
               publicMetadata: { role: 'mission-control-canary-runner' },
