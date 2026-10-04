@@ -109,7 +109,16 @@ function write(outputPath, content, siteName) {
     return;
   }
 
-  fs.mkdirSync(path.dirname(absPath), { recursive: true });
+  const dir = path.dirname(absPath);
+  if (!fs.existsSync(dir)) {
+    if (TARGET) {
+      console.error(`  ✗ ${siteName}: cannot generate explicitly requested target; directory does not exist: ${relativePath}`);
+      process.exit(1);
+    }
+    console.log(`  ⚠ ${siteName}: skipping ${relativePath} — target directory does not exist in this checkout`);
+    return;
+  }
+
   const existing = fs.existsSync(absPath) ? fs.readFileSync(absPath, 'utf8') : null;
 
   if (existing === content) {
