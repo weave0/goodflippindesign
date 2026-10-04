@@ -98,7 +98,7 @@ jobs:
 
       - name: Create incident issue on failure
         if: steps.run-health.outputs.critical_failure == '1'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           HEALTH_RESULTS: ${{ steps.run-health.outputs.results }}
         with:
