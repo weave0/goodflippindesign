@@ -25,3 +25,37 @@ export function resolveDeliveryBearer(hostBearer, bearerEnv = 'the host bearer v
   }
   return { bearer: hostBearer, generated: false };
 }
+
+/**
+ * The canary-runner credential has the same canonical strength (64 random bytes, 128 lowercase hex) but is a
+ * different secret: it must never equal the FWOMPS delivery bearer. Reuse an already-valid local value; an absent one
+ * is generated; a present-but-malformed (or worker-colliding) one is an error, never silently replaced.
+ */
+export function resolveCanaryRunnerToken(localToken, workerBearer, envName = 'the canary-runner variable') {
+  if (localToken == null || localToken === '') return { token: generateDistinctFrom(workerBearer), generated: true };
+  if (!strongTokenBytes(localToken)) {
+    throw new Error(`${envName} is set but is not the canonical 128-lowercase-hex token; refusing to replace it silently (rotate deliberately)`);
+  }
+  if (localToken === workerBearer) throw new Error(`${envName} equals the delivery bearer; the canary-runner secret must be independent (rotate it)`);
+  return { token: localToken, generated: false };
+}
+
+/** A fresh token for deliberate rotation, guaranteed distinct from the delivery bearer. */
+export function resolveCanaryRunnerProvision(localToken, workerBearer, { remoteInstalled = false, replace = false, envName = 'the canary-runner variable' } = {}) {
+  if (remoteInstalled && !replace && (localToken == null || localToken === '')) {
+    throw new Error(`${envName} is not set on this host while MISSION_CONTROL_CANARY_RUNNER_TOKEN is already installed; refusing to claim a usable runner pair (rotate deliberately)`);
+  }
+  return resolveCanaryRunnerToken(localToken, workerBearer, envName);
+}
+
+export function generateCanaryRunnerToken(workerBearer) {
+  return generateDistinctFrom(workerBearer);
+}
+
+function generateDistinctFrom(other) {
+  for (let i = 0; i < 4; i += 1) {
+    const candidate = generateDeliveryBearer();
+    if (candidate !== other) return candidate;
+  }
+  throw new Error('could not generate an independent canary-runner token');
+}
