@@ -24,6 +24,7 @@
     "lint:html": "html-validate index.html",
     "gen:csp": "node scripts/generate-csp.js",
     "gen:csp:dry": "node scripts/generate-csp.js --dry-run",
+    "verify:hook-boundary": "node scripts/verify-precommit-hook-boundary.js",
     "deploy:stripe": "wrangler deploy --config workers/wrangler-stripe.toml",
     "stripe:secret": "wrangler secret put STRIPE_SECRET_KEY --config workers/wrangler-stripe.toml",
     "deploy:health-sweep": "wrangler deploy --config workers/wrangler-health-sweep.toml",
