@@ -1008,6 +1008,10 @@ test("the workflow prints sidecar-derived text only JSON-serialized, never raw",
     }
   }
   assert.ok(!/source_findings\[:\d+\]/.test(validate), "every source finding must be printed, not a truncated slice");
+  assert.ok(!validate.includes("explanation=finding.explanation"), "producer explanation text must never be emitted");
+  assert.ok(!validate.includes("notes=(\"; \".join(finding.limitations)"), "producer limitation text must never be emitted");
+  assert.match(validate, /re\.fullmatch\(r"\[A-Za-z0-9\._:\-\]/, "source identifiers must be allow-listed before logging");
+  assert.match(validate, /http_status=http_match\.group\(1\)/, "only a numeric HTTP status may be extracted from producer prose");
 });
 
 test("the workflow builds the estate through the tested script, not inline shell", async () => {
