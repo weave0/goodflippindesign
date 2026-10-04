@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { env } from 'cloudflare:test';
 
 import worker from '../../workers/auth.js';
-import { createD1WorkItemStore, ensureWorkItemSchema, settleObservation } from '../../workers/mission-control-work-items.js';
+import { CANARY_FINDING_KEY, createD1WorkItemStore, ensureWorkItemSchema, settleObservation } from '../../workers/mission-control-work-items.js';
 import { ensureOutboxSchema } from '../../workers/lib/mission-control-outbox.js';
 
 const SECRET = 'sk_test_mission_control';
@@ -89,6 +89,19 @@ async function healthItem() {
     observedAt: '2026-10-03T12:00:00.000Z', evidenceDigest: digest, severity: 'low',
   }, { status: 'degraded', checkedAt: '2026-10-03T12:00:00.000Z', actor: 'health-sweep' });
   return (await store().list()).find((item) => item.producer !== 'mc-canary');
+}
+async function decoyCanaryItem() {
+  const findingKey = 'canary:decoy:same-property-different-finding';
+  const observedAt = '2026-10-03T12:05:00.000Z';
+  await settleObservation(store(), {
+    producer: 'mc-canary',
+    propertyId: 'aiaimate.com',
+    findingKey,
+    observedAt,
+    evidenceDigest: `sha256:${'2'.repeat(64)}`,
+    severity: 'low',
+  }, { status: 'degraded', checkedAt: observedAt, actor: 'hostile-fixture' });
+  return (await store().list()).find((item) => item.findingKey === findingKey);
 }
 const effectCount = async () => Number((await env.DB.prepare('SELECT COUNT(*) AS n FROM mc_effects').first()).n);
 const actorsOf = async (workItemId) => (await env.DB.prepare('SELECT actor_id FROM mc_work_item_events WHERE work_item_id = ?').bind(workItemId).all()).results.map((r) => r.actor_id);
@@ -206,7 +219,7 @@ describe('canary-runner bounded surface (kill switch exactly aiaimate.com)', () 
     expect((await call(itemPath(item.workItemId), { method: 'GET' })).status).toBe(200);
     expect((await call('/api/mission-control/operations', { method: 'GET' })).status).toBe(200);
     const listed = await json(await call('/api/mission-control/work-items', { method: 'GET' }));
-    expect(listed.workItems.every((entry) => entry.producer === 'mc-canary')).toBe(true);
+    expect(listed.workItems.every((entry) => entry.producer === 'mc-canary' && entry.findingKey === CANARY_FINDING_KEY)).toBe(true);
     expect((await call('/api/mission-control/provenance', { method: 'GET' })).status).toBe(200);
   });
 
@@ -269,6 +282,26 @@ describe('canary-runner bounded surface (kill switch exactly aiaimate.com)', () 
     const admin = await call(itemPath(id), { method: 'GET', token: adminToken() });
     expect(admin.status).toBe(200);
   });
+
+  it('cannot see or mutate a same-producer/same-property row with a different finding identity', async () => {
+    const decoy = await decoyCanaryItem();
+    expect(decoy.producer).toBe('mc-canary');
+    expect(decoy.propertyId).toBe('aiaimate.com');
+    expect(decoy.findingKey).not.toBe(CANARY_FINDING_KEY);
+
+    const id = decoy.workItemId;
+    expect((await call(itemPath(id), { method: 'GET' })).status).toBe(404);
+    expect((await call(itemPath(id, 'transition'), { body: { to: 'QUALIFIED' } })).status).toBe(404);
+    expect((await call(itemPath(id, 'investigate'), { body: { evidenceRevision: REVISION } })).status).toBe(404);
+    const dispatched = await call(itemPath(id, 'dispatch'), { body: {} });
+    expect([dispatched.status, (await json(dispatched)).code]).toEqual([403, 'canary_ineligible']);
+
+    const listed = await json(await call('/api/mission-control/work-items', { method: 'GET' }));
+    expect(listed.workItems.some((entry) => entry.workItemId === id)).toBe(false);
+    const operations = JSON.stringify(await json(await call('/api/mission-control/operations', { method: 'GET' })));
+    expect(operations).not.toContain(id);
+    expect((await store().get(id)).state).toBe('OBSERVED');
+  });
 });
 
 describe('attribution and secrecy', () => {
@@ -292,11 +325,16 @@ describe('attribution and secrecy', () => {
       ['GET', '/api/mission-control', undefined, RUNNER_TOKEN],
       ['GET', `/api/mission-control/${RUNNER_TOKEN}`, undefined, RUNNER_TOKEN],
       ['POST', '/api/mission-control/canary-observations', { status: 'degraded' }, OTHER_VALID_TOKEN],
+      ['POST', '/api/mission-control/canary-observations', { status: 'degraded', [RUNNER_TOKEN]: true }, RUNNER_TOKEN],
+      ['POST', itemPath(item.workItemId, 'investigate'), { evidenceRevision: RUNNER_TOKEN }, RUNNER_TOKEN],
       ['POST', '/api/mission-control/canary-observations', { status: 'degraded' }, RUNNER_TOKEN],
     ]) {
       const response = await call(path, { method, body, token });
       responses.push(await response.text());
     }
+    const hostileMethod = await call('/api/mission-control/provenance', { method: RUNNER_TOKEN });
+    expect(hostileMethod.status).toBe(403);
+    responses.push(await hostileMethod.text());
     const malformedId = await call('/api/mission-control/work-items/%E0%A4%A', { method: 'GET' });
     expect(malformedId.status).toBe(404);
     responses.push(await malformedId.text());
@@ -314,6 +352,7 @@ describe('attribution and secrecy', () => {
     expect(audit.some((entry) => entry.result === 'refused:out_of_surface')).toBe(true);
     expect(audit.some((entry) => entry.result === 'refused:canary_disabled')).toBe(true);
     expect(audit.some((entry) => entry.route === ':route')).toBe(true);
+    expect(audit.some((entry) => entry.method === ':method')).toBe(true);
     expect(audit.some((entry) => entry.route === 'work-items/:id' && entry.workItemId === null)).toBe(true);
     for (const entry of audit) expect(Object.keys(entry).sort()).toEqual(['actor', 'at', 'kind', 'method', 'release', 'result', 'role', 'route', 'workItemId']);
   });
