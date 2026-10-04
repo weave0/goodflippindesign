@@ -28,7 +28,7 @@ const KCV = {
   result: kcvFromBytes(strongHexKeyBytes(RESULT_HEX), 'result'),
   bearer: kcvFromBytes(strongTokenBytes(BEARER), 'bearer'),
 };
-const MC = ['MISSION_CONTROL_CONTRACT_KEY', 'MISSION_CONTROL_CONTRACT_KEY_ID', 'MISSION_CONTROL_RESULT_KEY', 'MISSION_CONTROL_RESULT_KEY_ID', 'MISSION_CONTROL_RESULT_WORKER_ID', 'MISSION_CONTROL_WORKER_TOKEN'];
+const MC = ['MISSION_CONTROL_CONTRACT_KEY', 'MISSION_CONTROL_CONTRACT_KEY_ID', 'MISSION_CONTROL_RESULT_KEY', 'MISSION_CONTROL_RESULT_KEY_ID', 'MISSION_CONTROL_RESULT_WORKER_ID', 'MISSION_CONTROL_WORKER_TOKEN', 'MISSION_CONTROL_CANARY_RUNNER_TOKEN'];
 
 // --- fixtures: the raw Cloudflare API shape, normalized by the real code -------------------------------
 const rawProject = () => ({
@@ -56,7 +56,7 @@ const goodBody = () => ({
   bindings: Object.fromEntries([
     present('MISSION_CONTROL_CONTRACT_KEY', null, KCV.contract), present('MISSION_CONTROL_CONTRACT_KEY_ID', CONTRACT_KEY_ID),
     present('MISSION_CONTROL_RESULT_KEY', null, KCV.result), present('MISSION_CONTROL_RESULT_KEY_ID', RESULT_KEY_ID),
-    present('MISSION_CONTROL_RESULT_WORKER_ID', WORKER_ID), present('MISSION_CONTROL_WORKER_TOKEN', null, KCV.bearer),
+    present('MISSION_CONTROL_RESULT_WORKER_ID', WORKER_ID), present('MISSION_CONTROL_WORKER_TOKEN', null, KCV.bearer), present('MISSION_CONTROL_CANARY_RUNNER_TOKEN'),
   ]),
   d1: { bound: true, reachable: true, workItemSchema: true },
   ready: true,
@@ -177,8 +177,15 @@ for (const name of MC) {
   assert.match(undeclared.checks.P5.reason, new RegExp(name));
 }
 only(run((i) => { i.probe.body.ready = false; i.probe.body.blockers = ['x']; }), 'P5');
+// the runner is a credential too: Cloudflare must expose it as secret_text, never plain_text
+{
+  const r = run((i) => { i.controlPlane = cp((raw) => { raw.deployment_configs.production.env_vars.MISSION_CONTROL_CANARY_RUNNER_TOKEN = { type: 'plain_text', value: '' }; }); });
+  assert.equal(r.checks.P5.status, 'FAIL');
+  assert.match(r.checks.P5.reason, /MISSION_CONTROL_CANARY_RUNNER_TOKEN/);
+}
+
 // credentials must be encrypted secrets in the Pages production environment; an empty plain_text placeholder is not a secret
-for (const name of ['MISSION_CONTROL_CONTRACT_KEY', 'MISSION_CONTROL_RESULT_KEY', 'MISSION_CONTROL_WORKER_TOKEN']) {
+for (const name of ['MISSION_CONTROL_CONTRACT_KEY', 'MISSION_CONTROL_RESULT_KEY', 'MISSION_CONTROL_WORKER_TOKEN', 'MISSION_CONTROL_CANARY_RUNNER_TOKEN']) {
   for (const type of ['plain_text', 'unknown', undefined]) {
     const r = run((i) => { i.controlPlane = cp((raw) => { raw.deployment_configs.production.env_vars[name] = type ? { type, value: '' } : {}; }); });
     only(r, 'P5');
