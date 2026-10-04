@@ -177,6 +177,13 @@ for (const name of MC) {
   assert.match(undeclared.checks.P5.reason, new RegExp(name));
 }
 only(run((i) => { i.probe.body.ready = false; i.probe.body.blockers = ['x']; }), 'P5');
+// the runner is a credential too: Cloudflare must expose it as secret_text, never plain_text
+{
+  const r = run((i) => { i.controlPlane = cp((raw) => { raw.deployment_configs.production.env_vars.MISSION_CONTROL_CANARY_RUNNER_TOKEN = { type: 'plain_text', value: '' }; }); });
+  assert.equal(r.checks.P5.status, 'FAIL');
+  assert.match(r.checks.P5.reason, /MISSION_CONTROL_CANARY_RUNNER_TOKEN/);
+}
+
 // credentials must be encrypted secrets in the Pages production environment; an empty plain_text placeholder is not a secret
 for (const name of ['MISSION_CONTROL_CONTRACT_KEY', 'MISSION_CONTROL_RESULT_KEY', 'MISSION_CONTROL_WORKER_TOKEN', 'MISSION_CONTROL_CANARY_RUNNER_TOKEN']) {
   for (const type of ['plain_text', 'unknown', undefined]) {
