@@ -40,6 +40,8 @@ NODE_ENV = "production"
 # MISSION_CONTROL_CONTRACT_KEY / MISSION_CONTROL_CONTRACT_KEY_ID — signs investigation requests and lease grants
 # MISSION_CONTROL_RESULT_KEY / MISSION_CONTROL_RESULT_KEY_ID / MISSION_CONTROL_RESULT_WORKER_ID — verifies worker results by key id
 # MISSION_CONTROL_WORKER_TOKEN — 128 lowercase hex characters generated from 64 random bytes; FWOMPS delivery bearer
+# MISSION_CONTROL_CANARY_RUNNER_TOKEN — 128 lowercase hex characters (64 random bytes), independent of every other secret; the
+#                              mission-control-canary-runner identity. It has ZERO authority unless MISSION_CONTROL_CANARY is exactly aiaimate.com.
 # TOKEN_ENCRYPTION_KEY    — 32+ char random string for AES-GCM token/state encryption
 # OPENAI_API_KEY          — Required for Content Studio DALL-E 3 image generation
 #
