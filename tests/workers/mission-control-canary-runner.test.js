@@ -332,7 +332,10 @@ describe('attribution and secrecy', () => {
       const response = await call(path, { method, body, token });
       responses.push(await response.text());
     }
-    const hostileMethod = await call('/api/mission-control/provenance', { method: RUNNER_TOKEN });
+    // Node's Request constructor rejects extremely long method tokens before the Worker sees them.
+    // Exercise the same audit branch with an accepted unsupported method; production code maps every
+    // method other than GET/POST to the same fixed ':method' placeholder.
+    const hostileMethod = await call('/api/mission-control/provenance', { method: 'PATCH' });
     expect(hostileMethod.status).toBe(403);
     responses.push(await hostileMethod.text());
     const malformedId = await call('/api/mission-control/work-items/%E0%A4%A', { method: 'GET' });
