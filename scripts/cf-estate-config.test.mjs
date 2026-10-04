@@ -997,6 +997,23 @@ test("the workflow never sends per_page to the Pages project endpoint", async ()
   for (const line of requestLines) assert.ok(!/per_page/.test(line), line);
 });
 
+test("the workflow prints sidecar-derived text only JSON-serialized, never raw", async () => {
+  const workflow = await readFile(WORKFLOW, "utf8");
+  const validate = workflow.split("Validate live insight sidecar")[1]?.split("Assert governed secrets are absent")[0] ?? "";
+  assert.ok(validate.includes("def emit("), "free-text diagnostics must go through emit()");
+  assert.match(validate, /json\.dumps\(fields, ensure_ascii=True/);
+  for (const line of validate.split(/\r?\n/)) {
+    if (/print\(f".*\{(finding\.|row\.property_id|reason|notes)/.test(line) && !line.includes("estate_status")) {
+      assert.fail(`raw interpolation of sidecar text into the command stream: ${line.trim()}`);
+    }
+  }
+  assert.ok(!/source_findings\[:\d+\]/.test(validate), "every source finding must be printed, not a truncated slice");
+  assert.ok(!validate.includes("explanation=finding.explanation"), "producer explanation text must never be emitted");
+  assert.ok(!validate.includes("notes=(\"; \".join(finding.limitations)"), "producer limitation text must never be emitted");
+  assert.match(validate, /re\.fullmatch\(r"\[A-Za-z0-9\._:\-\]/, "source identifiers must be allow-listed before logging");
+  assert.match(validate, /http_status=http_match\.group\(1\)/, "only a numeric HTTP status may be extracted from producer prose");
+});
+
 test("the workflow builds the estate through the tested script, not inline shell", async () => {
   const workflow = await readFile(WORKFLOW, "utf8");
   assert.match(workflow, /scripts\/cf-pages-projects\.sh/);

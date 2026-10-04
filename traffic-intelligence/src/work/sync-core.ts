@@ -12,6 +12,7 @@ import {
   extractSnoozeFromLabelsOrBody,
   lifecycleFromLabels,
   parseMachineBlock,
+  proseDiffers,
   upsertMachineBlock,
   type ComposedIssue,
 } from "./issue-body";
@@ -573,7 +574,8 @@ export function planWorkSync(options: {
       groupSize,
     });
 
-    if (materialFieldsChanged(machine, composed.machine) || consolidatable) {
+    const proseStale = proseDiffers(existing.body, composed.body);
+    if (materialFieldsChanged(machine, composed.machine) || consolidatable || proseStale) {
       composed.machine.lifecycle = lifecycle;
       // composeIssue() already carries the preserved first-detection evidence
       // from prior_body while rebuilding all human-readable fields from the
@@ -585,7 +587,11 @@ export function planWorkSync(options: {
         eligibility,
         issue_number: existing.number,
         composed,
-        reason: consolidatable ? "consolidated evidence refresh" : "material fields / evidence changed",
+        reason: consolidatable
+          ? "consolidated evidence refresh"
+          : proseStale
+            ? "headline prose no longer matches current finding/brief"
+            : "material fields / evidence changed",
       });
       metrics.updates_last_sync += 1;
     } else {
