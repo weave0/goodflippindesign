@@ -352,6 +352,7 @@ jobs:
           python - <<'PY'
           import json
           import os
+          import re
           from datetime import datetime, timedelta, timezone
           from pathlib import Path
           from gfdti.insights import TrafficInsightDocument
@@ -448,11 +449,20 @@ jobs:
           source_findings = [f for f in doc.findings if f.scope == "source"]
           print(f"source_scope_findings={len(source_findings)}")
           for finding in source_findings:
+              # Never place producer free text in Actions logs. Emit only constrained identifiers/states,
+              # plus a numeric HTTP status extracted from the explanation when one is present.
+              source_id = finding.source_id or ""
+              safe_source_id = source_id if re.fullmatch(r"[A-Za-z0-9._:-]{1,160}", source_id) else "<invalid-source-id>"
+              http_match = re.search(r"\\bHTTP\\s+([1-5][0-9]{2})\\b", finding.explanation or "", re.IGNORECASE)
               emit(
                   "source_finding",
-                  id=finding.finding_id[:200],
-                  explanation=finding.explanation[:200],
-                  notes=("; ".join(finding.limitations) or "no producer note")[:200],
+                  id=finding.finding_id[:120] if re.fullmatch(r"[A-Za-z0-9._:-]{1,120}", finding.finding_id) else "<invalid-finding-id>",
+                  source_id=safe_source_id,
+                  evidence_state=str(finding.evidence_state),
+                  coverage_state=str(finding.coverage_state),
+                  exactness=str(finding.exactness),
+                  http_status=http_match.group(1) if http_match else None,
+                  limitation_count=len(finding.limitations),
               )
           PY
 
