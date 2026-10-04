@@ -83,6 +83,12 @@ const PLATFORM_SPECS = {
   },
 };
 
+const RESOLVED_VARIANT_STATUSES = new Set(['published', 'failed']);
+
+function isSupportedPlatform(platform) {
+  return Object.prototype.hasOwnProperty.call(PLATFORM_SPECS, platform);
+}
+
 // ──────────────────────────────────────────────────────────────
 //  Token management (stored in D1, encrypted AES-GCM)
 // ──────────────────────────────────────────────────────────────
@@ -453,6 +459,15 @@ async function refreshLinkedInToken(db, brand, platform, payload, encryptionKey)
   await saveToken(db, brand, platform, payload.account_id, payload.account_label, refreshed, encryptionKey);
   return refreshed;
 }
+
+function validateLinkedInTokenShape(token) {
+  if (!token?.access_token) throw new Error('LinkedIn token missing access_token');
+  if (!token?.person_urn) throw new Error('LinkedIn token missing person_urn');
+}
+
+const PLATFORM_PREFLIGHT_VALIDATORS = {
+  linkedin: validateLinkedInTokenShape,
+};
 
 /**
  * Post to LinkedIn via versioned REST APIs.
@@ -905,7 +920,13 @@ async function publishVariant(variant, db, env) {
     'UPDATE cms_post_variants SET status=?, updated_at=? WHERE id=?'
   ).bind('publishing', now, id).run();
 
+  let dispatchStarted = false;
+
   try {
+    if (!isSupportedPlatform(platform)) {
+      throw new Error(`Unsupported platform: ${platform}`);
+    }
+
     // Get token (throws if not configured)
     const token = await getToken(db, brand, platform, env.TOKEN_ENCRYPTION_KEY);
 
@@ -917,7 +938,12 @@ async function publishVariant(variant, db, env) {
     // Format content per platform
     const { text } = formatContent(content, platform);
 
+    // Validate known credential/configuration failures before crossing the external effect boundary.
+    const preflightValidate = PLATFORM_PREFLIGHT_VALIDATORS[platform];
+    if (preflightValidate) preflightValidate(token);
+
     let result;
+    dispatchStarted = true;
     switch (platform) {
       case 'instagram':
         result = await postInstagram(token, mediaUrl, text);
@@ -963,27 +989,28 @@ async function publishVariant(variant, db, env) {
 
   } catch (err) {
     const errorMsg = err.message || String(err);
-    console.error(`[social-publisher] Failed ${platform} variant ${id}: ${errorMsg}`);
+    // Once an external dispatch begins, a thrown error cannot prove the provider did not commit.
+    // Never auto-retry that effect: quarantine it as ambiguous for explicit reconciliation.
+    const status = dispatchStarted ? 'ambiguous' : 'failed';
+    const retryCount = variant.retry_count || 0;
+    console.error(`[social-publisher] ${status} ${platform} variant ${id}: ${errorMsg}`);
 
-    const MAX_RETRIES = 3;
-    const retryCount = (variant.retry_count || 0) + 1;
-    const willRetry = retryCount <= MAX_RETRIES;
+    await db.prepare(
+      'UPDATE cms_post_variants SET status=?, retry_count=?, error_message=?, updated_at=? WHERE id=?'
+    ).bind(status, retryCount, errorMsg.substring(0, 500), now, id).run();
 
-    if (willRetry) {
-      // Exponential backoff: 15 min × 2^(attempt-1) → 15, 30, 60 min
-      const backoffMs = 15 * 60 * 1000 * Math.pow(2, retryCount - 1);
-      const retryAt = new Date(Date.now() + backoffMs).toISOString();
-      console.warn(`[social-publisher] Scheduling retry ${retryCount}/${MAX_RETRIES} for variant ${id} at ${retryAt}`);
-      await db.prepare(
-        'UPDATE cms_post_variants SET status=\'pending\', retry_count=?, scheduled_at=?, error_message=?, updated_at=? WHERE id=?'
-      ).bind(retryCount, retryAt, errorMsg.substring(0, 500), now, id).run();
-    } else {
-      await db.prepare(
-        'UPDATE cms_post_variants SET status=\'failed\', retry_count=?, error_message=?, updated_at=? WHERE id=?'
-      ).bind(retryCount, errorMsg.substring(0, 500), now, id).run();
-    }
+    await updateParentPostStatus(db, variant.post_id);
 
-    return { success: false, platform, id, error: errorMsg, willRetry };
+    return {
+      success: false,
+      platform,
+      id,
+      error: errorMsg,
+      status,
+      ambiguous: status === 'ambiguous',
+      manual_reconciliation_required: status === 'ambiguous',
+      willRetry: false,
+    };
   }
 }
 
@@ -995,10 +1022,16 @@ async function updateParentPostStatus(db, postId) {
   if (!results || results.length === 0) return;
 
   const statuses = results.map(r => r.status);
-  const allDone = statuses.every(s => s === 'published' || s === 'failed');
+  const allDone = statuses.every(s => RESOLVED_VARIANT_STATUSES.has(s));
+  const anyAmbiguous = statuses.some(s => s === 'ambiguous');
   const anyPublished = statuses.some(s => s === 'published');
 
-  if (allDone) {
+  if (anyAmbiguous) {
+    const now = new Date().toISOString();
+    await db.prepare(`
+      UPDATE cms_social_posts SET status='ambiguous', updated_at=? WHERE id=?
+    `).bind(now, postId).run();
+  } else if (allDone) {
     const parentStatus = anyPublished ? 'published' : 'failed';
     const now = new Date().toISOString();
     await db.prepare(`
@@ -1039,13 +1072,15 @@ async function runScheduler(env) {
   );
 
   const succeeded = results.filter(r => r.status === 'fulfilled' && r.value?.success).length;
-  const failed = results.length - succeeded;
+  const ambiguous = results.filter(r => r.status === 'fulfilled' && r.value?.ambiguous).length;
+  const failed = results.length - succeeded - ambiguous;
 
-  console.log(`[social-publisher] Cron complete: ${succeeded} published, ${failed} failed`);
+  console.log(`[social-publisher] Cron complete: ${succeeded} published, ${ambiguous} ambiguous, ${failed} failed/blocked`);
 
   return {
     processed: results.length,
     published: succeeded,
+    ambiguous,
     failed,
   };
 }
@@ -1126,3 +1161,6 @@ export default {
     return json({ error: 'Not found' }, 404, corsHeaders);
   },
 };
+
+
+export { publishVariant, runScheduler, updateParentPostStatus };

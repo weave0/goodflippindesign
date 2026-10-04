@@ -77,6 +77,7 @@
     "test:security": "node tests/security/audit-policy.test.js && node tests/security/payment-surface.test.js",
     "test:workers:payments": "vitest run --config vitest.stripe-payments.config.mjs",
     "test:workers:stripe-webhook": "vitest run --config vitest.workers.config.mjs tests/workers/stripe.test.js tests/workers/stripe-ledger.test.js",
+    "test:workers:social-publisher": "vitest run --config vitest.workers.config.mjs --no-file-parallelism tests/workers/social-publisher.test.js",
     "test:all": "npm test && npm run test:workers && npm run test:workers:payments",
     "traffic:dev": "npm --prefix traffic-intelligence run dev",
     "traffic:test": "npm --prefix traffic-intelligence test",

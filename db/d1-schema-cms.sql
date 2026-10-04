@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS cms_social_posts (
   published_at TEXT,                        -- when actually published
   external_id TEXT DEFAULT '',             -- platform's post ID after publish
   external_url TEXT DEFAULT '',            -- link to live post
-  status TEXT DEFAULT 'draft',             -- draft, scheduled, publishing, published, failed
+  status TEXT DEFAULT 'draft',             -- draft, scheduled, publishing, published, failed, ambiguous
   error_message TEXT DEFAULT '',           -- if status = failed
   campaign_id INTEGER,                     -- FK to cms_campaigns(id)
   objective TEXT DEFAULT '',               -- campaign objective copy
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS cms_post_variants (
   char_count INTEGER DEFAULT 0,
   hashtags TEXT DEFAULT '[]',             -- JSON array
   scheduled_at TEXT,
-  status TEXT DEFAULT 'pending',           -- pending, publishing, published, failed
+  status TEXT DEFAULT 'pending',           -- pending, publishing, published, failed, ambiguous
   retry_count INTEGER DEFAULT 0,           -- incremented on transient failure (max 3)
   external_id TEXT DEFAULT '',
   external_url TEXT DEFAULT '',
