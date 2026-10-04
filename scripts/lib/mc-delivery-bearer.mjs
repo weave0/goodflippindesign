@@ -42,8 +42,12 @@ export function resolveCanaryRunnerToken(localToken, workerBearer, envName = 'th
 
 /** A fresh token for deliberate rotation, guaranteed distinct from the delivery bearer. */
 export function resolveCanaryRunnerProvision(localToken, workerBearer, { remoteInstalled = false, replace = false, envName = 'the canary-runner variable' } = {}) {
-  if (remoteInstalled && !replace && (localToken == null || localToken === '')) {
-    throw new Error(`${envName} is not set on this host while MISSION_CONTROL_CANARY_RUNNER_TOKEN is already installed; refusing to claim a usable runner pair (rotate deliberately)`);
+  // Cloudflare does not reveal secret values, so the mere presence of the remote secret cannot prove that an
+  // independently stored local token is still its pair. Reusing an existing remote value would therefore allow
+  // an out-of-band remote rotation to look healthy until the driver starts receiving 401s. Fail closed unless
+  // this run will deliberately write the remote value (--replace) or the remote secret does not exist yet.
+  if (remoteInstalled && !replace) {
+    throw new Error(`MISSION_CONTROL_CANARY_RUNNER_TOKEN is already installed and its value cannot be compared to ${envName}; refusing to claim synchronization (rotate deliberately or use --replace to re-pair it)`);
   }
   return resolveCanaryRunnerToken(localToken, workerBearer, envName);
 }
