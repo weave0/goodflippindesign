@@ -12,6 +12,7 @@ const SHA = 'a'.repeat(40);
 const CONTRACT_KEY = 'f'.repeat(64);
 const RESULT_KEY = 'e'.repeat(64);
 const WORKER_TOKEN = 'provenance-worker-token-sentinel';
+const RUNNER_TOKEN = 'c'.repeat(128);
 const KEY_ID = 'gfd-contract-key-id-sentinel';
 const RESULT_KEY_ID = 'gfd-result-key-id-sentinel';
 const WORKER_ID = 'fwomps-worker-id-sentinel';
@@ -23,6 +24,7 @@ const BINDINGS = [
   'MISSION_CONTROL_RESULT_KEY_ID',
   'MISSION_CONTROL_RESULT_WORKER_ID',
   'MISSION_CONTROL_WORKER_TOKEN',
+  'MISSION_CONTROL_CANARY_RUNNER_TOKEN',
 ];
 
 function liveToken(sub) {
@@ -52,6 +54,7 @@ function fullEnv(overrides = {}) {
     MISSION_CONTROL_RESULT_KEY_ID: RESULT_KEY_ID,
     MISSION_CONTROL_RESULT_WORKER_ID: WORKER_ID,
     MISSION_CONTROL_WORKER_TOKEN: WORKER_TOKEN,
+    MISSION_CONTROL_CANARY_RUNNER_TOKEN: RUNNER_TOKEN,
     ASSETS: assetsServing(PAGES_STAMP),
     ...overrides,
   };
@@ -276,5 +279,24 @@ describe('worker provenance probe: report', () => {
     expect(report.ready).toBe(false);
     expect(report.release.state).toBe('unstamped');
     for (const name of BINDINGS) expect(report.bindings[name].state).toBe('missing');
+  });
+});
+
+describe('worker provenance: canary-runner credential binding', () => {
+  it('is a required binding: missing, weak, or equal to the worker bearer is unavailable; canonical is present', async () => {
+    const canonical = 'ef'.repeat(64);
+    for (const [label, value, state] of [
+      ['missing', undefined, 'missing'],
+      ['weak', 'weak-runner-token', 'invalid'],
+      ['wrong case', 'EF'.repeat(64), 'invalid'],
+      ['equals the worker bearer', 'ab'.repeat(64), 'invalid'],
+      ['canonical', canonical, 'present'],
+    ]) {
+      const overrides = { MISSION_CONTROL_CANARY_RUNNER_TOKEN: value, ...(label === 'equals the worker bearer' ? { MISSION_CONTROL_WORKER_TOKEN: value } : {}) };
+      const report = await buildProvenanceReport(fullEnv(overrides));
+      expect(report.bindings.MISSION_CONTROL_CANARY_RUNNER_TOKEN.state, label).toBe(state);
+      expect(report.ready, label).toBe(state === 'present');
+      expect(JSON.stringify(report)).not.toContain(canonical);
+    }
   });
 });
