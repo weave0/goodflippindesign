@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 import { strongTokenBytes } from '../workers/lib/key-check-value.js';
-import { generateCanaryRunnerToken, generateDeliveryBearer, resolveCanaryRunnerToken, resolveDeliveryBearer } from '../scripts/lib/mc-delivery-bearer.mjs';
+import { generateCanaryRunnerToken, generateDeliveryBearer, resolveCanaryRunnerProvision, resolveCanaryRunnerToken, resolveDeliveryBearer } from '../scripts/lib/mc-delivery-bearer.mjs';
 
 for (let i = 0; i < 20; i += 1) {
   const bearer = generateDeliveryBearer();
@@ -37,9 +37,16 @@ assert.ok(!/randomBytes\(\s*32\s*\)/.test(provisioner), 'no 256-bit bearer gener
   assert.deepEqual(reused, { token: 'cd'.repeat(64), generated: false });
   assert.throws(() => resolveCanaryRunnerToken('ab'.repeat(32), worker, 'GFD_MC_CANARY_RUNNER_TOKEN'), /canonical 128-lowercase-hex/);
   assert.throws(() => resolveCanaryRunnerToken(worker, worker, 'GFD_MC_CANARY_RUNNER_TOKEN'), /independent/);
+  assert.throws(() => resolveCanaryRunnerProvision(undefined, worker, { remoteInstalled: true, replace: false, envName: 'GFD_MC_CANARY_RUNNER_TOKEN' }), /already installed/);
+  assert.deepEqual(resolveCanaryRunnerProvision('cd'.repeat(64), worker, { remoteInstalled: true, replace: false, envName: 'GFD_MC_CANARY_RUNNER_TOKEN' }), { token: 'cd'.repeat(64), generated: false });
+  assert.throws(() => resolveCanaryRunnerProvision('CD'.repeat(64), worker, { remoteInstalled: true, replace: false, envName: 'GFD_MC_CANARY_RUNNER_TOKEN' }), /canonical 128-lowercase-hex/);
+  const replacedRemote = resolveCanaryRunnerProvision(undefined, worker, { remoteInstalled: true, replace: true, envName: 'GFD_MC_CANARY_RUNNER_TOKEN' });
+  assert.equal(replacedRemote.generated, true); assert.ok(strongTokenBytes(replacedRemote.token)); assert.notEqual(replacedRemote.token, worker);
   for (let i = 0; i < 10; i += 1) { const t = generateCanaryRunnerToken(worker); assert.ok(strongTokenBytes(t)); assert.notEqual(t, worker); }
   const provisioner2 = readFileSync(new URL('../scripts/mc-production-provision.mjs', import.meta.url), 'utf8');
   assert.ok(provisioner2.includes("'MISSION_CONTROL_CANARY_RUNNER_TOKEN'") && provisioner2.includes('--rotate-canary-runner') && provisioner2.includes('--revoke-canary-runner'));
+  assert.ok(provisioner2.includes('resolveCanaryRunnerProvision'), 'provisioner must validate the local/remote runner pair before success');
+  assert.ok(!provisioner2.includes('WARNING: ${RUNNER_NAME} is installed'), 'missing local runner pair must fail, not warn and continue');
   // state files record secret NAMES only: nothing in save() calls receives a token value
   const saveCalls = provisioner2.split('\n').filter((line) => line.includes('= save({'));
   assert.ok(saveCalls.length >= 3);
