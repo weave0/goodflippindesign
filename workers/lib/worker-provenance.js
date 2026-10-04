@@ -40,6 +40,7 @@ export const REQUIRED_BINDINGS = Object.freeze([
   'MISSION_CONTROL_RESULT_KEY_ID',
   'MISSION_CONTROL_RESULT_WORKER_ID',
   'MISSION_CONTROL_WORKER_TOKEN',
+  'MISSION_CONTROL_CANARY_RUNNER_TOKEN',
 ]);
 
 function nonBlank(value) {
@@ -67,6 +68,13 @@ function tokenState(value) {
   return value.trim().length >= 16 ? 'present' : 'invalid';
 }
 
+// The canary-runner credential is its own secret: canonical 128 lowercase hex, and never the worker bearer.
+function runnerTokenState(value, workerToken) {
+  if (!nonBlank(value)) return 'missing';
+  if (!strongTokenBytes(value) || value === workerToken) return 'invalid';
+  return 'present';
+}
+
 export async function bindingReadiness(env) {
   const bindings = {
     MISSION_CONTROL_CONTRACT_KEY: { state: keyState(env?.MISSION_CONTROL_CONTRACT_KEY), secret: true },
@@ -75,6 +83,7 @@ export async function bindingReadiness(env) {
     MISSION_CONTROL_RESULT_KEY_ID: { state: idState(env?.MISSION_CONTROL_RESULT_KEY_ID), secret: false },
     MISSION_CONTROL_RESULT_WORKER_ID: { state: idState(env?.MISSION_CONTROL_RESULT_WORKER_ID), secret: false },
     MISSION_CONTROL_WORKER_TOKEN: { state: tokenState(env?.MISSION_CONTROL_WORKER_TOKEN), secret: true },
+    MISSION_CONTROL_CANARY_RUNNER_TOKEN: { state: runnerTokenState(env?.MISSION_CONTROL_CANARY_RUNNER_TOKEN, env?.MISSION_CONTROL_WORKER_TOKEN), secret: true },
   };
   for (const [name, entry] of Object.entries(bindings)) {
     if (!entry.secret && entry.state === 'present') entry.fingerprint = await fingerprint(env[name]);
