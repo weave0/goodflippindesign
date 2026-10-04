@@ -153,7 +153,8 @@ describe("issue prose refresh", () => {
     const old = insights(FINDING, STALE_SUMMARY, "2026-09-15T12:00:00.000Z");
     const issue = issueFrom(old);
     expect(issue.body).toContain("ti-evidence-before");
-    const next = insights(CURRENT_FINDING, CURRENT_SUMMARY, "2026-09-20T12:00:00.000Z");
+    // Keep generated_at identical so every machine field stays unchanged; prose alone must trigger the update.
+    const next = insights(CURRENT_FINDING, CURRENT_SUMMARY, "2026-09-15T12:00:00.000Z");
 
     const plan = planWorkSync({ insights: next, issues: [issue] });
     const update = plan.plans.find((p) => p.kind === "update_body");
