@@ -25,7 +25,7 @@ import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { generateCanaryRunnerToken, resolveCanaryRunnerProvision, resolveCanaryRunnerToken, resolveDeliveryBearer } from './lib/mc-delivery-bearer.mjs';
+import { generateCanaryRunnerToken, resolveCanaryRunnerProvision, resolveDeliveryBearer } from './lib/mc-delivery-bearer.mjs';
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
