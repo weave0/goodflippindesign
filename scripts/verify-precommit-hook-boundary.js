@@ -49,8 +49,9 @@ function findForeignDirs(root) {
 }
 
 const hookSource = fs.readFileSync(path.join(REPO_ROOT, '.husky', 'pre-commit'), 'utf8');
-if (!/if ! node scripts\/generate-csp\.js gfd; then[\s\S]*?exit 1[\s\S]*?fi/.test(hookSource)) {
-  throw new Error('pre-commit must propagate a failed GFD CSP generator instead of continuing');
+const cspConditional = hookSource.match(/if ! node scripts\/generate-csp\.js gfd; then\n([\s\S]*?)\nfi/);
+if (!cspConditional || !/(^|\n)\s*exit 1\s*(\n|$)/.test(cspConditional[1])) {
+  throw new Error('pre-commit must propagate a failed GFD CSP generator inside its own conditional');
 }
 
 let failed = false;
@@ -58,6 +59,19 @@ try {
   console.log(`Repo root: ${REPO_ROOT}`);
   console.log(`Creating isolated worktree at: ${worktreeDir}`);
   run('git', ['worktree', 'add', '--detach', worktreeDir, 'HEAD'], REPO_ROOT);
+
+  // Explicit single-site generation is an assertion, not a best-effort sweep: a missing
+  // sibling checkout must fail non-zero rather than claim a successful no-op.
+  let missingExplicitTargetFailed = false;
+  try {
+    run('node', ['scripts/generate-csp.js', 'culturesherpa'], worktreeDir);
+  } catch {
+    missingExplicitTargetFailed = true;
+  }
+  if (!missingExplicitTargetFailed) {
+    failed = true;
+    console.error('FAIL: explicitly requested missing CultureSherpa target returned success.');
+  }
 
   // No `npm install` step is needed here: the hook shells out only to
   // standard POSIX utilities already present on the runner/dev machine
