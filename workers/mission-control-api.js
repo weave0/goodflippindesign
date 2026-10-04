@@ -23,6 +23,7 @@ import { buildProvenanceReport } from './lib/worker-provenance.js';
 import {
   CANARY_PRODUCER,
   CANARY_PROPERTY_ID,
+  CANARY_FINDING_KEY,
   recordCanaryObservation,
   WorkItemError,
   abandonExpiredInvestigation,
@@ -348,9 +349,14 @@ const CANARY_RUNNER_ROLE = 'mission-control-canary-runner';
 const CANARY_RUNNER_WORK_ITEM_ID = /^gfdwi_v1_[0-9a-f]{64}$/;
 const CANARY_RUNNER_TOP_ROUTES = new Set(['provenance', 'operations', 'work-items', 'canary-observations']);
 const CANARY_RUNNER_ACTIONS = new Set(['transition', 'investigate', 'dispatch']);
+const CANARY_RUNNER_METHODS = new Set(['GET', 'POST']);
+const SHA40 = /^[0-9a-f]{40}$/;
 
 function canaryEligible(item, env) {
-  return item?.producer === CANARY_PRODUCER && item?.propertyId === CANARY_PROPERTY_ID && env.MISSION_CONTROL_CANARY === CANARY_PROPERTY_ID;
+  return item?.producer === CANARY_PRODUCER
+    && item?.propertyId === CANARY_PROPERTY_ID
+    && item?.findingKey === CANARY_FINDING_KEY
+    && env.MISSION_CONTROL_CANARY === CANARY_PROPERTY_ID;
 }
 
 function decodePathPart(part) {
@@ -372,7 +378,8 @@ function auditRunner(env, user, request, parts, result) {
   const decodedId = parts[2] === 'work-items' && parts[3] ? decodePathPart(parts[3]) : null;
   const workItemId = decodedId && CANARY_RUNNER_WORK_ITEM_ID.test(decodedId) ? decodedId : null;
   console.log(JSON.stringify({
-    at: nowIso(), kind: 'mc-canary-runner-access', actor: user.id, role: CANARY_RUNNER_ROLE, method: request.method,
+    at: nowIso(), kind: 'mc-canary-runner-access', actor: user.id, role: CANARY_RUNNER_ROLE,
+    method: CANARY_RUNNER_METHODS.has(request.method) ? request.method : ':method',
     route: runnerAuditRoute(parts),
     workItemId, release: env.CF_PAGES_COMMIT_SHA ? String(env.CF_PAGES_COMMIT_SHA).slice(0, 12) : null, result,
   }));
@@ -405,7 +412,7 @@ function canaryRunnerGate(request, env, user, parts) {
 function requireOnlyKeys(body, allowed) {
   const extra = Object.keys(body).filter((key) => !allowed.includes(key));
   if (extra.length) {
-    throw new WorkItemError('unexpected_fields', `unexpected fields: ${extra.join(', ')}`, 400);
+    throw new WorkItemError('unexpected_fields', 'Unexpected request fields are not allowed', 400);
   }
 }
 
@@ -496,7 +503,9 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       let leases = await rows('SELECT * FROM mc_work_item_leases');
       if (isRunner) {
         // The runner sees only the enabled canary's own material, never unrelated operator visibility.
-        workItems = workItems.filter((row) => row.producer === CANARY_PRODUCER && row.property_id === env.MISSION_CONTROL_CANARY);
+        workItems = workItems.filter((row) => row.producer === CANARY_PRODUCER
+          && row.property_id === CANARY_PROPERTY_ID
+          && row.finding_key === CANARY_FINDING_KEY);
         const ids = new Set(workItems.map((row) => row.work_item_id));
         events = events.filter((row) => ids.has(row.work_item_id));
         effects = effects.filter((row) => ids.has(row.work_item_id));
@@ -524,8 +533,8 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       const store = await workItemStore(env);
       const item = await store.get(decodeURIComponent(parts[3]));
       if (!item) throw new WorkItemError('not_found', 'Work item was not found', 404);
-      if (item.producer !== CANARY_PRODUCER || item.propertyId !== env.MISSION_CONTROL_CANARY) {
-        throw new WorkItemError('canary_ineligible', 'Only the canary work item of the enabled property can be dispatched here', 403);
+      if (!canaryEligible(item, env)) {
+        throw new WorkItemError('canary_ineligible', 'Only the canonical enabled canary work item can be dispatched here', 403);
       }
       if (item.state !== 'INVESTIGATION_READY' || !item.investigation?.digest) {
         throw new WorkItemError('illegal_transition', 'Only an investigation-ready item with a signed contract can be dispatched', 409);
@@ -586,8 +595,8 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       const id = decodeURIComponent(parts[3]);
       const item = await store.get(id);
       if (!item) throw new WorkItemError('not_found', 'Work item was not found', 404);
-      if (item.producer !== CANARY_PRODUCER || item.propertyId !== env.MISSION_CONTROL_CANARY) {
-        throw new WorkItemError('canary_ineligible', 'Only the canary work item of the enabled property can be recovered here', 403);
+      if (!canaryEligible(item, env)) {
+        throw new WorkItemError('canary_ineligible', 'Only the canonical enabled canary work item can be recovered here', 403);
       }
       if (item.state !== 'INVESTIGATION_READY' || item.activeLease || !item.investigation?.digest) {
         throw new WorkItemError('illegal_transition', 'Only a stale investigation-ready canary dispatch can be recovered', 409);
@@ -680,6 +689,9 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
           if (body.to !== 'QUALIFIED') throw new WorkItemError('canary_forbidden_transition', 'The canary runner may only qualify the canary item', 403);
         } else if (action === 'investigate') {
           requireOnlyKeys(body, ['evidenceRevision']);
+          if (!SHA40.test(body.evidenceRevision || '')) {
+            throw new WorkItemError('malformed_evidence_revision', 'The canary runner requires a full lowercase commit SHA evidence revision', 400);
+          }
         }
       }
       const dispatch = {};
