@@ -111,6 +111,10 @@ function write(outputPath, content, siteName) {
 
   const dir = path.dirname(absPath);
   if (!fs.existsSync(dir)) {
+    if (TARGET) {
+      console.error(`  ✗ ${siteName}: cannot generate explicitly requested target; directory does not exist: ${relativePath}`);
+      process.exit(1);
+    }
     console.log(`  ⚠ ${siteName}: skipping ${relativePath} — target directory does not exist in this checkout`);
     return;
   }
