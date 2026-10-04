@@ -290,12 +290,16 @@ describe('attribution and secrecy', () => {
       ['POST', itemPath(item.workItemId, 'dispatch'), {}, RUNNER_TOKEN],
       ['POST', itemPath(item.workItemId, 'lease'), {}, RUNNER_TOKEN],
       ['GET', '/api/mission-control', undefined, RUNNER_TOKEN],
+      ['GET', `/api/mission-control/${RUNNER_TOKEN}`, undefined, RUNNER_TOKEN],
       ['POST', '/api/mission-control/canary-observations', { status: 'degraded' }, OTHER_VALID_TOKEN],
       ['POST', '/api/mission-control/canary-observations', { status: 'degraded' }, RUNNER_TOKEN],
     ]) {
       const response = await call(path, { method, body, token });
       responses.push(await response.text());
     }
+    const malformedId = await call('/api/mission-control/work-items/%E0%A4%A', { method: 'GET' });
+    expect(malformedId.status).toBe(404);
+    responses.push(await malformedId.text());
     const off = await call('/api/mission-control/canary-observations', { body: { status: 'degraded' }, envOverrides: { MISSION_CONTROL_CANARY: undefined } });
     responses.push(await off.text());
     for (const text of [...responses, ...logs]) {
@@ -308,6 +312,9 @@ describe('attribution and secrecy', () => {
     expect(audit.every((entry) => entry.actor === RUNNER_ACTOR && entry.role === 'mission-control-canary-runner')).toBe(true);
     expect(audit.some((entry) => entry.result === 'allowed')).toBe(true);
     expect(audit.some((entry) => entry.result === 'refused:out_of_surface')).toBe(true);
+    expect(audit.some((entry) => entry.result === 'refused:canary_disabled')).toBe(true);
+    expect(audit.some((entry) => entry.route === ':route')).toBe(true);
+    expect(audit.some((entry) => entry.route === 'work-items/:id' && entry.workItemId === null)).toBe(true);
     for (const entry of audit) expect(Object.keys(entry).sort()).toEqual(['actor', 'at', 'kind', 'method', 'release', 'result', 'role', 'route', 'workItemId']);
   });
 });
