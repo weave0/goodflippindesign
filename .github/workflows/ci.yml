@@ -112,6 +112,9 @@ jobs:
       - name: Run Tests
         run: npm test
 
+      - name: Verify pre-commit project boundary
+        run: npm run verify:hook-boundary
+
       - name: Run governed Worker tests
         run: |
           npm run test:workers:mission-control-events
