@@ -157,12 +157,15 @@ const hostBearer = userEnv(bearerEnv);
 resolveDeliveryBearer(hostBearer, bearerEnv); // a present-but-malformed host bearer stops the plan, not just the apply
 const localRunner = userEnv(RUNNER_ENV);
 const runnerAlreadyInstalled = before.includes(RUNNER_NAME);
-// A remote runner secret is unusable to the local driver without its paired local copy. Fail the plan/apply instead of
-// reporting success, and validate every local value even when the remote secret already exists and will be kept.
-if (runnerAlreadyInstalled && !REPLACE && !localRunner) {
-  resolveCanaryRunnerProvision(localRunner, hostBearer, { remoteInstalled: true, replace: false, envName: RUNNER_ENV });
-}
-if (localRunner) resolveCanaryRunnerToken(localRunner, hostBearer, RUNNER_ENV);
+// Cloudflare exposes the runner secret's NAME, not its value. Therefore an already-installed remote value can never
+// be claimed synchronized merely because a local token exists. Plan and apply both fail closed unless this run will
+// deliberately re-pair the remote value (--replace); first-time creation remains safe because both copies are written
+// from this run's single token.
+resolveCanaryRunnerProvision(localRunner, hostBearer, {
+  remoteInstalled: runnerAlreadyInstalled,
+  replace: REPLACE,
+  envName: RUNNER_ENV,
+});
 for (const name of Object.keys(names)) {
   const action = existing.includes(name) ? (REPLACE ? 'REPLACE' : 'keep (exists)') : 'create';
   console.log(`  ${action.padEnd(14)} ${name}${name === 'MISSION_CONTROL_WORKER_TOKEN' ? (hostBearer ? ' (reusing the host user bearer)' : ' (a new bearer will be generated and persisted)') : ''}`);
