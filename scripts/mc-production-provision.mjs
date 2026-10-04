@@ -25,7 +25,7 @@ import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { generateCanaryRunnerToken, resolveCanaryRunnerToken, resolveDeliveryBearer } from './lib/mc-delivery-bearer.mjs';
+import { generateCanaryRunnerToken, resolveCanaryRunnerProvision, resolveCanaryRunnerToken, resolveDeliveryBearer } from './lib/mc-delivery-bearer.mjs';
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
@@ -155,6 +155,14 @@ console.log(`project ${PROJECT} production secrets today: ${before.length} (${be
 console.log(`host identity: worker ${mc.worker_id}, contract key id ${contractIds[0]}, result key id ${mc.worker_key_id}, bearer env ${bearerEnv}`);
 const hostBearer = userEnv(bearerEnv);
 resolveDeliveryBearer(hostBearer, bearerEnv); // a present-but-malformed host bearer stops the plan, not just the apply
+const localRunner = userEnv(RUNNER_ENV);
+const runnerAlreadyInstalled = before.includes(RUNNER_NAME);
+// A remote runner secret is unusable to the local driver without its paired local copy. Fail the plan/apply instead of
+// reporting success, and validate every local value even when the remote secret already exists and will be kept.
+if (runnerAlreadyInstalled && !REPLACE && !localRunner) {
+  resolveCanaryRunnerProvision(localRunner, hostBearer, { remoteInstalled: true, replace: false, envName: RUNNER_ENV });
+}
+if (localRunner) resolveCanaryRunnerToken(localRunner, hostBearer, RUNNER_ENV);
 for (const name of Object.keys(names)) {
   const action = existing.includes(name) ? (REPLACE ? 'REPLACE' : 'keep (exists)') : 'create';
   console.log(`  ${action.padEnd(14)} ${name}${name === 'MISSION_CONTROL_WORKER_TOKEN' ? (hostBearer ? ' (reusing the host user bearer)' : ' (a new bearer will be generated and persisted)') : ''}`);
@@ -165,10 +173,11 @@ if (!APPLY) { console.log('plan only: re-run with --apply'); process.exit(0); }
 const { bearer, generated } = resolveDeliveryBearer(hostBearer, bearerEnv);
 if (generated) { persistUserEnv(bearerEnv, bearer); console.log(`persisted ${bearerEnv} as a Windows user environment variable (new shells only)`); }
 names.MISSION_CONTROL_WORKER_TOKEN = () => bearer;
-const localRunner = userEnv(RUNNER_ENV);
-const runnerAlreadyInstalled = before.includes(RUNNER_NAME);
-if (runnerAlreadyInstalled && !localRunner) console.log(`WARNING: ${RUNNER_NAME} is installed but ${RUNNER_ENV} is not set on this host; rotate it deliberately (--rotate-canary-runner) to get a usable pair`);
-const { token: runnerToken, generated: runnerGenerated } = runnerAlreadyInstalled && !REPLACE ? { token: localRunner, generated: false } : resolveCanaryRunnerToken(localRunner, bearer, RUNNER_ENV);
+const { token: runnerToken, generated: runnerGenerated } = resolveCanaryRunnerProvision(localRunner, bearer, {
+  remoteInstalled: runnerAlreadyInstalled,
+  replace: REPLACE,
+  envName: RUNNER_ENV,
+});
 if (runnerGenerated) { persistUserEnv(RUNNER_ENV, runnerToken); console.log(`persisted ${RUNNER_ENV} as a Windows user environment variable (new shells only)`); }
 names[RUNNER_NAME] = () => runnerToken;
 const created = [];
