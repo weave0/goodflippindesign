@@ -345,17 +345,35 @@ function requireCanary(env) {
 }
 
 const CANARY_RUNNER_ROLE = 'mission-control-canary-runner';
+const CANARY_RUNNER_WORK_ITEM_ID = /^gfdwi_v1_[0-9a-f]{64}$/;
+const CANARY_RUNNER_TOP_ROUTES = new Set(['provenance', 'operations', 'work-items', 'canary-observations']);
+const CANARY_RUNNER_ACTIONS = new Set(['transition', 'investigate', 'dispatch']);
 
 function canaryEligible(item, env) {
   return item?.producer === CANARY_PRODUCER && item?.propertyId === CANARY_PROPERTY_ID && env.MISSION_CONTROL_CANARY === CANARY_PROPERTY_ID;
 }
 
-/** Structured, secret-free access diagnostic for the canary-runner identity. Never receives headers or tokens. */
+function decodePathPart(part) {
+  try { return decodeURIComponent(part); } catch { return null; }
+}
+
+function runnerAuditRoute(parts) {
+  const top = parts[2];
+  if (!CANARY_RUNNER_TOP_ROUTES.has(top)) return ':route';
+  if (top !== 'work-items') return parts.length === 3 ? top : `${top}/:extra`;
+  if (parts.length === 3) return 'work-items';
+  if (parts.length === 4) return 'work-items/:id';
+  if (parts.length === 5) return `work-items/:id/${CANARY_RUNNER_ACTIONS.has(parts[4]) ? parts[4] : ':action'}`;
+  return 'work-items/:id/:extra';
+}
+
+/** Structured, secret-free access diagnostic. Untrusted path values are never reflected into logs. */
 function auditRunner(env, user, request, parts, result) {
-  const workItemId = parts[2] === 'work-items' && parts[3] ? decodeURIComponent(parts[3]).slice(0, 96) : null;
+  const decodedId = parts[2] === 'work-items' && parts[3] ? decodePathPart(parts[3]) : null;
+  const workItemId = decodedId && CANARY_RUNNER_WORK_ITEM_ID.test(decodedId) ? decodedId : null;
   console.log(JSON.stringify({
     at: nowIso(), kind: 'mc-canary-runner-access', actor: user.id, role: CANARY_RUNNER_ROLE, method: request.method,
-    route: parts.slice(2).map((part, i) => (parts[2] === 'work-items' && i === 1 ? ':id' : part)).join('/'),
+    route: runnerAuditRoute(parts),
     workItemId, release: env.CF_PAGES_COMMIT_SHA ? String(env.CF_PAGES_COMMIT_SHA).slice(0, 12) : null, result,
   }));
 }
@@ -639,13 +657,16 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
 
     if (parts[2] === 'work-items' && parts.length === 4 && request.method === 'GET') {
       const store = await workItemStore(env);
-      const item = await store.get(decodeURIComponent(parts[3]));
+      const id = decodePathPart(parts[3]);
+      if (!id) return jsonResponse({ error: 'Work item was not found' }, 404);
+      const item = await store.get(id);
       if (!item || (isRunner && !canaryEligible(item, env))) return jsonResponse({ error: 'Work item was not found' }, 404);
       return jsonResponse({ workItem: item });
     }
 
     if (parts[2] === 'work-items' && parts.length === 5 && request.method === 'POST') {
-      const id = decodeURIComponent(parts[3]);
+      const id = decodePathPart(parts[3]);
+      if (!id) return jsonResponse({ error: 'Work item was not found' }, 404);
       const action = parts[4];
       const store = await workItemStore(env);
       const body = await readJson(request);
