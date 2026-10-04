@@ -41,6 +41,13 @@ export function resolveCanaryRunnerToken(localToken, workerBearer, envName = 'th
 }
 
 /** A fresh token for deliberate rotation, guaranteed distinct from the delivery bearer. */
+export function resolveCanaryRunnerProvision(localToken, workerBearer, { remoteInstalled = false, replace = false, envName = 'the canary-runner variable' } = {}) {
+  if (remoteInstalled && !replace && (localToken == null || localToken === '')) {
+    throw new Error(`${envName} is not set on this host while MISSION_CONTROL_CANARY_RUNNER_TOKEN is already installed; refusing to claim a usable runner pair (rotate deliberately)`);
+  }
+  return resolveCanaryRunnerToken(localToken, workerBearer, envName);
+}
+
 export function generateCanaryRunnerToken(workerBearer) {
   return generateDistinctFrom(workerBearer);
 }
