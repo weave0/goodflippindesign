@@ -4,7 +4,10 @@
  * (production by default). A canary, not an activation: one eligible property (aiaimate.com), one canonical work
  * item, the host's fixed registered read-only profile, no repair or deploy authority anywhere.
  *
- *   GFD_OPERATOR_TOKEN=<admin Clerk session bearer>   (admin steps; read from env only, never printed or recorded)
+ *   GFD_MC_CANARY_RUNNER_TOKEN=<canary-runner token>  (PREFERRED production identity for the operator-side steps: a dedicated
+ *                                                      machine credential, authoritative only while MISSION_CONTROL_CANARY=aiaimate.com,
+ *                                                      limited to the canary surface; never a Clerk admin)
+ *   GFD_OPERATOR_TOKEN=<admin Clerk session bearer>   (alternative: operator steps as the human admin; read from env only, never printed or recorded)
  *   GFD_OPERATOR_TOKEN_FEED=<http://127.0.0.1:port/path>  (optional, loopback only; instead of the static token: GET returns one
  *                                                        fresh bearer per admin request, because Clerk session tokens live ~60s)
  *   GFD_MC_WORKER_TOKEN=<delivery bearer>             (worker steps; the same variable the FWOMPS host delivers with)
@@ -37,7 +40,7 @@ const OUT = path.resolve(value('--out') || path.join(os.tmpdir(), `mc-production
 const FWOMPS_REPO = process.env.FWOMPS_REPO;
 const PYTHON = process.env.PYTHON || 'python';
 const BEARER_ENV = 'GFD_MC_WORKER_TOKEN';
-const operatorToken = createOperatorTokenSource({ staticToken: process.env.GFD_OPERATOR_TOKEN, feedUrl: process.env.GFD_OPERATOR_TOKEN_FEED });
+const operatorToken = createOperatorTokenSource({ runnerToken: process.env.GFD_MC_CANARY_RUNNER_TOKEN, staticToken: process.env.GFD_OPERATOR_TOKEN, feedUrl: process.env.GFD_OPERATOR_TOKEN_FEED });
 const WORKER = process.env[BEARER_ENV];
 const PROPERTY = 'aiaimate.com';
 for (const [name, ok] of [['FWOMPS_REPO', FWOMPS_REPO], [BEARER_ENV, WORKER]]) {
