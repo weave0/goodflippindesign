@@ -17,7 +17,7 @@
  *   P2  cloudflare_commit_matches       canonical deployment commit == expected SHA
  *   P3  runtime_endpoint_reachable      provenance endpoint answered through https://goodflippindesign.com
  *   P4  runtime_stamp_matches           runtime build stamp == Cloudflare canonical commit == expected, built for the canonical deployment URL
- *   P5  mission_control_bindings        all six bindings present+valid at runtime AND declared in the Pages env (credentials as secret_text)
+ *   P5  mission_control_bindings        all seven bindings present+valid at runtime AND declared in the Pages env (credentials as secret_text)
  *   P6  worker_identity_matches         worker id / key ids agree AND the host holds the SAME key material (one-way KCV) and delivery bearer
  *   P7  fwomps_host_verified            the real ~/.fwomps binds aiaimate.com -> workspace -> weave0/aiaimate -> profile
  *   P8  sole_dispatch_ready             aiaimate.com is the only dispatch-ready / promotable property
@@ -47,7 +47,7 @@ import { judgeControlPlane } from './pages-control-plane.mjs';
 
 export const PROPERTY_ID = 'aiaimate.com';
 export { CANONICAL_MC_ORIGIN, REQUIRED_BINDINGS };
-export const CREDENTIAL_BINDINGS = Object.freeze(['MISSION_CONTROL_CONTRACT_KEY', 'MISSION_CONTROL_RESULT_KEY', 'MISSION_CONTROL_WORKER_TOKEN']);
+export const CREDENTIAL_BINDINGS = Object.freeze(['MISSION_CONTROL_CONTRACT_KEY', 'MISSION_CONTROL_RESULT_KEY', 'MISSION_CONTROL_WORKER_TOKEN', 'MISSION_CONTROL_CANARY_RUNNER_TOKEN']);
 export const CHECKS = Object.freeze([
   ['P0', 'local_checkout_is_expected'],
   ['P1', 'cloudflare_deployment_healthy'],
@@ -225,7 +225,7 @@ export function evaluatePreflight(input) {
       if (idWrongType.length) problems.push(`unrecognised binding type for: ${idWrongType.join(', ')}`);
     }
     if (!bad.length && body.ready !== true) problems.push('runtime reports not ready (its blocker text is not trusted and not recorded)');
-    out.P5 = problems.length ? FAIL(problems.join('; ')) : PASS('all six Mission Control bindings present and usable at runtime, and declared in the Pages production environment');
+    out.P5 = problems.length ? FAIL(problems.join('; ')) : PASS('all seven Mission Control bindings present and usable at runtime, and declared in the Pages production environment');
   }
 
   // P6
