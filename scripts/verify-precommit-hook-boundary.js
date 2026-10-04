@@ -48,6 +48,11 @@ function findForeignDirs(root) {
   return hits;
 }
 
+const hookSource = fs.readFileSync(path.join(REPO_ROOT, '.husky', 'pre-commit'), 'utf8');
+if (!/if ! node scripts\/generate-csp\.js gfd; then[\s\S]*?exit 1[\s\S]*?fi/.test(hookSource)) {
+  throw new Error('pre-commit must propagate a failed GFD CSP generator instead of continuing');
+}
+
 let failed = false;
 try {
   console.log(`Repo root: ${REPO_ROOT}`);
