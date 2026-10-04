@@ -273,7 +273,7 @@ async function handleAssetAnalytics(env) {
 async function handleAutomationCenter(env) {
   const db = env.DB;
 
-  const [queueRes, sweepRunsRes, retryRes, failedBrandRes] = await Promise.all([
+  const [queueRes, sweepRunsRes, retryRes, ambiguousRes, failedBrandRes] = await Promise.all([
     // Queue snapshot: counts by status
     db.prepare(`
       SELECT status, COUNT(*) AS count
@@ -304,6 +304,17 @@ async function handleAutomationCenter(env) {
       WHERE v.status = 'failed' AND v.retry_count < 3
       ORDER BY v.updated_at DESC
       LIMIT 10
+    `).all(),
+
+    // Ambiguous variants may have committed externally and require manual reconciliation; never ordinary retry.
+    db.prepare(`
+      SELECT v.id, v.post_id, v.platform, v.status, v.retry_count, v.error_message,
+             v.external_id, v.external_url, v.scheduled_at, sp.brand, sp.content
+      FROM cms_post_variants v
+      JOIN cms_social_posts sp ON sp.id = v.post_id
+      WHERE v.status = 'ambiguous'
+      ORDER BY v.updated_at DESC
+      LIMIT 25
     `).all(),
 
     // Failed variants grouped by brand — surface alert if any brand has 5+
@@ -338,6 +349,12 @@ async function handleAutomationCenter(env) {
     last_sweep:          lastSweep,
     minutes_since_sweep: minutesSinceLastSweep,
     retry_candidates:    retryRes.results  || [],
+    ambiguous_variants:  (ambiguousRes.results || []).map(row => ({
+      ...row,
+      effect_state: 'ambiguous',
+      last_error: row.error_message || '',
+      manual_reconciliation_required: true,
+    })),
     failed_by_brand:     failedBrandRes.results || [],
   });
 }
@@ -1267,6 +1284,7 @@ async function handleRetryVariant(user, env, variantId) {
     .prepare('SELECT v.id, v.status, v.retry_count, sp.brand FROM cms_post_variants v JOIN cms_social_posts sp ON sp.id = v.post_id WHERE v.id = ?')
     .bind(variantId).first();
   if (!variant) return errorResponse('Variant not found', 404);
+  if (variant.status === 'ambiguous') return errorResponse('Ambiguous variants require manual reconciliation before retry', 409);
   if (variant.status !== 'failed') return errorResponse('Only failed variants can be retried', 409);
   if ((variant.retry_count || 0) >= 3) return errorResponse('Max retry attempts reached', 409);
 
