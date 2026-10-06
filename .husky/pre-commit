@@ -7,7 +7,10 @@ git add temp_review.html
 
 # 2. Regenerate CSP / security headers from single source of truth
 echo "🔒 Regenerating CSP headers..."
-node scripts/generate-csp.js
+if ! node scripts/generate-csp.js gfd; then
+  echo "ERROR: GFD CSP generation failed; refusing commit."
+  exit 1
+fi
 git add _headers
 
 # 3. Update cache bust
