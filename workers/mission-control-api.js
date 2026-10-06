@@ -375,13 +375,13 @@ function runnerAuditRoute(parts) {
 
 /** Structured, secret-free access diagnostic. Untrusted path values are never reflected into logs. */
 function auditRunner(env, user, request, parts, result) {
-  const decodedId = parts[2] === 'work-items' && parts[3] ? decodePathPart(parts[3]) : null;
-  const workItemId = decodedId && CANARY_RUNNER_WORK_ITEM_ID.test(decodedId) ? decodedId : null;
+  // The gate runs before item resolution, so a syntactically valid path ID is still attacker-controlled.
+  // Never persist it in access logs; canonical item identity is available from durable event records instead.
   console.log(JSON.stringify({
     at: nowIso(), kind: 'mc-canary-runner-access', actor: user.id, role: CANARY_RUNNER_ROLE,
     method: CANARY_RUNNER_METHODS.has(request.method) ? request.method : ':method',
     route: runnerAuditRoute(parts),
-    workItemId, release: env.CF_PAGES_COMMIT_SHA ? String(env.CF_PAGES_COMMIT_SHA).slice(0, 12) : null, result,
+    workItemId: null, release: env.CF_PAGES_COMMIT_SHA ? String(env.CF_PAGES_COMMIT_SHA).slice(0, 12) : null, result,
   }));
 }
 
@@ -534,6 +534,7 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       const item = await store.get(decodeURIComponent(parts[3]));
       if (!item) throw new WorkItemError('not_found', 'Work item was not found', 404);
       if (!canaryEligible(item, env)) {
+        if (isRunner) throw new WorkItemError('not_found', 'Work item was not found', 404);
         throw new WorkItemError('canary_ineligible', 'Only the canonical enabled canary work item can be dispatched here', 403);
       }
       if (item.state !== 'INVESTIGATION_READY' || !item.investigation?.digest) {
