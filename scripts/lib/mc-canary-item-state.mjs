@@ -21,8 +21,11 @@ export const RUNNABLE_STATES = Object.freeze({
 
 const safe = (value) => String(value ?? '').replace(/[^\w:.-]/g, '').slice(0, 60);
 
-/** @param items the runner's work-item list (already restricted to canary-eligible items) */
-export function classifyCanaryItems(items) {
+/** @param items the runner's work-item list (already restricted to canary-eligible items)
+ *  @param options.closePrevious explicit opt-in: a DIAGNOSED item (a previous cycle that already produced its diagnosis) is first
+ *         taken to RESOLVED by a strictly newer healthy observation, the ordinary reverification the lifecycle defines, which the
+ *         runner is allowed to post. The next degraded observation then reopens it as RECURRENT for a clean cycle. */
+export function classifyCanaryItems(items, { closePrevious = false } = {}) {
   const list = Array.isArray(items) ? items : [];
   if (list.length === 0) return { run: true, action: 'qualify', state: null, reason: 'no canary item exists yet' };
   if (list.length > 1) return { run: false, action: 'refuse', state: null, reason: `${list.length} canary items exist; exactly one is allowed, refusing without changing anything` };
@@ -39,8 +42,11 @@ export function classifyCanaryItems(items) {
   if (state === 'INVESTIGATION_READY') {
     return { run: false, action: 'refuse', state, reason: 'the canary item holds an issued contract that was never leased; recovering it (recover-dispatch) is admin-only. Refusing before any mutation.' };
   }
+  if (state === 'DIAGNOSED' && closePrevious) {
+    return { run: true, action: 'close-previous', state, reason: 'the canary item is DIAGNOSED by a previous cycle; it will be reverified to RESOLVED first (explicit --close-previous), then reopened by a fresh degraded observation' };
+  }
   if (state === 'DIAGNOSED' || state === 'REVERIFYING') {
-    return { run: false, action: 'refuse', state, reason: `the canary item is already ${state}: a previous run produced the diagnosis. This driver runs the whole specimen once and cannot resume mid-lifecycle. Refusing before any mutation.` };
+    return { run: false, action: 'refuse', state, reason: `the canary item is already ${state}: a previous run produced the diagnosis. This driver runs the whole specimen once and cannot resume mid-lifecycle${state === 'DIAGNOSED' ? '; pass --close-previous to reverify that earlier cycle to RESOLVED first and run a clean new cycle' : ''}. Refusing before any mutation.` };
   }
   return { run: false, action: 'refuse', state, reason: `the canary item is in state ${state || 'unknown'}, which this driver does not advance. Refusing before any mutation.` };
 }

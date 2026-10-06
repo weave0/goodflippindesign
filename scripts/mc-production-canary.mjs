@@ -14,7 +14,7 @@
  *   FWOMPS_REPO=<merged FWOMPS checkout> PYTHON=<python with fwomps deps>
  *   node --no-warnings --import ./tests/acceptance/node-json-hook.mjs scripts/mc-production-canary.mjs \
  *       --fwomps-home ~/.fwomps --out <evidence.json> [--origin https://goodflippindesign.com] \
- *       [--preflight <preflight.json>] [--tests "<label>=<passed>/<total>" ...] [--no-reverify]
+ *       [--preflight <preflight.json>] [--tests "<label>=<passed>/<total>" ...] [--no-reverify] [--close-previous]
  *
  * Requires MISSION_CONTROL_CANARY=aiaimate.com on the target deployment (see scripts/mc-production-provision.mjs).
  * It uses the host's REAL registered delivery path: `fwomps investigate` delivers the signed result to the origin
@@ -107,9 +107,19 @@ try {
   step('canary item state (runner read)');
   const existing = await admin('GET', '/api/mission-control/work-items');
   if (!check('canary is enabled and the work-item list is readable', existing.status === 200 && Array.isArray(existing.json?.workItems), { status: existing.status, code: existing.json?.code })) throw new Error('canary is not enabled on the target');
-  const plan = classifyCanaryItems(existing.json.workItems.filter((entry) => entry.producer === 'mc-canary'));
+  const plan = classifyCanaryItems(existing.json.workItems.filter((entry) => entry.producer === 'mc-canary'), { closePrevious: args.includes('--close-previous') });
   evidence.startState = { state: plan.state, action: plan.action };
   if (!check('the canary item is in a state this run can safely advance', plan.run, { state: plan.state, reason: plan.reason })) throw new Error(plan.reason);
+  if (plan.action === 'close-previous') {
+    // The earlier cycle's diagnosis stays in the item's event ledger; this only completes its lifecycle the ordinary way
+    // (operator-asserted healthy observation, strictly newer than the diagnosis) so a clean new cycle can be proven.
+    step('close the previous diagnosed cycle (healthy canary observation, explicit --close-previous)');
+    const before = existing.json.workItems.find((entry) => entry.producer === 'mc-canary');
+    const closed = await admin('POST', '/api/mission-control/canary-observations', { status: 'pass' });
+    const closedItem = closed.json?.workItem;
+    if (!check('the previous diagnosed cycle is reverified to RESOLVED', closed.status === 200 && closedItem?.workItemId === before.workItemId && closedItem?.state === 'RESOLVED', { status: closed.status, state: closedItem?.state })) throw new Error('could not close the previous cycle; nothing else was changed');
+    evidence.previousCycle = { workItemId: before.workItemId, diagnosedState: before.state, diagnosisDigest: before.diagnosis?.resultDigest ?? null, resolvedAt: closedItem.resolvedAt ?? null, note: 'completed by an operator-asserted healthy canary observation; the diagnosis remains in the work-item event ledger' };
+  }
 
   // ---- 1. observation boundary (operator-asserted, canary identity) -------------------------------------------------------------
   step('canary observation: degraded');
