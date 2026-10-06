@@ -86,6 +86,9 @@
     "traffic:lint": "npm --prefix traffic-intelligence run lint",
     "estate:validate": "node scripts/validate-estate-registry.mjs",
     "test:workers:mission-control": "vitest run --config vitest.workers.config.mjs --no-file-parallelism tests/workers/mission-control-api.test.js tests/workers/mission-control-result-bridge.test.js tests/workers/mission-control-writer-races.test.js tests/workers/mission-control-confluence.test.js tests/workers/mission-control-lease-authority.test.js tests/workers/mission-control-canary-runner.test.js tests/workers/fwomps-investigation-adapter.test.js tests/workers/fwomps-wire-conformance.test.js tests/workers/worker-provenance.test.js tests/workers/health-sweep.test.js && node tests/mission-control-surface.test.js",
+    "test:workers:mission-control-off-proof": "vitest run --config vitest.workers.config.mjs tests/workers/mission-control-off-proof.test.js",
+    "mc:off-proof": "node --no-warnings scripts/mc-production-off-proof.mjs",
+    "mc:redeploy": "node --no-warnings scripts/mc-pages-redeploy.mjs",
     "mc:preflight": "node --no-warnings scripts/mc-production-preflight.mjs"
   },
   "repository": {
@@ -114,7 +117,8 @@
     "fast-uri": "^3.1.8",
     "undici": "^7.29.1",
     "qs": "^6.15.2",
-    "ws": "^8.21.0"
+    "ws": "^8.21.0",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.16.14",
@@ -125,7 +129,7 @@
     "husky": "^9.0.0",
     "prettier": "^3.9.6",
     "puppeteer": "^24.43.1",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
     "vitest": "^4.1.11"
   }
 }

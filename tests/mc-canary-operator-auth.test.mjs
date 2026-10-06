@@ -108,7 +108,8 @@ for (const ok of ['http://127.0.0.1:9/t', 'http://localhost:9/t', 'http://[::1]:
 {
   const run = spawnSync(process.execPath, ['--no-warnings', '--import', './tests/acceptance/node-json-hook.mjs', 'scripts/mc-production-canary.mjs', '--out', 'NUL-not-written.json'], {
     cwd: ROOT, encoding: 'utf8',
-    env: { ...process.env, FWOMPS_REPO: ROOT, GFD_MC_WORKER_TOKEN: 'w'.repeat(128), GFD_OPERATOR_TOKEN: SECRET_A, GFD_OPERATOR_TOKEN_FEED: 'http://example.com/token' },
+    // The operator's real runner credential may be in the environment; blank it so this test can never reach production.
+    env: { ...process.env, FWOMPS_REPO: ROOT, GFD_MC_CANARY_RUNNER_TOKEN: '', GFD_MC_WORKER_TOKEN: 'w'.repeat(128), GFD_OPERATOR_TOKEN: SECRET_A, GFD_OPERATOR_TOKEN_FEED: 'http://example.com/token' },
   });
   assert.notEqual(run.status, 0);
   assert.match(`${run.stderr}${run.stdout}`, /loopback/);
