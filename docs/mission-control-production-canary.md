@@ -30,7 +30,7 @@ A canary, not an activation. Every gate must be green before the next step; a fa
    — P0–P11 all green, release stamp equals the merged sha, all seven bindings are present, credential bindings are `secret_text`, key ids/worker id agree, public routes expose nothing, and no repair/deploy/write authority exists.
 8. **Run the canary once:**
    ```bash
-   GFD_OPERATOR_TOKEN=<admin session bearer> GFD_MC_WORKER_TOKEN=<delivery bearer> FWOMPS_REPO=<merged fwomps> PYTHON=<python> \
+   GFD_MC_CANARY_RUNNER_TOKEN=<runner bearer> GFD_MC_WORKER_TOKEN=<delivery bearer> FWOMPS_REPO=<merged fwomps> PYTHON=<python> \
    node --no-warnings --import ./tests/acceptance/node-json-hook.mjs scripts/mc-production-canary.mjs \
      --fwomps-home ~/.fwomps --out docs/evidence/mc-production-canary-<date>.json --preflight <preflight.json> --tests "core=70/70" --tests "governed=118/118"
    ```
