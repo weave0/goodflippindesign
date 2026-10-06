@@ -76,6 +76,7 @@ jobs:
           node --no-warnings tests/mc-off-proof.test.mjs
           node --no-warnings tests/mc-pages-redeploy.test.mjs
           node --no-warnings tests/mc-preflight-wrangler-runner.test.mjs
+          node --no-warnings tests/mc-delivery-path-probe.test.mjs
           node --no-warnings tests/mc-delivery-bearer.test.mjs
           node --no-warnings tests/property-gap-diagnostics.test.mjs
 
