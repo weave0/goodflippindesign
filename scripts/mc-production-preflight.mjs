@@ -3,14 +3,23 @@
  * Production preflight gate for the real-host Mission Control investigation. READ-ONLY.
  * Exit 0 only when every check passes; the investigation must not start otherwise.
  *
- *   CLOUDFLARE_API_TOKEN=<read-only token: Account > Cloudflare Pages > Read> \
- *   GFD_OPERATOR_TOKEN=<operator Clerk session bearer> \
  *   node --no-warnings scripts/mc-production-preflight.mjs \
  *     --expected-sha <40-hex merged main sha> --expected-worker-id <id> \
- *     --fwomps-home ~/.fwomps [--json out.json] [--origin https://goodflippindesign.com]
+ *     --fwomps-home ~/.fwomps [--json out.json] [--origin https://goodflippindesign.com] \
+ *     [--control-plane env|wrangler] [--probe-identity auto|runner|operator]
  *
- * Both tokens are read from the environment only (never argv, never printed, never in the evidence file).
- * The executable always reads the live Cloudflare control plane. Tests inject snapshots into the pure evaluator directly.
+ * Cloudflare read credential (--control-plane, default env): `env` reads CLOUDFLARE_API_TOKEN (read-only Pages token);
+ * `wrangler` uses the operator's existing Wrangler login via `wrangler auth token` (see scripts/lib/cloudflare-token.mjs).
+ * Both feed the same exact control-plane checks and the token is used for GET only. Never a silent fallback.
+ *
+ * Provenance credential (--probe-identity, default auto): P3-P11 consume ONE observation-level read, GET
+ * /api/mission-control/provenance, which is on the canary-runner's accepted surface. `auto` uses
+ * GFD_MC_CANARY_RUNNER_TOKEN when set (the dedicated machine identity: no operator/admin authority), otherwise
+ * GFD_OPERATOR_TOKEN. The identity used is recorded in the evidence. With the canary OFF the runner is inert (by design),
+ * so run this after the canary is enabled (runbook step 6).
+ *
+ * Tokens are read from the environment only (never argv, never printed, never in the evidence file).
+ * Tests inject snapshots into the pure evaluator directly.
  * See scripts/lib/mc-production-preflight.mjs for the twelve checks.
  */
 import { execFileSync } from 'node:child_process';
@@ -20,8 +29,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { runPromotionGate } from './lib/property-promotion-gate.mjs';
-import { CANONICAL_MC_ORIGIN, evaluatePreflight, fetchRuntimeProbe, formatPreflight } from './lib/mc-production-preflight.mjs';
+import { CANONICAL_MC_ORIGIN, evaluatePreflight, fetchRuntimeProbe, formatPreflight, resolveProbeIdentity } from './lib/mc-production-preflight.mjs';
 import { fetchPagesControlPlane } from './lib/pages-control-plane.mjs';
+import { resolveCloudflareToken } from './lib/cloudflare-token.mjs';
+import { scanEvidence } from './lib/mc-off-proof.mjs';
 import { kcvFromBytes, readHostIdentity } from './lib/fwomps-host-identity.mjs';
 import { strongTokenBytes } from '../workers/lib/key-check-value.js';
 
@@ -36,7 +47,6 @@ const expectedSha = first('--expected-sha');
 const expectedWorkerId = first('--expected-worker-id');
 const homeArg = first('--fwomps-home');
 const fwompsHome = homeArg ? path.resolve(homeArg.replace(/^~(?=$|[\\/])/, os.homedir())) : null;
-const operatorToken = process.env.GFD_OPERATOR_TOKEN;
 
 function expectedOnMain() {
   try { git(['merge-base', '--is-ancestor', expectedSha, 'origin/main']); return true; } catch { return false; }
@@ -54,7 +64,14 @@ if (args.includes('--control-plane-file')) {
   console.error('--control-plane-file is test-only and is not accepted by the production preflight executable');
   process.exit(2);
 }
-const controlPlane = await fetchPagesControlPlane({ token: process.env.CLOUDFLARE_API_TOKEN });
+const controlPlaneSource = first('--control-plane') || 'env';
+const cloudflare = resolveCloudflareToken({ source: controlPlaneSource });
+const controlPlane = cloudflare.error ? { error: cloudflare.error } : await fetchPagesControlPlane({ token: cloudflare.token });
+const probeCredential = resolveProbeIdentity({ choice: first('--probe-identity') || 'auto' });
+if (probeCredential.error && !String(probeCredential.error).includes('is not set')) {
+  console.error(`--probe-identity: ${probeCredential.error}`);
+  process.exit(2);
+}
 
 const gate = await runPromotionGate(
   { registry: readJson('estate/registry.json'), brands: readJson('brands.json'), healthTargets: readJson('config/health-targets.json') },
@@ -68,11 +85,17 @@ const bearerKcv = bearerBytes ? kcvFromBytes(bearerBytes, 'bearer') : null;
 
 const result = evaluatePreflight({
   expectedSha, localHeadSha, expectedOnMain: Boolean(expectedSha) && expectedOnMain(), expectedWorkerId, origin,
-  controlPlane, probe: await fetchRuntimeProbe({ origin, token: operatorToken }), host, gate, canonicalD1Id: canonicalD1Id(), bearerKcv,
+  controlPlane, probe: await fetchRuntimeProbe({ origin, token: probeCredential.token }), host, gate, canonicalD1Id: canonicalD1Id(), bearerKcv,
+  probeIdentity: probeCredential.identity,
 });
-const evidence = { ...result, observedAt: new Date().toISOString() };
+const evidence = { ...result, controlPlaneSource, observedAt: new Date().toISOString() };
 
 console.log(formatPreflight(result));
 const jsonPath = first('--json');
-if (jsonPath) writeFileSync(jsonPath, `${JSON.stringify(evidence, null, 2)}\n`);
+if (jsonPath) {
+  const text = `${JSON.stringify(evidence, null, 2)}\n`;
+  const leaks = scanEvidence(text, [process.env.GFD_MC_CANARY_RUNNER_TOKEN, process.env.GFD_OPERATOR_TOKEN, process.env.GFD_MC_WORKER_TOKEN, process.env.CLOUDFLARE_API_TOKEN, cloudflare.token].filter(Boolean));
+  if (leaks.length) { console.error(`preflight evidence not written: it contains ${leaks.join(', ')}`); process.exit(2); }
+  writeFileSync(jsonPath, text);
+}
 process.exitCode = result.canStartInvestigation ? 0 : 1;

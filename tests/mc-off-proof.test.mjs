@@ -227,7 +227,7 @@ const rejects = async (fn, pattern, message) => {
     r = cli(['--label', 'initial', '--expected-sha', SHA]);
     assert.notEqual(r.status, 0); assert.match(r.stderr, /--out/);
     r = cli([...base, '--control-plane', 'magic']);
-    assert.notEqual(r.status, 0); assert.match(r.stderr, /api or wrangler/);
+    assert.notEqual(r.status, 0); assert.match(r.stderr, /api, wrangler or wrangler-list/);
     r = cli(base, { CLOUDFLARE_API_TOKEN: '' });
     assert.notEqual(r.status, 0); assert.match(r.stderr, /CLOUDFLARE_API_TOKEN is not set.*--control-plane wrangler/);
     assert.ok(!existsSync(out));
