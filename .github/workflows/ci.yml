@@ -73,6 +73,8 @@ jobs:
           node --no-warnings tests/fwomps-host-identity.test.mjs
           node --no-warnings tests/mc-revision-evidence.test.mjs
           node --no-warnings tests/mc-canary-operator-auth.test.mjs
+          node --no-warnings tests/mc-off-proof.test.mjs
+          node --no-warnings tests/mc-pages-redeploy.test.mjs
           node --no-warnings tests/mc-delivery-bearer.test.mjs
           node --no-warnings tests/property-gap-diagnostics.test.mjs
 
@@ -120,6 +122,7 @@ jobs:
           npm run test:workers:mission-control-events
           npm run test:workers:mission-control-core
           npm run test:workers:mission-control
+          npm run test:workers:mission-control-off-proof
           npm run test:workers:payments
           npm run test:workers:stripe-webhook
           npm run test:workers:social-publisher

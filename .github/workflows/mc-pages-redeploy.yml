@@ -1,0 +1,55 @@
+name: MC pinned production redeploy
+
+# Retries the CURRENT canonical production Pages deployment (same commit, new deployment, current Pages secrets) after
+# verifying it is the expected SHA. It never builds branch HEAD and never deploys local files. See
+# scripts/lib/pages-redeploy.mjs. Manual only; the plan (apply=false) is read-only.
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Full 40-character commit SHA the canonical production deployment must already be
+        required: true
+        type: string
+      apply:
+        description: Actually retry the deployment (false = read-only plan)
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mc-pages-redeploy
+  cancel-in-progress: false
+
+jobs:
+  redeploy:
+    name: Plan or retry the pinned production deployment
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+
+      - name: Validate the expected SHA
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          if ! printf '%s' "$EXPECTED_SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "expected_sha must be a full 40-character lowercase commit SHA" >&2
+            exit 1
+          fi
+
+      - name: Plan or retry
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          APPLY_FLAG: ${{ inputs.apply && '--apply' || '' }}
+        run: node --no-warnings scripts/mc-pages-redeploy.mjs --expected-sha "$EXPECTED_SHA" $APPLY_FLAG
