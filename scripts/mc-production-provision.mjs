@@ -125,7 +125,7 @@ if (flag('--rotate-canary-runner') || flag('--revoke-canary-runner')) {
     if (before.includes(RUNNER_NAME)) deleteSecret(RUNNER_NAME);
     clearUserEnv(RUNNER_ENV);
   }
-  const file = save({ kind: rotating ? 'canary-runner-rotate' : 'canary-runner-revoke', at: new Date().toISOString(), project: PROJECT, before, created: [] });
+  const file = save({ kind: rotating ? 'canary-runner-rotate' : 'canary-runner-revoke', at: new Date().toISOString(), project: PROJECT, before, created: rotating && !before.includes(RUNNER_NAME) ? [RUNNER_NAME] : [] });
   console.log(`done; state (names only) ${file}; redeploy for the change to take effect`);
   process.exit(0);
 }
