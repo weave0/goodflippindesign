@@ -50,7 +50,13 @@ A canary, not an activation. Every gate must be green before the next step; a fa
    canary-runner's accepted surface and returns the same report the human admin gets, so `--probe-identity auto` (default) uses
    `GFD_MC_CANARY_RUNNER_TOKEN`; no Clerk/operator bearer is needed. The identity used is recorded in the evidence. The runner is inert while the
    canary is OFF, so the preflight runs after step 6 (with the canary off P3 says so and P4–P11 are BLOCKED, never passed).
-8. **Run the canary once:**
+8. **Run the canary once.** The canary item is single-attempt (one lease per signed contract) and only a human admin can expire an abandoned lease,
+   so the driver proves what previously spent it **before any production write**: (a) the FWOMPS host's *real* delivery transport reaches the
+   Worker, using a credential-less probe (`scripts/mc-production-delivery-path-probe.mjs`, also runnable on its own, with the canary OFF) — the first
+   production delivery was blocked at the Cloudflare edge (`403 error code: 1010`, Python's default `urllib` signature) and surfaced as
+   `delivery_refused_auth`; FWOMPS must be a revision that sends its fixed `User-Agent`; and (b) the existing canary item, if any, is in a state the
+   bounded runner can advance (otherwise the run refuses with the exact reason). Windows Sandbox is single-instance: run nothing else that uses it
+   (FWOMPS tests, another specimen) while the specimen executes. `FWOMPS_REPO` must be a clean worktree of merged FWOMPS `origin/main`.
    ```bash
    GFD_MC_CANARY_RUNNER_TOKEN=<runner bearer> GFD_MC_WORKER_TOKEN=<delivery bearer> FWOMPS_REPO=<merged fwomps> PYTHON=<python> \
    node --no-warnings --import ./tests/acceptance/node-json-hook.mjs scripts/mc-production-canary.mjs \

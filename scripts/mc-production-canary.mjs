@@ -29,6 +29,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { createOperatorTokenSource, sendWithConnectionRetry } from './lib/canary-operator-auth.mjs';
+import { runDeliveryPathProbe } from './lib/mc-delivery-path-probe.mjs';
+import { classifyCanaryItems } from './lib/mc-canary-item-state.mjs';
 
 const args = process.argv.slice(2);
 const value = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] ?? null : null; };
@@ -94,6 +96,21 @@ try {
   const provenance = await http('GET', '/api/mission-control/provenance', { token: await operatorToken() });
   evidence.deployment = provenance.status === 200 ? provenance.json : { status: provenance.status, note: 'provenance route unavailable' };
 
+  // ---- 0. nothing is mutated until the one-shot attempt can actually succeed -----------------------------------------------------------
+  // The canary item is single-attempt and only a human admin can expire an abandoned lease, so prove the two things that
+  // previously spent it: the host's REAL transport must reach the Worker (not be blocked at the Cloudflare edge), and the
+  // existing canary item (if any) must be in a state the bounded runner can advance.
+  step('delivery path: host transport -> origin (credential-less, writes nothing)');
+  const deliveryPath = runDeliveryPathProbe({ origin: ORIGIN, python: PYTHON, fwompsRepo: FWOMPS_REPO });
+  evidence.deliveryPath = { verdict: deliveryPath.verdict, status: deliveryPath.status, detail: deliveryPath.detail };
+  if (!check('the host delivery transport reaches the Worker (not blocked at the edge)', deliveryPath.ok, evidence.deliveryPath)) throw new Error(`delivery path blocked (${deliveryPath.verdict}); nothing was changed in production`);
+  step('canary item state (runner read)');
+  const existing = await admin('GET', '/api/mission-control/work-items');
+  if (!check('canary is enabled and the work-item list is readable', existing.status === 200 && Array.isArray(existing.json?.workItems), { status: existing.status, code: existing.json?.code })) throw new Error('canary is not enabled on the target');
+  const plan = classifyCanaryItems(existing.json.workItems.filter((entry) => entry.producer === 'mc-canary'));
+  evidence.startState = { state: plan.state, action: plan.action };
+  if (!check('the canary item is in a state this run can safely advance', plan.run, { state: plan.state, reason: plan.reason })) throw new Error(plan.reason);
+
   // ---- 1. observation boundary (operator-asserted, canary identity) -------------------------------------------------------------
   step('canary observation: degraded');
   const observed = await admin('POST', '/api/mission-control/canary-observations', { status: 'degraded' });
@@ -105,9 +122,13 @@ try {
   const advance = (next) => { item = next; lifecycle.push({ state: item.state, at: new Date().toISOString(), lifecycleVersion: item.lifecycleVersion }); };
 
   // ---- 2. qualify, signed contract -----------------------------------------------------------------------------------------------
-  const qualified = await admin('POST', itemRoute(workItemId, 'transition'), { to: 'QUALIFIED' });
-  check('qualified from the governed registry', qualified.status === 200 && qualified.json.workItem.state === 'QUALIFIED', { status: qualified.status });
-  advance(qualified.json.workItem);
+  if (item.state === 'QUALIFIED') {
+    check('qualified from the governed registry (already QUALIFIED by a recovered earlier attempt)', true, { state: item.state });
+  } else {
+    const qualified = await admin('POST', itemRoute(workItemId, 'transition'), { to: 'QUALIFIED' });
+    check('qualified from the governed registry', qualified.status === 200 && qualified.json.workItem.state === 'QUALIFIED', { status: qualified.status });
+    advance(qualified.json.workItem);
+  }
   const issued = await admin('POST', itemRoute(workItemId, 'investigate'), { evidenceRevision: revision });
   if (!check('production GFD signed a read-only investigation contract', issued.status === 200 && issued.json.workItem.state === 'INVESTIGATION_READY' && issued.json.contract, { status: issued.status })) throw new Error('no contract');
   advance(issued.json.workItem);
@@ -141,7 +162,10 @@ try {
   let status = {};
   try { status = JSON.parse(run.stdout.trim().split('\n').pop() || '{}'); } catch { /* reported below */ }
   evidence.fwompsRun = { exitCode: run.status, status: status.status, requestId: status.request_id, resultDigest: status.result_digest, attempt: status.attempt };
-  check('fwomps executed and the origin acknowledged delivery (exit 0, acknowledged)', run.status === 0 && status.status === 'acknowledged', evidence.fwompsRun);
+  if (!check('fwomps executed and the origin acknowledged delivery (exit 0, acknowledged)', run.status === 0 && status.status === 'acknowledged', evidence.fwompsRun)) {
+    // The one-shot lease is spent; nothing after this can be proven. Stop with the recovery facts instead of probing further.
+    throw new Error(`delivery was not acknowledged (${status.status || 'no status'}, exit ${run.status}); the single-attempt lease is spent and request ${status.request_id || '(none)'} must be redelivered by the host before the lease expires, otherwise a human admin must expire the lease`);
+  }
   const persistedPath = path.join(HOME, 'mission-control', 'results', `${status.request_id}.attempt-1.json`);
   const persisted = readFileSync(persistedPath, 'utf8');
   const envelope = JSON.parse(persisted);
@@ -151,6 +175,7 @@ try {
     receipts: envelope.execution_receipts?.map((r) => ({ profile: r.profile, status: r.status, exit_code: r.exit_code, output_digest: r.output_digest, authoritative_sandbox: r.authoritative_sandbox })),
     bodySha256: sha256(persisted),
   };
+  check('the investigation EXECUTED in the authoritative sandbox (outcome reproduced|not_reproduced with a receipt), not blocked or inconclusive', ['reproduced', 'not_reproduced'].includes(envelope.outcome) && (envelope.execution_receipts?.length ?? 0) > 0, { outcome: envelope.outcome, stop_reason: envelope.stop_reason ?? null });
   check('result is read-only, from the authoritative sandbox, signed by the registered worker key id', envelope.repairability?.state === 'not_indicated' && envelope.execution_receipts?.every((r) => r.authoritative_sandbox === true) && envelope.authentication?.key_id === mc.worker_key_id && envelope.worker?.id === mc.worker_id);
 
   // ---- 6. production verified and projected the result ----------------------------------------------------------------------------------
@@ -170,7 +195,7 @@ try {
     'byte-identical redelivery': [{ raw: persisted }, 200],
     'tampered MAC': [{ body: (() => { const c = JSON.parse(persisted); c.authentication[macKey] = `${c.authentication[macKey].slice(0, -1)}${c.authentication[macKey].endsWith('0') ? '1' : '0'}`; return c; })() }, 'mac_invalid'],
     'edited summary (MAC mismatch)': [{ body: (() => { const c = JSON.parse(persisted); c.summary += ' (edited)'; return c; })() }, 'mac_invalid'],
-    'VALIDLY SIGNED different result (conflict)': [{ body: await resign((c) => { c.outcome = c.outcome === 'reproduced' ? 'not_reproduced' : 'reproduced'; c.summary += ' (conflicting)'; }) }, 'result_conflict'],
+    'VALIDLY SIGNED different result (conflict)': [{ body: await resign((c) => { c.summary = `${c.summary.slice(0, -1)}${c.summary.endsWith('x') ? 'y' : 'x'}`; }) }, 'result_conflict'],
     'VALIDLY SIGNED stale/old attempt': [{ body: await resign((c) => { c.attempt = 2; }) }, 'result_conflict'],
     'smuggled repair authority (signed)': [{ body: await resign((c) => { c.repair_authority = true; }) }, 'malformed_result'],
   };
