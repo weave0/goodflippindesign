@@ -271,7 +271,7 @@ describe('canary-runner bounded surface (kill switch exactly aiaimate.com)', () 
     expect((await call(itemPath(id, 'transition'), { body: { to: 'QUALIFIED' } })).status).toBe(404);
     expect((await call(itemPath(id, 'investigate'), { body: { evidenceRevision: REVISION } })).status).toBe(404);
     const dispatched = await call(itemPath(id, 'dispatch'), { body: {} });
-    expect([dispatched.status, (await json(dispatched)).code]).toEqual([403, 'canary_ineligible']);
+    expect([dispatched.status, (await json(dispatched)).code]).toEqual([404, 'not_found']);
     const listed = await json(await call('/api/mission-control/work-items', { method: 'GET' }));
     expect(listed.workItems).toEqual([]);
     const operations = JSON.stringify(await json(await call('/api/mission-control/operations', { method: 'GET' })));
@@ -294,7 +294,7 @@ describe('canary-runner bounded surface (kill switch exactly aiaimate.com)', () 
     expect((await call(itemPath(id, 'transition'), { body: { to: 'QUALIFIED' } })).status).toBe(404);
     expect((await call(itemPath(id, 'investigate'), { body: { evidenceRevision: REVISION } })).status).toBe(404);
     const dispatched = await call(itemPath(id, 'dispatch'), { body: {} });
-    expect([dispatched.status, (await json(dispatched)).code]).toEqual([403, 'canary_ineligible']);
+    expect([dispatched.status, (await json(dispatched)).code]).toEqual([404, 'not_found']);
 
     const listed = await json(await call('/api/mission-control/work-items', { method: 'GET' }));
     expect(listed.workItems.some((entry) => entry.workItemId === id)).toBe(false);
@@ -341,11 +341,16 @@ describe('attribution and secrecy', () => {
     const malformedId = await call('/api/mission-control/work-items/%E0%A4%A', { method: 'GET' });
     expect(malformedId.status).toBe(404);
     responses.push(await malformedId.text());
+    const secretShapedId = `gfdwi_v1_${RUNNER_TOKEN.slice(0, 64)}`;
+    const secretShaped = await call(itemPath(secretShapedId), { method: 'GET' });
+    expect(secretShaped.status).toBe(404);
+    responses.push(await secretShaped.text());
     const off = await call('/api/mission-control/canary-observations', { body: { status: 'degraded' }, envOverrides: { MISSION_CONTROL_CANARY: undefined } });
     responses.push(await off.text());
     for (const text of [...responses, ...logs]) {
       expect(text).not.toContain(RUNNER_TOKEN);
       expect(text).not.toContain(OTHER_VALID_TOKEN);
+      expect(text).not.toContain(`gfdwi_v1_${RUNNER_TOKEN.slice(0, 64)}`);
       expect(text.toLowerCase()).not.toContain('authorization');
     }
     const audit = logs.filter((line) => line.includes('mc-canary-runner-access')).map((line) => JSON.parse(line));
