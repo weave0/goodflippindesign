@@ -21,8 +21,21 @@ export function assertLoopbackFeed(feedUrl) {
   return url;
 }
 
-/** Returns an async () => bearer. Throws immediately when the feed is not loopback or neither source is configured. */
-export function createOperatorTokenSource({ staticToken, feedUrl, fetchImpl = fetch } = {}) {
+const RUNNER_TOKEN_SHAPE = /^[0-9a-f]{128}$/;
+
+/**
+ * Returns an async () => bearer. Preference order:
+ *   1. runnerToken: the dedicated mission-control-canary-runner machine identity (GFD_MC_CANARY_RUNNER_TOKEN). It is a
+ *      long-lived secret that is authoritative only while the production kill switch names aiaimate.com.
+ *   2. feedUrl: loopback-only fresh human-session bearer feed (test / backward compatible).
+ *   3. staticToken: GFD_OPERATOR_TOKEN.
+ * Throws immediately when the feed is not loopback, the runner token is malformed, or nothing is configured.
+ */
+export function createOperatorTokenSource({ runnerToken, staticToken, feedUrl, fetchImpl = fetch } = {}) {
+  if (runnerToken) {
+    if (!RUNNER_TOKEN_SHAPE.test(runnerToken)) throw new Error('GFD_MC_CANARY_RUNNER_TOKEN is not the canonical 128-lowercase-hex token');
+    return async () => runnerToken;
+  }
   if (feedUrl) {
     const url = assertLoopbackFeed(feedUrl);
     return async () => {
@@ -43,7 +56,7 @@ export function createOperatorTokenSource({ staticToken, feedUrl, fetchImpl = fe
       return token;
     };
   }
-  if (!staticToken) throw new Error('GFD_OPERATOR_TOKEN or GFD_OPERATOR_TOKEN_FEED must be set in the environment');
+  if (!staticToken) throw new Error('GFD_MC_CANARY_RUNNER_TOKEN, GFD_OPERATOR_TOKEN_FEED or GFD_OPERATOR_TOKEN must be set in the environment');
   return async () => staticToken;
 }
 

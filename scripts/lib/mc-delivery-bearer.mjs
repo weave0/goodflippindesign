@@ -25,3 +25,41 @@ export function resolveDeliveryBearer(hostBearer, bearerEnv = 'the host bearer v
   }
   return { bearer: hostBearer, generated: false };
 }
+
+/**
+ * The canary-runner credential has the same canonical strength (64 random bytes, 128 lowercase hex) but is a
+ * different secret: it must never equal the FWOMPS delivery bearer. Reuse an already-valid local value; an absent one
+ * is generated; a present-but-malformed (or worker-colliding) one is an error, never silently replaced.
+ */
+export function resolveCanaryRunnerToken(localToken, workerBearer, envName = 'the canary-runner variable') {
+  if (localToken == null || localToken === '') return { token: generateDistinctFrom(workerBearer), generated: true };
+  if (!strongTokenBytes(localToken)) {
+    throw new Error(`${envName} is set but is not the canonical 128-lowercase-hex token; refusing to replace it silently (rotate deliberately)`);
+  }
+  if (localToken === workerBearer) throw new Error(`${envName} equals the delivery bearer; the canary-runner secret must be independent (rotate it)`);
+  return { token: localToken, generated: false };
+}
+
+/** A fresh token for deliberate rotation, guaranteed distinct from the delivery bearer. */
+export function resolveCanaryRunnerProvision(localToken, workerBearer, { remoteInstalled = false, replace = false, envName = 'the canary-runner variable' } = {}) {
+  // Cloudflare does not reveal secret values, so the mere presence of the remote secret cannot prove that an
+  // independently stored local token is still its pair. Reusing an existing remote value would therefore allow
+  // an out-of-band remote rotation to look healthy until the driver starts receiving 401s. Fail closed unless
+  // this run will deliberately write the remote value (--replace) or the remote secret does not exist yet.
+  if (remoteInstalled && !replace) {
+    throw new Error(`MISSION_CONTROL_CANARY_RUNNER_TOKEN is already installed and its value cannot be compared to ${envName}; refusing to claim synchronization (rotate deliberately or use --replace to re-pair it)`);
+  }
+  return resolveCanaryRunnerToken(localToken, workerBearer, envName);
+}
+
+export function generateCanaryRunnerToken(workerBearer) {
+  return generateDistinctFrom(workerBearer);
+}
+
+function generateDistinctFrom(other) {
+  for (let i = 0; i < 4; i += 1) {
+    const candidate = generateDeliveryBearer();
+    if (candidate !== other) return candidate;
+  }
+  throw new Error('could not generate an independent canary-runner token');
+}

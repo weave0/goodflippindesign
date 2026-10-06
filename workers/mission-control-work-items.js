@@ -202,7 +202,7 @@ export const CANARY_PRODUCER = 'mc-canary';
 export const CANARY_PROPERTY_ID = 'aiaimate.com';
 export const CANARY_FINDING_KEY = 'canary:mc-confluence-002:aiaimate-read-only-investigation';
 
-export async function recordCanaryObservation(store, { status, checkedAt }) {
+export async function recordCanaryObservation(store, { status, checkedAt, actor = 'operator-canary' }) {
   if (status !== 'degraded' && status !== 'pass') {
     throw new WorkItemError('malformed_observation', 'canary status must be degraded or pass', 400);
   }
@@ -224,7 +224,7 @@ export async function recordCanaryObservation(store, { status, checkedAt }) {
       return await settleObservation(store, observation, {
         status,
         checkedAt,
-        actor: 'operator-canary',
+        actor,
         detail: { findingKind: 'canary', operatorAsserted: true },
       });
     } catch (error) {

@@ -34,7 +34,7 @@ const { Miniflare } = await import('miniflare');
 
 const contractKeyHex = randomBytes(32).toString('hex');
 const workerKeyHex = randomBytes(32).toString('hex');
-const ids = { contractKeyId: 'gfd-selftest-contract', workerKeyId: 'gfd-selftest-result', workerId: 'fwomps-selftest-host', workerToken: randomBytes(24).toString('hex') };
+const ids = { contractKeyId: 'gfd-selftest-contract', workerKeyId: 'gfd-selftest-result', workerId: 'fwomps-selftest-host', workerToken: randomBytes(24).toString('hex'), runnerToken: randomBytes(64).toString('hex') };
 
 const mf = new Miniflare({ modules: true, script: 'export default { fetch() { return new Response("d1") } }', d1Databases: { DB: 'canary-selftest' }, d1Persist: join(RUN_DIR, 'd1') });
 const DB = await mf.getD1Database('DB');
@@ -46,6 +46,7 @@ const env = {
   MISSION_CONTROL_RESULT_KEY: workerKeyHex, MISSION_CONTROL_RESULT_KEY_ID: ids.workerKeyId,
   MISSION_CONTROL_RESULT_WORKER_ID: ids.workerId, MISSION_CONTROL_WORKER_TOKEN: ids.workerToken,
   MISSION_CONTROL_CANARY: 'aiaimate.com',
+  MISSION_CONTROL_CANARY_RUNNER_TOKEN: ids.runnerToken,
 };
 const realFetch = globalThis.fetch;
 globalThis.fetch = async (input, init = {}) => {
@@ -74,26 +75,18 @@ try {
   writeFileSync(specPath, JSON.stringify(spec));
   sh(PYTHON, [join(HERE, 'fwomps_host_setup.py'), specPath], { env: { ...process.env, FWOMPS_REPO } });
 
-  const b64 = (payload) => Buffer.from(JSON.stringify(payload)).toString('base64url');
-  // Production mints a ~60s Clerk token per request, so the driver is exercised through the loopback feed: every admin
-  // request gets a DIFFERENT token (counter), proving none is captured at startup. Opaque header => compat verifier path.
-  const issued = [];
-  const operatorToken = () => { const token = `header.${b64({ sid: 'sess_selftest', sub: 'user_selftest_admin', azp: 'http://127.0.0.1', jti: issued.length + 1, exp: Math.floor(Date.now() / 1000) + 3600 })}.signature`; issued.push(token); return token; };
-  const feedServer = createServer((req, res) => res.end(operatorToken()));
-  await new Promise((ready) => feedServer.listen(0, '127.0.0.1', ready));
-  const feedUrl = `http://127.0.0.1:${feedServer.address().port}/operator-token`;
+  // The operator-side steps run as the dedicated mission-control-canary-runner machine identity (no Clerk session),
+  // so this also proves the real driver fits entirely inside the runner's bounded surface.
   const out = join(RUN_DIR, 'canary-evidence.json');
   const child = spawn(process.execPath, ['--no-warnings', '--import', pathToFileURL(join(HERE, 'node-json-hook.mjs')).href, join(GFD_ROOT, 'scripts', 'mc-production-canary.mjs'), '--origin', BASE, '--fwomps-home', home, '--out', out], {
-    env: { ...process.env, FWOMPS_REPO, PYTHON, GFD_OPERATOR_TOKEN_FEED: feedUrl, GFD_MC_WORKER_TOKEN: ids.workerToken }, stdio: ['ignore', 'inherit', 'inherit'],
+    env: { ...process.env, FWOMPS_REPO, PYTHON, GFD_MC_CANARY_RUNNER_TOKEN: ids.runnerToken, GFD_MC_WORKER_TOKEN: ids.workerToken }, stdio: ['ignore', 'inherit', 'inherit'],
   });
   const exit = await new Promise((done) => child.on('close', done));
-  feedServer.close();
   const evidence = JSON.parse(readFileSync(out, 'utf8'));
   const raw = readFileSync(out, 'utf8');
-  const leaked = [contractKeyHex, workerKeyHex, ids.workerToken, ...issued].filter((secret) => raw.includes(secret));
-  console.log(`driver exit ${exit}; outcome ${evidence.outcome}; checks ${evidence.checks.length - evidence.checkTotals.failed.length}/${evidence.checks.length}; hostile ${evidence.hostileCases.length}; secrets in evidence: ${leaked.length}; fresh operator tokens issued: ${issued.length}`);
-  const fresh = new Set(issued).size === issued.length && issued.length > 5; // many admin requests, each with its own token
-  code = fresh && exit === 0 && evidence.outcome === 'pass' && leaked.length === 0 && evidence.lifecycle.map((entry) => entry.state).join('>') === 'OBSERVED>QUALIFIED>INVESTIGATION_READY>INVESTIGATING>DIAGNOSED>RESOLVED' ? 0 : 1;
+  const leaked = [contractKeyHex, workerKeyHex, ids.workerToken, ids.runnerToken].filter((secret) => raw.includes(secret));
+  console.log(`driver exit ${exit}; outcome ${evidence.outcome}; checks ${evidence.checks.length - evidence.checkTotals.failed.length}/${evidence.checks.length}; hostile ${evidence.hostileCases.length}; secrets in evidence: ${leaked.length}`);
+  code = exit === 0 && evidence.outcome === 'pass' && leaked.length === 0 && evidence.lifecycle.map((entry) => entry.state).join('>') === 'OBSERVED>QUALIFIED>INVESTIGATION_READY>INVESTIGATING>DIAGNOSED>RESOLVED' ? 0 : 1;
   if (code !== 0) console.log('lifecycle:', evidence.lifecycle?.map((entry) => entry.state).join('>'), 'failed:', evidence.checkTotals.failed);
 } catch (error) {
   console.error(error);

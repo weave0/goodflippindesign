@@ -23,6 +23,7 @@ import { buildProvenanceReport } from './lib/worker-provenance.js';
 import {
   CANARY_PRODUCER,
   CANARY_PROPERTY_ID,
+  CANARY_FINDING_KEY,
   recordCanaryObservation,
   WorkItemError,
   abandonExpiredInvestigation,
@@ -344,11 +345,74 @@ function requireCanary(env) {
   }
 }
 
+const CANARY_RUNNER_ROLE = 'mission-control-canary-runner';
+const CANARY_RUNNER_WORK_ITEM_ID = /^gfdwi_v1_[0-9a-f]{64}$/;
+const CANARY_RUNNER_TOP_ROUTES = new Set(['provenance', 'operations', 'work-items', 'canary-observations']);
+const CANARY_RUNNER_ACTIONS = new Set(['transition', 'investigate', 'dispatch']);
+const CANARY_RUNNER_METHODS = new Set(['GET', 'POST']);
+const SHA40 = /^[0-9a-f]{40}$/;
+
+function canaryEligible(item, env) {
+  return item?.producer === CANARY_PRODUCER
+    && item?.propertyId === CANARY_PROPERTY_ID
+    && item?.findingKey === CANARY_FINDING_KEY
+    && env.MISSION_CONTROL_CANARY === CANARY_PROPERTY_ID;
+}
+
+function decodePathPart(part) {
+  try { return decodeURIComponent(part); } catch { return null; }
+}
+
+function runnerAuditRoute(parts) {
+  const top = parts[2];
+  if (!CANARY_RUNNER_TOP_ROUTES.has(top)) return ':route';
+  if (top !== 'work-items') return parts.length === 3 ? top : `${top}/:extra`;
+  if (parts.length === 3) return 'work-items';
+  if (parts.length === 4) return 'work-items/:id';
+  if (parts.length === 5) return `work-items/:id/${CANARY_RUNNER_ACTIONS.has(parts[4]) ? parts[4] : ':action'}`;
+  return 'work-items/:id/:extra';
+}
+
+/** Structured, secret-free access diagnostic. Untrusted path values are never reflected into logs. */
+function auditRunner(env, user, request, parts, result) {
+  // The gate runs before item resolution, so a syntactically valid path ID is still attacker-controlled.
+  // Never persist it in access logs; canonical item identity is available from durable event records instead.
+  console.log(JSON.stringify({
+    at: nowIso(), kind: 'mc-canary-runner-access', actor: user.id, role: CANARY_RUNNER_ROLE,
+    method: CANARY_RUNNER_METHODS.has(request.method) ? request.method : ':method',
+    route: runnerAuditRoute(parts),
+    workItemId: null, release: env.CF_PAGES_COMMIT_SHA ? String(env.CF_PAGES_COMMIT_SHA).slice(0, 12) : null, result,
+  }));
+}
+
+/**
+ * The canary runner's entire reachable surface (exact method + route). Anything else, including lease/result,
+ * expire, recover, the evidence root and every unlisted action, is refused. Active only while the kill switch
+ * names exactly the canary property; with it off this is the canary's own 404.
+ */
+function canaryRunnerGate(request, env, user, parts) {
+  if (env.MISSION_CONTROL_CANARY !== CANARY_PROPERTY_ID) {
+    auditRunner(env, user, request, parts, 'refused:canary_disabled');
+    return jsonResponse({ error: 'The Mission Control canary is not enabled', code: 'canary_disabled' }, 404);
+  }
+  const m = request.method;
+  const allowed = (m === 'GET' && parts.length === 3 && ['provenance', 'operations', 'work-items'].includes(parts[2]))
+    || (m === 'GET' && parts.length === 4 && parts[2] === 'work-items')
+    || (m === 'POST' && parts.length === 3 && parts[2] === 'canary-observations')
+    || (m === 'POST' && parts.length === 5 && parts[2] === 'work-items' && ['transition', 'investigate', 'dispatch'].includes(parts[4]));
+  if (!allowed) {
+    auditRunner(env, user, request, parts, 'refused:out_of_surface');
+    return jsonResponse({ error: 'Forbidden: canary runner credential is limited to the canary surface' }, 403);
+  }
+  auditRunner(env, user, request, parts, 'allowed');
+  return null;
+}
+
 /** Canary routes accept only the exact keys they document; anything else (property, command, worker, authority) is refused. */
 function requireOnlyKeys(body, allowed) {
   const extra = Object.keys(body).filter((key) => !allowed.includes(key));
   if (extra.length) {
-    throw new WorkItemError('unexpected_fields', `unexpected fields: ${extra.join(', ')}`, 400);
+    throw new WorkItemError('unexpected_fields', 'Unexpected request fields are not allowed', 400);
   }
 }
 
@@ -356,7 +420,7 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-async function mutate(store, id, producer, { onVersionConflict = null } = {}) {
+async function mutate(store, id, producer, { onVersionConflict = null, actor = 'operator' } = {}) {
   const current = await store.get(id);
   if (!current) throw new WorkItemError('not_found', 'Work item was not found', 404);
   const at = nowIso();
@@ -367,7 +431,7 @@ async function mutate(store, id, producer, { onVersionConflict = null } = {}) {
     from: current.state,
     to: next.state,
     reason: null,
-    actor: 'operator',
+    actor,
     detail: {},
   };
   delete next.pendingEvent;
@@ -393,7 +457,8 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
   const role = user?.publicMetadata?.role;
   const isAdmin = role === 'admin';
   const isWorker = role === 'mission-control-worker';
-  if (!isAdmin && !isWorker) {
+  const isRunner = role === CANARY_RUNNER_ROLE;
+  if (!isAdmin && !isWorker && !isRunner) {
     return jsonResponse({ error: 'Forbidden: Mission Control access required' }, 403);
   }
   const { parts } = routeOf(request);
@@ -409,6 +474,10 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
   }
   if (isAdmin && workerAction) {
     return jsonResponse({ error: 'Forbidden: lease/result intake requires worker authentication' }, 403);
+  }
+  if (isRunner) {
+    const refusal = canaryRunnerGate(request, env, user, parts);
+    if (refusal) return refusal;
   }
 
   try {
@@ -428,13 +497,21 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       await workItemStore(env);
       await ensureOutboxSchema(env.DB);
       const rows = async (sql) => (await env.DB.prepare(sql).all()).results || [];
-      const operations = projectMissionControlOperations({
-        now: nowIso(),
-        workItems: await rows('SELECT * FROM mc_work_items'),
-        events: await rows('SELECT event_id, work_item_id, event_type, from_state, to_state, occurred_at, evidence_digest, detail_json FROM mc_work_item_events'),
-        effects: await rows('SELECT * FROM mc_effects'),
-        leases: await rows('SELECT * FROM mc_work_item_leases'),
-      });
+      let workItems = await rows('SELECT * FROM mc_work_items');
+      let events = await rows('SELECT event_id, work_item_id, event_type, from_state, to_state, occurred_at, evidence_digest, detail_json FROM mc_work_item_events');
+      let effects = await rows('SELECT * FROM mc_effects');
+      let leases = await rows('SELECT * FROM mc_work_item_leases');
+      if (isRunner) {
+        // The runner sees only the enabled canary's own material, never unrelated operator visibility.
+        workItems = workItems.filter((row) => row.producer === CANARY_PRODUCER
+          && row.property_id === CANARY_PROPERTY_ID
+          && row.finding_key === CANARY_FINDING_KEY);
+        const ids = new Set(workItems.map((row) => row.work_item_id));
+        events = events.filter((row) => ids.has(row.work_item_id));
+        effects = effects.filter((row) => ids.has(row.work_item_id));
+        leases = leases.filter((row) => ids.has(row.work_item_id));
+      }
+      const operations = projectMissionControlOperations({ now: nowIso(), workItems, events, effects, leases });
       return jsonResponse({ operations });
     }
 
@@ -443,7 +520,7 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       const store = await workItemStore(env);
       const body = await readJson(request);
       requireOnlyKeys(body, ['status']);
-      const saved = await recordCanaryObservation(store, { status: body.status, checkedAt: nowIso() });
+      const saved = await recordCanaryObservation(store, { status: body.status, checkedAt: nowIso(), ...(isRunner ? { actor: user.id } : {}) });
       return jsonResponse({ workItem: saved });
     }
 
@@ -456,8 +533,9 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       const store = await workItemStore(env);
       const item = await store.get(decodeURIComponent(parts[3]));
       if (!item) throw new WorkItemError('not_found', 'Work item was not found', 404);
-      if (item.producer !== CANARY_PRODUCER || item.propertyId !== env.MISSION_CONTROL_CANARY) {
-        throw new WorkItemError('canary_ineligible', 'Only the canary work item of the enabled property can be dispatched here', 403);
+      if (!canaryEligible(item, env)) {
+        if (isRunner) throw new WorkItemError('not_found', 'Work item was not found', 404);
+        throw new WorkItemError('canary_ineligible', 'Only the canonical enabled canary work item can be dispatched here', 403);
       }
       if (item.state !== 'INVESTIGATION_READY' || !item.investigation?.digest) {
         throw new WorkItemError('illegal_transition', 'Only an investigation-ready item with a signed contract can be dispatched', 409);
@@ -518,8 +596,8 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       const id = decodeURIComponent(parts[3]);
       const item = await store.get(id);
       if (!item) throw new WorkItemError('not_found', 'Work item was not found', 404);
-      if (item.producer !== CANARY_PRODUCER || item.propertyId !== env.MISSION_CONTROL_CANARY) {
-        throw new WorkItemError('canary_ineligible', 'Only the canary work item of the enabled property can be recovered here', 403);
+      if (!canaryEligible(item, env)) {
+        throw new WorkItemError('canary_ineligible', 'Only the canonical enabled canary work item can be recovered here', 403);
       }
       if (item.state !== 'INVESTIGATION_READY' || item.activeLease || !item.investigation?.digest) {
         throw new WorkItemError('illegal_transition', 'Only a stale investigation-ready canary dispatch can be recovered', 409);
@@ -582,24 +660,43 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
 
     if (parts[2] === 'work-items' && parts.length === 3 && request.method === 'GET') {
       const store = await workItemStore(env);
-      const workItems = await store.list();
+      const all = await store.list();
+      const workItems = isRunner ? all.filter((entry) => canaryEligible(entry, env)) : all;
       return jsonResponse({ workItems });
     }
 
     if (parts[2] === 'work-items' && parts.length === 4 && request.method === 'GET') {
       const store = await workItemStore(env);
-      const item = await store.get(decodeURIComponent(parts[3]));
-      if (!item) return jsonResponse({ error: 'Work item was not found' }, 404);
+      const id = decodePathPart(parts[3]);
+      if (!id) return jsonResponse({ error: 'Work item was not found' }, 404);
+      const item = await store.get(id);
+      if (!item || (isRunner && !canaryEligible(item, env))) return jsonResponse({ error: 'Work item was not found' }, 404);
       return jsonResponse({ workItem: item });
     }
 
     if (parts[2] === 'work-items' && parts.length === 5 && request.method === 'POST') {
-      const id = decodeURIComponent(parts[3]);
+      const id = decodePathPart(parts[3]);
+      if (!id) return jsonResponse({ error: 'Work item was not found' }, 404);
       const action = parts[4];
       const store = await workItemStore(env);
       const body = await readJson(request);
+      if (isRunner) {
+        // The generic transition/investigate actions are NOT arbitrary machine operations: exactly the canary item,
+        // exactly the specimen's QUALIFIED transition / read-only investigation, and no caller-chosen extras.
+        const target = await store.get(id);
+        if (!target || !canaryEligible(target, env)) throw new WorkItemError('not_found', 'Work item was not found', 404);
+        if (action === 'transition') {
+          requireOnlyKeys(body, ['to']);
+          if (body.to !== 'QUALIFIED') throw new WorkItemError('canary_forbidden_transition', 'The canary runner may only qualify the canary item', 403);
+        } else if (action === 'investigate') {
+          requireOnlyKeys(body, ['evidenceRevision']);
+          if (!SHA40.test(body.evidenceRevision || '')) {
+            throw new WorkItemError('malformed_evidence_revision', 'The canary runner requires a full lowercase commit SHA evidence revision', 400);
+          }
+        }
+      }
       const dispatch = {};
-      const conflictHooks = {};
+      const conflictHooks = { actor: isRunner ? user.id : 'operator' };
       if (action === 'result') {
         // A concurrent identical delivery loses the swap to its twin. Reload: if the item is now
         // DIAGNOSED with exactly this authenticated result digest, it is the same delivery.
@@ -630,6 +727,9 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
             keyId: env.MISSION_CONTROL_CONTRACT_KEY_ID || '',
             now: new Date(at),
           });
+          if (isRunner && (contract.repairAuthority !== false || contract.payload?.contract?.requested_mode !== 'read_only')) {
+            throw new WorkItemError('repair_authority_denied', 'The canary runner can only issue read-only investigations', 403);
+          }
           const next = issueInvestigation(current, contract);
           next.pendingEvent = {
             at,
@@ -749,7 +849,7 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
           return next;
         }
         throw new WorkItemError('not_found', 'Unknown work-item action', 404);
-      }, conflictHooks);
+      }, { ...conflictHooks });
       return jsonResponse({
         workItem: saved,
         ...(dispatch.contract ? { contract: dispatch.contract } : {}),

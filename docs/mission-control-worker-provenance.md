@@ -52,7 +52,7 @@ bearer is refused (it reaches only `POST .../lease` and `.../result`). It report
 `gfd-mc-runtime-provenance-1`; runtime kind `cloudflare-pages-advanced-worker` and the host that answered; the
 release stamp above; protocol versions (`gfd-mission-control-1`, `mc-fw-investigation-request-1`,
 `mc-fw-lease-grant-1`, `mc-fw-investigation-result-1` and purposes); the read-only capability contract; state
-(`present`/`missing`/`invalid`) for exactly the six `MISSION_CONTROL_*` bindings; D1 reachability and presence of
+(`present`/`missing`/`invalid`) for exactly the seven `MISSION_CONTROL_*` bindings (the six worker bindings plus `MISSION_CONTROL_CANARY_RUNNER_TOKEN`); D1 reachability and presence of
 the work-item table (read-only `sqlite_master` query). **No value is returned.** The two key ids and the worker id
 carry a 16-hex-char SHA-256 fingerprint so the gate can compare them with the FWOMPS host; keys and the token
 carry nothing.
@@ -72,7 +72,7 @@ node --no-warnings scripts/mc-production-preflight.mjs --expected-sha <40-hex me
 | P2 | `cloudflare_commit_matches` | canonical deployment commit == expected SHA |
 | P3 | `runtime_endpoint_reachable` | answered through `https://goodflippindesign.com` (any other origin, including the legacy Worker, is refused) as the Pages runtime |
 | P4 | `runtime_stamp_matches` | runtime stamp is `stamped`/`cloudflare-pages`, == Cloudflare canonical commit == expected, **and built for the canonical deployment's own URL** (`CF_PAGES_URL`), because a retry deployment rebuilds the same commit under a new deployment id |
-| P5 | `mission_control_bindings` | all six bindings present+valid at runtime **and** declared in the Pages production environment, with the three credentials (`..._CONTRACT_KEY`, `..._RESULT_KEY`, `..._WORKER_TOKEN`) typed `secret_text` (an empty or populated `plain_text` credential fails) |
+| P5 | `mission_control_bindings` | all seven bindings present+valid at runtime **and** declared in the Pages production environment, with the four credentials (`..._CONTRACT_KEY`, `..._RESULT_KEY`, `..._WORKER_TOKEN`, `..._CANARY_RUNNER_TOKEN`) typed `secret_text` (an empty or populated `plain_text` credential fails) |
 | P6 | `worker_identity_matches` | worker id and key ids agree (fingerprints), the host has valid enrolled worker and contract keys, **and the host holds the same key material** as the runtime (one-way key check values) **and** the delivery bearer in the FWOMPS shell equals `MISSION_CONTROL_WORKER_TOKEN` |
 | P7 | `fwomps_host_verified` | the real `~/.fwomps` passes C1-C10 for `aiaimate.com` |
 | P8 | `sole_dispatch_ready` | `aiaimate.com` is the only dispatch-ready **and** promotable property |

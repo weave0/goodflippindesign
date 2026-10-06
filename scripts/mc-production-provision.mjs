@@ -7,6 +7,7 @@
  *   node --no-warnings scripts/mc-production-provision.mjs --fwomps-home ~/.fwomps --apply       # write
  *   node --no-warnings scripts/mc-production-provision.mjs --enable-canary | --disable-canary [--apply]
  *   node --no-warnings scripts/mc-production-provision.mjs --rollback <state.json> [--apply]
+ *   node --no-warnings scripts/mc-production-provision.mjs --rotate-canary-runner | --revoke-canary-runner [--apply]
  *
  * Writes (Pages production secrets, via `wrangler pages secret put`, value on stdin only):
  *   MISSION_CONTROL_CONTRACT_KEY / _KEY_ID   <- host contract key store (the key FWOMPS verifies contracts/leases with)
@@ -24,7 +25,7 @@ import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { resolveDeliveryBearer } from './lib/mc-delivery-bearer.mjs';
+import { generateCanaryRunnerToken, resolveCanaryRunnerProvision, resolveDeliveryBearer } from './lib/mc-delivery-bearer.mjs';
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
@@ -35,6 +36,8 @@ const PROJECT = value('--project') || 'goodflippindesign';
 const home = path.resolve((value('--fwomps-home') || path.join(os.homedir(), '.fwomps')).replace(/^~(?=$|[\\/])/, os.homedir()));
 const STATE_DIR = path.join(home, 'provisioning');
 const CANARY_NAME = 'MISSION_CONTROL_CANARY';
+const RUNNER_NAME = 'MISSION_CONTROL_CANARY_RUNNER_TOKEN'; // the canary-runner identity; inert unless the kill switch names aiaimate.com
+const RUNNER_ENV = 'GFD_MC_CANARY_RUNNER_TOKEN';           // the authorized local canary host's copy (Windows user env)
 const NPX = process.platform === 'win32' ? 'npx.cmd' : 'npx';
 
 const wrangler = (wranglerArgs, { input } = {}) => spawnSync(NPX, ['wrangler', ...wranglerArgs], {
@@ -71,6 +74,12 @@ function userEnv(name) {
   return done.status === 0 && done.stdout.trim() ? done.stdout.trim() : null;
 }
 
+function clearUserEnv(name) {
+  if (process.platform !== 'win32') throw new Error('clearing the canary-runner variable is implemented for Windows user env only; unset it yourself');
+  const done = spawnSync('powershell', ['-NoProfile', '-Command', `[Environment]::SetEnvironmentVariable('${name}', $null, 'User')`], { encoding: 'utf8', windowsHide: true });
+  if (done.status !== 0) throw new Error(`could not clear ${name}`);
+}
+
 function save(state) {
   mkdirSync(STATE_DIR, { recursive: true });
   const file = path.join(STATE_DIR, `pages-secrets-${state.kind}-${state.at.replace(/[:.]/g, '-')}.json`);
@@ -99,6 +108,28 @@ if (flag('--enable-canary') || flag('--disable-canary')) {
   process.exit(0);
 }
 
+// ---- canary-runner credential: deliberate rotation / revocation (values are never printed or stored) -----------------
+if (flag('--rotate-canary-runner') || flag('--revoke-canary-runner')) {
+  const rotating = flag('--rotate-canary-runner');
+  const before = listSecretNames();
+  console.log(`${rotating ? 'rotate' : 'revoke'} ${RUNNER_NAME} (currently ${before.includes(RUNNER_NAME) ? 'set' : 'unset'}); takes effect on the next deployment`);
+  if (!APPLY) { console.log('plan only: re-run with --apply'); process.exit(0); }
+  const previousLocal = userEnv(RUNNER_ENV);
+  if (rotating) {
+    let workerBearer = null;
+    try { workerBearer = userEnv(JSON.parse(readFileSync(path.join(home, 'config.json'), 'utf8')).mission_control?.delivery?.bearer_env || 'GFD_MC_WORKER_TOKEN'); } catch { workerBearer = userEnv('GFD_MC_WORKER_TOKEN'); }
+    const next = generateCanaryRunnerToken(workerBearer);
+    persistUserEnv(RUNNER_ENV, next);
+    try { putSecret(RUNNER_NAME, next); } catch (error) { if (previousLocal) persistUserEnv(RUNNER_ENV, previousLocal); else clearUserEnv(RUNNER_ENV); throw error; }
+  } else {
+    if (before.includes(RUNNER_NAME)) deleteSecret(RUNNER_NAME);
+    clearUserEnv(RUNNER_ENV);
+  }
+  const file = save({ kind: rotating ? 'canary-runner-rotate' : 'canary-runner-revoke', at: new Date().toISOString(), project: PROJECT, before, created: rotating && !before.includes(RUNNER_NAME) ? [RUNNER_NAME] : [] });
+  console.log(`done; state (names only) ${file}; redeploy for the change to take effect`);
+  process.exit(0);
+}
+
 // ---- provisioning plan ---------------------------------------------------------------------------------------------
 const config = JSON.parse(readFileSync(path.join(home, 'config.json'), 'utf8'));
 const mc = config.mission_control || {};
@@ -116,6 +147,7 @@ const names = {
   MISSION_CONTROL_RESULT_KEY: () => secretOf(path.join(home, 'mission-control', 'worker-keys', `${mc.worker_key_id}.json`)),
   MISSION_CONTROL_RESULT_WORKER_ID: () => mc.worker_id,
   MISSION_CONTROL_WORKER_TOKEN: null, // resolved below
+  [RUNNER_NAME]: null,                // resolved below (independent of the delivery bearer)
 };
 const before = listSecretNames();
 const existing = Object.keys(names).filter((name) => before.includes(name));
@@ -123,6 +155,17 @@ console.log(`project ${PROJECT} production secrets today: ${before.length} (${be
 console.log(`host identity: worker ${mc.worker_id}, contract key id ${contractIds[0]}, result key id ${mc.worker_key_id}, bearer env ${bearerEnv}`);
 const hostBearer = userEnv(bearerEnv);
 resolveDeliveryBearer(hostBearer, bearerEnv); // a present-but-malformed host bearer stops the plan, not just the apply
+const localRunner = userEnv(RUNNER_ENV);
+const runnerAlreadyInstalled = before.includes(RUNNER_NAME);
+// Cloudflare exposes the runner secret's NAME, not its value. Therefore an already-installed remote value can never
+// be claimed synchronized merely because a local token exists. Plan and apply both fail closed unless this run will
+// deliberately re-pair the remote value (--replace); first-time creation remains safe because both copies are written
+// from this run's single token.
+resolveCanaryRunnerProvision(localRunner, hostBearer, {
+  remoteInstalled: runnerAlreadyInstalled,
+  replace: REPLACE,
+  envName: RUNNER_ENV,
+});
 for (const name of Object.keys(names)) {
   const action = existing.includes(name) ? (REPLACE ? 'REPLACE' : 'keep (exists)') : 'create';
   console.log(`  ${action.padEnd(14)} ${name}${name === 'MISSION_CONTROL_WORKER_TOKEN' ? (hostBearer ? ' (reusing the host user bearer)' : ' (a new bearer will be generated and persisted)') : ''}`);
@@ -133,6 +176,13 @@ if (!APPLY) { console.log('plan only: re-run with --apply'); process.exit(0); }
 const { bearer, generated } = resolveDeliveryBearer(hostBearer, bearerEnv);
 if (generated) { persistUserEnv(bearerEnv, bearer); console.log(`persisted ${bearerEnv} as a Windows user environment variable (new shells only)`); }
 names.MISSION_CONTROL_WORKER_TOKEN = () => bearer;
+const { token: runnerToken, generated: runnerGenerated } = resolveCanaryRunnerProvision(localRunner, bearer, {
+  remoteInstalled: runnerAlreadyInstalled,
+  replace: REPLACE,
+  envName: RUNNER_ENV,
+});
+if (runnerGenerated) { persistUserEnv(RUNNER_ENV, runnerToken); console.log(`persisted ${RUNNER_ENV} as a Windows user environment variable (new shells only)`); }
+names[RUNNER_NAME] = () => runnerToken;
 const created = [];
 const replaced = [];
 for (const [name, supply] of Object.entries(names)) {
