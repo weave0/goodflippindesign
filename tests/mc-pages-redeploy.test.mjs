@@ -205,6 +205,32 @@ const current = projectResult(deployment(OLD_ID, SHA));
   assert.match(workflow, /secrets\.CLOUDFLARE_API_TOKEN/);
 }
 
+// ---- the redeploy path cannot be turned into "deploy branch HEAD / local files" ---------------------------------------------------------------
+{
+  const strip = (source) => source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const lib = strip(readFileSync(path.join(ROOT, 'scripts/lib/pages-redeploy.mjs'), 'utf8'));
+  const cliSource = strip(readFileSync(path.join(ROOT, 'scripts/mc-pages-redeploy.mjs'), 'utf8'));
+  const posts = [...lib.matchAll(/call\('POST',\s*(`[^`]*`)\)/g)].map((m) => m[1]);
+  assert.equal(posts.length, 1, 'exactly one mutating call exists');
+  assert.match(posts[0], /^`\/deployments\/\$\{encodeURIComponent\(id\)\}\/retry`$/, 'and it is the per-deployment retry, never a create-deployment POST');
+  assert.ok(!/call\('(PUT|PATCH|DELETE)'/.test(lib), 'no other mutating verbs');
+  for (const [label, source] of [['lib', lib], ['cli', cliSource]]) {
+    assert.ok(!/child_process|spawn|exec(File)?Sync?\(/.test(source), `${label}: launches no process (no wrangler deploy, no git)`);
+    assert.ok(!/wrangler pages deploy(?!ment)|upload|multipart|FormData|branch\s*:\s*['"`]|HEAD/.test(source), `${label}: no local-file upload, no branch-HEAD build`);
+  }
+  // the only way a deployment is chosen is the id of the canonical deployment that was already verified to be the expected SHA
+  assert.match(lib, /api\.retry\(target\.id\)/);
+  // a retried deployment that never finishes still reports the id it created, and does not POST again
+  const api = scriptedApi({
+    projectStates: [current], retryResult: deployment(NEW_ID, SHA, { stage: ['queued', 'active'] }),
+    deploymentStates: [deployment(NEW_ID, SHA, { stage: ['build', 'active'] })],
+  });
+  const stuck = await refused(() => redeploySameRevision({ expectedSha: SHA, api, apply: true, timeoutMs: 30000, pollMs: 5000, ...fastClock() }), 'deployment_timeout', 'stuck build');
+  assert.equal(stuck.evidence.retried.id, NEW_ID);
+  assert.equal(api.calls.filter((c) => c.startsWith('retry')).length, 1);
+  // the exposed client has exactly three operations
+  assert.deepEqual(Object.keys(createPagesApi({ token: 'cf-test-token-0123456789' })).sort(), ['getDeployment', 'getProject', 'retry']);
+}
 // ---- CLI refusals (no network: the token is unset or the SHA is invalid before any request) ---------------------------------------------
 {
   const cli = (extra, env = {}) => spawnSync(process.execPath, ['--no-warnings', path.join(ROOT, 'scripts/mc-pages-redeploy.mjs'), ...extra], {

@@ -130,6 +130,31 @@ export function isCanonicalOrigin(origin) {
   }
 }
 
+const RUNNER_TOKEN_SHAPE = /^[0-9a-f]{128}$/;
+export const PROBE_IDENTITIES = Object.freeze(['auto', 'runner', 'operator']);
+
+/**
+ * Which credential the provenance GET carries. The preflight consumes exactly one observation-level read
+ * (GET /api/mission-control/provenance), which is on the canary-runner's accepted surface; it needs no operator/admin
+ * authority, so the dedicated runner identity is preferred and never broadened. Choice is explicit and recorded:
+ *   runner    GFD_MC_CANARY_RUNNER_TOKEN only          operator  GFD_OPERATOR_TOKEN only
+ *   auto      runner when set, otherwise operator (the identity actually used is recorded in the evidence)
+ * Never reads, prints or returns any value other than the one selected token.
+ * @returns { identity: 'canary-runner'|'operator', token } | { error }
+ */
+export function resolveProbeIdentity({ choice = 'auto', env = process.env } = {}) {
+  if (!PROBE_IDENTITIES.includes(choice)) return { error: `--probe-identity must be one of ${PROBE_IDENTITIES.join(', ')}` };
+  const runner = env.GFD_MC_CANARY_RUNNER_TOKEN;
+  const operator = env.GFD_OPERATOR_TOKEN;
+  if (choice === 'runner' || (choice === 'auto' && runner)) {
+    if (!runner) return { error: 'GFD_MC_CANARY_RUNNER_TOKEN is not set' };
+    if (!RUNNER_TOKEN_SHAPE.test(runner)) return { error: 'GFD_MC_CANARY_RUNNER_TOKEN is not the canonical 128-lowercase-hex token' };
+    return { identity: 'canary-runner', token: runner };
+  }
+  if (!operator) return { error: 'neither GFD_MC_CANARY_RUNNER_TOKEN nor GFD_OPERATOR_TOKEN is set' };
+  return { identity: 'operator', token: operator };
+}
+
 /**
  * Fetches the runtime provenance report. The operator bearer is attached ONLY when the origin is the canonical
  * Mission Control origin (https, exact host, no userinfo/port); for anything else no request is made at all, so a
@@ -138,7 +163,7 @@ export function isCanonicalOrigin(origin) {
 export async function fetchRuntimeProbe({ origin, token, fetchImpl = fetch }) {
   if (!isCanonicalOrigin(origin)) return { error: 'refusing to send the operator credential to a non-canonical origin' };
   try { const url = new URL(origin); if (url.username || url.password) return { error: 'refusing an origin with embedded credentials' }; } catch { return { error: 'invalid origin' }; }
-  if (!token) return { error: 'GFD_OPERATOR_TOKEN is not set' };
+  if (!token) return { error: 'the provenance probe credential is not set' };
   try {
     const res = await fetchImpl(new URL('/api/mission-control/provenance', CANONICAL_MC_ORIGIN), {
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
@@ -164,7 +189,8 @@ export async function fetchRuntimeProbe({ origin, token, fetchImpl = fetch }) {
  * }
  */
 export function evaluatePreflight(input) {
-  const { expectedSha, localHeadSha, expectedOnMain, expectedWorkerId, origin, controlPlane, probe, host, gate, canonicalD1Id, bearerKcv = null } = input;
+  const { expectedSha, localHeadSha, expectedOnMain, expectedWorkerId, origin, controlPlane, probe, host, gate, canonicalD1Id, bearerKcv = null, probeIdentity = 'operator' } = input;
+  const identityLabel = probeIdentity === 'canary-runner' ? 'canary-runner' : 'operator';
   const out = {};
   let hostIdentityFacts = null;
 
@@ -188,7 +214,9 @@ export function evaluatePreflight(input) {
   const body = probe?.body;
   if (!isCanonicalOrigin(origin)) out.P3 = FAIL('origin is not the canonical Mission Control origin');
   else if (!probe || probe.error) out.P3 = FAIL(`provenance endpoint unreachable: ${scrub(probe?.error || 'no response')}`);
-  else if (probe.status === 401 || probe.status === 403) out.P3 = FAIL(`operator credential refused by the endpoint (HTTP ${Number(probe.status)})`);
+  // With the kill switch off the runner is inert by design: it gets the canary's own structured 404, not a provenance report.
+  else if (probe.status === 404 && body?.code === 'canary_disabled') out.P3 = FAIL(`the canary is OFF, so the ${identityLabel} credential cannot read provenance through the canary gate; enable the canary and redeploy first (runbook step 6)`);
+  else if (probe.status === 401 || probe.status === 403) out.P3 = FAIL(`${identityLabel} credential refused by the endpoint (HTTP ${Number(probe.status)})`);
   else if (probe.status !== 200) out.P3 = FAIL(`provenance endpoint answered HTTP ${Number(probe.status)}${probe.status === 404 ? ' - the deployed revision predates the endpoint' : ''}`);
   else if (body?.schemaVersion !== PROVENANCE_SCHEMA) out.P3 = FAIL('response is not a Mission Control runtime provenance report');
   else if (body.runtime?.kind !== RUNTIME_KIND || body.runtime?.servedHost !== new URL(CANONICAL_MC_ORIGIN).hostname) {
@@ -336,6 +364,7 @@ export function evaluatePreflight(input) {
       : null,
     runtimeRelease: body?.release ? { state: en(body.release.state, RELEASE_STATES), sha: sha(body.release.sha), builtAt: ts(body.release.builtAt), source: en(body.release.source, ['cloudflare-pages', 'local']), url: safeDeploymentUrl(body.release.url) } : null,
     hostIdentity: hostIdentityFacts,
+    probeIdentity: identityLabel,
     checks,
     canStartInvestigation: failing.length === 0,
     failing,
