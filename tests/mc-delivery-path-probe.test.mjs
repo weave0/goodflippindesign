@@ -83,6 +83,11 @@ const CF_JSON = { status: 403, body: '{"type":"https://developers.cloudflare.com
   assert.match(stuck.reason, /2026-10-06T22:45:39\.000Z/);
   assert.match(classifyCanaryItems([item('INVESTIGATION_READY')]).reason, /recover-dispatch\) is admin-only/);
   for (const state of ['DIAGNOSED', 'REVERIFYING']) assert.match(classifyCanaryItems([item(state)]).reason, /already .* cannot resume/);
+  assert.match(classifyCanaryItems([item('DIAGNOSED')]).reason, /--close-previous/, 'the refusal names the explicit opt-in');
+  assert.ok(!/--close-previous/.test(classifyCanaryItems([item('REVERIFYING')]).reason), 'only DIAGNOSED is closable');
+  assert.deepEqual(classifyCanaryItems([item('DIAGNOSED')], { closePrevious: true }).action, 'close-previous');
+  for (const state of ['REVERIFYING', 'INVESTIGATING', 'INVESTIGATION_READY', 'DEPLOYED', 'DISMISSED']) assert.equal(classifyCanaryItems([item(state)], { closePrevious: true }).run, false, `${state} is never closable by the flag`);
+  assert.equal(classifyCanaryItems([item('DIAGNOSED'), item('DIAGNOSED')], { closePrevious: true }).run, false, 'two canary items is never runnable, flag or not');
   for (const state of ['DISMISSED', 'SUPERSEDED', 'REPAIR_READY', 'REPAIRING', 'DEPLOYED', 'mystery', undefined]) {
     const plan = classifyCanaryItems([item(state)]);
     assert.equal(plan.run, false, String(state));
@@ -103,6 +108,10 @@ const CF_JSON = { status: 403, body: '{"type":"https://developers.cloudflare.com
   assert.ok(driver.includes("throw new Error(plan.reason)") && driver.includes('delivery path blocked'), 'both gates abort the run');
   assert.match(driver, /already QUALIFIED by a recovered earlier attempt/);
   assert.match(driver, /single-attempt lease is spent/);
+  assert.match(driver, /args\.includes\('--close-previous'\)/);
+  const closeAt = driver.indexOf("step('close the previous diagnosed cycle"); const degradedAt = driver.indexOf("canary-observations', { status: 'degraded' }");
+  assert.ok(closeAt > classify && closeAt < degradedAt, 'the previous cycle is closed after the gates and before the new degraded observation');
+  assert.match(driver, /status: 'pass' \}\);\n    const closedItem/, 'closing uses only the healthy observation the runner is allowed to post');
   // the conflict probe must not depend on what the investigation concluded: flipping a 'blocked' outcome to an executed one is itself malformed
   assert.ok(!/c\.outcome\s*=/.test(driver), 'no hostile probe rewrites the outcome');
   assert.match(driver, /investigation EXECUTED in the authoritative sandbox/);

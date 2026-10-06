@@ -77,18 +77,34 @@ try {
 
   // The operator-side steps run as the dedicated mission-control-canary-runner machine identity (no Clerk session),
   // so this also proves the real driver fits entirely inside the runner's bounded surface.
-  const out = join(RUN_DIR, 'canary-evidence.json');
-  const child = spawn(process.execPath, ['--no-warnings', '--import', pathToFileURL(join(HERE, 'node-json-hook.mjs')).href, join(GFD_ROOT, 'scripts', 'mc-production-canary.mjs'), '--origin', BASE, '--fwomps-home', home, '--out', out], {
-    env: { ...process.env, FWOMPS_REPO, PYTHON, GFD_MC_CANARY_RUNNER_TOKEN: ids.runnerToken, GFD_MC_WORKER_TOKEN: ids.workerToken }, stdio: ['ignore', 'inherit', 'inherit'],
-  });
-  const exit = await new Promise((done) => child.on('close', done));
-  const evidence = JSON.parse(readFileSync(out, 'utf8'));
-  const raw = readFileSync(out, 'utf8');
-  const leaked = [contractKeyHex, workerKeyHex, ids.workerToken, ids.runnerToken].filter((secret) => raw.includes(secret));
-  console.log(`driver exit ${exit}; outcome ${evidence.outcome}; checks ${evidence.checks.length - evidence.checkTotals.failed.length}/${evidence.checks.length}; hostile ${evidence.hostileCases.length}; secrets in evidence: ${leaked.length}`);
-  code = exit === 0 && evidence.outcome === 'pass' && leaked.length === 0 && evidence.lifecycle.map((entry) => entry.state).join('>') === 'OBSERVED>QUALIFIED>INVESTIGATION_READY>INVESTIGATING>DIAGNOSED>RESOLVED' ? 0 : 1;
-  if (code !== 0) console.log('lifecycle:', evidence.lifecycle?.map((entry) => entry.state).join('>'), 'failed:', evidence.checkTotals.failed);
-} catch (error) {
+  const runDriver = async (label, extraArgs = []) => {
+    const out = join(RUN_DIR, `canary-evidence-${label}.json`);
+    const child = spawn(process.execPath, ['--no-warnings', '--import', pathToFileURL(join(HERE, 'node-json-hook.mjs')).href, join(GFD_ROOT, 'scripts', 'mc-production-canary.mjs'), '--origin', BASE, '--fwomps-home', home, '--out', out, ...extraArgs], {
+      env: { ...process.env, FWOMPS_REPO, PYTHON, GFD_MC_CANARY_RUNNER_TOKEN: ids.runnerToken, GFD_MC_WORKER_TOKEN: ids.workerToken }, stdio: ['ignore', 'inherit', 'inherit'],
+    });
+    const exit = await new Promise((done) => child.on('close', done));
+    const raw = readFileSync(out, 'utf8');
+    const evidence = JSON.parse(raw);
+    const leaked = [contractKeyHex, workerKeyHex, ids.workerToken, ids.runnerToken].filter((secret) => raw.includes(secret));
+    const lifecycle = evidence.lifecycle?.map((entry) => entry.state).join('>');
+    console.log(`cycle ${label}: driver exit ${exit}; outcome ${evidence.outcome}; checks ${evidence.checks.length - evidence.checkTotals.failed.length}/${evidence.checks.length}; hostile ${evidence.hostileCases.length}; secrets in evidence: ${leaked.length}; lifecycle ${lifecycle}`);
+    if (exit !== 0 || evidence.outcome !== 'pass' || leaked.length) console.log('failed:', evidence.checkTotals.failed, evidence.error || '');
+    return { exit, evidence, leaked, lifecycle };
+  };
+  // Three serial cycles on the ONE canary item (the sandbox is single-instance; nothing runs concurrently), mirroring production:
+  //   A  a normal full cycle                                   (none -> ... -> DIAGNOSED -> RESOLVED)
+  //   B  a new cycle from RESOLVED that stops at DIAGNOSED    (the state the first production specimen left behind)
+  //   C  --close-previous from DIAGNOSED, then a full clean cycle
+  const A = await runDriver('A');
+  const B = await runDriver('B', ['--no-reverify']);
+  const C = await runDriver('C', ['--close-previous']);
+  const ok = (cycle, lifecycle) => cycle.exit === 0 && cycle.evidence.outcome === 'pass' && cycle.leaked.length === 0 && cycle.lifecycle === lifecycle;
+  code = ok(A, 'OBSERVED>QUALIFIED>INVESTIGATION_READY>INVESTIGATING>DIAGNOSED>RESOLVED')
+    && ok(B, 'RECURRENT>QUALIFIED>INVESTIGATION_READY>INVESTIGATING>DIAGNOSED')
+    && ok(C, 'RECURRENT>QUALIFIED>INVESTIGATION_READY>INVESTIGATING>DIAGNOSED>RESOLVED')
+    && C.evidence.previousCycle?.diagnosedState === 'DIAGNOSED' && C.evidence.startState?.action === 'close-previous'
+    && A.evidence.workItemId === B.evidence.workItemId && B.evidence.workItemId === C.evidence.workItemId ? 0 : 1;
+  console.log(`selftest ${code === 0 ? 'PASS' : 'FAIL'}: three cycles on one canary item`);} catch (error) {
   console.error(error);
 } finally {
   server.close();

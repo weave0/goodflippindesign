@@ -57,6 +57,10 @@ A canary, not an activation. Every gate must be green before the next step; a fa
    `delivery_refused_auth`; FWOMPS must be a revision that sends its fixed `User-Agent`; and (b) the existing canary item, if any, is in a state the
    bounded runner can advance (otherwise the run refuses with the exact reason). Windows Sandbox is single-instance: run nothing else that uses it
    (FWOMPS tests, another specimen) while the specimen executes. `FWOMPS_REPO` must be a clean worktree of merged FWOMPS `origin/main`.
+   If an earlier cycle left the canary item DIAGNOSED (e.g. the first specimen: the host's delivery was edge-blocked, then the driver's own byte-identical
+   redelivery was accepted), pass `--close-previous`: the runner posts the one healthy observation the lifecycle defines to take it to RESOLVED, and a fresh
+   degraded observation reopens it as RECURRENT for a clean cycle whose result the HOST delivers. The earlier diagnosis stays in the event ledger and is
+   recorded in the evidence (`previousCycle`). No admin authority is involved; any other non-runnable state is refused before any write.
    ```bash
    GFD_MC_CANARY_RUNNER_TOKEN=<runner bearer> GFD_MC_WORKER_TOKEN=<delivery bearer> FWOMPS_REPO=<merged fwomps> PYTHON=<python> \
    node --no-warnings --import ./tests/acceptance/node-json-hook.mjs scripts/mc-production-canary.mjs \
