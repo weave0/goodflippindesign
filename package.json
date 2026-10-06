@@ -123,9 +123,9 @@
     "html-validate": "^10.17.0",
     "http-server": "^14.1.1",
     "husky": "^9.0.0",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.9",
     "puppeteer": "^24.43.1",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
     "vitest": "^4.1.11"
   }
 }
