@@ -49,6 +49,10 @@ assert.ok(!/randomBytes\(\s*32\s*\)/.test(provisioner), 'no 256-bit bearer gener
   assert.ok(provisioner2.includes('resolveCanaryRunnerProvision'), 'provisioner must validate runner pairing before success');
   assert.ok(!provisioner2.includes('WARNING: ${RUNNER_NAME} is installed'), 'runner pairing uncertainty must fail, not warn and continue');
   assert.ok(!provisioner2.includes('if (localRunner) resolveCanaryRunnerToken'), 'plan must not accept an opaque remote secret merely because the local token is well formed');
+  assert.ok(
+    provisioner2.includes("created: rotating && !before.includes(RUNNER_NAME) ? [RUNNER_NAME] : []"),
+    'rotating an absent runner secret must record it as created so rollback can remove it',
+  );
   // state files record secret NAMES only: nothing in save() calls receives a token value
   const saveCalls = provisioner2.split('\n').filter((line) => line.includes('= save({'));
   assert.ok(saveCalls.length >= 3);
