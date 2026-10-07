@@ -31,6 +31,8 @@ export const DISABLED_BODY = Object.freeze({ error: 'The Mission Control canary 
 const RUNNER_TOKEN_SHAPE = /^[0-9a-f]{128}$/;
 const HEX128_ANYWHERE = /[0-9a-f]{128}/;
 const SHA40 = /^[0-9a-f]{40}$/;
+// Cloudflare Pages deployment ids are lowercase UUIDs (same pattern as scripts/lib/pages-control-plane.mjs).
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const NIL_ITEM = `gfdwi_v1_${'0'.repeat(64)}`;
 const BASE = '/api/mission-control';
 const item = (action) => `${BASE}/work-items/${NIL_ITEM}${action ? `/${action}` : ''}`;
@@ -136,12 +138,15 @@ export function bindRelease({ before, after, expectedSha }) {
     if (!snap || snap.error) { problems.push(`${label}: no control-plane snapshot (${snap?.error || 'missing'})`); continue; }
     if (String(snap.environment).toLowerCase() !== 'production') problems.push(`${label}: deployment environment is ${snap.environment}`);
     if (snap.branch !== 'main') problems.push(`${label}: deployment branch is ${snap.branch}, not main`);
+    // The binding is "the SAME deployment before and after", which is meaningless without an identity: anything other
+    // than a Cloudflare deployment UUID fails closed (two snapshots both lacking an id must never compare equal).
+    if (typeof snap.id !== 'string' || !UUID.test(snap.id)) problems.push(`${label}: deployment id is missing or not a deployment UUID`);
     const commit = String(snap.commitHash || '');
     const matches = snap.commitIsPrefix ? commit.length >= 7 && expectedSha.startsWith(commit) : commit === expectedSha;
     if (!matches) problems.push(`${label}: deployed commit ${commit.slice(0, 12) || 'unknown'} is not the expected ${String(expectedSha).slice(0, 12)}`);
     if (snap.stage !== null && snap.stage !== 'deploy:success') problems.push(`${label}: deployment stage is ${snap.stage}`);
   }
-  if (before && after && !before.error && !after.error && before.id !== after.id) problems.push('production deployment changed while the proof was running');
+  if (before && after && UUID.test(before.id) && UUID.test(after.id) && before.id !== after.id) problems.push('production deployment changed while the proof was running');
   return { ok: problems.length === 0, problems };
 }
 
