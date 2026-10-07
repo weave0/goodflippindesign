@@ -1,0 +1,130 @@
+{
+  "_comment": "MC-FW-002 cross-language PREPARE fixture. TEST-ONLY seed; never a real key.",
+  "digest_input_jcs": "{\"actors\":{\"approved_at\":\"2026-10-07T12:01:00Z\",\"approver_subject_id\":\"user_fixture_admin\",\"requested_at\":\"2026-10-07T12:00:00Z\",\"requester_subject_id\":\"user_fixture_requester\"},\"audience\":\"fwomps\",\"authentication\":{\"key_id\":\"gfdprep_fixture\"},\"contract_id\":\"mcpc_fedcba9876543210\",\"diagnostic\":{\"digest\":\"sha256:1111111111111111111111111111111111111111111111111111111111111111\",\"eligibility_decision\":\"eligible\",\"eligibility_version\":\"gfd-mc-prepare-eligibility-1\",\"id\":\"mcw_fixture\",\"source_revision\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"},\"evidence\":[{\"digest\":\"sha256:2222222222222222222222222222222222222222222222222222222222222222\",\"freshness_state\":\"fresh\",\"id\":\"mcw_fixture:observation\",\"observed_at\":\"2026-10-07T11:00:00Z\",\"snapshot_digest\":\"sha256:3333333333333333333333333333333333333333333333333333333333333333\",\"source_revision\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}],\"lifetime\":{\"expires_at\":\"2026-10-07T12:11:00Z\",\"issued_at\":\"2026-10-07T12:01:00Z\",\"nonce\":\"00112233445566778899aabbccddeeff\"},\"operation\":\"prepare_repair\",\"profile\":{\"reproduction_profile_id\":\"repro-v1\",\"task_policy_version\":\"mc-fw-002-repair-v1\",\"verification_profile_id\":\"verify-v1\"},\"property\":{\"id\":\"example.com\",\"repository\":\"weave0/example\",\"repository_id\":\"123456789\"},\"purpose\":\"gfd->fwomps:prepare-repair:v1\",\"request_id\":\"mcpr_0123456789abcdef\",\"requested\":{\"operation_class\":\"edit_tracked_files\",\"paths\":[\"src/a.js\",\"src/b.js\"]},\"schema_version\":\"mc-fw-prepare-repair-1\",\"workspace\":{\"base_sha\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"workspace_id\":\"ws-example\"}}",
+  "expected_contract_digest": "sha256:a23f92708204b119479db32f9edfa7caf8f3dc3a04a2573fc928a1e187f657d3",
+  "expected_signature_hex": "e0de9d2510465144cd172cf7493a33f21a730dfb759c17d5fabf5ae544e2122c0e4ed8badbdc065ca2c268af25057e9bf4ae029a79a0cbe073865bb66d57940e",
+  "public_key_hex": "03a107bff3ce10be1d70dd18e74bc09967e4d6309ba50d5f1ddc8664125531b8",
+  "seed_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "signed": {
+    "actors": {
+      "approved_at": "2026-10-07T12:01:00Z",
+      "approver_subject_id": "user_fixture_admin",
+      "requested_at": "2026-10-07T12:00:00Z",
+      "requester_subject_id": "user_fixture_requester"
+    },
+    "audience": "fwomps",
+    "authentication": {
+      "contract_digest": "sha256:a23f92708204b119479db32f9edfa7caf8f3dc3a04a2573fc928a1e187f657d3",
+      "key_id": "gfdprep_fixture",
+      "signature": "e0de9d2510465144cd172cf7493a33f21a730dfb759c17d5fabf5ae544e2122c0e4ed8badbdc065ca2c268af25057e9bf4ae029a79a0cbe073865bb66d57940e"
+    },
+    "contract_id": "mcpc_fedcba9876543210",
+    "diagnostic": {
+      "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "eligibility_decision": "eligible",
+      "eligibility_version": "gfd-mc-prepare-eligibility-1",
+      "id": "mcw_fixture",
+      "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "evidence": [
+      {
+        "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "freshness_state": "fresh",
+        "id": "mcw_fixture:observation",
+        "observed_at": "2026-10-07T11:00:00Z",
+        "snapshot_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "lifetime": {
+      "expires_at": "2026-10-07T12:11:00Z",
+      "issued_at": "2026-10-07T12:01:00Z",
+      "nonce": "00112233445566778899aabbccddeeff"
+    },
+    "operation": "prepare_repair",
+    "profile": {
+      "reproduction_profile_id": "repro-v1",
+      "task_policy_version": "mc-fw-002-repair-v1",
+      "verification_profile_id": "verify-v1"
+    },
+    "property": {
+      "id": "example.com",
+      "repository": "weave0/example",
+      "repository_id": "123456789"
+    },
+    "purpose": "gfd->fwomps:prepare-repair:v1",
+    "request_id": "mcpr_0123456789abcdef",
+    "requested": {
+      "operation_class": "edit_tracked_files",
+      "paths": [
+        "src/a.js",
+        "src/b.js"
+      ]
+    },
+    "schema_version": "mc-fw-prepare-repair-1",
+    "workspace": {
+      "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "workspace_id": "ws-example"
+    }
+  },
+  "unsigned": {
+    "actors": {
+      "approved_at": "2026-10-07T12:01:00Z",
+      "approver_subject_id": "user_fixture_admin",
+      "requested_at": "2026-10-07T12:00:00Z",
+      "requester_subject_id": "user_fixture_requester"
+    },
+    "audience": "fwomps",
+    "authentication": {
+      "key_id": "gfdprep_fixture"
+    },
+    "contract_id": "mcpc_fedcba9876543210",
+    "diagnostic": {
+      "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "eligibility_decision": "eligible",
+      "eligibility_version": "gfd-mc-prepare-eligibility-1",
+      "id": "mcw_fixture",
+      "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "evidence": [
+      {
+        "digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "freshness_state": "fresh",
+        "id": "mcw_fixture:observation",
+        "observed_at": "2026-10-07T11:00:00Z",
+        "snapshot_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "lifetime": {
+      "expires_at": "2026-10-07T12:11:00Z",
+      "issued_at": "2026-10-07T12:01:00Z",
+      "nonce": "00112233445566778899aabbccddeeff"
+    },
+    "operation": "prepare_repair",
+    "profile": {
+      "reproduction_profile_id": "repro-v1",
+      "task_policy_version": "mc-fw-002-repair-v1",
+      "verification_profile_id": "verify-v1"
+    },
+    "property": {
+      "id": "example.com",
+      "repository": "weave0/example",
+      "repository_id": "123456789"
+    },
+    "purpose": "gfd->fwomps:prepare-repair:v1",
+    "request_id": "mcpr_0123456789abcdef",
+    "requested": {
+      "operation_class": "edit_tracked_files",
+      "paths": [
+        "src/a.js",
+        "src/b.js"
+      ]
+    },
+    "schema_version": "mc-fw-prepare-repair-1",
+    "workspace": {
+      "base_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "workspace_id": "ws-example"
+    }
+  }
+}

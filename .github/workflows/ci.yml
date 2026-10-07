@@ -65,6 +65,9 @@ jobs:
       - name: Estate cohort plan tests
         run: node --no-warnings tests/estate-cohort-plan.test.mjs
 
+      - name: MC-FW-002 PREPARE issuer (cross-language Ed25519/JCS fixture)
+        run: npm run test:mc-prepare
+
       - name: Mission Control provenance, topology, evidence and preflight tests
         run: |
           node --no-warnings tests/pages-release-stamp.test.mjs
