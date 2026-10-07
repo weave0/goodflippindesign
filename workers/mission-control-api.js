@@ -710,7 +710,7 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
         keyId: env.MISSION_CONTROL_PREPARE_KEY_ID || '',
         now: new Date(),
       });
-      await recordPrepareGrant(env.DB, grant, { workItemId: id, approverId, issuedAt: grant.payload.lifetime.issued_at });
+      await recordPrepareGrant(env.DB, grant, { workItem: item, approverId, issuedAt: grant.payload.lifetime.issued_at });
       return jsonResponse({
         grant: {
           contractId: grant.contractId,

@@ -222,7 +222,14 @@ export async function buildSignedPrepareContract(workItem, binding, options) {
     verification_predicate: workItem.verificationPredicate,
     investigation_profile: workItem.investigationProfile,
   };
-  const diagnosticDigest = await digestOf(diagnosticPayload);
+  let diagnosticDigest;
+  try {
+    diagnosticDigest = await digestOf(diagnosticPayload);
+  } catch {
+    // Same canonical payload the OBSERVE contract uses; a value it cannot canonicalize was never
+    // investigated, so it can never match an investigated digest.
+    throw new PrepareIssuerError('diagnostic_not_canonical', 'the diagnostic payload has no canonical digest', 409);
+  }
   if (!workItem.diagnosis?.resultDigest || workItem.investigation?.diagnosticDigest !== diagnosticDigest) {
     // The diagnostic changed since it was investigated (or was never diagnosed): a fresh
     // investigation is required before a PREPARE grant can describe it.
@@ -293,8 +300,13 @@ export async function buildSignedPrepareContract(workItem, binding, options) {
   };
 }
 
-/** Durable GFD-side replay ledger and audit record of issued grants (one row per contract id). */
-export async function recordPrepareGrant(db, grant, { workItemId, approverId, issuedAt }) {
+/**
+ * Durable GFD-side replay ledger and audit record of issued grants (one row per contract id).
+ * The insert is conditional on the exact work-item snapshot the grant was built from, so a
+ * concurrent observation or lifecycle change makes issuance fail instead of recording a grant
+ * for stale evidence.
+ */
+export async function recordPrepareGrant(db, grant, { workItem, approverId, issuedAt }) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS mc_prepare_grants (
     contract_id TEXT PRIMARY KEY,
     work_item_id TEXT NOT NULL,
@@ -304,9 +316,19 @@ export async function recordPrepareGrant(db, grant, { workItemId, approverId, is
     issued_at TEXT NOT NULL,
     expires_at TEXT NOT NULL
   )`).run();
-  await db.prepare(`INSERT INTO mc_prepare_grants
+  const result = await db.prepare(`INSERT INTO mc_prepare_grants
     (contract_id, work_item_id, contract_digest, nonce, approver_id, issued_at, expires_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`).bind(
-    grant.contractId, workItemId, grant.contractDigest, grant.payload.lifetime.nonce, approverId, issuedAt, grant.expiresAt,
+    SELECT ?, ?, ?, ?, ?, ?, ?
+    WHERE EXISTS (
+      SELECT 1 FROM mc_work_items
+      WHERE work_item_id = ? AND lifecycle_state = 'DIAGNOSED' AND lifecycle_version = ?
+        AND last_seen = ? AND evidence_digest = ? AND evidence_revision = ?
+    )`).bind(
+    grant.contractId, workItem.workItemId, grant.contractDigest, grant.payload.lifetime.nonce, approverId, issuedAt,
+    grant.expiresAt, workItem.workItemId, workItem.lifecycleVersion, workItem.lastSeen, workItem.evidenceDigest,
+    workItem.evidenceRevision,
   ).run();
+  if (!result?.meta?.changes) {
+    throw new PrepareIssuerError('work_item_changed', 'the work item changed while the grant was being issued; re-adjudicate', 409);
+  }
 }
