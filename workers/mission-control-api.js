@@ -694,7 +694,7 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       const id = decodePathPart(parts[3]);
       if (!id) return jsonResponse({ error: 'Work item was not found' }, 404);
       const body = await readJson(request);
-      requireOnlyKeys(body, ['requestedPaths', 'baseSha', 'evidenceRevision', 'requesterId', 'requestedAt']);
+      requireOnlyKeys(body, ['requestedPaths', 'baseSha', 'requestedAt']);
       const store = await workItemStore(env);
       const item = await store.get(id);
       if (!item) return jsonResponse({ error: 'Work item was not found' }, 404);
@@ -702,9 +702,9 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       const grant = await buildSignedPrepareContract(item, resolveEstateBinding(item.propertyId), {
         requestedPaths: body.requestedPaths,
         baseSha: body.baseSha,
-        evidenceRevision: body.evidenceRevision,
-        requesterId: body.requesterId,
         requestedAt: body.requestedAt,
+        // The authenticated adjudicator is the requester of record; a body cannot name another subject.
+        requesterId: approverId,
         approverId,
         signingKey,
         keyId: env.MISSION_CONTROL_PREPARE_KEY_ID || '',

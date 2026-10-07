@@ -14,7 +14,7 @@ import {
   signPrepareEnvelope,
   validateRequestedPaths,
 } from '../../workers/fwomps-prepare-issuer.js';
-import { jcsBytes } from '../../workers/fwomps-investigation-adapter.js';
+import { digestOf, jcsBytes } from '../../workers/fwomps-investigation-adapter.js';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/mc-fw002-prepare-contract.json', import.meta.url)));
 
@@ -82,7 +82,14 @@ const item = {
   workItemId: 'mcw_abc', propertyId: 'example.com', producer: 'health-sweep', state: 'DIAGNOSED',
   repository: 'weave0/example', lastSeen: '2026-10-07T11:00:00.000Z', evidenceDigest: `sha256:${'2'.repeat(64)}`,
   severity: 'high', confidence: 'high', occurrenceCount: 3, verificationPredicate: 'http_ok', investigationProfile: 'web-health',
+  evidenceRevision: 'a'.repeat(40),
+  diagnosis: { resultDigest: `sha256:${'4'.repeat(64)}` },
 };
+item.investigation = { diagnosticDigest: await digestOf({
+  work_item_id: item.workItemId, property_id: item.propertyId, severity: item.severity, confidence: item.confidence,
+  occurrence_count: item.occurrenceCount, last_seen: item.lastSeen, verification_predicate: item.verificationPredicate,
+  investigation_profile: item.investigationProfile,
+}) };
 
 test('builds a signed PREPARE contract that verifies and carries no root/command/promotion field', async () => {
   const signingKey = await importPrepareSigningKey(fixture.seed_hex);
@@ -93,6 +100,8 @@ test('builds a signed PREPARE contract that verifies and carries no root/command
   assert.equal(grant.promotionAuthority, false);
   assert.ok(await verify(grant.payload, fixture.public_key_hex));
   assert.equal(grant.payload.workspace.workspace_id, 'ws-example');
+  assert.equal(grant.payload.diagnostic.source_revision, item.evidenceRevision);
+  assert.equal(grant.payload.diagnostic.digest, item.investigation.diagnosticDigest);
   const text = JSON.stringify(grant.payload);
   for (const forbidden of ['"root"', '"argv"', '"command"', '"promotion"', '"merge"', fixture.seed_hex]) {
     assert.ok(!text.includes(forbidden), forbidden);
@@ -110,11 +119,17 @@ test('eligibility refuses canary, non-diagnosed, stale, unbound and mismatched i
     [{ ...item, lastSeen: '2026-10-05T11:00:00.000Z' }, binding, 'evidence_stale'],
     [item, { ...binding, prepareBinding: null }, 'prepare_binding_unavailable'],
     [{ ...item, repository: 'weave0/other' }, binding, 'repository_mismatch'],
+    [{ ...item, occurrenceCount: 4 }, binding, 'diagnostic_changed_since_investigation'],
+    [{ ...item, diagnosis: null }, binding, 'diagnostic_changed_since_investigation'],
   ];
   for (const [workItem, b, code] of cases) {
     await assert.rejects(buildSignedPrepareContract(workItem, b, options), (e) => e.code === code, code);
   }
   await assert.rejects(importPrepareSigningKey(''), (e) => e.code === 'prepare_signing_key_unavailable');
+  await assert.rejects(buildSignedPrepareContract(item, binding, { ...options, requestedAt: 'not-a-date' }),
+    (e) => e.code === 'malformed_actor_time' && e.status === 400);
+  await assert.rejects(buildSignedPrepareContract({ ...item, evidenceRevision: null }, binding, options),
+    (e) => e.code === 'malformed_revision');
 });
 
 test('issuer canary producer constant matches the work-item module', () => {

@@ -178,14 +178,15 @@ export function prepareEligibility(workItem, binding, now) {
 
 /**
  * Build and sign one PREPARE contract for an eligible work item.
- * options: { requestedPaths, baseSha, evidenceRevision, approverId, requesterId, requestedAt, signingKey, keyId, now, lifetimeSeconds }
+ * options: { requestedPaths, baseSha, approverId, requesterId, requestedAt, signingKey, keyId, now, lifetimeSeconds }
  */
 export async function buildSignedPrepareContract(workItem, binding, options) {
   const now = options?.now instanceof Date ? options.now : new Date();
   const prepare = prepareEligibility(workItem, binding, now);
   const paths = validateRequestedPaths(options.requestedPaths);
   const baseSha = String(options.baseSha || '');
-  const evidenceRevision = String(options.evidenceRevision || '');
+  // Bound to the revision the MC-FW-001 investigation actually ran against, never a caller value.
+  const evidenceRevision = String(workItem.evidenceRevision || '');
   if (!SHA40.test(baseSha) || !SHA40.test(evidenceRevision)) {
     throw new PrepareIssuerError('malformed_revision', 'base SHA and evidence revision must be full lowercase commit SHAs', 400);
   }
@@ -202,8 +203,12 @@ export async function buildSignedPrepareContract(workItem, binding, options) {
     throw new PrepareIssuerError('malformed_lifetime', 'PREPARE lifetime must be in (0, 900] seconds', 400);
   }
   const issuedAt = utc(now);
-  const requestedAt = options.requestedAt ? utc(new Date(options.requestedAt)) : issuedAt;
-  if (Date.parse(requestedAt) > now.getTime()) {
+  const requestedMs = options.requestedAt ? Date.parse(options.requestedAt) : now.getTime();
+  if (!Number.isFinite(requestedMs)) {
+    throw new PrepareIssuerError('malformed_actor_time', 'request time is not a valid timestamp', 400);
+  }
+  const requestedAt = utc(new Date(requestedMs));
+  if (requestedMs > now.getTime()) {
     throw new PrepareIssuerError('malformed_actor_time', 'request time is in the future', 400);
   }
   const observedAt = utc(new Date(workItem.lastSeen));
@@ -217,6 +222,12 @@ export async function buildSignedPrepareContract(workItem, binding, options) {
     verification_predicate: workItem.verificationPredicate,
     investigation_profile: workItem.investigationProfile,
   };
+  const diagnosticDigest = await digestOf(diagnosticPayload);
+  if (!workItem.diagnosis?.resultDigest || workItem.investigation?.diagnosticDigest !== diagnosticDigest) {
+    // The diagnostic changed since it was investigated (or was never diagnosed): a fresh
+    // investigation is required before a PREPARE grant can describe it.
+    throw new PrepareIssuerError('diagnostic_changed_since_investigation', 'the diagnostic no longer matches its investigated digest', 409);
+  }
   const unsigned = {
     schema_version: PREPARE_SCHEMA,
     operation: 'prepare_repair',
@@ -237,7 +248,7 @@ export async function buildSignedPrepareContract(workItem, binding, options) {
     },
     diagnostic: {
       id: workItem.workItemId,
-      digest: await digestOf(diagnosticPayload),
+      digest: diagnosticDigest,
       eligibility_decision: 'eligible',
       eligibility_version: PREPARE_ELIGIBILITY_VERSION,
       source_revision: evidenceRevision,
