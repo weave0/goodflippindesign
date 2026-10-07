@@ -136,12 +136,15 @@ export function bindRelease({ before, after, expectedSha }) {
     if (!snap || snap.error) { problems.push(`${label}: no control-plane snapshot (${snap?.error || 'missing'})`); continue; }
     if (String(snap.environment).toLowerCase() !== 'production') problems.push(`${label}: deployment environment is ${snap.environment}`);
     if (snap.branch !== 'main') problems.push(`${label}: deployment branch is ${snap.branch}, not main`);
+    // The binding is "the SAME deployment before and after", which is meaningless without an identity: a missing,
+    // non-string, blank or whitespace-padded id fails closed (two snapshots both lacking an id must never compare equal).
+    if (typeof snap.id !== 'string' || snap.id.length === 0 || snap.id !== snap.id.trim()) problems.push(`${label}: deployment id is missing or malformed`);
     const commit = String(snap.commitHash || '');
     const matches = snap.commitIsPrefix ? commit.length >= 7 && expectedSha.startsWith(commit) : commit === expectedSha;
     if (!matches) problems.push(`${label}: deployed commit ${commit.slice(0, 12) || 'unknown'} is not the expected ${String(expectedSha).slice(0, 12)}`);
     if (snap.stage !== null && snap.stage !== 'deploy:success') problems.push(`${label}: deployment stage is ${snap.stage}`);
   }
-  if (before && after && !before.error && !after.error && before.id !== after.id) problems.push('production deployment changed while the proof was running');
+  if (before && after && !before.error && !after.error && typeof before.id === 'string' && typeof after.id === 'string' && before.id !== after.id) problems.push('production deployment changed while the proof was running');
   return { ok: problems.length === 0, problems };
 }
 

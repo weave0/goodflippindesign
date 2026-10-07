@@ -158,6 +158,17 @@ const rejects = async (fn, pattern, message) => {
     ['short expected sha', SNAP, SNAP, SHA.slice(0, 12)],
     ['uppercase expected sha', SNAP, SNAP, SHA.toUpperCase()],
   ]) assert.equal(bindRelease({ before, after, expectedSha: sha }).ok, false, label);
+  // regression: matching snapshots with a missing/malformed deployment id are NOT a release binding (undefined === undefined)
+  const { id: _omitted, ...NO_ID } = SNAP;
+  for (const [label, badId] of [['missing', undefined], ['null', null], ['empty', ''], ['blank', '   '], ['padded', ` ${SNAP.id}`], ['number', 12345], ['object', { id: SNAP.id }]]) {
+    const bad = badId === undefined ? NO_ID : { ...SNAP, id: badId };
+    const bound = bindRelease({ before: bad, after: bad, expectedSha: SHA });
+    assert.equal(bound.ok, false, `${label} id on both snapshots`);
+    assert.ok(bound.problems.some((p) => /deployment id is missing or malformed/.test(p)), label);
+    assert.equal(bindRelease({ before: bad, after: SNAP, expectedSha: SHA }).ok, false, `${label} id before only`);
+    assert.equal(bindRelease({ before: SNAP, after: bad, expectedSha: SHA }).ok, false, `${label} id after only`);
+  }
+  assert.equal(bindRelease({ before: SNAP, after: { ...SNAP, id: '22222222-2222-4222-8222-222222222222' }, expectedSha: SHA }).ok, false, 'mismatched ids');
   // a Wrangler-sourced snapshot (7-char source SHA, no stage) is accepted only when it is a prefix of the expected SHA
   const wr = { source: 'wrangler-list', id: SNAP.id, environment: 'Production', branch: 'main', commitHash: '5c184c9', commitIsPrefix: true, stage: null };
   assert.equal(bindRelease({ before: wr, after: wr, expectedSha: SHA }).ok, true);
