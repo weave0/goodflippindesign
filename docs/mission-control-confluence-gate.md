@@ -195,6 +195,9 @@ One decision owns it: `reverifyWorkItem` in `workers/lib/mission-control-work-it
 lifecycle: states, events, evidence and the compare-and-swap store are the existing ones. Verdicts are journaled on the
 event (`detail.reverification`) so the operator projection can say why an item did or did not move.
 
+**Production certification (2026-10-06): passed, canary OFF.** The loop was exercised against production once, bounded, as the canary-runner identity; see the certification record in
+[mission-control-production-canary.md](./mission-control-production-canary.md#certification-record-2026-10-06-passed-canary-off) and the raw evidence in docs/evidence/.
+
 | fence                                                               | verdict / behaviour                                                        | tier 1 test (`mission-control-reverification.test.js` unit; `mission-control-confluence.test.js` D1/API) |
 | ------------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | evidence not strictly newer than failing evidence / state entry / prior verdict | `stale`, no change                                              | unit matrix; `older than the diagnosis…`; `at the very instant…`                                          |

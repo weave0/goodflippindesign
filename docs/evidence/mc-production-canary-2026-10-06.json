@@ -1,0 +1,615 @@
+{
+  "schema": "gfd-mc-production-canary-1",
+  "origin": "https://goodflippindesign.com",
+  "startedAt": "2026-10-07T00:02:01.299Z",
+  "steps": [
+    {
+      "at": "2026-10-07T00:02:01.892Z",
+      "name": "delivery path: host transport -> origin (credential-less, writes nothing)"
+    },
+    {
+      "at": "2026-10-07T00:02:02.491Z",
+      "name": "canary item state (runner read)"
+    },
+    {
+      "at": "2026-10-07T00:02:02.676Z",
+      "name": "close the previous diagnosed cycle (healthy canary observation, explicit --close-previous)"
+    },
+    {
+      "at": "2026-10-07T00:02:03.019Z",
+      "name": "canary observation: degraded"
+    },
+    {
+      "at": "2026-10-07T00:02:05.289Z",
+      "name": "fwomps investigate (attested sandbox, real registered delivery)"
+    }
+  ],
+  "checks": [
+    {
+      "name": "host delivery origin is the origin under test (no substituted receiver)",
+      "pass": true,
+      "detail": {
+        "configured": "https://goodflippindesign.com",
+        "under_test": "https://goodflippindesign.com"
+      }
+    },
+    {
+      "name": "host workspace is clean",
+      "pass": true,
+      "detail": {
+        "revision": "257210036bff85961a1b9c96c0572aabcaaa9cd4"
+      }
+    },
+    {
+      "name": "the host delivery transport reaches the Worker (not blocked at the edge)",
+      "pass": true,
+      "detail": {
+        "verdict": "worker_refused_fake_bearer",
+        "status": 401,
+        "detail": "HTTP 401 from the Worker (JSON): the delivery path reaches the origin"
+      }
+    },
+    {
+      "name": "canary is enabled and the work-item list is readable",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "the canary item is in a state this run can safely advance",
+      "pass": true,
+      "detail": {
+        "state": "DIAGNOSED",
+        "reason": "the canary item is DIAGNOSED by a previous cycle; it will be reverified to RESOLVED first (explicit --close-previous), then reopened by a fresh degraded observation"
+      }
+    },
+    {
+      "name": "the previous diagnosed cycle is reverified to RESOLVED",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "state": "RESOLVED"
+      }
+    },
+    {
+      "name": "canary observation accepted (kill switch is on)",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "qualified from the governed registry",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "production GFD signed a read-only investigation contract",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "contract carries no repair authority",
+      "pass": true
+    },
+    {
+      "name": "durable dispatch intent committed and claimed (attempt 1)",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "signed lease minted, item INVESTIGATING",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "fwomps executed and the origin acknowledged delivery (exit 0, acknowledged)",
+      "pass": true,
+      "detail": {
+        "exitCode": 0,
+        "status": "acknowledged",
+        "requestId": "mci_15fadd527dfe9085bbc1bc9a443ceaee",
+        "resultDigest": "sha256:43629fb5be295d4074bb8b70721a218f7063c3f75029a9867a73e6eeb08e8737",
+        "attempt": 1
+      }
+    },
+    {
+      "name": "the investigation EXECUTED in the authoritative sandbox (outcome reproduced|not_reproduced with a receipt), not blocked or inconclusive",
+      "pass": true,
+      "detail": {
+        "outcome": "not_reproduced",
+        "stop_reason": null
+      }
+    },
+    {
+      "name": "result is read-only, from the authoritative sandbox, signed by the registered worker key id",
+      "pass": true
+    },
+    {
+      "name": "the SAME canonical work item is DIAGNOSED in production",
+      "pass": true,
+      "detail": {
+        "state": "DIAGNOSED"
+      }
+    },
+    {
+      "name": "diagnosis digest equals the digest FWOMPS persisted and reported",
+      "pass": true
+    },
+    {
+      "name": "lease released; no active lease",
+      "pass": true
+    },
+    {
+      "name": "hostile: byte-identical redelivery -> 200",
+      "pass": true,
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "name": "hostile: tampered MAC -> mac_invalid",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "mac_invalid"
+      }
+    },
+    {
+      "name": "hostile: edited summary (MAC mismatch) -> mac_invalid",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "mac_invalid"
+      }
+    },
+    {
+      "name": "hostile: VALIDLY SIGNED different result (conflict) -> result_conflict",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "result_conflict"
+      }
+    },
+    {
+      "name": "hostile: VALIDLY SIGNED stale/old attempt -> result_conflict",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "result_conflict"
+      }
+    },
+    {
+      "name": "hostile: smuggled repair authority (signed) -> malformed_result",
+      "pass": true,
+      "detail": {
+        "status": 409,
+        "code": "malformed_result"
+      }
+    },
+    {
+      "name": "hostile: wrong bearer refused",
+      "pass": true,
+      "detail": {
+        "status": 401
+      }
+    },
+    {
+      "name": "fwomps redelivery after acknowledgement is idempotent (acknowledged, nothing re-executed)",
+      "pass": true
+    },
+    {
+      "name": "after every hostile delivery: still one item, still DIAGNOSED, same diagnosis, no repair/deploy authority",
+      "pass": true
+    },
+    {
+      "name": "the operator projection grants no authority and shows reverification required",
+      "pass": true
+    },
+    {
+      "name": "exactly one canary work item exists in production",
+      "pass": true
+    },
+    {
+      "name": "a strictly newer healthy canary observation reverifies the SAME item (RESOLVED)",
+      "pass": true,
+      "detail": {
+        "state": "RESOLVED"
+      }
+    },
+    {
+      "name": "a repeated healthy observation is idempotent",
+      "pass": true
+    }
+  ],
+  "hostileCases": [
+    {
+      "name": "byte-identical redelivery",
+      "expected": 200,
+      "observed": 200,
+      "pass": true
+    },
+    {
+      "name": "tampered MAC",
+      "expected": "mac_invalid",
+      "observed": "mac_invalid",
+      "pass": true
+    },
+    {
+      "name": "edited summary (MAC mismatch)",
+      "expected": "mac_invalid",
+      "observed": "mac_invalid",
+      "pass": true
+    },
+    {
+      "name": "VALIDLY SIGNED different result (conflict)",
+      "expected": "result_conflict",
+      "observed": "result_conflict",
+      "pass": true
+    },
+    {
+      "name": "VALIDLY SIGNED stale/old attempt",
+      "expected": "result_conflict",
+      "observed": "result_conflict",
+      "pass": true
+    },
+    {
+      "name": "smuggled repair authority (signed)",
+      "expected": "malformed_result",
+      "observed": "malformed_result",
+      "pass": true
+    },
+    {
+      "name": "wrong bearer",
+      "expected": "401|403",
+      "observed": 401,
+      "pass": true
+    },
+    {
+      "name": "fwomps redelivery after ack",
+      "expected": "acknowledged",
+      "observed": 0,
+      "pass": true
+    }
+  ],
+  "host": {
+    "workerId": "fwomps-host-weave0-01",
+    "workerKeyId": "gfd-mc-result-2026-10",
+    "deliveryOrigin": "https://goodflippindesign.com",
+    "profile": "web-health-readonly-v1",
+    "repository": "weave0/aiaimate",
+    "workspaceRevision": "257210036bff85961a1b9c96c0572aabcaaa9cd4",
+    "workspaceClean": true
+  },
+  "fwomps": {
+    "revision": "07e871a3e35ef80909deb0d8565a9d5f9452e1f9",
+    "branch": "(detached)",
+    "dirty": false
+  },
+  "gfdSource": {
+    "revision": "2ccc7b449e069c5367de3391581c87f77cfcdc6c",
+    "dirty": false
+  },
+  "deployment": {
+    "schemaVersion": "gfd-mc-runtime-provenance-1",
+    "runtime": {
+      "kind": "cloudflare-pages-advanced-worker",
+      "expectedProject": "goodflippindesign",
+      "servedHost": "goodflippindesign.com"
+    },
+    "observedAt": "2026-10-07T00:02:04.124Z",
+    "release": {
+      "state": "stamped",
+      "sha": "2ccc7b449e069c5367de3391581c87f77cfcdc6c",
+      "branch": "main",
+      "builtAt": "2026-10-07T00:01:12.345Z",
+      "source": "cloudflare-pages",
+      "url": "https://c0e9f11f.goodflippindesign.pages.dev",
+      "reason": null
+    },
+    "protocol": {
+      "missionControlApi": "gfd-mission-control-1",
+      "investigationRequest": {
+        "schema": "mc-fw-investigation-request-1",
+        "purpose": "gfd->fwomps:investigation-request:v1"
+      },
+      "leaseGrant": {
+        "schema": "mc-fw-lease-grant-1",
+        "purpose": "gfd->fwomps:lease-grant:v1"
+      },
+      "investigationResult": {
+        "schema": "mc-fw-investigation-result-1",
+        "purpose": "fwomps->gfd:investigation-result:v1"
+      }
+    },
+    "capabilities": {
+      "investigation": true,
+      "readOnly": true,
+      "repairAuthority": false,
+      "deployAuthority": false,
+      "writeAuthority": false,
+      "maxAttempts": 1
+    },
+    "bindings": {
+      "MISSION_CONTROL_CONTRACT_KEY": {
+        "state": "present",
+        "kcv": "kcv:cebb8091ca6915b6"
+      },
+      "MISSION_CONTROL_CONTRACT_KEY_ID": {
+        "state": "present",
+        "fingerprint": "sha256:bf8298a9ae2f1ac5"
+      },
+      "MISSION_CONTROL_RESULT_KEY": {
+        "state": "present",
+        "kcv": "kcv:56398cd12351e949"
+      },
+      "MISSION_CONTROL_RESULT_KEY_ID": {
+        "state": "present",
+        "fingerprint": "sha256:4de17836e66fbda6"
+      },
+      "MISSION_CONTROL_RESULT_WORKER_ID": {
+        "state": "present",
+        "fingerprint": "sha256:cbe5d1b2c5111f5e"
+      },
+      "MISSION_CONTROL_WORKER_TOKEN": {
+        "state": "present",
+        "kcv": "kcv:5b449170ecbbf566"
+      },
+      "MISSION_CONTROL_CANARY_RUNNER_TOKEN": {
+        "state": "present"
+      }
+    },
+    "d1": {
+      "bound": true,
+      "reachable": true,
+      "workItemSchema": true
+    },
+    "ready": true,
+    "blockers": []
+  },
+  "deliveryPath": {
+    "verdict": "worker_refused_fake_bearer",
+    "status": 401,
+    "detail": "HTTP 401 from the Worker (JSON): the delivery path reaches the origin"
+  },
+  "startState": {
+    "state": "DIAGNOSED",
+    "action": "close-previous"
+  },
+  "previousCycle": {
+    "workItemId": "gfdwi_v1_da56b4b0313e3f9ffdcc2ef1f32e3583c220c58fcfced5fc14128d7b7acf5412",
+    "diagnosedState": "DIAGNOSED",
+    "diagnosisDigest": "sha256:4a95e0ad1a3e239d7f9c3c6af65d84797e343ead3bde510fe00b4cf9812c7fd7",
+    "resolvedAt": "2026-10-07T00:02:05.113Z",
+    "note": "completed by an operator-asserted healthy canary observation; the diagnosis remains in the work-item event ledger"
+  },
+  "workItemId": "gfdwi_v1_da56b4b0313e3f9ffdcc2ef1f32e3583c220c58fcfced5fc14128d7b7acf5412",
+  "investigation": {
+    "requestId": "mci_15fadd527dfe9085bbc1bc9a443ceaee",
+    "contractDigest": "sha256:64124e380a850c0acff49316965e57cdb6ff3d2459a9ff1205940963b5ac485b",
+    "contractSchema": "mc-fw-investigation-request-1",
+    "repairAuthority": false,
+    "evidenceRevision": "257210036bff85961a1b9c96c0572aabcaaa9cd4",
+    "effectId": "gfdeffect_v1_4456ae41fedd813d779c99c4aac4f328e9ba7c489161dadd192835dd7570313a",
+    "attempt": 1,
+    "leaseSchema": "mc-fw-lease-grant-1",
+    "leaseTokenDigest": "sha256:7f09a6cb750291e982e44ef6810a646269f8f737edea3e5ac4de8a651b88fc65"
+  },
+  "fwompsRun": {
+    "exitCode": 0,
+    "status": "acknowledged",
+    "requestId": "mci_15fadd527dfe9085bbc1bc9a443ceaee",
+    "resultDigest": "sha256:43629fb5be295d4074bb8b70721a218f7063c3f75029a9867a73e6eeb08e8737",
+    "attempt": 1
+  },
+  "result": {
+    "schema": "mc-fw-investigation-result-1",
+    "outcome": "not_reproduced",
+    "summary": "profile web-health-readonly-v1: not_reproduced",
+    "workerId": "fwomps-host-weave0-01",
+    "completedAt": "2026-10-07T00:02:21.615243Z",
+    "keyId": "gfd-mc-result-2026-10",
+    "repairability": "not_indicated",
+    "receipts": [
+      {
+        "profile": "web-health-readonly-v1",
+        "status": "pass",
+        "exit_code": 0,
+        "output_digest": "sha256:6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+        "authoritative_sandbox": true
+      }
+    ],
+    "bodySha256": "sha256:a1dcacec6d271554b8d1e1dd0337aea02e66f72ad8a0b8bddf69805fbc0c9290"
+  },
+  "diagnosis": {
+    "resultDigest": "sha256:43629fb5be295d4074bb8b70721a218f7063c3f75029a9867a73e6eeb08e8737",
+    "signatureRef": "mc-fw-investigation-result-1:gfd-mc-result-2026-10",
+    "outcome": "not_reproduced",
+    "summary": "profile web-health-readonly-v1: not_reproduced"
+  },
+  "projection": {
+    "afterDiagnosis": {
+      "occurrenceCount": 2,
+      "observationAgeMs": 21576,
+      "investigationReady": false,
+      "diagnosisAvailable": true,
+      "reverificationRequired": true,
+      "reverification": null,
+      "lastVerdict": null,
+      "recurrenceCount": 1,
+      "blocker": "Waiting for a healthy production observation newer than the diagnosis."
+    },
+    "authority": {
+      "repair": false,
+      "deployment": false,
+      "execution": false
+    }
+  },
+  "reverification": {
+    "diagnosedAt": "2026-10-07T00:02:24.412Z",
+    "resolvedAt": "2026-10-07T00:02:28.890Z",
+    "resolutionEvidenceDigest": "sha256:700bf366d3121a166e297d297c471ac5f5cecb6bccb6f7d35281afc87358337b",
+    "note": "operator-asserted canary observation; not a production health probe"
+  },
+  "lifecycle": [
+    {
+      "state": "RECURRENT",
+      "at": "2026-10-07T00:02:03.338Z",
+      "lifecycleVersion": 10
+    },
+    {
+      "state": "QUALIFIED",
+      "at": "2026-10-07T00:02:03.714Z",
+      "lifecycleVersion": 11
+    },
+    {
+      "state": "INVESTIGATION_READY",
+      "at": "2026-10-07T00:02:04.117Z",
+      "lifecycleVersion": 12
+    },
+    {
+      "state": "INVESTIGATING",
+      "at": "2026-10-07T00:02:05.283Z",
+      "lifecycleVersion": 14
+    },
+    {
+      "state": "DIAGNOSED",
+      "at": "2026-10-07T00:02:22.510Z",
+      "lifecycleVersion": 16
+    },
+    {
+      "state": "RESOLVED",
+      "at": "2026-10-07T00:02:26.800Z",
+      "lifecycleVersion": 18
+    }
+  ],
+  "finishedAt": "2026-10-07T00:02:26.988Z",
+  "outcome": "pass",
+  "preflight": {
+    "contractName": "gfd-mc-production-preflight",
+    "schemaVersion": "2.0.0",
+    "runtimeTarget": {
+      "kind": "cloudflare-pages-advanced-worker",
+      "project": "goodflippindesign",
+      "origin": "https://goodflippindesign.com"
+    },
+    "expectedSha": "2ccc7b449e069c5367de3391581c87f77cfcdc6c",
+    "cloudflare": {
+      "deploymentId": "c0e9f11f-2420-452b-b72c-1c56791c40fb",
+      "environment": "production",
+      "branch": "main",
+      "commitHash": "2ccc7b449e069c5367de3391581c87f77cfcdc6c",
+      "stage": "deploy:success",
+      "completedOn": "2026-10-07T00:01:34.594Z",
+      "createdOn": "2026-10-07T00:00:25.932Z",
+      "url": "https://c0e9f11f.goodflippindesign.pages.dev"
+    },
+    "runtimeRelease": {
+      "state": "stamped",
+      "sha": "2ccc7b449e069c5367de3391581c87f77cfcdc6c",
+      "builtAt": "2026-10-07T00:01:12.345Z",
+      "source": "cloudflare-pages",
+      "url": "https://c0e9f11f.goodflippindesign.pages.dev"
+    },
+    "hostIdentity": {
+      "workerKeyEnrolled": true,
+      "workerKeyIdFingerprint": "sha256:4de17836e66fbda6",
+      "contractKeyEnrolled": true,
+      "contractKeyIdFingerprint": "sha256:bf8298a9ae2f1ac5",
+      "contractKeyMaterialMatches": true,
+      "workerKeyMaterialMatches": true,
+      "deliveryBearerMatches": true
+    },
+    "probeIdentity": "canary-runner",
+    "checks": {
+      "P0": {
+        "name": "local_checkout_is_expected",
+        "status": "PASS",
+        "reason": "checkout == expected == 2ccc7b449e069c5367de3391581c87f77cfcdc6c, reachable from origin/main"
+      },
+      "P1": {
+        "name": "cloudflare_deployment_healthy",
+        "status": "PASS",
+        "reason": "Pages project goodflippindesign: canonical production deployment c0e9f11f-2420-452b-b72c-1c56791c40fb (main) deployed 2026-10-07T00:01:34.594Z; weave0/goodflippindesign; domain goodflippindesign.com"
+      },
+      "P2": {
+        "name": "cloudflare_commit_matches",
+        "status": "PASS",
+        "reason": "canonical deployment c0e9f11f-2420-452b-b72c-1c56791c40fb commit == expected"
+      },
+      "P3": {
+        "name": "runtime_endpoint_reachable",
+        "status": "PASS",
+        "reason": "gfd-mc-runtime-provenance-1 observed 2026-10-07T00:01:56.927Z from goodflippindesign.com"
+      },
+      "P4": {
+        "name": "runtime_stamp_matches",
+        "status": "PASS",
+        "reason": "runtime stamp == Cloudflare canonical commit == expected, and built for the canonical deployment URL (2ccc7b449e069c5367de3391581c87f77cfcdc6c, built 2026-10-07T00:01:12.345Z)"
+      },
+      "P5": {
+        "name": "mission_control_bindings",
+        "status": "PASS",
+        "reason": "all seven Mission Control bindings present and usable at runtime, and declared in the Pages production environment"
+      },
+      "P6": {
+        "name": "worker_identity_matches",
+        "status": "PASS",
+        "reason": "worker id and key ids agree (by fingerprint), and the FWOMPS host holds the SAME contract and worker key material and delivery bearer as the runtime (by one-way key check value)"
+      },
+      "P7": {
+        "name": "fwomps_host_verified",
+        "status": "PASS",
+        "reason": "C1-C10 all PASS with the real host read (workspace, repository and read-only profile bound)"
+      },
+      "P8": {
+        "name": "sole_dispatch_ready",
+        "status": "PASS",
+        "reason": "aiaimate.com is the sole dispatch-ready property; the other 24 remain blocked"
+      },
+      "P9": {
+        "name": "protocol_versions_match",
+        "status": "PASS",
+        "reason": "mc-fw-investigation-request-1 / mc-fw-lease-grant-1 / mc-fw-investigation-result-1 / gfd-mission-control-1"
+      },
+      "P10": {
+        "name": "read_only_authority",
+        "status": "PASS",
+        "reason": "read-only investigation; repair=false, deploy=false, repository write=false; one attempt"
+      },
+      "P11": {
+        "name": "canonical_d1",
+        "status": "PASS",
+        "reason": "production DB binding == canonical D1 a46ec9df-31b8-4285-845b-1fd3a62bd1b5; reachable with the work-item schema"
+      }
+    },
+    "canStartInvestigation": true,
+    "failing": [],
+    "authority": {
+      "mutates": false,
+      "repair": false,
+      "deploy": false,
+      "repositoryWrite": false
+    },
+    "controlPlaneSource": "wrangler",
+    "observedAt": "2026-10-07T00:01:54.830Z"
+  },
+  "tests": {
+    "core": "72/72",
+    "governed": "207/207",
+    "certification": "15/15"
+  },
+  "checkTotals": {
+    "total": 31,
+    "failed": []
+  }
+}

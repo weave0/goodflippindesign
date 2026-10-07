@@ -1,0 +1,109 @@
+{
+  "contractName": "gfd-mc-production-preflight",
+  "schemaVersion": "2.0.0",
+  "runtimeTarget": {
+    "kind": "cloudflare-pages-advanced-worker",
+    "project": "goodflippindesign",
+    "origin": "https://goodflippindesign.com"
+  },
+  "expectedSha": "a1f5c665ee7ced5400dc05f5a05109cbc770de65",
+  "cloudflare": {
+    "deploymentId": "5e8b149d-c80d-4c07-8167-ac54e8a2f36e",
+    "environment": "production",
+    "branch": "main",
+    "commitHash": "a1f5c665ee7ced5400dc05f5a05109cbc770de65",
+    "stage": "deploy:success",
+    "completedOn": "2026-10-06T22:35:08.409Z",
+    "createdOn": "2026-10-06T22:34:02.545Z",
+    "url": "https://5e8b149d.goodflippindesign.pages.dev"
+  },
+  "runtimeRelease": {
+    "state": "stamped",
+    "sha": "a1f5c665ee7ced5400dc05f5a05109cbc770de65",
+    "builtAt": "2026-10-06T22:34:49.060Z",
+    "source": "cloudflare-pages",
+    "url": "https://5e8b149d.goodflippindesign.pages.dev"
+  },
+  "hostIdentity": {
+    "workerKeyEnrolled": true,
+    "workerKeyIdFingerprint": "sha256:4de17836e66fbda6",
+    "contractKeyEnrolled": true,
+    "contractKeyIdFingerprint": "sha256:bf8298a9ae2f1ac5",
+    "contractKeyMaterialMatches": true,
+    "workerKeyMaterialMatches": true,
+    "deliveryBearerMatches": true
+  },
+  "probeIdentity": "canary-runner",
+  "checks": {
+    "P0": {
+      "name": "local_checkout_is_expected",
+      "status": "PASS",
+      "reason": "checkout == expected == a1f5c665ee7ced5400dc05f5a05109cbc770de65, reachable from origin/main"
+    },
+    "P1": {
+      "name": "cloudflare_deployment_healthy",
+      "status": "PASS",
+      "reason": "Pages project goodflippindesign: canonical production deployment 5e8b149d-c80d-4c07-8167-ac54e8a2f36e (main) deployed 2026-10-06T22:35:08.409Z; weave0/goodflippindesign; domain goodflippindesign.com"
+    },
+    "P2": {
+      "name": "cloudflare_commit_matches",
+      "status": "PASS",
+      "reason": "canonical deployment 5e8b149d-c80d-4c07-8167-ac54e8a2f36e commit == expected"
+    },
+    "P3": {
+      "name": "runtime_endpoint_reachable",
+      "status": "PASS",
+      "reason": "gfd-mc-runtime-provenance-1 observed 2026-10-06T22:35:29.907Z from goodflippindesign.com"
+    },
+    "P4": {
+      "name": "runtime_stamp_matches",
+      "status": "PASS",
+      "reason": "runtime stamp == Cloudflare canonical commit == expected, and built for the canonical deployment URL (a1f5c665ee7ced5400dc05f5a05109cbc770de65, built 2026-10-06T22:34:49.060Z)"
+    },
+    "P5": {
+      "name": "mission_control_bindings",
+      "status": "PASS",
+      "reason": "all seven Mission Control bindings present and usable at runtime, and declared in the Pages production environment"
+    },
+    "P6": {
+      "name": "worker_identity_matches",
+      "status": "PASS",
+      "reason": "worker id and key ids agree (by fingerprint), and the FWOMPS host holds the SAME contract and worker key material and delivery bearer as the runtime (by one-way key check value)"
+    },
+    "P7": {
+      "name": "fwomps_host_verified",
+      "status": "PASS",
+      "reason": "C1-C10 all PASS with the real host read (workspace, repository and read-only profile bound)"
+    },
+    "P8": {
+      "name": "sole_dispatch_ready",
+      "status": "PASS",
+      "reason": "aiaimate.com is the sole dispatch-ready property; the other 24 remain blocked"
+    },
+    "P9": {
+      "name": "protocol_versions_match",
+      "status": "PASS",
+      "reason": "mc-fw-investigation-request-1 / mc-fw-lease-grant-1 / mc-fw-investigation-result-1 / gfd-mission-control-1"
+    },
+    "P10": {
+      "name": "read_only_authority",
+      "status": "PASS",
+      "reason": "read-only investigation; repair=false, deploy=false, repository write=false; one attempt"
+    },
+    "P11": {
+      "name": "canonical_d1",
+      "status": "PASS",
+      "reason": "production DB binding == canonical D1 a46ec9df-31b8-4285-845b-1fd3a62bd1b5; reachable with the work-item schema"
+    }
+  },
+  "canStartInvestigation": true,
+  "failing": [],
+  "authority": {
+    "mutates": false,
+    "repair": false,
+    "deploy": false,
+    "repositoryWrite": false
+  },
+  "controlPlaneSource": "wrangler",
+  "observedAt": "2026-10-06T22:35:27.566Z"
+}
