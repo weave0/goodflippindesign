@@ -58,7 +58,7 @@
 | Z:/.pnpm-store | 1.5 GB | Global pnpm cache                               | Run `pnpm store prune`                           |
 
 **Total quickly reclaimable: ~20 GB (venvs + caches, zero data loss)**
-Full detail: [STORAGE_AUDIT_2026-03-08.md](STORAGE_AUDIT_2026-03-08.md) → Phase 1 Deep Scan section
+Full detail: [STORAGE_AUDIT_2026-03-08.md](docs/audits/STORAGE_AUDIT_2026-03-08.md) → Phase 1 Deep Scan section
 
 ---
 
@@ -198,14 +198,14 @@ Full detail: [STORAGE_AUDIT_2026-03-08.md](STORAGE_AUDIT_2026-03-08.md) → Phas
 ## 8. Phase 1 Completion Checklist
 
 - [x] Baseline ecosystem map produced (this doc)
-- [x] Storage usage map — Z: drive hot-spots + large files → see section 2.3 above + [STORAGE_AUDIT_2026-03-08.md](STORAGE_AUDIT_2026-03-08.md) Phase 1 Deep Scan
+- [x] Storage usage map — Z: drive hot-spots + large files → see section 2.3 above + [STORAGE_AUDIT_2026-03-08.md](docs/audits/STORAGE_AUDIT_2026-03-08.md) Phase 1 Deep Scan
 - [x] Security — sensitive docs removed from repo tip AND full git history purge completed 2026-03-17
 - [x] Admin suite module inventory — section 3 above
 - [x] Documentation spine established (EVERYTHING.md + this doc + charter)
 - [x] Asset intake standard defined — see DEVELOPER_GUIDE.md § Asset Intake SOP
 - [x] Deployment/feature-gating rules locked — see DEVELOPER_GUIDE.md § Deployment & Feature-Gating Rules
-- [x] CultureSherpa community architecture plan — see [CULTURESHERPA_COMMUNITY_PLAN.md](CULTURESHERPA_COMMUNITY_PLAN.md)
-- [x] Media generation pipeline audit — see [MEDIA_PIPELINE_AUDIT.md](MEDIA_PIPELINE_AUDIT.md)
+- [x] CultureSherpa community architecture plan — see [CULTURESHERPA_COMMUNITY_PLAN.md](docs/CULTURESHERPA_COMMUNITY_PLAN.md)
+- [x] Media generation pipeline audit — see [MEDIA_PIPELINE_AUDIT.md](docs/audits/MEDIA_PIPELINE_AUDIT.md)
 - [x] Branch protection applied to all public repos (2026-03-16)
 - [x] Admin panels 22-24 built: Projects, Deployments, Settings (charter §10)
 
