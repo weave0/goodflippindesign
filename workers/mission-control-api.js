@@ -19,6 +19,13 @@ import {
   verifySignedEnvelope,
 } from './fwomps-investigation-adapter.js';
 import { resolveEstateBinding } from './estate-bindings.js';
+import {
+  PrepareIssuerError,
+  buildSignedPrepareContract,
+  importPrepareSigningKey,
+  prepareApprover,
+  recordPrepareGrant,
+} from './fwomps-prepare-issuer.js';
 import { buildProvenanceReport } from './lib/worker-provenance.js';
 import {
   CANARY_PRODUCER,
@@ -674,6 +681,48 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
       return jsonResponse({ workItem: item });
     }
 
+    // MC-FW-002 PREPARE adjudication. Separate key, permission and ledger from OBSERVE; the signed grant
+    // lets FWOMPS prepare an unpromoted candidate and nothing more. Disabled unless explicitly enabled.
+    if (parts[2] === 'work-items' && parts.length === 5 && parts[4] === 'prepare' && request.method === 'POST') {
+      if (isRunner || isWorker) {
+        return jsonResponse({ error: 'Forbidden: PREPARE requires an adjudicating admin' }, 403);
+      }
+      if (env.MISSION_CONTROL_PREPARE_ENABLED !== 'true') {
+        return jsonResponse({ error: 'PREPARE issuance is disabled', code: 'prepare_disabled' }, 404);
+      }
+      const approverId = prepareApprover(user);
+      const id = decodePathPart(parts[3]);
+      if (!id) return jsonResponse({ error: 'Work item was not found' }, 404);
+      const body = await readJson(request);
+      requireOnlyKeys(body, ['requestedPaths', 'baseSha', 'requestedAt']);
+      const store = await workItemStore(env);
+      const item = await store.get(id);
+      if (!item) return jsonResponse({ error: 'Work item was not found' }, 404);
+      const signingKey = await importPrepareSigningKey(env.MISSION_CONTROL_PREPARE_SIGNING_KEY);
+      const grant = await buildSignedPrepareContract(item, resolveEstateBinding(item.propertyId), {
+        requestedPaths: body.requestedPaths,
+        baseSha: body.baseSha,
+        requestedAt: body.requestedAt,
+        // The authenticated adjudicator is the requester of record; a body cannot name another subject.
+        requesterId: approverId,
+        approverId,
+        signingKey,
+        keyId: env.MISSION_CONTROL_PREPARE_KEY_ID || '',
+        now: new Date(),
+      });
+      await recordPrepareGrant(env.DB, grant, { workItem: item, approverId, issuedAt: grant.payload.lifetime.issued_at });
+      return jsonResponse({
+        grant: {
+          contractId: grant.contractId,
+          contractDigest: grant.contractDigest,
+          expiresAt: grant.expiresAt,
+          promotionAuthority: false,
+          fact: 'repair contract (PREPARE grant) — not a candidate, not verification, not promotion or resolution',
+        },
+        contract: grant.payload,
+      }, 201);
+    }
+
     if (parts[2] === 'work-items' && parts.length === 5 && request.method === 'POST') {
       const id = decodePathPart(parts[3]);
       if (!id) return jsonResponse({ error: 'Work item was not found' }, 404);
@@ -874,6 +923,9 @@ export async function handleMissionControlRequest(request, env, user, fetchImpl 
     }
     if (error?.code === 'UPSTREAM_NOT_CONFIGURED') {
       return jsonResponse({ error: 'Mission Control evidence source is not configured' }, 503);
+    }
+    if (error instanceof PrepareIssuerError) {
+      return jsonResponse({ error: error.message, code: error.code }, error.status || 409);
     }
     const workItemError = mapWorkItemError(error);
     if (workItemError) {

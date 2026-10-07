@@ -37,6 +37,8 @@ export function resolveEstateBinding(propertyId) {
     verificationProfile: operating.verification_profile || null,
     verificationScope: operating.verification_scope || null,
     verificationPredicate: operating.verification_predicate || null,
+    // MC-FW-002: host-registered FWOMPS PREPARE workspace/repository/profile ids. Null until registered.
+    prepareBinding: operating.prepare_binding || null,
   };
 }
 
