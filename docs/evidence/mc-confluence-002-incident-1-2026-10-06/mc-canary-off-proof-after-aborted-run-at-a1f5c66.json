@@ -1,0 +1,247 @@
+{
+  "schema": "gfd.mission-control.canary-off-proof.v1",
+  "label": "final",
+  "origin": "https://goodflippindesign.com",
+  "startedAt": "2026-10-06T22:38:13.025Z",
+  "finishedAt": "2026-10-06T22:38:15.709Z",
+  "expectedSha": "a1f5c665ee7ced5400dc05f5a05109cbc770de65",
+  "credential": {
+    "env": "GFD_MC_CANARY_RUNNER_TOKEN",
+    "shape": "canonical-128-lowercase-hex",
+    "value": "never recorded"
+  },
+  "release": {
+    "before": {
+      "source": "cloudflare-api",
+      "id": "44667d06-cf65-46d5-887a-cc5923c6e856",
+      "environment": "production",
+      "branch": "main",
+      "commitHash": "a1f5c665ee7ced5400dc05f5a05109cbc770de65",
+      "commitIsPrefix": false,
+      "stage": "deploy:success",
+      "createdOn": "2026-10-06T22:36:27.106773Z"
+    },
+    "after": {
+      "source": "cloudflare-api",
+      "id": "44667d06-cf65-46d5-887a-cc5923c6e856",
+      "environment": "production",
+      "branch": "main",
+      "commitHash": "a1f5c665ee7ced5400dc05f5a05109cbc770de65",
+      "commitIsPrefix": false,
+      "stage": "deploy:success",
+      "createdOn": "2026-10-06T22:36:27.106773Z"
+    },
+    "bound": true,
+    "controlPlaneSource": "wrangler"
+  },
+  "probes": [
+    {
+      "id": "surface:provenance",
+      "method": "GET",
+      "path": "/api/mission-control/provenance",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "surface:operations",
+      "method": "GET",
+      "path": "/api/mission-control/operations",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "surface:work-items",
+      "method": "GET",
+      "path": "/api/mission-control/work-items",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "surface:work-item",
+      "method": "GET",
+      "path": "/api/mission-control/work-items/gfdwi_v1_0000000000000000000000000000000000000000000000000000000000000000",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "surface:canary-observations",
+      "method": "POST",
+      "path": "/api/mission-control/canary-observations",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "surface:transition",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_0000000000000000000000000000000000000000000000000000000000000000/transition",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "surface:investigate",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_0000000000000000000000000000000000000000000000000000000000000000/investigate",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "surface:dispatch",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_0000000000000000000000000000000000000000000000000000000000000000/dispatch",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "out:lease",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_0000000000000000000000000000000000000000000000000000000000000000/lease",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "out:result",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_0000000000000000000000000000000000000000000000000000000000000000/result",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "out:expire",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_0000000000000000000000000000000000000000000000000000000000000000/expire",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "out:recover-dispatch",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_0000000000000000000000000000000000000000000000000000000000000000/recover-dispatch",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "out:evidence-root",
+      "method": "GET",
+      "path": "/api/mission-control",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "out:unknown-route",
+      "method": "GET",
+      "path": "/api/mission-control/off-proof-unknown-route",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "out:unknown-action",
+      "method": "POST",
+      "path": "/api/mission-control/work-items/gfdwi_v1_0000000000000000000000000000000000000000000000000000000000000000/off-proof-unknown-action",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "out:delete-item",
+      "method": "DELETE",
+      "path": "/api/mission-control/work-items/gfdwi_v1_0000000000000000000000000000000000000000000000000000000000000000",
+      "kind": "runner-credential",
+      "expect": "canary_disabled-404",
+      "status": 404,
+      "code": "canary_disabled",
+      "ok": true,
+      "reason": null
+    }
+  ],
+  "controls": [
+    {
+      "id": "control:no-credential",
+      "method": "GET",
+      "path": "/api/mission-control/provenance",
+      "kind": "control",
+      "expect": "401-not-canary_disabled",
+      "status": 401,
+      "code": null,
+      "ok": true,
+      "reason": null
+    },
+    {
+      "id": "control:forged-runner-shaped-credential",
+      "method": "GET",
+      "path": "/api/mission-control/provenance",
+      "kind": "control",
+      "expect": "401-not-canary_disabled",
+      "status": 401,
+      "code": null,
+      "ok": true,
+      "reason": null
+    }
+  ],
+  "summary": {
+    "probes": 16,
+    "probesOk": 16,
+    "controls": 2,
+    "controlsOk": 2
+  },
+  "failures": [],
+  "verdict": "OFF_PROVEN"
+}
