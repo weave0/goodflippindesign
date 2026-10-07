@@ -160,14 +160,16 @@ const rejects = async (fn, pattern, message) => {
   ]) assert.equal(bindRelease({ before, after, expectedSha: sha }).ok, false, label);
   // regression: matching snapshots with a missing/malformed deployment id are NOT a release binding (undefined === undefined)
   const { id: _omitted, ...NO_ID } = SNAP;
-  for (const [label, badId] of [['missing', undefined], ['null', null], ['empty', ''], ['blank', '   '], ['padded', ` ${SNAP.id}`], ['number', 12345], ['object', { id: SNAP.id }]]) {
+  for (const [label, badId] of [['missing', undefined], ['null', null], ['empty', ''], ['blank', '   '], ['padded', ` ${SNAP.id}`], ['number', 12345], ['object', { id: SNAP.id }],
+    ['garbage', 'garbage'], ['short uuid', SNAP.id.slice(0, 35)], ['uppercase uuid', '734E1743-7934-4E9F-B383-ED6E9BD162B2'], ['uuid + suffix', `${SNAP.id}x`], ['no dashes', SNAP.id.replaceAll('-', '')], ['non-hex uuid', SNAP.id.replace(/^./, 'g')]]) {
     const bad = badId === undefined ? NO_ID : { ...SNAP, id: badId };
     const bound = bindRelease({ before: bad, after: bad, expectedSha: SHA });
     assert.equal(bound.ok, false, `${label} id on both snapshots`);
-    assert.ok(bound.problems.some((p) => /deployment id is missing or malformed/.test(p)), label);
+    assert.ok(bound.problems.some((p) => /deployment id is missing or not a deployment UUID/.test(p)), label);
     assert.equal(bindRelease({ before: bad, after: SNAP, expectedSha: SHA }).ok, false, `${label} id before only`);
     assert.equal(bindRelease({ before: SNAP, after: bad, expectedSha: SHA }).ok, false, `${label} id after only`);
   }
+  for (const good of ['11111111-1111-4111-8111-111111111111', '734e1743-7934-4e9f-b383-ed6e9bd162b2', 'bf1813c6-a20c-43e1-a333-2ef0a5d56a48', 'c2238527-19c6-408a-b516-dae3f13057f5']) assert.equal(bindRelease({ before: { ...SNAP, id: good }, after: { ...SNAP, id: good }, expectedSha: SHA }).ok, true, `valid production UUID ${good}`);
   assert.equal(bindRelease({ before: SNAP, after: { ...SNAP, id: '22222222-2222-4222-8222-222222222222' }, expectedSha: SHA }).ok, false, 'mismatched ids');
   // a Wrangler-sourced snapshot (7-char source SHA, no stage) is accepted only when it is a prefix of the expected SHA
   const wr = { source: 'wrangler-list', id: SNAP.id, environment: 'Production', branch: 'main', commitHash: '5c184c9', commitIsPrefix: true, stage: null };
