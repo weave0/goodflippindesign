@@ -167,6 +167,7 @@ const rejects = async (fn, pattern, message) => {
     assert.equal(bound.ok, false, `${label} id on both snapshots`);
     assert.ok(bound.problems.some((p) => /deployment id is missing or not a deployment UUID/.test(p)), label);
     assert.equal(bindRelease({ before: bad, after: SNAP, expectedSha: SHA }).ok, false, `${label} id before only`);
+    assert.ok(!bindRelease({ before: bad, after: SNAP, expectedSha: SHA }).problems.some((p) => /changed while the proof/.test(p)), `${label}: a malformed id is reported as malformed, not as a deployment change`);
     assert.equal(bindRelease({ before: SNAP, after: bad, expectedSha: SHA }).ok, false, `${label} id after only`);
   }
   for (const good of ['11111111-1111-4111-8111-111111111111', '734e1743-7934-4e9f-b383-ed6e9bd162b2', 'bf1813c6-a20c-43e1-a333-2ef0a5d56a48', 'c2238527-19c6-408a-b516-dae3f13057f5']) assert.equal(bindRelease({ before: { ...SNAP, id: good }, after: { ...SNAP, id: good }, expectedSha: SHA }).ok, true, `valid production UUID ${good}`);

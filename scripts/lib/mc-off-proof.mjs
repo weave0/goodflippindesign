@@ -146,7 +146,7 @@ export function bindRelease({ before, after, expectedSha }) {
     if (!matches) problems.push(`${label}: deployed commit ${commit.slice(0, 12) || 'unknown'} is not the expected ${String(expectedSha).slice(0, 12)}`);
     if (snap.stage !== null && snap.stage !== 'deploy:success') problems.push(`${label}: deployment stage is ${snap.stage}`);
   }
-  if (before && after && !before.error && !after.error && before.id !== after.id) problems.push('production deployment changed while the proof was running');
+  if (before && after && UUID.test(before.id) && UUID.test(after.id) && before.id !== after.id) problems.push('production deployment changed while the proof was running');
   return { ok: problems.length === 0, problems };
 }
 
