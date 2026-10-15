@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="/ga4-consent.js" data-ga4="G-QPPVJM1B60" data-hosts="goodflippindesign.com,www.goodflippindesign.com"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
@@ -10,20 +11,15 @@
         content="Join the Good Flippin Vibes community — earn XP, unlock badges, share ideas, and connect with humans who give a damn.">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QPPVJM1B60"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-QPPVJM1B60', { 'transport_type': 'beacon', page_title: 'Community Portal', page_path: '/community-portal.html' });
-    </script>
+
+
     <!-- Global error capture (forwards to GA4 when Sentry isn't loaded) -->
     <script>
         window.addEventListener('error', function (e) {
-            if (window.gtag) gtag('event', 'js_error', { description: (e.message || '') + ' @ ' + (e.filename || '') + ':' + (e.lineno || ''), fatal: false });
+            if (window.gtag) gtag('event', 'js_error', { description: 'client_error', fatal: false });
         });
         window.addEventListener('unhandledrejection', function (e) {
-            if (window.gtag) gtag('event', 'js_error', { description: 'UnhandledRejection: ' + (e.reason || ''), fatal: false });
+            if (window.gtag) gtag('event', 'js_error', { description: 'unhandled_rejection', fatal: false });
         });
     </script>
 
