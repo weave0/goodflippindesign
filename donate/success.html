@@ -2,30 +2,20 @@
 <html lang="en">
 
 <head>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QPPVJM1B60"></script>
+    <!-- Measure only the return-page view here. A successful donation must be
+         attributed from a verified Stripe webhook, not from a URL parameter. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WM6Q66W9W0"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-        gtag('config', 'G-QPPVJM1B60', { 'transport_type': 'beacon' });
-
-        // Track successful donation conversion
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('session_id');
-        if (sessionId && window.gtag) {
-            gtag('event', 'purchase', {
-                event_category: 'ecommerce',
-                transaction_id: sessionId,
-                currency: 'USD',
-                // Value will be tracked by Stripe
-            });
-        }
+        gtag('config', 'G-WM6Q66W9W0', { 'transport_type': 'beacon' });
+        gtag('event', 'donation_return_page_view');
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <link rel="canonical" href="https://goodflippinvibes.com/donate">
+    <link rel="canonical" href="https://goodflippindesign.com/donate/success.html">
     <title>Thank You! - Good Flippin Design</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
