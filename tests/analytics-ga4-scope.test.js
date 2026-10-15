@@ -9,7 +9,8 @@ const pages = [
   'music-heavymoose-dross1.html', 'music-heavymoose-dross2.html',
   'temp_review.html',
 ];
-const measurementId = 'G-WM6Q66W9W0';
+// GA Admin: GFD property 522463875, stream 13393411447 (verified 2026-10-15).
+const measurementId = 'G-QPPVJM1B60';
 
 for (const page of pages) {
   test(`${page} has one GFD GA4 setup without cross-property linker`, () => {
