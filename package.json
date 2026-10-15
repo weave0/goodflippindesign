@@ -17,7 +17,7 @@
     "cache-bust": "node scripts/update-cache-bust.js",
     "export:music": "node scripts/export-music-catalog.js",
     "build": "npm run cache-bust && npm run sync && node scripts/stamp-pages-release.mjs",
-    "pretest": "npm run sync",
+    "pretest": "npm run sync && npm run test:ga4",
     "prepare": "node -e \"if (!process.env.CI) { require('child_process').execSync('husky install', {stdio: 'inherit'}) }\"",
     "format": "prettier --write \"*.html\" \"tests/**/*.js\" \"scripts/**/*.js\"",
     "lint": "eslint .",
@@ -90,7 +90,8 @@
     "test:workers:mission-control-certification": "vitest run --config vitest.workers.config.mjs tests/workers/mission-control-off-proof.test.js tests/workers/mission-control-preflight-surface.test.js",
     "mc:off-proof": "node --no-warnings scripts/mc-production-off-proof.mjs",
     "mc:redeploy": "node --no-warnings scripts/mc-pages-redeploy.mjs",
-    "mc:preflight": "node --no-warnings scripts/mc-production-preflight.mjs"
+    "mc:preflight": "node --no-warnings scripts/mc-production-preflight.mjs",
+    "test:ga4": "node --test tests/analytics-ga4-scope.test.js"
   },
   "repository": {
     "type": "git",
