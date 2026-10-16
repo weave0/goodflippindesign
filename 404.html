@@ -3,6 +3,7 @@
 <html lang="en">
 
 <head>
+    <script src="/ga4-consent.js" data-ga4="G-QPPVJM1B60" data-hosts="goodflippindesign.com,www.goodflippindesign.com"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>404 – Page Not Found | Good Flippin Design</title>
@@ -106,17 +107,17 @@
     }
   </style>
   <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QPPVJM1B60"></script>
+
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-QPPVJM1B60', { 'transport_type': 'beacon' });
+
+
+
+
     // Track 404s: report the missing URL so we know what's broken
     gtag('event', '404_error', {
       event_category: 'Error',
-      event_label: window.location.pathname + window.location.search,
-      referrer: document.referrer || '(direct)',
+      event_label: window.location.pathname,
+      referrer: '(redacted)',
       non_interaction: true
     });
   </script>

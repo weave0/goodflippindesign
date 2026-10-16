@@ -15,10 +15,10 @@ const measurementId = 'G-QPPVJM1B60';
 for (const page of pages) {
   test(`${page} has one GFD GA4 setup without cross-property linker`, () => {
     const html = fs.readFileSync(path.resolve(__dirname, '..', page), 'utf8');
-    const scripts = [...html.matchAll(/googletagmanager\.com\/gtag\/js\?id=(G-[A-Z0-9]+)/g)].map(m => m[1]);
+    const scripts = [...html.matchAll(/src="\/ga4-consent\.js"[^>]+data-ga4="(G-[A-Z0-9]+)"/g)].map(m => m[1]);
     const configs = [...html.matchAll(/gtag\(\s*['"]config['"]\s*,\s*['"](G-[A-Z0-9]+)['"]/g)].map(m => m[1]);
     assert.deepEqual(scripts, [measurementId]);
-    assert.deepEqual(configs, [measurementId]);
+    assert.deepEqual(configs, [], 'only the consent initializer may configure GA');
     assert.doesNotMatch(html.slice(0, html.indexOf('</head>')), /['"]linker['"]\s*:/);
   });
 }
