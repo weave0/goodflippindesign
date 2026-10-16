@@ -18,7 +18,7 @@
  *  - Responsive layout — no horizontal overflow at mobile / tablet / desktop
  *  - Touch targets ≥44px on mobile (header logo)
  *  - WCAG AA colour contrast on body text
- *  - GA4 script tag present (G-WM6Q66W9W0)
+ *  - GFD GA4 consent initializer present; tracking remains gated before consent
  *  - Canonical link tag present and correct
  *  - CSS custom properties defined on :root (checks --bg, --text, --accent)
  *  - catalogue URL falls back gracefully with noscript message when JS is off
@@ -149,11 +149,15 @@ async function runGalleryTests() {
         }
 
         try {
-            const ga4 = await page.$('script[src*="googletagmanager.com"]');
-            Assertions.isTrue(ga4 !== null, 'GA4 script tag present');
-            results.pass('GA4 analytics script tag present');
+            const initializer = await page.$(
+                'script[src="/ga4-consent.js"][data-ga4="G-QPPVJM1B60"]'
+            );
+            Assertions.isTrue(initializer !== null, 'GFD GA4 consent initializer present');
+            const analyticsTag = await page.$('script[src*="googletagmanager.com"]');
+            Assertions.isTrue(analyticsTag === null, 'GA4 script not loaded before consent');
+            results.pass('GFD GA4 initializer present and tracking remains gated before consent');
         } catch (e) {
-            results.fail('GA4 analytics script tag present', e.message);
+            results.fail('GFD GA4 consent initializer present with tracking gated', e.message);
         }
 
         // ────────────────────────────────────────────
