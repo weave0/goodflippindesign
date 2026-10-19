@@ -163,7 +163,7 @@
 **Parent Brand (GFV LLC):**
 
 - Facebook: https://facebook.com/profile.php?id=61566870218978
-- Twitter/X: https://twitter.com/goodflippinvibes
+- Twitter/X: removed. The previous Good Flippin Vibes profile link used an invalid handle, and the brand registry has no replacement X account.
 
 **GFD-Specific:**
 
@@ -175,8 +175,8 @@
 
 | Site | Facebook | Twitter/X | Instagram | LinkedIn | GitHub | Schema.org |
 | ---- | -------- | --------- | --------- | -------- | ------ | ---------- |
-| GFD  | ✅       | ✅        | ✅        | ✅       | ✅     | ✅         |
-| GFV  | ✅       | ✅        | ✅        | ✅       | ✅     | ✅         |
+| GFD  | ✅       | removed   | ✅        | ✅       | ✅     | ✅         |
+| GFV  | ✅       | removed   | ✅        | ✅       | ✅     | ✅         |
 
 **Files Updated (GFD):**
 
