@@ -149,7 +149,6 @@
       <p class="trust-item">🔒 Secure automated processing</p>
       <p class="trust-item">📧 Email copies to all parties</p>
       <p class="trust-item">🗄️ Permanent archive storage</p>
-      <p class="trust-item">⚖️ Attorney-reviewed templates</p>
     </div>
   </div>
 </section>
