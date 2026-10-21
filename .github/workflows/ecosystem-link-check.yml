@@ -103,7 +103,9 @@ jobs:
                     "https://goodflippinvibes.com"
                     "https://aiaimate.com"
                     "https://citizenapproved.org"
-                    "https://culturesherpa.org"
+                    # culturesherpa.org removed 2026-10-21: offline since the AWS account
+                    # closed (2026-10-19) and no longer linked from the site. Re-add when
+                    # it is rehosted and the links are restored.
                     "https://heavymoose.com"
                     "https://globaldeets.com"
                   )

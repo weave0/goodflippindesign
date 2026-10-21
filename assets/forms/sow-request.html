@@ -197,7 +197,7 @@
         </div>
 
         <h1>Request Statement of Work</h1>
-        <p class="subtitle">Generate a detailed project specification document with deliverables, milestones, and budget breakdown.</p>
+        <p class="subtitle">Request a detailed project specification document with deliverables, milestones, and budget breakdown.</p>
 
         <form id="sow-form">
             <div class="form-row">
@@ -313,69 +313,66 @@
                 <textarea name="notes" placeholder="Any other details, constraints, or requirements..."></textarea>
             </div>
 
-            <button type="submit" class="submit-btn">Generate Statement of Work</button>
+            <button type="submit" class="submit-btn">Request Statement of Work</button>
 
             <div class="success-message" id="success-message">
-                ✓ Statement of Work generated and sent to your email!
+                ✓ Statement of Work request sent. We'll review it and email the document to you.
             </div>
             <div class="error-message" id="error-message">
-                Error generating document. Please try again or contact support.
+                Could not send your request. Please try again or email getsome@goodflippindesign.com.
             </div>
         </form>
     </div>
 
     <script>
-        const API_ENDPOINT = 'https://0k023ei145.execute-api.us-east-1.amazonaws.com/api/generate';
+        // The original document generator ran on AWS API Gateway/Lambda
+        // (0k023ei145.execute-api…), which went offline when the AWS account
+        // closed on 2026-10-19. Requests now go to the site's existing Formspree
+        // contact inbox and are prepared manually — no document is auto-generated.
+        const FORM_ENDPOINT = 'https://formspree.io/f/xgvgzjbw';
+        const FORM_TYPE = 'sow-request';
+        const SUBMIT_LABEL = 'Request Statement of Work';
 
         document.getElementById('sow-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const submitBtn = e.target.querySelector('.submit-btn');
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
             const successMsg = document.getElementById('success-message');
             const errorMsg = document.getElementById('error-message');
-
-            // Reset messages
+            const errorText = document.getElementById('error-text');
             successMsg.classList.remove('show');
             errorMsg.classList.remove('show');
 
-            // Disable button
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Generating...';
+            const formData = new FormData(form);
+            formData.append('form_type', FORM_TYPE);
+            formData.append('_subject', 'Statement of Work request — ' + (formData.get('company') || formData.get('client_name') || formData.get('name') || 'goodflippindesign.com'));
+            if (formData.get('email')) formData.append('_replyto', formData.get('email'));
 
-            // Collect form data
-            const formData = new FormData(e.target);
-            const data = {};
-            formData.forEach((value, key) => {
-                data[key] = value;
-            });
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
 
             try {
-                const response = await fetch(API_ENDPOINT, {
+                const response = await fetch(FORM_ENDPOINT, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        documentType: 'sow',
-                        formData: data
-                    })
+                    headers: { Accept: 'application/json' },
+                    body: formData,
                 });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    successMsg.classList.add('show');
-                    e.target.reset();
-                } else {
-                    throw new Error(result.error || 'Unknown error');
+                let result = {};
+                try { result = await response.json(); } catch (_) { /* non-JSON error page */ }
+                if (!response.ok) {
+                    const detail = Array.isArray(result.errors) ? result.errors.map((er) => er.message).join('; ') : '';
+                    throw new Error(detail || 'Could not send your request. Please email getsome@goodflippindesign.com.');
                 }
+                successMsg.classList.add('show');
+                form.reset();
             } catch (error) {
-                console.error('Error:', error);
-                errorMsg.textContent = `Error: ${error.message}`;
+                const message = error && error.message ? error.message : 'Could not send your request.';
+                if (errorText) errorText.textContent = message; else errorMsg.textContent = 'Error: ' + message;
                 errorMsg.classList.add('show');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Generate Statement of Work';
+                submitBtn.textContent = SUBMIT_LABEL;
             }
         });
     </script>

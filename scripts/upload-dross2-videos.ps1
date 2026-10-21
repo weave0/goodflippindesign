@@ -5,7 +5,7 @@
 $ErrorActionPreference = "Stop"
 
 $sourceBase = "GFD Dev Projects\SummitView\output\gfv_music_videos\dross_album_2"
-$r2Prefix = "dross-album-2"
+$r2Prefix = "media/dross-album-2"   # _worker.js serves /api/media/<x> from R2 key media/<x>
 $bucket = "gfv-media"
 
 # Track folders -> video filenames
@@ -54,7 +54,7 @@ foreach ($t in $tracks) {
 
 # Also upload Heavy Moose intro video
 $introSource = "GFD Dev Projects\SummitView\output\gfv_music_videos\heavy_moose_intro\Heavy Moose - Chilly Sun.mp4"
-$introR2Key = "heavy-moose/Heavy Moose - Chilly Sun.mp4"
+$introR2Key = "media/heavy-moose/Heavy Moose - Chilly Sun.mp4"
 
 if (Test-Path $introSource) {
     $sizeMB = [math]::Round((Get-Item $introSource).Length / 1MB, 1)
@@ -73,5 +73,5 @@ else {
 }
 
 Write-Host "`nDone: $uploaded uploaded, $failed failed." -ForegroundColor Cyan
-Write-Host "Videos will be served at /api/media/$r2Prefix/<filename>" -ForegroundColor Gray
+Write-Host "Videos will be served at /api/$r2Prefix/<filename>" -ForegroundColor Gray
 Write-Host "Intro video at /api/media/heavy-moose/Heavy Moose - Chilly Sun.mp4" -ForegroundColor Gray

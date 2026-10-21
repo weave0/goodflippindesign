@@ -872,13 +872,48 @@
         <section class="intro-banner" aria-label="Meet Heavy Moose">
             <div class="container">
                 <div class="intro-banner-inner">
-                    <div class="intro-banner-video">
+                    <div class="intro-banner-video" id="heavy-moose-intro-video">
                         <video controls preload="none" playsinline
-                            poster=""
                             aria-label="Heavy Moose — Chilly Sun introduction video">
                             <source src="/api/media/heavy-moose/Heavy Moose - Chilly Sun.mp4" type="video/mp4">
+                            <!-- Fallback: the Heavy Moose intro clip already hosted on goodflippinvibes.com,
+                                 used until the full clip is uploaded to R2 at media/heavy-moose/. -->
+                            <source src="https://goodflippinvibes.com/assets/music/heavy-moose-chilly-on-this-sun.mp4" type="video/mp4">
                         </video>
                     </div>
+                    <script>
+                        // Degrade honestly if the intro video is not in media storage:
+                        // replace the player with a "coming soon" note instead of a dead control.
+                        (function () {
+                            var box = document.getElementById('heavy-moose-intro-video');
+                            if (!box) return;
+                            var sources = Array.prototype.slice.call(box.querySelectorAll('source'));
+                            var done = false;
+                            function comingSoon() {
+                                if (done) return;
+                                done = true;
+                                box.innerHTML = '<p class="intro-video-coming-soon" role="note" style="margin:0;padding:2rem 1.5rem;border:1px dashed rgba(255,255,255,0.25);border-radius:12px;text-align:center;opacity:0.85;">Heavy Moose intro video coming soon.</p>';
+                            }
+                            if (!sources.length) return comingSoon();
+                            // The browser only reports failure on the last <source> once all have failed.
+                            sources[sources.length - 1].addEventListener('error', comingSoon);
+                            if (!window.fetch) return;
+                            // preload="none" means errors only surface on play, so probe each source
+                            // up front with HEAD and drop the ones that are missing.
+                            Promise.all(sources.map(function (el) {
+                                return fetch(el.getAttribute('src'), { method: 'HEAD' })
+                                    .then(function (res) { return res.ok; })
+                                    .catch(function () { return null; });
+                            })).then(function (results) {
+                                if (results.indexOf(null) !== -1) return; // network hiccup: leave the player alone
+                                if (results.indexOf(true) === -1) return comingSoon();
+                                var removed = false;
+                                sources.forEach(function (el, i) { if (!results[i]) { el.remove(); removed = true; } });
+                                var video = box.querySelector('video');
+                                if (removed && video && video.paused) video.load(); // re-run source selection
+                            });
+                        })();
+                    </script>
                     <div class="intro-banner-text">
                         <h2>Meet Heavy Moose</h2>
                         <p>

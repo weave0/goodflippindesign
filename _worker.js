@@ -24,6 +24,45 @@ async function getAuthWorker() {
   return _authWorker;
 }
 
+// Admin-only pages/assets. Anonymous requests receive 404 (see fetch()).
+// Pages "pretty URLs" also serve admin.html at /admin and /admin/.
+const ADMIN_ONLY_PATHS = new Set([
+  "/admin.html",
+  "/admin",
+  "/admin/",
+  "/admin-panels.js",
+  "/admin.css",
+  "/mission-control-admin.js",
+]);
+
+function hasClerkSessionCookie(request) {
+  const cookieHeader = request.headers.get("Cookie") || "";
+  const sessionMatch = cookieHeader.match(/(?:^|;\s*)__session=([^;]+)/);
+  const sessionVal = sessionMatch ? sessionMatch[1] : "";
+  return (
+    (sessionVal.startsWith("ey") && sessionVal.length > 20) ||
+    /(?:^|;\s*)__client_uat=[1-9]/.test(cookieHeader)
+  );
+}
+
+// Album prefixes written by the legacy upload-*-videos.ps1 scripts without "media/".
+const LEGACY_MEDIA_PREFIXES = [
+  "heavy-moose/",
+  "dross-album-1/",
+  "dross-album-2/",
+  "gfv-album-2/",
+];
+
+function legacyMediaKey(r2Key) {
+  if (!r2Key.startsWith("media/")) return null;
+  const rest = r2Key.slice("media/".length);
+  if (rest.includes("..") || rest.includes("//") || rest.includes("\\")) return null;
+  if (!/\.(mp4|webm|mp3|wav)$/i.test(rest)) return null;
+  return LEGACY_MEDIA_PREFIXES.some((prefix) => rest.startsWith(prefix))
+    ? rest
+    : null;
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -49,6 +88,9 @@ export default {
       "/robots.txt",
       "/sitemap.xml",
       "/ads.txt",
+      // GA4 consent loader included by every page (<script src="/ga4-consent.js">).
+      // Must be allowlisted or the root-level .js rule below 404s it sitewide.
+      "/ga4-consent.js",
       "/admin-panels.js",
       "/mission-control-admin.js",
     ]);
@@ -178,9 +220,21 @@ export default {
       });
     }
 
-    // admin.html is intentionally public at the edge — Clerk SDK inside
-    // the page handles authentication and hides all admin content unless
-    // the user is signed in as an admin. No edge redirect needed.
+    // Admin-only surfaces are NOT served to anonymous public requests.
+    // Requests without a Clerk session cookie get a plain 404 (no hint that
+    // the page exists). Signed-in sessions still receive the page, where the
+    // Clerk SDK enforces the admin role client-side. This is a presence check,
+    // not authentication — Cloudflare Access is the hardened option.
+    if (ADMIN_ONLY_PATHS.has(pathLower) && !hasClerkSessionCookie(request)) {
+      return new Response("Not found", {
+        status: 404,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Robots-Tag": "noindex, nofollow",
+        },
+      });
+    }
 
     // Protect the gated music catalog from unauthenticated access.
     // This file contains full album/track metadata and prompt data — never public.
@@ -213,22 +267,48 @@ export default {
         (sessionVal.startsWith("ey") && sessionVal.length > 20) ||
         cookieHeader.includes("__client_uat=1");
       if (!hasValidSession) {
-        return Response.redirect(`${url.origin}/admin.html`, 302);
+        // admin.html is not served to anonymous requests, so send them home.
+        return Response.redirect(`${url.origin}/`, 302);
       }
     }
 
     // Serve public media assets (videos, audio) directly from R2 (no auth required).
     // URL shape: /api/media/{path...}
     // R2 key shape: media/{path...}
-    if (url.pathname.startsWith("/api/media/") && request.method === "GET") {
+    // HEAD is supported so pages can check availability without downloading
+    // the video (music.html hides the player when the object is missing).
+    if (
+      url.pathname.startsWith("/api/media/") &&
+      (request.method === "GET" || request.method === "HEAD")
+    ) {
       if (!env.MEDIA_BUCKET) {
         return new Response("Media storage unavailable", { status: 503 });
       }
       // Decode percent-encoded pathname so R2 keys with spaces match
-      const r2Key = decodeURIComponent(url.pathname).replace(/^\/api\//, ""); // strip leading /api/ → media/...
-      const object = await env.MEDIA_BUCKET.get(r2Key);
-      if (!object) {
+      let decodedMediaPath;
+      try {
+        decodedMediaPath = decodeURIComponent(url.pathname);
+      } catch {
         return new Response("Not found", { status: 404 });
+      }
+      const r2Key = decodedMediaPath.replace(/^\/api\//, ""); // strip leading /api/ → media/...
+      const isHead = request.method === "HEAD";
+      const lookup = (key) =>
+        isHead ? env.MEDIA_BUCKET.head(key) : env.MEDIA_BUCKET.get(key);
+      let object = await lookup(r2Key);
+      // Legacy fallback: scripts/upload-{djz,dross1,dross2}-videos.ps1 historically
+      // uploaded to "<album>/<file>.mp4" without the "media/" prefix this route
+      // reads. Only those known public album prefixes and media extensions are
+      // eligible, so the fallback cannot expose other bucket keys (e.g. cms/).
+      if (!object) {
+        const legacyKey = legacyMediaKey(r2Key);
+        if (legacyKey) object = await lookup(legacyKey);
+      }
+      if (!object) {
+        return new Response("Not found", {
+          status: 404,
+          headers: { "Cache-Control": "no-store" },
+        });
       }
       const headers = new Headers();
       const ext = r2Key.split(".").pop().toLowerCase();
@@ -249,6 +329,9 @@ export default {
       headers.set("Cache-Control", "public, max-age=31536000, immutable");
       headers.set("ETag", object.httpEtag);
       if (object.size) headers.set("Content-Length", String(object.size));
+      if (isHead) {
+        return new Response(null, { status: 200, headers });
+      }
       const rangeHeader = request.headers.get("Range");
       if (rangeHeader) {
         return new Response(object.body, { status: 206, headers });
