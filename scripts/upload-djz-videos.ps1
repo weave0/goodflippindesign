@@ -5,7 +5,7 @@
 $ErrorActionPreference = "Stop"
 
 $sourceDir = "GFD Dev Projects\SummitView\output\youtube_packages\djzebra_album_1"
-$r2Prefix = "gfv-album-2"
+$r2Prefix = "media/gfv-album-2"   # _worker.js serves /api/media/<x> from R2 key media/<x>
 $bucket = "gfv-media"
 
 $tracks = @(
@@ -49,4 +49,4 @@ foreach ($track in $tracks) {
 }
 
 Write-Host "`nDone: $uploaded uploaded, $failed failed." -ForegroundColor Cyan
-Write-Host "Videos will be served at /api/media/$r2Prefix/<filename>" -ForegroundColor Gray
+Write-Host "Videos will be served at /api/$r2Prefix/<filename>" -ForegroundColor Gray

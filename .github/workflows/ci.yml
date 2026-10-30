@@ -83,6 +83,9 @@ jobs:
           node --no-warnings tests/mc-delivery-bearer.test.mjs
           node --no-warnings tests/property-gap-diagnostics.test.mjs
 
+      - name: Pages edge worker routing tests
+        run: node --no-warnings tests/pages-worker-edge.test.mjs
+
       - name: Validate TI work-sync live authority contract
         run: |
           node - <<'NODE'

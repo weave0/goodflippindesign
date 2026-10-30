@@ -182,12 +182,11 @@
         </div>
 
         <h1>Request Service Agreement</h1>
-        <p class="subtitle">Master service contract for client engagements. Generated within minutes. business discussions. Typically generated within minutes and emailed to all parties.</p>
+        <p class="subtitle">Master service contract for client engagements. We review each request and email the draft to you.</p>
 
         <div id="success-message" class="success-message">
             <strong>✓ Service Agreement Request Submitted!</strong><br>
-            Document ID: <span id="doc-id"></span><br>
-            You'll receive the service agreement draft via email within 5 minutes. Check your spam folder if you don't see it.
+            We'll review it and email the service agreement draft to you, usually within one business day.
         </div>
 
         <div id="error-message" class="error-message">
@@ -251,50 +250,54 @@
     </div>
 
     <script>
-        const API_ENDPOINT = 'https://0k023ei145.execute-api.us-east-1.amazonaws.com/api/generate';
+        // The original document generator ran on AWS API Gateway/Lambda
+        // (0k023ei145.execute-api…), which went offline when the AWS account
+        // closed on 2026-10-19. Requests now go to the site's existing Formspree
+        // contact inbox and are prepared manually — no document is auto-generated.
+        const FORM_ENDPOINT = 'https://formspree.io/f/xgvgzjbw';
+        const FORM_TYPE = 'service-agreement-request';
+        const SUBMIT_LABEL = 'Request Service Agreement';
 
         document.getElementById('service-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const formData = new FormData(e.target);
-            const data = {
-                PARTY_NAME: formData.get('name'),
-                PARTY_EMAIL: formData.get('email'),
-                PARTY_COMPANY: formData.get('company'),
-                PARTY_TITLE: formData.get('title') || 'Authorized Signatory',
-                PARTY_ADDRESS: formData.get('address') || '[Address to be provided]',
-                PURPOSE: formData.get('purpose'),
-                TERM_YEARS: formData.get('term_years'),
-            };
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const successMsg = document.getElementById('success-message');
+            const errorMsg = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            successMsg.classList.remove('show');
+            errorMsg.classList.remove('show');
 
-            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const formData = new FormData(form);
+            formData.append('form_type', FORM_TYPE);
+            formData.append('_subject', 'Service agreement request — ' + (formData.get('company') || formData.get('client_name') || formData.get('name') || 'goodflippindesign.com'));
+            if (formData.get('email')) formData.append('_replyto', formData.get('email'));
+
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Generating...';
+            submitBtn.textContent = 'Sending...';
 
             try {
-                const response = await fetch(API_ENDPOINT, {
+                const response = await fetch(FORM_ENDPOINT, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'service_agreement', data })
+                    headers: { Accept: 'application/json' },
+                    body: formData,
                 });
-
-                const result = await response.json();
-
-                if (response.ok && result.success) {
-                    document.getElementById('doc-id').textContent = result.documentId;
-                    document.getElementById('success-message').classList.add('show');
-                    document.getElementById('error-message').classList.remove('show');
-                    e.target.reset();
-                } else {
-                    throw new Error(result.error || 'Failed to Request Service Agreement');
+                let result = {};
+                try { result = await response.json(); } catch (_) { /* non-JSON error page */ }
+                if (!response.ok) {
+                    const detail = Array.isArray(result.errors) ? result.errors.map((er) => er.message).join('; ') : '';
+                    throw new Error(detail || 'Could not send your request. Please email getsome@goodflippindesign.com.');
                 }
+                successMsg.classList.add('show');
+                form.reset();
             } catch (error) {
-                document.getElementById('error-text').textContent = error.message;
-                document.getElementById('error-message').classList.add('show');
-                document.getElementById('success-message').classList.remove('show');
+                const message = error && error.message ? error.message : 'Could not send your request.';
+                if (errorText) errorText.textContent = message; else errorMsg.textContent = 'Error: ' + message;
+                errorMsg.classList.add('show');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Request Service Agreement';
+                submitBtn.textContent = SUBMIT_LABEL;
             }
         });
     </script>

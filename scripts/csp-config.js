@@ -126,6 +126,9 @@ const SITES = {
       ],
       'frame-src': [...SHARED.stripe.frame, ...SHARED.clerk.frame, 'https://www.instagram.com', 'https://www.facebook.com', 'https://open.spotify.com', 'https://googleads.g.doubleclick.net', 'https://tpc.googlesyndication.com', 'https://ep2.adtrafficquality.google', 'https://www.google.com'],
       'worker-src': ["'self'", 'blob:'],
+      // Video/audio: same-origin R2 media (/api/media/*) plus the Heavy Moose intro
+      // clip fallback that goodflippinvibes.com already hosts (music.html).
+      'media-src': ["'self'", 'https://goodflippinvibes.com'],
     },
 
     // Non-CSP security headers
