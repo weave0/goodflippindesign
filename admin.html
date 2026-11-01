@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GFD Admin</title>
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="robots" content="noindex, nofollow, noarchive">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1485,7 +1485,7 @@
                             <button class="btn btn-ghost" id="storage-clear-btn">Clear</button>
                         </div>
                     </div>
-                    <p class="subheading mb-08">Run <code>scripts/storage-snapshot.ps1</code> on WEAVERASUS, then import the resulting <code>storage-snapshot.json</code> here to see drive utilization, growth deltas, and pending action items.</p>
+                    <p class="subheading mb-08">Run <code>scripts/storage-snapshot.ps1</code> on the operator workstation, then import the resulting <code>storage-snapshot.json</code> here to see drive utilization, growth deltas, and pending action items.</p>
 
                     <!-- Cloud Assets (R2) — auto-loads from /api/cms/stats -->
                     <article class="panel mb-08" id="storage-cloud-panel">
@@ -1497,7 +1497,7 @@
 
                     <!-- Command CTA -->
                     <div class="storage-import-row">
-                        <span class="text-muted" style="font-size:0.82rem;white-space:nowrap">Run on WEAVERASUS:</span>
+                        <span class="text-muted" style="font-size:0.82rem;white-space:nowrap">Run on the operator workstation:</span>
                         <span class="storage-copy-cmd" id="storage-cmd-text">.\scripts\storage-snapshot.ps1</span>
                         <button class="btn btn-micro" id="storage-copy-cmd-btn">Copy</button>
                         <input type="file" id="storage-file-input" accept=".json" style="display:none" aria-label="Load snapshot JSON">
@@ -1566,7 +1566,7 @@
                     <!-- Empty state -->
                     <div id="storage-empty-state" class="panel" style="text-align:center;padding:3rem 1rem">
                         <p style="color:var(--text-muted);margin-bottom:0.85rem">No snapshot loaded yet.</p>
-                        <p style="font-size:0.82rem;color:var(--text-muted)">Run the PowerShell script on WEAVERASUS, then click <strong>Load Snapshot JSON</strong>.</p>
+                        <p style="font-size:0.82rem;color:var(--text-muted)">Run the PowerShell script on the operator workstation, then click <strong>Load Snapshot JSON</strong>.</p>
                     </div>
                 </section>
 
@@ -3148,7 +3148,7 @@
                             <button class="btn btn-secondary" id="machine-intel-refresh-btn">&#8635; Refresh</button>
                         </div>
                     </div>
-                    <p class="subheading mb-08">Live machine state &mdash; drives, git repos, toolchain, and MediaDrop queue. Run <code>npm run sweep</code> on WEAVERASUS, then open this panel on <code>localhost:3000</code> to auto-load.</p>
+                    <p class="subheading mb-08">Live machine state &mdash; drives, git repos, toolchain, and MediaDrop queue. Run <code>npm run sweep</code> on the operator workstation, then open this panel on <code>localhost:3000</code> to auto-load.</p>
 
                     <!-- Alerts -->
                     <div id="machine-intel-alerts" style="margin-bottom:0.8rem"></div>
@@ -3156,9 +3156,9 @@
                     <!-- Empty state (shown when local-sweep.json not found) -->
                     <div id="machine-intel-empty" style="display:none">
                         <article class="panel">
-                            <p class="text-muted" style="padding:0.75rem 0">No sweep data found. Generate it by running the command below on WEAVERASUS, then reload this panel.</p>
+                            <p class="text-muted" style="padding:0.75rem 0">No sweep data found. Generate it by running the command below on the operator workstation, then reload this panel.</p>
                             <div class="storage-import-row">
-                                <span class="text-muted" style="font-size:0.82rem;white-space:nowrap">Run on WEAVERASUS:</span>
+                                <span class="text-muted" style="font-size:0.82rem;white-space:nowrap">Run on the operator workstation:</span>
                                 <span class="storage-copy-cmd" id="machine-intel-cmd-text">npm run sweep</span>
                                 <button class="btn btn-micro" id="machine-intel-copy-cmd-btn">Copy</button>
                             </div>
