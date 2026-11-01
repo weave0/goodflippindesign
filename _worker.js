@@ -51,6 +51,9 @@ export default {
       "/ads.txt",
       "/admin-panels.js",
       "/mission-control-admin.js",
+      // Opt-in GA4 loader referenced from public HTML <head> elements.
+      // Root-level .js is denied below unless it is listed here.
+      "/ga4-consent.js",
     ]);
 
     const blockedPrefixes = [
@@ -151,8 +154,8 @@ export default {
     const isBlockedJson =
       pathLower.endsWith(".json") && !pathLower.startsWith("/assets/");
 
-    // Block root-level .js files (debug/test/utility scripts — all app JS is inline or CDN).
-    // Exception: /admin-panels.js is a static asset served from root (extracted from admin.html).
+    // Block root-level .js files (debug/test/utility scripts). Public exceptions
+    // are the admin bundles and /ga4-consent.js, listed in allowedExact above.
     const isRootLevelJs =
       pathLower.endsWith(".js") && !pathLower.slice(1).includes("/");
 
@@ -178,9 +181,10 @@ export default {
       });
     }
 
-    // admin.html is intentionally public at the edge — Clerk SDK inside
-    // the page handles authentication and hides all admin content unless
-    // the user is signed in as an admin. No edge redirect needed.
+    // admin.html stays reachable. Clerk sign-in runs on this document, and the
+    // admin shell is shown only after that client-side check, so an edge 401
+    // would remove the only sign-in page. Indexing is suppressed with the
+    // page's robots meta, robots.txt Disallow, and X-Robots-Tag on the response.
 
     // Protect the gated music catalog from unauthenticated access.
     // This file contains full album/track metadata and prompt data — never public.
@@ -544,6 +548,18 @@ export default {
         "Cache-Control",
         "public, max-age=0, must-revalidate",
       );
+    }
+
+    // Pages pretty URLs redirect /admin.html to /admin before the document is
+    // served. Tag both so the noindex header survives that redirect.
+    if (pathLower === "/admin.html" || pathLower === "/admin") {
+      const headers = new Headers(response.headers);
+      headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+      response = new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
     }
 
     return response;

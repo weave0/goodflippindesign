@@ -91,7 +91,7 @@
     "mc:off-proof": "node --no-warnings scripts/mc-production-off-proof.mjs",
     "mc:redeploy": "node --no-warnings scripts/mc-pages-redeploy.mjs",
     "mc:preflight": "node --no-warnings scripts/mc-production-preflight.mjs",
-    "test:ga4": "node --test tests/analytics-ga4-scope.test.js"
+    "test:ga4": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/analytics-ga4-scope.test.js tests/worker-script-allowlist.test.mjs"
   },
   "repository": {
     "type": "git",

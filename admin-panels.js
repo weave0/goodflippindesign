@@ -3186,7 +3186,7 @@
                         'music-library': { name: 'Music Library', title: 'GFV Music Library', sub: 'SummitView music catalog — browse artists, albums, and tracks. Open the per-album prompt studio or pre-fill the Post Composer.' },
                         'prompt-studio': { name: 'Prompt Studio', title: 'SummitView Prompt Studio', sub: 'Interactive SummitView hub — 16 albums, 152 tracks, 7 artists. Securely gated to Clerk admin session.' },
                         'eco-overview': { name: 'Ecosystem Overview', title: 'Ecosystem Overview', sub: 'Cross-property command surface — aggregate health, brand breakdown, and quick-jump links across the entire GFD/GFV ecosystem.' },
-                        'machine-intel': { name: 'Machine Intel', title: 'Machine Intelligence', sub: 'Live machine state — drive usage, git repo status, toolchain versions, and MediaDrop queue for the WEAVERASUS operator workstation.' },
+                        'machine-intel': { name: 'Machine Intel', title: 'Machine Intelligence', sub: 'Live machine state — drive usage, git repo status, toolchain versions, and MediaDrop queue for the operator workstation.' },
                     };
 
                     function updatePageContext(view) {
