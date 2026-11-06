@@ -430,6 +430,6 @@ All controlled from one ecosystem. All owned by us. Zero vendor lock-in.
 | Document                                             | Purpose                                                           |
 | ---------------------------------------------------- | ----------------------------------------------------------------- |
 | [ECOSYSTEM_CMS_ROADMAP.md](ECOSYSTEM_CMS_ROADMAP.md) | Full implementation roadmap with sprints, schemas, tech decisions |
-| [ROADMAP.md](ROADMAP.md)                             | GFD-specific development roadmap                                  |
-| [START_HERE.md](START_HERE.md)                       | Ecosystem navigation and deployment status                        |
-| [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)             | Development conventions and workflows                             |
+| [ROADMAP.md](../ROADMAP.md)                           | Platform roadmap and release history                              |
+| [START_HERE.md](../START_HERE.md)                     | Ecosystem navigation and deployment status                        |
+| [DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md)           | Development conventions and workflows                             |
